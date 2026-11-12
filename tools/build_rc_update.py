@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 """سازندهٔ بستهٔ کاندید ارتقاء مرکز درخواست (۱.۶۲.۹۰ ← ۱.۶۳-کاندید).
 
-پیش‌نیاز هدف: بسته‌های غذا تا ۱٫۶۲٫۹۴ (با مهاجرت ۰۳۶) پیشاپیش اعمال شده باشند؛
-فایل‌های قلمرو ۱٫۶۲٫۹۴ و پیش‌نمایش انتشار غذا عمداً از این بسته حذف می‌شوند.
+پیش‌نیاز هدف: بسته‌های غذا تا ۱٫۶۲٫۹۴ (با مهاجرت ۰۳۶) و سپس کاملِ ۱٫۶۲٫۹۵ پیشاپیش اعمال شده باشند؛
+فایل‌های قلمرو ۱٫۶۲٫۹۴/۱٫۶۲٫۹۵ و پیش‌نمایش انتشار غذا عمداً از این بسته حذف می‌شوند.
+بازسازی r6 (۲۰۲۶-۱۱-۱۲): جداسازی کامل نقش «مدیر واحدِ صرف» + حذف rebuild-final.sql مخرب از بسته.
 
 تفاوت این بسته با بسته‌های prod: این بستهٔ «کاندید» است؛ انتشار آن (تگ، merge به main
 و نصب) فقط با تأیید صریح مالک انجام می‌شود. محتوای آن از تفاوت دقیق main → این شاخه
@@ -24,12 +25,12 @@ from pathlib import Path, PurePosixPath, PureWindowsPath
 
 ROOT = Path(__file__).resolve().parent.parent
 RELEASE_VERSION = "1.63"
-REQUIRES_VERSION = "1.62.90"
+REQUIRES_VERSION = "1.62.95"
 BASE_COMMIT = "d30d7dfa031173535bd750b4e8a7af35593db244"
-RELEASE_DATE = "2026-11-11"
-PACKAGE_NAME = f"ticket-update-{REQUIRES_VERSION}-to-{RELEASE_VERSION}-request-center-rc-candidate-{RELEASE_DATE.replace('-', '')}.zip"
+RELEASE_DATE = "2026-11-12"
+PACKAGE_NAME = "ticket-update-1_62_95-to-1_63-request-center-rc-candidate-20261112-r6.zip"
 REPORT_NAME = f"CHANGE-REPORT-FA-{RELEASE_VERSION}.md"
-ZIP_DATE = (2026, 11, 11, 12, 0, 0)
+ZIP_DATE = (2026, 11, 12, 21, 0, 0)
 
 EXCLUDED_PREFIXES = ("downloads/", "updates/", "tests/", "docs/system-map/", ".github/", "ci-diagnostics/", "benchmark-results/", "preview/")
 MIGRATIONS = [
@@ -41,6 +42,10 @@ EXCLUDED_FILES = {
     "tools/build_update_1_62_88.py",
     # ابزار کمکی محلیِ بررسی نحوی (برای محیط توسعه؛ بخشی از محصول نیست)
     "tools/php_syntax_check.py",
+    # اسکریپتِ بازسازی مخرب دیتابیس؛ با تصمیم مالک به docs/architecture منتقل شد و
+    # در هیچ بستهٔ ارتقاء نباید حمل شود (نصب عادی آن را لازم ندارد).
+    "rebuild-final.sql",
+    "docs/architecture/rebuild-final.sql",
 }
 
 # ۲۰۲۶-۱۱-۰۹ — تصمیم مالک: بسته فقط RC است. هدف نصب، بسته‌های غذای تحویل‌شده
@@ -172,14 +177,14 @@ def build() -> tuple[Path, Path]:
         "name": "request-center-rc-candidate",
         "version": RELEASE_VERSION,
         "date": RELEASE_DATE,
-        "title": "کاندید بستهٔ ارتقاء مرکز درخواست — ماژول مستقل + گردش‌کار + نوبت‌ها و تقویم شمسی (۱.۶۲.۹۰ ← ۱.۶۳)",
+        "title": "کاندید بستهٔ ارتقاء مرکز درخواست — ماژول مستقل + گردش‌کار + نوبت‌ها و تقویم شمسی + جداسازی نقش مدیر واحدِ صرف (۱.۶۲.۹۵ ← ۱.۶۳) — r6",
         "requires_version": REQUIRES_VERSION,
         "migrations": list(MIGRATIONS),
         "files": sorted(files),
         "sha256": {name: sha256(files[name]) for name in sorted(files)},
         "release_status": "RC_CANDIDATE_NOT_FOR_PRODUCTION",
         "architecture_reference": "docs/architecture/REQUEST-CENTER-ARCHITECTURE.md",
-        "description": "Request Center module upgrade candidate from 1.62.90 (main) to 1.63. Install only after owner sign-off; requires migration 035 via the official runner. Migration 034 is owned by release 1.62.89 (already installed) and is NOT part of this package. By owner decisions (2026-11-09 and 2026-11-11) this package is RC-only: food 1.62.93/1.62.94 files, the release preview harness (preview/) and migration 036 are intentionally excluded; the target must already have the food updates (through 1.62.94 + migration 036) applied.",
+        "description": "Request Center module upgrade candidate from 1.62.95 (main + food wave) to 1.63. Install only after owner sign-off; requires migration 035 via the official runner. Migration 034 is owned by release 1.62.89 (already installed) and is NOT part of this package. By owner decisions (2026-11-09, 2026-11-11 and 2026-11-12) this package is RC-only: food/1.62.94/1.62.95 files, the release preview harness (preview/) and migration 036 are intentionally excluded; the target must already have the food updates (through 1.62.94 + migration 036, then 1.62.95) applied. r5 (2026-11-12): افزودن actions/food-order-actions.php که index.php آن را require می‌کند ولی در r4 غایب بود. r6 (2026-11-12): جداسازی کامل نقش «مدیر واحدِ صرف» (رئیس چارت بدون عاملیت کارشناسی/پرسنل پشتیبانی): دامنهٔ دید فقط چارت (حذف فیلتر service_group و حذف «ارجاع‌شده‌های به‌خودش»)، بدون اختیار کارشناسی (نه برداشتن درخواست، نه شروع پاسخ اول، نه تغییر وضعیت/موعد، نه تقویم=۴۰۳، نه bulk، نه انتقال)، اصلاح عنوان/توضیح/اولویت روی درخواستِ بازِ هر دو وضعیت ارجاع‌شده و نشده با مسیر اختصاصی unit_head_ticket_update (حسابرس + رویداد + اعلان)، ارجاع فقط تا پیش از تخصیص (پس از آن قفل)، «درخواست لغو» برای زیرمجموعه (هرگز لغو مستقیم)، تصمیم لغو فقط manager/assignee یا سوپروایزر؛ rebuild-final.sql مخرب از بسته حذف شد.",
     }
 
     out_dir = ROOT / "downloads"

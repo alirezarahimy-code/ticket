@@ -92,7 +92,7 @@ if (!defined('APP_ROOT')) {
                     continue;
                 }
                 // فقط کارشناس مسئول یا مدیر واحد، فقط روی درخواست دارای کارشناس و فقط در مسیر مجاز وضعیت.
-                if (ticket_handler_level($bulkTicket, $queueUser) === '' || empty($bulkTicket['assigned_to']) || !in_array($status, ticket_allowed_transitions($bulkOld), true)) {
+                if (!in_array(ticket_handler_level($bulkTicket, $queueUser), ['manager', 'assignee'], true) || empty($bulkTicket['assigned_to']) || !in_array($status, ticket_allowed_transitions($bulkOld), true)) {
                     $bulkSkipped++;
                     continue;
                 }

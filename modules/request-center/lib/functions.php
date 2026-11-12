@@ -170,7 +170,7 @@ function choose_handling_agent(string $serviceGroup, ?int $departmentId = null, 
         . ' WHERE u.is_active = 1 AND u.role IN ("agent", "manager") AND hu.code = ?'
         // مدیر عادی فقط مسئول همان معاونت/واحدِ ثبت‌شده روی درخواست است؛ از معاونت دیگری انتخاب نشود.
         . ' AND (u.role <> "manager" OR (? > 0 AND u.department_id = ?))'
-        // تصمیم مالک (۲۰۲۶-۱۱-۱۱): مدیران چارت سازمانی از ارجاع خودکار حذف‌اند؛ فقط انتصاب دستی روی یک تیکت ممکن است.
+        // تصمیم مالک (۲۰۲۶-۱۱-۱۱): مدیران چارت سازمانی از ارجاع خودکار حذف‌اند؛ فقط انتصاب دستی روی یک درخواست ممکن است.
         . ' AND COALESCE(u.org_auto_role, 0) = 0'
         . ' GROUP BY u.id, u.role, u.is_active, u.is_primary_admin, u.department_id, u.is_it_agent, hu.code ORDER BY ' . $orgManagerRank . 'COUNT(t.id), u.id'
     );
@@ -715,7 +715,9 @@ function request_center_is_unit_head(array $user): bool
     if (function_exists('user_is_primary_admin') && user_is_primary_admin($user)) {
         return false;
     }
-    if (function_exists('user_can') && user_can($user, 'supervisor.panel')) {
+    // اولویت با خودِ نقش است؛ دسترسی‌های موردیِ گرنت‌شده از گروه‌ها، نقش را تغییر نمی‌دهند.
+    $role = (string) ($user['role'] ?? '');
+    if (function_exists('is_global_ticket_role') && is_global_ticket_role($role)) {
         return false;
     }
     return request_center_unit_head_scope_ids($user) !== [];
@@ -727,6 +729,10 @@ function request_center_is_unit_head(array $user): bool
  */
 function request_center_is_org_unit_head(array $user): bool
 {
+    if (function_exists('ticket_sole_unit_head')) {
+        // یک منبع حقیقت: lib/auth-scope.php::ticket_sole_unit_head (همان مرزِ چارت).
+        return ticket_sole_unit_head($user);
+    }
     if (!request_center_is_unit_head($user)) {
         return false;
     }
@@ -741,4 +747,51 @@ function request_center_is_org_unit_head(array $user): bool
         return false;
     }
     return true;
+}
+
+
+/** آیا ثبت‌کنندهٔ این درخواست، داخل زیردرخت واحدهایی است که این کاربر رئیس فعال آن‌هاست؟ */
+function request_center_manager_ticket_in_subtree(array $ticket, array $user): bool
+{
+    if (!function_exists('ticket_manager_scope_unit_ids') || !function_exists('ticket_requester_tree_predicate')) {
+        return false;
+    }
+    $unitIds = ticket_manager_scope_unit_ids($user);
+    if (!$unitIds) {
+        return false;
+    }
+    [$predicate, $params] = ticket_requester_tree_predicate('?', $unitIds);
+    try {
+        $query = db()->prepare('SELECT ' . $predicate);
+        $query->execute(array_merge([(int) ($ticket['requester_id'] ?? 0)], $params));
+        return (bool) $query->fetchColumn();
+    } catch (Throwable $error) {
+        if (function_exists('app_error_log')) {
+            app_error_log('[unit-head-cancel] ' . $error->getMessage());
+        }
+        return false;
+    }
+}
+
+/**
+ * «مدیر واحدِ صرف» می‌تواند برای درخواستِ بازِ بدون درخواست لغوِ درانتظارِ ثبت‌شده توسط
+ * عضوی از زیرمجموعه‌اش، فقط «درخواست لغو» ثبت کند (هرگز لغو مستقیم یا تصمیم نهایی نیست).
+ * برای درخواست‌های خودش، مسیر عادی ثبت‌کننده اعمال می‌شود.
+ */
+function request_center_manager_can_request_cancel(array $ticket, array $user): bool
+{
+    if (!function_exists('ticket_sole_unit_head') || !ticket_sole_unit_head($user)) {
+        return false;
+    }
+    if (function_exists('ticket_user_is_requester') && ticket_user_is_requester($ticket, $user)) {
+        return false;
+    }
+    if (!function_exists('ticket_requester_cancelable_statuses')
+        || !in_array((string) ($ticket['status'] ?? ''), ticket_requester_cancelable_statuses(), true)) {
+        return false;
+    }
+    if (!empty($ticket['cancel_requested_at'])) {
+        return false;
+    }
+    return request_center_manager_ticket_in_subtree($ticket, $user);
 }

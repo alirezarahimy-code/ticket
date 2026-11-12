@@ -542,11 +542,10 @@ final class RequestCenterRepository
     }
 
     /**
-     * فضای مدیر واحد — فهرست تیکت‌های «خودِ مدیر + زیرمجموعهٔ چارت سازمانی‌اش» (هر دو حوزهٔ IT و پشتیبانی).
+     * فضای مدیر واحد — فهرست درخواست‌های «خودِ مدیر + زیرمجموعهٔ چارت سازمانی‌اش» (هر دو حوزهٔ IT و پشتیبانی).
      *
      * مرز اختیار، همان ticket_manager_scope_unit_ids است و فیلتر service_group عمداً اعمال نمی‌شود
-     * (تصمیم مالک: فقط تیکت‌های خودش و زیرمجموعه‌اش؛ نه بیشتر، نه کمتر). ارجاع‌شده‌های به‌خودش هم
-     * داخل دامنه هستند. نمایش فهرست بر اساس موعد SLA مرتب می‌شود (نزدیک‌ترین موعد اول).
+     * (تصمیم مالک: فقط درخواست‌های خودش و زیرمجموعه‌اش؛ نه بیشتر، نه کمتر). نمایش فهرست بر اساس موعد SLA مرتب می‌شود (نزدیک‌ترین موعد اول).
      *
      * @return array{total:int, rows:array<int,array<string,mixed>>}
      */
@@ -559,8 +558,8 @@ final class RequestCenterRepository
         $scopeIds = function_exists('ticket_manager_scope_unit_ids') ? ticket_manager_scope_unit_ids($user) : [];
         [$treePredicate, $treeParams] = ticket_requester_tree_predicate('t.requester_id', $scopeIds);
 
-        $clauses = ['((t.requester_id = ?) OR (t.assigned_to = ?) OR (' . $treePredicate . '))'];
-        $params = array_merge([$ownId, $ownId], $treeParams);
+        $clauses = ['((t.requester_id = ?) OR (' . $treePredicate . '))'];
+        $params = array_merge([$ownId], $treeParams);
 
         $status = (string) ($filters['status'] ?? '');
         if (in_array($status, ['new', 'manager_review', 'assigned', 'in_progress', 'waiting_user', 'pending', 'resolved', 'closed', 'cancelled', 'rejected'], true)) {
@@ -621,8 +620,8 @@ final class RequestCenterRepository
         $ownId = (int) ($user['id'] ?? 0);
         $scopeIds = function_exists('ticket_manager_scope_unit_ids') ? ticket_manager_scope_unit_ids($user) : [];
         [$treePredicate, $treeParams] = ticket_requester_tree_predicate('t.requester_id', $scopeIds);
-        $scope = '((t.requester_id = ?) OR (t.assigned_to = ?) OR (' . $treePredicate . '))';
-        $params = array_merge([$ownId, $ownId], $treeParams);
+        $scope = '((t.requester_id = ?) OR (' . $treePredicate . '))';
+        $params = array_merge([$ownId], $treeParams);
         try {
             $query = $this->pdo->prepare(
                 "SELECT

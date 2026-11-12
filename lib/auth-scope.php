@@ -131,6 +131,34 @@ function ticket_manager_scope_unit_ids(array $user): array
     }
 }
 
+/**
+ * آیا کاربر «مدیر واحدِ صرف» است؟
+ * رئیسِ فعالِ دست‌کم یک واحدِ چارت سازمانی است و هیچ نشانۀ کارشناسی/پشتیبانی/سراسری ندارد:
+ * نه نقش agent/support_manager، نه is_it_agent، نه handling_unit_code، نه نقش سراسری و نه مدیر اصلی.
+ * مالکِ این تعریف همین تابع است؛ هر مرزِ دسترسیِ «مدیر واحد» باید از آن تغذیه شود.
+ */
+function ticket_sole_unit_head(array $user): bool
+{
+    if (function_exists('user_is_primary_admin') && user_is_primary_admin($user)) {
+        return false;
+    }
+    // اولویت با خودِ نقش است؛ دسترسی‌های موردیِ گرنت‌شده از گروه‌ها، نقش را تغییر نمی‌دهند.
+    if (is_global_ticket_role((string) ($user['role'] ?? ''))) {
+        return false;
+    }
+    $role = (string) ($user['role'] ?? '');
+    if (in_array($role, ['agent', 'support_manager'], true)) {
+        return false;
+    }
+    if (function_exists('is_it_agent') && is_it_agent($user)) {
+        return false;
+    }
+    if (trim((string) ($user['handling_unit_code'] ?? '')) !== '') {
+        return false;
+    }
+    return ticket_manager_scope_unit_ids($user) !== [];
+}
+
 /** SQL predicate shared by list and single-ticket authorization. */
 function ticket_requester_tree_predicate(string $requesterExpr, array $unitIds): array
 {
@@ -183,7 +211,9 @@ function ticket_user_can_view(array $ticket, array $user, ?callable $permissionC
     }
     if ($user['role'] === 'manager') {
         // فضای مدیر واحد: مرزِ اختیار او = چارت سازمانی (خودش + زیرمجموعه‌اش، هر دو حوزهٔ IT و پشتیبانی).
-        if ((int) ($ticket['assigned_to'] ?? 0) === (int) $user['id'] && $permissionCheck($user, 'ticket.view_unit')) {
+        // مدیر واحدِ صرف حتی درخواستِ ارجاعی به خودش را از این مسیر نمی‌بیند؛ مرز او فقط چارت است.
+        if (!ticket_sole_unit_head($user)
+            && (int) ($ticket['assigned_to'] ?? 0) === (int) $user['id'] && $permissionCheck($user, 'ticket.view_unit')) {
             // هر درخواستی که به خودِ مدیر ارجاع شده برای خودش قابل مشاهده است.
             return true;
         }
@@ -264,6 +294,10 @@ function ticket_handler_level(array $ticket, array $user): string
     // ولی فقط در حد کارشناس. (ticket_reply_starts_work گارد جداگانهٔ خودش را دارد
     // تا پاسخِ چنین کاربری وضعیت را به‌طور ضمنی جلو نبرد.)
     if (ticket_user_is_requester($ticket, $user)) {
+        if (ticket_sole_unit_head($user)) {
+            // مدیر واحدِ صرف روی درخواست خودش هم اختیار رسیدگی ندارد.
+            return '';
+        }
         return ((int) ($ticket['assigned_to'] ?? 0) === (int) ($user['id'] ?? 0)
             && is_assignable_role((string) ($user['role'] ?? '')))
             ? 'assignee'
@@ -271,6 +305,10 @@ function ticket_handler_level(array $ticket, array $user): string
     }
     if ((is_assignable_role((string) ($user['role'] ?? '')) || user_is_primary_admin($user))
         && user_can($user, 'ticket.assign')) {
+        if (ticket_sole_unit_head($user)) {
+            // اختیار «ارجاع پیش از تخصیص» + اولویت/اصلاح — نه اختیار کامل کارشناسی.
+            return 'assigner';
+        }
         return 'manager';
     }
     if ((int) ($ticket['assigned_to'] ?? 0) === (int) $user['id'] && is_assignable_role((string) ($user['role'] ?? ''))) {
@@ -310,6 +348,10 @@ function ticket_view_mode(array $ticket, array $user): string
  */
 function ticket_can_see_internal(array $ticket, array $user): bool
 {
+    if (ticket_sole_unit_head($user)) {
+        // مدیر واحدِ صرف: فقط گفت‌وگوی عمومی را می‌بیند؛ یادداشت‌های تیم رسیدگی نه.
+        return false;
+    }
     if (ticket_user_is_requester($ticket, $user)
         && (int) ($ticket['assigned_to'] ?? 0) !== (int) ($user['id'] ?? 0)) {
         return false;
@@ -406,6 +448,7 @@ function ticket_reply_starts_work(array $ticket, array $user): bool
         && (string) ($ticket['status'] ?? '') === 'assigned'
         && empty($ticket['cancel_requested_at'])
         && user_can($user, 'ticket.edit')
+        && !ticket_sole_unit_head($user)
         && ticket_handler_level($ticket, $user) !== '';
 }
 
@@ -420,6 +463,14 @@ function ticket_scope(array $user, string $alias = 't'): array
     if (in_array($role, ['support_manager', 'agent', 'manager'], true)) {
         $group = $role === 'support_manager' ? 'support' : user_service_group($user);
         if ($unit && $role !== 'manager') return ["WHERE {$alias}.service_group = ?", [$group]];
+        if ($role === 'manager' && ticket_sole_unit_head($user)) {
+            // مدیر واحدِ صرف: همان مرزِ «فضای مدیر واحد» — خودش + زیردرخت چارت؛ بدون فیلتر حوزهٔ خدمت.
+            [$tree, $treeParams] = ticket_requester_tree_predicate("{$alias}.requester_id", ticket_manager_scope_unit_ids($user));
+            $parts = []; $params = [];
+            if ($own) { $parts[] = "{$alias}.requester_id = ?"; $params[] = (int) ($user['id'] ?? 0); }
+            $parts[] = $tree; $params = array_merge($params, $treeParams);
+            return ["WHERE (" . implode(' OR ', $parts) . ')', $params];
+        }
         $parts = []; $params = [$group];
         if ($own) { $parts[] = "{$alias}.requester_id = ?"; $params[] = (int) ($user['id'] ?? 0); }
         if ($unit && $role === 'manager') {

@@ -23,6 +23,11 @@ if (!defined('APP_ROOT')) {
 
 require_once dirname(__DIR__) . '/AppointmentRepository.php';
 
+// مدیر واحدِ صرف هیچ دسترسی به تقویم/برنامهٔ رسیدگی ندارد (حتی با ticket.edit).
+if (function_exists('ticket_sole_unit_head') && ticket_sole_unit_head($user)) {
+    http_response_code(403);
+    exit('مدیر واحد دسترسی به تقویم ندارد.');
+}
 $rcCanSchedule = user_can($user, 'ticket.edit') || user_can($user, 'queue.view')
     || user_can($user, 'ticket.view_unit') || user_can($user, 'ticket.view_all')
     || user_can($user, 'supervisor.panel') || user_is_primary_admin($user);

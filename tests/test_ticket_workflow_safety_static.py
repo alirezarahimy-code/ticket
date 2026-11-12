@@ -43,11 +43,11 @@ class TicketWorkflowSafetyTests(unittest.TestCase):
         reply = section(action, "if ($action === 'reply')", "if ($action === 'update_ticket')")
         self.assertIn('ticket_user_is_requester($ticket, $user)', reply)
         self.assertIn('ticket_reply_starts_work($ticket, $user)', reply)
-        self.assertIn("$isStaffUser && !$asRequester && ticket_handler_level($ticket, $user) !== ''", reply)
+        self.assertIn("$isStaffUser && !$asRequester && in_array(ticket_handler_level($ticket, $user), ['manager', 'assignee'], true)", reply)
         self.assertIn("if (!empty($_POST['is_internal']) && (!$isStaffUser || $asRequester || !ticket_can_see_internal($ticket, $user)))", reply)
         self.assertIn("$lockedReply['assigned_to']", reply)
         self.assertIn('$requesterView = $isRequester;', source('modules/request-center/Pages/detail.php'))
-        self.assertIn("!user_can($user, 'ticket.edit') || ticket_handler_level($ticket, $user) === ''", reply)
+        self.assertIn("!user_can($user, 'ticket.edit') || !in_array(ticket_handler_level($ticket, $user), ['manager', 'assignee'], true)", reply)
         self.assertIn("$requiresRating && !user_can($user, 'ticket.rate')", source('modules/request-center/Pages/detail.php'))
 
     def test_concurrent_rating_and_auto_close_revalidate_under_lock(self):

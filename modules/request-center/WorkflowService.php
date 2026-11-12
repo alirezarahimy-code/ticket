@@ -63,6 +63,9 @@ final class RequestCenterWorkflowService
         'priority', 'department_id', 'service_group', 'support_location',
         'support_equipment', 'asset_id', 'requesting_unit_id', 'category_id',
         'service_id', 'custom_fields', 'ticket_type', 'handling_unit_id',
+        // برای ویرایش‌های مدیریتیِ «همان‌وضعیتی» استفاده می‌شود؛ فریزِ لغو درخواست‌منتظر
+        // هم‌چنان این ستون‌ها را خارج از CANCELLATION_PENDING_SAME_STATE_COLUMNS نگه می‌دارد.
+        'subject', 'description',
     ];
 
     public function __construct(private PDO $pdo)

@@ -159,7 +159,7 @@ FEATURES: list[tuple[str, str, str, str, str]] = [
      "سلامت، لاگ و حسابرسی", "system-health.php;lib/activity-audit.php;lib/logging-csrf.php;cron/prune_activity_logs.php;index.php",
      "system_logs;activity_logs;system_incidents", "خروجی امن و خوانا؛ لاگها بدون تأیید حذف نمیشوند"),
     ("نصب|install|config|پیکربندی|دیتابیس خالی",
-     "نصب و پیکربندی", "install.php;schema.sql;install-empty-db.sql;config.sample.php;.env.example;rebuild-final.sql",
+     "نصب و پیکربندی", "install.php;schema.sql;install-empty-db.sql;config.sample.php;.env.example;docs/architecture/rebuild-final.sql",
      "settings", "install.php?force=1 خطرناک است؛ قبل از اجرا تأیید بگیر"),
     ("مهاجرت|migration|upgrade|ارتقا|schema_updates|ستون جدید",
      "مهاجرتهای پایگاهداده", "migrations/;schema.sql;install-empty-db.sql;upgrade-1.1-departments.sql",

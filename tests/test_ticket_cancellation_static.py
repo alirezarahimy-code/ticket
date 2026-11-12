@@ -45,7 +45,7 @@ check("function requestCancellation(" in workflow_service
       and "CANCELLATION_PENDING_SAME_STATE_COLUMNS" in workflow_service,
       "later cancellation is centrally recorded; conversation continues while lifecycle transitions and reassignment are frozen")
 check("decide_ticket_cancellation" in index
-      and "$decisionHandlerLevel === ''" in index and "ticket_handler_level($ticket, $decisionUser)" in index
+      and "!in_array($decisionHandlerLevel, ['manager', 'assignee'], true)" in index and "ticket_handler_level($ticket, $decisionUser)" in index
       and "cancel_requested_by" in index
       and "function rejectCancellation(" in workflow_service
       and "WHERE id = ? AND status = ? AND cancel_requested_at = ?" in workflow_service

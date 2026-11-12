@@ -263,8 +263,12 @@ if (!defined('APP_ROOT')) {
             $cancelUser = require_permission('ticket.create');
             $ticketId = (int) ($_POST['ticket_id'] ?? 0);
             $ticket = fetch_ticket($ticketId);
-            if (!$ticket || !ticket_requester_can_cancel($ticket, $cancelUser)) {
-                throw new RuntimeException('فقط ثبت‌کننده می‌تواند برای درخواست بازِ خودش که درخواست لغوِ درانتظار ندارد، لغو ثبت کند.');
+            $requesterCanCancel = $ticket && ticket_requester_can_cancel($ticket, $cancelUser);
+            $unitHeadCanRequestCancel = !$requesterCanCancel && $ticket
+                && function_exists('request_center_manager_can_request_cancel')
+                && request_center_manager_can_request_cancel($ticket, $cancelUser);
+            if (!$requesterCanCancel && !$unitHeadCanRequestCancel) {
+                throw new RuntimeException('فقط ثبت‌کنندهٔ درخواست یا مدیر واحدِ همان زیرمجموعه می‌تواند برای درخواستِ باز «درخواست لغو» ثبت کند.');
             }
             $oldStatus = (string) $ticket['status'];
             $reason = post_value('cancel_reason');
@@ -275,7 +279,8 @@ if (!defined('APP_ROOT')) {
                 throw new RuntimeException('دلیل لغو نباید بیشتر از ۱۰۰۰ نویسه باشد.');
             }
 
-            $directCancellation = ticket_requester_can_cancel_directly($ticket);
+            // لغو مستقیم فقط برای ثبت‌کننده؛ مدیر واحد همیشه مسیر «درخواست لغو» دارد.
+            $directCancellation = $requesterCanCancel && ticket_requester_can_cancel_directly($ticket);
             db()->beginTransaction();
             if ($directCancellation) {
                 [$cancelDueAt, $cancelPauseAt, $cancelPauseMinutes] = ticket_sla_transition($ticket, 'cancelled', (string) $ticket['priority']);
@@ -340,10 +345,10 @@ if (!defined('APP_ROOT')) {
                 if (!$requestRecorded) {
                     throw new RuntimeException('وضعیت درخواست یا درخواست لغو هم‌زمان تغییر کرد؛ صفحه را تازه کنید.');
                 }
-                (new RequestCenterWorkflowService(db()))->appendMessage($ticketId, (int) $cancelUser['id'], 'درخواست لغو درخواست ثبت شد: ' . $reason);
-                save_audit_required((int) $cancelUser['id'], 'ticket_cancellation_requested', $ticketId, ['reason' => $reason, 'status' => $oldStatus]);
-                log_ticket_event($ticketId, (int) $cancelUser['id'], 'cancellation_requested', $oldStatus, $oldStatus, ['reason' => $reason]);
-                request_center_notify_ticket_parties($ticketId, 'ticket_cancellation_requested', 'درخواست لغو درخواست ثبت شد', 'ثبت‌کننده درخواست لغو درخواست ' . ticket_number($ticketId) . ' را ثبت کرده است. تا تصمیم مسئول، گفت‌وگو ادامه دارد اما تغییر وضعیت و ارجاع متوقف است.', (int) $cancelUser['id'], true);
+                (new RequestCenterWorkflowService(db()))->appendMessage($ticketId, (int) $cancelUser['id'], ($unitHeadCanRequestCancel ? 'درخواست لغو از سوی مدیر واحدِ زیرمجموعه ثبت شد: ' : 'درخواست لغو درخواست ثبت شد: ') . $reason);
+                save_audit_required((int) $cancelUser['id'], 'ticket_cancellation_requested', $ticketId, ['reason' => $reason, 'status' => $oldStatus, 'actor' => $unitHeadCanRequestCancel ? 'unit_head' : 'requester']);
+                log_ticket_event($ticketId, (int) $cancelUser['id'], 'cancellation_requested', $oldStatus, $oldStatus, ['reason' => $reason, 'actor' => $unitHeadCanRequestCancel ? 'unit_head' : 'requester']);
+                request_center_notify_ticket_parties($ticketId, 'ticket_cancellation_requested', 'درخواست لغو درخواست ثبت شد', ($unitHeadCanRequestCancel ? 'مدیر واحدِ زیرمجموعه' : 'ثبت‌کننده') . ' درخواست لغو درخواست ' . ticket_number($ticketId) . ' را ثبت کرده است. تا تصمیم مسئول، گفت‌وگو ادامه دارد اما تغییر وضعیت و ارجاع متوقف است.', (int) $cancelUser['id'], true);
                 db_commit_or_fail('ticket:cancel_request_submitted');
                 flash('info', 'درخواست لغو ثبت شد؛ تا تصمیم مسئول، گفت‌وگو ادامه دارد اما تغییر وضعیت و ارجاع متوقف است.');
             }
@@ -359,7 +364,7 @@ if (!defined('APP_ROOT')) {
                 && request_center_can_supervise_ticket($ticket, $decisionUser)
                 && user_can($decisionUser, 'supervisor.decide');
             if (!$ticket || !can_view_ticket($ticket, $decisionUser)
-                || ($decisionHandlerLevel === '' && !$supervisorCanDecideCancellation)
+                || (!in_array($decisionHandlerLevel, ['manager', 'assignee'], true) && !$supervisorCanDecideCancellation)
                 || (int) ($ticket['cancel_requested_by'] ?? 0) === (int) $decisionUser['id']) {
                 throw new RuntimeException('فقط مسئول رسیدگی یا مدیر مجاز همان حوزه و غیر از درخواست‌کننده می‌تواند درخواست لغو را بررسی کند.');
             }
@@ -471,6 +476,10 @@ if (!defined('APP_ROOT')) {
             $ticket = fetch_ticket($ticketId);
             if (!$ticket || !can_view_ticket($ticket, $claimUser)) {
                 throw new RuntimeException('درخواست پیدا نشد یا دسترسی ندارید.');
+            }
+            if (function_exists('ticket_sole_unit_head') && ticket_sole_unit_head($claimUser)) {
+                // مدیر واحدِ صرف حق ندارد خودش را کارشناس کند؛ ارجاع فقط به کارشناس واجد شرایط است.
+                throw new RuntimeException('مدیر واحد نمی‌تواند درخواست را به‌عنوان کارشناس برداشت کند؛ درخواست را به کارشناس ارجاع دهید.');
             }
             if (!ticket_assignee_is_eligible($ticket, $claimUser, 'ticket_notification_user_can')) {
                 throw new RuntimeException('برداشتن درخواست فقط برای مسئول فعال و دارای دسترسی رسیدگی در همین حوزه و معاونت مجاز است.');
@@ -651,7 +660,7 @@ if (!defined('APP_ROOT')) {
                         if ($cancelPendingReply) {
                             throw new RuntimeException('لغو این درخواست در انتظار تصمیم مسئول است؛ ابتدا آن را تأیید یا رد کنید.');
                         }
-                        if (!user_can($user, 'ticket.edit') || ticket_handler_level($ticket, $user) === '') {
+                        if (!user_can($user, 'ticket.edit') || !in_array(ticket_handler_level($ticket, $user), ['manager', 'assignee'], true)) {
                             throw new RuntimeException('فقط کارشناس مسئول یا مدیر واحد می‌تواند وضعیت درخواست را تغییر دهد.');
                         }
                         if (empty($ticket['assigned_to'])) {
@@ -667,7 +676,7 @@ if (!defined('APP_ROOT')) {
                     }
                 }
             }
-            $setFirstResponse = $isStaffUser && !$asRequester && ticket_handler_level($ticket, $user) !== '' && !$internal;
+            $setFirstResponse = $isStaffUser && !$asRequester && in_array(ticket_handler_level($ticket, $user), ['manager', 'assignee'], true) && !$internal;
             $setResolvedAt = $newStatus === 'resolved' && $oldStatus !== 'resolved';
             [$replyDueAt, $replyPauseAt, $replyPauseMinutes] = ticket_sla_transition($ticket, $newStatus, (string) $ticket['priority']);
             $replyOla = ticket_ola_transition($ticket, $newStatus, (string) $ticket['priority']);
@@ -786,6 +795,182 @@ if (!defined('APP_ROOT')) {
             redirect(request_center_ticket_return_url($ticketId));
         }
 
+        if ($action === 'unit_head_ticket_update') {
+            // «مدیر واحدِ صرف» (رئیس چارت، بدون نشانۀ کارشناسی): اصلاح عنوان/توضیح/اولویت
+            // روی درخواستِ بازِ زیرمجموعه‌اش + «ارجاع، فقط تا پیش از تخصیص». هیچ اختیار کارشناسی‌ای
+            // در این مسیر ارائه نمی‌شود؛ تصمیم نهایی لغو و بستن هم‌چنان با مسئول رسیدگی/سوپروایزر است.
+            $headUser = require_login();
+            if (!function_exists('ticket_sole_unit_head') || !ticket_sole_unit_head($headUser)) {
+                throw new RuntimeException('این عملیات فقط برای مدیر واحدِ دارای زیرمجموعه در چارت مجاز است.');
+            }
+            $ticketId = (int) ($_POST['ticket_id'] ?? 0);
+            $ticket = fetch_ticket($ticketId);
+            if (!$ticket || !ticket_user_can_view($ticket, $headUser)) {
+                throw new RuntimeException('درخواست پیدا نشد یا به واحد شما تعلق ندارد.');
+            }
+            $handlerLevel = ticket_handler_level($ticket, $headUser);
+            if ($handlerLevel !== 'assigner') {
+                throw new RuntimeException('این درخواست در حوزهٔ اختیار شما نیست؛ فقط درخواست‌های باز ثبت‌شده توسط زیرمجموعهٔ واحدتان قابل ویرایش هستند.');
+            }
+            $status = (string) $ticket['status'];
+            if (in_array($status, ['closed', 'cancelled', 'rejected'], true)) {
+                throw new RuntimeException('درخواستِ بسته/لغو/ردشده از این مسیر قابل ویرایش نیست.');
+            }
+            if (!empty($ticket['cancel_requested_at'])) {
+                throw new RuntimeException('لغو این درخواست در انتظار تصمیم مسئول است؛ ابتدا تصمیم انجام شود.');
+            }
+            $subject = trim((string) ($_POST['subject'] ?? ''));
+            $subjectLength = function_exists('mb_strlen') ? mb_strlen($subject, 'UTF-8') : strlen($subject);
+            if ($subject === '' || $subjectLength > 180) {
+                throw new RuntimeException('عنوان درخواست الزامی است و حداکثر ۱۸۰ نویسه می‌تواند باشد.');
+            }
+            $description = trim((string) ($_POST['description'] ?? ''));
+            $descriptionLength = function_exists('mb_strlen') ? mb_strlen($description, 'UTF-8') : strlen($description);
+            if ($description === '' || $descriptionLength > 20000) {
+                throw new RuntimeException('توضیحات درخواست الزامی است و حداکثر ۲۰۰۰۰ نویسه می‌تواند باشد.');
+            }
+            $priority = valid_choice(post_value('priority'), ['normal', 'urgent', 'critical'], (string) $ticket['priority']);
+            $subjectChanged = $subject !== (string) $ticket['subject'];
+            $descriptionChanged = $description !== (string) $ticket['description'];
+            $priorityChanged = $priority !== (string) $ticket['priority'];
+            // ارجاع فقط برای درخواست تخصیص‌نشده و در وضعیت نو/در انتظار ارجاع.
+            $assignee = (int) ($ticket['assigned_to'] ?? 0) ?: null;
+            $postedAssignee = (int) ($_POST['assigned_to'] ?? 0) ?: null;
+            $assignNow = false;
+            if ($postedAssignee !== null) {
+                if (!empty($ticket['assigned_to'])) {
+                    if ($postedAssignee !== (int) $ticket['assigned_to']) {
+                        throw new RuntimeException('این درخواست قبلاً ارجاع شده است؛ تغییر مسئول فقط با تأیید سوپروایزر امکان‌پذیر است.');
+                    }
+                } elseif (in_array($status, ['new', 'manager_review'], true)) {
+                    $assignNow = true;
+                    $assignee = $postedAssignee;
+                } else {
+                    throw new RuntimeException('ارجاع فقط در وضعیت «نو» یا «در انتظار ارجاع» ممکن است.');
+                }
+            }
+            $editNote = post_value('edit_note');
+            $editNoteLength = function_exists('mb_strlen') ? mb_strlen($editNote, 'UTF-8') : strlen($editNote);
+            if (($priorityChanged || $assignNow) && $editNote === '') {
+                throw new RuntimeException('برای تغییر اولویت یا ارجاع، ثبت دلیل قابل مشاهده برای درخواست‌کننده الزامی است.');
+            }
+            if ($editNoteLength > 1000) {
+                throw new RuntimeException('دلیل ویرایش نباید بیشتر از ۱۰۰۰ نویسه باشد.');
+            }
+            $assigneeRow = null;
+            if ($assignNow && $assignee) {
+                $assigneeQuery = db()->prepare('SELECT u.id, u.full_name, u.department_id, u.role, u.is_active, u.is_it_agent, u.is_primary_admin, hu.code AS handling_unit_code FROM users u LEFT JOIN handling_units hu ON hu.id = u.handling_unit_id WHERE u.id = ? AND u.is_active = 1 LIMIT 1');
+                $assigneeQuery->execute(array($assignee));
+                $assigneeRow = $assigneeQuery->fetch();
+                $ticketGroupForAssign = (string) ($ticket['service_group'] ?? 'it');
+                $assigneeRole = (string) ($assigneeRow['role'] ?? '');
+                $assigneeHu = (string) ($assigneeRow['handling_unit_code'] ?? '');
+                $assigneeDepartmentOk = $assigneeRole !== 'manager'
+                    || ((int) ($ticket['department_id'] ?? 0) > 0
+                        && (int) ($assigneeRow['department_id'] ?? 0) === (int) ($ticket['department_id'] ?? 0));
+                $assigneeGroupOk = $assigneeRow
+                    && ((user_is_primary_admin($assigneeRow) && $ticketGroupForAssign === 'it')
+                        || ($assigneeRole === 'support_manager' && $ticketGroupForAssign === 'support')
+                        || (in_array($assigneeRole, ['agent', 'manager'], true) && $assigneeHu === $ticketGroupForAssign));
+                if (!$assigneeRow || !ticket_assignee_is_eligible($ticket, $assigneeRow, 'ticket_notification_user_can') || !$assigneeGroupOk || !$assigneeDepartmentOk) {
+                    throw new RuntimeException('کارشناس انتخاب‌شده به این درخواست تعلق ندارد.');
+                }
+            }
+            $newStatus = $assignNow ? 'assigned' : $status;
+            $slaMinutes = priority_sla_minutes($priority);
+            [$newDueAt, $newPauseAt, $newPauseMinutes] = ticket_sla_transition($ticket, $newStatus, $priority);
+            $ola = ticket_ola_transition($ticket, $newStatus, $priority);
+            db()->beginTransaction();
+            $workflowUpdates = [
+                'priority' => $priority,
+                'subject' => $subject,
+                'description' => $description,
+                'sla_minutes' => $slaMinutes,
+                'due_at' => $newDueAt,
+                'ola_policy_id' => $ola['policy_id'],
+                'ola_response_due_at' => $ola['response_due_at'],
+                'ola_due_at' => $ola['due_at'],
+                'ola_escalation_1_at' => $ola['escalation_1_at'],
+                'ola_escalation_2_at' => $ola['escalation_2_at'],
+                'sla_paused_at' => $newPauseAt,
+                'sla_pause_minutes' => $newPauseMinutes,
+            ];
+            if ($assignNow) {
+                $workflowUpdates['assigned_to'] = $assignee;
+                $workflowUpdates['assigned_at'] = RequestCenterSqlExpression::now();
+            }
+            $workflow = new RequestCenterWorkflowService(db());
+            $workflowKind = $newStatus === $status ? 'same_state' : 'standard';
+            $updated = $workflow->transition($ticketId, $status, $newStatus, $workflowUpdates, $workflowKind, [
+                'requester_id' => $ticket['requester_id'],
+                'assigned_to' => $ticket['assigned_to'] ?? null,
+                'first_response_at' => $ticket['first_response_at'] ?? null,
+                'priority' => $ticket['priority'],
+                'department_id' => $ticket['department_id'] ?? null,
+                'service_group' => $ticket['service_group'] ?? null,
+                'due_at' => $ticket['due_at'] ?? null,
+                'sla_minutes' => $ticket['sla_minutes'] ?? null,
+                'sla_paused_at' => $ticket['sla_paused_at'] ?? null,
+                'sla_pause_minutes' => $ticket['sla_pause_minutes'] ?? null,
+                'ola_policy_id' => $ticket['ola_policy_id'] ?? null,
+                'ola_response_due_at' => $ticket['ola_response_due_at'] ?? null,
+                'ola_due_at' => $ticket['ola_due_at'] ?? null,
+                'ola_escalation_1_at' => $ticket['ola_escalation_1_at'] ?? null,
+                'ola_escalation_2_at' => $ticket['ola_escalation_2_at'] ?? null,
+                'cancel_requested_at' => null,
+            ]);
+            if (!$updated) {
+                throw new RuntimeException('وضعیت درخواست هم‌زمان تغییر کرد؛ صفحه را تازه کنید.');
+            }
+            save_audit_required((int) $headUser['id'], 'unit_head_ticket_updated', $ticketId, [
+                'subject_changed' => $subjectChanged,
+                'description_changed' => $descriptionChanged,
+                'from_priority' => (string) $ticket['priority'],
+                'to_priority' => $priority,
+                'assigned_to' => $assignNow ? $assignee : null,
+                'assign_now' => $assignNow,
+                'note' => $editNote,
+            ]);
+            if ($editNote !== '') {
+                (new RequestCenterWorkflowService(db()))->appendMessage($ticketId, (int) $headUser['id'], $editNote);
+                log_ticket_event($ticketId, (int) $headUser['id'], 'reply');
+            }
+            log_ticket_event($ticketId, (int) $headUser['id'], 'edited', $status, $newStatus, [
+                'subject_changed' => $subjectChanged,
+                'description_changed' => $descriptionChanged,
+                'priority_changed' => $priorityChanged,
+                'assigned_to' => $assignNow ? $assignee : null,
+            ]);
+            if ($assignNow) {
+                log_ticket_event($ticketId, (int) $headUser['id'], 'assignment_changed', $status, $newStatus, [
+                    'assignment_source' => 'unit_head',
+                    'to_assigned_to' => $assignee,
+                    'to_assignee_name' => (string) ($assigneeRow['full_name'] ?? ''),
+                    'reason' => $editNote,
+                ]);
+                request_center_notify_ticket_parties(
+                    $ticketId,
+                    'ticket_updated',
+                    'درخواست به کارشناس ارجاع شد',
+                    'درخواست ' . ticket_number($ticketId) . ' توسط مدیر واحد به «' . (string) ($assigneeRow['full_name'] ?? 'کارشناس') . '» ارجاع شد.',
+                    (int) $headUser['id'],
+                    true
+                );
+            } elseif ($priorityChanged) {
+                request_center_notify_ticket_parties(
+                    $ticketId,
+                    'ticket_updated',
+                    'اولویت درخواست تغییر کرد',
+                    'درخواست ' . ticket_number($ticketId) . ': اولویت به «' . priority_label($priority) . '» تغییر کرد.',
+                    (int) $headUser['id'],
+                    true
+                );
+            }
+            db_commit_or_fail('ticket:unit_head_ticket_update');
+            flash('success', 'ویرایش/ارجاع درخواست ثبت شد.');
+            redirect(request_center_ticket_return_url($ticketId));
+        }
+
         if ($action === 'update_ticket') {
             $staffUser = require_login();
             if (!user_can($staffUser, 'ticket.edit')) {
@@ -797,6 +982,10 @@ if (!defined('APP_ROOT')) {
                 throw new RuntimeException('درخواست پیدا نشد یا به واحد شما تعلق ندارد.');
             }
             $handlerLevel = ticket_handler_level($ticket, $staffUser);
+            if ($handlerLevel === 'assigner') {
+                // مدیر واحدِ صرف مسیر اختصاصی «ویرایش و ارجاع» دارد؛ مسیر مدیریتیِ عمومی برایش بسته است.
+                throw new RuntimeException('اصلاح/ارجاع این درخواست از کارت «ویرایش و ارجاع» قابل انجام است.');
+            }
             if ($handlerLevel === '') {
                 throw new RuntimeException('فقط مدیر واحد یا کارشناس مسئول همین درخواست می‌تواند آن را تغییر دهد.');
             }
@@ -839,13 +1028,13 @@ if (!defined('APP_ROOT')) {
                      || ((int) ($ticket['department_id'] ?? 0) > 0
                          && (int) ($assigneeRow['department_id'] ?? 0) === (int) $ticket['department_id']);
                  $staffGroupOk = true;
+                 $staffDept = (int) ($staffUser['department_id'] ?? 0);
+                 $deptOk = true;
                  if (($staffUser['role'] ?? '') === 'support_manager' && $ticketGroupForAssign !== 'support') {
                      $staffGroupOk = false;
                  } elseif (in_array(($staffUser['role'] ?? ''), ['agent', 'manager'], true) && user_service_group($staffUser) !== $ticketGroupForAssign) {
                      $staffGroupOk = false;
                  }
-                 $staffDept = (int) ($staffUser['department_id'] ?? 0);
-                 $deptOk = true;
                  if (($staffUser['role'] ?? '') === 'manager' && user_service_group($staffUser) === 'support' && $staffDept > 0) {
                      $deptOk = (int) ($assigneeRow['department_id'] ?? 0) === $staffDept
                          && (int) ($ticket['department_id'] ?? 0) === $staffDept;
@@ -1029,8 +1218,8 @@ if (!defined('APP_ROOT')) {
                 throw new RuntimeException('درخواست پیدا نشد یا به واحد شما تعلق ندارد.');
             }
             $handlerLevel = ticket_handler_level($ticket, $staffUser);
-            if ($handlerLevel === '') {
-                throw new RuntimeException('فقط مدیر واحد یا کارشناس مسئول همین درخواست می‌تواند مهلت را تغییر دهد.');
+            if ($handlerLevel === '' || $handlerLevel === 'assigner') {
+                throw new RuntimeException('فقط مدیر واحدِ رسیدگی یا کارشناس مسئول همین درخواست می‌تواند مهلت را تغییر دهد.');
             }
             if (in_array((string) $ticket['status'], ['closed', 'cancelled', 'rejected'], true)) {
                 throw new RuntimeException('درخواست بسته‌شده از این مسیر قابل تغییر نیست.');
