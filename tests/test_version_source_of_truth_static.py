@@ -45,6 +45,14 @@ KNOWN_PACKAGE_VERSION_DRIFT: dict[str, str] = {
 # فایل‌هایی که مقایسهشان با بسته معنی ندارد (خودِ نسخه، گزارش‌های تغییرات).
 EXCLUDED_FROM_COMPARE = {"VERSION"}
 
+# انحراف‌های ثبت‌شده: فایل‌هایی که نسخهٔ مخزن به‌دستور مالک عمداً با بستهٔ پین‌شده متفاوت است.
+# فقط همین یک فایل؛ بقیهٔ بسته هم‌چنان بایت‌به‌بایت مقایسه می‌شود.
+KNOWN_REDACTION_DRIFT: dict[str, str] = {
+    # گزارش ۱٫۶۲٫۹۵ داخل بستهٔ پین‌شده همان نسخهٔ اصلی است (SHA‑256 بسته تغییر نمی‌کند)؛
+    # نسخهٔ مخزن به‌دستور مالک از هر اشاره‌ای به خط ارتقای ناتمام/۱٫۶۳ پاک‌سازی شده است.
+    "CHANGE-REPORT-FA-1.62.95.md": "owner-mandated redaction of unfinished-line references",
+}
+
 
 def version_tuple(value: str) -> tuple[int, ...]:
     parts = re.findall(r"\d+", value or "")
@@ -137,6 +145,8 @@ class VersionSourceOfTruthTests(unittest.TestCase):
             for name in sorted(package["members"]):
                 relative = name[len("files/"):]
                 if relative in EXCLUDED_FROM_COMPARE:
+                    continue
+                if relative in KNOWN_REDACTION_DRIFT:
                     continue
                 # The already-delivered 1.62.72 ZIP includes the 1.62.70 README.
                 # Keep its checksum immutable; the repository README is corrected

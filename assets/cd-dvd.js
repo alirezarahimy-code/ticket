@@ -149,6 +149,11 @@ document.addEventListener('click', function (event) {
         }
         if (exitSheetField) {
             exitSheetField.hidden = isIncoming;
+            const exitSheetInput = exitSheetField.querySelector('input[name="exit_sheet"]');
+            if (exitSheetInput) {
+                exitSheetInput.disabled = isIncoming;
+                exitSheetInput.required = !isIncoming;
+            }
         }
         if (serialOutWrap) {
             serialOutWrap.hidden = isIncoming;

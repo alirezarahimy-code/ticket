@@ -1145,6 +1145,12 @@ function food_ticket_tpl_model(array $event, ?array $row = null): array
             $time = sprintf('%02d:%02d', (int) $tm[1], (int) $tm[2]);
         }
         $groupLines = [];
+        $copyLabel = trim((string) ($event['copy_label'] ?? ''));
+        if ($copyLabel !== '') {
+            // «نسخهٔ سلف» / «نسخهٔ نماینده» — زیر عنوان فیش چاپ می‌شود
+            $groupLines[] = ['kind' => 'copy', 'text' => $copyLabel];
+
+        }
         if (!$groupTitleIncluded && trim((string) ($event['group_title'] ?? '')) !== '') {
             $groupLines[] = ['kind' => 'meta', 'text' => 'گروه: ' . (string) $event['group_title']];
         }
@@ -1186,7 +1192,8 @@ function food_ticket_tpl_model(array $event, ?array $row = null): array
             $bodyY = max($bottom + 1.5, (float) ($anchor['y'] ?? 0.0));
             $lineY = $bodyY;
             foreach ($groupLines as $groupLine) {
-                $style = ($groupLine['kind'] ?? '') === 'menu' ? $menuStyle : $memberStyle;
+                $kind = (string) ($groupLine['kind'] ?? 'member');
+                $style = $kind === 'menu' ? $menuStyle : $memberStyle;
                 $line = [
                     'type' => 'text', 'x' => $bodyX, 'y' => $lineY, 'w' => $bodyW, 'h' => 0.5,
                     'text' => food_ticket_tpl_fa((string) $groupLine['text']),
@@ -1195,6 +1202,12 @@ function food_ticket_tpl_model(array $event, ?array $row = null): array
                     'align' => (string) ($anchor['align'] ?? 'right'),
                     'lh' => (float) ($style['line_height'] ?? 1.2), 'border' => false,
                 ];
+                if ($kind === 'copy') {
+                    // برچسب نسخه، درست زیر عنوان فیش، بولد و وسط‌چین
+                    $line['bold'] = true;
+                    $line['align'] = 'center';
+                    $line['pt'] = max(10.0, (float) $line['pt'] + 1);
+                }
                 $items[] = $line;
                 $lineY += food_ticket_tpl_text_height_mm($line);
                 if (($groupLine['kind'] ?? '') === 'menu') {
@@ -2174,8 +2187,18 @@ function food_ticket_tpl_list_payload(): array
         'fonts' => array_keys(food_ticket_tpl_font_files()),
         'brand' => food_ticket_tpl_brand_payload(),
         'group_print_mode' => food_ticket_group_print_mode(),
+        'group_double_copy' => food_ticket_group_double_copy_enabled(),
         'net' => ['dots_per_mm' => (float) $cfg['dots_per_mm'], 'head_dots_80' => food_ticket_tpl_head_dots(80.0, $cfg), 'head_dots_58' => food_ticket_tpl_head_dots(58.0, $cfg)],
     ];
+}
+
+/** چاپ دو نسخهٔ پشت‌سرهم فقط برای فیش گروهی: «نسخهٔ سلف» + «نسخهٔ نماینده» — پیش‌فرض فعال. */
+function food_ticket_group_double_copy_enabled(): bool
+{
+    $raw = function_exists('food_ticket_tpl_setting')
+        ? food_ticket_tpl_setting('food_ticket_group_double_copy', '1')
+        : (function_exists('setting') ? (string) setting('food_ticket_group_double_copy', '1') : '1');
+    return in_array((string) $raw, ['0', 'false', 'off', 'no'], true) ? false : true;
 }
 
 /** حالت چاپ گروه: group = یک فیش مشترک؛ individual = بازگشت به فیش‌های عضو‌به‌عضو. */
@@ -2306,13 +2329,25 @@ function food_ticket_templates_api(string $route, array $user): never
         food_ticket_api_json(['ok' => true] + food_ticket_tpl_list_payload());
     }
     if ($route === 'templates/group-mode') {
-        $mode = (string) ($body['mode'] ?? '');
-        if (!in_array($mode, ['group', 'individual'], true)) {
-            food_ticket_api_json(['error' => 'حالت چاپ گروهی معتبر نیست.'], 422);
+        if (array_key_exists('double_copy', $body)) {
+            $enabled = !in_array((string) ($body['double_copy'] ?? ''), ['0', 'false', 'off', 'no'], true) && !empty($body['double_copy']);
+            save_setting('food_ticket_group_double_copy', $enabled ? '1' : '0');
+            if ((string) food_ticket_tpl_setting('food_ticket_group_double_copy', '1') !== ($enabled ? '1' : '0')) {
+                food_ticket_api_json(['error' => 'تنظیم چاپ دو نسخه‌ایِ فیش گروهی در پایگاه‌داده ذخیره نشد.'], 500);
+            }
         }
-        save_setting('food_ticket_group_print_mode', $mode);
-        if (food_ticket_tpl_setting('food_ticket_group_print_mode', '') !== $mode) {
-            food_ticket_api_json(['error' => 'حالت چاپ گروهی در پایگاه‌داده ذخیره نشد.'], 500);
+        if (array_key_exists('mode', $body)) {
+            $mode = (string) $body['mode'];
+            if (!in_array($mode, ['group', 'individual'], true)) {
+                food_ticket_api_json(['error' => 'حالت چاپ گروهی معتبر نیست.'], 422);
+            }
+            save_setting('food_ticket_group_print_mode', $mode);
+            if (food_ticket_tpl_setting('food_ticket_group_print_mode', '') !== $mode) {
+                food_ticket_api_json(['error' => 'حالت چاپ گروهی در پایگاه‌داده ذخیره نشد.'], 500);
+            }
+        }
+        if (!array_key_exists('double_copy', $body) && !array_key_exists('mode', $body)) {
+            food_ticket_api_json(['error' => 'حالت چاپ یا گزینهٔ چاپ دو نسخه‌ای مشخص نشده است.'], 422);
         }
         food_ticket_api_json(['ok' => true] + food_ticket_tpl_list_payload());
     }

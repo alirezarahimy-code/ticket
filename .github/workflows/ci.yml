@@ -192,18 +192,27 @@ jobs:
     - name: Test 1.62.88 package builder contracts
       run: python -m pytest -q tests/test_release_1_62_88_package_integrity.py
 
-    - name: Build and verify 1.62.88 update archive
+    # بسته‌های الحاقی ۱٫۶۲٫۹۰→۹۳→۹۴→۹۵ از قبل با SHA‑256 پین و داخل مخزن هستند؛
+    # به‌جای بازساخت بستهٔ کلاسیک ۱٫۶۲٫۸۸ (که VERSION==1.62.88 می‌خواهد) همان‌ها تأیید می‌شوند.
+    - name: Verify pinned 1.62.93/1.62.94/1.62.95 union update archives
       run: |
-        python tools/build_update_1_62_88.py
         cd downloads
-        sha256sum -c ticket-update-1.62.82-to-1.62.88-merged-20261105.zip.sha256
-        unzip -t ticket-update-1.62.82-to-1.62.88-merged-20261105.zip
+        sha256sum -c ticket-update-1.62.90-to-1.62.93-food-reconciliation-leftover-20261106.zip.sha256
+        sha256sum -c ticket-update-1.62.93-to-1.62.94-food-guest-org-holiday-20261110.zip.sha256
+        sha256sum -c ticket-update-1.62.94-to-1.62.95-food-auto-receipts-cddvd-20261111.zip.sha256
+        unzip -t ticket-update-1.62.90-to-1.62.93-food-reconciliation-leftover-20261106.zip
+        unzip -t ticket-update-1.62.93-to-1.62.94-food-guest-org-holiday-20261110.zip
+        unzip -t ticket-update-1.62.94-to-1.62.95-food-auto-receipts-cddvd-20261111.zip
 
-    - name: Upload verified 1.62.88 update archive
+    - name: Upload verified 1.62.93–1.62.95 union update archives
       uses: actions/upload-artifact@v4
       with:
-        name: ticket-update-1.62.82-to-1.62.88-verified
+        name: ticket-update-1.62.9x-union-verified
         path: |
-          downloads/ticket-update-1.62.82-to-1.62.88-merged-20261105.zip
-          downloads/ticket-update-1.62.82-to-1.62.88-merged-20261105.zip.sha256
+          downloads/ticket-update-1.62.90-to-1.62.93-food-reconciliation-leftover-20261106.zip
+          downloads/ticket-update-1.62.90-to-1.62.93-food-reconciliation-leftover-20261106.zip.sha256
+          downloads/ticket-update-1.62.93-to-1.62.94-food-guest-org-holiday-20261110.zip
+          downloads/ticket-update-1.62.93-to-1.62.94-food-guest-org-holiday-20261110.zip.sha256
+          downloads/ticket-update-1.62.94-to-1.62.95-food-auto-receipts-cddvd-20261111.zip
+          downloads/ticket-update-1.62.94-to-1.62.95-food-auto-receipts-cddvd-20261111.zip.sha256
         if-no-files-found: error

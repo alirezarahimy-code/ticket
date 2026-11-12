@@ -138,6 +138,9 @@ function food_ticket_render_from_template(array $event, ?array $template = null)
             $date = sprintf('%04d/%02d/%02d', $jy, $jm, $jd);
         }
         $lines = [$org, $title];
+        if (trim((string) ($event['copy_label'] ?? '')) !== '') {
+            $lines[] = (string) $event['copy_label'];
+        }
         if (trim((string) ($event['group_title'] ?? '')) !== '') {
             $lines[] = 'گروه: ' . (string) $event['group_title'];
         }
@@ -513,15 +516,24 @@ function food_ticket_print_group_run(array $event, array $config, array $tpl, in
             $groupTpl['title'] = 'فیش گروهی غذا';
         }
 
-        $text = food_ticket_render_from_template($ticket, $groupTpl);
-        food_ticket_send_raw_payload($text, $config, $groupTpl, $ticket);
+        $doubleCopy = function_exists('food_ticket_group_double_copy_enabled') && food_ticket_group_double_copy_enabled();
+        $copyLabels = $doubleCopy ? ['نسخهٔ سلف', 'نسخهٔ نماینده'] : [''];
+        foreach ($copyLabels as $copyIndex => $copyLabel) {
+            $copyTicket = $ticket;
+            if ($copyLabel !== '') {
+                // زیر عنوان فیش؛ نسخهٔ سلف نزد سلف و نسخهٔ نماینده دست نماینده می‌ماند
+                $copyTicket['copy_label'] = $copyLabel;
+            }
+            $text = food_ticket_render_from_template($copyTicket, $groupTpl);
+            food_ticket_send_raw_payload($text, $config, $groupTpl, $copyTicket);
+        }
         $update = db()->prepare('UPDATE food_ticket_events SET print_status = "printed", event_type = IF(event_type = "guest", "guest", "printed"), '
             . 'processed_at = NOW(), last_error = NULL, next_retry_at = NULL WHERE id IN (' . $eligibleMarks . ')');
         $update->execute($eligibleIds);
         foreach ($eligible as $memberEvent) {
             $memberId = (int) $memberEvent['id'];
             food_ticket_mark_delivered_on_print($memberId);
-            food_ticket_print_log($memberId, $jobId, $memberEvent['source_key'] ?? null, $memberEvent['ticket_key'] ?? null, $printer, 'printed', $retry, 'group ticket printed once for run ' . $runId);
+            food_ticket_print_log($memberId, $jobId, $memberEvent['source_key'] ?? null, $memberEvent['ticket_key'] ?? null, $printer, 'printed', $retry, 'group ticket printed ' . ($doubleCopy ? '2 copies (نسخه سلف + نسخه نماینده)' : 'once') . ' for run ' . $runId);
         }
         return ['handled' => true, 'ids' => $ids, 'printed' => true, 'count' => count($eligible)];
     } catch (Throwable $e) {

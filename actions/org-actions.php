@@ -136,7 +136,7 @@ if (in_array($action, $orgCompanyActions, true)) {
             } elseif ($nodeType === 'liaison') {
                 // ۱.۶۲.۱۰: واحد مستقل (نمایندگی) کنار مدیرعامل؛ والد ندارد و زیرمجموعهٔ مدیرعامل نیست.
                 $parentId = 0;
-                $chartSide = valid_choice(post_value('chart_side'), ['right', 'left'], 'right');
+                $chartSide = valid_choice(post_value('chart_side'), ['right', 'left', 'center'], 'right');
                 $sideTaken = db()->prepare('SELECT id FROM org_units WHERE company_id = ? AND unit_type = "liaison" AND chart_side = ? AND is_active = 1 AND id <> ? LIMIT 1');
                 $sideTaken->execute([$orgCompanyId, $chartSide, $unitId]);
                 if ($sideTaken->fetchColumn()) {

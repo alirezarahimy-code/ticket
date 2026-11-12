@@ -738,12 +738,29 @@ function food_ticket_group_plan(array $members, array $absentUserIds, array $tic
  * اعضای گروه از دیتابیس.
  * @return list<array<string,mixed>>
  */
+if (!function_exists('food_person_name_split')) {
+    /**
+     * جداسازی «نام» و «نام خانوادگی» برای نمایش دو ستونه؛ رکوردهای قدیمی بدون
+     * first/last_name: کل «نام کامل» در ستون نام خانوادگی می‌نشیند و نام یک «—».
+     * @return array{first:string,last:string}
+     */
+    function food_person_name_split(array $row): array
+    {
+        $first = trim((string) ($row['first_name'] ?? ''));
+        $last = trim((string) ($row['last_name'] ?? ''));
+        if ($first === '' && $last === '') {
+            return ['first' => '', 'last' => trim((string) ($row['full_name'] ?? ''))];
+        }
+        return ['first' => $first, 'last' => $last];
+    }
+}
+
 function food_ticket_group_members(int $groupId, bool $activeOnly = false): array
 {
     if ($groupId <= 0 || !food_ticket_groups_ensure()) {
         return [];
     }
-    $sql = 'SELECT u.id, u.full_name, u.employee_number, u.national_code, u.is_active '
+    $sql = 'SELECT u.id, u.full_name, u.first_name, u.last_name, u.employee_number, u.national_code, u.is_active '
         . 'FROM food_ticket_group_members m JOIN users u ON u.id = m.user_id WHERE m.group_id = ?';
     if ($activeOnly) {
         $sql .= ' AND u.is_active = 1';
@@ -779,7 +796,7 @@ function food_ticket_day_visit_users(int $groupId, string $date): array
     }
     try {
         $q = db()->prepare(
-            'SELECT u.id, u.full_name, u.employee_number, u.national_code, u.is_active, '
+            'SELECT u.id, u.full_name, u.first_name, u.last_name, u.employee_number, u.national_code, u.is_active, '
             . 'm.group_id AS home_group_id, hg.title AS home_group_title '
             . 'FROM food_ticket_day_visits v JOIN users u ON u.id = v.user_id '
             . 'LEFT JOIN food_ticket_group_members m ON m.user_id = u.id '
@@ -1877,8 +1894,8 @@ function food_ticket_api_manual_attendance(string $date = ''): array
 
     // لیست را از سفارش‌ها محدود می‌کنیم؛ کد ملی برای نگاشت داخلی استفاده می‌شود و حذف می‌شود.
     $people = db()->query(
-        'SELECT id, employee_number, national_code, full_name, username, is_active FROM users '
-        . 'WHERE is_active = 1 ORDER BY full_name, employee_number, id'
+        'SELECT id, employee_number, national_code, full_name, first_name, last_name, username, is_active FROM users '
+        . 'WHERE is_active = 1 ORDER BY last_name, first_name, full_name, employee_number, id'
     )->fetchAll();
     $people = array_values(array_filter($people ?: [], static function (array $row) use ($hasEligibleOrder): bool {
         return $hasEligibleOrder($row) !== null;
@@ -2000,7 +2017,7 @@ function food_ticket_api_manual_attendance_save(int $userId, bool $withTicket, b
     }
 
     $q = db()->prepare(
-        'SELECT id, employee_number, national_code, full_name, username, is_active FROM users WHERE id = ? LIMIT 1'
+        'SELECT id, employee_number, national_code, full_name, first_name, last_name, username, is_active FROM users WHERE id = ? LIMIT 1'
     );
     $q->execute([$userId]);
     $person = $q->fetch();
@@ -2416,10 +2433,13 @@ function food_ticket_api_groups(string $overviewDate = '', ?array $actor = null)
     // اگر سرویس سفارش پاسخ داد، «بدون سفارش» واقعی است؛ وگرنه اصلاً نمایش داده نمی‌شود.
     $foodMapAvailable = ($memberOrderMaps[$date] ?? null) !== null;
     $userOut = static function (array $r) use ($memberFoodOf, $foodMapAvailable): array {
+        $split = food_person_name_split($r);
         return [
             'id' => (int) $r['id'],
             'pc' => (string) ($r['employee_number'] ?? ''),
             'name' => (string) ($r['full_name'] ?? ''),
+            'first_name' => $split['first'],
+            'last_name' => $split['last'],
             'nat' => (string) ($r['national_code'] ?? ''),
             'active' => (bool) ($r['is_active'] ?? false),
             'food' => $memberFoodOf ? $memberFoodOf($r) : null,
@@ -2429,8 +2449,8 @@ function food_ticket_api_groups(string $overviewDate = '', ?array $actor = null)
     $groups = db()->query('SELECT id, title, l_uid, rfid_card, description, visit_change_until, status, created_at FROM food_ticket_groups ORDER BY status ASC, id DESC')->fetchAll();
     $byGroup = [];
     $mrows = db()->query(
-        'SELECT m.group_id, u.id, u.employee_number, u.national_code, u.full_name, u.is_active '
-        . 'FROM food_ticket_group_members m JOIN users u ON u.id = m.user_id ORDER BY u.full_name'
+        'SELECT m.group_id, u.id, u.employee_number, u.national_code, u.full_name, u.first_name, u.last_name, u.is_active '
+        . 'FROM food_ticket_group_members m JOIN users u ON u.id = m.user_id ORDER BY u.last_name, u.first_name, u.full_name'
     )->fetchAll();
     foreach ($mrows as $r) {
         $byGroup[(int) $r['group_id']][] = $userOut($r);
@@ -2438,12 +2458,12 @@ function food_ticket_api_groups(string $overviewDate = '', ?array $actor = null)
     $visitorsByGroup = [];
     try {
         $vq = db()->prepare(
-            'SELECT v.group_id, u.id, u.employee_number, u.national_code, u.full_name, u.is_active, '
+            'SELECT v.group_id, u.id, u.employee_number, u.national_code, u.full_name, u.first_name, u.last_name, u.is_active, '
             . 'm.group_id AS home_group_id, hg.title AS home_group_title '
             . 'FROM food_ticket_day_visits v JOIN users u ON u.id = v.user_id '
             . 'LEFT JOIN food_ticket_group_members m ON m.user_id = u.id '
             . 'LEFT JOIN food_ticket_groups hg ON hg.id = m.group_id '
-            . 'WHERE v.visit_date = ? ORDER BY u.full_name'
+            . 'WHERE v.visit_date = ? ORDER BY u.last_name, u.first_name, u.full_name'
         );
         $vq->execute([$date]);
         foreach ($vq->fetchAll() ?: [] as $r) {
@@ -2477,7 +2497,7 @@ function food_ticket_api_groups(string $overviewDate = '', ?array $actor = null)
         ];
     }
     $free = db()->query(
-        'SELECT u.id, u.employee_number, u.national_code, u.full_name, u.is_active FROM users u '
+        'SELECT u.id, u.employee_number, u.national_code, u.full_name, u.first_name, u.last_name, u.is_active FROM users u '
         . 'LEFT JOIN food_ticket_group_members m ON m.user_id = u.id '
         . "WHERE m.id IS NULL AND u.employee_number IS NOT NULL AND TRIM(u.employee_number) <> '' "
         . 'ORDER BY u.is_active DESC, u.full_name'
@@ -2784,10 +2804,13 @@ function food_ticket_api_absence_status(int $groupId, string $date, array $actor
         $visit = $visitById[$uid] ?? null;
         $homeGroupId = (int) ($visit['home_group_id'] ?? 0);
         $isVisitor = $visit !== null && ($homeGroupId <= 0 || $homeGroupId !== $groupId);
+        $splitAbs = food_person_name_split($m);
         $membersOut[] = [
             'id' => $uid,
             'pc' => (string) ($m['employee_number'] ?? ''),
             'name' => (string) ($m['full_name'] ?? ''),
+            'first_name' => $splitAbs['first'],
+            'last_name' => $splitAbs['last'],
             'national_code' => food_ticket_digits($m['national_code'] ?? ''),
             'active' => (bool) ($m['is_active'] ?? false),
             'absent' => !$isVisitor && isset($absences[$uid]),

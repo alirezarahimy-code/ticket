@@ -3,11 +3,13 @@ param(
     [Parameter(Mandatory=$true)][string]$Root,
     [Parameter(Mandatory=$true)][string]$InstalledRoot,
     [switch]$CheckInstalledAcl,
-    [string]$BaseUrl
+    [string]$BaseUrl,
+    # پیش‌فرض روی همان نسخهٔ مراسم ریلیز ۱٫۶۲٫۸۸ می‌ماند (سازگاری پس‌رو)؛
+    # staging-checks آن را از خودِ فایل VERSION مخزن می‌خواند تا برای خط ۱٫۶۲٫۹۵ هم درست باشد.
+    [string]$ExpectedVersion = '1.62.88'
 )
 
 $ErrorActionPreference = 'Stop'
-$ExpectedVersion = '1.62.88'
 $SourceRoot = (Resolve-Path -LiteralPath $Root).Path
 $InstallPath = (Resolve-Path -LiteralPath $InstalledRoot).Path
 
