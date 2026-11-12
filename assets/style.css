@@ -1633,6 +1633,7 @@ body.page-organization .content-wrap { height: auto; min-height: 100vh; overflow
 .org-wire { fill: none; stroke: #6d8a7a; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; opacity: .76; }
 .org-wire-shared { stroke: #9aa9a0; stroke-width: 1.7; }
 .org-top-row { display: grid; grid-template-columns: minmax(210px,1fr) auto auto minmax(210px,1fr); align-items: start; gap: clamp(25px,5vw,90px); min-height: 128px; direction: ltr; position: relative; z-index: 1; }
+.org-top-row--with-center { grid-template-columns: minmax(210px,1fr) auto auto auto minmax(210px,1fr); }
 .org-liaison-cell, .org-ceo-cell { display: flex; justify-content: center; direction: rtl; }
 .org-liaison-cell { padding-top: 30px; }
 .org-office-cell { display: flex; align-items: center; justify-content: flex-end; direction: ltr; }

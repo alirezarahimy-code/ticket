@@ -12,7 +12,8 @@
   const MAX_TEMPLATES = 4;
   const S = {
     loaded: false, loading: false, error: '', busy: false,
-    templates: [], catalog: [], fonts: ['Tahoma'], brand: {}, net: {},
+    templates: [], catalog: [], fonts: ['Tahoma'], brand: {},
+    groupDoubleCopy: true, net: {},
     groupPrintMode: 'group', previewKind: 'individual', designTab: 'individual',
     groupTemplate: null, individualWork: null, groupWork: null,
     individualDirty: false, groupDirty: false,
@@ -147,6 +148,7 @@
     S.brand = x.brand || S.brand;
     S.net = x.net || S.net;
     S.groupPrintMode = x.group_print_mode === 'individual' ? 'individual' : 'group';
+    S.groupDoubleCopy = x.group_double_copy !== false;
     const individual = activeRow() || S.templates[0];
     if (individual && (!S.individualWork || !keepSelection)) S.individualWork = workFrom(individual);
     if (x.group_template) S.groupTemplate = x.group_template;
@@ -432,10 +434,15 @@
 
   function groupModeHtml() {
     const isGroup = S.groupPrintMode !== 'individual';
+    const doubleRow = isGroup
+      ? '<label class="fd-check" style="margin-top:10px"><input type="checkbox" data-fd-double-copy' + (S.groupDoubleCopy ? ' checked' : '') + '> <span>چاپ دو نسخهٔ پشت‌سرهم برای فیش گروهی <b>(«نسخهٔ سلف» و «نسخهٔ نماینده»)</b></span></label>' +
+        '<p class="fd-help">نسخهٔ «سلف» نزد سلف می‌ماند و نسخهٔ «نماینده» دست نماینده. این قاعده فقط فیش گروهی را شامل می‌شود.</p>'
+      : '';
     return '<div class="fd-card fd-group-mode"><h3>حالت چاپ گروه‌های غذایی</h3>' +
       '<p class="fd-help">این گزینه فقط برای گروه‌های غذایی است؛ مسیرهای چاپ فیش انفرادی و سایر چاپ‌ها بدون تغییر می‌مانند.</p>' +
       '<div class="fd-actions"><button type="button" class="fd-btn ' + (isGroup ? 'primary' : '') + '" data-fd-group-mode="group">چاپ یک فیش مشترک برای گروه</button>' +
       '<button type="button" class="fd-btn ' + (!isGroup ? 'primary' : '') + '" data-fd-group-mode="individual">بازگشت به چاپ انفرادی اعضا</button></div>' +
+      doubleRow +
       '<p class="fd-help">وضعیت فعلی: <b>' + (isGroup ? 'فیش مشترک برای هر گروه' : 'فیش جداگانه برای هر عضو') + '</b></p></div>';
   }
 
@@ -557,7 +564,7 @@
       '.fd-border{position:absolute;border:1px solid #000;pointer-events:none}.fd-el{position:absolute;cursor:move;box-sizing:border-box;outline:1px dashed #9db4c0;direction:rtl}.fd-el.fd-sel{outline:2px solid #0f766e;z-index:5}.fd-el.fd-off{opacity:.3}.fd-text{width:100%;height:100%;overflow:visible;white-space:pre-wrap;color:#000}.fd-line{border-top:1px dashed #000;margin-top:3px}.fd-el img{max-width:100%;max-height:100%;object-fit:contain;pointer-events:none}.fd-ph{font-size:11px;color:#9aa8b2}.fd-qr{background:repeating-conic-gradient(#000 0 25%,#fff 0 50%) 0 0/20% 20%;color:transparent}' +
       '.fd-h{position:absolute;right:-5px;bottom:-5px;width:11px;height:11px;background:#0f766e;border:2px solid #fff;border-radius:3px;cursor:nwse-resize}.fd-dim{font-size:11px;color:#6d7c89;margin-top:6px}.fd-zoom{font-size:12px;margin:6px 0}.fd-zoom button{border:1px solid #cbd8df;background:#fff;border-radius:6px;width:28px;cursor:pointer}' +
       '.fd-layers{display:flex;flex-direction:column;gap:4px;max-height:260px;overflow:auto}.fd-layer{display:flex;justify-content:space-between;align-items:center;border:1px solid #e3ebf0;border-radius:8px;padding:4px 8px;font-size:12px;cursor:pointer}.fd-layer.on{border-color:#0f766e;background:#e9f7f5}.fd-layer.off{opacity:.55}.fd-lbtn button{border:0;background:transparent;cursor:pointer;color:#0f766e}' +
-      '.fd-pv-paper{background:#eef2f4;padding:10px;text-align:center;border-radius:10px;overflow:auto}.fd-pv-paper img{background:#fff;box-shadow:0 2px 10px #0003}.fd-group-mode{border-right:4px solid #0f766e}.fd-live-title,.fd-group-server-preview h4{margin:10px 0 6px;font-size:13px}.fd-group-live-preview{background:#eef2f4;padding:10px;border-radius:10px;overflow:auto}.fd-group-server-preview{margin-top:14px;padding-top:8px;border-top:1px solid #dce5eb}.fd-real-preview-title{margin:0 0 8px;font-size:15px}.fd-sample-toggle{margin:0 0 8px}.fd-sample-toggle .fd-btn{font-size:12px}';
+      '.fd-pv-paper{background:#eef2f4;padding:10px;text-align:center;border-radius:10px;overflow:auto}.fd-pv-paper img{background:#fff;box-shadow:0 2px 10px #0003}.fd-group-mode{border-right:4px solid #0f766e}.fd-check{display:flex;align-items:flex-start;gap:8px;cursor:pointer;font-size:13px;line-height:1.9}.fd-check input{margin-top:2px;flex:none}.fd-live-title,.fd-group-server-preview h4{margin:10px 0 6px;font-size:13px}.fd-group-live-preview{background:#eef2f4;padding:10px;border-radius:10px;overflow:auto}.fd-group-server-preview{margin-top:14px;padding-top:8px;border-top:1px solid #dce5eb}.fd-real-preview-title{margin:0 0 8px;font-size:15px}.fd-sample-toggle{margin:0 0 8px}.fd-sample-toggle .fd-btn{font-size:12px}';
   }
 
   // ───────────────────────── تغییر داده و پیش‌نمایش ─────────────────────────
@@ -760,6 +767,14 @@
   document.addEventListener('change', (ev) => {
     if (!within(ev.target) || !S.work) return;
     const d = ev.target.dataset;
+    if (d.fdDoubleCopy !== undefined) {
+      const enabled = !!ev.target.checked;
+      callApi('/api/templates/group-mode', { method: 'POST', body: JSON.stringify({ double_copy: enabled }) }).then((x) => {
+        S.groupDoubleCopy = x.group_double_copy !== false;
+        say(S.groupDoubleCopy ? 'چاپ دو نسخه‌ایِ فیش گروهی فعال شد.' : 'چاپ تک نسخه‌ایِ فیش گروهی فعال شد.');
+      }).catch((e) => say((e && e.message) || 'ذخیرهٔ تنظیم چاپ دو نسخه‌ای انجام نشد'));
+      return;
+    }
     if (ev.target.id === 'fd-logo-file') { const f = ev.target.files && ev.target.files[0]; if (f) uploadLogo(f); return; }
     if (d.fdToggle) {
       const key = d.fdToggle;

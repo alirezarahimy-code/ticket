@@ -295,7 +295,7 @@
         return '<div class="org-node org-ceo' + nodeMatch(manager) + '" data-unit="' + ceo.id + '" data-drop="ceo"><div class="org-node-menu-wrap">' + nodeMenuButton(ceo.id) + '</div><div class="org-avatar">' + esc(initial(manager.name)) + '</div><div class="org-node-name">' + esc(manager.name) + '</div><div class="org-node-title"><span class="org-title-icon">' + iconFor('manager') + '</span> ' + esc(rootLabel()) + '</div><div class="org-company-node-name">' + esc(data.companyName || '') + '</div><div class="org-node-count">' + iconFor('deputy') + ' ' + children(ceo.id, 'deputy').length + ' معاونت</div>' + renderCeoAddActions() + '</div>';
     };
     var renderLiaisonSide = function (side) {
-        var sideLabel = side === 'right' ? 'راست' : 'چپ';
+        var sideLabel = side === 'right' ? 'راست' : (side === 'left' ? 'چپ' : 'وسط');
         var item = liaisonAt(side);
         if (!item) {
             if (!data.canManage) return '';
@@ -406,9 +406,12 @@
         var orphanSection = orphanMarkup ? '<section class="org-orphan-units"><h3>واحدهای خارج از مسیر اصلی یا دارای والد ناسازگار</h3><p>رکوردها حفظ شده‌اند؛ این بخش برای جلوگیری از پنهان‌شدن داده‌های قدیمی/ناقص است. با ویرایش والد می‌توان آن‌ها را به مسیر معتبر منتقل کرد.</p><div class="org-orphan-row">' + orphanMarkup + '</div></section>' : '';
         var leftLiaison = rootType() === 'company_manager' ? '' : renderLiaisonSide('left');
         var rightLiaison = rootType() === 'company_manager' ? '' : renderLiaisonSide('right');
+        var centerLiaison = rootType() === 'company_manager' ? '' : renderLiaisonSide('center');
         var officeMarkup = office ? renderOffice(office) : '';
         var emptyHint = !rootBranches.length && !directDepartments.length && data.canManage ? '<div class="org-empty-branch-hint">از دکمه‌های کارت مدیرعامل، معاونت یا مدیریت مستقل را اضافه کنید.</div>' : '';
-        return '<div class="org-chart-stage"><svg class="org-wires" id="org-wires" aria-hidden="true"></svg><div class="org-top-row"><div class="org-liaison-cell physical-left">' + leftLiaison + '</div><div class="org-office-cell">' + officeMarkup + '</div><div class="org-ceo-cell">' + renderCeo() + '</div><div class="org-liaison-cell physical-right">' + rightLiaison + '</div></div><div class="org-deputy-rows">' + rows + directMarkup + emptyHint + orphanSection + '</div></div>';
+        var topRowClass = centerLiaison ? 'org-top-row org-top-row--with-center' : 'org-top-row';
+        var centerLiaisonCell = centerLiaison ? '<div class="org-liaison-cell org-liaison-cell-center">' + centerLiaison + '</div>' : '';
+        return '<div class="org-chart-stage"><svg class="org-wires" id="org-wires" aria-hidden="true"></svg><div class="' + topRowClass + '"><div class="org-liaison-cell physical-left">' + leftLiaison + '</div><div class="org-office-cell">' + officeMarkup + '</div><div class="org-ceo-cell">' + renderCeo() + '</div>' + centerLiaisonCell + '<div class="org-liaison-cell physical-right">' + rightLiaison + '</div></div><div class="org-deputy-rows">' + rows + directMarkup + emptyHint + orphanSection + '</div></div>';
     };
     var expandCanvasForNegativeCards = function (stage) {
         var wrap = stage.closest('.org-chart-wrap'), canvas = $('#org-canvas');

@@ -194,7 +194,8 @@ def test_save_config_persists_window_without_breaking_printer_save() -> None:
 
 def test_worker_gates_access_behind_the_window() -> None:
     assert "food_ticket_window_state($config, $tehranNow)" in WORKER
-    assert "$readSource = !$queueOnly && ($windowOpen || $finalSweepPending);" in WORKER
+    assert "$strictClosed = $windowEnabled && !$windowOpen && !$forceOutsideWindow;" in WORKER
+    assert "$readSource = !$queueOnly && ($windowOpen || $endOfDayDue || $forceOutsideWindow);" in WORKER
     assert "if ($readSource) {" in WORKER
 
 
@@ -206,8 +207,11 @@ def test_worker_never_kills_itself_outside_the_window() -> None:
     assert "$cycle['idle'] = true;" in WORKER
 
 
-def test_worker_still_drains_the_print_queue_outside_the_window() -> None:
-    """فیشی که چاپگر نپذیرفته نباید تا فردا معطل بماند."""
+def test_worker_does_not_drain_queue_outside_the_strict_window() -> None:
+    """خواستهٔ مالک: خارج از پنجره حتی تخلیهٔ صف چاپ هم انجام نمی‌شود (مانع چاپ ناخواسته مثل فیش ۷:۴۸).
+    تنها استثنا، گذر پایان‌روز ساعت ۲۳ به بعد است که اول صف را تخلیه و سپس ثبت خودکار می‌کند."""
+    gate = WORKER[WORKER.index("حالت سختگیرانهٔ خارج از پنجره") : WORKER.index("$cycle['window']")]
+    assert "$drainQueue = false;" in gate
     assert "$foodWorkerPendingPrints" in WORKER
     assert "$drainQueue = $queueOnly || $readSource || $pendingPrints > 0;" in WORKER
     assert "if ($drainQueue) {" in WORKER
@@ -215,28 +219,36 @@ def test_worker_still_drains_the_print_queue_outside_the_window() -> None:
 
 def test_queue_only_mode_never_touches_access() -> None:
     """--queue-only فقط صف چاپ را تخلیه می‌کند و نباید درگیر پنجره شود."""
-    assert "$readSource = !$queueOnly && ($windowOpen || $finalSweepPending);" in WORKER
+    assert "$readSource = !$queueOnly && ($windowOpen || $endOfDayDue || $forceOutsideWindow);" in WORKER
     assert "$drainQueue = $queueOnly || $readSource || $pendingPrints > 0;" in WORKER
 
 
-def test_worker_sweeps_once_after_every_restart() -> None:
-    """تسک ویندوز هر ۶ ساعت Worker را تازه می‌کند؛ نباید ترددی بین دو اجرا گم شود."""
-    assert "$previousWindowOpen = null;" in WORKER
-    assert "if ($previousWindowOpen !== false && !$windowOpen) {" in WORKER
+def test_worker_does_nothing_outside_the_window_even_after_restart() -> None:
+    """خواستهٔ صریح مالک: خارج از پنجرهٔ کاری هیچ فعالیت و کاری انجام ندهد؛
+    اسکن یک‌بارهٔ «جاروی پایانی پس از ری‌استارت» حذف شد."""
+    assert "$finalSweepPending" not in WORKER
+    assert "$previousWindowOpen" not in WORKER
+    assert "$cycle['final_sweep']" not in WORKER
+    assert "$cycle['strict_window_idle'] = true;" in WORKER
 
 
-def test_worker_runs_a_final_sweep_when_the_window_closes() -> None:
-    """ردیف‌های روز قبل هرگز دوباره خوانده نمی‌شوند؛ جارو تنها فرصت آخرین تردد است."""
-    assert "if ($previousWindowOpen !== false && !$windowOpen) {" in WORKER
-    assert "$finalSweepPending = true;" in WORKER
-    assert "$cycle['final_sweep'] = true;" in WORKER
+def test_worker_end_of_day_pass_is_the_only_exception() -> None:
+    """تنها گذر استثنا: ساعت ۲۳ به بعد، یک بار در روز — اول خواندن/چاپ ترددهای واقعی،
+    سپس ثبت خودکار تحویل برای وعده‌های سلف‌بسته (بدون چاپ فیزیکی)."""
+    assert "$endOfDayDue = $processorEnabled" in WORKER
+    assert "$tehranHour >= 23" in WORKER
+    assert "food_ticket_auto_receipts_run($tehranNow->modify('-1 day')->format('Y-m-d'))" in WORKER
+    assert "food_ticket_auto_receipts_run($tehranDay, true)" in WORKER
+    assert "if ($endOfDayDue && $readSource && $processorEnabled && (int) ($cycle['errors'] ?? 0) === 0) {" in WORKER
 
 
 def test_auto_receipts_are_not_blocked_by_the_window() -> None:
-    """کار روزانهٔ ثبت فیش خودکار باید حتی در روز تعطیل اجرا شود."""
+    """کار روزانهٔ ثبت فیش خودکار حتی در روز تعطیل و وقتی پنجره بسته است اجرا می‌شود؛
+    در «گذر پایان‌روز» (ساعت ۲۳ به بعد) انجام می‌شود، نه در صبح روز بعد."""
     auto = WORKER.index("food_ticket_auto_receipts_run(")
-    gate = WORKER.index("دروازهٔ پنجرهٔ کاری")
-    assert auto < gate, "auto-receipts باید پیش از دروازه اجرا شود"
+    gate = WORKER.index("حالت سختگیرانهٔ خارج از پنجره")
+    assert auto > gate, "گذر پایان‌روز بعد از دروازه تعریف می‌شود"
+    assert "if ($strictClosed && !$endOfDayDue) {" in WORKER, "پنجرهٔ بسته فقط در حضور گذر پایان‌روز استثناکده می‌شود"
 
 
 # ─────────────────── کاهش تأخیر چاپ ───────────────────
@@ -386,13 +398,13 @@ def test_six_window_fields_sit_in_two_rows_of_three() -> None:
 
 
 def test_time_inputs_are_forced_to_24_hour() -> None:
-    """input[type=time] قالبش را از locale می‌گیرد؛ lang=en-GB یعنی ۲۴ساعته."""
+    """ساعت بازه همیشه ۲۴ساعتهٔ HH:MM است؛ input متنی با الگوی سختگیرانهٔ ۲۴ساعته."""
     for name in ("windowStart", "windowEnd"):
-        field = PANEL[PANEL.index(f'name="{name}"') :][:140]
-        assert 'type="time"' in field, name
-        assert 'lang="en-GB"' in field, name
+        field = PANEL[PANEL.index(f'name="{name}"') :][:260]
+        assert 'pattern="([01][0-9]|2[0-3]):[0-5][0-9]"' in field, name
+        assert 'inputmode="numeric"' in field, name
         assert 'dir="ltr"' in field, name
-        assert 'step="60"' in field, name
+        assert 'maxlength="5"' in field, name
 
 
 def test_time_picker_icon_stays_attached_to_its_field() -> None:
