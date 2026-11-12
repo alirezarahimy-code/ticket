@@ -117,6 +117,26 @@ function can_view_ticket(array $ticket, array $user): bool
  * ۱.۶۲.۶ — آیا زیرساخت چارت سازمانی برای تشخیص «مدیر سازمانی» در دسترس است؟
  * نتیجه کش می‌شود تا ثبت درخواست روی نصب‌های قدیمیِ بدون این جدول‌ها خطا نگیرد.
  */
+/**
+ * آیا ستون‌های نقش خودکار چارت (users.org_auto_role / users.org_prev_role) موجودند؟
+ * در شِمای تازهٔ ۱٫۶۲٫۹۵ این ستون‌ها را صفحهٔ سازمان به‌صورت تنبل می‌سازد؛ مسیر ثبت درخواست
+ * هرگز نباید برای ترمیم شِما DDL اجرا کند. اگر ستون نباشد، «مدیر خودکار-چارتی» هم وجود ندارد
+ * و شرط حذف او معنا ندارد. نتیجه کش می‌شود.
+ */
+function ticket_org_auto_role_sql(): string
+{
+    static $ready = null;
+    if ($ready === null) {
+        try {
+            db()->query('SELECT org_auto_role, org_prev_role FROM users LIMIT 1');
+            $ready = true;
+        } catch (Throwable) {
+            $ready = false;
+        }
+    }
+    return $ready ? ' AND COALESCE(u.org_auto_role, 0) = 0' : '';
+}
+
 function ticket_org_manager_rank_sql(): string
 {
     static $ready = null;
@@ -171,7 +191,8 @@ function choose_handling_agent(string $serviceGroup, ?int $departmentId = null, 
         // مدیر عادی فقط مسئول همان معاونت/واحدِ ثبت‌شده روی درخواست است؛ از معاونت دیگری انتخاب نشود.
         . ' AND (u.role <> "manager" OR (? > 0 AND u.department_id = ?))'
         // تصمیم مالک (۲۰۲۶-۱۱-۱۱): مدیران چارت سازمانی از ارجاع خودکار حذف‌اند؛ فقط انتصاب دستی روی یک درخواست ممکن است.
-        . ' AND COALESCE(u.org_auto_role, 0) = 0'
+        // شرط فقط وقتی ستون‌های org_* موجود باشند اعمال می‌شود (نصب تازهٔ ۱٫۶۲٫۹۵ ستون‌ها را تنبل می‌سازد)؛ وگرنه کل کوئری با خطای ستون ناموجود می‌شکند.
+        . ticket_org_auto_role_sql()
         . ' GROUP BY u.id, u.role, u.is_active, u.is_primary_admin, u.department_id, u.is_it_agent, hu.code ORDER BY ' . $orgManagerRank . 'COUNT(t.id), u.id'
     );
     $fallback->execute([$serviceGroup, $departmentId, $departmentId]);
