@@ -83,6 +83,8 @@ CREATE TABLE IF NOT EXISTS users (
     handling_unit_id INT UNSIGNED NULL,
     is_it_agent TINYINT(1) NOT NULL DEFAULT 0,
     is_primary_admin TINYINT(1) NOT NULL DEFAULT 0,
+    org_auto_role TINYINT(1) NOT NULL DEFAULT 0,
+    org_prev_role VARCHAR(20) NULL,
     role ENUM('user','agent','manager','supervisor','admin','primary_admin','support_manager','inspector','local_user','guard') NOT NULL DEFAULT 'user',
     auth_source ENUM('local','ldap','food') NOT NULL DEFAULT 'local',
     is_active TINYINT(1) NOT NULL DEFAULT 1,

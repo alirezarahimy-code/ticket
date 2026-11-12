@@ -1,15 +1,9 @@
--- مهاجرت واحد Request Center برای ارتقاء ۱.۶۲.۹۰ ← ۱.۶۳ (نسخهٔ ادغام‌شده ۲۰۲۶-۱۱-۰۹).
--- فایل واحد به‌درخواست مالک نگه‌داشته شد؛ محتوای پیشین ۳۷-request-center-lifecycle-rejection.sql
--- عیناً به همین فایل منتقل شد (همان شمارهٔ ۰۳۵، بدون ساخت مهاجرت جداگانه).
--- افزایشی، idempotent و بدون حذف/بازنویسی داده؛ قابل اجراست حتی روی دیتابیسی که ۰۳۵ را
--- قبلاً ثبت کرده باشد (گاردهای information_schema آن را امن می‌کنند)، ولی توجه کنید:
--- system-update.php مهاجرت‌ها را فقط با «نام فایل» در schema_updates ثبت می‌کند؛ اگر هدف
--- قدیمی جدول request_center_appointments را ساخته و ردیف ۰۳۵ را ثبت کرده باشد، این فایل را
--- یک‌بار به‌دستی اعمال کنید (mariadb < migrations/035-request-center-appointments.sql)
--- یا ردیف schema_updates مربوط به '035-request-center-appointments.sql' را پاک کنید.
--- هیچ ستون/داده‌ای خارج از حوزهٔ Request Center تغییر نمی‌کند.
--- 034 (Logging) و 036 (غذا) تغییر نکرده‌اند.
-
+-- مهاجرت ۰۳۵ برای Request Center: جدول نوبت‌ها و دلتاهای lifecycle.
+-- runner رجیستری را فقط با نام فایل می‌سنجد. اگر نصب قدیمی قبلاً payload نوبت‌های ۰۳۵ را ثبت کرده باشد،
+-- این نسخهٔ ادغام‌شده Skip می‌شود؛ ردیف schema_updates را حذف نکنید. مهاجرت یکتای ۰۳۹ دلتاهای lifecycle را تکمیل می‌کند.
+-- مهاجرت ۰۳۸ ستون‌های نقش خودکار چارت سازمانی را اضافه می‌کند.
+-- افزایشی و idempotent؛ از بازنویسی دسته‌های سفارشی جلوگیری می‌شود.
+-- ۰۳۴ (Logging) و ۰۳۶/۰۳۷ (غذا) خارج از این مهاجرت هستند.
 -- ════════════ قسمت ۱: جدول نوبت‌های رسیدگی (محتوای اصیل ۰۳۵) ════════════
 CREATE TABLE IF NOT EXISTS request_center_appointments (
     id               INT UNSIGNED      NOT NULL AUTO_INCREMENT,
@@ -133,7 +127,7 @@ INSERT INTO categories (name, code, service_group) VALUES
 ('ملزومات اداری', 'SUP-CAT-STAT', 'support'),
 ('خدمات عمومی', 'SUP-CAT-GEN', 'support'),
 ('سایر خدمات پشتیبانی', 'SUP-CAT-MISC', 'support')
-ON DUPLICATE KEY UPDATE name = VALUES(name), service_group = VALUES(service_group), is_active = 1;
+ON DUPLICATE KEY UPDATE id = id;
 
 -- Restore the category relation when existing service data has no orphaned category IDs.
 -- If legacy data contains orphan references, preserve those rows and leave the FK absent;

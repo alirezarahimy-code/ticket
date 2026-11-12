@@ -35,6 +35,7 @@ def test_all_pages_are_covered_by_a_server_side_guard():
             "user_is_primary_admin(",
             "user_can(",
             "fetch_ticket(",          # detail: scope-enforced read + 404
+            "request_center_is_unit_head($user)",  # unit workspace: active org-chart scope
             "is_staff_role(",
         ]
         if not any(marker in source for marker in markers):
@@ -42,12 +43,31 @@ def test_all_pages_are_covered_by_a_server_side_guard():
     assert not failures, f"صفحه‌های بدون حصار سرور-محور: {failures}"
 
 
+def test_unit_workspace_checks_chart_scope_before_reading_requests():
+    source = read(PAGES / "unit.php")
+    assert "if (!defined('APP_ROOT'))" in source
+    guard_at = source.index("request_center_is_unit_head($user)")
+    summary_at = source.index("$repo->unitHeadSummary($user)")
+    list_at = source.index("$repo->listUnitHead($user")
+    assert guard_at < summary_at and guard_at < list_at
+
+    functions = read(ROOT / "modules" / "request-center" / "lib" / "functions.php")
+    assert "function request_center_is_unit_head(array $user)" in functions
+    assert "request_center_unit_head_scope_ids($user) !== []" in functions
+    assert "ticket_manager_scope_unit_ids($user)" in functions
+
+    scope = read(ROOT / "lib" / "auth-scope.php")
+    assert "function ticket_manager_scope_unit_ids(array $user)" in scope
+    assert "company.is_active = 1" in scope
+    assert "ou.is_active = 1" in scope
+
+
 def test_pages_have_no_unguarded_module_requests():
     failures = []
     for page in sorted(PAGES.glob("*.php")):
         source = read(page)
         # تمام جاهایی که مستقیماً 403/404 صادر می‌کنند یا مجوز می‌خواهند را شمارش کن
-        if not re.search(r"require_permission\(|require_login\(|http_response_code\((403|404)\)|can_view_ticket\(", source):
+        if not re.search(r"require_permission\(|require_login\(|http_response_code\((403|404)\)|can_view_ticket\(|request_center_error_page\((403|404)", source):
             failures.append(page.name)
     assert not failures, f"صفحه‌های بدون مسیرِ مردودِ صریح: {failures}"
 

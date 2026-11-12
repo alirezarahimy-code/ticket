@@ -71,5 +71,8 @@ $seedCount = (int) $pdo->query(
 )->fetchColumn();
 migration_check($seedCount >= 16, 'Request Center category seed is idempotently populated');
 
+$customCategory = $pdo->query("SELECT name, is_active FROM categories WHERE code = 'IT-CAT-HW' LIMIT 1")->fetch(PDO::FETCH_ASSOC);
+migration_check(is_array($customCategory) && (string) $customCategory['name'] === 'دسته سفارشی حفظ‌شده' && (int) $customCategory['is_active'] === 0, 'existing category customization is preserved by catch-up migration');
+
 echo "PASS: Request Center migration 035 (merged lifecycle) upgrade path on MariaDB " .
     $pdo->query('SELECT VERSION()')->fetchColumn() . "\n";
