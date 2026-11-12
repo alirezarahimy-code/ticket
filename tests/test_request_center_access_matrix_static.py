@@ -36,6 +36,7 @@ def test_all_pages_are_covered_by_a_server_side_guard():
             "user_can(",
             "fetch_ticket(",          # detail: scope-enforced read + 404
             "is_staff_role(",
+            "request_center_is_unit_head(",   # Pages/unit.php: دروازهٔ فضای مدیر واحد (۴۰۳ در همان صفحه)
         ]
         if not any(marker in source for marker in markers):
             failures.append(page.name)
