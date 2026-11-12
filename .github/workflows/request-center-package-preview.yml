@@ -218,10 +218,16 @@ jobs:
             sha256sum -c SHA256SUMS
           )
 
-      - name: Upload QA package preview
+      - name: Build and validate the Request Center RC update archive
+        run: python tools/build_rc_update.py
+
+      - name: Upload QA package preview and RC candidate
         uses: actions/upload-artifact@v4
         with:
-          name: request-center-qa-preview
-          path: dist/request-center-qa/
+          name: request-center-qa-and-rc-candidate
+          path: |
+            dist/request-center-qa/
+            downloads/ticket-update-1.62.94-to-1.63-request-center-rc-candidate-20261111.zip
+            downloads/ticket-update-1.62.94-to-1.63-request-center-rc-candidate-20261111.zip.sha256
           if-no-files-found: error
           retention-days: 14

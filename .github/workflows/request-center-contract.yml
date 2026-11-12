@@ -1,8 +1,10 @@
 name: Request Center Contract
 
 on:
+  push:
+    branches: [ 'fix/rc-contract-tests-*' ]
   pull_request:
-    branches: [ main ]
+    branches: [ main, arena/22d4eba7-ticket ]
     paths:
       - 'request-center.php'
       - 'modules/request-center/**'
