@@ -7,6 +7,14 @@ on:
       - 'request-center.php'
       - 'modules/request-center/**'
       - 'migrations/035-request-center-appointments.sql'
+      - 'migrations/037-org-role-sync-columns.sql'
+      - 'migrations/038-request-center-lifecycle-catchup.sql'
+      - 'schema.sql'
+      - 'install-empty-db.sql'
+      - 'tools/build_rc_update.py'
+      - 'downloads/CHANGE-REPORT-FA-1.63.md'
+      - 'tests/test_org_role_sync_columns_mariadb.php'
+      - 'tests/test_rc_package_prerequisites_static.py'
       - 'tests/test_request_center_phase3_lifecycle_static.py'
       - 'tests/test_request_center_phase3_workspaces_static.py'
       - 'tests/test_request_center_workflow_service_sqlite.php'
@@ -48,7 +56,7 @@ on:
       - 'lib/http-input.php'
       - 'lib/render.php'
   push:
-    branches: [ feature/request-center-module-1.62.88, arena/22d4eba7-ticket ]
+    branches: [ feature/request-center-module-1.62.88, arena/22d4eba7-ticket, 'fix/rc-contract-tests-*' ]
 
 permissions:
   contents: write
@@ -120,7 +128,7 @@ jobs:
           php -l cron/sla_maintenance.php
           php -l modules/request-center/Pages/calendar.php
       - name: First-slice and Phase-3 lifecycle architecture contracts
-        run: python -m pytest -q tests/test_request_center_first_slice_static.py tests/test_request_center_access_matrix_static.py tests/test_request_center_phase3_lifecycle_static.py tests/test_request_center_phase3_workspaces_static.py
+        run: python -m pytest -q tests/test_request_center_first_slice_static.py tests/test_request_center_access_matrix_static.py tests/test_request_center_phase3_lifecycle_static.py tests/test_request_center_phase3_workspaces_static.py tests/test_rc_package_prerequisites_static.py
       - name: Repository query and visibility integration tests
         run: php tests/test_request_center_repository_sqlite.php
       - name: Appointment lifecycle, conflict and capacity contract (SQLite)
@@ -148,14 +156,32 @@ jobs:
 
       - name: Load fresh-install schema into disposable MariaDB
         run: mariadb --skip-ssl -h 127.0.0.1 -uroot -pci-ephemeral-root-password persian_ticketing_ci < install-empty-db.sql
+      - name: Verify fresh-install organization role-sync columns
+        run: php tests/test_org_role_sync_columns_mariadb.php
         env:
           CI_DB_HOST: 127.0.0.1
           CI_DB_PORT: '3306'
           CI_DB_NAME: persian_ticketing_ci
           CI_DB_USER: root
           CI_DB_PASS: ci-ephemeral-root-password
-      - name: Apply Request Center merged migration 035 (lifecycle) to disposable MariaDB
+      - name: Apply Request Center migration 035 (current candidate payload)
         run: mariadb --skip-ssl -h 127.0.0.1 -uroot -pci-ephemeral-root-password persian_ticketing_ci < migrations/035-request-center-appointments.sql
+      - name: Apply organization role-sync migration 037 twice
+        run: |
+          mariadb --skip-ssl -h 127.0.0.1 -uroot -pci-ephemeral-root-password persian_ticketing_ci < migrations/037-org-role-sync-columns.sql
+          mariadb --skip-ssl -h 127.0.0.1 -uroot -pci-ephemeral-root-password persian_ticketing_ci < migrations/037-org-role-sync-columns.sql
+      - name: Apply lifecycle catch-up migration 038 twice
+        run: |
+          mariadb --skip-ssl -h 127.0.0.1 -uroot -pci-ephemeral-root-password persian_ticketing_ci < migrations/038-request-center-lifecycle-catchup.sql
+          mariadb --skip-ssl -h 127.0.0.1 -uroot -pci-ephemeral-root-password persian_ticketing_ci < migrations/038-request-center-lifecycle-catchup.sql
+      - name: Verify organization role-sync columns after migration
+        run: php tests/test_org_role_sync_columns_mariadb.php
+        env:
+          CI_DB_HOST: 127.0.0.1
+          CI_DB_PORT: '3306'
+          CI_DB_NAME: persian_ticketing_ci
+          CI_DB_USER: root
+          CI_DB_PASS: ci-ephemeral-root-password
       - name: Request Center schema preflight on MariaDB
         run: php tests/test_request_center_schema_preflight_mariadb.php
         env:
@@ -175,12 +201,23 @@ jobs:
           mariadb --skip-ssl -h 127.0.0.1 -uroot -pci-ephemeral-root-password rc_migration_upgrade_ci -e "DROP TABLE ticket_number_seq"
           mariadb --skip-ssl -h 127.0.0.1 -uroot -pci-ephemeral-root-password rc_migration_upgrade_ci -e "ALTER TABLE categories DROP INDEX code, DROP COLUMN code"
           mariadb --skip-ssl -h 127.0.0.1 -uroot -pci-ephemeral-root-password rc_migration_upgrade_ci -e "ALTER TABLE service_catalog DROP FOREIGN KEY fk_services_category, DROP INDEX idx_services_category, DROP COLUMN category_id"
-      - name: Apply migration 035 (merged) twice to prove upgrade and idempotency
+          mariadb --skip-ssl -h 127.0.0.1 -uroot -pci-ephemeral-root-password rc_migration_upgrade_ci -e "INSERT IGNORE INTO users (username, full_name, role, is_active) VALUES ('__ci_org_role_sync_migration_037__', 'CI Org Role Migration Fixture', 'agent', 1)"
+          mariadb --skip-ssl -h 127.0.0.1 -uroot -pci-ephemeral-root-password rc_migration_upgrade_ci -e "ALTER TABLE users DROP COLUMN org_prev_role, DROP COLUMN org_auto_role"
+      - name: Simulate legacy 035 already recorded (appointments-only payload)
         run: |
-          mariadb --skip-ssl -h 127.0.0.1 -uroot -pci-ephemeral-root-password rc_migration_upgrade_ci < migrations/035-request-center-appointments.sql
-          mariadb --skip-ssl -h 127.0.0.1 -uroot -pci-ephemeral-root-password rc_migration_upgrade_ci < migrations/035-request-center-appointments.sql
-      - name: Verify migration 035 (merged) upgrade path
-        run: php tests/test_request_center_migration_037_mariadb.php
+          awk '/قسمت ۲:/{exit} {print}' migrations/035-request-center-appointments.sql | mariadb --skip-ssl -h 127.0.0.1 -uroot -pci-ephemeral-root-password rc_migration_upgrade_ci
+          mariadb --skip-ssl -h 127.0.0.1 -uroot -pci-ephemeral-root-password rc_migration_upgrade_ci -e "CREATE TABLE IF NOT EXISTS schema_updates (id INT AUTO_INCREMENT PRIMARY KEY, version VARCHAR(32) NOT NULL, migration VARCHAR(190) NOT NULL, applied_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP, UNIQUE KEY uq_schema_update (version, migration)) DEFAULT CHARSET=utf8mb4"
+          mariadb --skip-ssl -h 127.0.0.1 -uroot -pci-ephemeral-root-password rc_migration_upgrade_ci -e "INSERT IGNORE INTO schema_updates (version, migration) VALUES ('1.63', '035-request-center-appointments.sql')"
+      - name: Apply migrations 037 and 038 twice after recorded legacy 035
+        run: |
+          mariadb --skip-ssl -h 127.0.0.1 -uroot -pci-ephemeral-root-password rc_migration_upgrade_ci < migrations/037-org-role-sync-columns.sql
+          mariadb --skip-ssl -h 127.0.0.1 -uroot -pci-ephemeral-root-password rc_migration_upgrade_ci < migrations/038-request-center-lifecycle-catchup.sql
+          mariadb --skip-ssl -h 127.0.0.1 -uroot -pci-ephemeral-root-password rc_migration_upgrade_ci < migrations/037-org-role-sync-columns.sql
+          mariadb --skip-ssl -h 127.0.0.1 -uroot -pci-ephemeral-root-password rc_migration_upgrade_ci < migrations/038-request-center-lifecycle-catchup.sql
+      - name: Verify lifecycle catch-up 038 and organization role-sync 037
+        run: |
+          php tests/test_request_center_migration_037_mariadb.php
+          php tests/test_org_role_sync_columns_mariadb.php
         env:
           CI_DB_HOST: 127.0.0.1
           CI_DB_PORT: '3306'

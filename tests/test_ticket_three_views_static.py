@@ -67,11 +67,14 @@ def test_a_requester_who_is_also_the_assigned_agent_can_still_work():
     code = strip_php_comments(
         php_function("lib/auth-scope.php", "function ticket_handler_level(array $ticket, array $user): string")
     )
-    block = code[code.index("ticket_user_is_requester($ticket, $user)"):]
-    assert "'assignee'" in block[:600], (
+    start = code.index("if (ticket_user_is_requester($ticket, $user))")
+    next_branch = code.find("\n    if (", start + 1)
+    requester_branch = code[start:next_branch if next_branch >= 0 else len(code)]
+    assert "'assignee'" in requester_branch, (
         "ثبت‌کننده‌ای که کارشناس مسئول همین درخواست است باید نمای کارشناس بگیرد"
     )
-    assert "assigned_to" in block[:600]
+    assert "assigned_to" in requester_branch
+    assert "is_assignable_role" in requester_branch
 
 
 def test_reply_guard_keeps_its_explicit_requester_check():
