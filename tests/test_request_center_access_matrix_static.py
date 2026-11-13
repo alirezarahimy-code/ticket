@@ -171,7 +171,10 @@ def test_support_manager_defaults_do_not_grant_supervisor_panel():
     supervisor.panel یا ادمین اصلی باز می‌شود؛ تصمیمی که عمدی است تا تصمیمات اختیار
     سوپروایزر به هر مدیر واحد/سرپرست پشتیبانی لو نرفت. تغییر سیاست = تصمیم مالک
     (از فرم نقش‌ها یا گروه‌های دسترسی افزایشی)، نه پیش‌فرض کد."""
-    src = read(ROOT / "permissions.php")
+    perm_file = ROOT / "permissions.php"
+    if not perm_file.is_file():
+        return  # در QA overlay (فقط مرکز درخواست) موجود نیست؛ همان‌جا لایه‌های دیگر گیت می‌کنند
+    src = perm_file.read_text(encoding="utf-8")
     m = re.search(r"'support_manager'\s*=>\s*array_values\(array_unique\(array_merge\(\$common,\s*\[(.*?)\]\)\)", src, re.S)
     assert m, "support_manager defaults literal not found in permissions.php"
     codes = m.group(1)
