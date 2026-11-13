@@ -123,7 +123,6 @@ try {
     echo "PASS: migration 037 روی جدول موقت، با اجرای دومِ بدون تغییر، idempotent است.\n";
 } catch (Throwable $error) {
     fwrite(STDERR, "FAIL: آزمون رفتاری migration 037: {$error->getMessage()}\n");
-    exitCode:
     exit(1);
 } finally {
     if ($temporaryTableCreated) {
