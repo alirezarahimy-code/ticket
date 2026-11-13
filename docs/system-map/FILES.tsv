@@ -8,7 +8,7 @@ path	category	lines	bytes
 .github/workflows/ci.yml	workflows	223	10351
 .github/workflows/critical-system-stress.yml	workflows	54	1926
 .github/workflows/food-system-stress.yml	workflows	223	10114
-.github/workflows/logging-acceptance.yml	workflows	138	5159
+.github/workflows/logging-acceptance.yml	workflows	152	6110
 .github/workflows/logging-contract.yml	workflows	43	2180
 .gitignore	config	27	447
 .htaccess	config	24	788
