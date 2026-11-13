@@ -113,6 +113,16 @@ jobs:
         CI_DB_PASS: ci-ephemeral-root-password
         CI_DB_REQUIRED: '1'
 
+    - name: Verify migration 037 data scope on temporary MariaDB table
+      run: php tests/test_food_auto_receipts_migration.php
+      env:
+        CI_DB_HOST: 127.0.0.1
+        CI_DB_PORT: '3306'
+        CI_DB_NAME: persian_ticketing_ci
+        CI_DB_USER: root
+        CI_DB_PASS: ci-ephemeral-root-password
+        CI_DB_REQUIRED: '1'
+
     # اگر هر گام قبلی red شد، لاگ کانتینر MariaDB چاپ شود (تشخیص بدون نیاز به دسترسی به رانر).
     - name: MariaDB diagnostics (if failure)
       if: failure()
@@ -152,6 +162,11 @@ jobs:
 
     - name: Run food worker window tests
       run: php tests/test_food_worker_window.php
+
+    # قفل رگرسیون‌های جدید ۱.۶۲.۹۵ که قبلاً در CI فراخوانی نمی‌شدند:
+    # پنجرهٔ سختگیرانهٔ Worker، دامنهٔ فیش خودکار پایان‌روز و الزام شمارهٔ برگهٔ خروج CD/DVD.
+    - name: Run 1.62.95 food worker, auto-receipt and CD/DVD regression contracts
+      run: python -m pytest -q tests/test_food_worker_window_static.py tests/test_food_auto_receipts_scope_static.py tests/test_cd_dvd_exit_sheet_required_static.py
 
     - name: Run system update prerequisite tests
       run: php tests/test_system_update_requires_version.php
