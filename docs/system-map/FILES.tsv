@@ -5,7 +5,7 @@ path	category	lines	bytes
 .github/copilot-instructions.md	workflows	23	1566
 .github/workflows/benchmark-250.yml	workflows	116	4154
 .github/workflows/benchmark-operations.yml	workflows	367	15800
-.github/workflows/ci.yml	workflows	223	10351
+.github/workflows/ci.yml	workflows	233	10691
 .github/workflows/critical-system-stress.yml	workflows	54	1926
 .github/workflows/food-system-stress.yml	workflows	223	10114
 .github/workflows/logging-acceptance.yml	workflows	150	5994
@@ -486,6 +486,7 @@ tests/test_chatbot_tts_static.py	tests	144	9034
 tests/test_chatbot_widget_static.py	tests	76	4007
 tests/test_duty_split_and_work_hours_static.py	tests	246	13020
 tests/test_food_aggregate_report_static.py	tests	148	7669
+tests/test_food_auto_receipts_migration.php	tests	135	5399
 tests/test_food_auto_receipts_scope_static.py	tests	70	3851
 tests/test_food_bulk_operations_static.py	tests	104	5801
 tests/test_food_cancel_request_timestamp.py	tests	32	1467
