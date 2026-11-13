@@ -74,6 +74,15 @@ function request_center_excel_download(string $filename, string $title, array $h
 function request_center_export_report(array $user): never
 {
     $reportUser = $user;
+    // هماهنگ با صفحهٔ گزارش‌ها (Pages/reports.php): مدیر واحدِ صرف از خروجی هم نمی‌گیرد؛
+    // همان داده‌های زیرمجموعهٔ او در «فضای مدیر واحد» در دسترس است.
+    if (function_exists('request_center_is_org_unit_head') && request_center_is_org_unit_head($reportUser)) {
+        if (function_exists('request_center_error_page')) {
+            request_center_error_page(403, 'دسترسی مجاز نیست', 'این بخش برای «مدیر واحد» فعال نیست؛ از «فضای مدیر واحد» استفاده کنید.', [], $reportUser);
+        }
+        http_response_code(403);
+        exit('این بخش برای «مدیر واحد» فعال نیست؛ از «فضای مدیر واحد» استفاده کنید.');
+    }
     $reportMissingColumns = db_missing_columns('tickets', ['subject', 'description', 'status', 'priority', 'requester_id', 'department_id', 'service_group', 'created_at', 'updated_at', 'assigned_to', 'ticket_type', 'assigned_at', 'first_response_at', 'resolved_at', 'closed_at', 'due_at', 'sla_minutes']);
     if ($reportMissingColumns) {
         http_response_code(503);
