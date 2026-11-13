@@ -126,6 +126,9 @@ if ($rcMethod === 'GET' && ($rcPage !== '' && in_array($rcPage, $rcLifecyclePage
     require_once __DIR__ . '/bootstrap.php';
     require_once __DIR__ . '/modules/request-center/WorkflowService.php';
     require_once __DIR__ . '/modules/request-center/lib/functions.php';
+    // جزئیات و ثبت درخواست هر دو از helperهای asset_* استفاده می‌کنند؛ در مسیر
+    // مستقل ماژول front controller بارگذاری نمی‌شود، پس این قرارداد را همینجا بار می‌کنیم.
+    require_once __DIR__ . '/asset-names.php';
     // The lifecycle pages use the shared site chrome, which was extracted from
     // index.php into lib/render.php during Phase 2. Load that contract directly
     // instead of pulling the legacy front controller into the RC runtime.
@@ -202,6 +205,9 @@ if ($rcMethod === 'GET' && ($rcPage !== '' && in_array($rcPage, $rcLifecyclePage
 
 // Workspace dashboards and the scoped read interface already belong to RC.
 if ($rcMethod === 'GET' && $rcPage === '') {
+    // داشبورد از request_center_is_unit_head/is_org_unit_head برای ساخت فضای کار استفاده می‌کند؛
+    // توابع ماژول اینجا بارگذاری نمی‌شدند و فضای «مدیر واحد» بی‌صدا غایب می‌شد.
+    require_once __DIR__ . '/modules/request-center/lib/functions.php';
     require __DIR__ . '/modules/request-center/Pages/index.php';
     exit;
 }

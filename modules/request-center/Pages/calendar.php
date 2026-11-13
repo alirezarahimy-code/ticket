@@ -71,6 +71,16 @@ $daysInJMonth = static function (int $jy2, int $jm2): int {
     $span = (strtotime(sprintf('%04d-%02d-%02d', $ny, $nm, $nd)) - strtotime(sprintf('%04d-%02d-%02d', $sy, $sm, $sd))) / 86400;
     return (int) $span === 366 ? 30 : 29;
 };
+$view = in_array((string) ($_GET['view'] ?? 'month'), ['month', 'agenda', 'day'], true) ? (string) ($_GET['view'] ?? 'month') : 'month';
+$dayParam = trim((string) ($_GET['date'] ?? ''));
+if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $dayParam) || strtotime($dayParam) === false) { $dayParam = $todayGStr; }
+$kindFilter = trim((string) ($_GET['kind'] ?? ''));
+if ($kindFilter !== '' && $kindFilter !== 'sla' && !isset(AppointmentRepository::KINDS[$kindFilter])) {
+    $kindFilter = '';
+}
+$showDeadlines = ($kindFilter === '' || $kindFilter === 'sla');
+$showAppointments = ($kindFilter === '' || $kindFilter !== 'sla');
+
 $daysInThisMonth = $daysInJMonth($jy, $jm);
 [$gsy, $gsm, $gsd] = jalali_to_gregorian($jy, $jm, 1);
 [$gey, $gem, $ged] = jalali_to_gregorian($jy, $jm, $daysInThisMonth);
@@ -86,15 +96,6 @@ $currentJ = sprintf('%04d-%02d', $tjy, $tjm);
 $monthLabel = $jalaliMonthNames[$jm - 1] . ' ' . $jy;
 $monthLabelEn = $gFrom . ' → ' . $gTo;
 
-$view = in_array((string) ($_GET['view'] ?? 'month'), ['month', 'agenda', 'day'], true) ? (string) ($_GET['view'] ?? 'month') : 'month';
-$dayParam = trim((string) ($_GET['date'] ?? ''));
-if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $dayParam) || strtotime($dayParam) === false) { $dayParam = $todayGStr; }
-$kindFilter = trim((string) ($_GET['kind'] ?? ''));
-if ($kindFilter !== '' && $kindFilter !== 'sla' && !isset(AppointmentRepository::KINDS[$kindFilter])) {
-    $kindFilter = '';
-}
-$showDeadlines = ($kindFilter === '' || $kindFilter === 'sla');
-$showAppointments = ($kindFilter === '' || $kindFilter !== 'sla');
 $calendarLink = static function (string $jmonth, string $view, string $kind, string $date = '') use ($workspace, $agentView, $dayParam): string {
     $qs = 'workspace=' . rawurlencode($workspace) . '&calendar=1&agent_view=' . rawurlencode($agentView)
         . '&jmonth=' . rawurlencode($jmonth) . '&view=' . rawurlencode($view);
@@ -338,6 +339,8 @@ $capRemaining = max(0, $capMax - $capUsed);
 $capPct = min(100, (int) round($capUsed / $capMax * 100));
 
 // ——— دادهٔ پاپ‌آپ روز (نمای ماهانه): رویدادهای هر روز برای رندر سمت کلاینت ———
+$faDigits = static fn(string $value): string => strtr($value, ['0' => '۰', '1' => '۱', '2' => '۲', '3' => '۳', '4' => '۴', '5' => '۵', '6' => '۶', '7' => '۷', '8' => '۸', '9' => '۹']);
+
 $rcPopupEvents = [];
 foreach ($eventsByDay as $gDate => $gDateEvents) {
     if (!is_string($gDate) || !preg_match('/^\d{4}-\d{2}-\d{2}$/', $gDate)) {
@@ -404,7 +407,6 @@ $avatarInitials = static function (?string $name): string {
     return $first . $last;
 };
 /** چهره‌ٔ فارسی اعداد برای خوانایی بیشتر در نسخهٔ فارسی (فقط متن‌های نمایش) */
-$faDigits = static fn(string $value): string => strtr($value, ['0' => '۰', '1' => '۱', '2' => '۲', '3' => '۳', '4' => '۴', '5' => '۵', '6' => '۶', '7' => '۷', '8' => '۸', '9' => '۹']);
 
 $avatarColor = static function (int $seed): string {
     $palette = ['#1e4f8f', '#0e7a6d', '#6d3bc2', '#b45309', '#0f766e', '#9333ea', '#c2410c', '#1d4ed8'];
