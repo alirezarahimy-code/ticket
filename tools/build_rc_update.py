@@ -10,6 +10,11 @@
 و نصب) فقط با تأیید صریح مالک انجام می‌شود. محتوای آن از تفاوت دقیق main → این شاخه
 ساخته می‌شود و مهاجرت فقط ۰۳۵ (request_center_appointments) است — سایر مهاجرت‌ها
 (۰۳۲–۰۳۴) متعلق به main/Logging هستند و قبلاً روی هدف اعمال شده‌اند.
+بازسازی r7 (۲۰۲۶-۱۱-۱۳): لایهٔ نمایشی سراسریِ اعداد فارسی در کل سامانه
+(دیت‌لیجیتس: lib/fa-digits.php + ob_start در bootstrap.php) + انتساب
+«معاونت سازمانیِ درخواست‌کننده» به‌عنوان مرز دومِ دید مدیر واحد (۲a0d8ff2) +
+تلرانس گارد استاتیک QA overlay (d5c33d7c) + رفع دو نقصِ تشخیصی/بایت‌ایِ لایهٔ
+نمایشی و هم‌راستایی آزمون‌های قراردادی (a8e8d014).
 
 تصمیم مالک (۲۰۲۶-۱۱-۰۹): این بسته **فقط به‌روزرسانی مرکز درخواست** را حمل می‌کند.
 هدف نصب، پیش‌تر تمام بسته‌های غذایی موجود را (تا ۱.۶۲.۹۴ با مهاجرت ۰۳۶ و سپس ۱.۶۲.۹۵ کامل)
@@ -32,10 +37,10 @@ REQUIRES_VERSION = "1.62.95"
 # هدفِ ارتقا، "main متحدِ ۱٫۶۲٫۹۵" (00e7e759) است؛ شاخه فقط بالادستِ همین محتواست.
 # پایهٔ diff روی همان main است تا موج غذایی/سی‌دی‌دی‌وی‌دیِ ۱٫۶۲٫۹۵ وارد بسته نشود.
 BASE_COMMIT = "00e7e759bda9460dcb245812e2e6b617670efade"
-RELEASE_DATE = "2026-11-12"
-PACKAGE_NAME = "ticket-update-1_62_95-to-1_63-request-center-rc-candidate-20261112-r6.zip"
+RELEASE_DATE = "2026-11-13"
+PACKAGE_NAME = "ticket-update-1_62_95-to-1_63-request-center-rc-candidate-20261113-r7.zip"
 REPORT_NAME = f"CHANGE-REPORT-FA-{RELEASE_VERSION}.md"
-ZIP_DATE = (2026, 11, 12, 21, 0, 0)
+ZIP_DATE = (2026, 11, 13, 21, 0, 0)
 
 EXCLUDED_PREFIXES = ("downloads/", "updates/", "tests/", "docs/system-map/", ".github/", "ci-diagnostics/", "benchmark-results/", "preview/")
 MIGRATIONS = [
@@ -194,14 +199,14 @@ def build() -> tuple[Path, Path]:
         "name": "request-center-rc-candidate",
         "version": RELEASE_VERSION,
         "date": RELEASE_DATE,
-        "title": "کاندید بستهٔ ارتقاء مرکز درخواست — ماژول مستقل + گردش‌کار + نوبت‌ها و تقویم شمسی + جداسازی نقش مدیر واحدِ صرف (۱.۶۲.۹۵ ← ۱.۶۳) — r6",
+        "title": "کاندید بستهٔ ارتقاء مرکز درخواست — ماژول مستقل + گردش‌کار + نوبت‌ها و تقویم شمسی + جداسازی نقش مدیر واحدِ صرف + لایهٔ اعداد فارسیِ سراسری (۱.۶۲.۹۵ ← ۱.۶۳) — r7",
         "requires_version": REQUIRES_VERSION,
         "migrations": list(MIGRATIONS),
         "files": sorted(files),
         "sha256": {name: sha256(files[name]) for name in sorted(files)},
         "release_status": "RC_CANDIDATE_NOT_FOR_PRODUCTION",
         "architecture_reference": "docs/architecture/REQUEST-CENTER-ARCHITECTURE.md",
-        "description": "Request Center module upgrade candidate from 1.62.95 (main + food wave) to 1.63. Install only after owner sign-off; requires migration 035 via the official runner. Migration 034 is owned by release 1.62.89 (already installed) and is NOT part of this package. By owner decisions (2026-11-09, 2026-11-11 and 2026-11-12) this package is RC-only: food/1.62.94/1.62.95 files, the release preview harness (preview/) and migration 036 are intentionally excluded; the target must already have the food updates (through 1.62.94 + migration 036, then 1.62.95) applied. r5 (2026-11-12): افزودن actions/food-order-actions.php که index.php آن را require می‌کند ولی در r4 غایب بود. r6 (2026-11-12): جداسازی کامل نقش «مدیر واحدِ صرف» (رئیس چارت بدون عاملیت کارشناسی/پرسنل پشتیبانی): دامنهٔ دید فقط چارت (حذف فیلتر service_group و حذف «ارجاع‌شده‌های به‌خودش»)، بدون اختیار کارشناسی (نه برداشتن درخواست، نه شروع پاسخ اول، نه تغییر وضعیت/موعد، نه تقویم=۴۰۳، نه bulk، نه انتقال)، اصلاح عنوان/توضیح/اولویت روی درخواستِ بازِ هر دو وضعیت ارجاع‌شده و نشده با مسیر اختصاصی unit_head_ticket_update (حسابرس + رویداد + اعلان)، ارجاع فقط تا پیش از تخصیص (پس از آن قفل)، «درخواست لغو» برای زیرمجموعه (هرگز لغو مستقیم)، تصمیم لغو فقط manager/assignee یا سوپروایزر؛ rebuild-final.sql مخرب از بسته حذف شد.",
+        "description": "Request Center module upgrade candidate from 1.62.95 (main + food wave) to 1.63. Install only after owner sign-off; requires migration 035 via the official runner. Migration 034 is owned by release 1.62.89 (already installed) and is NOT part of this package. By owner decisions (2026-11-09, 2026-11-11 and 2026-11-12) this package is RC-only: food/1.62.94/1.62.95 files, the release preview harness (preview/) and migration 036 are intentionally excluded; the target must already have the food updates (through 1.62.94 + migration 036, then 1.62.95) applied. r5 (2026-11-12): افزودن actions/food-order-actions.php که index.php آن را require می‌کند ولی در r4 غایب بود. r6 (2026-11-12): جداسازی کامل نقش «مدیر واحدِ صرف» (رئیس چارت بدون عاملیت کارشناسی/پرسنل پشتیبانی): دامنهٔ دید فقط چارت (حذف فیلتر service_group و حذف «ارجاع‌شده‌های به‌خودش»)، بدون اختیار کارشناسی (نه برداشتن درخواست، نه شروع پاسخ اول، نه تغییر وضعیت/موعد، نه تقویم=۴۰۳، نه bulk، نه انتقال)، اصلاح عنوان/توضیح/اولویت روی درخواستِ بازِ هر دو وضعیت ارجاع‌شده و نشده با مسیر اختصاصی unit_head_ticket_update (حسابرس + رویداد + اعلان)، ارجاع فقط تا پیش از تخصیص (پس از آن قفل)، «درخواست لغو» برای زیرمجموعه (هرگز لغو مستقیم)، تصمیم لغو فقط manager/assignee یا سوپروایزر؛ rebuild-final.sql مخرب از بسته حذف شد. r7 (۲۰۲۶-۱۱-۱۳): لایهٔ نمایشی سراسریِ اعداد فارسی در کل سامانه (lib/fa-digits.php + ثبت ob_start در bootstrap.php): فقط «متن نمایشیِ داخل تگ‌ها» تبدیل می‌شود؛ اتربیوت‌ها، فرم‌ها، اسکریپت/استایل/pre/code/textarea و کامنت‌ها دست‌نخورده‌اند؛ IP و ایمیل لاتین می‌مانند؛ فقط Content-Type: text/html یا application/xhtml+xml (یا نبودِ Content-Type — صفحات PHP) تبدیل می‌شود، پس JSON، XLSX، text/plain و همهٔ دانلودها بایت‌به‌بایت عبور می‌کنند؛ راه برگشت اضطراری: تنظیم display.fa_digits=0. علت ریشه‌ایِ گزارش مالک («همه اعداد لاتین است») نبودِ هرگونه لایهٔ یکپارچهٔ اعداد در خروجی بود (اعداد با sprintf/number_format/echo لاتین چاپ می‌شدند و فقط تقویم/برنامهٔ غذا دستی تبدیل می‌کردند). همین نسخه: انتساب «معاونت سازمانیِ درخواست‌کننده» به‌عنوان مرز دومِ نمایش مدیر واحد (۲a0d8ff2)، تلرانس گارد استاتیک QA overlay برای permissions.php (d5c33d7c) و هم‌راستایی آزمون‌های قراردادیِ ارقام‌محور (a8e8d014). CI روی a8e8d014: Contract سبز (MariaDB 10.4.32 و 10.11)، T12 سبز (۲۰ سناریو)، QA Package Preview سبز؛ Logging contract قرمزِ ازپیش‌موجود (قلمرو D3)؛ pytest با HEAD پایه یک‌به‌یک (۷۸ شکست ازپیش‌موجود، صفر رگرسیون)؛ پذیرش نصب پاک ۱۲۰/۱۲۰.",
     }
 
     out_dir = ROOT / "downloads"
