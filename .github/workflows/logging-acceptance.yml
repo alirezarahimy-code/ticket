@@ -109,21 +109,23 @@ jobs:
       - name: Read repository VERSION
         id: repo_version
         shell: bash
-        run: echo "value=$(tr -d '\\r\\n' < VERSION)" >> "$GITHUB_OUTPUT"
+        run: echo "value=$(python -c 'from pathlib import Path; print(Path("VERSION").read_text(encoding="utf-8").strip())')" >> "$GITHUB_OUTPUT"
       - uses: shivammathur/setup-php@v2
+        if: steps.repo_version.outputs.value == '1.62.88'
         with:
           php-version: '8.4'
           extensions: pdo_mysql, mbstring, zip
           coverage: none
       - uses: actions/setup-python@v5
+        if: steps.repo_version.outputs.value == '1.62.88'
         with:
           python-version: '3.12'
       - name: Install package validation test runner
+        if: steps.repo_version.outputs.value == '1.62.88'
         run: python -m pip install --disable-pip-version-check pytest
-        if: steps.repo_version.outputs.value == '1.62.88'
       - name: Build and validate cumulative update package
-        run: |
         if: steps.repo_version.outputs.value == '1.62.88'
+        run: |
           python -m py_compile tools/build_update_1_62_88.py
           python tools/build_update_1_62_88.py
           python -m pytest -q \
@@ -139,9 +141,9 @@ jobs:
         if: steps.repo_version.outputs.value != '1.62.88'
         run: echo "::notice::Skipping legacy 1.62.88 builder; repository VERSION is ${{ steps.repo_version.outputs.value }}. Current union packages are validated by CI and Logging contract."
       - uses: actions/upload-artifact@v4
+        if: steps.repo_version.outputs.value == '1.62.88'
         with:
           name: ticket-update-1.62.88-verified
-        if: steps.repo_version.outputs.value == '1.62.88'
           path: |
             downloads/ticket-update-1.62.82-to-1.62.88-merged-20261105.zip
             downloads/ticket-update-1.62.82-to-1.62.88-merged-20261105.zip.sha256
