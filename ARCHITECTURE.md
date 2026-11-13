@@ -67,7 +67,7 @@
 | `[TK-CORE]` | `index.php` (`page=ticket`، `new-ticket`، `queue`، `supervisor`) | `tickets`، `ticket_messages`، `ticket_events`، `ticket_attachments`، `ticket_ratings`، `ticket_number_seq` | 🟡 |
 | `[TK-SERVICE]` | `index.php` (`page=services`)، فرم‌های سرویس | `service_catalog`، `service_catalog_fields`، `categories` | 🟡 |
 | `[TK-SLA]` | `cron/sla_maintenance.php`، `ticket_sla_alerts` | `ticket_sla_alerts` | 🟡 |
-| `[TK-OLA]` | `ola.php` (۱۰۵ خط)، صفحه `ola` | `ola_policies`، `ticket_ola_alerts` | 🟡 |
+| `[TK-OLA]` | `modules/request-center/Pages/ola.php`، صفحه `request-center.php?page=ola` | `ola_policies`، `ticket_ola_alerts` | 🟡 |
 | `[TK-CHANGE]` | مدل‌های change در schema | `change_records`، `change_approvals`، `change_ticket_links` | ❓ |
 | `[TK-PROBLEM]` | مدل‌های problem در schema | `problem_records`، `problem_ticket_links` | ❓ |
 | `[TK-KB]` | `index.php` (`page=knowledge`) | `knowledge_articles` | 🟡 |
@@ -90,7 +90,7 @@
 |---|---|---|---|
 | `[ORG-CORE]` | `organization.php` (۳۲۹ خط)، صفحه `organization` | `org_units`، `org_unit_managers`، `departments`، `handling_units` | 🟡 |
 | `[ORG-USERS]` | `index.php` (`profile`، `supervisor`) | `users` | 🟡 |
-| `[ORG-GOV]` | `governance.php` (۵۱۵ خط)، صفحه `governance` | ۱۲ CSRF؛ جداول governance در bootstrap | 🟡 |
+| `[ORG-GOV]` | `modules/request-center/Pages/governance.php`، صفحه `request-center.php?page=governance` | ۱۲ CSRF؛ جداول governance در bootstrap | 🟡 |
 
 ### 3.5 تردد عمومی (Traffic Control) و CD/DVD
 | تگ | فایل | جدول‌ها | وضعیت |

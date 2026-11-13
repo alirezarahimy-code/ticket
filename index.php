@@ -25,7 +25,7 @@ if (strtoupper((string) ($_SERVER['REQUEST_METHOD'] ?? 'GET')) === 'GET'
 $legacyRequestCenterPage = is_string($_GET['page'] ?? null) ? (string) $_GET['page'] : '';
 if (strtoupper((string) ($_SERVER['REQUEST_METHOD'] ?? 'GET')) === 'GET'
     && empty($_GET['action'])
-    && in_array($legacyRequestCenterPage, ['new-ticket', 'ticket', 'queue', 'supervisor', 'services', 'reports', 'analytics'], true)) {
+    && in_array($legacyRequestCenterPage, ['new-ticket', 'ticket', 'queue', 'supervisor', 'services', 'reports', 'analytics', 'knowledge', 'governance', 'ola'], true)) {
     $requestCenterQuery = $_GET;
     header('Location: request-center.php?' . http_build_query($requestCenterQuery), true, 302);
     exit;
@@ -912,7 +912,7 @@ if ($page === 'profile') {
 }
 
 if ($page === 'governance') {
-    redirect('governance.php');
+    redirect('request-center.php?page=governance');
 }
 
 if ($page === 'food-ticket') {
@@ -951,43 +951,6 @@ if ($page === 'help') {
     $helpUser = require_login();
     render_header('راهنمای سامانه', $helpUser);
     require __DIR__ . '/help-guide.php';
-    render_footer();
-    exit;
-}
-
-if ($page === 'knowledge') {
-    $knowledgeUser = require_login();
-    $articleId = (int) ($_GET['id'] ?? 0);
-    $article = null;
-    if ($articleId > 0) {
-        $articleQuery = db()->prepare('SELECT k.*, u.full_name AS author_name FROM knowledge_articles k LEFT JOIN users u ON u.id = k.created_by WHERE k.id = ? AND (k.is_published = 1 OR ? = 1) LIMIT 1');
-        $articleQuery->execute([$articleId, is_staff_role($knowledgeUser['role']) ? 1 : 0]);
-        $article = $articleQuery->fetch();
-    }
-    $knowledgeSearch = trim((string) ($_GET['q'] ?? ''));
-    $knowledgeSql = 'SELECT id, title, category, updated_at FROM knowledge_articles WHERE ' . (is_staff_role($knowledgeUser['role']) ? '1 = 1' : 'is_published = 1');
-    $knowledgeParams = [];
-    if ($knowledgeSearch !== '') {
-        $knowledgeSql .= ' AND (title LIKE ? OR body LIKE ? OR category LIKE ?)';
-        $knowledgeParams = array_fill(0, 3, '%' . $knowledgeSearch . '%');
-    }
-    $knowledgeSql .= ' ORDER BY updated_at DESC LIMIT 100';
-    $knowledgeQuery = db()->prepare($knowledgeSql);
-    $knowledgeQuery->execute($knowledgeParams);
-    $articles = $knowledgeQuery->fetchAll();
-    render_header('دانش‌نامه', $knowledgeUser);
-    echo '<section class="page-heading"><div><span class="eyebrow">Knowledge Base</span><h1>دانش‌نامه و راهنمای حل مشکل</h1><p>قبل از ثبت درخواست، راه‌حل‌های تاییدشده سازمان را جست‌وجو کنید.</p></div><form class="inline-search" method="get"><input type="hidden" name="page" value="knowledge"><input name="q" value="' . e($knowledgeSearch) . '" placeholder="جست‌وجو در دانش‌نامه"><button class="button" type="submit">جست‌وجو</button></form></section>';
-    if ($article) {
-        echo '<article class="card knowledge-article"><span class="eyebrow">' . e($article['category'] ?: 'راهنما') . '</span><h2>' . e($article['title']) . '</h2><p class="muted">نویسنده: ' . e($article['author_name'] ?: 'سامانه') . ' • ' . e(jalali_date($article['updated_at'])) . '</p><div class="article-body">' . nl2br(e($article['body'])) . '</div><a class="button secondary" href="index.php?page=knowledge">بازگشت به دانش‌نامه</a></article>';
-    } else {
-        echo '<section class="knowledge-grid">';
-        foreach ($articles as $item) { echo '<a class="card knowledge-card" href="index.php?page=knowledge&id=' . (int) $item['id'] . '"><span class="eyebrow">' . e($item['category'] ?: 'راهنما') . '</span><h2>' . e($item['title']) . '</h2><small>به‌روزرسانی: ' . e(jalali_date($item['updated_at'], false)) . '</small></a>'; }
-        if (!$articles) { echo '<div class="card empty-state"><h2>مقاله‌ای پیدا نشد.</h2><p>عبارت دیگری جست‌وجو کنید یا از کارشناس انفورماتیک کمک بگیرید.</p></div>'; }
-        echo '</section>';
-    }
-    if (is_staff_role($knowledgeUser['role'])) {
-        echo '<section class="card form-card"><h2>افزودن مقاله دانش‌نامه</h2><form method="post">' . csrf_field() . '<input type="hidden" name="action" value="add_knowledge"><div class="form-grid"><label>عنوان مقاله<input name="article_title" required></label><label>دسته‌بندی<input name="article_category" placeholder="شبکه، پرینتر، نرم‌افزار"></label><label class="full">متن راهنما<textarea name="article_body" rows="7" required></textarea></label><label class="check-label"><input type="checkbox" name="is_published" value="1" checked> منتشر شود</label></div><button class="button" type="submit">ذخیره مقاله</button></form></section>';
-    }
     render_footer();
     exit;
 }
@@ -2501,9 +2464,9 @@ if (user_can($user, 'traffic.view')) {
 if (user_can($user, 'cddvd.view')) {
     $quickLinks[] = ['index.php?page=cd-dvd', 'کنترل CD/DVD', 'ثبت و پیگیری جابجایی رسانه‌ها'];
 }
-$quickLinks[] = ['index.php?page=knowledge', 'دانش‌نامه', 'مقالات و راهنماهای حل مشکل'];
+$quickLinks[] = ['request-center.php?page=knowledge', 'دانش‌نامه', 'مقالات و راهنماهای حل مشکل'];
 if ($isStaff) {
-    $quickLinks[] = ['governance.php', 'مدیریت تغییر و مشکل', 'ثبت و پیگیری تغییر و Problem'];
+    $quickLinks[] = ['request-center.php?page=governance', 'مدیریت تغییر و مشکل', 'ثبت و پیگیری تغییر و Problem'];
 }
 $quickLinks[] = ['index.php?page=help', 'راهنمای سامانه', 'آموزش کار با بخش‌های سامانه'];
 echo '<section class="list-section"><div class="section-title"><div><h2>دسترسی سریع</h2><p>بخش‌های اصلی سامانه در یک نگاه.</p></div></div><div class="card category-list">';

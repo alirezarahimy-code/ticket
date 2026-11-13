@@ -13,6 +13,7 @@ declare(strict_types=1);
     <link rel="stylesheet" href="assets/style.css">
     <link rel="stylesheet" href="assets/custom.css">
     <link rel="stylesheet" href="assets/theme-mode.css?v=3">
+    <link rel="stylesheet" href="assets/topbar-chrome.css?v=1">
 </head>
 <body data-theme-mode="<?= htmlspecialchars(function_exists('app_theme_mode') ? app_theme_mode() : 'light', ENT_QUOTES, 'UTF-8') ?>">
     <div class="app-shell">

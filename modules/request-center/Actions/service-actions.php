@@ -224,5 +224,5 @@ if (!defined('APP_ROOT')) {
                 throw $exception;
             }
             flash('success', 'مقاله دانش‌نامه ذخیره شد.');
-            redirect('index.php?page=knowledge');
+            redirect('request-center.php?page=knowledge');
         }

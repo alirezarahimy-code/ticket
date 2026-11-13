@@ -153,7 +153,7 @@ if (is_file($__rcRender)) { require_once $__rcRender; }
 render_header('مدیریت مرکز درخواست‌ها', $user);
 ?>
 <div class="rc-page rc-admin-page">
-<link rel="stylesheet" href="modules/request-center/Assets/request-center.css?v=20261111rc4">
+<link rel="stylesheet" href="modules/request-center/Assets/request-center.css?v=20261114rc1">
 <style>
 .rc-admin-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin:18px 0}
 .rc-admin-stat{background:var(--white,#fffdf8);border:1px solid var(--line);border-radius:13px;padding:16px;min-width:0;min-height:94px;box-shadow:0 3px 12px rgba(65,70,44,.06)}
@@ -226,9 +226,11 @@ render_header('مدیریت مرکز درخواست‌ها', $user);
 <label>ساعت شروع<input type="number" min="0" max="23" name="work_start_hour" required value="<?= (int) $businessHours['start'] ?>"></label>
 <label>ساعت پایان<input type="number" min="1" max="24" name="work_end_hour" required value="<?= (int) $businessHours['end'] ?>"></label>
 <fieldset style="border:1px solid #e4eaf1;border-radius:9px;padding:8px 12px"><legend>روزهای تعطیل هفتگی</legend>
-<?php foreach ([1 => 'دوشنبه', 2 => 'سه‌شنبه', 3 => 'چهارشنبه', 4 => 'پنجشنبه', 5 => 'جمعه', 6 => 'شنبه', 7 => 'یکشنبه'] as $day => $label): ?>
-<label style="display:inline-flex;gap:5px;align-items:center;margin:4px 8px"><input type="checkbox" name="weekend_days[]" value="<?= $day ?>" <?= in_array($day, $businessHours['weekend'], true) ? 'checked' : '' ?>><?= $label ?></label>
+<div class="rc-weekday-row">
+<?php foreach ([6 => 'شنبه', 7 => 'یکشنبه', 1 => 'دوشنبه', 2 => 'سه‌شنبه', 3 => 'چهارشنبه', 4 => 'پنجشنبه', 5 => 'جمعه'] as $day => $label): ?>
+<label class="rc-weekday-item"><input type="checkbox" name="weekend_days[]" value="<?= $day ?>" <?= in_array($day, $businessHours['weekend'], true) ? 'checked' : '' ?>><?= $label ?></label>
 <?php endforeach; ?>
+</div>
 </fieldset>
 <button class="button" type="submit">ذخیره تقویم کاری</button>
 </form>

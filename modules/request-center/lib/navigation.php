@@ -4,8 +4,9 @@ declare(strict_types=1);
 /**
  * Request Center-only navigation.
  *
- * منوی فشرده و گروه‌بندی‌شده (هم‌شکل منوی سامانهٔ اصلی) + خروج اضطراری «بازگشت به سامانهٔ اصلی».
+ * منوی فشرده و گروه‌بندی‌شده (هم‌شکل منوی سامانهٔ اصلی) + لینک سادهٔ «بازگشت به سامانه».
  * این تابع داخل render_header() بارگذاری می‌شود؛ چهرهٔ صفحات RC را هسته تعیین می‌کند.
+ * دکمه‌های «حالت شب» و نام کاربر در ردیف برند (بالای منو) توسط render_header() رندر می‌شوند.
  *
  * @param callable(string,string,string):string $menuLink
  * @param callable(string):string $menuIcon
@@ -39,6 +40,7 @@ function request_center_render_navigation(array $user, callable $menuLink, calla
     if (user_can($user, 'ticket.create')) {
         $workLinks[] = $submenuLink('request-center.php?page=new-ticket', 'ثبت درخواست جدید');
     }
+    $workLinks[] = $submenuLink('request-center.php?page=knowledge', 'دانش‌نامه');
     if ($isUnitHead) {
         $workLinks[] = $submenuLink('request-center.php?workspace=unit', 'فضای مدیر واحد');
     }
@@ -67,6 +69,14 @@ function request_center_render_navigation(array $user, callable $menuLink, calla
         $superviseLinks[] = $submenuLink($calendarUrl, 'تقویم برنامه‌ریزی رسیدگی');
     }
 
+    // «تغییر و مشکل» و «OLA» فقط برای نقش‌های کارمندی با کد مربوطه
+    if (user_can($user, 'governance.view') && function_exists('is_staff_role') && is_staff_role((string) ($user['role'] ?? ''))) {
+        $superviseLinks[] = $submenuLink('request-center.php?page=governance', 'تغییر و مشکل');
+    }
+    if (user_can($user, 'ola.view')) {
+        $superviseLinks[] = $submenuLink('request-center.php?page=ola', 'OLA');
+    }
+
     $reportLinks = [];
     if (!$unitHeadOnly && user_can($user, 'reports.view')) {
         $reportLinks[] = $submenuLink('request-center.php?page=reports', 'گزارش‌ها');
@@ -89,18 +99,13 @@ function request_center_render_navigation(array $user, callable $menuLink, calla
         $submenu('rc-menu-supervise', 'نظارت و تقویم', 'support', $superviseLinks),
         $submenu('rc-menu-reports', 'گزارش‌ها', 'reports', $reportLinks),
         $submenu('rc-menu-admin', 'مدیریت', 'settings', $adminLinks),
-        '<li class="logout"><form method="post" class="logout-form">' . csrf_field()
-            . '<input type="hidden" name="action" value="logout"><button class="logout-link" type="submit">'
-            . $menuIcon('logout') . '<span>خروج</span></button></form></li>',
+        // «خروج» از مرکز درخواست‌ها کار نمی‌کرد (POST به مسیرهای ماژول می‌خورد به «درخواست نامعتبر است.»).
+        // خروج واقعی در داشبورد اصلی سامانه است؛ اینجا فقط راه برگشت ساده می‌گذاریم.
+        '<li class="logout"><a class="back-to-system-link" href="index.php">'
+            . '<svg class="icon-svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M9 14l-4-4 4-4"/><path d="M5 10h9a5 5 0 0 1 0 10h-3"/></svg>'
+            . '<span>بازگشت به سامانه</span></a></li>',
     ];
 
-    echo '<div class="header-tools">'
-        . '<a class="profile-shortcut rc-back-link" href="index.php" title="بازگشت به صفحهٔ اصلی سامانهٔ سازمانی">'
-        . '<svg class="icon-svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M9 14l-4-4 4-4"/><path d="M5 10h9a5 5 0 0 1 0 10h-3"/></svg>'
-        . '<span>بازگشت به سامانهٔ اصلی</span></a>'
-        . app_theme_toggle_markup()
-        . '<span class="profile-shortcut">' . e((string) ($user['full_name'] ?? $user['username'] ?? '')) . '</span>'
-        . '</div>';
     echo '<nav class="navbar" aria-label="ناوبری مرکز درخواست‌ها"><ul class="menu">'
         . implode('', array_filter($menuItems)) . '</ul></nav>';
 }

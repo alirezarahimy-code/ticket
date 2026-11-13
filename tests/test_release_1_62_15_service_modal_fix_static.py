@@ -42,10 +42,10 @@ def test_backdrop_click_closes_service_modal_like_other_popups():
 
 
 def test_cache_bust_versions_bumped():
-    # پین‌ها با هر انتشار جلو می‌روند؛ نسخهٔ ۱.۶۲.۵۹: style 3.4.60 و app 3.4.28.
-    src = read("index.php")
-    assert "assets/style.css?v=3.4.60" in src
-    assert "assets/app.js?v=3.4.28" in src
+    # پین‌ها با هر انتشار جلو می‌روند؛ از تجمیع RC چهرهٔ مشترک در lib/render.php است.
+    src = read("lib/render.php")
+    assert "assets/style.css?v=3.4.62" in src
+    assert "assets/app.js?v=3.4.29" in src
     assert "assets/style.css?v=3.4.45" not in src
     assert "assets/app.js?v=3.4.26" not in src
 
@@ -61,7 +61,16 @@ def test_version_manifest_and_package():
     for need in ("VERSION", "index.php", "assets/style.css", "assets/app.js",
                  "actions/service-actions.php", "food-ticket-web/assets/food-capitalio-dashboard-r42.js"):
         assert need in files, need
+    # ۱.۶۳: این دو فایل ریشه‌ای در تجمیع RC به modules/request-center/Pages/ منتقل شدند؛ بسته‌های ریلیز تغییرناپذیر می‌مانند.
+    MOVED_IN_1_63_RC_MIGRATION = {
+        "governance.php": "modules/request-center/Pages/governance.php",
+        "ola.php": "modules/request-center/Pages/ola.php",
+    }
     for f in files:
+        if f in MOVED_IN_1_63_RC_MIGRATION:
+            assert not (ROOT / f).exists(), f
+            assert (ROOT / MOVED_IN_1_63_RC_MIGRATION[f]).is_file(), f
+            continue
         assert (ROOT / f).is_file(), f
 
     package = ROOT / "downloads" / PACKAGE_NAME

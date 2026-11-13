@@ -74,7 +74,16 @@ def test_version_manifest_and_package():
                                            "actions/org-actions.php", "actions/supervisor-actions.php",
                                            "food-ticket-web/assets/food-capitalio-dashboard-r42.js"]:
         assert need in files, need
+    # ۱.۶۳: این فایل‌های ریشه‌ای در تجمیع RC به modules/request-center/Pages/ منتقل شدند؛ بستهٔ ۱.۶۲.۱۸ تغییرناپذیر می‌ماند.
+    MOVED_IN_1_63_RC_MIGRATION = {
+        "governance.php": "modules/request-center/Pages/governance.php",
+        "ola.php": "modules/request-center/Pages/ola.php",
+    }
     for f in files:
+        if f in MOVED_IN_1_63_RC_MIGRATION:
+            assert not (ROOT / f).exists(), f
+            assert (ROOT / MOVED_IN_1_63_RC_MIGRATION[f]).is_file(), f
+            continue
         assert (ROOT / f).is_file(), f
 
     package = ROOT / "downloads" / PACKAGE_NAME

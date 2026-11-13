@@ -35,7 +35,7 @@ function save_setting(string $key, string $value): void
 }
 
 // --- پیش‌بررسی: این آزمون باید در ریشهٔ سامانه (کنار index.php) اجرا شود -----------------
-$requiredFiles = ['index.php', 'bootstrap.php', 'permissions.php', 'food-ticket.php', 'traffic-control.php', 'cd-dvd.php', 'ola.php', 'governance.php', 'install.php', 'api/inventory.php'];
+$requiredFiles = ['index.php', 'bootstrap.php', 'permissions.php', 'food-ticket.php', 'traffic-control.php', 'cd-dvd.php', 'modules/request-center/Pages/ola.php', 'modules/request-center/Pages/governance.php', 'install.php', 'api/inventory.php'];
 $missingFiles = [];
 foreach ($requiredFiles as $requiredFile) {
     if (!is_file(APP_ROOT . '/' . $requiredFile)) {
@@ -149,7 +149,7 @@ foreach (['*.php' => true] as $pattern => $_) {
         $sourceFiles[] = $file;
     }
 }
-foreach (['actions', 'api', 'cron', 'lib', 'tools', 'modules/request-center/Actions'] as $dir) {
+foreach (['actions', 'api', 'cron', 'lib', 'tools', 'modules/request-center/Actions', 'modules/request-center/Pages', 'modules/request-center/lib'] as $dir) {
     foreach (glob($root . '/' . $dir . '/*.php') ?: [] as $file) {
         // فایل‌های آزمون، دادهٔ آزمایشی دارند (نام کدها را برای سنجش می‌نویسند) و شمرده نمی‌شوند.
         if ($dir === 'tools' && str_starts_with(basename($file), 'test_')) {
@@ -181,9 +181,14 @@ $lines[] = '';
 $lines[] = '── ۳) گارد اکشن‌ها ──';
 $index = (string) file_get_contents(APP_ROOT . '/index.php');
 $dispatchOffset = strpos($index, "if (\$_SERVER['REQUEST_METHOD'] === 'POST') {");
-$csrfOffset = $dispatchOffset !== false ? strpos($index, 'require_csrf();', $dispatchOffset) : false;
+$httpPostInclude = $dispatchOffset !== false ? strpos($index, "require_once __DIR__ . '/lib/http-post.php';", $dispatchOffset) : false;
+$postContextCall = $dispatchOffset !== false ? strpos($index, 'post_context_begin();', $dispatchOffset) : false;
 $firstActionInclude = $dispatchOffset !== false ? strpos($index, "require __DIR__ . '/actions/account-actions.php';", $dispatchOffset) : false;
-check('index.php: CSRF پیش از بارگذاری ماژول‌های POST بررسی می‌شود', $dispatchOffset !== false && $csrfOffset !== false && $firstActionInclude !== false && $csrfOffset < $firstActionInclude);
+// از ۱.۶۲.۱۸: index.php از طریق post_context_begin() (داخل lib/http-post.php) مهار CSRF می‌کند؛
+// زنجیرهٔ واقعی سنجیده می‌شود: opener → include http-post → post_context_begin → (داخل آن) require_csrf، پیش از هر Handler.
+$httpPost = (string) file_get_contents(APP_ROOT . '/lib/http-post.php');
+$httpPostGuardsCsrf = strpos($httpPost, 'function post_context_begin()') !== false && strpos($httpPost, 'require_csrf();') !== false;
+check('index.php: CSRF پیش از بارگذاری ماژول‌های POST بررسی می‌شود', $dispatchOffset !== false && $httpPostInclude !== false && $postContextCall !== false && $firstActionInclude !== false && $httpPostInclude < $postContextCall && $postContextCall < $firstActionInclude && $httpPostGuardsCsrf);
 
 $logoutOffset = strpos($index, "if (\$_SERVER['REQUEST_METHOD'] === 'POST' && (\$_POST['action'] ?? '') === 'logout')");
 $logoutCsrfOffset = $logoutOffset !== false ? strpos($index, 'require_csrf();', $logoutOffset) : false;
@@ -213,19 +218,35 @@ $requestCenterActionFiles = glob(APP_ROOT . '/modules/request-center/Actions/*.p
 $ungatedRequestCenterActionFiles = [];
 foreach ($requestCenterActionFiles as $actionFile) {
     $actionSource = (string) file_get_contents($actionFile);
-    if (preg_match('/require_(?:login|permission|primary_admin|staff)\\s*\\(/', $actionSource) !== 1) {
+    // dispatch.php رجیستری محض است: فقط require فایل‌های اکشن + بلوک محافظ مسیر؛ هر کد دیگری نقض گیت است.
+    if (basename($actionFile) === 'dispatch.php') {
+        $registry = preg_replace('#/\*.*?\*/#s', '', $actionSource);
+        $registry = preg_replace('#^\s*//.*$#m', '', (string) $registry);
+        $registry = preg_replace('#^<\?php|^\s*declare\s*\(\s*strict_types\s*=\s*1\s*\)\s*;?#m', '', (string) $registry);
+        $registry = preg_replace('#if\s*\(\s*!defined\s*\(\s*\'APP_ROOT\'\s*\)\s*\)\s*\{\s*http_response_code\s*\(\s*404\s*\)\s*;\s*exit\s*;\s*\}#s', '', (string) $registry);
+        $registry = preg_replace('#^\s*require(_once)?\s+__DIR__\s*\.\s*\'/[A-Za-z0-9._-]+\.php\'\s*;?\s*$#m', '', (string) $registry);
+        if (trim((string) $registry) !== '') {
+            $ungatedRequestCenterActionFiles[] = 'dispatch.php (محتوای ناشناخته)';
+        }
+        continue;
+    }
+    // گارد مجاز: require_* مستقیم یا گیت user_can اختصاصی اکشن (الگوی governance-actions/ola-actions).
+    if (preg_match('/require_(?:login|permission|primary_admin|staff)\\s*\\(|user_can\\s*\\(\\$user|user_is_primary_admin\\s*\\(/', $actionSource) !== 1) {
         $ungatedRequestCenterActionFiles[] = basename($actionFile);
     }
 }
 check('تمام Handlerهای POST ماژول Request Center دارای گارد ورود یا مجوز هستند', $ungatedRequestCenterActionFiles === [], 'بدون گارد: ' . implode(', ', $ungatedRequestCenterActionFiles));
 
-$governance = (string) file_get_contents(APP_ROOT . '/governance.php');
-check('governance.php: require_staff()', str_contains($governance, '$user = require_staff();'));
-check('governance.php: کد governance.manage بررسی می‌شود', str_contains($governance, "user_can(\$user, 'governance.manage')"));
+// صفحات «تغییر و مشکل» و «OLA» در ۲۰۲۶-۱۱-۱۴ به ماژول مرکز درخواست‌ها منتقل شدند.
+$governancePage = (string) file_get_contents(APP_ROOT . '/modules/request-center/Pages/governance.php');
+$governanceActions = (string) file_get_contents(APP_ROOT . '/modules/request-center/Actions/governance-actions.php');
+check('ماژول تغییر و مشکل: صفحهٔ require_staff()', str_contains($governancePage, '$user = require_staff();') && str_contains($governancePage, "user_can(\$user, 'governance.view')"));
+check('ماژول تغییر و مشکل: کد governance.manage در اکشن‌ها بررسی می‌شود', str_contains($governanceActions, "user_can(\$user, 'governance.manage')"));
 
-$ola = (string) file_get_contents(APP_ROOT . '/ola.php');
-check('ola.php: صفحه با ola.view و ثبت با ola.manage بررسی می‌شود', str_contains($ola, "require_permission('ola.view')") && str_contains($ola, "user_can(\$user, 'ola.manage')"));
-check('ola.php: دیگر فقط require_admin() نیست', !str_contains($ola, '$user = require_admin();'));
+$olaPage = (string) file_get_contents(APP_ROOT . '/modules/request-center/Pages/ola.php');
+$olaActions = (string) file_get_contents(APP_ROOT . '/modules/request-center/Actions/ola-actions.php');
+check('ماژول OLA: صفحه با ola.view و ثبت با ola.manage بررسی می‌شود', str_contains($olaPage, "user_can(\$user, 'ola.view')") && str_contains($olaActions, "user_can(\$user, 'ola.manage')"));
+check('ماژول OLA: دیگر فقط require_admin() نیست', !str_contains($olaPage, '$user = require_admin();') && !str_contains($olaActions, '$user = require_admin();'));
 
 $cd = (string) file_get_contents(APP_ROOT . '/cd-dvd.php');
 check('cd-dvd.php: ثبت ورود مجوز می‌خواهد', str_contains($cd, 'cd_dvd_can_register_in($user)'));

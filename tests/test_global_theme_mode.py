@@ -9,11 +9,15 @@ def test_global_theme_is_attached_to_all_main_shells():
     css = (ROOT / "assets/theme-mode.css").read_text(encoding="utf-8")
     app = (ROOT / "assets/app.js").read_text(encoding="utf-8")
 
+    # از تجمیع RC: اسکلت چهرهٔ هسته در lib/render.php است؛ index.php فقط render_header/footer را فرا می‌خواند.
+    render = (ROOT / "lib/render.php").read_text(encoding="utf-8")
+
     assert "function app_theme_mode()" in bootstrap
     assert "ticket_theme_mode" in bootstrap
-    assert "data-theme-mode=\"' . e($themeMode)" in index
-    assert "app_theme_toggle_markup()" in index
-    assert "assets/theme-mode.css?v=3" in index
+    assert "data-theme-mode=\"' . e($themeMode)" in render
+    assert "app_theme_toggle_markup()" in render
+    assert "assets/theme-mode.css?v=3" in render
+    assert "render_header(" in index and "render_footer(" in index
     assert "data-theme-toggle" in bootstrap
     assert "themeRoot.setAttribute('data-theme-mode', mode)" in app
     assert "document.cookie = 'ticket_theme_mode=' + mode" in app
@@ -45,11 +49,16 @@ def test_food_panel_and_standalone_modules_follow_the_global_mode():
 
 
 def test_independent_php_renderers_use_shared_mode():
-    for path in ["governance.php", "ola.php"]:
+    # صفحات «تغییر و مشکل» و «OLA» با تصمیم مالک ۲۰۲۶-۱۱-۱۴ به ماژول مرکز درخواست‌ها منتقل شدند
+    # و اکنون چهره‌شان از render_header هسته (که theme-mode.css را بارگذاری می‌کند) می‌آید.
+    for path in ["modules/request-center/Pages/governance.php", "modules/request-center/Pages/ola.php"]:
         source = (ROOT / path).read_text(encoding="utf-8")
-        assert "app_theme_mode()" in source
-        assert "app_theme_toggle_markup()" in source
-        assert "assets/theme-mode.css?v=3" in source
+        assert "render_header(" in source
+        assert "render_footer(" in source
+    shared = (ROOT / "lib/render.php").read_text(encoding="utf-8")
+    assert "app_theme_mode()" in shared
+    assert "app_theme_toggle_markup()" in shared
+    assert "assets/theme-mode.css?v=3" in shared
     fallback = (ROOT / "app/Views/layout/header.php").read_text(encoding="utf-8")
     assert "app_theme_mode()" in fallback
     assert "app_theme_toggle_markup()" in fallback

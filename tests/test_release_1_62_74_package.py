@@ -13,6 +13,12 @@ PACKAGE = ROOT / "downloads/ticket-update-1.62.74-food-meal-reconciliation-20261
 REPORT = ROOT / "CHANGE-REPORT-FA-1.62.74.md"
 EXPECTED_BASE_SHA256 = "2aba2ead127c9a69a96f113a4f4d401ac7bf033c567a2a6cc75fc4aff916fb2c"
 EXPECTED_PACKAGE_SHA256 = "ff1d40fc9fa8f3d9e7aadb9aae5e3eeb8fafe504fec05b3048dffd1dee127391"
+# فایل‌هایی که در ۱.۶۳ (تجمیع ماژول مرکز درخواست‌ها) از ریشه حذف و به ماژول منتقل شدند.
+# بسته‌های تغییرناپذیر بررسی می‌شوند ولی «عدم برابری با مخزن» برای فایل حذف‌شده معنا ندارد؛
+# به‌جایش وجود جانشین ماژولی و نبودن فایل ریشه‌ای بررسی می‌شود.
+MOVED_IN_1_63_RC_MIGRATION = {
+    "governance.php": "modules/request-center/Pages/governance.php",
+}
 # 1.62.78 پنجرهٔ کاری Worker را به food-ticket.php اضافه کرد؛ بستهٔ ۱.۶۲.۷۴ دست‌نخورده می‌ماند.
 POST_RELEASE_WORKTREE_CHANGES = {
     # ۱.۶۲.۹۳: تعیین تکلیف غذای باقیمانده — جدول تطبیق بازطراحی شد (min-width جدید).
@@ -73,7 +79,7 @@ POST_RELEASE_WORKTREE_CHANGES = {
     "food-ticket-templates.php",
     "food-ticket-web/assets/jalali-calendar.js",
     "food-ticket.php",
-    "governance.php",
+    # ۱.۶۳: از ریشه به modules/request-center/Pages/ منتقل شد؛ بستهٔ ۱.۶۲.۷۴ تغییرناپذیر می‌ماند.
     "help-guide.php",
     "holiday-board.php",
     "index.php",
@@ -186,7 +192,10 @@ class FoodReconciliationReleasePackageTest(unittest.TestCase):
                 after = package.read("files/" + relative)
                 if before != after:
                     changed.add(relative)
-                if relative in POST_RELEASE_WORKTREE_CHANGES:
+                if relative in MOVED_IN_1_63_RC_MIGRATION:
+                    self.assertFalse((ROOT / relative).exists(), relative)
+                    self.assertTrue((ROOT / MOVED_IN_1_63_RC_MIGRATION[relative]).is_file(), relative)
+                elif relative in POST_RELEASE_WORKTREE_CHANGES:
                     self.assertNotEqual(after, (ROOT / relative).read_bytes(), relative)
                 elif relative in EXPECTED_REPLACEMENTS:
                     self.assertEqual(after, (ROOT / relative).read_bytes(), relative)

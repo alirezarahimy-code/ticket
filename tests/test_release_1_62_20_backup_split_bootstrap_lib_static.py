@@ -144,7 +144,16 @@ def test_version_manifest_and_package():
     for need in LIB_FILES + ["VERSION", "index.php", "bootstrap.php", "actions/backup-actions.php",
                              "actions/org-actions.php", "actions/user-structure-actions.php"]:
         assert need in files, need
+    # ۱.۶۳: این دو فایل ریشه‌ای در تجمیع RC به modules/request-center/Pages/ منتقل شدند؛ بسته‌های ریلیز تغییرناپذیر می‌مانند.
+    MOVED_IN_1_63_RC_MIGRATION = {
+        "governance.php": "modules/request-center/Pages/governance.php",
+        "ola.php": "modules/request-center/Pages/ola.php",
+    }
     for f in files:
+        if f in MOVED_IN_1_63_RC_MIGRATION:
+            assert not (ROOT / f).exists(), f
+            assert (ROOT / MOVED_IN_1_63_RC_MIGRATION[f]).is_file(), f
+            continue
         assert (ROOT / f).is_file(), f
 
     package = ROOT / "downloads" / PACKAGE_NAME

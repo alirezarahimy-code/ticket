@@ -63,8 +63,8 @@ class TriangleEffectReleaseTests(unittest.TestCase):
         self.assertIn("ripple: function ()", self.engine)
         self.assertIn("destroy: function ()", self.engine)
         self.assertIn("requestAnimationFrame", self.engine)
-        for direct_page in ("ola.php", "governance.php"):
-            self.assertIn("triangle_effect_script_tag()", (ROOT / direct_page).read_text(encoding="utf-8"))
+        # صفحات تغییر و مشکل/OLA به ماژول منتقل شدند؛ چهره‌شان از render_footer هسته می‌آید.
+        self.assertIn("triangle_effect_script_tag()", (ROOT / "lib/render.php").read_text(encoding="utf-8"))
 
     def test_interaction_controls_are_wired(self):
         for marker in (

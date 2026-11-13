@@ -120,7 +120,7 @@ if ($rcMethod === 'POST') {
 
 // Route lifecycle pages through the module. Do not load the system front
 // controller for these pages: it is a compatibility bridge, not their runtime.
-$rcLifecyclePages = ['new-ticket', 'ticket', 'queue', 'supervisor', 'services', 'reports', 'analytics'];
+$rcLifecyclePages = ['new-ticket', 'ticket', 'queue', 'supervisor', 'services', 'reports', 'analytics', 'knowledge', 'governance', 'ola'];
 if ($rcMethod === 'GET' && ($rcPage !== '' && in_array($rcPage, $rcLifecyclePages, true)
     || $rcPage === '' && (int) ($_GET['id'] ?? 0) > 0)) {
     require_once __DIR__ . '/bootstrap.php';
@@ -199,6 +199,18 @@ if ($rcMethod === 'GET' && ($rcPage !== '' && in_array($rcPage, $rcLifecyclePage
     }
     if ($page === 'analytics') {
         require __DIR__ . '/modules/request-center/Pages/analytics.php';
+        exit;
+    }
+    if ($page === 'knowledge') {
+        require __DIR__ . '/modules/request-center/Pages/knowledge.php';
+        exit;
+    }
+    if ($page === 'governance') {
+        require __DIR__ . '/modules/request-center/Pages/governance.php';
+        exit;
+    }
+    if ($page === 'ola') {
+        require __DIR__ . '/modules/request-center/Pages/ola.php';
         exit;
     }
 }

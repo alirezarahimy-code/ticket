@@ -1002,6 +1002,16 @@
             var match = String(value || '').replace(/-/g, '/').match(/^(\d{4})\/(\d{1,2})\/(\d{1,2})$/);
             return match ? [Number(match[1]), Number(match[2]), Number(match[3])] : null;
         };
+        // روزهای تعطیل از data-weekend-days بدنه خوانده می‌شود (ایزو: ۱=دوشنبه … ۷=یکشنبه)؛
+        // ایندکس JS این تقویم ۰=شنبه … 6=جمعه است ⇒ jsIndex = (iso + 1) % 7.
+        var weekdayFaFull = ['شنبه', 'یکشنبه', 'دوشنبه', 'سه‌شنبه', 'چهارشنبه', 'پنجشنبه', 'جمعه'];
+        var weekendJs = {};
+        var weekendIsoRaw = (document.body && document.body.getAttribute('data-weekend-days')) || '';
+        weekendIsoRaw.split(',').forEach(function (part) {
+            var iso = parseInt(part, 10);
+            if (iso >= 1 && iso <= 7) { weekendJs[(iso + 1) % 7] = true; }
+        });
+        var weekendNames = Object.keys(weekendJs).map(Number).sort(function (a, b) { return a - b; }).map(function (i) { return weekdayFaFull[i]; });
         var now = new Date();
         var current = gregorianToJalali(now.getFullYear(), now.getMonth() + 1, now.getDate());
         var parsed = parseJalali(jalaliInput.value);
@@ -1017,11 +1027,11 @@
             for (var blank = 0; blank < startIndex; blank++) html += '<span></span>';
             for (var day = 1; day <= monthLength(viewYear, viewMonth); day++) {
                 var weekdayIndex = (startIndex + day - 1) % 7;
-                var weekend = weekdayIndex === 5 || weekdayIndex === 6;
+                var weekend = !!weekendJs[weekdayIndex];
                 var selected = jalaliInput.value === viewYear + '/' + pad(viewMonth) + '/' + pad(day);
                 html += '<button type="button" class="jalali-day' + (weekend ? ' fixed-weekend' : '') + (selected ? ' selected' : '') + '" data-jalali-day="' + day + '"' + (weekend ? ' disabled title="تعطیلی ثابت"' : '') + '>' + day + '</button>';
             }
-            html += '</div><small class="jalali-calendar-note">پنج‌شنبه و جمعه تعطیل ثابت هستند.</small>';
+            if (weekendNames.length) { html += '</div><small class="jalali-calendar-note">تعطیل ثابت: ' + weekendNames.join(' و ') + '.</small>'; } else { html += '</div>'; }
             jalaliCalendar.innerHTML = html;
             jalaliCalendar.querySelector('[data-calendar-prev]').addEventListener('click', function () { viewMonth -= 1; if (viewMonth < 1) { viewMonth = 12; viewYear -= 1; } renderCalendar(); });
             jalaliCalendar.querySelector('[data-calendar-next]').addEventListener('click', function () { viewMonth += 1; if (viewMonth > 12) { viewMonth = 1; viewYear += 1; } renderCalendar(); });

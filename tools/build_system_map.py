@@ -77,7 +77,7 @@ FEATURES: list[tuple[str, str, str, str, str]] = [
      "صف کاری و عملیات گروهی", "index.php;actions/bulk-actions.php;actions/ticket-actions.php",
      "tickets", "فیلتر بدون مسئول / خارج از SLA / مسئول من"),
     ("SLA|OLA|مهلت|تعطیلات|تقویم|زمانبندی|هشدار",
-     "SLA/OLA و تقویم", "lib/tickets-sla.php;ola.php;actions/holiday-actions.php;cron/sla_maintenance.php;assets/jalali-calendar.js",
+     "SLA/OLA و تقویم", "lib/tickets-sla.php;modules/request-center/Pages/ola.php;actions/holiday-actions.php;cron/sla_maintenance.php;assets/jalali-calendar.js",
      "ticket_sla_alerts;ticket_ola_alerts;ola_policies;holidays;change_records",
      "پنجشنبه/جمعه مصرف SLA نمیکنند"),
     ("تأیید نهایی|سوپروایزر|بازگشایی|supervisor",
@@ -105,7 +105,7 @@ FEATURES: list[tuple[str, str, str, str, str]] = [
      "org_units;org_unit_managers;departments;handling_units",
      "واحد مستقل (نمایندگی) جایگاه چپ/راست دارد؛ migration 010"),
     ("تغییر|مشکل|change|problem|CAB|governance|حاکمیت",
-     "مدیریت تغییر و مشکل", "governance.php;index.php",
+     "مدیریت تغییر و مشکل", "modules/request-center/Pages/governance.php;index.php",
      "change_records;change_approvals;change_ticket_links;problem_records;problem_ticket_links",
      "صفحهای مستقل که require مستقیم bootstrap دارد"),
     ("تردد|ترافیک|traffic|ملاقات|مقصد|تأییدکننده",
@@ -308,7 +308,7 @@ def extract_routes(rel: Path, text: str) -> list[tuple[str, str, int, str]]:
         out.append((kind, name, text.count("\n", 0, pos) + 1, str_rel))
 
     if str_rel == "index.php" or str_rel.startswith("actions/") or str_rel.startswith("modules/request-center/Actions/") or str_rel in {
-        "food-ticket.php", "food-order.php", "traffic-control.php", "governance.php", "ola.php"
+        "food-ticket.php", "food-order.php", "traffic-control.php", "modules/request-center/Pages/governance.php", "modules/request-center/Pages/ola.php"
     }:
         for m in PAGE_RE.finditer(text):
             add("page", m.group(1) or m.group(2), m.start())

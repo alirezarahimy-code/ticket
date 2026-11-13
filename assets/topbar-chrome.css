@@ -1,0 +1,17 @@
+/* چهرهٔ مشترک نوار بالا (۱.۶۳، ۲۰۲۶-۱۱-۱۴)
+   ابزارهای برند (انتخاب تم + نام کاربر/لینک پروفایل)، آیکن‌های ابزار نوار و
+   ترتیب ناوبری را تعریف می‌کند. چون بستهٔ ارتقای RC به تصمیم مالک (۲۰۲۶-۱۱-۰۹)
+   دارایی مشترک «قلمرو غذا» را حمل نمی‌کند، این قواعد از assets/style.css جدا
+   نگه‌داشته می‌شود تا هدف ارتقا هم آن‌ها را دریافت کند. */
+.brand-tools { order: 1; flex: none; display: flex; align-items: center; gap: 8px; }
+.brand-tools .profile-shortcut, .brand-tools .theme-mode-toggle { margin-inline-start: 0; }
+.brand-tools .icon-svg { width: 18px; height: 18px; }
+.header-tools .icon-svg { width: 18px; height: 18px; }
+/* بازگشت به سامانهٔ اصلی از مرکز درخواست‌ها — لینک خنثی (نه هشدار قرمز مثل خروج) */
+.menu .back-to-system-link { color: #a7f3d0; }
+.menu .back-to-system-link .icon-svg { stroke: #6ee7b7; }
+.menu .back-to-system-link:hover { background: rgba(16,185,129,.12); color: #fff; }
+.menu .back-to-system-link:hover .icon-svg { stroke: #fff; }
+.menu .back-to-system-link:hover::before { background: #10b981; }
+/* ناوبری بعد از ابزارهای برند و جست‌وجو در ترتیب لایه‌ای نوار */
+.navbar { order: 3; }

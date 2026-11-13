@@ -234,3 +234,7 @@ form[aria-busy="true"] button[type="submit"].rc-busy { pointer-events: none; }
 .rc-cap-full{color:var(--rc-red);font-weight:700}
 .rc-cap-note{color:var(--rc-muted)}
 @media print{.rc-cap{display:none}}
+
+/* روزهای تعطیل هفتگی — شنبه تا جمعه، همیشه در یک خط */
+.rc-weekday-row{display:flex;flex-wrap:nowrap;gap:4px 12px;overflow-x:auto;padding:2px 2px 4px}
+.rc-weekday-item{display:inline-flex;gap:5px;align-items:center;margin:0;white-space:nowrap;flex:0 0 auto}

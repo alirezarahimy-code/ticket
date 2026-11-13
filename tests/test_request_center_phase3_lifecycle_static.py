@@ -42,7 +42,9 @@ def test_attachment_and_report_endpoints_are_independent():
     # The module chrome owns the way back to the core system (navigation.php); operational forms remain RC-owned.
     navigation = source("modules/request-center/lib/navigation.php")
     assert 'href="index.php"' in navigation
-    assert "بازگشت به سامانهٔ اصلی" in navigation
+    # ۲۰۲۶-۱۱-۱۴: برچسب مطابق درخواست کاربر «بازگشت به سامانه» است (قبلاً «خروج» / «بازگشت به سامانهٔ اصلی»).
+    assert 'class="back-to-system-link"' in navigation
+    assert "<span>بازگشت به سامانه</span>" in navigation
     assert 'href="index.php">بازگشت به سامانه' not in source("modules/request-center/Pages/admin.php")
     assert 'href="index.php">بازگشت به سامانه' not in source("modules/request-center/Pages/supervisor-workspace.php")
     assert 'href="request-center.php?action=export_report' in source("modules/request-center/Pages/reports.php")
@@ -584,7 +586,8 @@ def test_core_has_no_request_center_references():
     # تصمیم مالک ۲۰۲۶-۱۱-۱۰ (معکوسِ جزئیِ استقلال): ورودی «مرکز درخواست‌ها» به منوی اصلی،
     # کارت‌ها/فهرست داشبورد و نتایج جست‌وجوی سراسری برگشت؛ پنج لینک پشتیبانی و پل‌های ۳۰۲ سازگاری ماندند.
     # ممنوعیتِ ارجاع هسته به فایل‌های ماژول در بقیهٔ هسته همچنان برقرار است.
-    for path in ("governance.php", "chatbot.php", "assets/app.js", "lib/notify-users.php"):
+    # (governance.php/ola.php/knowledge در ۲۰۲۶-۱۱-۱۴ به ماژول منتقل شدند؛ دیگر هسته‌ای نیستند.)
+    for path in ("chatbot.php", "assets/app.js", "lib/notify-users.php"):
         assert "request-center.php" not in source(path)
     # جست‌وجوی سراسری دوباره ورودی‌های مرکز درخواست‌ها را در کاتالوگ دارد (تصمیم مالک ۲۰۲۶-۱۱-۱۰).
     catalog = source("global-search.php")

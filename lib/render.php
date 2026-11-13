@@ -40,7 +40,16 @@ function render_header(string $title, ?array $user = null): void
     }
     $bodyPageClass = ($page ?? '') === 'organization' ? 'page-organization' : '';
     $themeMode = app_theme_mode();
-    echo '<!doctype html><html lang="fa" dir="rtl" data-theme="' . e($theme) . '" data-theme-mode="' . e($themeMode) . '"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="' . ($themeMode === 'dark' ? '#101915' : '#174f43') . '"><title>' . e($title . ' | ' . $appName) . '</title><link rel="stylesheet" href="assets/style.css?v=3.4.61">' . ($layoutAdmin ? '<link rel="stylesheet" href="assets/admin-layout-design.css?v=9">' : '') . ($layoutCss !== '' ? '<style id="admin-page-layout-rules">' . $layoutCss . '</style>' : '') . '<link rel="stylesheet" href="assets/theme-mode.css?v=3">' . (($page ?? '') === 'logging-dashboard' ? '<link rel="stylesheet" href="assets/logging-dashboard.css?v=1">' : '') . '</head><body class="' . e($bodyPageClass) . '" data-theme-mode="' . e($themeMode) . '" data-layout-page="' . e($layoutPage) . '" data-layout-design-admin="' . ($layoutAdmin ? '1' : '0') . '" data-weekend-days="' . e(implode(',', sla_business_hours()['weekend'])) . '"><div class="app-shell"><header class="topbar"><div class="topbar-inner"><a class="brand" href="' . ($isRequestCenterEntry ? 'request-center.php' : 'index.php') . '"><span class="brand-mark">' . ($logo ? '<img src="' . e($logo) . '" alt="' . e($appName) . '">' : '<span class="brand-glyph">پ</span>') . '</span><span><strong>' . e($appName) . '</strong><small>مرکز خدمات و پشتیبانی</small></span></a>' . (!$user ? app_theme_toggle_markup() : '');
+    // ردیف برند: دکمهٔ «حالت شب» و پیل هویتی کاربر کنار مشخصات سامانه می‌نشینند تا هدر کوتاه‌تر شود (تصمیم مالک ۲۰۲۶-۱۱-۱۴).
+    $brandTools = '';
+    if ($user) {
+        $brandTools = '<div class="brand-tools">' . app_theme_toggle_markup()
+            . ($isRequestCenterEntry
+                ? '<span class="profile-shortcut">' . e((string) ($user['full_name'] ?? $user['username'] ?? '')) . '</span>'
+                : '<a class="profile-shortcut" href="index.php?page=profile#appearance">🎨 انتخاب تم</a><a class="profile-shortcut" href="index.php?page=profile">پروفایل: ' . e((string) $user['username']) . '</a>')
+            . '</div>';
+    }
+    echo '<!doctype html><html lang="fa" dir="rtl" data-theme="' . e($theme) . '" data-theme-mode="' . e($themeMode) . '"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="' . ($themeMode === 'dark' ? '#101915' : '#174f43') . '"><title>' . e($title . ' | ' . $appName) . '</title><link rel="stylesheet" href="assets/style.css?v=3.4.62">' . ($layoutAdmin ? '<link rel="stylesheet" href="assets/admin-layout-design.css?v=9">' : '') . ($layoutCss !== '' ? '<style id="admin-page-layout-rules">' . $layoutCss . '</style>' : '') . '<link rel="stylesheet" href="assets/theme-mode.css?v=3"><link rel="stylesheet" href="assets/topbar-chrome.css?v=1">' . (($page ?? '') === 'logging-dashboard' ? '<link rel="stylesheet" href="assets/logging-dashboard.css?v=1">' : '') . '</head><body class="' . e($bodyPageClass) . '" data-theme-mode="' . e($themeMode) . '" data-layout-page="' . e($layoutPage) . '" data-layout-design-admin="' . ($layoutAdmin ? '1' : '0') . '" data-weekend-days="' . e(implode(',', sla_business_hours()['weekend'])) . '"><div class="app-shell"><header class="topbar"><div class="topbar-inner"><a class="brand" href="' . ($isRequestCenterEntry ? 'request-center.php' : 'index.php') . '"><span class="brand-mark">' . ($logo ? '<img src="' . e($logo) . '" alt="' . e($appName) . '">' : '<span class="brand-glyph">پ</span>') . '</span><span><strong>' . e($appName) . '</strong><small>مرکز خدمات و پشتیبانی</small></span></a>' . ($user ? $brandTools : app_theme_toggle_markup());
     if ($user) {
         $menuIcons = [
             'home' => '<path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>',
@@ -73,26 +82,12 @@ function render_header(string $title, ?array $user = null): void
             require_once dirname(__DIR__) . '/modules/request-center/lib/navigation.php';
             request_center_render_navigation($user, $menuLink, $menuIcon);
         } else {
-        $supportLinks = [
-            $submenuLink('index.php?page=services', 'خدمات'),
-            $submenuLink('index.php?page=knowledge', 'دانش‌نامه'),
-        ];
-        if (user_can($user, 'queue.view')) {
-            $supportLinks[] = $submenuLink('index.php?page=queue', 'صف کاری');
-        }
+        // «پشتیبانی» دیگر صفحات مرکز درخواست‌ها را تکرار نمی‌کند؛ آن‌ها به ماژول منتقل شدند (تصمیم مالک ۲۰۲۶-۱۱-۱۴).
+        // خدمات/دانش‌نامه/صف کاری/تغییر و مشکل/پنل سوپروایزر/OLA فقط داخل «مرکز درخواست‌ها» در دسترس‌اند.
+        // «شناسنامه‌های فنی» چون صفحهٔ ماژولی ندارد فعلاً اینجا می‌ماند.
+        $supportLinks = [];
         if (user_can($user, 'assets.view')) {
             $supportLinks[] = $submenuLink('index.php?page=assets', 'شناسنامه‌های فنی');
-        }
-        // ۱.۳۷.۷ — «تغییر و مشکل» فقط برای کارمندان: پیش‌تر این آیتم در منوی کاربران عادی هم
-        // دیده می‌شد، ولی خود صفحه با require_staff() رد می‌کرد.
-        if (user_can($user, 'governance.view') && is_staff_role((string) $user['role'])) {
-            $supportLinks[] = $submenuLink('governance.php', 'تغییر و مشکل');
-        }
-        if (user_can($user, 'supervisor.panel')) {
-            $supportLinks[] = $submenuLink('index.php?page=supervisor', 'پنل سوپروایزر');
-        }
-        if (user_can($user, 'ola.view')) {
-            $supportLinks[] = $submenuLink('ola.php', 'OLA');
         }
         $reportLinks = [];
         if (user_can($user, 'reports.view')) {
@@ -128,8 +123,8 @@ function render_header(string $title, ?array $user = null): void
         if (user_can_any($user, ['ticket.create', 'ticket.view_own', 'ticket.edit', 'queue.view', 'ticket.view_unit', 'ticket.view_all', 'supervisor.panel']) || user_is_primary_admin($user)) {
             $menuItems[] = '<li>' . $menuLink('request-center.php', 'مرکز درخواست‌ها', 'ticket') . '</li>';
         }
-        // پنج لینک مستقیمِ گروه پشتیبانی (services/queue/governance/supervisor/OLA) عمداً باقی ماندند؛
-        // ورودی بالا، «مرکز درخواست‌ها» را به‌عنوان مبدأ رسمی درخواست‌ها بازمی‌گرداند (تصمیم مالک ۲۰۲۶-۱۱-۱۰).
+        // ورودی رسمی «مرکز درخواست‌ها» — خانهٔ اصلی همهٔ صفحات چرخهٔ درخواست (تصمیم مالک ۲۰۲۶-۱۱-۱۰)؛
+        // صفحات تک‌محصولی پشتیبانی دیگر در منوی اصلی تکرار نمی‌شوند (تصمیم مالک ۲۰۲۶-۱۱-۱۴).
         if (user_can($user, 'cddvd.view')) {
             $menuItems[] = '<li>' . $menuLink('index.php?page=cd-dvd', 'کنترل CD/DVD', 'disc') . '</li>';
         }
@@ -150,7 +145,7 @@ function render_header(string $title, ?array $user = null): void
     $menuItems[] = '<li class="notification-item"><a class="notification-link" href="index.php?page=notifications">' . $menuIcon('bell') . '<span>اعلان‌ها</span>' . ($notificationCount > 0 ? '<b>' . (int) $notificationCount . '</b>' : '') . '</a></li>';
         }
         $menuItems[] = '<li class="logout"><form method="post" class="logout-form">' . csrf_field() . '<input type="hidden" name="action" value="logout"><button class="logout-link" type="submit">' . $menuIcon('logout') . '<span>خروج</span></button></form></li>';
-        echo '<div class="header-tools"><form class="global-search header-search" method="get"><input type="hidden" name="page" value="search"><input name="q" placeholder="جست‌وجو در صفحه‌ها، درخواست، دارایی یا دانش‌نامه"></form>' . app_theme_toggle_markup() . ($layoutAdmin ? '<button class="layout-design-launch" type="button" data-layout-design-launch data-layout-page-title="' . e(admin_layout_design_page_label($layoutPage)) . '" aria-pressed="false">🎨 طراحی همین صفحه</button>' : '') . '<a class="profile-shortcut" href="index.php?page=profile#appearance">🎨 انتخاب تم</a><a class="profile-shortcut" href="index.php?page=profile">پروفایل: ' . e((string) $user['username']) . '</a></div>';
+        echo '<div class="header-tools"><form class="global-search header-search" method="get"><input type="hidden" name="page" value="search"><input name="q" placeholder="جست‌وجو در صفحه‌ها، درخواست، دارایی یا دانش‌نامه"></form>' . ($layoutAdmin ? '<button class="layout-design-launch" type="button" data-layout-design-launch data-layout-page-title="' . e(admin_layout_design_page_label($layoutPage)) . '" aria-pressed="false">🎨 طراحی همین صفحه</button>' : '') . '</div>';
         echo '<nav class="navbar" aria-label="ناوبری اصلی"><ul class="menu">' . implode('', $menuItems) . '</ul></nav>';
         }
     }
@@ -234,7 +229,7 @@ function render_footer(): void
     $particleScript = function_exists('particle_effect_script_tag') ? particle_effect_script_tag() : '';
     $triangleScript = function_exists('triangle_effect_script_tag') ? triangle_effect_script_tag() : '';
     $chatbotWidget = function_exists('chatbot_render_widget') ? chatbot_render_widget($layoutUser) : '';
-    echo ';</script><script src="assets/jalali-calendar.js?v=3.4.7"></script><script src="assets/app.js?v=3.4.28&theme-mode=2"></script>' . $particleScript . $triangleScript . $chatbotWidget . $inspectionReminder;
+    echo ';</script><script src="assets/jalali-calendar.js?v=3.4.7"></script><script src="assets/app.js?v=3.4.29&theme-mode=2"></script>' . $particleScript . $triangleScript . $chatbotWidget . $inspectionReminder;
     if ($inspectionReminder !== '') {
         echo '<script defer src="assets/inspection-food-reminder.js?v=1"></script>';
     }

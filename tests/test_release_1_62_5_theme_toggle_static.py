@@ -21,8 +21,11 @@ def test_app_js_theme_toggle_is_robust():
 
 
 def test_all_host_shells_load_the_new_app_js():
-    for path in ["index.php", "governance.php", "ola.php", "app/Views/layout/footer.php"]:
-        assert "assets/app.js?v=3.4.28" in read(path), path
+    # governance.php و ola.php در ۲۰۲۶-۱۱-۱۴ به ماژول منتقل شدند؛ چهره‌شان از lib/render.php هسته می‌آید.
+    # index.php خودش app.js را صدا نمی‌زند؛ از تجمیع RC از طریق render_footer() به lib/render.php واگذار می‌کند.
+    for path in ["lib/render.php", "app/Views/layout/footer.php"]:
+        assert "assets/app.js?v=3.4.29" in read(path), path
+    assert "render_footer(" in read("index.php")
 
 
 def test_release_package_ships_app_js():

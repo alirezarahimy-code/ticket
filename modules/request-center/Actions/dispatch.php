@@ -24,3 +24,5 @@ require __DIR__ . '/ticket-actions.php';
 require __DIR__ . '/service-actions.php';
 require __DIR__ . '/bulk-actions.php';
 require __DIR__ . '/admin-actions.php';
+require __DIR__ . '/governance-actions.php';
+require __DIR__ . '/ola-actions.php';

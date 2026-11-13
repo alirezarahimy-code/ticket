@@ -19,6 +19,9 @@ const REQUEST_CENTER_POST_ACTIONS = [
     'bulk_update_tickets', 'cancel_ticket', 'claim_ticket', 'create_ticket',
     'decide_ticket_cancellation', 'delete_service', 'delete_service_category',
     'edit_service', 'rate_ticket', 'reopen_ticket', 'reply', 'save_service_category',
+    'create_change', 'update_change', 'submit_change', 'cab_decision', 'change_transition',
+    'create_problem', 'update_problem', 'link_governance_ticket',
+    'save_ola_policy', 'toggle_ola_policy',
     'create_ola_policy', 'save_rc_work_hours', 'save_rc_capacity', 'agent_transfer_ticket', 'rc_holiday_save', 'rc_holiday_delete', 'supervisor_assign_ticket', 'supervisor_decision', 'supervisor_reopen', 'update_ola_policy', 'update_ticket', 'update_due_date', 'unit_head_ticket_update',
 ];
 
@@ -115,7 +118,10 @@ function request_center_post_error(Throwable $exception, string $page): never
         'create_ola_policy', 'update_ola_policy' => 'request-center.php?workspace=admin#ola-policies',
         'add_service', 'edit_service', 'delete_service', 'add_service_field',
         'save_service_category', 'delete_service_category' => 'request-center.php?page=services',
-        'add_knowledge' => 'index.php?page=knowledge',
+        'add_knowledge' => 'request-center.php?page=knowledge',
+        'create_change', 'update_change', 'submit_change', 'cab_decision', 'change_transition',
+        'create_problem', 'update_problem', 'link_governance_ticket' => 'request-center.php?page=governance',
+        'save_ola_policy', 'toggle_ola_policy' => 'request-center.php?page=ola',
         'add_asset_relation' => 'index.php?page=inventory&id=' . max(0, (int) ($_POST['source_asset_id'] ?? 0)),
         default => $ticketId > 0
             ? request_center_ticket_return_url($ticketId)
