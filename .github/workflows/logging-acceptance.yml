@@ -33,11 +33,9 @@ jobs:
           php-version: '8.4'
           extensions: pdo_mysql, mbstring, zip
           coverage: none
-        if: steps.repo_version.outputs.value == '1.62.88'
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-        if: steps.repo_version.outputs.value == '1.62.88'
       - name: Install test runner
         run: python -m pip install --disable-pip-version-check pytest
       - name: PHP syntax checks
