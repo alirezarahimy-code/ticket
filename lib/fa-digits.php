@@ -13,7 +13,9 @@ declare(strict_types=1);
  *   • فقط متنِ داخل تگ‌ها تبدیل می‌شود؛ مقدار اتربیوت‌ها (id، href، value، csrf…) ثابت می‌ماند.
  *   • محتوای <script>، <style>، <pre>، <code>، <textarea> و کامنت‌های <!-- --> کلاً تبدیل نمی‌شوند.
  *   • توکن‌های ماشینی داخل متن: آدرس‌های IP و ایمیل‌ها لاتین می‌مانند.
- *   • خروجی غیر HTML (JSON، دانلود XLSX/پیوست/…) اصلاً دست نمی‌خورد.
+ *   • خروجی غیر HTML فقط وقتی تبدیل می‌شود که Content-Type صریحاً text/html یا application/xhtml+xml باشد؛
+ *     نبودِ Content-Type صریح (صفحات PHP که پیش‌فرض text/html هستند) هم تبدیل می‌شود.
+ *     JSON، XLSX، text/plain (عیب‌یابی/دانلود ماشینی) و همهٔ دانلودها دست‌نخورده می‌مانند.
  *   • اگر display.fa_digits در تنظیمات «۰» شود، لایه غیرفعال است (راه برگشت اضطراری).
  */
 
@@ -30,7 +32,9 @@ function fa_digits_text(string $text): string
         return $text;
     }
     $tokens = [];
-    $text = (string) preg_replace_callback(
+    // NB: در ورودی باینری/UTF-8 نامعتبر، preg_replace_callback مقدار null می‌دهد؛
+    // در آن صورت متن اصلی را دست‌نخورده برمی‌گردانیم تا هیچ بایتی پاک/جابجا نشود.
+    $swapped = preg_replace_callback(
         '/(?:\d{1,3}(?:\.\d{1,3}){3}|[\w._%+\-]+@[\w\-]+(?:\.[\w\-]+)+)/u',
         static function (array $m) use (&$tokens): string {
             // کلید فقط حروف دارد تا مرحلهٔ نگاشت رقم‌ها به آن دست نزند
@@ -40,7 +44,10 @@ function fa_digits_text(string $text): string
         },
         $text
     );
-    $text = strtr($text, fa_digits_map());
+    if (!is_string($swapped)) {
+        return $text;
+    }
+    $text = strtr($swapped, fa_digits_map());
     if ($tokens !== []) {
         $text = strtr($text, $tokens);
     }
@@ -160,9 +167,12 @@ function fa_digits_output_callback(string $buffer): string
             foreach ($headers as $header) {
                 if (stripos($header, 'content-type:') === 0) {
                     $value = strtolower(trim(substr($header, strlen('content-type:'))));
-                    $isHtml = str_contains($value, 'html') || str_contains($value, 'xml') || str_contains($value, 'text/plain');
+                    // فقط نوع‌های نمایشی HTML مجازند؛ «application/vnd.openxmlformats-
+                    // officedocument.spreadsheetml.sheet» ناخواسته شامل «xml» است و text/plain
+                    // خروجی ماشینی/عیب‌یابی است — هیچ‌کدام تبدیل نمی‌شوند.
+                    $isHtml = str_contains($value, 'text/html') || str_contains($value, 'application/xhtml+xml');
                     if (!$isHtml) {
-                        return $buffer; // JSON/دانلود/… تبدیل نمی‌شود
+                        return $buffer; // JSON/آیاکسل/دانلود/… تبدیل نمی‌شود
                     }
                 }
             }

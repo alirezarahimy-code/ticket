@@ -175,6 +175,13 @@ function t12s_post(string $baseUrl, array $session, string $action, array $field
 }
 
 /** Snapshot tickets matching a where clause; timestamps tolerated within 300s, rest strict. */
+/** ارقام نمایشیِ لایهٔ سراسریِ صفحه را برای مقایسه‌های محتوایی به لاتین برمی‌گرداند. */
+function t12s_latin_body(string $body): string
+{
+    static $map = ['۰' => '0', '۱' => '1', '۲' => '2', '۳' => '3', '۴' => '4', '۵' => '5', '۶' => '6', '۷' => '7', '۸' => '8', '۹' => '9'];
+    return strtr($body, $map);
+}
+
 function t12s_snapshot_tickets(PDO $pdo, string $where = '1=1'): array
 {
     $stmt = $pdo->query("SELECT * FROM tickets WHERE {$where} ORDER BY id");
@@ -944,7 +951,7 @@ try {
             'GET',
             ['Cookie: ' . $privacySessions['agent']['feature']['cookie']]
         );
-        if ($requesterDetail['status'] !== 200 || str_contains($requesterDetail['body'], $internalBody)) {
+        if ($requesterDetail['status'] !== 200 || str_contains(t12s_latin_body($requesterDetail['body']), $internalBody)) {
             $serverLog = sys_get_temp_dir() . '/t12s-server-' . (int) $privacyApp['port'] . '.log';
             $serverTail = is_file($serverLog) ? substr((string) file_get_contents($serverLog), -2000) : '(server log missing)';
             t12s_fail('14-internal-note leaked into requester detail: HTTP ' . $requesterDetail['status']
@@ -952,7 +959,7 @@ try {
                 . '\n, feature app.log tail:\n' . t12s_clone_log_tail($privacyApp)
                 . '\n, feature server log tail:\n' . $serverTail);
         }
-        if ($agentDetail['status'] !== 200 || !str_contains($agentDetail['body'], $internalBody)) {
+        if ($agentDetail['status'] !== 200 || !str_contains(t12s_latin_body($agentDetail['body']), $internalBody)) {
             t12s_fail('14-internal-note missing from assigned agent detail: HTTP ' . $agentDetail['status']
                 . ', feature app.log tail:\n' . t12s_clone_log_tail($privacyApp));
         }
