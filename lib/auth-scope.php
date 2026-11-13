@@ -170,6 +170,32 @@ function ticket_requester_tree_predicate(string $requesterExpr, array $unitIds):
         . ' OR EXISTS (SELECT 1 FROM org_unit_managers scope_members JOIN org_units scope_unit ON scope_unit.id = scope_members.unit_id AND scope_unit.is_active = 1 WHERE scope_members.user_id = scope_user.id AND scope_unit.id IN (' . $marks . '))))', array_merge($unitIds, $unitIds, $unitIds)];
 }
 
+/**
+ * پهنهٔ «انتساب سازمانی درخواست» (requesting_unit_id): درخواستی که form، آن را
+ * به یکی از واحدهای این زیردرخت منتسب کرده باشد. مرزِ آن با پهنهٔ ثبت‌کننده
+ * یکی است (همان واحدهای مدیریت‌شده)؛ درخواست‌هایی که اصلاً منتسب‌نشده‌اند
+ * (NULL) هرگز از این مسیر دیده نمی‌شوند.
+ * مثال: ادمین درخواستی برای «معاونت مالی» ثبت می‌کند؛ مدیر آن معاونت باید آن
+ * درخواست را ببیند، حتی اگر ثبت‌کننده داخل چارت او نباشد.
+ */
+function ticket_attribution_predicate(string $unitExpr, array $unitIds): array
+{
+    if (!$unitIds) return ['1 = 0', []];
+    $unitExpr = trim($unitExpr);
+    if (!preg_match('/^[a-zA-Z_][a-zA-Z0-9_.]*$/', $unitExpr)) {
+        throw new InvalidArgumentException('Invalid attribution expression');
+    }
+    $marks = implode(',', array_fill(0, count($unitIds), '?'));
+    return ["{$unitExpr} IN ({$marks})", array_values($unitIds)];
+}
+
+/** آیا این درخواست (بر پایهٔ ستون requesting_unit_id) به این واحدها منتسب است؟ */
+function ticket_attribution_in_unit_ids(array $ticket, array $unitIds): bool
+{
+    $attributedId = (int) ($ticket['requesting_unit_id'] ?? 0);
+    return $attributedId > 0 && in_array($attributedId, array_map('intval', $unitIds), true);
+}
+
 function ticket_user_can_view(array $ticket, array $user, ?callable $permissionCheck = null): bool
 {
     $permissionCheck = $permissionCheck ?? 'user_can';
@@ -217,11 +243,21 @@ function ticket_user_can_view(array $ticket, array $user, ?callable $permissionC
             // هر درخواستی که به خودِ مدیر ارجاع شده برای خودش قابل مشاهده است.
             return true;
         }
+        if (!ticket_sole_unit_head($user)
+            && (string) ($ticket['service_group'] ?? '') !== user_service_group($user)) {
+            // مدیر-کارشناس: بیرون از حوزهٔ خدمتِ خودش امتیازِ تفویض‌شده ندارد؛ چارت به‌تنهایی اختیاری برون‌حوزه‌ای نمی‌دهد.
+            // (هم‌راستا با ticket_scope که برای او فیلتر service_group را روی فهرست اعمال می‌کند.)
+            return false;
+        }
         $ids = ticket_manager_scope_unit_ids($user);
         if (!$ids) {
             // بدون درخت مشخص، همان رفتار داخلیِ حوزهٔ خودش باقی می‌ماند.
             return $permissionCheck($user, 'ticket.view_unit')
                 && (string) ($ticket['service_group'] ?? '') === user_service_group($user);
+        }
+        // هر دو مرز معتبر است: ثبت‌کننده داخل زیردرخت چارت، یا درخواست به همان زیردرخت منتسب شده باشد.
+        if (ticket_attribution_in_unit_ids($ticket, $ids)) {
+            return true;
         }
         [$predicate, $params] = ticket_requester_tree_predicate('?', $ids);
         try {
@@ -253,9 +289,10 @@ function ticket_handler_level(array $ticket, array $user): string
     if (($user['role'] ?? '') === 'agent' && $ticketGroup !== user_service_group($user)) {
         return '';
     }
-    if (($user['role'] ?? '') === 'manager' && empty(ticket_manager_scope_unit_ids($user))
+    if (($user['role'] ?? '') === 'manager'
+        && !(function_exists('ticket_sole_unit_head') && ticket_sole_unit_head($user))
         && $ticketGroup !== user_service_group($user)) {
-        // مدیر بدون درخت سازمانی: خارج از حوزهٔ خودش اختیاری ندارد.
+        // مدیر-کارشناس یا مدیر بدون چارت: خارج از حوزهٔ خدمتِ خودش اختیاری ندارد.
         return '';
     }
     if (($user['role'] ?? '') === 'manager') {
@@ -265,15 +302,18 @@ function ticket_handler_level(array $ticket, array $user): string
             // سرپرستی درخواست‌های دیگران داخل درخت واحدهای مدیر برقرار است (هر دو حوزه)؛
             // درخواستِ خودِ مدیر هرگز از درخت اختیارِ سرپرستی نمی‌گیرد (تفکیک وظایف).
             if (!$isManagerRequester) {
-                [$treePredicate, $treeParams] = ticket_requester_tree_predicate('?', $managerScopeIds);
-                $inSubtree = false;
-                try {
-                    $treeQuery = db()->prepare('SELECT ' . $treePredicate);
-                    $treeQuery->execute(array_merge([(int) ($ticket['requester_id'] ?? 0)], $treeParams));
-                    $inSubtree = (bool) $treeQuery->fetchColumn();
-                } catch (Throwable $error) {
-                    if (function_exists('app_error_log')) {
-                        app_error_log('[ticket-scope] ' . $error->getMessage());
+                // همان دو مرزِ دیدن: ثبت‌کننده داخل زیردرخت، یا منتسب به زیردرخت (نمونه: ادمین برای معاونت مالی ثبت کرده).
+                $inSubtree = ticket_attribution_in_unit_ids($ticket, $managerScopeIds);
+                if (!$inSubtree) {
+                    [$treePredicate, $treeParams] = ticket_requester_tree_predicate('?', $managerScopeIds);
+                    try {
+                        $treeQuery = db()->prepare('SELECT ' . $treePredicate);
+                        $treeQuery->execute(array_merge([(int) ($ticket['requester_id'] ?? 0)], $treeParams));
+                        $inSubtree = (bool) $treeQuery->fetchColumn();
+                    } catch (Throwable $error) {
+                        if (function_exists('app_error_log')) {
+                            app_error_log('[ticket-scope] ' . $error->getMessage());
+                        }
                     }
                 }
                 if (!$inSubtree) {
@@ -464,18 +504,24 @@ function ticket_scope(array $user, string $alias = 't'): array
         $group = $role === 'support_manager' ? 'support' : user_service_group($user);
         if ($unit && $role !== 'manager') return ["WHERE {$alias}.service_group = ?", [$group]];
         if ($role === 'manager' && ticket_sole_unit_head($user)) {
-            // مدیر واحدِ صرف: همان مرزِ «فضای مدیر واحد» — خودش + زیردرخت چارت؛ بدون فیلتر حوزهٔ خدمت.
-            [$tree, $treeParams] = ticket_requester_tree_predicate("{$alias}.requester_id", ticket_manager_scope_unit_ids($user));
+            // مدیر واحدِ صرف: همان مرزِ «فضای مدیر واحد» — خودش + زیردرخت چارت + منتسب‌های همان زیردرخت؛ بدون فیلتر حوزهٔ خدمت.
+            $scopeIds = ticket_manager_scope_unit_ids($user);
+            [$tree, $treeParams] = ticket_requester_tree_predicate("{$alias}.requester_id", $scopeIds);
+            [$attrib, $attribParams] = ticket_attribution_predicate("{$alias}.requesting_unit_id", $scopeIds);
             $parts = []; $params = [];
             if ($own) { $parts[] = "{$alias}.requester_id = ?"; $params[] = (int) ($user['id'] ?? 0); }
             $parts[] = $tree; $params = array_merge($params, $treeParams);
+            $parts[] = $attrib; $params = array_merge($params, $attribParams);
             return ["WHERE (" . implode(' OR ', $parts) . ')', $params];
         }
         $parts = []; $params = [$group];
         if ($own) { $parts[] = "{$alias}.requester_id = ?"; $params[] = (int) ($user['id'] ?? 0); }
         if ($unit && $role === 'manager') {
-            [$tree, $treeParams] = ticket_requester_tree_predicate("{$alias}.requester_id", ticket_manager_scope_unit_ids($user));
+            $scopeIds = ticket_manager_scope_unit_ids($user);
+            [$tree, $treeParams] = ticket_requester_tree_predicate("{$alias}.requester_id", $scopeIds);
+            [$attrib, $attribParams] = ticket_attribution_predicate("{$alias}.requesting_unit_id", $scopeIds);
             $parts[] = $tree; $params = array_merge($params, $treeParams);
+            $parts[] = $attrib; $params = array_merge($params, $attribParams);
         }
         return ["WHERE {$alias}.service_group = ? AND (" . ($parts ? implode(' OR ', $parts) : '1 = 0') . ')', $params];
     }

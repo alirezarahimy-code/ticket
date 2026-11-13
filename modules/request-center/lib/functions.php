@@ -771,7 +771,10 @@ function request_center_is_org_unit_head(array $user): bool
 }
 
 
-/** آیا ثبت‌کنندهٔ این درخواست، داخل زیردرخت واحدهایی است که این کاربر رئیس فعال آن‌هاست؟ */
+/**
+ * آیا این درخواست داخل پهنهٔ چارتِ این کاربر است؟ هر دو مرز معتبر است (همانِ ticket_scope):
+ * ثبت‌کننده داخل زیردرخت واحدهای مدیریت‌شده، یا درخواست به همین زیردرخت منتسب شده باشد.
+ */
 function request_center_manager_ticket_in_subtree(array $ticket, array $user): bool
 {
     if (!function_exists('ticket_manager_scope_unit_ids') || !function_exists('ticket_requester_tree_predicate')) {
@@ -780,6 +783,9 @@ function request_center_manager_ticket_in_subtree(array $ticket, array $user): b
     $unitIds = ticket_manager_scope_unit_ids($user);
     if (!$unitIds) {
         return false;
+    }
+    if (function_exists('ticket_attribution_in_unit_ids') && ticket_attribution_in_unit_ids($ticket, $unitIds)) {
+        return true;
     }
     [$predicate, $params] = ticket_requester_tree_predicate('?', $unitIds);
     try {

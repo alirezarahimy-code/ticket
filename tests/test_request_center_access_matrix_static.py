@@ -165,6 +165,31 @@ def test_pages_include_only_modules_are_guarded_and_htaccess_denies():
             "پوشهٔ Assets نباید deny شود؛ کاربر به CSS از مرورگر نیاز دارد"
 
 
+def test_support_manager_defaults_do_not_grant_supervisor_panel():
+    """مورد ۲ (تصمیم مستند ۲۰۲۶-۱۱-۱۳): نقش «مدیر پشتیبانی» (support_manager) به‌طور پیش‌فرض
+    supervisor.panel نمی‌گیرد. «خروجی Excel تصمیمات سوپروایزر» (export_decisions) فقط با
+    supervisor.panel یا ادمین اصلی باز می‌شود؛ تصمیمی که عمدی است تا تصمیمات اختیار
+    سوپروایزر به هر مدیر واحد/سرپرست پشتیبانی لو نرفت. تغییر سیاست = تصمیم مالک
+    (از فرم نقش‌ها یا گروه‌های دسترسی افزایشی)، نه پیش‌فرض کد."""
+    src = read(ROOT / "permissions.php")
+    m = re.search(r"'support_manager'\s*=>\s*array_values\(array_unique\(array_merge\(\$common,\s*\[(.*?)\]\)\)", src, re.S)
+    assert m, "support_manager defaults literal not found in permissions.php"
+    codes = m.group(1)
+    assert "supervisor.panel" not in codes, "support_manager must not silently gain the supervisor panel"
+    assert "supervisor.decide" not in codes and "supervisor.reopen" not in codes
+
+
+def test_export_decisions_gate_is_supervisor_panel_or_primary_admin_only():
+    source = read(ROOT / "request-center.php")
+    marker = "(string) ($_GET['action'] ?? '') === 'export_decisions'"
+    i = source.find(marker)
+    assert i != -1, "export_decisions branch missing in request-center.php"
+    block = source[i:i + 1200]
+    assert "user_can($decisionsUser, 'supervisor.panel')" in block
+    assert "user_is_primary_admin($decisionsUser)" in block
+    assert "request_center_error_page(403" in block
+
+
 def main() -> int:
     tests = [func for name, func in sorted(globals().items()) if name.startswith("test_")]
     failed = 0

@@ -544,7 +544,7 @@ final class RequestCenterRepository
     /**
      * فضای مدیر واحد — فهرست درخواست‌های «خودِ مدیر + زیرمجموعهٔ چارت سازمانی‌اش» (هر دو حوزهٔ IT و پشتیبانی).
      *
-     * مرز اختیار، همان ticket_manager_scope_unit_ids است و فیلتر service_group عمداً اعمال نمی‌شود
+     * مرز اختیار، همان ticket_manager_scope_unit_ids است (ثبت‌کنندهٔ داخل زیردرخت + درخواست‌های منتسب به همان زیردرخت) و فیلتر service_group عمداً اعمال نمی‌شود
      * (تصمیم مالک: فقط درخواست‌های خودش و زیرمجموعه‌اش؛ نه بیشتر، نه کمتر). نمایش فهرست بر اساس موعد SLA مرتب می‌شود (نزدیک‌ترین موعد اول).
      *
      * @return array{total:int, rows:array<int,array<string,mixed>>}
@@ -557,9 +557,12 @@ final class RequestCenterRepository
         $ownId = (int) ($user['id'] ?? 0);
         $scopeIds = function_exists('ticket_manager_scope_unit_ids') ? ticket_manager_scope_unit_ids($user) : [];
         [$treePredicate, $treeParams] = ticket_requester_tree_predicate('t.requester_id', $scopeIds);
+        [$attribPredicate, $attribParams] = function_exists('ticket_attribution_predicate')
+            ? ticket_attribution_predicate('t.requesting_unit_id', $scopeIds)
+            : ['1 = 0', []];
 
-        $clauses = ['((t.requester_id = ?) OR (' . $treePredicate . '))'];
-        $params = array_merge([$ownId], $treeParams);
+        $clauses = ['((t.requester_id = ?) OR (' . $treePredicate . ') OR (' . $attribPredicate . '))'];
+        $params = array_merge([$ownId], $treeParams, $attribParams);
 
         $status = (string) ($filters['status'] ?? '');
         if (in_array($status, ['new', 'manager_review', 'assigned', 'in_progress', 'waiting_user', 'pending', 'resolved', 'closed', 'cancelled', 'rejected'], true)) {
@@ -609,7 +612,7 @@ final class RequestCenterRepository
     }
 
     /**
-     * شمارنده‌های «فضای مدیر واحد» (خودش + زیرمجموعهٔ چارت سازمانی‌اش):
+     * شمارنده‌های «فضای مدیر واحد» (خودش + زیرمجموعهٔ چارت سازمانی‌اش + یا درخواست‌های منتسب به همان زیردرخت):
      * باز، معوق (موعد SLA گذشته و هنوز باز)، منتظر پاسخ کاربر، حل‌شده در ۳۰ روز اخیر.
      *
      * @return array{open:int, overdue:int, waiting_user:int, resolved_30d:int}
@@ -620,8 +623,11 @@ final class RequestCenterRepository
         $ownId = (int) ($user['id'] ?? 0);
         $scopeIds = function_exists('ticket_manager_scope_unit_ids') ? ticket_manager_scope_unit_ids($user) : [];
         [$treePredicate, $treeParams] = ticket_requester_tree_predicate('t.requester_id', $scopeIds);
-        $scope = '((t.requester_id = ?) OR (' . $treePredicate . '))';
-        $params = array_merge([$ownId], $treeParams);
+        [$attribPredicate, $attribParams] = function_exists('ticket_attribution_predicate')
+            ? ticket_attribution_predicate('t.requesting_unit_id', $scopeIds)
+            : ['1 = 0', []];
+        $scope = '((t.requester_id = ?) OR (' . $treePredicate . ') OR (' . $attribPredicate . '))';
+        $params = array_merge([$ownId], $treeParams, $attribParams);
         try {
             $query = $this->pdo->prepare(
                 "SELECT

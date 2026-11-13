@@ -99,7 +99,7 @@ check_ticket(ticket_handler_level($ownTicket, $users[9]) === '', 'custom assignm
 $ownTicket['requester_id'] = 5;
 check_ticket(ticket_user_can_view($ownTicket, $users[4]) && ticket_handler_level($ownTicket, $users[4]) === '', 'own ticket does not give manager authority outside department');
 [$ownScope, $ownParameters] = ticket_scope($users[4]);
-check_ticket(str_contains($ownScope, 'requester_id = ?') && $ownParameters === ['support', 5, 701, 701, 701], 'manager list includes own requests outside their department but within their group');
+check_ticket(str_contains($ownScope, 'requester_id = ?') && str_contains($ownScope, 'requesting_unit_id') && $ownParameters === ['support', 5, 701, 701, 701, 701], 'manager list includes own requests outside their department but within their group');
 // ───── تفکیک وظایف و سه نما (۱.۶۲.۸۴) ─────
 // سناریو: مدیر حوزه (کاربر ۴، نقش manager، همان گروه و همان واحد) خودش درخواست می‌دهد.
 $selfTicket = ['requester_id'=>4, 'assigned_to'=>3, 'service_group'=>'support', 'department_id'=>5, 'status'=>'assigned', 'cancel_requested_at'=>null];

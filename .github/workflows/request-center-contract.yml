@@ -121,6 +121,8 @@ jobs:
           php -l modules/request-center/Pages/calendar.php
       - name: First-slice and Phase-3 lifecycle architecture contracts
         run: python -m pytest -q tests/test_request_center_first_slice_static.py tests/test_request_center_access_matrix_static.py tests/test_request_center_phase3_lifecycle_static.py tests/test_request_center_phase3_workspaces_static.py
+      - name: Ticket visibility unit contract (chart boundaries + deputy attribution)
+        run: php tests/test_ticket_tree_visibility_unit.php
       - name: Repository query and visibility integration tests
         run: php tests/test_request_center_repository_sqlite.php
       - name: Appointment lifecycle, conflict and capacity contract (SQLite)

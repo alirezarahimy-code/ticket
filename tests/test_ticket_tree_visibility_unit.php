@@ -5,6 +5,7 @@ function user_is_primary_admin(array $u): bool { return ($u['role']??'') === 'pr
 function is_global_ticket_role(?string $r): bool { return in_array($r,['supervisor','inspector','primary_admin'],true); }
 function is_it_agent(array $u): bool { return false; }
 function user_can(array $u,string $p): bool { return in_array($p,$u['permissions']??[],true); }
+function is_assignable_role(?string $r): bool { return in_array($r,['agent','manager','support_manager','primary_admin'],true); }
 class ScopeStmt {
     public array $params=[];
     public function __construct(public string $sql) {}
@@ -31,12 +32,18 @@ ok(ticket_user_can_view($ticket,$manager),'manager sees descendant');
 $ticket['requester_id']=31;ok(!ticket_user_can_view($ticket,$manager),'manager cannot see unrelated branch');
 $ticket['requester_id']=32;ok(!ticket_user_can_view($ticket,$manager),'corrupt cross-company child excluded');
 $ticket['requester_id']=11;ok(ticket_user_can_view($ticket,$manager),'manager sees own request');
-$ticket['requester_id']=30;$ticket['service_group']='it';ok(!ticket_user_can_view($ticket,$manager),'service group respected');
-[$sql,$args]=ticket_scope($manager);ok(str_contains($sql,'scope_user.org_unit_id IN') && $args===['support',11,2,3,2,3,2,3],'list uses same subtree and group as detail');
+$ticket['requester_id']=30;$ticket['service_group']='it';ok(!ticket_user_can_view($ticket,$manager),'non-sole chart manager: chart grants no cross-domain detail visibility');
+// مرز دوم: درخواست منتسب به زیردرخت (requesting_unit_id)
+$ticket=['requester_id'=>40,'service_group'=>'it','requesting_unit_id'=>3];ok(!ticket_user_can_view($ticket,$manager),'non-sole manager: attribution does not cross service group');
+$ticket=['requester_id'=>40,'service_group'=>'support','requesting_unit_id'=>3];ok(ticket_user_can_view($ticket,$manager),'non-sole manager: attribution inside own group is visible');
+$ticket=['requester_id'=>40,'service_group'=>'support','requesting_unit_id'=>4];ok(!ticket_user_can_view($ticket,$manager),'non-sole manager: attribution outside chart is invisible');
+$ticket=['requester_id'=>40,'service_group'=>'support','requesting_unit_id'=>null];ok(!ticket_user_can_view($ticket,$manager),'non-sole manager: unattributed outsider stays invisible');
+[$sql,$args]=ticket_scope($manager);ok(str_contains($sql,'scope_user.org_unit_id IN') && str_contains($sql,'requesting_unit_id IN') && $args===['support',11,2,3,2,3,2,3,2,3],'list uses same subtree and attribution boundary as detail');
 $missing=$manager;$missing['id']=13;[$sql,$args]=ticket_scope($missing);ok(str_contains($sql,'1 = 0') && $args===['support',13], 'manager without chart cannot see entire support pool');
-$ticket=['requester_id'=>31,'service_group'=>'support'];ok(!ticket_user_can_view($ticket,$missing),'missing manager chart fails closed on detail');
+$ticket=['requester_id'=>31,'service_group'=>'support'];ok(ticket_user_can_view($ticket,$missing),'manager without chart keeps own-group visibility');
+$ticket=['requester_id'=>31,'service_group'=>'it'];ok(!ticket_user_can_view($ticket,$missing),'manager without chart cannot cross into IT domain');
 $ordinary=['id'=>20,'role'=>'user','permissions'=>['ticket.view_own']];ok(!ticket_user_can_view($ticket,$ordinary),'ordinary user cannot see another requester');[$sql,$args]=ticket_scope($ordinary);ok($args===[20] && str_contains($sql,'requester_id'), 'ordinary user list own only');
-$operator=['id'=>21,'role'=>'agent','handling_unit_code'=>'support','permissions'=>['ticket.view_unit']];ok(ticket_user_can_view($ticket,$operator),'support handler retains group visibility');[$sql,$args]=ticket_scope($operator);ok($args===['support'],'handler list limited to support');
+$operator=['id'=>21,'role'=>'agent','handling_unit_code'=>'support','permissions'=>['ticket.view_unit']];ok(!ticket_user_can_view($ticket,$operator),'support handler does not see IT domain');$operatorTicket=['requester_id'=>31,'service_group'=>'support'];ok(ticket_user_can_view($operatorTicket,$operator),'support handler retains group visibility');[$sql,$args]=ticket_scope($operator);ok($args===['support'],'handler list limited to support');
 // ───── مدیر واحدِ صرف (بدون handling_unit_code): مرزِ اختیار فقط چارت، هر دو حوزه ─────
 $sole=['id'=>14,'role'=>'manager','permissions'=>['ticket.view_own','ticket.view_unit','ticket.edit','ticket.assign']];
 $GLOBALS['roots'][14]=[2];
@@ -51,7 +58,15 @@ ok(!ticket_user_can_view($cross,$sole),'sole unit head cannot see other-company 
 $assignedToHead=['requester_id'=>7,'service_group'=>'it','assigned_to'=>14];
 ok(!ticket_user_can_view($assignedToHead,$sole),'ticket assigned to head but requested outside chart stays invisible');
 [$headSql,$headArgs]=ticket_scope($sole);
-ok(!str_contains($headSql,'service_group') && str_contains($headSql,'scope_user.org_unit_id IN') && $headArgs===[14,2,3,2,3,2,3],'sole unit head list spans both domains without service_group filter');
+ok(!str_contains($headSql,'service_group') && str_contains($headSql,'scope_user.org_unit_id IN') && str_contains($headSql,'requesting_unit_id IN') && $headArgs===[14,2,3,2,3,2,3,2,3],'sole unit head list spans both domains without service_group filter');
+// ───── مرز دوم: درخواست منتسب به زیردرخت چارت (requesting_unit_id) — همان منطق «فضای مدیر واحد» ─────
+$attributedOk=['requester_id'=>40,'service_group'=>'it','requesting_unit_id'=>3];
+ok(ticket_user_can_view($attributedOk,$sole),'sole unit head sees ticket attributed to subtree (IT service group included)');
+ok(ticket_user_can_view(['requester_id'=>40,'service_group'=>'support','requesting_unit_id'=>2],$sole),'sole unit head sees support ticket attributed to managed unit root');
+ok(!ticket_user_can_view(['requester_id'=>40,'service_group'=>'support','requesting_unit_id'=>4],$sole),'sole unit head cannot see ticket attributed to unmanaged unit');
+ok(!ticket_user_can_view(['requester_id'=>40,'service_group'=>'support','requesting_unit_id'=>null],$sole),'sole unit head cannot see unattributed outsider');
+ok(ticket_handler_level($attributedOk,$sole)==='assigner','sole unit head gets assigner level on attributed ticket');
+ok(ticket_handler_level(['requester_id'=>40,'service_group'=>'it','requesting_unit_id'=>4,'assigned_to'=>14],$sole)==='','attributed outside chart gives no handler level even if preassigned to head');
 $headless=$sole;$headless['id']=15;$GLOBALS['roots'][15]=[];[$hSql,$hArgs]=ticket_scope($headless);
 ok($hArgs===['support',15] && str_contains($hSql,'1 = 0'),'sole unit head without chart fails closed to legacy behaviour');
 ok(ticket_handler_level($itTicket,$sole)==='assigner','sole unit head gets assigner level on subtree ticket');
