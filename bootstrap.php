@@ -82,3 +82,11 @@ require __DIR__ . '/lib/activity-audit.php';
 // Shared request input normalization and allowlisted choice helpers.
 require_once __DIR__ . '/lib/http-input.php';
 
+
+// ───── لایهٔ نمایشی سراسری: فارسی‌سازی اعداد در خروجی HTML (۱٫۶۳) ─────
+// متنِ داخل صفحه‌ها هنگام ارسال تبدیل می‌شود؛ اتربیوت‌ها/فرم‌ها/اسکریپت‌ها و
+// پاسخ‌های غیر HTML دست‌نخورده می‌مانند. می‌توان با تنظیم display.fa_digits=0 خاموش کرد.
+require_once __DIR__ . '/lib/fa-digits.php';
+if (PHP_SAPI !== 'cli' && function_exists('fa_digits_output_callback') && (function_exists('cfg') ? (bool) cfg('display.fa_digits', true) : true)) {
+    ob_start('fa_digits_output_callback');
+}
