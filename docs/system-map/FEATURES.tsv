@@ -34,4 +34,4 @@ CD|DVD|رسانه|دیسک|آرشیو	آرشیو CD/DVD	cd-dvd.php;actions/cd-dv
 تست|test|آزمون|CI|benchmark|کارایی	تستها و کیفیت	tests/;tools/lint-php-syntax.php;.github/workflows/ci.yml;benchmark-results/	—	CI: PHP 8.2 + SecurityTest + ArchitectureTest + test_food_ticket_logic
 نسخه|version|انتشار|release|tag|changelog|بسته	نسخهبندی و انتشار	VERSION;updates/;downloads/;docs/RELEASE-1.62.36-FA.md;docs/HANDOFF-FA.md	—	شماره نسخه فقط با انتشار واقعی عوض میشود (قاعدهٔ ثابت)
 قوانین ثابت|قواعد کار|HANDOFF|باید|نباید	قواعد ثابت کاربر	docs/HANDOFF-FA.md;AGENTS.md;docs/ARCHITECTURE-FA.md	—	حتماً بند ۱ HANDOFF خوانده شود؛ پاسخ فارسی، XLSX، عدم حذف داده
-MVC|app/|router|controller|مدل قدیمی|کد مرده	لایهٔ MVC بلااستفاده	app/;routes/web.php	—	هیچ فایلی اینها را require نمیکند؛ روتر واقعی index.php است
+MVC|app/|router|controller|مدل قدیمی|کد مرده	لایهٔ MVC حذف‌شده	—	—	با ۱.۶۳ کاملاً حذف شد؛ هیچ فایلی require نمیکرد؛ روتر واقعی index.php و request-center.php است

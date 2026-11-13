@@ -59,9 +59,6 @@ def test_independent_php_renderers_use_shared_mode():
     assert "app_theme_mode()" in shared
     assert "app_theme_toggle_markup()" in shared
     assert "assets/theme-mode.css?v=3" in shared
-    fallback = (ROOT / "app/Views/layout/header.php").read_text(encoding="utf-8")
-    assert "app_theme_mode()" in fallback
-    assert "app_theme_toggle_markup()" in fallback
 
 
 if __name__ == "__main__":

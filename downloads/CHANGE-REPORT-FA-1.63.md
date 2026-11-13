@@ -1,5 +1,28 @@
 # گزارش تغییرات نسخهٔ ۱.۶۳ — کاندید ارتقاء مرکز درخواست (Request Center)
 
+> **بازسازی r9 (۲۰۲۶-۱۱-۱۴) — تعیین تکلیف نهاییِ باقی‌ماندهٔ «ثبت درخواست» در سامانهٔ اصلی + حذف کامل لایهٔ MVC مرده.** ساخت از همین شاخه روی `arena/22d4eba7-ticket`؛ نسخه همان **1.63** است.
+> وضعیت همچنان **RC_CANDIDATE_NOT_FOR_PRODUCTION** است؛ نصب فقط روی TEST/staging و با امضای صریح مالک. فایل جانبی `…-20261114-r9.zip.sha256` همراه بسته تحویل داده می‌شود.
+> **پاسخ صریح به «موارد و صفحاتی از ثبت درخواست که تو سامانه اصلی باقی مونده بود چی؟؟؟؟»:** فرم و هندلرِ ثبت درخواست در سامانهٔ اصلی **از قبل وجود نداشت**؛ «مرکز درخواست‌ها» تنها صاحب مسیر ساخت تیکت است. فهرست کاملِ تکلیف هر باقی‌مانده:
+
+| # | باقی‌مانده در سامانهٔ اصلی | تکلیف |
+|---|------------------------------|--------|
+| ۱ | **فرم ثبت درخواست / هندلر `create_ticket`** | از قبل فقط در ماژول است: `modules/request-center/Pages/create.php` (`page=new-ticket`) و `modules/request-center/Actions/ticket-actions.php`؛ ریشه فقط پل ۴ خطی `actions/ticket-actions.php` → ماژول را دارد. **هیچ فرم/هندلر دیگری در هسته نیست.** |
+| ۲ | **`index.php?page=new-ticket`** | پل سازگاریِ عمدی: GETهای لایف‌سایکل RC (از جمله `new-ticket`) با **302 و حفظِ کاملِ کوئری‌استرینگ** به `request-center.php?…` منتقل می‌شوند؛ بنابراین جریان «درخواست اصلاح CD/DVD» (`index.php?page=new-ticket&request=cd_dvd_edit&record_id=N`) بدون تغییر کار می‌کند. **حذف نشد — حذف آن یعنی شکستن همهٔ لینک‌های قدیمی.** |
+| ۳ | **لینک‌های «ثبت درخواست» (داشبورد ×۳، نتایج جست‌وجو، ماژول services/index/admin، `lib/navigation.php`، `lib/render.php`)** | از قبل همگی به `request-center.php?page=new-ticket` می‌روند؛ دست‌نخورده ماندند. |
+| ۴ | **«درخواست اصلاح» در کنترل CD/DVD (`cd-dvd.php`)** | از قبل به `request-center.php?page=new-ticket&request=cd_dvd_edit&record_id=…` می‌رود؛ با پلِ ردیف ۲ هم بی‌خطر است. |
+| ۵ | **`global-search.php`** | ورودی `new-ticket` بدون دروازه است (تصمیم ثبت قبلی مالک: «کاربر عادی ثبت درخواست را می‌بیند»)؛ نتایج تیکت و کاتالوگ صفحه‌ها از قبل به RC می‌روند. |
+| ۶ | **چتبات (`chatbot.php`)** | هیچ URL مستقیمی برای ساخت تیکت تولید نمی‌کند؛ جریان `ticket_create` کاربر را به «مرکز درخواست‌ها» ارجاع می‌دهد (متن آماده برای کپی). **سازگار؛ دست‌نخورده.** |
+| ۷ | **برچسب‌های `new-ticket` = «ثبت درخواست» در `admin-layout-design.php`، `system-health.php` و `lib/settings-effects.php`** | کلیدهای نمایشیِ سازگاری هستند (برچسب صفحهٔ سیستمی و کاتالوگ «افکت مثلث» که مقادیر ذخیره‌شدهٔ کاربران را در خود نگه می‌دارد؛ حذف کلید = دور ریختن بی‌صدای تنظیم ذخیره‌شده). **حذف نمی‌شوند؛ سند شد که هندلر/مسیری ندارند.** |
+| ۸ | **لایهٔ MVC مرده: `app/Views/layout/header.php`، `app/Views/layout/footer.php`، `routes/web.php`** | **کاملاً حذف شدند** — هیچ فایلی آن‌ها را require نمی‌کرد (`index.php` تک‌فایلی/ماژولی است؛ `App\Core\Router` هرگز وجود نداشت). اشاره‌ها در `tests/` و `tools/build_system_map.py` هم‌راستا شدند؛ `docs/SYSTEM-MAP-FA.md` و `ARCHITECTURE.md` به‌روز شدند. **توجه مقصد:** بسته‌های ارتقا فایل را در مقصد پاک نمی‌کنند؛ پس از ارتقا، `app/Views/layout/header.php`، `app/Views/layout/footer.php` و `routes/web.php` را (و در صورت خالی‌بودن پوشه‌های `app/Views/layout`، `app/Views`، `app`، `routes`) دستی حذف کنید. |
+| ۹ | **`storage/sessions/*`** | دادهٔ زمان اجرای نشستهاست؛ در `.gitignore` است و وارد گیت/بسته نمی‌شود. |
+| ۱۰ | **`preview/food-release-download/` و `updates/…` تاریخی** | تاریخچه/ابزار محلی؛ untracked یا عمداً خارج از بسته (`EXCLUDED_*` در `tools/build_rc_update.py`). |
+| ۱۱ | راستی‌آزمایی r9 | pytest استاتیک پس از حذف لایهٔ مرده: صفر شکست جدید نسبت به پایهٔ پایه (همهٔ قرمزی‌ها دقیقاً همانِ پایه‌اند؛ `test_version_source_of_truth` سبز ماند)؛ `tools/build_system_map.py --check` PASS (۱۸۶۶ فایل، ۳۹۶ روت)؛ بسته با گاردهای `build_rc_update.py` (CRC ZIP، مسیر مطلق/traversal، تطابق manifest.files با محتوای ZIP، SHA-256  تک‌تک فایل‌ها) ساخته و دوباره حسابرسی شد | — |
+
+> هشدارهای صادقانهٔ r9:
+> - **بسته فایل‌های حذف‌شده را از مقصد پاک نمی‌کند**؛ به‌علاوهٔ `governance.php` و `ola.php` ریشه‌ای (r8)، اکنون `app/Views/layout/header.php`، `app/Views/layout/footer.php` و `routes/web.php` را هم دستی حذف کنید.
+> - `docs/system-map/` و `tests/` عمداً در بسته نیستند (بخشی از ارتقای RUNTIME نیستند)؛ فایل `ARCHITECTURE.md` و `docs/SYSTEM-MAP-FA.md` چون مستندات RUNTIME تغییر کرده‌اند حمل می‌شوند.
+> - نصب فقط پس از تأیید صریح مالک، روی TEST/staging، با بکاپ و راهنمای `docs/architecture/REQUEST-CENTER-INSTALL-UPGRADE-FA.md`.
+
 > **بازسازی r8 (۲۰۲۶-۱۱-۱۴) — پنج اصلاح رابط/ماژول پس از بازخورد مالک روی r7: ردیف برند فشرده، «بازگشت به سامانه»، تقویم تعطیلات یک‌خطی و تجمیع نهایی «تغییر و مشکل» و «OLA» در خودِ ماژول.** ساخت از همین شاخه (شامل مجموعهٔ `4d6945d4`) روی `arena/22d4eba7-ticket`.
 > وضعیت همچنان **RC_CANDIDATE_NOT_FOR_PRODUCTION** است؛ نصب فقط روی محیط TEST/staging و با امضای صریح مالک. فایل جانبی `…-20261114-r8.zip.sha256` همراه بسته تحویل داده می‌شود.
 

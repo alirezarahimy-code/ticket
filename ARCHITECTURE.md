@@ -172,7 +172,7 @@
 
 | تگ | مورد | وضعیت |
 |---|---|---|
-| `[DEAD-MVC]` | پوشه `app/` (Controllers، Models، Services، Core، Views) و `routes/web.php` (`App\Core\Router`) | ✅ **هیچ فایلی این‌ها رو require نمی‌کنه.** `index.php` تک‌فایلی و بدون روتر MVC کار می‌کنه. احتمالاً نسخهٔ قدیمی یا نیمه‌کاره‌ست. |
+| `[DEAD-MVC]` | پوشه `app/` (Controllers، Models، Services، Core، Views) و `routes/web.php` (`App\Core\Router`) | ✅ **در ۱.۶۳ کاملاً حذف شد.** هیچ فایلی این‌ها رو require نمی‌کرد؛ `index.php` تک‌فایلی و بدون روتر MVC کار می‌کرد/کار می‌کنه. |
 | `[DEAD-TEST-COPY]` | `tests/test_group_flow_offline.php` و `tools/*` که توابع `food_ticket_*` رو دوباره تعریف می‌کنن | 🟡 فقط برای تست است، نه در اجرای عادی |
 
 ---

@@ -85,10 +85,18 @@ def test_version_manifest_and_package():
         "governance.php": "modules/request-center/Pages/governance.php",
         "ola.php": "modules/request-center/Pages/ola.php",
     }
+    # ۱.۶۳: لایهٔ MVC مرده کاملاً حذف شد (هیچ‌کس require نمی‌کرد).
+    DEAD_MVC_DELETED_IN_1_63 = {
+        "app/Views/layout/header.php",
+        "app/Views/layout/footer.php",
+    }
     for f in files:
         if f in MOVED_IN_1_63_RC_MIGRATION:
             assert not (ROOT / f).exists(), f
             assert (ROOT / MOVED_IN_1_63_RC_MIGRATION[f]).is_file(), f
+            continue
+        if f in DEAD_MVC_DELETED_IN_1_63:
+            assert not (ROOT / f).exists(), f
             continue
         assert (ROOT / f).is_file(), f
 

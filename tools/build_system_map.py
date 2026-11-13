@@ -180,8 +180,8 @@ FEATURES: list[tuple[str, str, str, str, str]] = [
      "قواعد ثابت کاربر", "docs/HANDOFF-FA.md;AGENTS.md;docs/ARCHITECTURE-FA.md",
      "—", "حتماً بند ۱ HANDOFF خوانده شود؛ پاسخ فارسی، XLSX، عدم حذف داده"),
     ("MVC|app/|router|controller|مدل قدیمی|کد مرده",
-     "لایهٔ MVC بلااستفاده", "app/;routes/web.php",
-     "—", "هیچ فایلی اینها را require نمیکند؛ روتر واقعی index.php است"),
+     "لایهٔ MVC حذف‌شده", "—",
+     "—", "با ۱.۶۳ کاملاً حذف شد؛ هیچ فایلی require نمیکرد؛ روتر واقعی index.php و request-center.php است"),
 ]
 
 
@@ -290,7 +290,6 @@ def extract_symbols(rel: Path, text: str) -> list[tuple[str, str, int, str]]:
 # --- استخراج روتها ----------------------------------------------------------
 PAGE_RE = re.compile(r"\$page\s*===\s*'([a-z0-9-]+)'|\bpage=([a-z0-9-]+)")
 ACTION_RE = re.compile(r"['\"]action['\"]\s*=>\s*['\"]([a-z0-9_-]+)['\"]|\$action\s*===\s*['\"]([a-z0-9_-]+)['\"]|case\s+'([a-z0-9_-]+)'\s*:")
-ROUTE_ADD_RE = re.compile(r"\$router->add\(\s*'([^']*)'")
 API_ROUTE_RE = re.compile(r"\$route\s*===\s*'([a-z0-9_/-]+)'|\$apiRoute\s*===\s*'([a-z0-9_/-]+)'")
 
 
@@ -316,9 +315,6 @@ def extract_routes(rel: Path, text: str) -> list[tuple[str, str, int, str]]:
             add("action", next((g for g in m.groups() if g), ""), m.start())
         for m in API_ROUTE_RE.finditer(text):
             add("api", next((g for g in m.groups() if g), ""), m.start())
-    if str_rel == "routes/web.php":
-        for m in ROUTE_ADD_RE.finditer(text):
-            add("mvc-route", m.group(1), m.start())
     return out
 
 
@@ -383,7 +379,7 @@ def build() -> dict[str, str]:
         if rel.suffix.lower() in {".php", ".js", ".py", ".ps1"}:
             for kind, name, line, scat in extract_symbols(rel, text):
                 symbol_rows.append([name, kind, str(rel), line, scat])
-        if rel.suffix.lower() in {".php"} or str(rel) == "routes/web.php":
+        if rel.suffix.lower() == ".php":
             for kind, name, line, rfile in extract_routes(rel, text):
                 route_rows.append([kind, name, rfile, line])
         if rel.suffix.lower() == ".sql":
