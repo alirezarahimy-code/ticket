@@ -40059,6 +40059,110 @@
         },
         {
             "id": "CORE-018",
+            "path": "lib\/release-notes.php",
+            "area": "CORE",
+            "lines": 148,
+            "file_fingerprint": "1cf44f1436f3",
+            "blocks": [
+                {
+                    "kind": "region",
+                    "anchor": "بلوک رویه‌ای 1-18",
+                    "line_start": 1,
+                    "line_end": 18,
+                    "lines": 18,
+                    "fingerprint": "0560ee175763",
+                    "risk": {
+                        "score": 0,
+                        "flags": []
+                    },
+                    "id": "CORE-018.01"
+                },
+                {
+                    "kind": "function",
+                    "anchor": "release_notes_all",
+                    "line_start": 19,
+                    "line_end": 40,
+                    "lines": 22,
+                    "fingerprint": "502e73b349ed",
+                    "risk": {
+                        "score": 0,
+                        "flags": []
+                    },
+                    "id": "CORE-018.02"
+                },
+                {
+                    "kind": "function",
+                    "anchor": "release_notes_version_key",
+                    "line_start": 42,
+                    "line_end": 46,
+                    "lines": 5,
+                    "fingerprint": "b4aabd992a4d",
+                    "risk": {
+                        "score": 1,
+                        "flags": {
+                            "error_suppression": 1
+                        }
+                    },
+                    "id": "CORE-018.03"
+                },
+                {
+                    "kind": "function",
+                    "anchor": "release_notes_current",
+                    "line_start": 48,
+                    "line_end": 65,
+                    "lines": 18,
+                    "fingerprint": "be9f2f469f8d",
+                    "risk": {
+                        "score": 0,
+                        "flags": []
+                    },
+                    "id": "CORE-018.04"
+                },
+                {
+                    "kind": "function",
+                    "anchor": "release_notes_render_items",
+                    "line_start": 67,
+                    "line_end": 79,
+                    "lines": 13,
+                    "fingerprint": "201a31a35ac9",
+                    "risk": {
+                        "score": 0,
+                        "flags": []
+                    },
+                    "id": "CORE-018.05"
+                },
+                {
+                    "kind": "function",
+                    "anchor": "release_notes_dashboard_card",
+                    "line_start": 81,
+                    "line_end": 114,
+                    "lines": 34,
+                    "fingerprint": "47759c1506d3",
+                    "risk": {
+                        "score": 4,
+                        "flags": {
+                            "silent_catch": 4
+                        }
+                    },
+                    "id": "CORE-018.06"
+                },
+                {
+                    "kind": "function",
+                    "anchor": "release_notes_page_html",
+                    "line_start": 116,
+                    "line_end": 147,
+                    "lines": 32,
+                    "fingerprint": "88f8f90a2a2d",
+                    "risk": {
+                        "score": 0,
+                        "flags": []
+                    },
+                    "id": "CORE-018.07"
+                }
+            ]
+        },
+        {
+            "id": "CORE-019",
             "path": "lib\/render.php",
             "area": "CORE",
             "lines": 241,
@@ -40075,7 +40179,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "CORE-018.01"
+                    "id": "CORE-019.01"
                 },
                 {
                     "kind": "function",
@@ -40092,7 +40196,7 @@
                             "long": 1
                         }
                     },
-                    "id": "CORE-018.02"
+                    "id": "CORE-019.02"
                 },
                 {
                     "kind": "function",
@@ -40107,7 +40211,7 @@
                             "raw_input": 2
                         }
                     },
-                    "id": "CORE-018.03"
+                    "id": "CORE-019.03"
                 },
                 {
                     "kind": "function",
@@ -40120,7 +40224,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "CORE-018.04"
+                    "id": "CORE-019.04"
                 },
                 {
                     "kind": "function",
@@ -40133,12 +40237,12 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "CORE-018.05"
+                    "id": "CORE-019.05"
                 }
             ]
         },
         {
-            "id": "CORE-019",
+            "id": "CORE-020",
             "path": "lib\/settings-effects.php",
             "area": "CORE",
             "lines": 386,
@@ -40155,7 +40259,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "CORE-019.01"
+                    "id": "CORE-020.01"
                 },
                 {
                     "kind": "function",
@@ -40168,7 +40272,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "CORE-019.02"
+                    "id": "CORE-020.02"
                 },
                 {
                     "kind": "function",
@@ -40181,7 +40285,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "CORE-019.03"
+                    "id": "CORE-020.03"
                 },
                 {
                     "kind": "function",
@@ -40196,7 +40300,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "CORE-019.04"
+                    "id": "CORE-020.04"
                 },
                 {
                     "kind": "function",
@@ -40209,7 +40313,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "CORE-019.05"
+                    "id": "CORE-020.05"
                 },
                 {
                     "kind": "function",
@@ -40222,7 +40326,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "CORE-019.06"
+                    "id": "CORE-020.06"
                 },
                 {
                     "kind": "function",
@@ -40235,7 +40339,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "CORE-019.07"
+                    "id": "CORE-020.07"
                 },
                 {
                     "kind": "function",
@@ -40248,7 +40352,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "CORE-019.08"
+                    "id": "CORE-020.08"
                 },
                 {
                     "kind": "function",
@@ -40261,7 +40365,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "CORE-019.09"
+                    "id": "CORE-020.09"
                 },
                 {
                     "kind": "function",
@@ -40274,7 +40378,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "CORE-019.10"
+                    "id": "CORE-020.10"
                 },
                 {
                     "kind": "function",
@@ -40287,7 +40391,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "CORE-019.11"
+                    "id": "CORE-020.11"
                 },
                 {
                     "kind": "function",
@@ -40300,7 +40404,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "CORE-019.12"
+                    "id": "CORE-020.12"
                 },
                 {
                     "kind": "function",
@@ -40313,7 +40417,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "CORE-019.13"
+                    "id": "CORE-020.13"
                 },
                 {
                     "kind": "function",
@@ -40326,7 +40430,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "CORE-019.14"
+                    "id": "CORE-020.14"
                 },
                 {
                     "kind": "function",
@@ -40339,7 +40443,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "CORE-019.15"
+                    "id": "CORE-020.15"
                 },
                 {
                     "kind": "function",
@@ -40354,7 +40458,7 @@
                             "raw_input": 2
                         }
                     },
-                    "id": "CORE-019.16"
+                    "id": "CORE-020.16"
                 },
                 {
                     "kind": "function",
@@ -40367,7 +40471,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "CORE-019.17"
+                    "id": "CORE-020.17"
                 },
                 {
                     "kind": "function",
@@ -40380,7 +40484,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "CORE-019.18"
+                    "id": "CORE-020.18"
                 },
                 {
                     "kind": "function",
@@ -40393,7 +40497,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "CORE-019.19"
+                    "id": "CORE-020.19"
                 },
                 {
                     "kind": "function",
@@ -40406,7 +40510,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "CORE-019.20"
+                    "id": "CORE-020.20"
                 },
                 {
                     "kind": "function",
@@ -40419,12 +40523,12 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "CORE-019.21"
+                    "id": "CORE-020.21"
                 }
             ]
         },
         {
-            "id": "CORE-020",
+            "id": "CORE-021",
             "path": "lib\/tickets-sla.php",
             "area": "CORE",
             "lines": 891,
@@ -40441,7 +40545,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "CORE-020.01"
+                    "id": "CORE-021.01"
                 },
                 {
                     "kind": "function",
@@ -40454,7 +40558,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "CORE-020.02"
+                    "id": "CORE-021.02"
                 },
                 {
                     "kind": "function",
@@ -40467,7 +40571,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "CORE-020.03"
+                    "id": "CORE-021.03"
                 },
                 {
                     "kind": "function",
@@ -40480,7 +40584,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "CORE-020.04"
+                    "id": "CORE-021.04"
                 },
                 {
                     "kind": "function",
@@ -40493,7 +40597,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "CORE-020.05"
+                    "id": "CORE-021.05"
                 },
                 {
                     "kind": "function",
@@ -40506,7 +40610,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "CORE-020.06"
+                    "id": "CORE-021.06"
                 },
                 {
                     "kind": "function",
@@ -40521,7 +40625,7 @@
                             "silent_catch": 4
                         }
                     },
-                    "id": "CORE-020.07"
+                    "id": "CORE-021.07"
                 },
                 {
                     "kind": "function",
@@ -40537,7 +40641,7 @@
                             "dangerous_call": 4
                         }
                     },
-                    "id": "CORE-020.08"
+                    "id": "CORE-021.08"
                 },
                 {
                     "kind": "function",
@@ -40550,7 +40654,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "CORE-020.09"
+                    "id": "CORE-021.09"
                 },
                 {
                     "kind": "function",
@@ -40563,7 +40667,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "CORE-020.10"
+                    "id": "CORE-021.10"
                 },
                 {
                     "kind": "function",
@@ -40578,7 +40682,7 @@
                             "silent_catch": 4
                         }
                     },
-                    "id": "CORE-020.11"
+                    "id": "CORE-021.11"
                 },
                 {
                     "kind": "function",
@@ -40594,7 +40698,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "CORE-020.12"
+                    "id": "CORE-021.12"
                 },
                 {
                     "kind": "function",
@@ -40611,7 +40715,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "CORE-020.13"
+                    "id": "CORE-021.13"
                 },
                 {
                     "kind": "function",
@@ -40624,7 +40728,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "CORE-020.14"
+                    "id": "CORE-021.14"
                 },
                 {
                     "kind": "function",
@@ -40637,7 +40741,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "CORE-020.15"
+                    "id": "CORE-021.15"
                 },
                 {
                     "kind": "function",
@@ -40650,7 +40754,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "CORE-020.16"
+                    "id": "CORE-021.16"
                 },
                 {
                     "kind": "function",
@@ -40663,7 +40767,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "CORE-020.17"
+                    "id": "CORE-021.17"
                 },
                 {
                     "kind": "function",
@@ -40676,7 +40780,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "CORE-020.18"
+                    "id": "CORE-021.18"
                 },
                 {
                     "kind": "function",
@@ -40691,7 +40795,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "CORE-020.19"
+                    "id": "CORE-021.19"
                 },
                 {
                     "kind": "function",
@@ -40704,7 +40808,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "CORE-020.20"
+                    "id": "CORE-021.20"
                 },
                 {
                     "kind": "function",
@@ -40717,7 +40821,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "CORE-020.21"
+                    "id": "CORE-021.21"
                 },
                 {
                     "kind": "function",
@@ -40733,7 +40837,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "CORE-020.22"
+                    "id": "CORE-021.22"
                 },
                 {
                     "kind": "function",
@@ -40746,7 +40850,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "CORE-020.23"
+                    "id": "CORE-021.23"
                 },
                 {
                     "kind": "function",
@@ -40759,7 +40863,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "CORE-020.24"
+                    "id": "CORE-021.24"
                 },
                 {
                     "kind": "function",
@@ -40772,7 +40876,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "CORE-020.25"
+                    "id": "CORE-021.25"
                 },
                 {
                     "kind": "function",
@@ -40785,7 +40889,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "CORE-020.26"
+                    "id": "CORE-021.26"
                 },
                 {
                     "kind": "function",
@@ -40798,7 +40902,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "CORE-020.27"
+                    "id": "CORE-021.27"
                 },
                 {
                     "kind": "function",
@@ -40811,7 +40915,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "CORE-020.28"
+                    "id": "CORE-021.28"
                 },
                 {
                     "kind": "function",
@@ -40824,7 +40928,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "CORE-020.29"
+                    "id": "CORE-021.29"
                 },
                 {
                     "kind": "function",
@@ -40837,7 +40941,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "CORE-020.30"
+                    "id": "CORE-021.30"
                 },
                 {
                     "kind": "function",
@@ -40852,7 +40956,7 @@
                             "sql_concat": 5
                         }
                     },
-                    "id": "CORE-020.31"
+                    "id": "CORE-021.31"
                 },
                 {
                     "kind": "function",
@@ -40865,7 +40969,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "CORE-020.32"
+                    "id": "CORE-021.32"
                 },
                 {
                     "kind": "function",
@@ -40880,7 +40984,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "CORE-020.33"
+                    "id": "CORE-021.33"
                 },
                 {
                     "kind": "function",
@@ -40893,7 +40997,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "CORE-020.34"
+                    "id": "CORE-021.34"
                 },
                 {
                     "kind": "function",
@@ -40906,7 +41010,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "CORE-020.35"
+                    "id": "CORE-021.35"
                 },
                 {
                     "kind": "function",
@@ -40919,7 +41023,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "CORE-020.36"
+                    "id": "CORE-021.36"
                 }
             ]
         },
@@ -89525,16 +89629,16 @@
             "id": "TOOL-016",
             "path": "tools\/build_rc_update.py",
             "area": "TOOL",
-            "lines": 263,
-            "file_fingerprint": "3454ecf01d12",
+            "lines": 267,
+            "file_fingerprint": "fca2437dbf48",
             "blocks": [
                 {
                     "kind": "block",
                     "anchor": "مقدمهٔ فایل",
                     "line_start": 1,
-                    "line_end": 113,
-                    "lines": 113,
-                    "fingerprint": "bed8abf5c90a",
+                    "line_end": 117,
+                    "lines": 117,
+                    "fingerprint": "e504c8538606",
                     "risk": {
                         "score": 1,
                         "flags": {
@@ -89546,8 +89650,8 @@
                 {
                     "kind": "block",
                     "anchor": "sha256",
-                    "line_start": 114,
-                    "line_end": 117,
+                    "line_start": 118,
+                    "line_end": 121,
                     "lines": 4,
                     "fingerprint": "775c87ac30d4",
                     "risk": {
@@ -89559,8 +89663,8 @@
                 {
                     "kind": "block",
                     "anchor": "git",
-                    "line_start": 118,
-                    "line_end": 123,
+                    "line_start": 122,
+                    "line_end": 127,
                     "lines": 6,
                     "fingerprint": "dacec4d095c3",
                     "risk": {
@@ -89572,8 +89676,8 @@
                 {
                     "kind": "block",
                     "anchor": "changed_files",
-                    "line_start": 124,
-                    "line_end": 133,
+                    "line_start": 128,
+                    "line_end": 137,
                     "lines": 10,
                     "fingerprint": "97b6d264027a",
                     "risk": {
@@ -89585,8 +89689,8 @@
                 {
                     "kind": "block",
                     "anchor": "safe_archive_path",
-                    "line_start": 134,
-                    "line_end": 148,
+                    "line_start": 138,
+                    "line_end": 152,
                     "lines": 15,
                     "fingerprint": "e10645908a18",
                     "risk": {
@@ -89598,8 +89702,8 @@
                 {
                     "kind": "block",
                     "anchor": "validate_archive",
-                    "line_start": 149,
-                    "line_end": 181,
+                    "line_start": 153,
+                    "line_end": 185,
                     "lines": 33,
                     "fingerprint": "0c6fdf8961d0",
                     "risk": {
@@ -89611,10 +89715,10 @@
                 {
                     "kind": "block",
                     "anchor": "build",
-                    "line_start": 182,
-                    "line_end": 228,
+                    "line_start": 186,
+                    "line_end": 232,
                     "lines": 47,
-                    "fingerprint": "256ea7fa1d60",
+                    "fingerprint": "da6db021c2d7",
                     "risk": {
                         "score": 0,
                         "flags": []
@@ -89624,8 +89728,8 @@
                 {
                     "kind": "block",
                     "anchor": "entry",
-                    "line_start": 229,
-                    "line_end": 263,
+                    "line_start": 233,
+                    "line_end": 267,
                     "lines": 35,
                     "fingerprint": "0e17f2c4805d",
                     "risk": {

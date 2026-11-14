@@ -19,7 +19,7 @@
         "CORE-009.02",
         "CORE-011.18",
         "CORE-012.15",
-        "CORE-019.05"
+        "CORE-020.05"
       ],
       "related": [
         "CRON-005.04",
@@ -190,7 +190,7 @@
       "permission": null,
       "primary": [
         "PAGE-031.52",
-        "CORE-019.05"
+        "CORE-020.05"
       ],
       "related": [
         "TOOL-009.01",
@@ -213,7 +213,7 @@
         "PAGE-034.01",
         "PAGE-034.02",
         "PAGE-034.04",
-        "CORE-019.05"
+        "CORE-020.05"
       ],
       "related": [
         "TOOL-009.01",
@@ -236,7 +236,7 @@
         "ASSET-017.01",
         "PAGE-035.01",
         "PAGE-035.03",
-        "CORE-018.02"
+        "CORE-019.02"
       ],
       "related": [
         "PAGE-075.27",
@@ -252,10 +252,17 @@
       "key": "release-notes",
       "permission": null,
       "primary": [
-        "PAGE-031.53"
+        "PAGE-031.53",
+        "CORE-018.06",
+        "CORE-018.03",
+        "CORE-018.01",
+        "CORE-018.02",
+        "CORE-018.04",
+        "CORE-018.05",
+        "CORE-018.07"
       ],
       "related": [],
-      "total": 1
+      "total": 8
     },
     {
       "id": "page:system-health",
@@ -367,7 +374,7 @@
       "permission": "cddvd.history",
       "primary": [
         "PAGE-031.49",
-        "CORE-019.05"
+        "CORE-020.05"
       ],
       "related": [
         "PAGE-007.43",
@@ -391,7 +398,7 @@
       "permission": "asset.history",
       "primary": [
         "PAGE-031.68",
-        "CORE-019.05"
+        "CORE-020.05"
       ],
       "related": [
         "PAGE-001.12",
@@ -411,7 +418,7 @@
         "PAGE-075.18",
         "PAGE-049.01",
         "PAGE-049.02",
-        "CORE-019.05"
+        "CORE-020.05"
       ],
       "related": [
         "TEST-185.08",
@@ -435,7 +442,7 @@
       "permission": "inventory.diagnostics",
       "primary": [
         "PAGE-031.67",
-        "CORE-019.05"
+        "CORE-020.05"
       ],
       "related": [
         "TOOL-009.01",
@@ -456,7 +463,7 @@
       "primary": [
         "PAGE-031.26",
         "PAGE-031.41",
-        "CORE-019.05"
+        "CORE-020.05"
       ],
       "related": [
         "PAGE-031.25",
@@ -515,11 +522,11 @@
         "DB-004.04",
         "DB-007.02",
         "DB-044.01",
-        "CORE-019.04",
-        "CORE-019.02",
-        "CORE-019.05",
-        "CORE-019.17",
-        "CORE-019.18",
+        "CORE-020.04",
+        "CORE-020.02",
+        "CORE-020.05",
+        "CORE-020.17",
+        "CORE-020.18",
         "DB-004.93",
         "DB-004.94",
         "DB-061.05",
@@ -548,7 +555,7 @@
       "primary": [
         "PAGE-051.03",
         "PAGE-075.12",
-        "CORE-019.05"
+        "CORE-020.05"
       ],
       "related": [
         "TEST-185.08",
@@ -579,11 +586,11 @@
         "PAGE-024.24",
         "PAGE-024.56",
         "TEST-197.04",
-        "CORE-018.02",
+        "CORE-019.02",
         "CORE-015.08",
         "CORE-001.14",
         "CORE-015.10",
-        "CORE-019.05"
+        "CORE-020.05"
       ],
       "related": [
         "TEST-185.08",
@@ -609,8 +616,8 @@
         "PAGE-031.63",
         "PAGE-031.62",
         "PAGE-028.03",
-        "CORE-018.02",
-        "CORE-019.05"
+        "CORE-019.02",
+        "CORE-020.05"
       ],
       "related": [
         "PAGE-052.03",
@@ -670,9 +677,9 @@
       "permission": "dash.view",
       "primary": [
         "PAGE-031.75",
-        "CORE-018.02",
-        "CORE-019.16",
-        "CORE-019.05"
+        "CORE-019.02",
+        "CORE-020.16",
+        "CORE-020.05"
       ],
       "related": [
         "PAGE-007.43",
@@ -699,7 +706,7 @@
         "PAGE-075.19",
         "PAGE-055.01",
         "PAGE-055.02",
-        "CORE-019.05"
+        "CORE-020.05"
       ],
       "related": [
         "PAGE-031.05",
@@ -759,7 +766,7 @@
       "primary": [
         "PAGE-031.71",
         "PAGE-002.02",
-        "CORE-019.05"
+        "CORE-020.05"
       ],
       "related": [
         "TOOL-023.01",
@@ -820,7 +827,7 @@
         "PAGE-075.14",
         "PAGE-057.01",
         "PAGE-057.02",
-        "CORE-019.05"
+        "CORE-020.05"
       ],
       "related": [
         "TEST-185.08",
@@ -844,8 +851,8 @@
       "permission": null,
       "primary": [
         "PAGE-031.60",
-        "CORE-018.03",
-        "CORE-019.05"
+        "CORE-019.03",
+        "CORE-020.05"
       ],
       "related": [
         "PAGE-031.30",
@@ -869,7 +876,7 @@
       "permission": "chatbot.manage",
       "primary": [
         "PAGE-031.64",
-        "CORE-019.05"
+        "CORE-020.05"
       ],
       "related": [
         "PAGE-009.122",
@@ -926,7 +933,7 @@
       "primary": [
         "PAGE-031.43",
         "PAGE-004.16",
-        "CORE-019.05"
+        "CORE-020.05"
       ],
       "related": [
         "ACT-003.12",
@@ -1014,7 +1021,7 @@
         "PAGE-059.04",
         "PAGE-059.05",
         "CORE-001.14",
-        "CORE-019.05"
+        "CORE-020.05"
       ],
       "related": [
         "TEST-185.08",
@@ -1110,8 +1117,8 @@
       "primary": [
         "PAGE-031.74",
         "PAGE-031.59",
-        "CORE-018.03",
-        "CORE-019.05"
+        "CORE-019.03",
+        "CORE-020.05"
       ],
       "related": [
         "TOOL-089.12",
@@ -1138,8 +1145,8 @@
         "PAGE-075.17",
         "PAGE-058.01",
         "PAGE-058.02",
-        "CORE-018.02",
-        "CORE-019.05"
+        "CORE-019.02",
+        "CORE-020.05"
       ],
       "related": [
         "TEST-185.08",
@@ -1201,7 +1208,7 @@
       "key": "notif.view",
       "primary": [
         "PAGE-031.54",
-        "CORE-018.02"
+        "CORE-019.02"
       ],
       "related": [
         "PAGE-073.03",
@@ -1256,7 +1263,7 @@
         "PAGE-066.26",
         "PAGE-066.13",
         "TEST-197.04",
-        "CORE-018.02"
+        "CORE-019.02"
       ],
       "related": [
         "PAGE-009.27",
@@ -1279,7 +1286,7 @@
         "CORE-003.14",
         "CORE-003.22",
         "PAGE-066.26",
-        "CORE-018.02"
+        "CORE-019.02"
       ],
       "related": [
         "PAGE-073.03",
@@ -1302,7 +1309,7 @@
         "CORE-003.14",
         "CORE-003.22",
         "PAGE-066.26",
-        "CORE-018.02"
+        "CORE-019.02"
       ],
       "related": [
         "PAGE-058.03",
@@ -1325,7 +1332,7 @@
         "CORE-003.14",
         "CORE-003.22",
         "PAGE-066.26",
-        "CORE-018.02"
+        "CORE-019.02"
       ],
       "related": [
         "PAGE-058.03",
@@ -1460,7 +1467,7 @@
       "key": "queue.view",
       "primary": [
         "PAGE-057.03",
-        "CORE-018.02"
+        "CORE-019.02"
       ],
       "related": [
         "PAGE-052.03",
@@ -1487,7 +1494,7 @@
         "TEST-177.15",
         "TEST-177.14",
         "TEST-186.27",
-        "CORE-018.02"
+        "CORE-019.02"
       ],
       "related": [
         "PAGE-052.03",
@@ -1647,7 +1654,7 @@
       "group": "کنترل CD/DVD",
       "key": "cddvd.view",
       "primary": [
-        "CORE-018.02"
+        "CORE-019.02"
       ],
       "related": [
         "PAGE-031.63",
@@ -1769,7 +1776,7 @@
         "PAGE-079.59",
         "PAGE-080.23",
         "PAGE-079.67",
-        "CORE-018.02"
+        "CORE-019.02"
       ],
       "related": [
         "PAGE-031.31",
@@ -1845,7 +1852,7 @@
       "key": "assets.view",
       "primary": [
         "PAGE-031.70",
-        "CORE-018.02"
+        "CORE-019.02"
       ],
       "related": [
         "PAGE-031.31",
@@ -2058,7 +2065,7 @@
       "key": "reports.view",
       "primary": [
         "PAGE-058.03",
-        "CORE-018.02"
+        "CORE-019.02"
       ],
       "related": [
         "PAGE-031.30",
@@ -2078,7 +2085,7 @@
       "key": "analytics.view",
       "primary": [
         "PAGE-049.03",
-        "CORE-018.02"
+        "CORE-019.02"
       ],
       "related": [
         "PAGE-048.08",
@@ -2098,7 +2105,7 @@
       "key": "audit.view",
       "primary": [
         "PAGE-031.56",
-        "CORE-018.02"
+        "CORE-019.02"
       ],
       "related": [
         "PAGE-031.60",
@@ -2118,7 +2125,7 @@
       "primary": [
         "PAGE-031.74",
         "PAGE-031.59",
-        "CORE-018.02"
+        "CORE-019.02"
       ],
       "related": [
         "PAGE-031.60",
@@ -2139,7 +2146,7 @@
       "primary": [
         "PAGE-077.28",
         "PAGE-077.30",
-        "CORE-018.02"
+        "CORE-019.02"
       ],
       "related": [
         "PAGE-031.60",
@@ -2176,7 +2183,7 @@
       "key": "logs.activity",
       "primary": [
         "PAGE-031.59",
-        "CORE-018.02"
+        "CORE-019.02"
       ],
       "related": [
         "PAGE-031.60",
@@ -2695,7 +2702,7 @@
       "key": "foodorder.self",
       "primary": [
         "PAGE-031.46",
-        "CORE-018.02"
+        "CORE-019.02"
       ],
       "related": [
         "PAGE-013.100",
@@ -2715,7 +2722,7 @@
       "key": "org.view",
       "primary": [
         "PAGE-031.72",
-        "CORE-018.02"
+        "CORE-019.02"
       ],
       "related": [
         "PAGE-073.03",
@@ -2760,9 +2767,9 @@
       "primary": [
         "PAGE-031.73",
         "PAGE-031.40",
-        "CORE-019.17",
-        "CORE-019.18",
-        "CORE-018.02"
+        "CORE-020.17",
+        "CORE-020.18",
+        "CORE-019.02"
       ],
       "related": [
         "PAGE-073.03",
@@ -2801,7 +2808,7 @@
       "primary": [
         "PAGE-031.73",
         "PAGE-031.40",
-        "CORE-018.02"
+        "CORE-019.02"
       ],
       "related": [
         "PAGE-031.66",
@@ -2839,7 +2846,7 @@
       "primary": [
         "PAGE-031.73",
         "PAGE-031.40",
-        "CORE-018.02"
+        "CORE-019.02"
       ],
       "related": [
         "PAGE-073.03",
@@ -2908,7 +2915,7 @@
       "key": "backup.view",
       "primary": [
         "PAGE-031.61",
-        "CORE-018.02"
+        "CORE-019.02"
       ],
       "related": [
         "PAGE-073.03",
@@ -2973,7 +2980,7 @@
       "primary": [
         "PAGE-031.64",
         "PAGE-031.34",
-        "CORE-018.02"
+        "CORE-019.02"
       ],
       "related": [
         "PAGE-073.03"
@@ -4448,7 +4455,7 @@
         "DB-007.36",
         "DB-044.43",
         "DB-080.04",
-        "CORE-020.22",
+        "CORE-021.22",
         "DB-007.484",
         "DB-046.04",
         "DB-007.474",
@@ -4723,11 +4730,11 @@
         "DB-004.04",
         "DB-007.02",
         "DB-044.01",
-        "CORE-019.04",
-        "CORE-019.02",
-        "CORE-019.05",
-        "CORE-019.17",
-        "CORE-019.18"
+        "CORE-020.04",
+        "CORE-020.02",
+        "CORE-020.05",
+        "CORE-020.17",
+        "CORE-020.18"
       ],
       "related": [
         "TEST-192.36",
@@ -4876,11 +4883,11 @@
         "DB-040.03",
         "DB-044.66",
         "DB-053.03",
-        "CORE-020.12",
-        "CORE-020.11",
+        "CORE-021.12",
+        "CORE-021.11",
         "DB-007.670",
-        "CORE-020.08",
-        "CORE-020.09"
+        "CORE-021.08",
+        "CORE-021.09"
       ],
       "related": [
         "TOOL-055.24",
@@ -4979,12 +4986,12 @@
         "DB-004.24",
         "DB-007.15",
         "DB-044.21",
-        "CORE-020.13",
-        "CORE-020.08",
-        "CORE-020.07",
-        "CORE-020.11",
-        "CORE-020.03",
-        "CORE-020.09",
+        "CORE-021.13",
+        "CORE-021.08",
+        "CORE-021.07",
+        "CORE-021.11",
+        "CORE-021.03",
+        "CORE-021.09",
         "DB-004.37"
       ],
       "related": [
@@ -28021,47 +28028,63 @@
       "lines": 10
     },
     "CORE-018.01": {
-      "path": "lib/render.php",
+      "path": "lib/release-notes.php",
       "area": "CORE",
       "line": 1,
-      "anchor": "بلوک رویه‌ای 1-13",
+      "anchor": "بلوک رویه‌ای 1-18",
       "risk": 0,
-      "lines": 13
+      "lines": 18
     },
     "CORE-018.02": {
-      "path": "lib/render.php",
+      "path": "lib/release-notes.php",
       "area": "CORE",
-      "line": 14,
-      "anchor": "render_header",
-      "risk": 4,
-      "lines": 156
-    },
-    "CORE-018.03": {
-      "path": "lib/render.php",
-      "area": "CORE",
-      "line": 171,
-      "anchor": "list_sort_page_off",
-      "risk": 2,
-      "lines": 8
-    },
-    "CORE-018.04": {
-      "path": "lib/render.php",
-      "area": "CORE",
-      "line": 180,
-      "anchor": "inspection_food_reminder_markup",
+      "line": 19,
+      "anchor": "release_notes_all",
       "risk": 0,
       "lines": 22
     },
-    "CORE-018.05": {
-      "path": "lib/render.php",
+    "CORE-018.03": {
+      "path": "lib/release-notes.php",
       "area": "CORE",
-      "line": 203,
-      "anchor": "render_footer",
+      "line": 42,
+      "anchor": "release_notes_version_key",
+      "risk": 1,
+      "lines": 5
+    },
+    "CORE-018.04": {
+      "path": "lib/release-notes.php",
+      "area": "CORE",
+      "line": 48,
+      "anchor": "release_notes_current",
       "risk": 0,
-      "lines": 38
+      "lines": 18
+    },
+    "CORE-018.05": {
+      "path": "lib/release-notes.php",
+      "area": "CORE",
+      "line": 67,
+      "anchor": "release_notes_render_items",
+      "risk": 0,
+      "lines": 13
+    },
+    "CORE-018.06": {
+      "path": "lib/release-notes.php",
+      "area": "CORE",
+      "line": 81,
+      "anchor": "release_notes_dashboard_card",
+      "risk": 4,
+      "lines": 34
+    },
+    "CORE-018.07": {
+      "path": "lib/release-notes.php",
+      "area": "CORE",
+      "line": 116,
+      "anchor": "release_notes_page_html",
+      "risk": 0,
+      "lines": 32
     },
     "CORE-019.01": {
-      "path": "lib/settings-effects.php",
+      "path": "lib/render.php",
       "area": "CORE",
       "line": 1,
       "anchor": "بلوک رویه‌ای 1-13",
@@ -28069,6 +28092,46 @@
       "lines": 13
     },
     "CORE-019.02": {
+      "path": "lib/render.php",
+      "area": "CORE",
+      "line": 14,
+      "anchor": "render_header",
+      "risk": 4,
+      "lines": 156
+    },
+    "CORE-019.03": {
+      "path": "lib/render.php",
+      "area": "CORE",
+      "line": 171,
+      "anchor": "list_sort_page_off",
+      "risk": 2,
+      "lines": 8
+    },
+    "CORE-019.04": {
+      "path": "lib/render.php",
+      "area": "CORE",
+      "line": 180,
+      "anchor": "inspection_food_reminder_markup",
+      "risk": 0,
+      "lines": 22
+    },
+    "CORE-019.05": {
+      "path": "lib/render.php",
+      "area": "CORE",
+      "line": 203,
+      "anchor": "render_footer",
+      "risk": 0,
+      "lines": 38
+    },
+    "CORE-020.01": {
+      "path": "lib/settings-effects.php",
+      "area": "CORE",
+      "line": 1,
+      "anchor": "بلوک رویه‌ای 1-13",
+      "risk": 0,
+      "lines": 13
+    },
+    "CORE-020.02": {
       "path": "lib/settings-effects.php",
       "area": "CORE",
       "line": 14,
@@ -28076,7 +28139,7 @@
       "risk": 0,
       "lines": 23
     },
-    "CORE-019.03": {
+    "CORE-020.03": {
       "path": "lib/settings-effects.php",
       "area": "CORE",
       "line": 38,
@@ -28084,7 +28147,7 @@
       "risk": 0,
       "lines": 7
     },
-    "CORE-019.04": {
+    "CORE-020.04": {
       "path": "lib/settings-effects.php",
       "area": "CORE",
       "line": 46,
@@ -28092,7 +28155,7 @@
       "risk": 1,
       "lines": 10
     },
-    "CORE-019.05": {
+    "CORE-020.05": {
       "path": "lib/settings-effects.php",
       "area": "CORE",
       "line": 57,
@@ -28100,7 +28163,7 @@
       "risk": 0,
       "lines": 57
     },
-    "CORE-019.06": {
+    "CORE-020.06": {
       "path": "lib/settings-effects.php",
       "area": "CORE",
       "line": 115,
@@ -28108,7 +28171,7 @@
       "risk": 0,
       "lines": 10
     },
-    "CORE-019.07": {
+    "CORE-020.07": {
       "path": "lib/settings-effects.php",
       "area": "CORE",
       "line": 126,
@@ -28116,7 +28179,7 @@
       "risk": 0,
       "lines": 17
     },
-    "CORE-019.08": {
+    "CORE-020.08": {
       "path": "lib/settings-effects.php",
       "area": "CORE",
       "line": 144,
@@ -28124,7 +28187,7 @@
       "risk": 0,
       "lines": 32
     },
-    "CORE-019.09": {
+    "CORE-020.09": {
       "path": "lib/settings-effects.php",
       "area": "CORE",
       "line": 177,
@@ -28132,7 +28195,7 @@
       "risk": 0,
       "lines": 5
     },
-    "CORE-019.10": {
+    "CORE-020.10": {
       "path": "lib/settings-effects.php",
       "area": "CORE",
       "line": 183,
@@ -28140,7 +28203,7 @@
       "risk": 0,
       "lines": 14
     },
-    "CORE-019.11": {
+    "CORE-020.11": {
       "path": "lib/settings-effects.php",
       "area": "CORE",
       "line": 198,
@@ -28148,7 +28211,7 @@
       "risk": 0,
       "lines": 30
     },
-    "CORE-019.12": {
+    "CORE-020.12": {
       "path": "lib/settings-effects.php",
       "area": "CORE",
       "line": 229,
@@ -28156,7 +28219,7 @@
       "risk": 0,
       "lines": 6
     },
-    "CORE-019.13": {
+    "CORE-020.13": {
       "path": "lib/settings-effects.php",
       "area": "CORE",
       "line": 236,
@@ -28164,7 +28227,7 @@
       "risk": 0,
       "lines": 9
     },
-    "CORE-019.14": {
+    "CORE-020.14": {
       "path": "lib/settings-effects.php",
       "area": "CORE",
       "line": 246,
@@ -28172,7 +28235,7 @@
       "risk": 0,
       "lines": 6
     },
-    "CORE-019.15": {
+    "CORE-020.15": {
       "path": "lib/settings-effects.php",
       "area": "CORE",
       "line": 253,
@@ -28180,7 +28243,7 @@
       "risk": 0,
       "lines": 23
     },
-    "CORE-019.16": {
+    "CORE-020.16": {
       "path": "lib/settings-effects.php",
       "area": "CORE",
       "line": 277,
@@ -28188,7 +28251,7 @@
       "risk": 2,
       "lines": 13
     },
-    "CORE-019.17": {
+    "CORE-020.17": {
       "path": "lib/settings-effects.php",
       "area": "CORE",
       "line": 291,
@@ -28196,7 +28259,7 @@
       "risk": 0,
       "lines": 31
     },
-    "CORE-019.18": {
+    "CORE-020.18": {
       "path": "lib/settings-effects.php",
       "area": "CORE",
       "line": 323,
@@ -28204,7 +28267,7 @@
       "risk": 0,
       "lines": 31
     },
-    "CORE-019.19": {
+    "CORE-020.19": {
       "path": "lib/settings-effects.php",
       "area": "CORE",
       "line": 355,
@@ -28212,7 +28275,7 @@
       "risk": 0,
       "lines": 8
     },
-    "CORE-019.20": {
+    "CORE-020.20": {
       "path": "lib/settings-effects.php",
       "area": "CORE",
       "line": 364,
@@ -28220,7 +28283,7 @@
       "risk": 0,
       "lines": 16
     },
-    "CORE-019.21": {
+    "CORE-020.21": {
       "path": "lib/settings-effects.php",
       "area": "CORE",
       "line": 381,
@@ -28228,7 +28291,7 @@
       "risk": 0,
       "lines": 4
     },
-    "CORE-020.01": {
+    "CORE-021.01": {
       "path": "lib/tickets-sla.php",
       "area": "CORE",
       "line": 1,
@@ -28236,7 +28299,7 @@
       "risk": 0,
       "lines": 19
     },
-    "CORE-020.02": {
+    "CORE-021.02": {
       "path": "lib/tickets-sla.php",
       "area": "CORE",
       "line": 20,
@@ -28244,7 +28307,7 @@
       "risk": 0,
       "lines": 5
     },
-    "CORE-020.03": {
+    "CORE-021.03": {
       "path": "lib/tickets-sla.php",
       "area": "CORE",
       "line": 26,
@@ -28252,7 +28315,7 @@
       "risk": 0,
       "lines": 25
     },
-    "CORE-020.04": {
+    "CORE-021.04": {
       "path": "lib/tickets-sla.php",
       "area": "CORE",
       "line": 52,
@@ -28260,7 +28323,7 @@
       "risk": 0,
       "lines": 21
     },
-    "CORE-020.05": {
+    "CORE-021.05": {
       "path": "lib/tickets-sla.php",
       "area": "CORE",
       "line": 74,
@@ -28268,7 +28331,7 @@
       "risk": 0,
       "lines": 10
     },
-    "CORE-020.06": {
+    "CORE-021.06": {
       "path": "lib/tickets-sla.php",
       "area": "CORE",
       "line": 85,
@@ -28276,7 +28339,7 @@
       "risk": 0,
       "lines": 22
     },
-    "CORE-020.07": {
+    "CORE-021.07": {
       "path": "lib/tickets-sla.php",
       "area": "CORE",
       "line": 108,
@@ -28284,7 +28347,7 @@
       "risk": 4,
       "lines": 98
     },
-    "CORE-020.08": {
+    "CORE-021.08": {
       "path": "lib/tickets-sla.php",
       "area": "CORE",
       "line": 207,
@@ -28292,7 +28355,7 @@
       "risk": 8,
       "lines": 55
     },
-    "CORE-020.09": {
+    "CORE-021.09": {
       "path": "lib/tickets-sla.php",
       "area": "CORE",
       "line": 263,
@@ -28300,7 +28363,7 @@
       "risk": 0,
       "lines": 37
     },
-    "CORE-020.10": {
+    "CORE-021.10": {
       "path": "lib/tickets-sla.php",
       "area": "CORE",
       "line": 301,
@@ -28308,7 +28371,7 @@
       "risk": 0,
       "lines": 13
     },
-    "CORE-020.11": {
+    "CORE-021.11": {
       "path": "lib/tickets-sla.php",
       "area": "CORE",
       "line": 315,
@@ -28316,7 +28379,7 @@
       "risk": 4,
       "lines": 26
     },
-    "CORE-020.12": {
+    "CORE-021.12": {
       "path": "lib/tickets-sla.php",
       "area": "CORE",
       "line": 342,
@@ -28324,7 +28387,7 @@
       "risk": 5,
       "lines": 19
     },
-    "CORE-020.13": {
+    "CORE-021.13": {
       "path": "lib/tickets-sla.php",
       "area": "CORE",
       "line": 362,
@@ -28332,7 +28395,7 @@
       "risk": 10,
       "lines": 95
     },
-    "CORE-020.14": {
+    "CORE-021.14": {
       "path": "lib/tickets-sla.php",
       "area": "CORE",
       "line": 458,
@@ -28340,7 +28403,7 @@
       "risk": 0,
       "lines": 5
     },
-    "CORE-020.15": {
+    "CORE-021.15": {
       "path": "lib/tickets-sla.php",
       "area": "CORE",
       "line": 464,
@@ -28348,7 +28411,7 @@
       "risk": 0,
       "lines": 29
     },
-    "CORE-020.16": {
+    "CORE-021.16": {
       "path": "lib/tickets-sla.php",
       "area": "CORE",
       "line": 494,
@@ -28356,7 +28419,7 @@
       "risk": 0,
       "lines": 27
     },
-    "CORE-020.17": {
+    "CORE-021.17": {
       "path": "lib/tickets-sla.php",
       "area": "CORE",
       "line": 522,
@@ -28364,7 +28427,7 @@
       "risk": 0,
       "lines": 10
     },
-    "CORE-020.18": {
+    "CORE-021.18": {
       "path": "lib/tickets-sla.php",
       "area": "CORE",
       "line": 533,
@@ -28372,7 +28435,7 @@
       "risk": 0,
       "lines": 20
     },
-    "CORE-020.19": {
+    "CORE-021.19": {
       "path": "lib/tickets-sla.php",
       "area": "CORE",
       "line": 554,
@@ -28380,7 +28443,7 @@
       "risk": 1,
       "lines": 16
     },
-    "CORE-020.20": {
+    "CORE-021.20": {
       "path": "lib/tickets-sla.php",
       "area": "CORE",
       "line": 571,
@@ -28388,7 +28451,7 @@
       "risk": 0,
       "lines": 4
     },
-    "CORE-020.21": {
+    "CORE-021.21": {
       "path": "lib/tickets-sla.php",
       "area": "CORE",
       "line": 576,
@@ -28396,7 +28459,7 @@
       "risk": 0,
       "lines": 4
     },
-    "CORE-020.22": {
+    "CORE-021.22": {
       "path": "lib/tickets-sla.php",
       "area": "CORE",
       "line": 581,
@@ -28404,7 +28467,7 @@
       "risk": 5,
       "lines": 24
     },
-    "CORE-020.23": {
+    "CORE-021.23": {
       "path": "lib/tickets-sla.php",
       "area": "CORE",
       "line": 606,
@@ -28412,7 +28475,7 @@
       "risk": 0,
       "lines": 11
     },
-    "CORE-020.24": {
+    "CORE-021.24": {
       "path": "lib/tickets-sla.php",
       "area": "CORE",
       "line": 618,
@@ -28420,7 +28483,7 @@
       "risk": 0,
       "lines": 17
     },
-    "CORE-020.25": {
+    "CORE-021.25": {
       "path": "lib/tickets-sla.php",
       "area": "CORE",
       "line": 636,
@@ -28428,7 +28491,7 @@
       "risk": 0,
       "lines": 54
     },
-    "CORE-020.26": {
+    "CORE-021.26": {
       "path": "lib/tickets-sla.php",
       "area": "CORE",
       "line": 691,
@@ -28436,7 +28499,7 @@
       "risk": 0,
       "lines": 11
     },
-    "CORE-020.27": {
+    "CORE-021.27": {
       "path": "lib/tickets-sla.php",
       "area": "CORE",
       "line": 703,
@@ -28444,7 +28507,7 @@
       "risk": 0,
       "lines": 15
     },
-    "CORE-020.28": {
+    "CORE-021.28": {
       "path": "lib/tickets-sla.php",
       "area": "CORE",
       "line": 719,
@@ -28452,7 +28515,7 @@
       "risk": 0,
       "lines": 21
     },
-    "CORE-020.29": {
+    "CORE-021.29": {
       "path": "lib/tickets-sla.php",
       "area": "CORE",
       "line": 741,
@@ -28460,7 +28523,7 @@
       "risk": 0,
       "lines": 24
     },
-    "CORE-020.30": {
+    "CORE-021.30": {
       "path": "lib/tickets-sla.php",
       "area": "CORE",
       "line": 766,
@@ -28468,7 +28531,7 @@
       "risk": 0,
       "lines": 17
     },
-    "CORE-020.31": {
+    "CORE-021.31": {
       "path": "lib/tickets-sla.php",
       "area": "CORE",
       "line": 784,
@@ -28476,7 +28539,7 @@
       "risk": 5,
       "lines": 33
     },
-    "CORE-020.32": {
+    "CORE-021.32": {
       "path": "lib/tickets-sla.php",
       "area": "CORE",
       "line": 818,
@@ -28484,7 +28547,7 @@
       "risk": 0,
       "lines": 48
     },
-    "CORE-020.33": {
+    "CORE-021.33": {
       "path": "lib/tickets-sla.php",
       "area": "CORE",
       "line": 867,
@@ -28492,7 +28555,7 @@
       "risk": 1,
       "lines": 8
     },
-    "CORE-020.34": {
+    "CORE-021.34": {
       "path": "lib/tickets-sla.php",
       "area": "CORE",
       "line": 876,
@@ -28500,7 +28563,7 @@
       "risk": 0,
       "lines": 4
     },
-    "CORE-020.35": {
+    "CORE-021.35": {
       "path": "lib/tickets-sla.php",
       "area": "CORE",
       "line": 881,
@@ -28508,7 +28571,7 @@
       "risk": 0,
       "lines": 4
     },
-    "CORE-020.36": {
+    "CORE-021.36": {
       "path": "lib/tickets-sla.php",
       "area": "CORE",
       "line": 886,
@@ -55578,12 +55641,12 @@
       "line": 1,
       "anchor": "مقدمهٔ فایل",
       "risk": 1,
-      "lines": 113
+      "lines": 117
     },
     "TOOL-016.02": {
       "path": "tools/build_rc_update.py",
       "area": "TOOL",
-      "line": 114,
+      "line": 118,
       "anchor": "sha256",
       "risk": 0,
       "lines": 4
@@ -55591,7 +55654,7 @@
     "TOOL-016.03": {
       "path": "tools/build_rc_update.py",
       "area": "TOOL",
-      "line": 118,
+      "line": 122,
       "anchor": "git",
       "risk": 0,
       "lines": 6
@@ -55599,7 +55662,7 @@
     "TOOL-016.04": {
       "path": "tools/build_rc_update.py",
       "area": "TOOL",
-      "line": 124,
+      "line": 128,
       "anchor": "changed_files",
       "risk": 0,
       "lines": 10
@@ -55607,7 +55670,7 @@
     "TOOL-016.05": {
       "path": "tools/build_rc_update.py",
       "area": "TOOL",
-      "line": 134,
+      "line": 138,
       "anchor": "safe_archive_path",
       "risk": 0,
       "lines": 15
@@ -55615,7 +55678,7 @@
     "TOOL-016.06": {
       "path": "tools/build_rc_update.py",
       "area": "TOOL",
-      "line": 149,
+      "line": 153,
       "anchor": "validate_archive",
       "risk": 0,
       "lines": 33
@@ -55623,7 +55686,7 @@
     "TOOL-016.07": {
       "path": "tools/build_rc_update.py",
       "area": "TOOL",
-      "line": 182,
+      "line": 186,
       "anchor": "build",
       "risk": 0,
       "lines": 47
@@ -55631,7 +55694,7 @@
     "TOOL-016.08": {
       "path": "tools/build_rc_update.py",
       "area": "TOOL",
-      "line": 229,
+      "line": 233,
       "anchor": "entry",
       "risk": 4,
       "lines": 35
