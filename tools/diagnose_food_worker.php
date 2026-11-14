@@ -20,7 +20,7 @@ declare(strict_types=1);
 $root = dirname(__DIR__);
 @chdir($root);
 
-const DIAG_VERSION = '1.2.0';
+const DIAG_VERSION = '1.3.0';
 $issues = 0;
 $warns = 0;
 $line = static function (string $s = ''): void { echo $s, PHP_EOL; };
@@ -736,6 +736,88 @@ if (is_file($appLog)) {
     $info('تعداد [food-groups] (کل): ' . count($hits) . ' | امروز: ' . count($hitsToday));
     foreach (array_slice($hits, -10) as $l) {
         $line('   | ' . mb_substr((string) $l, 0, 300));
+    }
+}
+
+// ── ۴ت) دقیقاً همان کوئری انتخاب Worker (read-only؛ LIMIT 30) ─────────
+// هدف: ببینیم ۳۰ ردیف قدیمیِ قابل‌ادعا کدام‌اند و طبق شاخه‌های کد چه سرنوشتی دارند.
+$line("\n۴ت) نتیجهٔ واقعیِ کوئری انتخاب Worker (LIMIT 30، مرتب id ASC)");
+if ($dbOk && diag_table_exists('food_ticket_events')) {
+    $hasDeliveryCol = false;
+    try {
+        $cols = db()->query("SELECT COUNT(*) FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'food_ticket_events' AND COLUMN_NAME = 'delivery_status'")->fetchColumn();
+        $hasDeliveryCol = ((int) $cols) > 0;
+        $info('ستون delivery_status در جدول events: ' . ($hasDeliveryCol ? 'موجود است' : 'وجود ندارد'));
+    } catch (Throwable $e) {
+        $warn('بررسی ستون delivery_status: ' . $e->getMessage());
+    }
+    try {
+        $claimableSql = '(print_status IN ("pending", "print_error", "failed") OR (print_status = "printing" AND updated_at < DATE_SUB(NOW(), INTERVAL 30 MINUTE)))';
+        $total = db()->query('SELECT COUNT(*) FROM food_ticket_events WHERE ' . $claimableSql . ' AND (next_retry_at IS NULL OR next_retry_at <= NOW())')->fetchColumn();
+        $line('  کل قابل‌ادعا (کوئری کد): ' . (int) $total);
+        $sql = 'SELECT id, print_status, event_type, retry_count, print_attempts, next_retry_at, created_at'
+            . ($hasDeliveryCol ? ', delivery_status' : '')
+            . ', (source_payload LIKE \'%"run_id":%\') AS has_run'
+            . ' FROM food_ticket_events WHERE ' . $claimableSql
+            . ' AND (next_retry_at IS NULL OR next_retry_at <= NOW()) ORDER BY id ASC LIMIT 30';
+        $sel = db()->query($sql)->fetchAll();
+        $line('  ردیف‌های برگزیدهٔ Worker این اجرا (' . count($sel) . ' ردیف):');
+        $skipRetry = 0;
+        $attemptable = 0;
+        $runRows = 0;
+        $delivered = 0;
+        foreach ($sel as $r) {
+            $retry = max((int) ($r['retry_count'] ?? 0), (int) ($r['print_attempts'] ?? 0));
+            $delivery = (string) ($r['delivery_status'] ?? 'pending');
+            $pred = '';
+            if ((int) ($r['has_run'] ?? 0) === 1) {
+                $pred = 'مسیر فیش گروهی';
+                $runRows++;
+            } elseif ($hasDeliveryCol && $delivery === 'delivered') {
+                $pred = 'guard تحویل‌شده → چاپ نمی‌شود، printed علامت می‌خورد';
+                $delivered++;
+            } elseif ($retry >= 5) {
+                $pred = 'retry>=5 → skip بی‌صدا';
+                $skipRetry++;
+            } else {
+                $pred = 'قابل چاپ (claim باید موفق شود)';
+                $attemptable++;
+            }
+            $line('    #' . $r['id'] . ' | ' . ($r['print_status'] ?? '?') . '/' . ($r['event_type'] ?? '?')
+                . ' | retry=' . ($r['retry_count'] ?? '?') . ' att=' . ($r['print_attempts'] ?? '?')
+                . ' | delivery=' . $delivery . ' | run=' . ($r['has_run'] ? 'بله' : 'خیر')
+                . ' | next_retry=' . ($r['next_retry_at'] ?? 'NULL') . ' | ' . ($r['created_at'] ?? '')
+                . '  ⇒ ' . $pred);
+        }
+        $line('  خلاصه: قابل‌چاپ=' . $attemptable . ' | retry>=5 (skip)=' . $skipRetry
+            . ' | مسیر گروهی=' . $runRows . ' | delivery-guard=' . $delivered);
+        if ($sel === []) {
+            $info('صف برگزیده خالی است (در این لحظه چیزی برای چاپ نیست یا همهٔ ردیف‌ها شرط next_retry را رعایت نمی‌کنند).');
+        } elseif ($attemptable === 0 && $runRows === 0) {
+            $bad('همهٔ ردیف‌های برگزیده یا retry≥5 هستند یا delivery-guard دارند ⇒ Worker چیزی claim نمی‌کند (head-of-line starvation محتمل است).');
+        } elseif ($attemptable === 0 && $runRows > 0) {
+            $warn('برگزیده‌ها فقط از مسیر گروهی‌اند؛ چاپشان وابسته به وضعیت اجرای گروهی است.');
+        } else {
+            $info('حداقل ' . $attemptable . ' ردیفِ برگزیده باید همین حالا claim/print شوند؛ اگر نمی‌شوند مشکل جای دیگری است.');
+        }
+        // توزیع وضعیتِ کل صف قابل‌ادعا
+        $rows = db()->query('SELECT print_status, COUNT(*) AS c FROM food_ticket_events WHERE ' . $claimableSql
+            . ' AND (next_retry_at IS NULL OR next_retry_at <= NOW()) GROUP BY print_status')->fetchAll();
+        $rep = [];
+        foreach ($rows as $r) {
+            $rep[(string) $r['print_status']] = (int) $r['c'];
+        }
+        $line('  توزیع کل صف قابل‌ادعا بر اساس print_status: ' . json_encode($rep, JSON_UNESCAPED_UNICODE));
+        $rows = db()->query('SELECT SUM(CASE WHEN GREATEST(COALESCE(retry_count,0), COALESCE(print_attempts,0)) >= 5 THEN 1 ELSE 0 END) AS dead, COUNT(*) AS total FROM food_ticket_events WHERE ' . $claimableSql
+            . ' AND (next_retry_at IS NULL OR next_retry_at <= NOW())')->fetch();
+        $line('  ردیف‌های retry≥5 (غیرقابل‌چاپ با منطق فعلی): ' . (int) ($rows['dead'] ?? 0) . ' از ' . (int) ($rows['total'] ?? 0));
+        if ($hasDeliveryCol) {
+            $cnt = db()->query('SELECT COUNT(*) FROM food_ticket_events WHERE ' . $claimableSql
+                . ' AND (next_retry_at IS NULL OR next_retry_at <= NOW()) AND delivery_status = "delivered"')->fetchColumn();
+            $line('  ردیف‌های delivery_status=delivered در صف: ' . (int) $cnt);
+        }
+    } catch (Throwable $e) {
+        $warn('کوئری شبیه‌سازی انتخاب: ' . $e->getMessage());
     }
 }
 
