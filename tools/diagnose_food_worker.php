@@ -20,7 +20,7 @@ declare(strict_types=1);
 $root = dirname(__DIR__);
 @chdir($root);
 
-const DIAG_VERSION = '1.0.0';
+const DIAG_VERSION = '1.1.0';
 $issues = 0;
 $warns = 0;
 $line = static function (string $s = ''): void { echo $s, PHP_EOL; };
@@ -284,6 +284,26 @@ foreach (['app.log', 'error.log'] as $name) {
     }
 }
 
+// ── ۳ب) probe قفل‌ها ─────────────────────────────────────────────────
+// اگر قفل print-queue در دست کسی باشد، Worker ساکت (بدون لاگ) صف را تخلیه نمی‌کند.
+$line("\n۳ب) probe قفل‌ها (بدون نگه‌داشتن قفل)");
+foreach (['food-print-queue.lock' => 'قفل صف چاپ', 'food-worker-process.lock' => 'قفل نمونهٔ Worker', 'food-ticket.lock' => 'قفل retry دستی'] as $lf => $label) {
+    $p = $root . '/storage/' . $lf;
+    $fh = @fopen($p, 'c');
+    if (!$fh) {
+        $warn($label . ': فایل باز نشد');
+        continue;
+    }
+    if (@flock($fh, LOCK_EX | LOCK_NB)) {
+        @flock($fh, LOCK_UN);
+        fclose($fh);
+        $ok($label . ': آزاد است');
+    } else {
+        fclose($fh);
+        $bad($label . ': هم‌اکنون قفل است — یک پروسهٔ گیرکرده آن را نگه داشته؛ تخلیهٔ صف چاپ تا آزادی قفل بی‌نتیجه است.');
+    }
+}
+
 // ── ۴) دیتابیس (فقط SELECT) ───────────────────────────────────────────
 $line("\n۴) دیتابیس");
 $dbOk = true;
@@ -519,7 +539,151 @@ if ($ap === '') {
     $ok('فایل تردد موجود است: ' . $ap . ' (' . number_format((float) filesize($ap) / 1024, 1) . ' KB | mtime ' . date('Y-m-d H:i:s', filemtime($ap)) . ')');
 }
 
-// ── ۷) جمع‌بندی ─────────────────────────────────────────────────────
+// ── ۴ب) تحلیل عمیق «در صف چاپ» ────────────────────────────────────────
+$line("\n۴ب) تحلیل عمیق صف چاپ (فقط‌خواندنی)");
+if ($dbOk && diag_table_exists('food_ticket_events')) {
+    $evCols2 = diag_columns('food_ticket_events');
+    $has2 = static fn (string $c): bool => in_array($c, $evCols2, true);
+    try {
+        $claimableWhere = "(print_status IN (\"pending\",\"print_error\",\"failed\") OR (print_status = \"printing\" AND updated_at < DATE_SUB(NOW(), INTERVAL 30 MINUTE)))"
+            . ' AND (next_retry_at IS NULL OR next_retry_at <= NOW())';
+        $dueAll    = (int) db()->query('SELECT COUNT(*) FROM food_ticket_events WHERE ' . $claimableWhere)->fetchColumn();
+        $duePending = (int) db()->query("SELECT COUNT(*) FROM food_ticket_events WHERE print_status = 'pending' AND (next_retry_at IS NULL OR next_retry_at <= NOW())")->fetchColumn();
+        $nullRetry = (int) db()->query("SELECT COUNT(*) FROM food_ticket_events WHERE print_status = 'pending' AND next_retry_at IS NULL")->fetchColumn();
+        $futureRetry = (int) db()->query("SELECT COUNT(*) FROM food_ticket_events WHERE print_status = 'pending' AND next_retry_at IS NOT NULL AND next_retry_at > NOW()")->fetchColumn();
+        $totalPend = (int) db()->query("SELECT COUNT(*) FROM food_ticket_events WHERE print_status = 'pending'")->fetchColumn();
+        $line("  pending کل={$totalPend} | بدون next_retry={$nullRetry} | next_retry آینده={$futureRetry} | pending واجد شرایط={$duePending} | کل قابل‌ادعا (همهٔ وضعیت‌ها)={$dueAll}");
+        if ($futureRetry > 0) {
+            $mx = db()->query("SELECT MAX(next_retry_at) FROM food_ticket_events WHERE print_status = 'pending' AND next_retry_at IS NOT NULL")->fetchColumn();
+            $warn('بیشترین next_retry_at در pending: ' . $mx);
+        }
+        if ($duePending > 0) {
+            $bad("{$duePending} ردیف pending واجد شرایط‌اند — Worker باید آن‌ها را همین الان چاپ کند؛ اگر چاپ نمی‌کند، علت در قفل صف/مسیر اجراست.");
+        }
+    } catch (Throwable $e) {
+        $warn('تحلیل واجد شرایط: ' . $e->getMessage());
+    }
+    if ($has2('retry_count')) {
+        try {
+            $rows = db()->query("SELECT retry_count, COUNT(*) AS c FROM food_ticket_events WHERE print_status = 'pending' GROUP BY retry_count ORDER BY retry_count")->fetchAll();
+            $rep = [];
+            foreach ($rows as $r) {
+                $rep[(string) $r['retry_count']] = (int) $r['c'];
+            }
+            $line('  retry_count در pending: ' . json_encode($rep, JSON_UNESCAPED_UNICODE));
+        } catch (Throwable $e) {
+            $warn('توزیع retry: ' . $e->getMessage());
+        }
+    }
+    try {
+        $rows = db()->query("SELECT COALESCE(event_type,'?') AS et, COALESCE(meal_type,'?') AS meal, COUNT(*) AS c FROM food_ticket_events WHERE print_status = 'pending' GROUP BY event_type, meal_type ORDER BY c DESC")->fetchAll();
+        $line('  pending بر اساس event_type / meal:');
+        foreach ($rows as $r) {
+            $line('        ' . $r['et'] . ' | ' . $r['meal'] . ' | ' . $r['c']);
+        }
+    } catch (Throwable $e) {
+        $warn('تفکیک event_type: ' . $e->getMessage());
+    }
+    if ($has2('source_uid')) {
+        try {
+            $rows = db()->query("SELECT CASE WHEN source_uid LIKE 'manual%' THEN 'manual' WHEN source_uid LIKE 'auto%' THEN 'auto' ELSE COALESCE(source_uid,'?') END AS grp, COUNT(*) AS c FROM food_ticket_events WHERE print_status = 'pending' GROUP BY grp ORDER BY c DESC")->fetchAll();
+            $rep = [];
+            foreach ($rows as $r) {
+                $rep[(string) $r['grp']] = (int) $r['c'];
+            }
+            $line('  pending بر اساس منبع: ' . json_encode($rep, JSON_UNESCAPED_UNICODE));
+        } catch (Throwable $e) {
+            $warn('تفکیک منبع: ' . $e->getMessage());
+        }
+    }
+    try {
+        $st = db()->query("SELECT MIN(created_at) AS oldest, MAX(created_at) AS newest FROM food_ticket_events WHERE print_status = 'pending'")->fetch();
+        $line('  created_at اولین/آخرین pending: ' . ($st['oldest'] ?? '?') . ' / ' . ($st['newest'] ?? '?'));
+    } catch (Throwable) {
+    }
+    try {
+        $st = db()->query("SELECT COUNT(*) AS c, MIN(updated_at) AS oldest FROM food_ticket_events WHERE print_status = 'printing'")->fetch();
+        $c = (int) ($st['c'] ?? 0);
+        $c > 0 ? $warn('ردیف‌های printing مانده: ' . $c . ' (قدیمی‌ترین: ' . ($st['oldest'] ?? '?') . ')') : $ok('هیچ ردیف printing مانده‌ای نیست.');
+    } catch (Throwable) {
+    }
+    try {
+        $rows = db()->query("SELECT HOUR(punch_time) AS hr, print_status, COUNT(*) AS c FROM food_ticket_events WHERE punch_date = '" . $tehranToday . "' GROUP BY HOUR(punch_time), print_status ORDER BY hr")->fetchAll();
+        $byHour = [];
+        foreach ($rows as $r) {
+            $byHour[(int) $r['hr']][(string) $r['print_status']] = (int) $r['c'];
+        }
+        ksort($byHour);
+        $line('  امروز به تفکیک ساعت (TIME):');
+        foreach ($byHour as $hr => $agg) {
+            $line('        ' . str_pad((string) $hr, 2, '0', STR_PAD_LEFT) . ':00 → ' . json_encode($agg, JSON_UNESCAPED_UNICODE));
+        }
+    } catch (Throwable $e) {
+        $warn('تفکیک ساعتی: ' . $e->getMessage());
+    }
+}
+// لاگ چاپ امروز به تفکیک وضعیت
+if ($dbOk && diag_table_exists('food_ticket_print_log')) {
+    try {
+        $plc = diag_columns('food_ticket_print_log');
+        $createdCol = in_array('created_at', $plc, true) ? 'created_at' : null;
+        if ($createdCol && in_array('status', $plc, true)) {
+            $rows = db()->query("SELECT COALESCE(status,'?') AS st, COUNT(*) AS c FROM food_ticket_print_log WHERE DATE({$createdCol}) = CURDATE() GROUP BY status")->fetchAll();
+            $rep = [];
+            foreach ($rows as $r) {
+                $rep[(string) $r['st']] = (int) $r['c'];
+            }
+            $line('  food_ticket_print_log امروز به تفکیک status: ' . json_encode($rep, JSON_UNESCAPED_UNICODE));
+        }
+    } catch (Throwable $e) {
+        $warn('تحلیل print_log: ' . $e->getMessage());
+    }
+}
+
+// ── ۷) پروسه‌های php/httpd با زمان شروع ──────────────────────────────
+$line("\n۷) پروسه‌های php.exe و httpd.exe (+ زمان بوت سرور)");
+if (stripos(PHP_OS, 'WIN') === 0 && function_exists('shell_exec')) {
+    $outU = @shell_exec('powershell -NoProfile -Command "(Get-CimInstance Win32_OperatingSystem).LastBootUpTime.ToString(\'yyyy-MM-dd HH:mm:ss\')" 2>&1');
+    if ($outU !== null && trim((string) $outU) !== '' && !str_contains((string) $outU, 'Exception')) {
+        $info('آخرین روشن‌شدن سرور: ' . trim((string) $outU));
+    }
+    $outP = @shell_exec('powershell -NoProfile -Command "Get-CimInstance Win32_Process -Filter \"Name=\'php.exe\' OR Name=\'httpd.exe\'\" | Select-Object ProcessId,Name,@{n=\'Start\';e={$_.CreationDate.ToString(\'yyyy-MM-dd HH:mm:ss\')}},@{n=\'Cmd\';e={if($_.CommandLine){$_.CommandLine -replace \'\\s+\',\' \'}}} | Format-List | Out-String -Width 500" 2>&1');
+    if ($outP !== null && trim((string) $outP) !== '' && !str_contains((string) $outP, 'Exception')) {
+        foreach (preg_split('/\r\n|\n|\r/', (string) $outP) as $l) {
+            if (trim($l) !== '') {
+                $line('    ' . mb_substr($l, 0, 320));
+            }
+        }
+    } else {
+        // راه دوم: جدول فرمت‌شده
+        $outP2 = @shell_exec('wmic process where "Name=\'php.exe\' or Name=\'httpd.exe\'" get ProcessId,Name,CommandLine /FORMAT:LIST 2>&1');
+        $line('    ' . mb_substr((string) $outP2, 0, 3000));
+    }
+} else {
+    $info('بررسی پروسه‌ها فقط روی ویندوز انجام می‌شود.');
+}
+
+// ── ۸) لاگ امروز سیستم (۲۰ خط آخر app.log) ────────────────────────────
+$line("\n۸) آخرین ۱۵ خط app.log (همهٔ محتوا)");
+foreach (['app.log'] as $name) {
+    $p = $root . '/storage/logs/' . $name;
+    if (!is_file($p)) {
+        $info('app.log وجود ندارد.');
+        break;
+    }
+    $c = @file_get_contents($p);
+    if ($c === false) {
+        $warn('app.log خوانده نشد.');
+        break;
+    }
+    $line('  حجم app.log: ' . number_format(filesize($p) / 1024, 1) . ' KB');
+    $nonEmpty = array_filter(preg_split('/\r\n|\n|\r/', $c) ?: [], static fn ($l) => trim((string) $l) !== '');
+    foreach (array_slice($nonEmpty, -15) as $l) {
+        $line('   | ' . mb_substr((string) $l, 0, 280));
+    }
+}
+
+// ── ۹) جمع‌بندی ─────────────────────────────────────────────────────
 $line("\n==================================================");
 $line(" جمع‌بندی: FAIL = {$issues} | WARN = {$warns}");
 $line(' خروجی کامل این اسکریپت را (بدون حذف بخش‌ها) برای تحلیلگر بفرستید.');
