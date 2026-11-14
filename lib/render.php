@@ -229,10 +229,17 @@ function render_footer(): void
     // Optional feature modules are not loaded by the independent Request Center entry.
     // Keep the shared shell usable without importing food, chatbot or visual-effects modules.
     $inspectionReminder = function_exists('inspection_food_reminder_markup') ? inspection_food_reminder_markup($layoutUser) : '';
+    if (is_file(__DIR__ . '/system-alarms.php')) {
+        require_once __DIR__ . '/system-alarms.php';
+    }
+    $systemAlarmChrome = function_exists('system_alarm_chrome') ? system_alarm_chrome($layoutUser) : '';
     $particleScript = function_exists('particle_effect_script_tag') ? particle_effect_script_tag() : '';
     $triangleScript = function_exists('triangle_effect_script_tag') ? triangle_effect_script_tag() : '';
     $chatbotWidget = function_exists('chatbot_render_widget') ? chatbot_render_widget($layoutUser) : '';
-    echo ';</script><script src="assets/jalali-calendar.js?v=3.4.7"></script><script src="assets/app.js?v=3.4.29&theme-mode=2"></script>' . $particleScript . $triangleScript . $chatbotWidget . $inspectionReminder;
+    echo ';</script><script src="assets/jalali-calendar.js?v=3.4.7"></script><script src="assets/app.js?v=3.4.29&theme-mode=2"></script>' . $particleScript . $triangleScript . $chatbotWidget . $inspectionReminder . $systemAlarmChrome;
+    if ($systemAlarmChrome !== '') {
+        echo '<script defer src="assets/system-alarm.js?v=1"></script>';
+    }
     if ($inspectionReminder !== '') {
         echo '<script defer src="assets/inspection-food-reminder.js?v=1"></script>';
     }
