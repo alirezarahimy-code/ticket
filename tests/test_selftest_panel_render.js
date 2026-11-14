@@ -74,7 +74,7 @@ const extract = (name) => {
   throw new Error('پایان «' + name + '» پیدا نشد');
 };
 
-const parts = ['esc', 'ST_LABELS', 'ST_CLASS', 'selftestBox'].map(extract).join('\n;\n');
+const parts = ['esc', 'ST_LABELS', 'ST_CLASS', 'selftestBox', 'releaseNotesBanner', 'loadReleaseNotes'].map(extract).join('\n;\n');
 
 const sandbox = {
   console,
@@ -93,8 +93,9 @@ const sandbox = {
 };
 vm.createContext(sandbox);
 vm.runInContext(parts, sandbox);
-vm.runInContext('globalThis.__selftestBox = selftestBox;', sandbox);
+vm.runInContext('globalThis.__selftestBox = selftestBox; globalThis.__releaseNotesBanner = releaseNotesBanner;', sandbox);
 const selftestBox = sandbox.__selftestBox;
+const releaseNotesBanner = sandbox.__releaseNotesBanner;
 
 /* ── ۱) حالت اولیه: دکمهٔ اجرا ─────────────────────────────────────────── */
 let out = selftestBox();
@@ -205,6 +206,49 @@ check('امنیت: متن escape شده دیده می‌شود', out.includes('&
 /* ── ۸) خود صفحه: جای درست قرارگیری ──────────────────────────────────── */
 check('تابع connections آزمون را بعد از فرم نشان می‌دهد', /\$\{selftestBox\(\)\}<\/section>/.test(html));
 check('آزمون بعد از فرم تنظیمات تردد است', html.indexOf('</form>${selftestBox()}') > html.indexOf('id="connection-form"'));
+
+
+/* ── ۹) بنر «تغییرات این به‌روزرسانی» (مستقل از ۱.۶۳) ─────────────────── */
+sandbox.window.__ftReleaseNotes = null;
+check('بنر تغییرات: بدون داده، چیزی رندر نمی‌شود', releaseNotesBanner() === '');
+
+sandbox.window.__ftReleaseNotes = {
+  version: '1.62.97',
+  label: 'به‌روزرسانی ۱.۶۲.۹۷',
+  date_fa: 'آبان ۱۴۰۵',
+  title: 'آزمون جامع Worker، چاپ و مدیریت — داخل خود پنل',
+  items: [
+    { icon: '◆', text: 'کارت آزمون جامع اضافه شد.' },
+    { icon: '◆', text: 'هفت بخش بررسی.' },
+    { icon: '◆', text: 'هیچ فیشی چاپ نمی‌شود.' },
+    { icon: '◆', text: 'درست‌بیکار با خراب اشتباه نمی‌شود.' },
+    { icon: '◆', text: 'مورد پنجم که در بنر خلاصه می‌شود.' },
+  ],
+  footnote: 'هیچ تغییری در مسیر چاپ ایجاد نمی‌کند.',
+};
+const banner = releaseNotesBanner();
+check('بنر تغییرات: عنوان نسخه را نشان می‌دهد', banner.includes('به‌روزرسانی ۱.۶۲.۹۷'));
+check('بنر تغییرات: عنوان تغییر را نشان می‌دهد', banner.includes('آزمون جامع Worker'));
+check('بنر تغییرات: فقط ۴ آیتم اول را نشان می‌دهد', banner.includes('کارت آزمون جامع اضافه شد') && !banner.includes('مورد پنجم که در بنر'));
+check('بنر تغییرات: شمارش بقیه را می‌گوید', banner.includes('۱ مورد دیگر'));
+check('بنر تغییرات: پاورقی را نشان می‌دهد', banner.includes('هیچ تغییری در مسیر چاپ'));
+check('بنر تغییرات: دکمهٔ بستن دارد', banner.includes('data-action="dismiss-release-notes"'));
+check('بنر تغییرات: شناسهٔ نسخه برای localStorage دارد', banner.includes('data-version="1.62.97"'));
+
+/* escape امنیتی بنر */
+sandbox.window.__ftReleaseNotes = {
+  version: '9.9', title: '<img src=x onerror=alert(1)>', label: '<b>x</b>', date_fa: '',
+  items: [{ text: '<script>bad()</script>' }], footnote: '<svg>',
+};
+const bannerXss = releaseNotesBanner();
+check('بنر تغییرات: تگ img در عنوان escape شد', !bannerXss.includes('<img src=x'));
+check('بنر تغییرات: تگ script در آیتم escape شد', !bannerXss.includes('<script>bad()'));
+check('بنر تغییرات: تگ svg در پاورقی escape شد', !bannerXss.includes('<svg>'));
+
+/* سیم‌کشی در صفحه */
+check('بنر تغییرات در shell صدا زده می‌شود', html.includes('let content=releaseNotesBanner()+versionBanner()'));
+check('بارگذاری یک‌باره در render هست', html.includes('loadReleaseNotes();'));
+check('اکشن بستن سیم‌کشی شده', html.includes("act==='dismiss-release-notes'"));
 
 console.log('\n' + '='.repeat(60));
 console.log('PASS=' + pass + ' | FAIL=' + fail);

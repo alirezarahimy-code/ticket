@@ -1,0 +1,110 @@
+<?php
+/**
+ * تست آفلاین «کارت تغییرات سامانه» و تاریخچهٔ نسخه‌ها (lib/release-notes.php).
+ *
+ * اجرا: php tools/test_release_notes_offline.php
+ *
+ * چرا؟  مالک باید بتواند ببیند در هر به‌روزرسانی چه چیزی عوض شده — از داخل خود سامانه.
+ * /* و مهم‌تر: تغییرات یک بستهٔ میانی (۱.۶۲.۹۷) باید بعد از نصب نسخهٔ بعدی (۱.۶۳) هم باقی بماند.
+ */
+declare(strict_types=1);
+
+define('APP_ROOT', sys_get_temp_dir() . '/rn_selftest_' . getmypid());
+@mkdir(APP_ROOT, 0777, true);
+
+$fails = 0;
+$passes = 0;
+function check(string $label, bool $ok, string $detail = ''): void
+{
+    global $fails, $passes;
+    if ($ok) {
+        $passes++;
+        echo "[PASS] {$label}\n";
+        return;
+    }
+    $fails++;
+    echo "[FAIL] {$label}" . ($detail !== '' ? " :: {$detail}" : '') . "\n";
+}
+
+if (!function_exists('e')) {
+    function e(mixed $x): string { return htmlspecialchars((string) $x, ENT_QUOTES, 'UTF-8'); }
+}
+if (!function_exists('csp_nonce')) {
+    function csp_nonce(): string { return 'testnonce'; }
+}
+
+require dirname(__DIR__) . '/lib/release-notes.php';
+
+/** تنظیم VERSION برای هر سناریو. */
+$setVersion = static function (string $v): void {
+    file_put_contents(APP_ROOT . '/VERSION', $v . "\n");
+};
+
+/* ── ۱) هر دو نسخه در تاریخچه هستند ───────────────────────────────────── */
+$history = release_notes_history();
+$versions = array_column($history, 'version');
+check('تاریخچه شامل ۱.۶۳ است', in_array('1.63', $versions, true), implode(',', $versions));
+check('تاریخچه شامل ۱.۶۲.۹۷ است', in_array('1.62.97', $versions, true), implode(',', $versions));
+check('تازه‌ترین نسخه اول می‌آید (۱.۶۳ بالای ۱.۶۲.۹۷)', ($versions[0] ?? '') === '1.63', implode(',', $versions));
+
+foreach ($history as $h) {
+    $label = (string) ($h['version'] ?? '?');
+    check("نسخهٔ {$label}: عنوان دارد", trim((string) ($h['title'] ?? '')) !== '');
+    check("نسخهٔ {$label}: حداقل ۵ آیتم دارد", count((array) ($h['items'] ?? [])) >= 5, 'count=' . count((array) ($h['items'] ?? [])));
+    foreach ((array) ($h['items'] ?? []) as $i => $item) {
+        if (trim((string) ($item['text'] ?? '')) === '') {
+            check("نسخهٔ {$label}: آیتم " . ($i + 1) . " متن دارد", false);
+        }
+    }
+}
+
+/* ── ۲) روی ۱.۶۲.۹۷ (قبل از نصب ۱.۶۳) ───────────────────────────────── */
+$setVersion('1.62.97');
+$current = release_notes_current();
+check('روی ۱.۶۲.۹۷، نسخهٔ جاری همان ۱.۶۲.۹۷ است', ($current['version'] ?? '') === '1.62.97', (string) ($current['version'] ?? ''));
+check('کارت داشبورد روی ۱.۶۲.۹۷ رندر می‌شود', strpos(release_notes_dashboard_card(), 'release-notes-card') !== false);
+$page97 = release_notes_page_html();
+check('صفحهٔ تغییرات روی ۱.۶۲.۹۷ هر دو نسخه را دارد',
+    strpos($page97, 'نسخهٔ ۱.۶۲.۹۷') !== false && strpos($page97, 'نسخهٔ ۱.۶۳') !== false);
+check('صفحهٔ تغییرات «نسخهٔ نصب‌شده» را نشان می‌دهد', substr_count($page97, 'نسخهٔ نصب‌شده') === 1);
+check('صفحهٔ تغییرات محتوای آزمون جامع را دارد', strpos($page97, 'آزمون جامع Worker') !== false);
+
+/* ── ۳) بعد از نصب ۱.۶۳: تغییرات ۹۷ نباید گم شود ─────────────────────── */
+$setVersion('1.63');
+$current63 = release_notes_current();
+check('روی ۱.۶۳، نسخهٔ جاری ۱.۶۳ است', ($current63['version'] ?? '') === '1.63');
+$page63 = release_notes_page_html();
+check('بعد از ۱.۶۳، بخش ۱.۶۲.۹۷ هنوز در صفحه هست', strpos($page63, 'آزمون جامع Worker') !== false);
+check('بعد از ۱.۶۳، هر دو بلوک رندر می‌شوند', substr_count($page63, 'release-notes-block"') === 2, 'blocks=' . substr_count($page63, 'release-notes-block"'));
+check('بعد از ۱.۶۳، برچسب «نسخهٔ نصب‌شده» یک‌بار است', substr_count($page63, 'نسخهٔ نصب‌شده') === 1);
+
+/* ── ۴) نسخهٔ ناشناخته ⇒ آخرین یادداشت (رفتار قبلی حفظ شود) ──────────── */
+$setVersion('9.99.99');
+$unknown = release_notes_current();
+check('نسخهٔ ناشناخته، آخرین یادداشت را برمی‌گرداند', $unknown !== null && ($unknown['version'] ?? '') !== '');
+
+/* ── ۵) escape امنیتی ────────────────────────────────────────────────── */
+check(
+    'متن آیتم‌ها escape می‌شود (XSS)',
+    strpos(release_notes_render_items([['icon' => '◆', 'text' => '<script>bad()</script>']]), '<script>') === false
+);
+
+/* ── ۶) مسیر دسترسی در سامانه ────────────────────────────────────────── */
+$indexSrc = (string) file_get_contents(dirname(__DIR__) . '/index.php');
+check("مسیر صفحه در index.php هست (page=release-notes)", strpos($indexSrc, "if (\$page === 'release-notes')") !== false);
+$renderSrc = (string) file_get_contents(dirname(__DIR__) . '/lib/render.php');
+check('لینک «تغییرات سامانه» در فوتر هست', strpos($renderSrc, 'index.php?page=release-notes') !== false);
+check('کارت داشبورد در index.php صدا زده می‌شود', strpos($indexSrc, 'release_notes_dashboard_card()') !== false);
+
+/* ── پاک‌سازی و خلاصه ────────────────────────────────────────────────── */
+@unlink(APP_ROOT . '/VERSION');
+@rmdir(APP_ROOT);
+
+echo "\n" . str_repeat('=', 60) . "\n";
+echo 'PASS=' . $passes . ' | FAIL=' . $fails . "\n";
+if ($fails > 0) {
+    echo "❌ کارت تغییرات یا تاریخچهٔ نسخه‌ها ایراد دارد.\n";
+    exit(1);
+}
+echo "✅ کارت تغییرات سامانه و تاریخچهٔ نسخه‌ها سالم است.\n";
+exit(0);

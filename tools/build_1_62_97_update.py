@@ -13,6 +13,8 @@
   • tools/prewindow_check.php  — پرچم --shared: دقیقاً همان گزارش پنل
   • tools/verify_1_62_97.php   — تأیید ۱۰ ثانیه‌ای سر جایش بودن کارت پس از نصب
   • tools/test_1_62_97_drift_offline.php — اثبات نبود عقب‌گرد (دریفت) نسبت به تولید
+  • tools/test_release_notes_offline.php — تست کارت/تاریخچهٔ تغییرات
+  • lib/release-notes.php     — ورودی ۱.۶۲.۹۷ در کارت + تاریخچهٔ نسخه‌ها (نه فقط نسخهٔ جاری)
   • CHANGE-REPORT + VERSION
 """
 
@@ -40,6 +42,11 @@ FILES = [
     "tools/prewindow_check.php",
     "tools/verify_1_62_97.php",
     "tools/test_1_62_97_drift_offline.php",
+    "tools/test_release_notes_offline.php",
+    # کارت «تغییرات سامانه»: ورودی ۱.۶۲.۹۷ + تاریخچهٔ نسخه‌ها
+    "lib/release-notes.php",
+    # «تغییرات این به‌روزرسانی» داخل خود پنل غذا (مستقل از index.php/۱.۶۳)
+    "food-ticket-release-notes.php",
 ]
 
 TITLE = (

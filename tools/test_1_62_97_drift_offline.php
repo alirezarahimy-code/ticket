@@ -118,11 +118,48 @@ $blkHandler = <<<'BLK'
 
 BLK;
 
-foreach (['بارگذاری کتابخانه' => $blkRequire, 'خط مسیر API' => $blkRoute, 'هندلر API' => $blkHandler] as $label => $blk) {
+// (د) بلوک بارگذاری «تغییرات این به‌روزرسانی»
+$blkNotesRequire = <<<'BLK'
+// «تغییرات این به‌روزرسانی» داخل خود پنل (مستقل از index.php/۱.۶۳).
+if (is_file(__DIR__ . '/food-ticket-release-notes.php')) {
+    require_once __DIR__ . '/food-ticket-release-notes.php';
+}
+BLK;
+
+// (ه) کلید releaseNotes در payload نسخهٔ پنل
+$blkNotesPayload = <<<'BLK'
+        // «تغییرات این به‌روزرسانی» — بنر بالای پنل (مستقل از index.php/۱.۶۳).
+        'releaseNotes' => function_exists('food_ticket_release_notes_current')
+            ? food_ticket_release_notes_current()
+            : null,
+BLK;
+
+// (و) کلید releaseNotes در payload تنظیمات
+$blkNotesCfg = <<<'BLK'
+        // «تغییرات این به‌روزرسانی» — پنل این را در نوار بالای صفحه نشان می‌دهد.
+        'releaseNotes' => function_exists('food_ticket_release_notes_current')
+            ? food_ticket_release_notes_current()
+            : null,
+BLK;
+
+foreach (['بارگذاری کتابخانه' => $blkRequire, 'خط مسیر API' => $blkRoute, 'هندلر API' => $blkHandler,
+          'بارگذاری تغییرات' => $blkNotesRequire, 'releaseNotes در نسخه' => $blkNotesPayload,
+          'releaseNotes در تنظیمات' => $blkNotesCfg] as $label => $blk) {
     check("food-ticket.php بلوک «{$label}» را دقیقاً یک‌بار دارد", substr_count($shipPhp, $blk) === 1, 'count=' . substr_count($shipPhp, $blk));
 }
 
-$strippedPhp = str_replace([$blkRequire, $blkRoute, $blkHandler], '', $shipPhp);
+$strippedPhp = str_replace([$blkRequire, $blkRoute, $blkHandler, $blkNotesRequire, $blkNotesPayload, $blkNotesCfg], '', $shipPhp);
+// بلوک notesRequire یک خط خالی انتهایی جا می‌گذارد؛ تولید آن را ندارد.
+$strippedPhp = str_replace(
+    "}\n\nif (is_file(__DIR__ . '/food-ticket-templates.php')) {",
+    "}\nif (is_file(__DIR__ . '/food-ticket-templates.php')) {",
+    $strippedPhp
+);
+// بلوک‌های releaseNotes در payloadها یک خط خالی جا می‌گذارند؛ تولید آن را ندارد.
+// (هر دو بلوک با کامنت متفاوت شروع می‌شوند، پس به متن بعد از آن‌ها لنگر می‌زنیم.)
+$strippedPhp = str_replace("\n\n        'attendancePath' => (string) (\$config['attendance_path']", "\n        'attendancePath' => (string) (\$config['attendance_path']", $strippedPhp);
+$strippedPhp = str_replace("\n\n        'attendancePath' => (string) (\$config['attendance_path']", "\n        'attendancePath' => (string) (\$config['attendance_path']", $strippedPhp);
+$strippedPhp = str_replace("\n\n        'printer' => [", "\n        'printer' => [", $strippedPhp);
 check(
     'food-ticket.php: حذف افزوده‌های آزمون ⇒ بایت‌به‌بایت برابر با تولید ۱.۶۲.۹۵',
     $strippedPhp === $prodPhp,
@@ -160,6 +197,28 @@ $strippedHtml = str_replace('${selftestBox()}', '', $strippedHtml);
 // دو اکشن کلیک را بردار.
 $strippedHtml = str_replace(
     "if(act==='run-worker-selftest'){runWorkerSelfTest();return}if(act==='copy-worker-selftest'){copyWorkerSelfTest();return}",
+    '',
+    $strippedHtml
+);
+
+// بلوک بنر «تغییرات این به‌روزرسانی» (تابع releaseNotesBanner + loadReleaseNotes)
+$bStart = strpos($strippedHtml, '/* ── «تغییرات این به‌روزرسانی» — از API پنل غذا می‌آید');
+$bEnd = strpos($strippedHtml, 'function emergencyWindowSettingsForm(){');
+if ($bStart !== false && $bEnd !== false && $bEnd > $bStart) {
+    $strippedHtml = substr($strippedHtml, 0, $bStart) . substr($strippedHtml, $bEnd);
+}
+$strippedHtml = str_replace('releaseNotesBanner()+versionBanner()', 'versionBanner()', $strippedHtml);
+$strippedHtml = str_replace('loadReleaseNotes();', '', $strippedHtml);
+// تابع بارگذاری یک‌بارهٔ بنر هم باید برود (جدا از خود بنر قرار دارد).
+$lStart = strpos($strippedHtml, '/* بارگذاری یک‌بارهٔ «تغییرات این به‌روزرسانی»');
+if ($lStart !== false) {
+    $lEnd = strpos($strippedHtml, 'function render(){', $lStart);
+    if ($lEnd !== false && $lEnd > $lStart) {
+        $strippedHtml = substr($strippedHtml, 0, $lStart) . substr($strippedHtml, $lEnd);
+    }
+}
+$strippedHtml = str_replace(
+    "if(act==='dismiss-release-notes'){const el=document.getElementById('ft-release-notes');const v=el?el.dataset.version:'';try{localStorage.setItem('ft-release-notes-dismissed:'+v,'1')}catch(e){}el&&el.remove();return}",
     '',
     $strippedHtml
 );

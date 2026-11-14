@@ -19,6 +19,23 @@ if (!defined('APP_ROOT')) {
 function release_notes_all(): array
 {
     return [
+        // ۱.۶۲.۹۷ — بستهٔ غذای مستقل از ۱.۶۳؛ بعد از نصبِ ۱.۶۳ هم در تاریخچه می‌ماند.
+        '1.62.97' => [
+            'label' => 'نسخهٔ ۱.۶۲.۹۷',
+            'date_fa' => 'آبان ۱۴۰۵',
+            'title' => 'آزمون جامع Worker، چاپ و مدیریت — داخل خود پنل',
+            'lead' => 'یک دکمه در انتهای صفحهٔ «تنظیمات سیستم ← اتصال پایگاه‌ها» که سلامت کل مسیر چاپ را همان‌جا نشان می‌دهد؛ بدون کاغذ، بدون تغییر هیچ تنظیمی.',
+            'items' => [
+                ['icon' => '◆', 'text' => 'کارت «آزمون جامع» به انتهای صفحهٔ «اتصال پایگاه‌ها» اضافه شد؛ با یک دکمه، ۳۲ بررسی در ۷ بخش همان‌جا اجرا و نمایش داده می‌شود.'],
+                ['icon' => '◆', 'text' => 'هفت بخش: تنظیمات و نصب، Worker (زنده‌بودن و بیکاری درست)، صف چاپ، منبع تردد Access، چاپگر و مسیر چاپ، مدیریت سامانه (زمان‌بند و مجوزها)، و آمادگی بازهٔ کاری هفت روز آینده.'],
+                ['icon' => '◆', 'text' => 'هیچ فیشی چاپ نمی‌شود و هیچ تنظیمی عوض نمی‌شود: اتصال چاپگر فقط با یک تست TCP و بدون ارسال یک بایت سنجیده می‌شود.'],
+                ['icon' => '◆', 'text' => '«درست بیکار» با «خراب» اشتباه نمی‌شود: بیرون از بازهٔ ۱۱ تا ۱۴ و با صف خالی، Worker عمداً بیکار است و کارت همین را توضیح می‌دهد به‌جای اینکه ایراد اعلام کند.'],
+                ['icon' => '◆', 'text' => 'کنار هر ایراد، یک جملهٔ راه‌حل فارسی نوشته شده؛ دکمهٔ «کپی گزارش» هم متن کامل را برای ارسال به پشتیبانی کپی می‌کند.'],
+                ['icon' => '◆', 'text' => 'همان آزمون از خط فرمان هم در دسترس است و دقیقاً همان گزارش را می‌دهد: php tools\\prewindow_check.php --shared'],
+                ['icon' => '◆', 'text' => 'ابزار تأیید نصب: php tools\\verify_1_62_97.php — ده ثانیه‌ای می‌گوید کارت سر جایش است یا نه.'],
+            ],
+            'footnote' => 'این نسخه مستقل از ۱.۶۳ نصب می‌شود (هر دو پیش‌نیاز ۱.۶۲.۹۶ دارند) و ترتیب نصب هیچ‌کدام دیگری را خراب نمی‌کند.',
+        ],
         '1.63' => [
             'label' => 'نسخهٔ ۱.۶۳',
             'date_fa' => 'آبان ۱۴۰۵',
@@ -62,6 +79,32 @@ function release_notes_current(): ?array
     $notes = $all[$lastKey];
     $notes['version'] = (string) $lastKey;
     return $notes;
+}
+
+/**
+ * تاریخچهٔ نسخه‌های ثبت‌شده، تازه‌ترین اول.
+ * برای صفحهٔ «تغییرات سامانه» استفاده می‌شود تا تغییرات نسخه‌های قبلی (مثل ۱.۶۲.۹۷)
+ * پس از نصب نسخهٔ بعدی هم قابل خواندن بماند.
+ *
+ * @return array<int,array> هر آیتم: version/label/date_fa/title/lead/items/footnote
+ */
+function release_notes_history(): array
+{
+    $all = release_notes_all();
+    if (!$all) {
+        return [];
+    }
+    // مقایسهٔ نسخه‌ای، نه ترتیب کلید (۱.۶۲.۹۷ باید زیر ۱.۶۳ بیاید).
+    uksort($all, static fn ($a, $b) => version_compare((string) $b, (string) $a));
+    $out = [];
+    foreach ($all as $version => $notes) {
+        if (!is_array($notes)) {
+            continue;
+        }
+        $notes['version'] = (string) $version;
+        $out[] = $notes;
+    }
+    return $out;
 }
 
 function release_notes_render_items(array $items, int $limit = 0): string
@@ -120,6 +163,56 @@ function release_notes_page_html(): string
     if ($notes === null) {
         return '<section class="page-heading"><div><span class="eyebrow">تغییرات سامانه</span><h1>تغییرات این نسخه</h1><p class="muted">برای این نسخه یادداشتی ثبت نشده است.</p></div></section>';
     }
+
+    // صفحه همیشه «همهٔ نسخه‌ها» را نشان می‌دهد (تازه‌ترین اول) تا تغییرات یک بستهٔ
+    // میانی (مثل ۱.۶۲.۹۷) بعد از نصب نسخهٔ بعدی هم گم نشود.
+    $history = release_notes_history();
+    if (count($history) <= 1) {
+        return release_notes_page_single($notes);
+    }
+
+    $currentVersion = (string) ($notes['version'] ?? '');
+    $html = '<style>'
+        . '.release-notes-block{border:1px solid rgba(127,127,127,.28);border-radius:14px;padding:1rem 1.1rem;margin:0 0 1rem;}'
+        . '.release-notes-block-head{display:flex;align-items:center;gap:.6rem;flex-wrap:wrap;margin-bottom:.2rem;}'
+        . '.release-notes-block h2{font-size:1.05rem;margin:.2rem 0 .1rem;}'
+        . '.release-notes-block .release-notes-lead{color:inherit;opacity:.75;font-size:.9rem;line-height:1.9;margin:.2rem 0 .6rem;}'
+        . '.release-notes-page-list{list-style:none;margin:0;padding:0;display:grid;gap:.5rem;}'
+        . '.release-notes-page-list li{display:flex;gap:.6rem;line-height:2;padding:.35rem .55rem;border-radius:10px;}'
+        . '.release-notes-page-list li:nth-child(odd){background:rgba(127,127,127,.07);}'
+        . '.release-notes-page-list .release-notes-item-icon{opacity:.6;margin-top:.1rem;}'
+        . '.release-notes-footnote{font-size:.85rem;opacity:.7;margin:.6rem 0 0;line-height:1.9;}'
+        . '.release-notes-current-tag{font-size:.72rem;font-weight:700;padding:.1rem .5rem;border-radius:999px;border:1px solid rgba(127,127,127,.45);}'
+        . '@media print{.release-notes-badge,.release-notes-current-tag{display:none !important;}}'
+        . '</style>';
+
+    $html .= '<section class="page-heading"><div><span class="eyebrow">تغییرات سامانه</span><h1>تغییرات نسخه‌ها</h1>'
+        . '<p>هر کاری که در هر نسخه عوض شد، درست شد یا اضافه شد — تازه‌ترین بالا.</p></div>'
+        . '<div class="release-notes-page-meta"><small class="muted">' . e((string) count($history)) . ' نسخه ثبت‌شده</small></div></section>';
+
+    foreach ($history as $h) {
+        $v = (string) ($h['version'] ?? '');
+        $isCurrent = $v === $currentVersion;
+        $html .= '<section class="release-notes-block">'
+            . '<div class="release-notes-block-head">'
+            . '<span class="release-notes-badge">' . e((string) ($h['label'] ?? ('نسخهٔ ' . $v))) . '</span>'
+            . ($isCurrent ? '<span class="release-notes-current-tag">نسخهٔ نصب‌شده</span>' : '')
+            . ($isCurrent ? '' : '<span class="release-notes-current-tag">قبلی</span>')
+            . '</div>'
+            . '<h2>' . e((string) ($h['title'] ?? 'تغییرات این نسخه')) . '</h2>'
+            . (($h['lead'] ?? '') !== '' ? '<p class="release-notes-lead">' . e((string) $h['lead']) . '</p>' : '')
+            . '<ul class="release-notes-page-list">' . release_notes_render_items((array) ($h['items'] ?? [])) . '</ul>'
+            . (($h['footnote'] ?? '') !== '' ? '<p class="release-notes-footnote">' . e((string) $h['footnote']) . '</p>' : '')
+            . '</section>';
+    }
+
+    $html .= '<p style="margin-top:.5rem"><a class="button secondary" href="index.php?page=help">راهنمای سامانه</a> <a class="button secondary" href="index.php">بازگشت به داشبورد</a></p>';
+    return $html;
+}
+
+/** نمایش تک‌نسخه‌ای (وقتی فقط یک نسخه ثبت شده است). */
+function release_notes_page_single(array $notes): string
+{
     $label = (string) ($notes['label'] ?? '');
     $dateFa = (string) ($notes['date_fa'] ?? '');
     $title = (string) ($notes['title'] ?? 'تغییرات این نسخه');

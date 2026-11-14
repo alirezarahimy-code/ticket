@@ -42,6 +42,10 @@ if (is_file(__DIR__ . '/food-ticket-web-host.php')) {
 if (is_file(__DIR__ . '/food-ticket-selftest.php')) {
     require_once __DIR__ . '/food-ticket-selftest.php';
 }
+// «تغییرات این به‌روزرسانی» داخل خود پنل (مستقل از index.php/۱.۶۳).
+if (is_file(__DIR__ . '/food-ticket-release-notes.php')) {
+    require_once __DIR__ . '/food-ticket-release-notes.php';
+}
 if (is_file(__DIR__ . '/food-ticket-templates.php')) {
     require_once __DIR__ . '/food-ticket-templates.php';
 }
@@ -3122,6 +3126,10 @@ function food_ticket_api_config(array $user = []): array
         : ['token' => '', 'fresh' => true, 'existing' => false, 'counts' => []];
     $payload = [
         'db' => $dbState,
+        // «تغییرات این به‌روزرسانی» — پنل این را در نوار بالای صفحه نشان می‌دهد.
+        'releaseNotes' => function_exists('food_ticket_release_notes_current')
+            ? food_ticket_release_notes_current()
+            : null,
         'attendancePath' => (string) ($config['attendance_path'] ?? ''),
         'attendanceTable' => food_ticket_source_table(),
         // مقادیر legacy برای سازگاری API؛ در رابط کاربری نمایش داده نمی‌شوند.
@@ -3163,6 +3171,10 @@ function food_ticket_api_config(array $user = []): array
         'brandName' => (string) ($brand['brand_name'] ?? 'سامانه مدیریت غذا'),
         'brandLogo' => (string) ($brand['brand_logo'] ?? ''),
         'panelVersion' => FOOD_TICKET_PANEL_VERSION,
+        // «تغییرات این به‌روزرسانی» — بنر بالای پنل (مستقل از index.php/۱.۶۳).
+        'releaseNotes' => function_exists('food_ticket_release_notes_current')
+            ? food_ticket_release_notes_current()
+            : null,
         'printer' => [
             'mode' => (food_ticket_normalize_printer_mode($config['printer_mode'] ?? 'tcp_raw') === 'tcp_raw' ? 'socket' : 'windows-spooler'),
             'mode_db' => food_ticket_normalize_printer_mode($config['printer_mode'] ?? 'tcp_raw'),
