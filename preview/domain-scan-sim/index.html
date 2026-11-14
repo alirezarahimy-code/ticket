@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>شبیه‌سازی استخراج اطلاعات سیستم‌های دامنه</title>
+<style>
+  :root{
+    --bg:#0f141b; --card:#171e27; --card2:#1c2530; --line:#2a3644; --text:#e8eef4; --muted:#9fb0c0;
+    --accent:#3b82f6; --accent2:#22c55e; --warn:#f59e0b; --danger:#ef4444; --chip:#24303d;
+    --mono:'Consolas','Cascadia Mono',monospace;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--text);font-family:Tahoma,'Segoe UI',sans-serif;font-size:14px;line-height:1.7}
+  .wrap{max-width:1180px;margin:0 auto;padding:20px 16px 60px}
+  header.top{display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between;border-bottom:1px solid var(--line);padding-bottom:14px;margin-bottom:16px}
+  h1{font-size:20px;margin:0}
+  .sub{color:var(--muted);font-size:13px;margin-top:4px}
+  .badge{display:inline-block;background:var(--chip);border:1px solid var(--line);border-radius:999px;padding:2px 12px;font-size:12px;color:var(--muted)}
+  .badge.sim{color:#fbbf24;border-color:#6b5410;background:#2a2210}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px;margin-bottom:16px}
+  .card h2{font-size:15px;margin:0 0 10px}
+  .steps{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px}
+  .step{flex:1 1 160px;background:var(--card);border:1px solid var(--line);border-radius:10px;padding:10px 12px;opacity:.55;transition:.2s}
+  .step.active{opacity:1;border-color:var(--accent)}
+  .step.done{opacity:1;border-color:var(--accent2)}
+  .step .n{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;background:var(--chip);font-size:12px;margin-left:6px}
+  .step.done .n{background:var(--accent2);color:#06130a}
+  .step .t{font-weight:700;font-size:13px}
+  .step .d{color:var(--muted);font-size:12px}
+  .row{display:flex;flex-wrap:wrap;gap:10px;align-items:flex-end}
+  .field{display:flex;flex-direction:column;gap:4px}
+  .field label{font-size:12px;color:var(--muted)}
+  input,select{background:var(--card2);border:1px solid var(--line);color:var(--text);border-radius:8px;padding:8px 10px;font-family:inherit;font-size:13px;min-width:170px}
+  button{background:var(--accent);color:#fff;border:0;border-radius:8px;padding:9px 16px;font-family:inherit;font-size:13px;font-weight:700;cursor:pointer;transition:.15s}
+  button:hover:not(:disabled){filter:brightness(1.12)}
+  button:disabled{opacity:.4;cursor:not-allowed}
+  button.ghost{background:transparent;border:1px solid var(--line);color:var(--text)}
+  button.green{background:var(--accent2);color:#06130a}
+  button.amber{background:var(--warn);color:#1a1206}
+  .methods{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:6px}
+  @media(max-width:760px){.methods{grid-template-columns:1fr}}
+  .method{border:1px solid var(--line);border-radius:10px;padding:12px;cursor:pointer;background:var(--card2)}
+  .method.sel{border-color:var(--accent);background:#16233a}
+  .method b{display:block;margin-bottom:4px}
+  .method small{color:var(--muted);font-size:12px}
+  table{width:100%;border-collapse:collapse;font-size:13px}
+  th,td{border-bottom:1px solid var(--line);padding:8px 10px;text-align:right;vertical-align:middle}
+  th{color:var(--muted);font-weight:700;font-size:12px}
+  tr.selrow{background:#16233a}
+  .pill{display:inline-block;border-radius:999px;padding:1px 10px;font-size:12px;border:1px solid var(--line);background:var(--chip)}
+  .pill.ok{color:#4ade80;border-color:#14532d;background:#0c2317}
+  .pill.bad{color:#f87171;border-color:#7f1d1d;background:#2a0f0f}
+  .pill.mid{color:#fbbf24;border-color:#6b5410;background:#2a2210}
+  .pill.off{color:#94a3b8}
+  .mono{font-family:var(--mono);font-size:12px;direction:ltr;text-align:left}
+  .console{background:#0a0e13;border:1px solid var(--line);border-radius:10px;padding:12px;height:280px;overflow:auto;font-family:var(--mono);font-size:12px;direction:ltr;text-align:left;line-height:1.9}
+  .console .t{color:#5b6b7c}
+  .console .cmd{color:#7dd3fc}
+  .console .ok{color:#4ade80}
+  .console .err{color:#f87171}
+  .console .info{color:#e8eef4}
+  .console .warn{color:#fbbf24}
+  .summary{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0}
+  .sum{background:var(--card2);border:1px solid var(--line);border-radius:8px;padding:6px 14px;font-size:13px}
+  .sum b{font-size:16px}
+  .linkbtn{background:none;border:0;color:var(--accent);cursor:pointer;font-size:12px;padding:0;font-family:inherit}
+  .modal{position:fixed;inset:0;background:rgba(0,0,0,.6);display:none;align-items:center;justify-content:center;z-index:50;padding:16px}
+  .modal.open{display:flex}
+  .modal .box{background:var(--card);border:1px solid var(--line);border-radius:12px;max-width:560px;width:100%;max-height:86vh;overflow:auto;padding:20px}
+  .modal h3{margin:0 0 12px}
+  .kv{display:grid;grid-template-columns:150px 1fr;gap:6px 12px;font-size:13px}
+  .kv dt{color:var(--muted)}
+  .kv dd{margin:0}
+  code{background:#0a0e13;border:1px solid var(--line);border-radius:6px;padding:1px 6px;font-family:var(--mono);font-size:12px;direction:ltr;display:inline-block}
+  pre{background:#0a0e13;border:1px solid var(--line);border-radius:10px;padding:12px;overflow:auto;font-family:var(--mono);font-size:12px;direction:ltr;text-align:left;line-height:1.8}
+  details{margin-top:10px}
+  summary{cursor:pointer;font-weight:700}
+  .note{color:var(--muted);font-size:12px}
+  .errbox{background:#2a0f0f;border:1px solid #7f1d1d;border-radius:10px;padding:12px;margin-top:8px}
+  .errbox b{color:#f87171}
+  .remedy{margin:8px 0 0;padding-right:18px;color:var(--muted);font-size:13px}
+  .remedy li{margin-bottom:4px}
+  .hidden{display:none!important}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header class="top">
+  <div>
+    <h1>شبیه‌سازی «استخراج اطلاعات سیستم‌های انتخاب‌شده»</h1>
+    <div class="sub">جریان کامل پنل را با چند سیستم فرضی تجربه کنید: ورود از دامنه ← پینگ ← استخراج ← <b>آماده‌سازی راه‌دور مقصد</b> ← تلاش دوباره. هیچ اتصال واقعی‌ای برقرار نمی‌شود.</div>
+  </div>
+  <span class="badge sim">محیط شبیه‌سازی — بدون شبکه/دیتابیس واقعی</span>
+</header>
+
+<div class="steps" id="steps">
+  <div class="step" data-s="1"><span class="n">۱</span><span class="t">ورود کامپیوترهای دامنه</span><div class="d">فهرست سیستم‌ها از Active Directory</div></div>
+  <div class="step" data-s="2"><span class="n">۲</span><span class="t">تست اتصال (پینگ)</span><div class="d">تشخیص آنلاین/آفلاین</div></div>
+  <div class="step" data-s="3"><span class="n">۳</span><span class="t">استخراج اطلاعات</span><div class="d">WMI/CIM از طریق DCOM یا WinRM</div></div>
+  <div class="step" data-s="4"><span class="n">۴</span><span class="t">آماده‌سازی سیستم‌های مقصد</span><div class="d">باز کردن مسیر DCOM/WinRM با اعتبارنامهٔ دامنه</div></div>
+  <div class="step" data-s="5"><span class="n">۵</span><span class="t">تلاش دوباره</span><div class="d">استخراج موفق پس از آماده‌سازی</div></div>
+</div>
+
+<div class="card">
+  <h2>اعتبارنامهٔ همین نوبت <span class="note">(در حالت واقعی فقط در نشست نگه داشته می‌شود و ذخیره نمی‌شود)</span></h2>
+  <div class="row">
+    <div class="field"><label>نام کاربری (DOMAIN\user)</label><input id="credUser" value="COMPANY\domain-admin"></div>
+    <div class="field"><label>رمز</label><input id="credPass" type="password" value="••••••••••"></div>
+    <div class="field"><label>ترتیب پروتکل‌ها (تنظیمات)</label>
+      <select id="protoOrder">
+        <option value="dcom,wsman">اول DCOM، بعد WinRM</option>
+        <option value="wsman,dcom">اول WinRM، بعد DCOM</option>
+      </select>
+    </div>
+  </div>
+  <h2 style="margin-top:16px">روش آماده‌سازی سیستم‌های مقصد</h2>
+  <div class="methods">
+    <div class="method sel" data-m="smb" id="mSmb">
+      <b>روش الف — SMB + تسک زمان‌بندی‌شده</b>
+      <small>کپی اسکریپت آماده‌سازی به <code>\\host\C$\</code> و اجرای آن با <code>schtasks</code> (نیازمند باز بودن پورت‌های 445 و 135 روی مقصد؛ DCOM/WinRM بسته باشند هم کار می‌کند).</small>
+    </div>
+    <div class="method" data-m="gpo" id="mGpo">
+      <b>روش ب — Group Policy</b>
+      <small>ساخت و لینک GPO از خودِ سرور پنل (نیازمند عضویت سرور پنل در دامنه + ماژول GroupPolicy). حتی اگر همهٔ پورت‌ها بسته باشند کار می‌کند؛ در به‌روزرسانی بعدی خط‌مشی اعمال می‌شود.</small>
+    </div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="row" style="margin-bottom:10px">
+    <button id="btnImport">۱) ورود کامپیوترهای دامنه</button>
+    <button id="btnPing" disabled>۲) تست اتصال (پینگ)</button>
+    <button id="btnExtract" disabled>۳) استخراج اطلاعات سیستم‌های انتخاب‌شده</button>
+    <button id="btnPrepare" class="amber" disabled>۴) آماده‌سازی سیستم‌های مقصد</button>
+    <button id="btnRetry" class="green" disabled>۵) تلاش دوباره برای ناموفق‌ها</button>
+    <button id="btnReset" class="ghost">از اول</button>
+  </div>
+  <div class="summary" id="summary"></div>
+  <div style="overflow:auto">
+  <table id="fleet">
+    <thead><tr>
+      <th><input type="checkbox" id="chkAll"></th><th>نام سیستم</th><th>IP</th><th>پینگ</th>
+      <th>DCOM</th><th>WinRM</th><th>SMB</th><th>وضعیت استخراج</th><th>جزئیات</th>
+    </tr></thead>
+    <tbody><tr><td colspan="9" class="note">هنوز وارد نشده — دکمهٔ «ورود کامپیوترهای دامنه» را بزنید.</td></tr></tbody>
+  </table>
+  </div>
+</div>
+
+<div class="card">
+  <h2>کنسول اجرای شبیه‌سازی <span class="note">(دستورهایی که در حالت واقعی روی سرور ویندوزی پنل اجرا می‌شوند)</span></h2>
+  <div class="console" id="console"></div>
+</div>
+
+<div class="card">
+  <h2>بررسی دقیق: اگر DCOM و WinRM بسته باشند، آیا می‌توان مقصد را با اعتبارنامهٔ ادمین دامنه آماده کرد؟</h2>
+  <p class="note">پاسخ کوتاه: <b style="color:var(--text)">بله، در بیشتر موارد</b> — اما نه در همه. برای اجرای هر دستور روی مقصد، حداقل یک «کانال مدیریت» باید باز باشد. سه سناریو:</p>
+  <table>
+    <thead><tr><th>سناریو</th><th>وضعیت کانال‌ها روی مقصد</th><th>آماده‌سازی راه‌دور ممکن؟</th><th>روش</th></tr></thead>
+    <tbody>
+      <tr><td>الف</td><td>SMB (445) و RPC (135) باز؛ DCOM/WinRM بسته</td><td><span class="pill ok">بله</span></td><td>کپی اسکریپت به <code>C$\ITSM</code> + ساخت/اجرای تسک با <code>schtasks /s</code> (همان تکنیک PsExec)؛ داخل تسک: فعال‌سازی WinRM و قواعد فایروال WMI</td></tr>
+      <tr><td>ب</td><td>همهٔ پورت‌ها بسته؛ سرور پنل عضو دامنه است</td><td><span class="pill ok">بله</span></td><td>Group Policy: ساخت/لینک GPO از سرور پنل؛ در به‌روزرسانی بعدی خط‌مشی (یا ریبوت) اعمال می‌شود</td></tr>
+      <tr><td>ج</td><td>همهٔ پورت‌ها بسته؛ سرور پنل عضو دامنه نیست</td><td><span class="pill bad">خیر</span></td><td>هیچ کدی این حالت را دور نمی‌زند (محدودیت شبکه است). راه: GPO از یک سیستم عضو دامنه، SCCM/Intune، یا اقدام دستی</td></tr>
+    </tbody>
+  </table>
+  <details>
+    <summary>دستورهایی که روش الف (SMB + تسک) در حالت واقعی اجرا می‌کند</summary>
+    <pre># ۱) بررسی کانال SMB با اعتبارنامهٔ دامنه (روی سرور پنل)
+Test-NetConnection -ComputerName PC-023 -Port 445   # True
+
+# ۲) کپی اسکریپت آماده‌سازی به مقصد
+Copy-Item .\prepare_remote_target.ps1 \\PC-023\C$\ITSM\prepare_remote_target.ps1
+
+# ۳) ساخت تسک زمان‌بندی‌شده روی مقصد (از RPC به Task Scheduler، نه از WMI)
+schtasks /create /s PC-023 /u COMPANY\domain-admin /p *** /tn "ITSM-Prepare" /tr "powershell -NoProfile -ExecutionPolicy Bypass -File C:\ITSM\prepare_remote_target.ps1" /sc once /st 00:00 /f
+
+# ۴) اجرای تسک و انتظار
+schtasks /run /s PC-023 /tn "ITSM-Prepare"
+
+# ۵) داخل مقصد (prepare_remote_target.ps1):
+Enable-PSRemoting -Force
+Enable-NetFirewallRule -DisplayGroup "Windows Management Instrumentation (WMI-In)"
+Enable-NetFirewallRule -DisplayGroup "Windows Remote Management"
+Set-Service WinRM -StartupType Automatic; Start-Service WinRM
+
+# ۶) بررسی نهایی از سرور پنل
+New-CimSession -ComputerName PC-023 -Protocol Wsman   # OK → استخراج فعال شد</pre>
+  </details>
+  <details>
+    <summary>دستورهایی که روش ب (Group Policy) در حالت واقعی اجرا می‌کند</summary>
+    <pre># روی سرور پنلِ عضو دامنه (ماژول GroupPolicy از RSAT)
+Import-Module GroupPolicy
+New-GPO -Name "ITSM - Enable WinRM and WMI Firewall" -Comment "آماده‌سازی استخراج شناسنامه"
+# فعال‌سازی WinRM از طریق Administrative Templates:
+Set-GPRegistryValue -Name "ITSM - Enable WinRM and WMI Firewall" -Key "HKLM\Software\Policies\Microsoft\Windows\WinRM\Service" -ValueName "AllowAutoConfig" -Type DWord -Value 1
+# لینک به OU کامپیوترها:
+New-GPLink -Name "ITSM - Enable WinRM and WMI Firewall" -Target "OU=Computers,DC=COMPANY,DC=LOCAL"
+# اعمال روی مقصدها در به‌روزرسانی بعدی خط‌مشی (پیش‌فرض ~۹۰ دقیقه) یا با ریبوت؛
+# برای اعمال فوری روی مقصدِ در دسترس: gpupdate /force (نیازمند یک کانال باز)</pre>
+  </details>
+  <p class="note" style="margin-top:10px">ملاحظات امنیتی برای پیاده‌سازی واقعی: مجوز جداگانه (مثلاً <code>asset.remote_prepare</code>)، تأیید صریح با فهرست سیستم‌ها، ثبت کامل در <code>system_log</code> (چه کسی، چه زمانی، روی چه سیستم‌هایی)، اسکریپت ثابت و قابل بازبینی (نه ورودی کاربر)، اعتبارنامه فقط per-run در نشست، و مرحلهٔ بررسی (verify) بعد از آماده‌سازی. این قابلیت یعنی «اجرای کد SYSTEM روی ناوگان از پنل»؛ اگر پنل به خطر بیفتد، مهاجم به کل ناوگان می‌رسد — پس احراز هویت مجدد و محدودیت به ادمین‌های IT ضروری است.</p>
+</div>
+
+</div>
+
+<div class="modal" id="modal"><div class="box" id="modalBox"></div></div>
+
+<script>
+const $ = s => document.querySelector(s);
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+const fa = n => Number(n).toLocaleString('fa-IR');
+
+const SYSTEMS = [
+  {name:'ADMINIT2', ip:'192.168.10.11', online:true,  dcom:true,  winrm:true,  smb:true,  os:'Windows 11 Pro 23H2', cpu:'Intel Core i5-12400', ram:'16 GB', disk:'512 GB SSD', mac:'A4-BB-6A-11-22-33', serial:'SN-8841207', av:'Windows Defender'},
+  {name:'PC-023',   ip:'192.168.10.23', online:true,  dcom:false, winrm:false, smb:true,  os:'Windows 10 Pro 22H2', cpu:'Intel Core i3-9100', ram:'8 GB',  disk:'256 GB SSD', mac:'A4-BB-6A-11-22-34', serial:'SN-8841208', av:'Windows Defender'},
+  {name:'PC-024',   ip:'192.168.10.24', online:true,  dcom:false, winrm:true,  smb:true,  os:'Windows 11 Pro 23H2', cpu:'Intel Core i5-10400', ram:'16 GB', disk:'512 GB SSD', mac:'A4-BB-6A-11-22-35', serial:'SN-8841209', av:'ESET Endpoint'},
+  {name:'PC-025',   ip:'192.168.10.25', online:true,  dcom:true,  winrm:false, smb:true,  os:'Windows 10 Pro 22H2', cpu:'Intel Core i5-8400', ram:'8 GB',  disk:'1 TB HDD',   mac:'A4-BB-6A-11-22-36', serial:'SN-8841210', av:'Windows Defender'},
+  {name:'PC-026',   ip:'192.168.10.26', online:false, dcom:false, winrm:false, smb:false, os:'Windows 10 Pro 21H2', cpu:'Intel Core i3-6100', ram:'8 GB',  disk:'256 GB SSD', mac:'A4-BB-6A-11-22-37', serial:'SN-8841211', av:'—'},
+  {name:'PC-027',   ip:'192.168.10.27', online:true,  dcom:false, winrm:false, smb:false, os:'Windows 11 Pro 22H2', cpu:'Intel Core i7-12700', ram:'32 GB', disk:'1 TB NVMe', mac:'A4-BB-6A-11-22-38', serial:'SN-8841212', av:'Windows Defender'},
+  {name:'PC-028',   ip:'192.168.10.28', online:true,  dcom:false, winrm:false, smb:true,  os:'Windows 10 Pro 22H2', cpu:'Intel Core i5-9500', ram:'16 GB', disk:'512 GB SSD', mac:'A4-BB-6A-11-22-39', serial:'SN-8841213', av:'Windows Defender'},
+  {name:'PC-029',   ip:'192.168.10.29', online:true,  dcom:true,  winrm:true,  smb:true,  os:'Windows 11 Pro 23H2', cpu:'Intel Core i5-13400', ram:'16 GB', disk:'512 GB SSD', mac:'A4-BB-6A-11-22-3A', serial:'SN-8841214', av:'ESET Endpoint'},
+];
+SYSTEMS.forEach(s => { s.ping='—'; s.extract='—'; s.prepared=false; s.errCode=null; s.checked=true; });
+
+let method = 'smb';
+let busy = false;
+
+function log(text, cls='info'){
+  const c = $('#console');
+  const t = new Date().toLocaleTimeString('fa-IR',{hour12:false});
+  const div = document.createElement('div');
+  div.innerHTML = `<span class="t">[${t}]</span> <span class="${cls}">${text}</span>`;
+  c.appendChild(div); c.scrollTop = c.scrollHeight;
+}
+function setStep(n){
+  document.querySelectorAll('.step').forEach(el=>{
+    const s = +el.dataset.s;
+    el.classList.toggle('active', s===n);
+    el.classList.toggle('done', s<n);
+  });
+}
+function render(){
+  const tb = $('#fleet tbody'); tb.innerHTML='';
+  SYSTEMS.forEach((s,i)=>{
+    const tr = document.createElement('tr');
+    if(s.checked) tr.className='selrow';
+    const pingPill = s.ping==='online' ? '<span class="pill ok">آنلاین</span>' : s.ping==='offline' ? '<span class="pill off">آفلاین</span>' : '<span class="pill off">—</span>';
+    const chan = v => v ? '<span class="pill ok">باز</span>' : '<span class="pill bad">بسته</span>';
+    let ex = '<span class="pill off">—</span>';
+    if(s.extract==='running') ex = '<span class="pill mid">در حال استخراج…</span>';
+    if(s.extract==='done') ex = '<span class="pill ok">موفق — شناسنامه پر شد</span>';
+    if(s.extract==='error') ex = `<span class="pill bad">ناموفق (${s.errCode})</span>`;
+    if(s.extract==='skipped') ex = '<span class="pill off">رد شد (آفلاین)</span>';
+    tr.innerHTML = `<td><input type="checkbox" data-i="${i}" ${s.checked?'checked':''}></td>
+      <td><b>${s.name}</b>${s.prepared?' <span class="pill mid">آماده‌شده</span>':''}</td>
+      <td class="mono">${s.ip}</td><td>${pingPill}</td><td>${chan(s.dcom)}</td><td>${chan(s.winrm)}</td><td>${chan(s.smb)}</td>
+      <td>${ex}</td><td><button class="linkbtn" data-detail="${i}">جزئیات</button></td>`;
+    tb.appendChild(tr);
+  });
+  tb.querySelectorAll('input[type=checkbox][data-i]').forEach(cb=>cb.addEventListener('change',e=>{SYSTEMS[+e.target.dataset.i].checked=e.target.checked;render();}));
+  tb.querySelectorAll('[data-detail]').forEach(b=>b.addEventListener('click',()=>showDetail(+b.dataset.detail)));
+  const on = SYSTEMS.filter(s=>s.ping==='online').length;
+  const ok = SYSTEMS.filter(s=>s.extract==='done').length;
+  const bad = SYSTEMS.filter(s=>s.extract==='error').length;
+  $('#summary').innerHTML = `
+    <span class="sum">آنلاین: <b>${fa(on)}</b></span>
+    <span class="sum">استخراج موفق: <b style="color:#4ade80">${fa(ok)}</b></span>
+    <span class="sum">ناموفق: <b style="color:#f87171">${fa(bad)}</b></span>
+    <span class="sum">آماده‌شده: <b style="color:#fbbf24">${fa(SYSTEMS.filter(s=>s.prepared).length)}</b></span>`;
+}
+function showDetail(i){
+  const s = SYSTEMS[i]; const box = $('#modalBox');
+  if(s.extract==='done'){
+    box.innerHTML = `<h3>شناسنامهٔ ${s.name}</h3><dl class="kv">
+      <dt>نام سیستم</dt><dd>${s.name}</dd><dt>آدرس IP</dt><dd class="mono">${s.ip}</dd>
+      <dt>آدرس MAC</dt><dd class="mono">${s.mac}</dd><dt>سیستم‌عامل</dt><dd>${s.os}</dd>
+      <dt>پردازنده</dt><dd>${s.cpu}</dd><dt>حافظه</dt><dd>${s.ram}</dd>
+      <dt>دیسک</dt><dd>${s.disk}</dd><dt>سریال</dt><dd class="mono">${s.serial}</dd>
+      <dt>آنتی‌ویروس</dt><dd>${s.av}</dd><dt>آخرین اسکن</dt><dd>${new Date().toLocaleString('fa-IR')}</dd></dl>
+      <p class="note">در حالت واقعی این فیلدها در جدول <code>asset_profiles</code> ذخیره و روی شناسنامهٔ سیستم اعمال می‌شوند.</p>`;
+  } else if(s.extract==='error'){
+    box.innerHTML = `<h3>علت شکست استخراج — ${s.name}</h3>
+      <div class="errbox"><b>کد خطا: ${s.errCode}</b><div style="margin-top:6px">اتصال از هیچ‌کدام از مسیرهای DCOM و WinRM برقرار نشد؛ روی سیستم مقصد، دسترسی WMI/DCOM (فایروال) یا WinRM آماده نیست.</div></div>
+      <ul class="remedy">
+        <li>این یعنی حساب، رمز و نام سیستم درست است اما هیچ مسیر شبکه‌ای برای خواندن WMI/CIM باز نیست؛ Domain Admin بودن حساب، به‌تنهایی فایروال خودِ مقصد را باز نمی‌کند.</li>
+        <li>اگر SMB روی مقصد باز است، از دکمهٔ «آماده‌سازی سیستم‌های مقصد» (روش الف) استفاده کنید.</li>
+        <li>اگر همهٔ پورت‌ها بسته‌اند، از Group Policy (روش ب) یا اقدام دستی استفاده کنید.</li>
+      </ul>`;
+  } else {
+    box.innerHTML = `<h3>${s.name}</h3><p class="note">هنوز استخراجی برای این سیستم انجام نشده است. مراحل ۱ تا ۳ را اجرا کنید.</p>`;
+  }
+  box.innerHTML += '<div style="margin-top:14px;text-align:left"><button onclick="document.getElementById(\'modal\').classList.remove(\'open\')">بستن</button></div>';
+  $('#modal').classList.add('open');
+}
+$('#modal').addEventListener('click', e=>{ if(e.target.id==='modal') e.target.classList.remove('open'); });
+
+$('#mSmb').addEventListener('click', ()=>{ method='smb'; $('#mSmb').classList.add('sel'); $('#mGpo').classList.remove('sel'); log('روش آماده‌سازی: SMB + تسک زمان‌بندی‌شده','warn'); });
+$('#mGpo').addEventListener('click', ()=>{ method='gpo'; $('#mGpo').classList.add('sel'); $('#mSmb').classList.remove('sel'); log('روش آماده‌سازی: Group Policy (نیازمند عضویت سرور پنل در دامنه)','warn'); });
+
+$('#btnImport').addEventListener('click', async ()=>{
+  if(busy) return; busy=true; setStep(1);
+  log('LDAP: اتصال به dc01.COMPANY.LOCAL و خواندن کامپیوترهای دامنه…','cmd');
+  await sleep(600);
+  log(`LDAP: ${SYSTEMS.length} رکورد کامپیوتر دریافت شد (شبیه‌سازی)`,'ok');
+  render();
+  $('#btnPing').disabled=false; busy=false;
+});
+$('#btnPing').addEventListener('click', async ()=>{
+  if(busy) return; busy=true; setStep(2);
+  log('Ping sweep روی سیستم‌ها…','cmd');
+  for(const s of SYSTEMS){
+    await sleep(280);
+    s.ping = s.online ? 'online' : 'offline';
+    log(`${s.online ? 'Reply from' : 'Request timed out.'} ${s.ip}  (${s.name})`, s.online?'ok':'err');
+    render();
+  }
+  log(`نتیجه: ${SYSTEMS.filter(s=>s.ping==='online').length} آنلاین، ${SYSTEMS.filter(s=>s.ping==='offline').length} آفلاین`,'info');
+  $('#btnExtract').disabled=false; busy=false;
+});
+async function runExtract(targets){
+  const order = $('#protoOrder').value.split(',');
+  for(const s of targets){
+    if(s.ping!=='online'){ s.extract='skipped'; render(); continue; }
+    s.extract='running'; render();
+    for(const p of order){
+      const open = p==='dcom' ? s.dcom : s.winrm;
+      log(`New-CimSession -ComputerName ${s.name} -Protocol ${p==='dcom'?'Dcom':'Wsman'} … ${open?'OK':'FAILED'}`, open?'ok':'err');
+      await sleep(300);
+      if(open) break;
+    }
+    if(s.dcom || s.winrm){
+      s.extract='done'; s.errCode=null;
+      log(`collect_server_inventory.ps1 → JSON (${s.name}) → ذخیره در asset_profiles + اعمال روی شناسنامه`,'ok');
+    } else {
+      s.extract='error'; s.errCode='all_protocols';
+      log(`ALL_PROTOCOLS_FAILED: ${s.name} — هیچ‌کدام از مسیرهای DCOM و WinRM باز نیست`,'err');
+    }
+    render();
+  }
+}
+$('#btnExtract').addEventListener('click', async ()=>{
+  if(busy) return; busy=true; setStep(3);
+  const targets = SYSTEMS.filter(s=>s.checked);
+  if(!targets.length){ log('هیچ سیستمی انتخاب نشده است.','warn'); busy=false; return; }
+  log(`استخراج برای ${targets.length} سیستم انتخاب‌شده با حساب ${$('#credUser').value} …`,'cmd');
+  await runExtract(targets);
+  const bad = SYSTEMS.filter(s=>s.extract==='error').length;
+  log(bad ? `${bad} سیستم ناموفق ماند — مرحلهٔ ۴ (آماده‌سازی) را اجرا کنید.` : 'همهٔ سیستم‌های انتخاب‌شده با موفقیت استخراج شدند.','info');
+  $('#btnPrepare').disabled = bad===0;
+  $('#btnRetry').disabled = bad===0;
+  busy=false;
+});
+$('#btnPrepare').addEventListener('click', async ()=>{
+  if(busy) return; busy=true; setStep(4);
+  const targets = SYSTEMS.filter(s=>s.extract==='error' && s.ping==='online');
+  if(!targets.length){ log('سیستم ناموفقِ آنلاینی برای آماده‌سازی نیست.','warn'); busy=false; return; }
+  if(method==='smb'){
+    log('═══ روش الف: SMB + تسک زمان‌بندی‌شده ═══','warn');
+    for(const s of targets){
+      log(`Test-NetConnection -ComputerName ${s.name} -Port 445 …`,'cmd'); await sleep(350);
+      if(!s.smb){
+        log(`SMB روی ${s.name} بسته است → آماده‌سازی راه‌دور با این روش ممکن نیست. از روش Group Policy یا اقدام دستی استفاده کنید.`,'err');
+        continue;
+      }
+      log(`SMB روی ${s.name} باز است → ادامه…`,'ok');
+      log(`Copy-Item .\\prepare_remote_target.ps1 \\\\${s.name}\\C$\\ITSM\\prepare_remote_target.ps1`,'cmd'); await sleep(350);
+      log(`schtasks /create /s ${s.name} /tn "ITSM-Prepare" /tr "powershell -File C:\\ITSM\\prepare_remote_target.ps1" /sc once /st 00:00 /f`,'cmd'); await sleep(350);
+      log(`schtasks /run /s ${s.name} /tn "ITSM-Prepare"`,'cmd'); await sleep(350);
+      log(`[روی ${s.name}] Enable-PSRemoting -Force`,'cmd'); await sleep(250);
+      log(`[روی ${s.name}] Enable-NetFirewallRule -DisplayGroup "Windows Management Instrumentation (WMI-In)"`,'cmd'); await sleep(250);
+      log(`[روی ${s.name}] Enable-NetFirewallRule -DisplayGroup "Windows Remote Management"`,'cmd'); await sleep(250);
+      log(`New-CimSession -ComputerName ${s.name} -Protocol Wsman … OK`,'ok');
+      s.dcom=true; s.winrm=true; s.prepared=true;
+      log(`${s.name} آماده شد — مسیرهای DCOM و WinRM باز شدند.`,'ok');
+      render();
+    }
+  } else {
+    log('═══ روش ب: Group Policy ═══','warn');
+    log('Import-Module GroupPolicy','cmd'); await sleep(300);
+    log('New-GPO -Name "ITSM - Enable WinRM and WMI Firewall"','cmd'); await sleep(300);
+    log('Set-GPRegistryValue … AllowAutoConfig = 1 (فعال‌سازی WinRM)','cmd'); await sleep(300);
+    log('New-GPLink -Target "OU=Computers,DC=COMPANY,DC=LOCAL"','cmd'); await sleep(300);
+    log('درخواست به‌روزرسانی خط‌مشی روی مقصدها (gpupdate /force) — در حالت واقعی در به‌روزرسانی بعدی (~۹۰ دقیقه) یا ریبوت اعمال می‌شود؛ اینجا برای شبیه‌سازی فوری اعمال می‌کنیم.','info'); await sleep(500);
+    for(const s of targets){
+      s.dcom=true; s.winrm=true; s.prepared=true;
+      log(`${s.name}: خط‌مشی اعمال شد → DCOM و WinRM باز شدند.`,'ok');
+      render();
+    }
+  }
+  $('#btnRetry').disabled=false; busy=false;
+});
+$('#btnRetry').addEventListener('click', async ()=>{
+  if(busy) return; busy=true; setStep(5);
+  const targets = SYSTEMS.filter(s=>s.extract==='error');
+  log(`تلاش دوباره برای ${targets.length} سیستم ناموفق…`,'cmd');
+  await runExtract(targets);
+  const bad = SYSTEMS.filter(s=>s.extract==='error').length;
+  log(bad ? `هنوز ${bad} سیستم ناموفق است.` : 'همهٔ سیستم‌ها با موفقیت استخراج شدند — شناسنامه‌ها پر شدند.','ok');
+  $('#btnPrepare').disabled = bad===0; $('#btnRetry').disabled = bad===0;
+  busy=false;
+});
+$('#btnReset').addEventListener('click', ()=>{
+  SYSTEMS.forEach(s=>{ s.ping='—'; s.extract='—'; s.prepared=false; s.errCode=null; s.checked=true;
+    s.dcom = ['ADMINIT2','PC-025','PC-029'].includes(s.name);
+    s.winrm = ['ADMINIT2','PC-024','PC-029'].includes(s.name);
+    s.smb = !['PC-026','PC-027'].includes(s.name);
+  });
+  $('#console').innerHTML=''; setStep(0); render();
+  ['btnPing','btnExtract','btnPrepare','btnRetry'].forEach(id=>$('#'+id).disabled=true);
+  log('شبیه‌سازی از اول شروع شد.','info');
+});
+$('#chkAll').addEventListener('change', e=>{ SYSTEMS.forEach(s=>s.checked=e.target.checked); render(); });
+
+render();
+log('محیط شبیه‌سازی آماده است. دکمهٔ «ورود کامپیوترهای دامنه» را بزنید.','info');
+</script>
+</body>
+</html>
