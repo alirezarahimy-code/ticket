@@ -38,6 +38,10 @@ if (is_file(__DIR__ . '/food-ticket-order-source.php')) {
 if (is_file(__DIR__ . '/food-ticket-web-host.php')) {
     require_once __DIR__ . '/food-ticket-web-host.php';
 }
+// آزمون جامع worker/چاپ/مدیریت — همان منطقی که ابزار CLI استفاده می‌کند.
+if (is_file(__DIR__ . '/food-ticket-selftest.php')) {
+    require_once __DIR__ . '/food-ticket-selftest.php';
+}
 if (is_file(__DIR__ . '/food-ticket-templates.php')) {
     require_once __DIR__ . '/food-ticket-templates.php';
 }
@@ -242,6 +246,8 @@ function food_ticket_route_allowed(array $user, string $route): bool
         'templates/group-design' => 'food.design',
         'health' => 'food.health',
         'self-test' => 'food.health',
+        // آزمون جامع worker/چاپ/مدیریت، در انتهای صفحهٔ «اتصال پایگاه‌ها» — فقط‌خواندنی.
+        'worker-selftest' => 'food.db',
         'process' => 'food.manual_attendance',
         'reprint-errors' => 'food.printer',
         // غیبت روزانه بخشی از گروه‌های غذاست؛ خواندن با food.groups و هر ویرایش با food.groups_edit.
@@ -5494,6 +5500,21 @@ function food_ticket_api_handle(string $route, array $user): never
 
         if ($_SERVER['REQUEST_METHOD'] === 'POST' && $route === 'self-test') {
             food_ticket_api_json(food_ticket_api_self_test());
+        }
+        // آزمون جامع Worker/چاپ/مدیریت — همان کتابخانه‌ای که CLI استفاده می‌کند.
+        // فقط‌خواندنی: هیچ فیشی چاپ نمی‌شود و هیچ تنظیمی تغییر نمی‌کند.
+        if (in_array($_SERVER['REQUEST_METHOD'] ?? 'GET', ['GET', 'POST'], true) && $route === 'worker-selftest') {
+            if (!function_exists('food_ticket_selftest_run')) {
+                food_ticket_api_json(['error' => 'کتابخانهٔ آزمون (food-ticket-selftest.php) بارگذاری نشد.'], 500);
+            }
+            $payload = food_ticket_selftest_run([
+                'config' => food_ticket_config(true),
+                'source' => 'panel',
+                'dry_print' => true,
+            ]);
+            $payload['text'] = food_ticket_selftest_text($payload);
+            $payload['ok'] = (int) ($payload['verdict']['counts']['fail'] ?? 0) === 0;
+            food_ticket_api_json($payload);
         }
 
         food_ticket_api_json(['error' => 'مسیر API چاپ فیش پیدا نشد.'], 404);

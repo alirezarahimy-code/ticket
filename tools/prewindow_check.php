@@ -66,11 +66,14 @@ $line('║  نسخهٔ ' . PRE_VERSION . ' — فقط‌خواندنی، بدو�
 $line('╚══════════════════════════════════════════════════════════════╝');
 $line(' زمان اجرا: ' . date('Y-m-d H:i:s') . ' | ریشه: ' . $root);
 
+
 require $root . '/bootstrap.php';
 foreach (['food-ticket-window.php', 'food-ticket.php', 'food-ticket-runtime.php', 'food-ticket-engine.php', 'food-ticket-auto-receipts.php', 'food-ticket-netprint.php'] as $f) {
     $p = $root . '/' . $f;
     if (is_file($p)) { require_once $p; }
 }
+
+
 
 // ── ۱) پنجرهٔ کاری: فردا ساعت ۱۱ در باز می‌شود؟ ────────────────────────
 $line("\n۱) پنجرهٔ کاری — «فردا ساعت ۱۱ در باز می‌شود؟»");
@@ -101,6 +104,24 @@ if ($atRaw !== '') {
     }
 }
 $targetAt ??= $nowTz;
+
+// ── حالت مشترک: خروجی دقیقاً همان گزارش پنل (حکم یکسان، بدون دو پیاده‌سازی) ──
+$shared = in_array('--shared', $args, true);
+if ($shared) {
+    $lib = $root . '/food-ticket-selftest.php';
+    if (!is_file($lib)) {
+        fwrite(STDERR, "[FAIL] food-ticket-selftest.php پیدا نشد — بستهٔ ۱.۶۳ را کامل کپی کنید.\n");
+        exit(1);
+    }
+    require_once $lib;
+    $result = food_ticket_selftest_run([
+        'source' => 'cli',
+        'dry_print' => $dryPrint,
+        'at' => $targetAt,
+    ]);
+    $line(food_ticket_selftest_text($result));
+    exit((int) ($result['verdict']['counts']['fail'] ?? 0) === 0 ? 0 : 1);
+}
 
 if (!function_exists('food_ticket_window_state')) {
     $bad('تابع food_ticket_window_state پیدا نشد — food-ticket-window.php بارگذاری نشد.');
