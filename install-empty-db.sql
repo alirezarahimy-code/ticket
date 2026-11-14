@@ -1114,6 +1114,9 @@ CREATE TABLE IF NOT EXISTS system_logs (
     context VARCHAR(120) NULL,
     message TEXT NULL,
     meta_json JSON NULL,
+    -- هم‌تراز با migrations/034 (تشدید و برچسب شدت)
+    escalation_count INT UNSIGNED NOT NULL DEFAULT 0,
+    escalation_label VARCHAR(32) NULL,
     user_id INT UNSIGNED NULL,
     request_uri VARCHAR(255) NULL,
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,

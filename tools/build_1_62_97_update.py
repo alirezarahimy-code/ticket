@@ -43,6 +43,14 @@ FILES = [
     "tools/verify_1_62_97.php",
     "tools/test_1_62_97_drift_offline.php",
     "tools/test_release_notes_offline.php",
+    # تفسیر هشدارهای سلامت + اجرای ثبت‌شدهٔ مهاجرت ۰۳۳
+    "tools/explain_alarms.php",
+    "tools/apply_migration_033.php",
+    "tools/test_explain_alarms_offline.php",
+    "tools/test_schema_baseline_offline.php",
+    # هم‌ترازی اسکیمای تجمیعی با مهاجرت‌ها (رفع هشدار کاذب «مهاجرت اجرا نشده»)
+    "schema.sql",
+    "install-empty-db.sql",
     # کارت «تغییرات سامانه»: ورودی ۱.۶۲.۹۷ + تاریخچهٔ نسخه‌ها
     "lib/release-notes.php",
     # «تغییرات این به‌روزرسانی» داخل خود پنل غذا (مستقل از index.php/۱.۶۳)

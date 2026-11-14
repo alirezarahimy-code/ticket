@@ -1093,6 +1093,9 @@ CREATE TABLE IF NOT EXISTS system_logs (
     context VARCHAR(120) NULL,
     message TEXT NULL,
     meta_json JSON NULL,
+    -- هم‌تراز با migrations/034 (تشدید و برچسب شدت)
+    escalation_count INT UNSIGNED NOT NULL DEFAULT 0,
+    escalation_label VARCHAR(32) NULL,
     user_id INT UNSIGNED NULL,
     request_uri VARCHAR(255) NULL,
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -1565,5 +1568,13 @@ INSERT IGNORE INTO schema_updates (version, migration) VALUES
     ('1.62.88', '029-activity-result-default-unknown.sql'),
     ('1.62.88', '030-logging-notification-idempotency-and-ticket-history.sql'),
     ('1.62.88', '031-food-worker-window.sql'),
-    ('1.62.88', '032-schema-updates-baseline.sql');
+    ('1.62.88', '032-schema-updates-baseline.sql'),
+    -- ۰۳۳ و ۰۳۴ در اسکیمای تجمیعی اعمال شده‌اند (۰۳۴ ستون‌های escalation_* را می‌سازد،
+    -- ۰۳۳ فقط backfill داده است و روی نصب تازه کاری ندارد). بدون این دو خط، گارد
+    -- مهاجرت‌ها روی هر نصب تازه هشدار کاذب «مهاجرت اجرا نشده» می‌داد.
+    ('1.62.88', '033-logging-legacy-context-collation.sql'),
+    ('1.62.88', '034-logging-escalation.sql'),
+    -- ۰۳۶ و ۰۳۷ هم در اسکیما اعمال شده‌اند (ستون‌های leftover_* و backfill تحویل).
+    ('1.62.95', '036-food-meal-leftover-disposition.sql'),
+    ('1.62.95', '037-food-auto-receipts-delivered.sql');
 
