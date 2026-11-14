@@ -1095,12 +1095,14 @@ CREATE TABLE IF NOT EXISTS system_logs (
     meta_json JSON NULL,
     -- هم‌تراز با migrations/034 (تشدید و برچسب شدت)
     escalation_count INT UNSIGNED NOT NULL DEFAULT 0,
-    escalation_label VARCHAR(32) NULL,
+    escalation_label VARCHAR(64) NULL,
     user_id INT UNSIGNED NULL,
     request_uri VARCHAR(255) NULL,
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     INDEX idx_system_logs_created (created_at),
     INDEX idx_system_logs_level (level),
+    -- هم‌تراز با migrations/034 (کوئری خلاصهٔ هوشمند: سطح + زمان)
+    INDEX idx_system_logs_level_time (level, created_at),
     UNIQUE KEY uq_system_event_id (event_id),
     KEY idx_system_logs_request (request_id),
     KEY idx_system_logs_fingerprint_time (fingerprint, created_at),
@@ -1534,6 +1536,27 @@ CREATE TABLE IF NOT EXISTS schema_updates (
     UNIQUE KEY uq_schema_update (version, migration)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+-- برنامهٔ نوبت‌های رسیدگی کارشناسان (مرکز درخواست‌ها — فاز ۴)
+-- همتای افزایشی migrations/035-request-center-appointments.sql؛ هر دو idempotent
+-- هستند تا نصب تازه و ارتقاء به یک نتیجه برسند.
+CREATE TABLE IF NOT EXISTS request_center_appointments (
+    id               INT UNSIGNED      NOT NULL AUTO_INCREMENT,
+    ticket_id        INT UNSIGNED      NOT NULL,
+    assignee_id      INT UNSIGNED      NOT NULL,
+    starts_at        DATETIME          NOT NULL,
+    ends_at          DATETIME          NOT NULL,
+    kind             VARCHAR(24)       NOT NULL DEFAULT 'work',
+    status           VARCHAR(16)       NOT NULL DEFAULT 'planned',
+    note             VARCHAR(500)      NULL,
+    created_by       INT UNSIGNED      NOT NULL,
+    created_at       DATETIME          NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at       DATETIME          NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    PRIMARY KEY (id),
+    KEY idx_rc_appt_assignee_time (assignee_id, starts_at, ends_at),
+    KEY idx_rc_appt_ticket (ticket_id),
+    KEY idx_rc_appt_status_time (status, starts_at)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 -- نصب تازه از اسکیما‌ی تجمیعی ساخته می‌شود؛ مهاجرت‌های تاریخی در همین اسکیما اعمال شده‌اند.
 -- ثبت baseline مانع گزارش کاذب «مهاجرت اجرا نشده» روی نصب تازه می‌شود.
 INSERT IGNORE INTO schema_updates (version, migration) VALUES
@@ -1576,5 +1599,8 @@ INSERT IGNORE INTO schema_updates (version, migration) VALUES
     ('1.62.88', '034-logging-escalation.sql'),
     -- ۰۳۶ و ۰۳۷ هم در اسکیما اعمال شده‌اند (ستون‌های leftover_* و backfill تحویل).
     ('1.62.95', '036-food-meal-leftover-disposition.sql'),
-    ('1.62.95', '037-food-auto-receipts-delivered.sql');
+    ('1.62.95', '037-food-auto-receipts-delivered.sql'),
+    -- ۰۳۵: جدولش را همین اسکیما چند خط بالاتر می‌سازد؛ بدون این ردیف، نصب تازه
+    -- هشدار کاذب «۰۳۵ اجرا نشده» می‌داد. فایل مهاجرت هم idempotent است.
+    ('1.63', '035-request-center-appointments.sql');
 

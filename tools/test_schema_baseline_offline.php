@@ -84,22 +84,37 @@ foreach ($files as $path) {
         $unseededStructural[] = $name;
     }
 }
-// ۰۳۵ متعلق به بستهٔ ۱.۶۳ است که عمداً در اسکیما/بستهٔ غذا نیست؛ فقط بعد از نصب
-// ۱.۶۳ فایلش روی دیسک می‌آید و صفحهٔ به‌روزرسانی همان بسته آن را ثبت می‌کند.
-// اگر آن را هم اینجا لازم بدانیم، روی سامانهٔ ۱.۶۲.x هشدار کاذب می‌سازیم.
-$knownOtherRelease = ['035-request-center-appointments.sql'];
-$unseededFoodRelevant = array_values(array_diff($unseededStructural, $knownOtherRelease));
+// قاعدهٔ کلی — بدون استثنا: هر مهاجرت ساختاریِ روی دیسک باید در baseline ثبت شده
+// باشد. «ثبت‌نشده ماندن» همان هشدار کاذب است، حتی اگر مهاجرت مال خط دیگری (۱.۶۳)
+// باشد؛ چون فایلش به‌هرحال روی همین دیسک نشسته و گارد مهاجرت‌ها آن را می‌بیند.
 check(
-    'هیچ مهاجرت ساختاریِ ثبت‌نشده‌ای (مرتبط با این خط) نمانده',
-    $unseededFoodRelevant === [],
-    implode(', ', $unseededFoodRelevant)
-);
-check(
-    '۰۳۵ فقط متعلق به ۱.۶۳ است و در این بسته لازم نیست',
-    (bool) preg_match('/035-request-center-appointments\\.sql$/', implode(',', $unseededStructural))
-    || in_array('035-request-center-appointments.sql', $unseededStructural, true),
+    'هیچ مهاجرت ساختاریِ ثبت‌نشده‌ای نمانده',
+    $unseededStructural === [],
     implode(', ', $unseededStructural)
 );
+
+// ۰۳۵: جدولش را install-empty-db می‌سازد ولی ردیف ثبتش نبود => هشدار کاذب.
+// فقط وقتی سنجیده می‌شود که فایلش (یا جدولش) در همین درخت باشد؛ در بستهٔ خط ۱.۶۲
+// هیچ‌کدام نیست و همان‌جا هم هشدار کاذبی در کار نیست.
+$has035File = is_file('migrations/035-request-center-appointments.sql');
+$has035Table = strpos($empty, 'request_center_appointments') !== false
+    || strpos($schema, 'request_center_appointments') !== false;
+if ($has035File || $has035Table) {
+    check(
+        'install-empty-db.sql مهاجرت ۰۳۵ را ثبت کرده',
+        $seeded($empty, '035-request-center-appointments.sql')
+    );
+    check(
+        'schema.sql مهاجرت ۰۳۵ را ثبت کرده',
+        $seeded($schema, '035-request-center-appointments.sql')
+    );
+    check(
+        'جدول request_center_appointments واقعاً در اسکیما هست (پس ثبت ۰۳۵ راست است)',
+        $has035Table
+    );
+} else {
+    check('۰۳۵ در این درخت نیست (خط ۱.۶۲) — ثبت‌نشدنش هشدار کاذب نمی‌سازد', true);
+}
 
 /* ── ۴) هم‌ترازی دو فایل اسکیما در baseline ───────────────────────────── */
 $countSchema = preg_match_all("/\\('1\\.62\\.[0-9]+', '[0-9]{3}-/", $schema);

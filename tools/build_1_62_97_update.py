@@ -13,7 +13,7 @@
   • tools/prewindow_check.php  — پرچم --shared: دقیقاً همان گزارش پنل
   • tools/verify_1_62_97.php   — تأیید ۱۰ ثانیه‌ای سر جایش بودن کارت پس از نصب
   • tools/test_1_62_97_drift_offline.php — اثبات نبود عقب‌گرد (دریفت) نسبت به تولید
-  • tools/test_release_notes_offline.php — تست کارت/تاریخچهٔ تغییرات
+  • (test_release_notes_offline.php در بسته نیست — به index.php ۱.۶۳ گره خورده)
   • lib/release-notes.php     — ورودی ۱.۶۲.۹۷ در کارت + تاریخچهٔ نسخه‌ها (نه فقط نسخهٔ جاری)
   • CHANGE-REPORT + VERSION
 """
@@ -42,20 +42,55 @@ FILES = [
     "tools/prewindow_check.php",
     "tools/verify_1_62_97.php",
     "tools/test_1_62_97_drift_offline.php",
-    "tools/test_release_notes_offline.php",
+    # توجه: test_release_notes_offline.php عمداً حمل نمی‌شود — سه بررسی‌اش به
+    # index.php و فوتر ۱.۶۳ گره خورده‌اند و در درخت ۱.۶۲ شکست می‌خورند."
     # تفسیر هشدارهای سلامت + اجرای ثبت‌شدهٔ مهاجرت ۰۳۳
     "tools/explain_alarms.php",
     "tools/apply_migration_033.php",
     "tools/test_explain_alarms_offline.php",
     "tools/test_schema_baseline_offline.php",
-    # هم‌ترازی اسکیمای تجمیعی با مهاجرت‌ها (رفع هشدار کاذب «مهاجرت اجرا نشده»)
-    "schema.sql",
-    "install-empty-db.sql",
     # کارت «تغییرات سامانه»: ورودی ۱.۶۲.۹۷ + تاریخچهٔ نسخه‌ها
     "lib/release-notes.php",
     # «تغییرات این به‌روزرسانی» داخل خود پنل غذا (مستقل از index.php/۱.۶۳)
     "food-ticket-release-notes.php",
 ]
+
+# اسکیمای خط ۱.۶۲ — نه شاخهٔ ۱.۶۳.
+# دلیل: شاخهٔ کاری، درخت ۱.۶۳ است و `schema.sql`/`install-empty-db.sql` آن ستون
+# `rejected_at` و جدول `request_center_appointments` را دارند. حمل آن‌ها در بستهٔ
+# ۱.۶۲.۹۷ یعنی نشت قلمرو ۱.۶۳ به خط غذا. پس این دو فایل از درخت تولید ۱.۶۲ ساخته
+# می‌شوند و فقط ردیف ثبت مهاجرت ۰۳۳ به baseline آن‌ها اضافه می‌شود.
+SCHEMA_LINE_REF = "arena/22d4eba7-1.62.95-main"
+LINE_SCHEMA_FILES = ("schema.sql", "install-empty-db.sql")
+SCHEMA_ANCHOR = "    ('1.62.95', '032-schema-updates-baseline.sql'),\n"
+SCHEMA_SEED_033 = (
+    "    -- ۰۳۳ فقط backfill داده است (UPDATE) و روی نصب تازه کاری ندارد. فایلش\n"
+    "    -- از بسته‌های ۱.۶۲.۸۳/۸۸/۹۴/۹۵ روی دیسک می‌آید و همان‌ها اجرایش کرده‌اند؛\n"
+    "    -- بدون این ردیف گارد مهاجرت‌ها روی هر نصب تازه هشدار کاذب می‌داد.\n"
+    "    ('1.62.88', '033-logging-legacy-context-collation.sql'),\n"
+)
+
+
+def line_schema_payload() -> dict[str, bytes]:
+    """schema.sql / install-empty-db.sql خط ۱.۶۲ + ثبت ۰۳۳؛ بدون هیچ اثر ۱.۶۳."""
+    out: dict[str, bytes] = {}
+    for rel in LINE_SCHEMA_FILES:
+        try:
+            raw = subprocess.check_output(
+                ["git", "show", f"{SCHEMA_LINE_REF}:{rel}"], cwd=ROOT
+            ).decode("utf-8")
+        except subprocess.CalledProcessError:
+            raise SystemExit(f"اسکیمای خط ۱.۶۲ پیدا نشد: {rel}") from None
+        if SCHEMA_ANCHOR not in raw:
+            raise SystemExit(f"نقطهٔ لنگر baseline در {rel} پیدا نشد.")
+        if "033-logging-legacy-context-collation.sql" not in raw:
+            raw = raw.replace(SCHEMA_ANCHOR, SCHEMA_ANCHOR + SCHEMA_SEED_033, 1)
+        for marker in ("rejected_at", "request_center_appointments"):
+            if marker in raw:
+                raise SystemExit(f"اثر ۱.۶۳ در {rel}: {marker}")
+        out[rel] = raw.encode("utf-8")
+    return out
+
 
 TITLE = (
     "آزمون جامع Worker/چاپ/مدیریت داخل پنل — در انتهای «تنظیمات سیستم ← اتصال پایگاه‌ها» "
@@ -172,8 +207,25 @@ C:\\xampp\\php\\php.exe tools\\prewindow_check.php --shared
 | `food-ticket.php` | بارگذاری کتابخانه + مسیر API `worker-selftest` با مجوز `food.db` |
 | `food-ticket-web/index.html` | کارت آزمون در انتهای صفحهٔ «اتصال پایگاه‌ها» + سیم‌کشی دکمه‌ها |
 | `tools/prewindow_check.php` | پرچم `--shared` برای خروجی یکسان با پنل |
+| `schema.sql` · `install-empty-db.sql` | **خط ۱.۶۲** + ثبت مهاجرت ۰۳۳ در baseline |
+| `tools/explain_alarms.php` | **جدید** — تفسیر چهار هشدار سلامت: کدام طبیعی، کدام ایراد واقعی |
+| `tools/apply_migration_033.php` | **جدید** — ثبت امن ۰۳۳ (`--dry-run` پیش‌فرض، `--apply` صریح) |
+| `tools/test_schema_baseline_offline.php` | **جدید** — گارد ضدبازگشت هشدار کاذب (۲۷/۲۷) |
+| `tools/test_explain_alarms_offline.php` | **جدید** — اثبات فقط‌خواندنی بودن ابزار (۲۴/۲۴) |
+| `lib/release-notes.php` · `food-ticket-release-notes.php` | کارت «تغییرات این به‌روزرسانی» |
+| `tools/test_1_62_97_drift_offline.php` | گارد دریفت — اثبات نبود عقب‌گرد (۲۹/۲۹) |
+| `tools/verify_1_62_97.php` | تأیید ۱۰ ثانیه‌ای نصب |
 
-بدون فایل حذف‌شده، بدون مهاجرت، بدون تغییر اسکیما، بدون تغییر مسیر چاپ یا ثبت فیش.
+بدون فایل حذف‌شده، بدون مهاجرت اجرایی، بدون تغییر مسیر چاپ یا ثبت فیش.
+
+### ۶-۰) دو نکتهٔ مهم دربارهٔ `schema.sql`
+
+1. **این فایل از خط ۱.۶۲ می‌آید، نه از شاخهٔ ۱.۶۳.** اگر نسخهٔ شاخه حمل می‌شد،
+   ستون `rejected_at` و جدول `request_center_appointments` (قلمرو ۱.۶۳) به خط غذا
+   نشت می‌کرد.
+2. **تنها تغییرش یک ردیف است:** ثبت `033-logging-legacy-context-collation.sql` در
+   baseline. با این ردیف، گارد مهاجرت‌ها روی هیچ نصب تازه‌ای هشدار کاذب
+   «مهاجرت اجرا نشده» نمی‌دهد. تفاوت دقیق با نسخهٔ ۱.۶۲.۹۵ همین است — نه بیشتر.
 
 ---
 
@@ -184,6 +236,9 @@ C:\\xampp\\php\\php.exe tools\\prewindow_check.php --shared
 | `php tools/test_selftest_offline.php` (منطق کتابخانه) | **۴۳/۴۳** |
 | `node tests/test_selftest_panel_render.js` (رندر پنل + escape امنیتی) | **۳۲/۳۲** |
 | `php tools/test_prewindow_check_offline.php` (بدون رگرسیون) | **۱۶/۱۶** |
+| `php tools/test_schema_baseline_offline.php` (هم‌ترازی اسکیما/مهاجرت) | **۲۷/۲۷** |
+| `php tools/test_explain_alarms_offline.php` (ابزار تفسیر، فقط‌خواندنی) | **۲۴/۲۴** |
+| `php tools/test_1_62_97_drift_offline.php` (اثبات نبود عقب‌گرد) | **۲۹/۲۹** |
 
 پوشش تست کتابخانه: «درست بیکار» FAIL نمی‌دهد · صف مانده در پنجرهٔ باز FAIL می‌دهد ·
 صف مانده بیرون از پنجره فقط WARN می‌دهد · پردازشگر غیرفعال FAIL می‌دهد ·
@@ -246,6 +301,8 @@ def main() -> None:
         if not p.is_file():
             raise SystemExit(f"missing required file: {rel}")
         payload[rel] = p.read_bytes()
+    # اسکیمای خط ۱.۶۲ (نه شاخهٔ ۱.۶۳) + ثبت ۰۳۳
+    payload.update(line_schema_payload())
 
     report = build_report().encode("utf-8")
     payload[REPORT_NAME] = report

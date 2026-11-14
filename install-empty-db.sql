@@ -1116,12 +1116,14 @@ CREATE TABLE IF NOT EXISTS system_logs (
     meta_json JSON NULL,
     -- هم‌تراز با migrations/034 (تشدید و برچسب شدت)
     escalation_count INT UNSIGNED NOT NULL DEFAULT 0,
-    escalation_label VARCHAR(32) NULL,
+    escalation_label VARCHAR(64) NULL,
     user_id INT UNSIGNED NULL,
     request_uri VARCHAR(255) NULL,
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     INDEX idx_system_logs_created (created_at),
     INDEX idx_system_logs_level (level),
+    -- هم‌تراز با migrations/034 (کوئری خلاصهٔ هوشمند: سطح + زمان)
+    INDEX idx_system_logs_level_time (level, created_at),
     UNIQUE KEY uq_system_event_id (event_id),
     KEY idx_system_logs_request (request_id),
     KEY idx_system_logs_fingerprint_time (fingerprint, created_at),
@@ -1637,5 +1639,16 @@ INSERT IGNORE INTO schema_updates (version, migration) VALUES
     ('1.62.88', '029-activity-result-default-unknown.sql'),
     ('1.62.88', '030-logging-notification-idempotency-and-ticket-history.sql'),
     ('1.62.88', '031-food-worker-window.sql'),
-    ('1.62.88', '032-schema-updates-baseline.sql');
+    ('1.62.88', '032-schema-updates-baseline.sql'),
+    -- ۰۳۳ و ۰۳۴ در اسکیمای تجمیعی اعمال شده‌اند (۰۳۴ ستون‌های escalation_* را می‌سازد،
+    -- ۰۳۳ فقط backfill داده است و روی نصب تازه کاری ندارد). بدون این دو خط، گارد
+    -- مهاجرت‌ها روی هر نصب تازه هشدار کاذب «مهاجرت اجرا نشده» می‌داد.
+    ('1.62.88', '033-logging-legacy-context-collation.sql'),
+    ('1.62.88', '034-logging-escalation.sql'),
+    -- ۰۳۶ و ۰۳۷ هم در اسکیما اعمال شده‌اند (ستون‌های leftover_* و backfill تحویل).
+    ('1.62.95', '036-food-meal-leftover-disposition.sql'),
+    ('1.62.95', '037-food-auto-receipts-delivered.sql'),
+    -- ۰۳۵: جدولش را همین فایل در بالا می‌سازد (request_center_appointments)؛
+    -- بدون این ردیف، نصب تازه از install-empty-db هشدار کاذب «۰۳۵ اجرا نشده» می‌داد.
+    ('1.63', '035-request-center-appointments.sql');
 

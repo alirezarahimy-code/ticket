@@ -80,8 +80,25 @@ C:\xampp\php\php.exe tools\prewindow_check.php --shared
 | `food-ticket.php` | بارگذاری کتابخانه + مسیر API `worker-selftest` با مجوز `food.db` |
 | `food-ticket-web/index.html` | کارت آزمون در انتهای صفحهٔ «اتصال پایگاه‌ها» + سیم‌کشی دکمه‌ها |
 | `tools/prewindow_check.php` | پرچم `--shared` برای خروجی یکسان با پنل |
+| `schema.sql` · `install-empty-db.sql` | **خط ۱.۶۲** + ثبت مهاجرت ۰۳۳ در baseline |
+| `tools/explain_alarms.php` | **جدید** — تفسیر چهار هشدار سلامت: کدام طبیعی، کدام ایراد واقعی |
+| `tools/apply_migration_033.php` | **جدید** — ثبت امن ۰۳۳ (`--dry-run` پیش‌فرض، `--apply` صریح) |
+| `tools/test_schema_baseline_offline.php` | **جدید** — گارد ضدبازگشت هشدار کاذب (۲۷/۲۷) |
+| `tools/test_explain_alarms_offline.php` | **جدید** — اثبات فقط‌خواندنی بودن ابزار (۲۴/۲۴) |
+| `lib/release-notes.php` · `food-ticket-release-notes.php` | کارت «تغییرات این به‌روزرسانی» |
+| `tools/test_1_62_97_drift_offline.php` | گارد دریفت — اثبات نبود عقب‌گرد (۲۹/۲۹) |
+| `tools/verify_1_62_97.php` | تأیید ۱۰ ثانیه‌ای نصب |
 
-بدون فایل حذف‌شده، بدون مهاجرت، بدون تغییر اسکیما، بدون تغییر مسیر چاپ یا ثبت فیش.
+بدون فایل حذف‌شده، بدون مهاجرت اجرایی، بدون تغییر مسیر چاپ یا ثبت فیش.
+
+### ۶-۰) دو نکتهٔ مهم دربارهٔ `schema.sql`
+
+1. **این فایل از خط ۱.۶۲ می‌آید، نه از شاخهٔ ۱.۶۳.** اگر نسخهٔ شاخه حمل می‌شد،
+   ستون `rejected_at` و جدول `request_center_appointments` (قلمرو ۱.۶۳) به خط غذا
+   نشت می‌کرد.
+2. **تنها تغییرش یک ردیف است:** ثبت `033-logging-legacy-context-collation.sql` در
+   baseline. با این ردیف، گارد مهاجرت‌ها روی هیچ نصب تازه‌ای هشدار کاذب
+   «مهاجرت اجرا نشده» نمی‌دهد. تفاوت دقیق با نسخهٔ ۱.۶۲.۹۵ همین است — نه بیشتر.
 
 ---
 
@@ -92,6 +109,9 @@ C:\xampp\php\php.exe tools\prewindow_check.php --shared
 | `php tools/test_selftest_offline.php` (منطق کتابخانه) | **۴۳/۴۳** |
 | `node tests/test_selftest_panel_render.js` (رندر پنل + escape امنیتی) | **۳۲/۳۲** |
 | `php tools/test_prewindow_check_offline.php` (بدون رگرسیون) | **۱۶/۱۶** |
+| `php tools/test_schema_baseline_offline.php` (هم‌ترازی اسکیما/مهاجرت) | **۲۷/۲۷** |
+| `php tools/test_explain_alarms_offline.php` (ابزار تفسیر، فقط‌خواندنی) | **۲۴/۲۴** |
+| `php tools/test_1_62_97_drift_offline.php` (اثبات نبود عقب‌گرد) | **۲۹/۲۹** |
 
 پوشش تست کتابخانه: «درست بیکار» FAIL نمی‌دهد · صف مانده در پنجرهٔ باز FAIL می‌دهد ·
 صف مانده بیرون از پنجره فقط WARN می‌دهد · پردازشگر غیرفعال FAIL می‌دهد ·
