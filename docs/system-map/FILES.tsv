@@ -558,7 +558,7 @@ tests/test_logging_integrity_late_arrival.php	tests	26	1803
 tests/test_logging_integrity_offline.php	tests	35	2369
 tests/test_logging_integrity_static.py	tests	32	1564
 tests/test_logging_issue_aggregator.php	tests	108	5557
-tests/test_logging_mysql_integration.php	tests	255	17404
+tests/test_logging_mysql_integration.php	tests	258	17603
 tests/test_logging_phase56_static.py	tests	29	1592
 tests/test_logging_phase73_regressions.php	tests	33	2829
 tests/test_logging_phase74_features.php	tests	30	2866
