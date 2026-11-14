@@ -9,6 +9,8 @@ declare(strict_types=1);
  * و هم ورودی مستقل modules/request-center بتوانند همان صفحه‌ها را بدون front controller اجرا کنند.
  */
 
+require_once __DIR__ . '/release-notes.php';
+
 function render_header(string $title, ?array $user = null): void
 {
     global $page;
@@ -206,7 +208,8 @@ function render_footer(): void
     if ($layoutUser && function_exists('admin_layout_design_is_admin') && admin_layout_design_is_admin($layoutUser)) {
         echo '<script defer src="assets/admin-layout-design.js?v=10"></script>';
     }
-    echo '</div><footer class="footer">' . e($appName) . ' • نسخه سازمانی فارسی • سازنده سامانه: Ali.r.Rahimi • نسخهٔ سامانه ' . e(app_version()) . '</footer></div><script nonce="' . e(csp_nonce()) . '">window.ITSM_HOLIDAYS = ';
+    $footerChangelog = current_user() ? ' <a class="footer-link" href="index.php?page=release-notes">تغییرات سامانه</a> •' : '';
+    echo '</div><footer class="footer">' . e($appName) . ' • نسخه سازمانی فارسی • سازنده سامانه: Ali.r.Rahimi •' . $footerChangelog . ' نسخهٔ سامانه ' . e(app_version()) . '</footer></div><script nonce="' . e(csp_nonce()) . '">window.ITSM_HOLIDAYS = ';
     try {
         $__h = db()->query("SELECT holiday_date, title FROM holidays WHERE is_active = 1")->fetchAll();
         $__out = [];

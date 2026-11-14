@@ -955,6 +955,16 @@ if ($page === 'help') {
     exit;
 }
 
+if ($page === 'release-notes') {
+    // «تغییرات سامانه» — صفحهٔ عمومی برای هر کاربر واردشده (تصمیم مالک ۲۰۲۶-۱۱-۱۴):
+    // بدون هیچ مجوز اضافه؛ محتوا از lib/release-notes.php (source of truth نسخه) می‌خواند.
+    $releaseNotesUser = require_login();
+    render_header('تغییرات سامانه', $releaseNotesUser);
+    echo release_notes_page_html();
+    render_footer();
+    exit;
+}
+
 if ($page === 'notifications' && $user && !user_can($user, 'notif.view')) {
     security_log_access_denied($user, 'notif.view', 'notifications');
     http_response_code(403);
@@ -2423,6 +2433,7 @@ if (is_array($rcCounts)) {
 }
 render_header('داشبورد', $user);
 $cdDvdReady = cd_dvd_available();
+echo release_notes_dashboard_card();
 echo '<section class="dashboard-hero"><div><span class="eyebrow">' . ($isStaff ? 'مرکز کنترل پشتیبانی' : 'فضای درخواست‌های شما') . '</span><h1>سلام ' . e($user['full_name']) . '،<br><strong>چه کمکی از ما می‌خواهید؟</strong></h1><p>درخواست جدید ثبت کنید یا وضعیت درخواست‌های قبلی را دنبال کنید؛ بقیهٔ بخش‌ها در «دسترسی سریع» پایین صفحه است.</p></div><a class="button hero-button" href="request-center.php?page=new-ticket"><span>＋</span> ثبت درخواست جدید</a></section>';
 if (is_array($rcCounts)) {
     $waiting = (int) ($rcCounts['waiting_user'] ?? 0) + (int) ($rcCounts['pending'] ?? 0);

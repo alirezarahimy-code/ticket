@@ -179,7 +179,7 @@ assets/particle-settings.js	assets	157	5957
 assets/server-sort.js	assets	66	2983
 assets/style.css	assets	1865	203803
 assets/theme-mode.css	assets	251	22017
-assets/topbar-chrome.css	assets	17	1470
+assets/topbar-chrome.css	assets	20	1768
 assets/traffic-control.js	assets	487	23802
 assets/traffic-history-1.62.72.css	assets	6	614
 assets/traffic-records-1.62.68.css	assets	20	1497
@@ -413,7 +413,7 @@ food-ticket.php	core	5704	282008
 global-search.php	core	122	12781
 help-guide.php	core	721	135663
 holiday-board.php	core	75	8205
-index.php	core	2477	244281
+index.php	core	2488	244807
 install-empty-db.sql	sql-root	1638	83720
 install-food-worker-SERVICE.bat	root-misc	40	857
 install-food-worker-SERVICE.ps1	root-misc	352	18384
@@ -437,7 +437,8 @@ lib/logging-escalation.php	lib	100	4402
 lib/logging-integrity.php	lib	237	15084
 lib/logging-replay.php	lib	260	18905
 lib/notify-users.php	lib	524	26237
-lib/render.php	lib	237	20145
+lib/release-notes.php	lib	147	10713
+lib/render.php	lib	240	20359
 lib/settings-effects.php	lib	385	14247
 lib/tickets-sla.php	lib	890	42454
 local-accounts.php	core	242	13440
@@ -660,9 +661,11 @@ storage/sessions/sess_31d879d468947e9d74ba2297f03c0a5f	other	1	77
 storage/sessions/sess_3275f86ec689b3c874bfb2d8bd682263	other	1	220
 storage/sessions/sess_329a21456aa2e07360d1f239874bb8f6	other	1	197
 storage/sessions/sess_331cfb03189a1b8264afbc2c92818130	other	1	158
+storage/sessions/sess_335818686cbe03a696846358e0bd6f5a	other	1	77
 storage/sessions/sess_3377ebb7dc83b16d856a8842e77424e2	other	1	221
 storage/sessions/sess_348ecc5027c813eb9b5a9d49f670a017	other	1	196
 storage/sessions/sess_34c4b153baae7b7c70a74a576c76c26a	other	1	91
+storage/sessions/sess_35cfe510c6e2a89ca3dd9871589535ed	other	1	77
 storage/sessions/sess_36503653ff14388763dd2b5af714b733	other	1	206
 storage/sessions/sess_36532aa462910b77dacaf237a39fd284	other	1	77
 storage/sessions/sess_376a70ff2bd52fd458107541733fe819	other	1	221
@@ -772,6 +775,7 @@ storage/sessions/sess_68a47cdf02a67f3971df9dc1ec87342a	other	1	229
 storage/sessions/sess_69d315be527184f59012408068996d94	other	1	220
 storage/sessions/sess_69eefbef2612e3dbfaf1a617d0d57edd	other	1	91
 storage/sessions/sess_6a71f693b61008b3c3b3325546155f12	other	1	89
+storage/sessions/sess_6a7b79a2c758a4198ec899d7c16b0eb4	other	1	77
 storage/sessions/sess_6b205cc50d7c94b0bdf040346597fab6	other	1	241
 storage/sessions/sess_6b342964f3bed893706e05e05a0d3c08	other	1	241
 storage/sessions/sess_6cca389575442c7eca9f5d7374408478	other	1	91
@@ -954,6 +958,7 @@ storage/sessions/sess_bb1a6222eb073ddff54cd8e26480b0ef	other	1	91
 storage/sessions/sess_bb59b77198bae73e80fd09dd79b715bf	other	1	91
 storage/sessions/sess_bb8a9454ca252844e788e09a42ab5191	other	1	220
 storage/sessions/sess_bcde5dd8f09b061a1f8f9ba17df5bf29	other	1	112
+storage/sessions/sess_bd0bf8f515179350eb00745b7f8c2643	other	1	113
 storage/sessions/sess_bd48d3afa8330e35e2c8ad60fe945b8c	other	1	567
 storage/sessions/sess_bd49b34f1fd75de5511353102a8b0b1c	other	1	112
 storage/sessions/sess_bd7be6159747fbf326b9548f661e3e0e	other	1	89
@@ -1000,6 +1005,7 @@ storage/sessions/sess_ce847534fac1fc91647d4f95251c3f78	other	1	91
 storage/sessions/sess_cf3681cf92ef717e5ca8d8b153d941af	other	1	112
 storage/sessions/sess_cf68e1737bd379b64647caa1607ea153	other	1	91
 storage/sessions/sess_cfa04cc64992a07072f53d0f63a99d80	other	1	112
+storage/sessions/sess_d07ac1726179bbd0f0339aca3a2c655b	other	1	77
 storage/sessions/sess_d0cab225741bd495f91c3a847eb0553d	other	1	91
 storage/sessions/sess_d23098f20e37e35495b6f59ac30927bb	other	1	308
 storage/sessions/sess_d32693fc55f7c3e16e48d637c55a2c0e	other	1	112

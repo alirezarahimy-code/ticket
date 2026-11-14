@@ -12295,8 +12295,8 @@
             "id": "ASSET-024",
             "path": "assets\/topbar-chrome.css",
             "area": "ASSET",
-            "lines": 18,
-            "file_fingerprint": "d4e682b60b31",
+            "lines": 21,
+            "file_fingerprint": "8c1ea590e853",
             "blocks": [
                 {
                     "kind": "block",
@@ -12328,14 +12328,27 @@
                     "kind": "block",
                     "anchor": "ناوبری بعد از ابزارهای برند و جست‌وجو در ترتیب لایه‌ای نوار",
                     "line_start": 16,
-                    "line_end": 18,
-                    "lines": 3,
+                    "line_end": 17,
+                    "lines": 2,
                     "fingerprint": "fbf670fefe18",
                     "risk": {
                         "score": 0,
                         "flags": []
                     },
                     "id": "ASSET-024.03"
+                },
+                {
+                    "kind": "block",
+                    "anchor": "لینک «تغییرات سامانه» در فوتر (۱.۶۳ — صفحهٔ تغییرات؛ تصمیم م",
+                    "line_start": 18,
+                    "line_end": 21,
+                    "lines": 4,
+                    "fingerprint": "f0b75e9883ab",
+                    "risk": {
+                        "score": 0,
+                        "flags": []
+                    },
+                    "id": "ASSET-024.04"
                 }
             ]
         },
@@ -32674,8 +32687,8 @@
             "id": "PAGE-031",
             "path": "index.php",
             "area": "PAGE",
-            "lines": 2478,
-            "file_fingerprint": "24b037a0f6b1",
+            "lines": 2489,
+            "file_fingerprint": "acfc8f27ef76",
             "blocks": [
                 {
                     "kind": "region",
@@ -33394,11 +33407,11 @@
                 },
                 {
                     "kind": "region",
-                    "anchor": "مسیر: notifications|notif.view",
+                    "anchor": "مسیر: release-notes",
                     "line_start": 958,
-                    "line_end": 965,
-                    "lines": 8,
-                    "fingerprint": "dc86bc55d5b1",
+                    "line_end": 967,
+                    "lines": 10,
+                    "fingerprint": "fa63c600249f",
                     "risk": {
                         "score": 0,
                         "flags": []
@@ -33407,9 +33420,22 @@
                 },
                 {
                     "kind": "region",
+                    "anchor": "مسیر: notifications|notif.view",
+                    "line_start": 968,
+                    "line_end": 975,
+                    "lines": 8,
+                    "fingerprint": "dc86bc55d5b1",
+                    "risk": {
+                        "score": 0,
+                        "flags": []
+                    },
+                    "id": "PAGE-031.54"
+                },
+                {
+                    "kind": "region",
                     "anchor": "مسیر: notifications",
-                    "line_start": 966,
-                    "line_end": 983,
+                    "line_start": 976,
+                    "line_end": 993,
                     "lines": 18,
                     "fingerprint": "3f21cd6d56c6",
                     "risk": {
@@ -33418,28 +33444,15 @@
                             "sql_concat": 5
                         }
                     },
-                    "id": "PAGE-031.54"
-                },
-                {
-                    "kind": "region",
-                    "anchor": "مسیر: audit",
-                    "line_start": 984,
-                    "line_end": 992,
-                    "lines": 9,
-                    "fingerprint": "87a567f11e96",
-                    "risk": {
-                        "score": 0,
-                        "flags": []
-                    },
                     "id": "PAGE-031.55"
                 },
                 {
                     "kind": "region",
-                    "anchor": "مسیر: logging-dashboard",
-                    "line_start": 993,
-                    "line_end": 996,
-                    "lines": 4,
-                    "fingerprint": "54e47224bef5",
+                    "anchor": "مسیر: audit",
+                    "line_start": 994,
+                    "line_end": 1002,
+                    "lines": 9,
+                    "fingerprint": "87a567f11e96",
                     "risk": {
                         "score": 0,
                         "flags": []
@@ -33448,11 +33461,11 @@
                 },
                 {
                     "kind": "region",
-                    "anchor": "مسیر: system-health",
-                    "line_start": 997,
-                    "line_end": 1000,
+                    "anchor": "مسیر: logging-dashboard",
+                    "line_start": 1003,
+                    "line_end": 1006,
                     "lines": 4,
-                    "fingerprint": "be1344b02adc",
+                    "fingerprint": "54e47224bef5",
                     "risk": {
                         "score": 0,
                         "flags": []
@@ -33461,11 +33474,11 @@
                 },
                 {
                     "kind": "region",
-                    "anchor": "مسیر: logs",
-                    "line_start": 1001,
-                    "line_end": 1006,
-                    "lines": 6,
-                    "fingerprint": "c65f22cdca8f",
+                    "anchor": "مسیر: system-health",
+                    "line_start": 1007,
+                    "line_end": 1010,
+                    "lines": 4,
+                    "fingerprint": "be1344b02adc",
                     "risk": {
                         "score": 0,
                         "flags": []
@@ -33474,9 +33487,22 @@
                 },
                 {
                     "kind": "region",
+                    "anchor": "مسیر: logs",
+                    "line_start": 1011,
+                    "line_end": 1016,
+                    "lines": 6,
+                    "fingerprint": "c65f22cdca8f",
+                    "risk": {
+                        "score": 0,
+                        "flags": []
+                    },
+                    "id": "PAGE-031.59"
+                },
+                {
+                    "kind": "region",
                     "anchor": "مسیر: activity-log",
-                    "line_start": 1007,
-                    "line_end": 1149,
+                    "line_start": 1017,
+                    "line_end": 1159,
                     "lines": 143,
                     "fingerprint": "84d1643d662a",
                     "risk": {
@@ -33487,13 +33513,13 @@
                             "long": 1
                         }
                     },
-                    "id": "PAGE-031.59"
+                    "id": "PAGE-031.60"
                 },
                 {
                     "kind": "region",
                     "anchor": "مسیر: backup",
-                    "line_start": 1150,
-                    "line_end": 1188,
+                    "line_start": 1160,
+                    "line_end": 1198,
                     "lines": 39,
                     "fingerprint": "fe4ec71b0d1e",
                     "risk": {
@@ -33503,26 +33529,26 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "PAGE-031.60"
+                    "id": "PAGE-031.61"
                 },
                 {
                     "kind": "region",
                     "anchor": "مسیر: search|search.global",
-                    "line_start": 1189,
-                    "line_end": 1196,
+                    "line_start": 1199,
+                    "line_end": 1206,
                     "lines": 8,
                     "fingerprint": "08b9308aa266",
                     "risk": {
                         "score": 0,
                         "flags": []
                     },
-                    "id": "PAGE-031.61"
+                    "id": "PAGE-031.62"
                 },
                 {
                     "kind": "region",
                     "anchor": "مسیر: search",
-                    "line_start": 1197,
-                    "line_end": 1292,
+                    "line_start": 1207,
+                    "line_end": 1302,
                     "lines": 96,
                     "fingerprint": "eb0dd291dd37",
                     "risk": {
@@ -33532,13 +33558,13 @@
                             "raw_input": 2
                         }
                     },
-                    "id": "PAGE-031.62"
+                    "id": "PAGE-031.63"
                 },
                 {
                     "kind": "region",
                     "anchor": "مسیر: chatbot-admin",
-                    "line_start": 1293,
-                    "line_end": 1395,
+                    "line_start": 1303,
+                    "line_end": 1405,
                     "lines": 103,
                     "fingerprint": "bada5e1b1cb6",
                     "risk": {
@@ -33548,26 +33574,26 @@
                             "unescaped_echo": 3
                         }
                     },
-                    "id": "PAGE-031.63"
+                    "id": "PAGE-031.64"
                 },
                 {
                     "kind": "region",
                     "anchor": "مسیر: holidays",
-                    "line_start": 1396,
-                    "line_end": 1406,
+                    "line_start": 1406,
+                    "line_end": 1416,
                     "lines": 11,
                     "fingerprint": "a1479fd7dd66",
                     "risk": {
                         "score": 0,
                         "flags": []
                     },
-                    "id": "PAGE-031.64"
+                    "id": "PAGE-031.65"
                 },
                 {
                     "kind": "region",
                     "anchor": "مسیر: inventory",
-                    "line_start": 1407,
-                    "line_end": 1507,
+                    "line_start": 1417,
+                    "line_end": 1517,
                     "lines": 101,
                     "fingerprint": "f107c7c13c1c",
                     "risk": {
@@ -33577,13 +33603,13 @@
                             "raw_input": 2
                         }
                     },
-                    "id": "PAGE-031.65"
+                    "id": "PAGE-031.66"
                 },
                 {
                     "kind": "region",
                     "anchor": "مسیر: inventory-diagnostics",
-                    "line_start": 1508,
-                    "line_end": 1539,
+                    "line_start": 1518,
+                    "line_end": 1549,
                     "lines": 32,
                     "fingerprint": "31f6b97d664f",
                     "risk": {
@@ -33592,13 +33618,13 @@
                             "raw_input": 2
                         }
                     },
-                    "id": "PAGE-031.66"
+                    "id": "PAGE-031.67"
                 },
                 {
                     "kind": "region",
                     "anchor": "مسیر: asset-history",
-                    "line_start": 1540,
-                    "line_end": 1557,
+                    "line_start": 1550,
+                    "line_end": 1567,
                     "lines": 18,
                     "fingerprint": "f05d04d150f3",
                     "risk": {
@@ -33608,13 +33634,13 @@
                             "raw_input": 2
                         }
                     },
-                    "id": "PAGE-031.67"
+                    "id": "PAGE-031.68"
                 },
                 {
                     "kind": "region",
                     "anchor": "مسیر: domain-scan",
-                    "line_start": 1558,
-                    "line_end": 1635,
+                    "line_start": 1568,
+                    "line_end": 1645,
                     "lines": 78,
                     "fingerprint": "383375bbfd1a",
                     "risk": {
@@ -33623,31 +33649,15 @@
                             "raw_input": 2
                         }
                     },
-                    "id": "PAGE-031.68"
-                },
-                {
-                    "kind": "region",
-                    "anchor": "مسیر: assets",
-                    "line_start": 1636,
-                    "line_end": 1680,
-                    "lines": 45,
-                    "fingerprint": "53502350682a",
-                    "risk": {
-                        "score": 7,
-                        "flags": {
-                            "sql_concat": 5,
-                            "raw_input": 2
-                        }
-                    },
                     "id": "PAGE-031.69"
                 },
                 {
                     "kind": "region",
-                    "anchor": "مسیر: asset",
-                    "line_start": 1681,
-                    "line_end": 1714,
-                    "lines": 34,
-                    "fingerprint": "59179257a2c4",
+                    "anchor": "مسیر: assets",
+                    "line_start": 1646,
+                    "line_end": 1690,
+                    "lines": 45,
+                    "fingerprint": "53502350682a",
                     "risk": {
                         "score": 7,
                         "flags": {
@@ -33659,9 +33669,25 @@
                 },
                 {
                     "kind": "region",
+                    "anchor": "مسیر: asset",
+                    "line_start": 1691,
+                    "line_end": 1724,
+                    "lines": 34,
+                    "fingerprint": "59179257a2c4",
+                    "risk": {
+                        "score": 7,
+                        "flags": {
+                            "sql_concat": 5,
+                            "raw_input": 2
+                        }
+                    },
+                    "id": "PAGE-031.71"
+                },
+                {
+                    "kind": "region",
                     "anchor": "مسیر: organization",
-                    "line_start": 1715,
-                    "line_end": 1905,
+                    "line_start": 1725,
+                    "line_end": 1915,
                     "lines": 191,
                     "fingerprint": "6cb4e8523ced",
                     "risk": {
@@ -33671,13 +33697,13 @@
                             "long": 1
                         }
                     },
-                    "id": "PAGE-031.71"
+                    "id": "PAGE-031.72"
                 },
                 {
                     "kind": "region",
                     "anchor": "مسیر: settings",
-                    "line_start": 1906,
-                    "line_end": 2378,
+                    "line_start": 1916,
+                    "line_end": 2388,
                     "lines": 473,
                     "fingerprint": "f1348b69ef4d",
                     "risk": {
@@ -33689,13 +33715,13 @@
                             "very_long": 3
                         }
                     },
-                    "id": "PAGE-031.72"
+                    "id": "PAGE-031.73"
                 },
                 {
                     "kind": "region",
                     "anchor": "مسیر: logs",
-                    "line_start": 2379,
-                    "line_end": 2400,
+                    "line_start": 2389,
+                    "line_end": 2410,
                     "lines": 22,
                     "fingerprint": "ead8507b92ee",
                     "risk": {
@@ -33704,28 +33730,15 @@
                             "raw_input": 2
                         }
                     },
-                    "id": "PAGE-031.73"
-                },
-                {
-                    "kind": "region",
-                    "anchor": "مسیر: dashboard",
-                    "line_start": 2401,
-                    "line_end": 2405,
-                    "lines": 5,
-                    "fingerprint": "4641c731ee3e",
-                    "risk": {
-                        "score": 0,
-                        "flags": []
-                    },
                     "id": "PAGE-031.74"
                 },
                 {
                     "kind": "region",
-                    "anchor": "بازگردانی کارت‌ها و فهرست درخواست‌ها در داشبورد (تصمیم مالک ",
-                    "line_start": 2406,
-                    "line_end": 2406,
-                    "lines": 1,
-                    "fingerprint": "f8a26b152d5c",
+                    "anchor": "مسیر: dashboard",
+                    "line_start": 2411,
+                    "line_end": 2415,
+                    "lines": 5,
+                    "fingerprint": "4641c731ee3e",
                     "risk": {
                         "score": 0,
                         "flags": []
@@ -33734,16 +33747,29 @@
                 },
                 {
                     "kind": "region",
-                    "anchor": "موج استقلال (2066cb0) این بلوک را حذف کرده بود؛ بازگردانده ش",
-                    "line_start": 2407,
-                    "line_end": 2478,
-                    "lines": 72,
-                    "fingerprint": "879bbbe58d2e",
+                    "anchor": "بازگردانی کارت‌ها و فهرست درخواست‌ها در داشبورد (تصمیم مالک ",
+                    "line_start": 2416,
+                    "line_end": 2416,
+                    "lines": 1,
+                    "fingerprint": "f8a26b152d5c",
                     "risk": {
                         "score": 0,
                         "flags": []
                     },
                     "id": "PAGE-031.76"
+                },
+                {
+                    "kind": "region",
+                    "anchor": "موج استقلال (2066cb0) این بلوک را حذف کرده بود؛ بازگردانده ش",
+                    "line_start": 2417,
+                    "line_end": 2489,
+                    "lines": 73,
+                    "fingerprint": "492d062d6d7c",
+                    "risk": {
+                        "score": 0,
+                        "flags": []
+                    },
+                    "id": "PAGE-031.77"
                 }
             ]
         },
@@ -40035,16 +40061,16 @@
             "id": "CORE-018",
             "path": "lib\/render.php",
             "area": "CORE",
-            "lines": 238,
-            "file_fingerprint": "987195cfddce",
+            "lines": 241,
+            "file_fingerprint": "74d6642c5ec4",
             "blocks": [
                 {
                     "kind": "region",
-                    "anchor": "بلوک رویه‌ای 1-3",
+                    "anchor": "بلوک رویه‌ای 1-13",
                     "line_start": 1,
-                    "line_end": 3,
-                    "lines": 3,
-                    "fingerprint": "2fa88eb34b3b",
+                    "line_end": 13,
+                    "lines": 13,
+                    "fingerprint": "f18d1879e34f",
                     "risk": {
                         "score": 0,
                         "flags": []
@@ -40054,10 +40080,10 @@
                 {
                     "kind": "function",
                     "anchor": "render_header",
-                    "line_start": 4,
-                    "line_end": 167,
-                    "lines": 164,
-                    "fingerprint": "03f2ec92248f",
+                    "line_start": 14,
+                    "line_end": 169,
+                    "lines": 156,
+                    "fingerprint": "258542e15203",
                     "risk": {
                         "score": 4,
                         "flags": {
@@ -40071,8 +40097,8 @@
                 {
                     "kind": "function",
                     "anchor": "list_sort_page_off",
-                    "line_start": 169,
-                    "line_end": 176,
+                    "line_start": 171,
+                    "line_end": 178,
                     "lines": 8,
                     "fingerprint": "58c426e3031d",
                     "risk": {
@@ -40086,8 +40112,8 @@
                 {
                     "kind": "function",
                     "anchor": "inspection_food_reminder_markup",
-                    "line_start": 178,
-                    "line_end": 199,
+                    "line_start": 180,
+                    "line_end": 201,
                     "lines": 22,
                     "fingerprint": "c1606ff28c22",
                     "risk": {
@@ -40099,10 +40125,10 @@
                 {
                     "kind": "function",
                     "anchor": "render_footer",
-                    "line_start": 201,
-                    "line_end": 237,
-                    "lines": 37,
-                    "fingerprint": "932b97dc11d1",
+                    "line_start": 203,
+                    "line_end": 240,
+                    "lines": 38,
+                    "fingerprint": "4e2de613794c",
                     "risk": {
                         "score": 0,
                         "flags": []

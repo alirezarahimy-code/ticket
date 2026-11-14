@@ -15,3 +15,6 @@
 .menu .back-to-system-link:hover::before { background: #10b981; }
 /* ناوبری بعد از ابزارهای برند و جست‌وجو در ترتیب لایه‌ای نوار */
 .navbar { order: 3; }
+/* لینک «تغییرات سامانه» در فوتر (۱.۶۳ — صفحهٔ تغییرات؛ تصمیم مالک ۲۰۲۶-۱۱-۱۴) */
+.footer a.footer-link { color: inherit; opacity: .85; text-decoration: underline; text-underline-offset: 3px; }
+.footer a.footer-link:hover { opacity: 1; }

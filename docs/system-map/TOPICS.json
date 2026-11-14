@@ -9,7 +9,7 @@
       "key": "audit",
       "permission": null,
       "primary": [
-        "PAGE-031.55",
+        "PAGE-031.56",
         "CORE-010.33",
         "CORE-001.14",
         "CORE-016.03",
@@ -23,14 +23,14 @@
       ],
       "related": [
         "CRON-005.04",
-        "PAGE-031.59",
+        "PAGE-031.60",
         "TEST-100.06",
         "TEST-105.06",
         "PAGE-077.03",
         "TEST-115.01",
         "PAGE-077.30",
         "PAGE-031.14",
-        "PAGE-031.73",
+        "PAGE-031.74",
         "DB-004.28"
       ],
       "total": 28
@@ -57,7 +57,7 @@
       "key": "domain-scan",
       "permission": "domain.scan",
       "primary": [
-        "PAGE-031.68",
+        "PAGE-031.69",
         "PAGE-011.37",
         "PAGE-011.19",
         "PAGE-011.16",
@@ -73,7 +73,7 @@
         "PAGE-011.20"
       ],
       "related": [
-        "PAGE-031.72",
+        "PAGE-031.73",
         "TOOL-009.01",
         "PAGE-028.03",
         "PAGE-031.34",
@@ -170,7 +170,7 @@
         "PAGE-067.07"
       ],
       "related": [
-        "PAGE-031.62",
+        "PAGE-031.63",
         "TEST-100.06",
         "PAGE-031.05",
         "PAGE-075.09",
@@ -229,7 +229,7 @@
       "key": "logging-dashboard",
       "permission": null,
       "primary": [
-        "PAGE-031.56",
+        "PAGE-031.57",
         "ASSET-016.01",
         "PAGE-035.04",
         "PAGE-035.02",
@@ -246,13 +246,25 @@
       "total": 11
     },
     {
+      "id": "page:release-notes",
+      "kind": "صفحه",
+      "fa": "release notes",
+      "key": "release-notes",
+      "permission": null,
+      "primary": [
+        "PAGE-031.53"
+      ],
+      "related": [],
+      "total": 1
+    },
+    {
       "id": "page:system-health",
       "kind": "صفحه",
       "fa": "system health",
       "key": "system-health",
       "permission": null,
       "primary": [
-        "PAGE-031.57",
+        "PAGE-031.58",
         "PAGE-077.28",
         "PAGE-077.03",
         "PAGE-077.04",
@@ -282,9 +294,9 @@
       "key": "notifications",
       "permission": null,
       "primary": [
-        "PAGE-031.54",
+        "PAGE-031.55",
         "ACT-010.03",
-        "PAGE-031.53",
+        "PAGE-031.54",
         "DB-004.30",
         "DB-007.21",
         "DB-044.27",
@@ -329,7 +341,7 @@
         "PAGE-005.10",
         "PAGE-005.11",
         "PAGE-005.12",
-        "PAGE-031.60",
+        "PAGE-031.61",
         "ACT-004.04",
         "PAGE-005.13"
       ],
@@ -339,7 +351,7 @@
         "PAGE-029.01",
         "ACT-017.06",
         "PAGE-020.16",
-        "PAGE-031.71",
+        "PAGE-031.72",
         "TEST-024.01",
         "PAGE-014.22",
         "PAGE-078.13",
@@ -378,7 +390,7 @@
       "key": "asset-history",
       "permission": "asset.history",
       "primary": [
-        "PAGE-031.67",
+        "PAGE-031.68",
         "CORE-019.05"
       ],
       "related": [
@@ -422,7 +434,7 @@
       "key": "inventory-diagnostics",
       "permission": "inventory.diagnostics",
       "primary": [
-        "PAGE-031.66",
+        "PAGE-031.67",
         "CORE-019.05"
       ],
       "related": [
@@ -463,7 +475,7 @@
       "permission": "holidays.view",
       "primary": [
         "ACT-009.07",
-        "PAGE-031.64",
+        "PAGE-031.65",
         "DB-004.35",
         "DB-007.26",
         "DB-044.32",
@@ -478,7 +490,7 @@
         "CORE-017.13"
       ],
       "related": [
-        "PAGE-031.72",
+        "PAGE-031.73",
         "PAGE-037.05",
         "PAGE-013.34",
         "PAGE-027.132",
@@ -498,7 +510,7 @@
       "key": "settings",
       "permission": null,
       "primary": [
-        "PAGE-031.72",
+        "PAGE-031.73",
         "PAGE-031.40",
         "DB-004.04",
         "DB-007.02",
@@ -575,7 +587,7 @@
       ],
       "related": [
         "TEST-185.08",
-        "PAGE-031.72",
+        "PAGE-031.73",
         "CRON-005.04",
         "PAGE-037.05",
         "PAGE-037.06",
@@ -594,18 +606,18 @@
       "key": "search",
       "permission": null,
       "primary": [
+        "PAGE-031.63",
         "PAGE-031.62",
-        "PAGE-031.61",
         "PAGE-028.03",
         "CORE-018.02",
         "CORE-019.05"
       ],
       "related": [
         "PAGE-052.03",
-        "PAGE-031.72",
+        "PAGE-031.73",
         "PAGE-061.03",
         "PAGE-007.43",
-        "PAGE-031.59",
+        "PAGE-031.60",
         "TEST-235.14",
         "PAGE-054.09",
         "PAGE-057.03",
@@ -622,7 +634,7 @@
       "permission": "assets.view",
       "primary": [
         "ACT-003.08",
-        "PAGE-031.69",
+        "PAGE-031.70",
         "DB-004.36",
         "DB-007.27",
         "DB-044.33",
@@ -657,7 +669,7 @@
       "key": "dashboard",
       "permission": "dash.view",
       "primary": [
-        "PAGE-031.74",
+        "PAGE-031.75",
         "CORE-018.02",
         "CORE-019.16",
         "CORE-019.05"
@@ -745,7 +757,7 @@
       "key": "asset",
       "permission": "asset.view",
       "primary": [
-        "PAGE-031.70",
+        "PAGE-031.71",
         "PAGE-002.02",
         "CORE-019.05"
       ],
@@ -831,7 +843,7 @@
       "key": "activity-log",
       "permission": null,
       "primary": [
-        "PAGE-031.59",
+        "PAGE-031.60",
         "CORE-018.03",
         "CORE-019.05"
       ],
@@ -856,7 +868,7 @@
       "key": "chatbot-admin",
       "permission": "chatbot.manage",
       "primary": [
-        "PAGE-031.63",
+        "PAGE-031.64",
         "CORE-019.05"
       ],
       "related": [
@@ -877,7 +889,7 @@
       "permission": "org.view",
       "primary": [
         "PAGE-072.39",
-        "PAGE-031.71",
+        "PAGE-031.72",
         "PAGE-031.27",
         "PAGE-072.02",
         "PAGE-072.49",
@@ -956,7 +968,7 @@
         "TEST-192.36",
         "TEST-185.08",
         "PAGE-052.03",
-        "PAGE-031.72",
+        "PAGE-031.73",
         "TEST-192.35",
         "TOOL-008.02",
         "PAGE-073.26",
@@ -1096,8 +1108,8 @@
       "key": "logs",
       "permission": null,
       "primary": [
-        "PAGE-031.73",
-        "PAGE-031.58",
+        "PAGE-031.74",
+        "PAGE-031.59",
         "CORE-018.03",
         "CORE-019.05"
       ],
@@ -1173,7 +1185,7 @@
       "group": "داشبورد و پایه",
       "key": "search.global",
       "primary": [
-        "PAGE-031.61"
+        "PAGE-031.62"
       ],
       "related": [
         "PAGE-073.03",
@@ -1188,7 +1200,7 @@
       "group": "داشبورد و پایه",
       "key": "notif.view",
       "primary": [
-        "PAGE-031.53",
+        "PAGE-031.54",
         "CORE-018.02"
       ],
       "related": [
@@ -1273,7 +1285,7 @@
         "PAGE-073.03",
         "TEST-222.08",
         "PAGE-028.03",
-        "PAGE-031.76",
+        "PAGE-031.77",
         "PAGE-054.01",
         "PAGE-070.02"
       ],
@@ -1298,7 +1310,7 @@
         "PAGE-073.03",
         "TEST-222.08",
         "PAGE-028.03",
-        "PAGE-031.76"
+        "PAGE-031.77"
       ],
       "total": 23
     },
@@ -1320,7 +1332,7 @@
         "PAGE-054.03",
         "PAGE-073.03",
         "PAGE-028.03",
-        "PAGE-031.76",
+        "PAGE-031.77",
         "PAGE-037.03"
       ],
       "total": 15
@@ -1638,7 +1650,7 @@
         "CORE-018.02"
       ],
       "related": [
-        "PAGE-031.62",
+        "PAGE-031.63",
         "TEST-024.01",
         "PAGE-073.03",
         "TEST-146.05",
@@ -1686,7 +1698,7 @@
       "group": "کنترل CD/DVD",
       "key": "cddvd.edit",
       "primary": [
-        "PAGE-031.72",
+        "PAGE-031.73",
         "PAGE-073.26",
         "PAGE-073.03"
       ],
@@ -1761,7 +1773,7 @@
       ],
       "related": [
         "PAGE-031.31",
-        "PAGE-031.62",
+        "PAGE-031.63",
         "TEST-024.01",
         "PAGE-073.03",
         "PAGE-028.03",
@@ -1832,13 +1844,13 @@
       "group": "دارایی و شناسنامه فنی",
       "key": "assets.view",
       "primary": [
-        "PAGE-031.69",
+        "PAGE-031.70",
         "CORE-018.02"
       ],
       "related": [
         "PAGE-031.31",
-        "PAGE-031.65",
-        "PAGE-031.70",
+        "PAGE-031.66",
+        "PAGE-031.71",
         "PAGE-073.03",
         "PAGE-028.03",
         "PAGE-031.34"
@@ -1900,12 +1912,12 @@
       "group": "دارایی و شناسنامه فنی",
       "key": "asset.extract",
       "primary": [
-        "PAGE-031.69",
         "PAGE-031.70",
+        "PAGE-031.71",
         "ACT-003.03"
       ],
       "related": [
-        "PAGE-031.65",
+        "PAGE-031.66",
         "PAGE-073.03",
         "PAGE-073.16"
       ],
@@ -1925,7 +1937,7 @@
         "ACT-003.11"
       ],
       "related": [
-        "PAGE-031.72",
+        "PAGE-031.73",
         "PAGE-073.26",
         "PAGE-073.03",
         "PAGE-073.08",
@@ -1940,7 +1952,7 @@
       "group": "دارایی و شناسنامه فنی",
       "key": "asset.history",
       "primary": [
-        "PAGE-031.67"
+        "PAGE-031.68"
       ],
       "related": [
         "PAGE-073.03",
@@ -1957,7 +1969,7 @@
       "key": "asset.ping",
       "primary": [
         "ACT-003.08",
-        "PAGE-031.69"
+        "PAGE-031.70"
       ],
       "related": [
         "PAGE-073.03",
@@ -1973,7 +1985,7 @@
       "key": "inventory.view",
       "primary": [
         "ACT-003.12",
-        "PAGE-031.65"
+        "PAGE-031.66"
       ],
       "related": [
         "PAGE-073.03",
@@ -1990,7 +2002,7 @@
       "group": "دارایی و شناسنامه فنی",
       "key": "inventory.diagnostics",
       "primary": [
-        "PAGE-031.66"
+        "PAGE-031.67"
       ],
       "related": [
         "ACT-003.04",
@@ -2011,8 +2023,8 @@
         "ACT-003.05"
       ],
       "related": [
-        "PAGE-031.65",
-        "PAGE-031.69",
+        "PAGE-031.66",
+        "PAGE-031.70",
         "TEST-024.01",
         "PAGE-073.03",
         "PAGE-073.16"
@@ -2026,12 +2038,12 @@
       "group": "دارایی و شناسنامه فنی",
       "key": "domain.scan",
       "primary": [
-        "PAGE-031.68"
+        "PAGE-031.69"
       ],
       "related": [
         "PAGE-073.26",
-        "PAGE-031.65",
-        "PAGE-031.69",
+        "PAGE-031.66",
+        "PAGE-031.70",
         "TEST-024.01",
         "PAGE-073.03",
         "PAGE-028.03"
@@ -2085,14 +2097,14 @@
       "group": "گزارش و تحلیل",
       "key": "audit.view",
       "primary": [
-        "PAGE-031.55",
+        "PAGE-031.56",
         "CORE-018.02"
       ],
       "related": [
-        "PAGE-031.59",
+        "PAGE-031.60",
         "PAGE-073.03",
         "PAGE-028.03",
-        "PAGE-031.58",
+        "PAGE-031.59",
         "PAGE-073.16"
       ],
       "total": 7
@@ -2104,12 +2116,12 @@
       "group": "گزارش و تحلیل",
       "key": "logs.view",
       "primary": [
-        "PAGE-031.73",
-        "PAGE-031.58",
+        "PAGE-031.74",
+        "PAGE-031.59",
         "CORE-018.02"
       ],
       "related": [
-        "PAGE-031.59",
+        "PAGE-031.60",
         "PAGE-077.27",
         "PAGE-077.30",
         "PAGE-073.03",
@@ -2130,10 +2142,10 @@
         "CORE-018.02"
       ],
       "related": [
-        "PAGE-031.59",
+        "PAGE-031.60",
         "PAGE-035.04",
         "PAGE-073.03",
-        "PAGE-031.58",
+        "PAGE-031.59",
         "PAGE-073.08",
         "PAGE-073.12"
       ],
@@ -2163,14 +2175,14 @@
       "group": "گزارش و تحلیل",
       "key": "logs.activity",
       "primary": [
-        "PAGE-031.58",
+        "PAGE-031.59",
         "CORE-018.02"
       ],
       "related": [
-        "PAGE-031.59",
+        "PAGE-031.60",
         "PAGE-073.03",
         "PAGE-028.03",
-        "PAGE-031.55",
+        "PAGE-031.56",
         "PAGE-073.16"
       ],
       "total": 7
@@ -2183,7 +2195,7 @@
       "key": "logs.activity_export",
       "primary": [
         "PAGE-031.30",
-        "PAGE-031.59",
+        "PAGE-031.60",
         "PAGE-073.03"
       ],
       "related": [
@@ -2688,7 +2700,7 @@
       "related": [
         "PAGE-013.100",
         "PAGE-073.03",
-        "PAGE-031.76",
+        "PAGE-031.77",
         "PAGE-073.16",
         "TEST-015.03",
         "TEST-052.03"
@@ -2702,7 +2714,7 @@
       "group": "سازمان",
       "key": "org.view",
       "primary": [
-        "PAGE-031.71",
+        "PAGE-031.72",
         "CORE-018.02"
       ],
       "related": [
@@ -2746,7 +2758,7 @@
       "group": "تنظیمات و سیستم",
       "key": "settings.general",
       "primary": [
-        "PAGE-031.72",
+        "PAGE-031.73",
         "PAGE-031.40",
         "CORE-019.17",
         "CORE-019.18",
@@ -2770,7 +2782,7 @@
       "key": "settings.general_edit",
       "primary": [
         "ACT-014.08",
-        "PAGE-031.72",
+        "PAGE-031.73",
         "ACT-014.07",
         "TEST-239.06"
       ],
@@ -2787,13 +2799,13 @@
       "group": "تنظیمات و سیستم",
       "key": "settings.domain",
       "primary": [
-        "PAGE-031.72",
+        "PAGE-031.73",
         "PAGE-031.40",
         "CORE-018.02"
       ],
       "related": [
-        "PAGE-031.65",
-        "PAGE-031.69",
+        "PAGE-031.66",
+        "PAGE-031.70",
         "TEST-024.01",
         "PAGE-073.03",
         "PAGE-028.03",
@@ -2809,7 +2821,7 @@
       "key": "settings.domain_edit",
       "primary": [
         "ACT-014.08",
-        "PAGE-031.72",
+        "PAGE-031.73",
         "ACT-014.06"
       ],
       "related": [
@@ -2825,7 +2837,7 @@
       "group": "تنظیمات و سیستم",
       "key": "settings.users",
       "primary": [
-        "PAGE-031.72",
+        "PAGE-031.73",
         "PAGE-031.40",
         "CORE-018.02"
       ],
@@ -2844,7 +2856,7 @@
       "group": "تنظیمات و سیستم",
       "key": "settings.users_edit",
       "primary": [
-        "PAGE-031.72",
+        "PAGE-031.73",
         "ACT-017.08",
         "ACT-014.05"
       ],
@@ -2862,7 +2874,7 @@
       "group": "تنظیمات و سیستم",
       "key": "settings.key_roles",
       "primary": [
-        "PAGE-031.72",
+        "PAGE-031.73",
         "PAGE-031.40"
       ],
       "related": [
@@ -2879,7 +2891,7 @@
       "group": "تنظیمات و سیستم",
       "key": "settings.key_roles_edit",
       "primary": [
-        "PAGE-031.72"
+        "PAGE-031.73"
       ],
       "related": [
         "ACT-012.03",
@@ -2895,7 +2907,7 @@
       "group": "تنظیمات و سیستم",
       "key": "backup.view",
       "primary": [
-        "PAGE-031.60",
+        "PAGE-031.61",
         "CORE-018.02"
       ],
       "related": [
@@ -2914,7 +2926,7 @@
       "primary": [
         "ACT-004.02",
         "ACT-004.03",
-        "PAGE-031.60",
+        "PAGE-031.61",
         "TEST-031.02"
       ],
       "related": [
@@ -2931,7 +2943,7 @@
       "group": "تنظیمات و سیستم",
       "key": "update.view",
       "primary": [
-        "PAGE-031.60",
+        "PAGE-031.61",
         "PAGE-073.03"
       ],
       "related": [],
@@ -2947,7 +2959,7 @@
         "ACT-004.04"
       ],
       "related": [
-        "PAGE-031.60",
+        "PAGE-031.61",
         "PAGE-073.03"
       ],
       "total": 3
@@ -2959,7 +2971,7 @@
       "group": "تنظیمات و سیستم",
       "key": "chatbot.manage",
       "primary": [
-        "PAGE-031.63",
+        "PAGE-031.64",
         "PAGE-031.34",
         "CORE-018.02"
       ],
@@ -3031,7 +3043,7 @@
         "PAGE-040.04"
       ],
       "related": [
-        "PAGE-031.62",
+        "PAGE-031.63",
         "PAGE-073.03",
         "PAGE-073.08",
         "PAGE-073.15",
@@ -3047,11 +3059,11 @@
       "group": "تنظیمات و سیستم",
       "key": "holidays.view",
       "primary": [
-        "PAGE-031.64",
+        "PAGE-031.65",
         "TEST-086.33"
       ],
       "related": [
-        "PAGE-031.72",
+        "PAGE-031.73",
         "PAGE-073.03",
         "PAGE-031.34",
         "PAGE-073.08"
@@ -3101,7 +3113,7 @@
         "TOOL-067.01",
         "TEST-115.08",
         "TEST-115.06",
-        "PAGE-031.72",
+        "PAGE-031.73",
         "PAGE-031.30"
       ],
       "total": 70
@@ -3179,7 +3191,7 @@
         "DB-007.390"
       ],
       "related": [
-        "PAGE-031.67",
+        "PAGE-031.68",
         "TEST-024.01"
       ],
       "total": 16
@@ -3275,9 +3287,9 @@
       "related": [
         "TOOL-001.01",
         "PAGE-004.03",
-        "PAGE-031.62",
-        "PAGE-031.65",
-        "PAGE-031.69",
+        "PAGE-031.63",
+        "PAGE-031.66",
+        "PAGE-031.70",
         "PAGE-004.16"
       ],
       "total": 96
@@ -3336,7 +3348,7 @@
       "key": "assets",
       "primary": [
         "ACT-003.08",
-        "PAGE-031.69",
+        "PAGE-031.70",
         "DB-004.36",
         "DB-007.27",
         "DB-044.33",
@@ -3402,7 +3414,7 @@
       ],
       "related": [
         "PAGE-007.33",
-        "PAGE-031.62",
+        "PAGE-031.63",
         "TOOL-006.01",
         "PAGE-007.39",
         "TEST-024.01",
@@ -3574,7 +3586,7 @@
       "related": [
         "TEST-185.08",
         "TEST-180.03",
-        "PAGE-031.72",
+        "PAGE-031.73",
         "PAGE-032.13",
         "PAGE-061.03",
         "TOOL-008.02"
@@ -4205,7 +4217,7 @@
       "related": [
         "TEST-185.08",
         "PAGE-052.03",
-        "PAGE-031.72",
+        "PAGE-031.73",
         "PAGE-032.13",
         "TOOL-008.02",
         "PAGE-044.03"
@@ -4219,7 +4231,7 @@
       "key": "holidays",
       "primary": [
         "ACT-009.07",
-        "PAGE-031.64",
+        "PAGE-031.65",
         "DB-004.35",
         "DB-007.26",
         "DB-044.32",
@@ -4230,7 +4242,7 @@
         "DB-007.297"
       ],
       "related": [
-        "PAGE-031.72",
+        "PAGE-031.73",
         "PAGE-037.05",
         "PAGE-013.34",
         "PAGE-027.132",
@@ -4257,7 +4269,7 @@
         "DB-007.290"
       ],
       "related": [
-        "PAGE-031.62",
+        "PAGE-031.63",
         "TEST-024.01",
         "PAGE-042.09",
         "PAGE-055.03",
@@ -4405,9 +4417,9 @@
       "fa": "notifications",
       "key": "notifications",
       "primary": [
-        "PAGE-031.54",
+        "PAGE-031.55",
         "ACT-010.03",
-        "PAGE-031.53",
+        "PAGE-031.54",
         "DB-004.30",
         "DB-007.21",
         "DB-044.27",
@@ -4492,7 +4504,7 @@
         "CORE-003.09"
       ],
       "related": [
-        "PAGE-031.72",
+        "PAGE-031.73",
         "PAGE-072.02",
         "ACT-011.18",
         "ACT-011.21",
@@ -4519,7 +4531,7 @@
         "DB-044.05"
       ],
       "related": [
-        "PAGE-031.72",
+        "PAGE-031.73",
         "PAGE-072.02",
         "ACT-011.18",
         "PAGE-063.02",
@@ -4706,7 +4718,7 @@
       "fa": "settings",
       "key": "settings",
       "primary": [
-        "PAGE-031.72",
+        "PAGE-031.73",
         "PAGE-031.40",
         "DB-004.04",
         "DB-007.02",
@@ -4981,7 +4993,7 @@
         "TEST-180.03",
         "TEST-115.08",
         "TOOL-001.01",
-        "PAGE-031.72"
+        "PAGE-031.73"
       ],
       "total": 215
     },
@@ -5071,7 +5083,7 @@
       "related": [
         "PAGE-027.130",
         "TEST-235.14",
-        "PAGE-031.62",
+        "PAGE-031.63",
         "PAGE-080.20",
         "PAGE-079.16",
         "PAGE-079.19"
@@ -12286,7 +12298,15 @@
       "line": 16,
       "anchor": "ناوبری بعد از ابزارهای برند و جست‌وجو در ترتیب لایه‌ای نوار",
       "risk": 0,
-      "lines": 3
+      "lines": 2
+    },
+    "ASSET-024.04": {
+      "path": "assets/topbar-chrome.css",
+      "area": "ASSET",
+      "line": 18,
+      "anchor": "لینک «تغییرات سامانه» در فوتر (۱.۶۳ — صفحهٔ تغییرات؛ تصمیم م",
+      "risk": 0,
+      "lines": 4
     },
     "ASSET-025.01": {
       "path": "assets/traffic-control.js",
@@ -24276,193 +24296,201 @@
       "path": "index.php",
       "area": "PAGE",
       "line": 958,
-      "anchor": "مسیر: notifications|notif.view",
+      "anchor": "مسیر: release-notes",
       "risk": 0,
-      "lines": 8
+      "lines": 10
     },
     "PAGE-031.54": {
       "path": "index.php",
       "area": "PAGE",
-      "line": 966,
-      "anchor": "مسیر: notifications",
-      "risk": 5,
-      "lines": 18
+      "line": 968,
+      "anchor": "مسیر: notifications|notif.view",
+      "risk": 0,
+      "lines": 8
     },
     "PAGE-031.55": {
       "path": "index.php",
       "area": "PAGE",
-      "line": 984,
-      "anchor": "مسیر: audit",
-      "risk": 0,
-      "lines": 9
+      "line": 976,
+      "anchor": "مسیر: notifications",
+      "risk": 5,
+      "lines": 18
     },
     "PAGE-031.56": {
       "path": "index.php",
       "area": "PAGE",
-      "line": 993,
-      "anchor": "مسیر: logging-dashboard",
+      "line": 994,
+      "anchor": "مسیر: audit",
       "risk": 0,
-      "lines": 4
+      "lines": 9
     },
     "PAGE-031.57": {
       "path": "index.php",
       "area": "PAGE",
-      "line": 997,
-      "anchor": "مسیر: system-health",
+      "line": 1003,
+      "anchor": "مسیر: logging-dashboard",
       "risk": 0,
       "lines": 4
     },
     "PAGE-031.58": {
       "path": "index.php",
       "area": "PAGE",
-      "line": 1001,
-      "anchor": "مسیر: logs",
+      "line": 1007,
+      "anchor": "مسیر: system-health",
       "risk": 0,
-      "lines": 6
+      "lines": 4
     },
     "PAGE-031.59": {
       "path": "index.php",
       "area": "PAGE",
-      "line": 1007,
-      "anchor": "مسیر: activity-log",
-      "risk": 8,
-      "lines": 143
+      "line": 1011,
+      "anchor": "مسیر: logs",
+      "risk": 0,
+      "lines": 6
     },
     "PAGE-031.60": {
       "path": "index.php",
       "area": "PAGE",
-      "line": 1150,
-      "anchor": "مسیر: backup",
-      "risk": 6,
-      "lines": 39
+      "line": 1017,
+      "anchor": "مسیر: activity-log",
+      "risk": 8,
+      "lines": 143
     },
     "PAGE-031.61": {
       "path": "index.php",
       "area": "PAGE",
-      "line": 1189,
-      "anchor": "مسیر: search|search.global",
-      "risk": 0,
-      "lines": 8
+      "line": 1160,
+      "anchor": "مسیر: backup",
+      "risk": 6,
+      "lines": 39
     },
     "PAGE-031.62": {
       "path": "index.php",
       "area": "PAGE",
-      "line": 1197,
-      "anchor": "مسیر: search",
-      "risk": 7,
-      "lines": 96
+      "line": 1199,
+      "anchor": "مسیر: search|search.global",
+      "risk": 0,
+      "lines": 8
     },
     "PAGE-031.63": {
       "path": "index.php",
       "area": "PAGE",
-      "line": 1293,
-      "anchor": "مسیر: chatbot-admin",
-      "risk": 5,
-      "lines": 103
+      "line": 1207,
+      "anchor": "مسیر: search",
+      "risk": 7,
+      "lines": 96
     },
     "PAGE-031.64": {
       "path": "index.php",
       "area": "PAGE",
-      "line": 1396,
-      "anchor": "مسیر: holidays",
-      "risk": 0,
-      "lines": 11
+      "line": 1303,
+      "anchor": "مسیر: chatbot-admin",
+      "risk": 5,
+      "lines": 103
     },
     "PAGE-031.65": {
       "path": "index.php",
       "area": "PAGE",
-      "line": 1407,
-      "anchor": "مسیر: inventory",
-      "risk": 7,
-      "lines": 101
+      "line": 1406,
+      "anchor": "مسیر: holidays",
+      "risk": 0,
+      "lines": 11
     },
     "PAGE-031.66": {
       "path": "index.php",
       "area": "PAGE",
-      "line": 1508,
-      "anchor": "مسیر: inventory-diagnostics",
-      "risk": 2,
-      "lines": 32
+      "line": 1417,
+      "anchor": "مسیر: inventory",
+      "risk": 7,
+      "lines": 101
     },
     "PAGE-031.67": {
       "path": "index.php",
       "area": "PAGE",
-      "line": 1540,
-      "anchor": "مسیر: asset-history",
-      "risk": 7,
-      "lines": 18
+      "line": 1518,
+      "anchor": "مسیر: inventory-diagnostics",
+      "risk": 2,
+      "lines": 32
     },
     "PAGE-031.68": {
       "path": "index.php",
       "area": "PAGE",
-      "line": 1558,
-      "anchor": "مسیر: domain-scan",
-      "risk": 2,
-      "lines": 78
+      "line": 1550,
+      "anchor": "مسیر: asset-history",
+      "risk": 7,
+      "lines": 18
     },
     "PAGE-031.69": {
       "path": "index.php",
       "area": "PAGE",
-      "line": 1636,
-      "anchor": "مسیر: assets",
-      "risk": 7,
-      "lines": 45
+      "line": 1568,
+      "anchor": "مسیر: domain-scan",
+      "risk": 2,
+      "lines": 78
     },
     "PAGE-031.70": {
       "path": "index.php",
       "area": "PAGE",
-      "line": 1681,
-      "anchor": "مسیر: asset",
+      "line": 1646,
+      "anchor": "مسیر: assets",
       "risk": 7,
-      "lines": 34
+      "lines": 45
     },
     "PAGE-031.71": {
       "path": "index.php",
       "area": "PAGE",
-      "line": 1715,
-      "anchor": "مسیر: organization",
-      "risk": 3,
-      "lines": 191
+      "line": 1691,
+      "anchor": "مسیر: asset",
+      "risk": 7,
+      "lines": 34
     },
     "PAGE-031.72": {
       "path": "index.php",
       "area": "PAGE",
-      "line": 1906,
-      "anchor": "مسیر: settings",
-      "risk": 11,
-      "lines": 473
+      "line": 1725,
+      "anchor": "مسیر: organization",
+      "risk": 3,
+      "lines": 191
     },
     "PAGE-031.73": {
       "path": "index.php",
       "area": "PAGE",
-      "line": 2379,
-      "anchor": "مسیر: logs",
-      "risk": 2,
-      "lines": 22
+      "line": 1916,
+      "anchor": "مسیر: settings",
+      "risk": 11,
+      "lines": 473
     },
     "PAGE-031.74": {
       "path": "index.php",
       "area": "PAGE",
-      "line": 2401,
-      "anchor": "مسیر: dashboard",
-      "risk": 0,
-      "lines": 5
+      "line": 2389,
+      "anchor": "مسیر: logs",
+      "risk": 2,
+      "lines": 22
     },
     "PAGE-031.75": {
       "path": "index.php",
       "area": "PAGE",
-      "line": 2406,
-      "anchor": "بازگردانی کارت‌ها و فهرست درخواست‌ها در داشبورد (تصمیم مالک ",
+      "line": 2411,
+      "anchor": "مسیر: dashboard",
       "risk": 0,
-      "lines": 1
+      "lines": 5
     },
     "PAGE-031.76": {
       "path": "index.php",
       "area": "PAGE",
-      "line": 2407,
+      "line": 2416,
+      "anchor": "بازگردانی کارت‌ها و فهرست درخواست‌ها در داشبورد (تصمیم مالک ",
+      "risk": 0,
+      "lines": 1
+    },
+    "PAGE-031.77": {
+      "path": "index.php",
+      "area": "PAGE",
+      "line": 2417,
       "anchor": "موج استقلال (2066cb0) این بلوک را حذف کرده بود؛ بازگردانده ش",
       "risk": 0,
-      "lines": 72
+      "lines": 73
     },
     "DB-004.01": {
       "path": "install-empty-db.sql",
@@ -27996,22 +28024,22 @@
       "path": "lib/render.php",
       "area": "CORE",
       "line": 1,
-      "anchor": "بلوک رویه‌ای 1-3",
+      "anchor": "بلوک رویه‌ای 1-13",
       "risk": 0,
-      "lines": 3
+      "lines": 13
     },
     "CORE-018.02": {
       "path": "lib/render.php",
       "area": "CORE",
-      "line": 4,
+      "line": 14,
       "anchor": "render_header",
       "risk": 4,
-      "lines": 164
+      "lines": 156
     },
     "CORE-018.03": {
       "path": "lib/render.php",
       "area": "CORE",
-      "line": 169,
+      "line": 171,
       "anchor": "list_sort_page_off",
       "risk": 2,
       "lines": 8
@@ -28019,7 +28047,7 @@
     "CORE-018.04": {
       "path": "lib/render.php",
       "area": "CORE",
-      "line": 178,
+      "line": 180,
       "anchor": "inspection_food_reminder_markup",
       "risk": 0,
       "lines": 22
@@ -28027,10 +28055,10 @@
     "CORE-018.05": {
       "path": "lib/render.php",
       "area": "CORE",
-      "line": 201,
+      "line": 203,
       "anchor": "render_footer",
       "risk": 0,
-      "lines": 37
+      "lines": 38
     },
     "CORE-019.01": {
       "path": "lib/settings-effects.php",
