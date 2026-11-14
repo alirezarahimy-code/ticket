@@ -1629,6 +1629,28 @@ if ($page === 'domain-scan') {
                     echo '<p class="alert danger">' . e((string) $preparePreflight) . '</p>';
                 }
             }
+            // روش دوم: انتشار خودکار GPO در دامنه از داخل همین پنل (بدون GPMC و بدون کار دستی).
+            // برای سیستم‌هایی که حتی SMB هم روی آن‌ها بسته است کار می‌کند و کل دامنه را پوشش می‌دهد.
+            $gpoHosts = [];
+            foreach ($scanRows as $scanRowForGpo) {
+                if ((string) ($scanRowForGpo['status'] ?? '') === 'error') {
+                    $gpoHosts[] = (string) $scanRowForGpo['hostname'];
+                }
+            }
+            $gpoHosts = array_values(array_unique(array_filter($gpoHosts, static fn (string $host): bool => $host !== '' && (bool) preg_match('/^[A-Za-z0-9._-]+$/', $host))));
+            if ($gpoHosts !== [] && user_can($scanPageUser, 'asset.remote_prepare')) {
+                $gpoPreflight = domain_scan_prepare_preflight();
+                if ($gpoPreflight === null && is_file(domain_scan_prepare_gpo_script_path())) {
+                    echo '<form id="gpo-form" method="post" class="form-grid" style="margin:0 0 14px;border:1px dashed var(--border,#ccc);padding:10px;border-radius:8px">' . csrf_field() . '<input type="hidden" name="action" value="domain_scan_prepare_gpo">';
+                    foreach ($gpoHosts as $gpoHost) {
+                        echo '<input type="hidden" name="hostnames[]" value="' . e($gpoHost) . '">';
+                    }
+                    echo '<label>حساب ادمین دامنه (DOMAIN\\admin)<input name="scan_username" required autocomplete="off" placeholder="COMPANY\\domain-admin"></label><label>رمز همان حساب<input type="password" name="scan_password" required autocomplete="new-password"></label><div class="full"><button class="button" id="gpo-btn" type="submit">روش دوم: ساخت و اعمال خودکار Group Policy در کل دامنه</button><small>پنل خودش روی کنترلر دامنه یک GPO می‌سازد (فعال‌سازی WinRM + قواعد فایروال WMI/RPC/WinRM)، به دامنه لینک می‌کند و همین حالا با gpupdate روی مقصدها اعمال می‌کند. لازم نیست شما در Group Policy Management کاری بکنید. اگر سرور پنل عضو دامنه نباشد، این روش خطای روشن می‌دهد و روش اول (SMB) جایگزین است.</small><label style="display:flex;gap:8px;align-items:center;font-weight:400"><input type="checkbox" name="gpo_unlink" value="1"> لغو لینک GPO از دامنه (سیاست از مقصدها برداشته می‌شود؛ خودِ GPO حذف نمی‌شود)</label></div></form><div id="gpo-results"></div>';
+                    echo '<script nonce="' . e(csp_nonce()) . '">(function(){var f=document.getElementById("gpo-form");if(!f){return;}var out=document.getElementById("gpo-results");var btn=document.getElementById("gpo-btn");f.addEventListener("submit",function(ev){ev.preventDefault();btn.disabled=true;out.innerHTML="";var d=new FormData(f);d.set("ajax","1");var unlink=d.get("gpo_unlink")==="1";if(unlink){d.set("action","domain_scan_prepare_gpo_unlink");}fetch("index.php",{method:"POST",body:d,credentials:"same-origin"}).then(function(r){return r.json();}).then(function(j){var p=document.createElement("p");p.className=(j&&j.ok)?"alert success":"alert danger";if(j&&j.ok){p.textContent="✓ "+j.message;if(j.details&&j.details.actions&&j.details.actions.length){p.textContent+=" | "+j.details.actions.join(" • ");}}else{p.textContent="✗ "+((j&&j.error)?j.error:"خطا در انتشار Group Policy.");}out.appendChild(p);btn.disabled=false;}).catch(function(){var p=document.createElement("p");p.className="alert danger";p.textContent="خطای ارتباط با سرور.";out.appendChild(p);btn.disabled=false;});});})();</script>';
+                } elseif ($gpoPreflight !== null) {
+                    echo '<p class="alert warning">روش Group Policy در این سرور در دسترس نیست: ' . e((string) $gpoPreflight) . ' روش اول (SMB) را استفاده کنید یا پنل را روی سرور عضو دامنه اجرا کنید.</p>';
+                }
+            }
             echo '<p class="muted">بعد از انجام هر اصلاح روی سرور یا کلاینت‌ها، دکمهٔ «تلاش دوباره» فقط سیستم‌های خطادار را در نوبت تازه‌ای صف می‌کند؛ سیستم‌های موفق دوباره استخراج نمی‌شوند.</p><div class="scan-failure-grid">';
             foreach ($scanFailureGroups as $scanGroup) {
                 echo '<article class="scan-failure"><h3>' . e((string) $scanGroup['title']) . ' <span class="scan-failure-count">' . (int) $scanGroup['count'] . ' سیستم</span></h3>';

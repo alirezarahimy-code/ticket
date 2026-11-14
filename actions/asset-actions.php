@@ -14,6 +14,8 @@ declare(strict_types=1);
  *   ping_assets               پینگ گروهی دارایی‌ها (پاسخ AJAX)
  *   domain_scan_retry         تلاش دوباره برای دستگاه‌های خطادار
  *   domain_scan_prepare       آماده‌سازی راه‌دور مقصدها (فعال‌سازی WinRM، بدون GPO) — AJAX دسته‌ای
+ *   domain_scan_prepare_gpo   انتشار/لینک خودکار GPO دامنه از داخل پنل (WinRM + فایروال WMI)
+ *   domain_scan_prepare_gpo_unlink  برداشتن لینک همان GPO از دامنه
  *   domain_scan_test_selected آزمایش اتصال/اعتبار روی موارد انتخاب‌شده (بدون ذخیره)
  *   domain_scan_selected      اسکن کامل موارد انتخاب‌شده
  *   save_inventory_form       ذخیرهٔ فرم شناسنامه/اموال دستگاه
@@ -363,6 +365,71 @@ if (!defined('APP_ROOT')) {
                 exit;
             }
             flash($prepareOk > 0 ? 'success' : 'danger', 'آماده‌سازی انجام شد: ' . $prepareOk . ' از ' . count($prepareHosts) . ' سیستم آماده شد.');
+            redirect('index.php?page=domain-scan');
+        }
+
+        if ($action === 'domain_scan_prepare_gpo' || $action === 'domain_scan_prepare_gpo_unlink') {
+            // آماده‌سازی خودکار کل دامنه با Group Policy — از داخل پنل؛ کاربر لازم نیست در GPMC
+            // کاری کند. پنل روی DC یک GPO می‌سازد/لینک می‌کند و با Invoke-GPUpdate همان لحظه
+            // اعمال می‌کند. لغو (Unlink) هم از همین‌جاست.
+            $gpoUser = require_permission('asset.remote_prepare');
+            $gpoAjax = post_value('ajax') === '1';
+            $gpoMode = $action === 'domain_scan_prepare_gpo_unlink' ? 'unlink' : 'link';
+            $gpoFail = static function (string $message) use ($gpoAjax): void {
+                if ($gpoAjax) {
+                    header('Content-Type: application/json; charset=utf-8');
+                    http_response_code(400);
+                    echo json_encode(['ok' => false, 'error' => $message], JSON_UNESCAPED_UNICODE);
+                    exit;
+                }
+                flash('danger', $message);
+                redirect('index.php?page=domain-scan');
+            };
+            $gpoUsername = trim((string) ($_POST['scan_username'] ?? ''));
+            $gpoPassword = (string) ($_POST['scan_password'] ?? '');
+            try {
+                domain_scan_validate_credentials($gpoUsername, $gpoPassword);
+            } catch (Throwable $gpoCredException) {
+                $gpoFail($gpoCredException->getMessage());
+            }
+            $gpoProblem = domain_scan_prepare_preflight();
+            if ($gpoProblem !== null) {
+                $gpoFail($gpoProblem);
+            }
+            if (function_exists('set_time_limit')) {
+                @set_time_limit(360);
+            }
+            if (function_exists('session_write_close')) {
+                @session_write_close();
+            }
+            $gpoHosts = array_values(array_unique(array_filter(
+                array_map('trim', (array) ($_POST['hostnames'] ?? [])),
+                static fn (string $host): bool => $host !== '' && (bool) preg_match('/^[A-Za-z0-9._-]+$/', $host)
+            )));
+            if (count($gpoHosts) > 50) {
+                $gpoHosts = array_slice($gpoHosts, 0, 50);
+            }
+            $gpoCredentials = ['username' => $gpoUsername, 'password' => $gpoPassword];
+            unset($gpoPassword, $_POST['scan_password']);
+            $gpoResult = domain_scan_prepare_domain_gpo($gpoHosts, $gpoCredentials, $gpoMode);
+            unset($gpoCredentials, $gpoUsername);
+            if (session_status() !== PHP_SESSION_ACTIVE) {
+                session_start();
+            }
+            $gpoMessage = (string) $gpoResult['message'];
+            system_log($gpoResult['success'] ? 'info' : 'warning', 'domain_scan', $gpoMode === 'unlink' ? 'برداشتن لینک GPO استخراج' : 'انتشار GPO استخراج (WinRM + فایروال WMI)', ['success' => $gpoResult['success'], 'message' => $gpoMessage, 'hosts' => $gpoHosts]);
+            save_audit_required((int) $gpoUser['id'], $gpoMode === 'unlink' ? 'domain_gpo_unlinked' : 'domain_gpo_published', null, ['success' => $gpoResult['success'], 'message' => $gpoMessage, 'hosts' => $gpoHosts, 'details' => $gpoResult['details'] ?? []]);
+            if ($gpoAjax) {
+                header('Content-Type: application/json; charset=utf-8');
+                if ($gpoResult['success']) {
+                    echo json_encode(['ok' => true, 'message' => $gpoMessage, 'details' => $gpoResult['details'] ?? []], JSON_UNESCAPED_UNICODE | JSON_INVALID_UTF8_SUBSTITUTE);
+                } else {
+                    http_response_code(400);
+                    echo json_encode(['ok' => false, 'error' => $gpoMessage], JSON_UNESCAPED_UNICODE | JSON_INVALID_UTF8_SUBSTITUTE);
+                }
+                exit;
+            }
+            flash($gpoResult['success'] ? 'success' : 'danger', $gpoMessage);
             redirect('index.php?page=domain-scan');
         }
 

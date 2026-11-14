@@ -706,6 +706,10 @@ function domain_scan_friendly_error(string $raw): string
         'prepare_task_failed' => 'ساخت یا اجرای تسک آماده‌سازی روی سیستم مقصد ناموفق بود. جزئیات فنی: ',
         'prepare_verify_failed' => 'آماده‌سازی انجام شد اما اتصال آزمایشی (CIM) برقرار نشد. جزئیات فنی: ',
         'prepare_no_credentials' => 'اعتبارنامهٔ آماده‌سازی در دسترس نیست؛ نام کاربری و رمز را دوباره وارد کنید. جزئیات فنی: ',
+        'prepare_gpo_not_domain' => 'سرور پنل عضو دامنه نیست؛ انتشار Group Policy فقط از سرور عضو دامنه ممکن است. جزئیات فنی: ',
+        'prepare_gpo_failed' => 'ساخت یا اعمال Group Policy روی کنترلر دامنه ناموفق بود. جزئیات فنی: ',
+        'prepare_gpo_link_failed' => 'لینک‌کردن Group Policy به دامنه ناموفق بود. جزئیات فنی: ',
+        'prepare_gpo_unavailable' => 'ساخت Group Policy از داخل پنل ممکن نشد. جزئیات فنی: ',
     ];
     foreach ($prepareMap as $token => $prefix) {
         if (str_contains($lower, strtolower($token))) {
@@ -775,6 +779,30 @@ function domain_scan_error_catalog(): array
                 'حسابی که در فرم آماده‌سازی وارد می‌کنید باید روی مقصد عضو Administrators محلی باشد؛ Domain Admin بودن به‌تنهایی کافی نیست اگر از گروه Administrators محلی حذف شده باشد.',
                 'مطمئن شوید سرویس Task Scheduler روی مقصد روشن است و حساب اسکن قفل (lockout) نشده باشد؛ رمز اشتباه هم همین خطا را می‌دهد.',
                 'جزئیات فنیِ پیام سیستم را بخوانید؛ اگر خطا دربارهٔ دسترسی بود، حساب را اصلاح کنید و دوباره «آماده‌سازی» را بزنید.',
+            ],
+        ],
+        'prepare_gpo_not_domain' => [
+            'title' => 'سرور پنل عضو دامنه نیست؛ ساخت GPO از داخل پنل ممکن نیست',
+            'remedy' => [
+                'ساخت و لینک Group Policy فقط از یک سیستم عضو دامنه (یا با RSAT روی سرور پنل) امکان‌پذیر است؛ اگر پنل روی سرور مستقل نصب شده، از دامنه جدا است.',
+                'در این حالت روش بی‌نیاز از GPO را انتخاب کنید: دکمهٔ «آماده‌سازی سیستم‌های مقصد» (SMB + تسک) که فایروال باز باشد کار می‌کند.',
+                'یا پنل را روی یک سرور عضو دامنه منتقل کنید تا هر دو روش (SMB و GPO) از داخل پنل در دسترس باشند.',
+            ],
+        ],
+        'prepare_gpo_failed' => [
+            'title' => 'ساخت یا اعمال Group Policy روی کنترلر دامنه ناموفق بود',
+            'remedy' => [
+                'حساب واردشده باید «Domain Admin» یا مجوز ساخت و لینک GPO در دامنه را داشته باشد؛ حساب سرویس معمولی نمی‌تواند GPO بسازد.',
+                'مطمئن شوید سرور پنل به کنترلر دامنه دسترسی دارد (پورت‌های 5985/5986 برای PowerShell Remoting، یا RPC برای ماژول GroupPolicy) و سرویس WinRM روی DC روشن است.',
+                'جزئیات فنی پیام را بخوانید؛ اگر خطا مربوط به «دسترسی» است، مجوز حساب را اصلاح کنید و دوباره تلاش کنید.',
+            ],
+        ],
+        'prepare_gpo_link_failed' => [
+            'title' => 'لینک‌کردن Group Policy به دامنه ناموفق بود',
+            'remedy' => [
+                'حساب واردشده باید اجازهٔ لینک‌کردن GPO به ریشه دامنه را داشته باشد (Domain Admin معمولاً دارد).',
+                'اگر GPO از قبل ساخته شده اما لینک نشده، در GPMC آن را دستی به دامنه لینک نکنید؛ دوباره همین دکمه را بزنید تا خودکار لینک شود.',
+                'جزئیات فنی پیام را برای علت دقیق بررسی کنید.',
             ],
         ],
         'prepare_verify_failed' => [
@@ -925,6 +953,10 @@ function domain_scan_error_code(string $message): string
         'prepare_smb_unreachable' => ['مسیر SMB روی سیستم مقصد'],
         'prepare_task_failed' => ['ساخت یا اجرای تسک آماده‌سازی'],
         'prepare_verify_failed' => ['آماده‌سازی انجام شد اما اتصال آزمایشی'],
+        'prepare_gpo_not_domain' => ['سرور پنل عضو دامنه نیست'],
+        'prepare_gpo_link_failed' => ['لینک‌کردن Group Policy'],
+        'prepare_gpo_failed' => ['ساخت یا اعمال Group Policy'],
+        'prepare_gpo_unavailable' => ['ساخت‌کردن Group Policy از داخل پنل'],
         'winrm_unavailable' => ['مسیر WinRM/WSMan'],
         'rpc_unavailable' => ['سرویس RPC/WMI'],
         'access_denied' => ['دسترسی رد شد'],
@@ -1189,6 +1221,93 @@ function domain_scan_remote_inventory(string $host, array $credentials = []): ar
 function domain_scan_prepare_script_path(): string
 {
     return __DIR__ . '/tools/prepare_targets.ps1';
+}
+
+function domain_scan_prepare_gpo_script_path(): string
+{
+    return __DIR__ . '/tools/prepare_domain_gpo.ps1';
+}
+
+/**
+ * آماده‌سازی کل دامنه از طریق Group Policy — کاملاً خودکار از داخل پنل (بدون GPMC دستی).
+ * روی سرور پنلِ عضو دامنه اجرا می‌شود، به یک DC وصل می‌شود، GPO می‌سازد/لینک می‌کند و
+ * با Invoke-GPUpdate همان لحظه اعمال می‌کند.
+ *
+ * @param string[] $hosts  مقصدهایی که باید فوراً gpupdate شوند (می‌تواند خالی باشد)
+ * @return array{success:bool,code:string,message:string,details?:array}
+ */
+function domain_scan_prepare_domain_gpo(array $hosts = [], array $credentials = [], string $mode = 'link'): array
+{
+    $problem = domain_scan_prepare_preflight();
+    if ($problem !== null) {
+        return ['success' => false, 'code' => 'unknown', 'message' => $problem];
+    }
+    if (!is_file(domain_scan_prepare_gpo_script_path())) {
+        return ['success' => false, 'code' => 'gpo_unavailable', 'message' => 'اسکریپت آماده‌سازی دامنه (tools/prepare_domain_gpo.ps1) پیدا نشد.'];
+    }
+    $user = trim((string) ($credentials['username'] ?? ''));
+    $pass = (string) ($credentials['password'] ?? '');
+    if ($user === '' || $pass === '') {
+        return ['success' => false, 'code' => 'prepare_no_credentials', 'message' => 'برای آماده‌سازی دامنه، نام کاربری و رمز حساب ادمین دامنه لازم است.'];
+    }
+    $domain = trim((string) setting('domain_scan_domain', ''));
+    if (strpos($user, '\\') === false && strpos($user, '@') === false && $domain !== '') {
+        $user = $domain . '\\' . $user;
+    }
+    $hosts = array_values(array_filter(array_map(static fn ($host): string => trim((string) $host), $hosts), static fn (string $host): bool => $host !== '' && (bool) preg_match('/^[A-Za-z0-9._-]+$/', $host)));
+    $env = ['ITSM_SCAN_USER' => $user, 'ITSM_SCAN_PASS' => $pass];
+    $cmd = [
+        domain_scan_powershell_path(),
+        '-NoProfile', '-NonInteractive', '-ExecutionPolicy', 'Bypass',
+        '-File', domain_scan_prepare_gpo_script_path(),
+        '-Mode', $mode === 'unlink' ? 'Unlink' : 'Link',
+        '-GpoName', (
+            trim((string) setting('domain_scan_gpo_name', '')) !== ''
+                ? trim((string) setting('domain_scan_gpo_name', ''))
+                : 'ITSM - Remote Inventory (WinRM + WMI)'
+        ),
+    ];
+    if ($hosts !== []) {
+        $cmd[] = '-TargetHosts';
+        $cmd[] = implode(',', $hosts);
+    }
+    if ($domain !== '') {
+        $cmd[] = '-DomainName';
+        $cmd[] = $domain;
+    }
+    $results = domain_scan_run_processes(['gpo' => ['cmd' => $cmd, 'env' => $env]], 1, 240);
+    $row = $results['gpo'] ?? ['code' => -1, 'out' => '', 'err' => '', 'timed_out' => false, 'started' => false];
+    if ($row['timed_out']) {
+        return ['success' => false, 'code' => 'timeout', 'message' => 'مهلت آماده‌سازی دامنه (۲۴۰ ثانیه) تمام شد؛ اتصال به کنترلر دامنه یا اعمال سیاست طول کشید. دوباره تلاش کنید.'];
+    }
+    $out = trim($row['out']);
+    $out = preg_replace('/^\xEF\xBB\xBF/', '', (string) $out) ?? (string) $out;
+    $jsonStart = strpos($out, '{');
+    $jsonEnd = strrpos($out, '}');
+    if ($jsonStart !== false && $jsonEnd !== false && $jsonEnd > $jsonStart) {
+        $out = substr($out, $jsonStart, $jsonEnd - $jsonStart + 1);
+    }
+    $decoded = $out !== '' ? json_decode($out, true, 512, JSON_INVALID_UTF8_SUBSTITUTE) : null;
+    if (is_array($decoded) && !empty($decoded['success'])) {
+        return [
+            'success' => true,
+            'code' => 'ok',
+            'message' => (string) ($decoded['message'] ?? 'GPO ساخته، لینک و اعمال شد.'),
+            'details' => [
+                'gpo' => (string) ($decoded['gpo'] ?? ''),
+                'domain' => (string) ($decoded['domain'] ?? ''),
+                'dc' => (string) ($decoded['dc'] ?? ''),
+                'actions' => array_values((array) ($decoded['actions'] ?? [])),
+                'warnings' => array_values((array) ($decoded['warnings'] ?? [])),
+            ],
+        ];
+    }
+    $detail = domain_scan_friendly_error(trim($row['err']) !== '' ? $row['err'] : $row['out']);
+    return [
+        'success' => false,
+        'code' => domain_scan_error_code($detail),
+        'message' => $detail !== '' ? $detail : 'پاسخ خالی از PowerShell (کد خروج ' . $row['code'] . ').',
+    ];
 }
 
 function domain_scan_prepare_target_script_path(): string

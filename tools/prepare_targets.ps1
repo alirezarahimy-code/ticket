@@ -59,7 +59,8 @@ try {
 
     # ۳) ساخت تسک زمان‌بندی‌شده روی مقصد (schtasks از RPC به Task Scheduler وصل می‌شود).
     $taskCmd = 'powershell -NoProfile -ExecutionPolicy Bypass -File C:\ITSM\prepare_remote_target.ps1'
-    $createOut = & schtasks.exe /create /s $ComputerName /u $user /p $pass /tn $taskName /tr $taskCmd /sc once /st 00:00 /f 2>&1
+    # /ru SYSTEM یعنی تسک مستقل از نشست کاربر و بدون نیاز به ورود دوباره اجرا می‌شود.
+    $createOut = & schtasks.exe /create /s $ComputerName /u $user /p $pass /tn $taskName /tr $taskCmd /sc once /st 00:00 /ru SYSTEM /rl HIGHEST /f 2>&1
     if ($LASTEXITCODE -ne 0) {
         Fail 'PREPARE_TASK_FAILED' "schtasks /create failed: $createOut"
     }

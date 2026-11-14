@@ -185,6 +185,52 @@ check('۲۹: دکمهٔ «آماده‌سازی سیستم‌های مقصد» �
     && str_contains($indexSource, 'domain_scan_prepare_preflight')
     && str_contains($indexSource, '__prepareHosts'));
 
+/* ── ۸) روش دوم: انتشار خودکار GPO از داخل پنل (بدون GPMC دستی) ─────────────── */
+$gpoScript = (string) file_get_contents($root . '/tools/prepare_domain_gpo.ps1');
+check('۳۰: اسکریپت GPO بدون نیاز به RSAT روی پنل کار می‌کند (Invoke-Command روی DC)',
+    str_contains($gpoScript, 'Invoke-Command')
+    && str_contains($gpoScript, 'DomainControllers')
+    && str_contains($gpoScript, 'Import-Module GroupPolicy'));
+check('۳۱: اسکریپت GPO سیاست WinRM و قواعد فایروال WMI/RPC/WinRM را می‌نویسد',
+    str_contains($gpoScript, 'AllowAutoConfig')
+    && str_contains($gpoScript, 'RPC-EPMap')
+    && str_contains($gpoScript, 'LPort=5985')
+    && str_contains($gpoScript, 'LPort=49152-65535'));
+check('۳۲: اسکریپت GPO لینک می‌کند، gpupdate اجباری می‌زند و حالت Unlink دارد',
+    str_contains($gpoScript, 'New-GPLink')
+    && str_contains($gpoScript, 'Invoke-GPUpdate')
+    && str_contains($gpoScript, 'Remove-GPLink')
+    && str_contains($gpoScript, 'PREPARE_GPO_LINK_FAILED'));
+$gpoSamples = [
+    'prepare_gpo_not_domain' => 'PREPARE_GPO_NOT_DOMAIN: The panel server is not a domain member',
+    'prepare_gpo_failed' => 'PREPARE_GPO_FAILED: New-GPO failed: Access is denied.',
+    'prepare_gpo_link_failed' => 'PREPARE_GPO_LINK_FAILED: New-GPLink failed: Access is denied.',
+];
+$gpoMismatch = [];
+foreach ($gpoSamples as $expectedCode => $raw) {
+    $detected = domain_scan_error_code(domain_scan_friendly_error($raw));
+    if ($detected !== $expectedCode) {
+        $gpoMismatch[] = $expectedCode . '→' . $detected;
+    }
+}
+check('۳۳: خطاهای PREPARE_GPO_* به کدهای درست نگاشت می‌شوند', $gpoMismatch === [], implode(' | ', $gpoMismatch));
+check('۳۴: کاتالوگ خطاهای GPO (عضو نبودن دامنه/ساخت/لینک) را با راه‌حل کامل دارد',
+    isset($catalog['prepare_gpo_not_domain'], $catalog['prepare_gpo_failed'], $catalog['prepare_gpo_link_failed'])
+    && count($catalog['prepare_gpo_failed']['remedy']) >= 2
+    && count($catalog['prepare_gpo_link_failed']['remedy']) >= 2);
+check('۳۵: اکشن انتشار و لغو GPO با مجوز و ممیزی ثبت شده است',
+    str_contains($actionsSource, 'domain_scan_prepare_gpo')
+    && str_contains($actionsSource, "domain_scan_prepare_gpo_unlink")
+    && str_contains($actionsSource, 'domain_gpo_published')
+    && str_contains($actionsSource, 'domain_gpo_unlinked')
+    && str_contains($actionsSource, 'domain_scan_prepare_domain_gpo'));
+check('۳۶: کارت «روش دوم: GPO خودکار» در صفحهٔ اسکن رندر می‌شود',
+    str_contains($indexSource, 'روش دوم: ساخت و اعمال خودکار Group Policy در کل دامنه')
+    && str_contains($indexSource, 'domain_scan_prepare_gpo')
+    && str_contains($indexSource, 'gpo-form'));
+check('۳۷: تسک آماده‌سازی با /ru SYSTEM ساخته می‌شود (مستقل از لاگین کاربر)',
+    str_contains($preparePanelScript, '/ru SYSTEM'));
+
 echo "\n" . ($fail === 0
     ? 'همهٔ ' . $pass . " بررسی مدیریت خطای استخراج موفق بود.\n"
     : $fail . ' بررسی ناموفق از ' . ($pass + $fail) . " مورد.\n");
