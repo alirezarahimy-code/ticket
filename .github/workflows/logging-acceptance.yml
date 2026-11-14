@@ -118,7 +118,7 @@ jobs:
         id: legacy_package
         shell: bash
         run: |
-          version="$(tr -d '\\r\\n' < VERSION)"
+          version="$(tr -d '\r\n' < VERSION)"
           if [[ "$version" == "1.62.88" ]]; then
             echo "build=true" >> "$GITHUB_OUTPUT"
           else
