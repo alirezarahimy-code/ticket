@@ -503,6 +503,14 @@ function inventory_base_inventory(): array
 
 function inventory_apply_powershell_data(array $inventory, array $data): array
 {
+    // شناسه‌های سرویس‌دهندهٔ پنل (php_version/php_sapi/server_software/os_release) مربوط به
+    // همان سروری‌اند که PowerShell را اجرا می‌کند، نه لزوماً سیستمی که شناسنامه‌اش ساخته
+    // می‌شود. اگر باقی بمانند، هنگام استخراج از راه دور داخل hardware_json سیستم مقصد
+    // ذخیره می‌شوند (نشت اطلاعات سرور پنل و دادهٔ گمراه‌کننده در شناسنامهٔ مقصد).
+    // هیچ‌جای برنامه این چهار کلید را نمی‌خواند، پس حذفشان بی‌اثر است.
+    foreach (['php_version', 'php_sapi', 'server_software', 'os_release'] as $panelOnlyKey) {
+        unset($inventory['hardware'][$panelOnlyKey]);
+    }
     $rows = static fn (string $key): array => inventory_rows($data[$key] ?? []);
     $collectionStatus = is_array($data['collection_status'] ?? null) ? $data['collection_status'] : [];
     $inventory['collection_status'] = $collectionStatus;

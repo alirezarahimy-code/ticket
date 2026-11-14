@@ -208,8 +208,11 @@ if (-not $result) {
     }
     Fail 'PREPARE_GPO_FAILED' "Group Policy operation failed (DC $dcHost): $remoteError"
 }
-if (-not $result) {
-    Fail 'PREPARE_GPO_FAILED' "No result returned from domain controller $dcHost"
+# Invoke-Command برای یک هاست یک شیء برمی‌گرداند، اما اگر خروجی چند شیء باشد
+# (یا fallback محلی) نتیجه آرایه می‌شود و $result.linked خطا می‌دهد؛ آخرین شیء
+# نتیجهٔ واقعی است.
+if ($result -is [array]) {
+    $result = $result[-1]
 }
 
 [ordered]@{

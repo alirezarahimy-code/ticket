@@ -5,6 +5,9 @@
 # می‌کند و با schtasks اجرا می‌کند؛ کاربر نهایی هرگز آن را مستقیم اجرا نمی‌کند.
 # قابل اجرای مجدد است (idempotent) و نتیجه را در C:\ITSM\prepare_result.json می‌نویسد.
 $ErrorActionPreference = 'Continue'
+# پیام‌ها در ArrayList نگه‌داری می‌شوند؛ ‎+=‎ روی آرایهٔ داخل [ordered]@{} در PowerShell 5.1
+# عنصر اضافه نمی‌کند و فقط یک آرایهٔ تازه می‌سازد که بیرون از شیء گم می‌شود.
+$messages = New-Object System.Collections.ArrayList
 $result = [ordered]@{ success = $false; winrm = $false; wmi = $false; messages = @() }
 $dir = 'C:\ITSM'
 try { New-Item -ItemType Directory -Path $dir -Force | Out-Null } catch { }
@@ -16,7 +19,7 @@ try {
     Start-Service -Name WinRM -ErrorAction SilentlyContinue
     $result.winrm = $true
 } catch {
-    $result.messages += "WinRM: $($_.Exception.Message)"
+    [void] $messages.Add("WinRM: $($_.Exception.Message)")
 }
 
 try {
@@ -26,7 +29,7 @@ try {
     Enable-NetFirewallRule -DisplayGroup 'Remote Service Management' -ErrorAction SilentlyContinue
     $result.wmi = $true
 } catch {
-    $result.messages += "Firewall: $($_.Exception.Message)"
+    [void] $messages.Add("Firewall: $($_.Exception.Message)")
 }
 
 try {
@@ -36,5 +39,9 @@ try {
 } catch { }
 
 $result.success = [bool]($result.winrm -and $result.wmi)
+$result.messages = @($messages.ToArray())
 $result | ConvertTo-Json -Depth 4 | Out-File -FilePath (Join-Path $dir 'prepare_result.json') -Encoding utf8
-exit 0
+
+# کد خروج بازتاب موفقیت است تا اجرای تسک از بیرون قابل تشخیص باشد.
+# (تسک زمان‌بندی‌شده کد خروج را نگه می‌دارد، اما پنل از روی prepare_result.json هم می‌خواند.)
+if ($result.success) { exit 0 } else { exit 1 }

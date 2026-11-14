@@ -44,7 +44,10 @@ if (-not $smbOpen) {
 }
 
 # ۲) درایو موقت روی C$ مقصد با اعتبارنامهٔ دامنه و کپی اسکریپت آماده‌سازی.
+#    $drive از ابتدا null است تا اگر New-PSDrive شکست خورد، بلوک finally
+#    با «متغیر تعریف‌نشده» پیام خطای اصلی را نپوشاند.
 $driveName = 'ITSM' + (Get-Random -Minimum 1000 -Maximum 9999)
+$drive = $null
 try {
     $drive = New-PSDrive -Name $driveName -PSProvider FileSystem -Root "\\$ComputerName\C$" -Credential $cred -ErrorAction Stop
 } catch {
@@ -65,14 +68,16 @@ try {
         Fail 'PREPARE_TASK_FAILED' "schtasks /create failed: $createOut"
     }
 
-    # ۴) اجرای تسک.
+    # ۴) اجرای تسک. فایل نتیجهٔ اجرای قبلی قبل از اجرا پاک می‌شود؛ وگرنه ممکن است
+    #    نتیجهٔ کهنه خوانده شود و آماده‌سازی ناموفق «موفق» گزارش شود.
+    $resultPath = Join-Path $remoteDir 'prepare_result.json'
+    try { Remove-Item -Path $resultPath -Force -ErrorAction SilentlyContinue } catch { }
     $runOut = & schtasks.exe /run /s $ComputerName /u $user /p $pass /tn $taskName 2>&1
     if ($LASTEXITCODE -ne 0) {
         Fail 'PREPARE_TASK_FAILED' "schtasks /run failed: $runOut"
     }
 
     # ۵) انتظار برای فایل نتیجهٔ اسکریپت مقصد (حداکثر ۷۵ ثانیه).
-    $resultPath = Join-Path $remoteDir 'prepare_result.json'
     $result = $null
     for ($i = 0; $i -lt 25; $i++) {
         Start-Sleep -Seconds 3
@@ -112,9 +117,11 @@ try {
         message  = "WinRM enabled and verified on $ComputerName"
     } | ConvertTo-Json -Depth 4
 } finally {
-    # ۷) پاک‌سازی: حذف تسک و فایل‌های موقت روی مقصد.
+    # ۷) پاک‌سازی: حذف تسک و فایل‌های موقت روی مقصد (اگر درایو ساخته شده باشد).
     try { & schtasks.exe /delete /s $ComputerName /u $user /p $pass /tn $taskName /f 2>&1 | Out-Null } catch { }
-    try { Remove-Item -Path "$($drive.Name):\ITSM\prepare_result.json" -Force -ErrorAction SilentlyContinue } catch { }
-    try { Remove-Item -Path "$($drive.Name):\ITSM\prepare_remote_target.ps1" -Force -ErrorAction SilentlyContinue } catch { }
-    try { Remove-PSDrive -Name $drive.Name -Force -ErrorAction SilentlyContinue } catch { }
+    if ($drive) {
+        try { Remove-Item -Path "$($drive.Name):\ITSM\prepare_result.json" -Force -ErrorAction SilentlyContinue } catch { }
+        try { Remove-Item -Path "$($drive.Name):\ITSM\prepare_remote_target.ps1" -Force -ErrorAction SilentlyContinue } catch { }
+        try { Remove-PSDrive -Name $drive.Name -Force -ErrorAction SilentlyContinue } catch { }
+    }
 }

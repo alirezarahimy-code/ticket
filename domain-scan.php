@@ -1192,6 +1192,9 @@ function domain_scan_remote_inventory_many(array $hosts, int $concurrency = 4, a
         $inventory['disks'] = [];
         $inventory['software'] = [];
         $inventory['peripherals'] = ['printers' => [], 'scanners' => [], 'monitors' => [], 'keyboards' => [], 'mice' => []];
+        // hardware کاملاً خالی می‌شود تا هیچ شناسهٔ سرورِ پنل (php_version/php_sapi/
+        // server_software/os_release که inventory_base_inventory() می‌گذارد) در
+        // شناسنامهٔ سیستم مقصد ذخیره نشود.
         $inventory['hardware'] = [];
         $resolved = domain_scan_resolve_ipv4($host);
         $inventory['ip_address'] = $resolved;

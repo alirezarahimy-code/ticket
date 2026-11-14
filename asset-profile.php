@@ -101,7 +101,7 @@ function asset_profile_sections(): array
             'fields' => [
                 ['key' => 'unit_name', 'label' => 'نام واحد', 'type' => 'text'],
                 ['key' => 'computer_type', 'label' => 'نوع رایانه', 'type' => 'text', 'auto' => true],
-                ['key' => 'user_login', 'label' => 'نام کاربری', 'type' => 'text'],
+                ['key' => 'user_login', 'label' => 'نام کاربری', 'type' => 'text', 'auto' => true],
                 ['key' => 'owner_full_name', 'label' => 'نام و نام خانوادگی', 'type' => 'text'],
                 ['key' => 'education', 'label' => 'رشته تحصیلی', 'type' => 'text'],
                 ['key' => 'phone', 'label' => 'شماره تماس', 'type' => 'text'],
@@ -164,7 +164,7 @@ function asset_profile_sections(): array
                 ['key' => 'netcard', 'label' => 'کارت شبکه', 'type' => 'text', 'auto' => true],
                 ['key' => 'net_node', 'label' => 'شماره نود شبکه', 'type' => 'text'],
                 ['key' => 'connected_internet', 'label' => 'متصل به اینترنت', 'type' => 'bool'],
-                ['key' => 'connected_network', 'label' => 'متصل به شبکه', 'type' => 'bool'],
+                ['key' => 'connected_network', 'label' => 'متصل به شبکه', 'type' => 'bool', 'auto' => true],
                 ['key' => 'lock_usb', 'label' => 'قفل شده USB', 'type' => 'bool'],
                 ['key' => 'lock_case', 'label' => 'پلمپ شده کیس', 'type' => 'bool'],
                 ['key' => 'lock_cd_dvd', 'label' => 'قفل CD-DVD R/W', 'type' => 'bool'],
@@ -198,13 +198,13 @@ function asset_profile_sections(): array
             'hint' => 'با اسکن دامنه به‌صورت خودکار پر می‌شود',
             'icon' => '🏢',
             'fields' => [
-                ['key' => 'ad_dn', 'label' => 'مسیر در دامنه (DN / OU)', 'type' => 'text', 'full' => true],
+                ['key' => 'ad_dn', 'label' => 'مسیر در دامنه (DN / OU)', 'type' => 'text', 'full' => true, 'auto' => true],
                 ['key' => 'ad_os', 'label' => 'سیستم‌عامل طبق دامنه', 'type' => 'text', 'auto' => true],
                 ['key' => 'ad_os_version', 'label' => 'نسخه طبق دامنه', 'type' => 'text', 'auto' => true],
                 ['key' => 'ad_last_logon', 'label' => 'آخرین ورود در دامنه', 'type' => 'date', 'auto' => true],
                 ['key' => 'ad_last_seen', 'label' => 'آخرین مشاهدهٔ آنلاین', 'type' => 'date', 'auto' => true],
                 ['key' => 'ad_scanned_at', 'label' => 'آخرین بررسی شبکه', 'type' => 'date', 'auto' => true],
-                ['key' => 'ad_online', 'label' => 'در شبکه آنلاین است', 'type' => 'bool'],
+                ['key' => 'ad_online', 'label' => 'در شبکه آنلاین است', 'type' => 'bool', 'auto' => true],
                 ['key' => 'ad_description', 'label' => 'توضیحات دامنه', 'type' => 'text', 'full' => true, 'auto' => true],
             ],
         ],
@@ -682,7 +682,14 @@ function asset_profile_auto_values(array $inventory): array
     };
     $osInstallDate = null;
     $rawInstall = (string) inventory_value($os, ['InstallDate', 'install_date'], '');
-    if (preg_match('/^(\d{4})(\d{2})(\d{2})/', $rawInstall, $matches)) {
+    // Win32_OperatingSystem.InstallDate در CIM خام «20230211000000.000000+000» است، اما
+    // Get-CimInstance با PowerShell 7 آن را DateTime می‌کند و ConvertTo-Json به ISO 8601
+    // («2023-02-11T00:00:00Z») تبدیل می‌شود. هر دو فرمت باید پذیرفته شوند؛ وگرنه تاریخ نصب
+    // سیستم‌عامل هرگز در شناسنامه پر نمی‌شد.
+    if (preg_match('/^(\d{4})-?(\d{2})-?(\d{2})/', $rawInstall, $matches)
+        && (int) $matches[2] >= 1 && (int) $matches[2] <= 12
+        && (int) $matches[3] >= 1 && (int) $matches[3] <= 31
+        && (int) $matches[1] >= 1990) {
         $osInstallDate = $matches[1] . '-' . $matches[2] . '-' . $matches[3] . ' 00:00:00';
     }
     $localUsers = inventory_rows($inventory['os_users'] ?? []);
