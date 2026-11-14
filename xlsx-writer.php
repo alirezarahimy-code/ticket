@@ -29,7 +29,13 @@ function xlsx_col_name(int $index): string
 function xlsx_clean_text(string $text): string
 {
     $clean = preg_replace('/[^\x{9}\x{A}\x{D}\x{20}-\x{D7FF}\x{E000}-\x{FFFD}\x{10000}-\x{10FFFF}]/u', '', $text);
-    return $clean ?? '';
+    $clean = $clean ?? '';
+    // همهٔ سلول‌ها باید تک‌خطی باشند: خط جدید، تب و فاصله‌های تکراری درون سلول به یک
+    // فاصله تبدیل می‌شوند. (wrapText=0 به‌تنهایی جلوی شکستن خودکار را می‌گیرد، اما
+    // خط جدیدِ داخل متن را اکسل همچنان در چند خط نشان می‌دهد.)
+    $clean = str_replace(["\r\n", "\r", "\n", "\t", "\x0B", "\x0C"], ' ', $clean);
+    $clean = preg_replace('/[\x{200B}\x{FEFF}]/u', '', $clean) ?? $clean;
+    return trim(preg_replace('/\s{2,}/u', ' ', $clean) ?? $clean);
 }
 
 function xlsx_sheet_name(string $name): string
@@ -107,13 +113,15 @@ function xlsx_build(array $sheets): string
         '</Relationships>');
 
     // ۰: متن ساده  ۱: سرستون (پررنگ، کادر، وسط‌چین)  ۲: عنوان (پررنگ‌تر، وسط‌چین)  ۳: متن بدنه (کادر، راست‌چین)
+    // فونت: متن‌ها B Nazanin و سرستون‌ها/عنوان B Titr (فونت‌های رایج فارسی در ویندوز).
+    // هر سه سبک wrapText="0" دارند تا هیچ سلولی چندخطی نشود و همه تک‌خطی بمانند.
     $zip->addFromString('xl/styles.xml',
         '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' .
         '<styleSheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">' .
         '<fonts count="3">' .
-        '<font><sz val="11"/><name val="Tahoma"/></font>' .
-        '<font><b/><sz val="11"/><name val="Tahoma"/></font>' .
-        '<font><b/><sz val="14"/><name val="Tahoma"/></font>' .
+        '<font><sz val="11"/><name val="B Nazanin"/><charset val="178"/><family val="2"/></font>' .
+        '<font><b/><sz val="11"/><name val="B Titr"/><charset val="178"/><family val="2"/></font>' .
+        '<font><b/><sz val="14"/><name val="B Titr"/><charset val="178"/><family val="2"/></font>' .
         '</fonts>' .
         '<fills count="3"><fill><patternFill patternType="none"/></fill><fill><patternFill patternType="gray125"/></fill>' .
         '<fill><patternFill patternType="solid"><fgColor rgb="FFE8F3EE"/><bgColor indexed="64"/></patternFill></fill></fills>' .
@@ -122,10 +130,10 @@ function xlsx_build(array $sheets): string
         '<top style="thin"><color rgb="FFBFCFC8"/></top><bottom style="thin"><color rgb="FFBFCFC8"/></bottom><diagonal/></border></borders>' .
         '<cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs>' .
         '<cellXfs count="4">' .
-        '<xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0"/>' .
-        '<xf numFmtId="0" fontId="1" fillId="2" borderId="1" xfId="0" applyFont="1" applyFill="1" applyBorder="1" applyAlignment="1"><alignment horizontal="center" vertical="center" wrapText="1"/></xf>' .
-        '<xf numFmtId="0" fontId="2" fillId="0" borderId="0" xfId="0" applyFont="1" applyAlignment="1"><alignment horizontal="center" vertical="center" wrapText="1"/></xf>' .
-        '<xf numFmtId="0" fontId="0" fillId="0" borderId="1" xfId="0" applyBorder="1" applyAlignment="1"><alignment horizontal="right" vertical="center" wrapText="1"/></xf>' .
+        '<xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0" applyFont="1"/>' .
+        '<xf numFmtId="0" fontId="1" fillId="2" borderId="1" xfId="0" applyFont="1" applyFill="1" applyBorder="1" applyAlignment="1"><alignment horizontal="center" vertical="center" wrapText="0"/></xf>' .
+        '<xf numFmtId="0" fontId="2" fillId="0" borderId="0" xfId="0" applyFont="1" applyAlignment="1"><alignment horizontal="center" vertical="center" wrapText="0"/></xf>' .
+        '<xf numFmtId="0" fontId="0" fillId="0" borderId="1" xfId="0" applyFont="1" applyBorder="1" applyAlignment="1"><alignment horizontal="right" vertical="center" wrapText="0"/></xf>' .
         '</cellXfs>' .
         '<cellStyles count="1"><cellStyle name="Normal" xfId="0" builtinId="0"/></cellStyles>' .
         '</styleSheet>');
@@ -175,10 +183,31 @@ function xlsx_sheet_xml(array $sheet): string
     }
     $lastRef = xlsx_col_name($maxCols - 1) . max(1, $rowNumber);
 
+    // عرض ستون: مقدار صریح اگر داده شده باشد، وگرنه بر اساس بلندترین متن همان ستون
+    // (چون سلول‌ها تک‌خطی‌اند، عرض کم باعث می‌شود متن بریده دیده شود).
+    // بازهٔ مجاز ۸ تا ۵۵ نویسه تا هم ستون‌های خالی خیلی باریک نشوند و هم ستون توضیحات
+    // غیرمعقول پهن نشود.
+    $autoWidths = [];
+    if (empty($sheet['widths'])) {
+        foreach ((array) ($sheet['rows'] ?? []) as $row) {
+            $col = 0;
+            foreach ((array) $row as $cell) {
+                $value = is_array($cell) ? ($cell['v'] ?? '') : $cell;
+                $text = is_scalar($value) ? trim((string) $value) : '';
+                $length = $text === '' ? 0 : (function_exists('mb_strlen') ? mb_strlen($text, 'UTF-8') : strlen($text));
+                $autoWidths[$col] = max($autoWidths[$col] ?? 0, $length);
+                $col++;
+            }
+        }
+    }
     $colsXml = '';
-    foreach (($sheet['widths'] ?? []) as $i => $width) {
-        $n = $i + 1;
-        $colsXml .= '<col min="' . $n . '" max="' . $n . '" width="' . (float) $width . '" customWidth="1"/>';
+    $widthList = !empty($sheet['widths']) ? (array) $sheet['widths'] : $autoWidths;
+    foreach ($widthList as $i => $width) {
+        $n = (int) $i + 1;
+        $value = empty($sheet['widths'])
+            ? max(8.0, min(55.0, (float) $width + 3.0))
+            : (float) $width;
+        $colsXml .= '<col min="' . $n . '" max="' . $n . '" width="' . $value . '" customWidth="1"/>';
     }
     if ($colsXml !== '') {
         $colsXml = '<cols>' . $colsXml . '</cols>';

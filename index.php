@@ -129,11 +129,12 @@ function excel_download(string $filename, string $title, array $headers, array $
         // همهٔ مقادیر رشته‌ای می‌شوند تا صفرهای ابتدای کدها (مثل کد ملی) حفظ شود
         $sheetRows[] = array_map(static fn ($value): array => ['v' => is_scalar($value) ? (string) $value : '', 's' => 'body'], array_values((array) $row));
     }
+    // عرض ستون‌ها خودکار از بلندترین متن هر ستون محاسبه می‌شود (چون همهٔ سلول‌ها
+    // تک‌خطی‌اند، عرض ثابت باعث بریده‌شدن متن‌های بلند مثل مدل CPU یا نام نرم‌افزار می‌شد).
     $bytes = xlsx_build([[
         'name' => 'گزارش',
         'rows' => $sheetRows,
         'merges' => ['A1:' . xlsx_col_name($columnCount - 1) . '1'],
-        'widths' => array_fill(0, $columnCount, 20),
     ]]);
     xlsx_send($filename, $bytes);
 }
