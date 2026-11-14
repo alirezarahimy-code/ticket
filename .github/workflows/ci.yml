@@ -168,6 +168,17 @@ jobs:
     - name: Run cross-version migration registry test
       run: php tests/test_system_update_migration_registry.php
 
+    - name: Run migration 032 updater-registration regression test
+      run: php tests/test_migration_032_updater_registration.php
+      env:
+        CI_DB_HOST: 127.0.0.1
+        CI_DB_PORT: '3306'
+        CI_DB_NAME: persian_ticketing_ci
+        CI_DB_USER: root
+        CI_DB_PASS: ci-ephemeral-root-password
+        CI_DB_REQUIRED: '1'
+
+
     - name: Run asset scope permission tests
       run: php tests/test_asset_scope_permissions.php
 
