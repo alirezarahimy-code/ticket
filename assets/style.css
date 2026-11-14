@@ -1864,13 +1864,3 @@ body.org-image-print-page img { display: block; width: min(100vw, 100%); height:
   .access-group-member-toolbar input { flex-basis: 100%; }
 }
 
-/* آژیر سلامت سامانه (فاز ۱ — «توقف‌کار»ها؛ فقط نقش‌های مدیریتی) */
-.system-alarm-list { list-style: none; margin: 0 0 18px; padding: 0; text-align: right; max-height: 40vh; overflow: auto; }
-.system-alarm-list li { padding: 8px 12px; border: 1px solid #fecaca; border-radius: 10px; background: #fff; margin: 0 0 8px; font-size: 13px; line-height: 1.9; }
-.system-alarm-list li strong { color: #b91c1c; }
-.system-alarm-link { color: #1d4ed8; font-weight: 700; white-space: nowrap; }
-.system-alarm-actions { display: flex; justify-content: center; gap: 10px; }
-.system-alarm-confirm { margin-top: 12px; border-top: 1px dashed #ef4444; padding-top: 12px; }
-.system-alarm-confirm p { margin: 0 0 10px; font-size: 13px; color: #7f1d1d; line-height: 1.9; }
-.system-alarm-confirm-actions { display: flex; justify-content: center; gap: 10px; }
-@media print { .system-alarm { display: none !important; } }

@@ -499,7 +499,21 @@ function system_alarm_chrome(?array $user): string
     if (!system_alarm_user_can_see($user)) {
         return '';
     }
-    return '<div class="inspection-food-reminder system-alarm" id="system-alarm" hidden aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="system-alarm-title" data-endpoint="api/system-alarms.php">'
+    // استایل مخصوص این ماژول عمداً inline است تا در هر دو پوسته (سامانه و مرکز درخواست‌ها)
+    // و روی هر نسخه‌ای از assets/style.css مستقل از مسیر بسته عمل کند (CSP: style-src اجازهٔ unsafe-inline می‌دهد).
+    $css = '<style>'
+        . '.system-alarm-list{list-style:none;margin:0 0 18px;padding:0;text-align:right;max-height:40vh;overflow:auto}'
+        . '.system-alarm-list li{padding:8px 12px;border:1px solid #fecaca;border-radius:10px;background:#fff;margin:0 0 8px;font-size:13px;line-height:1.9}'
+        . '.system-alarm-list li strong{color:#b91c1c}'
+        . '.system-alarm-link{color:#1d4ed8;font-weight:700;white-space:nowrap}'
+        . '.system-alarm-actions{display:flex;justify-content:center;gap:10px}'
+        . '.system-alarm-confirm{margin-top:12px;border-top:1px dashed #ef4444;padding-top:12px}'
+        . '.system-alarm-confirm p{margin:0 0 10px;font-size:13px;color:#7f1d1d;line-height:1.9}'
+        . '.system-alarm-confirm-actions{display:flex;justify-content:center;gap:10px}'
+        . '@media print{.system-alarm{display:none!important}}'
+        . '</style>';
+    return $css
+        . '<div class="inspection-food-reminder system-alarm" id="system-alarm" hidden aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="system-alarm-title" data-endpoint="api/system-alarms.php">'
         . '<section class="inspection-food-reminder-card system-alarm-card">'
         . '<div class="inspection-food-reminder-icon" aria-hidden="true">!</div>'
         . '<p class="inspection-food-reminder-heading">هشدار سلامت سامانه</p>'
