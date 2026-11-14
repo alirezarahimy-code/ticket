@@ -139,6 +139,52 @@ $credentialsMessage = 'اعتبارنامهٔ امن این نوبت در دست
 check('۲۳: پیام «اعتبارنامهٔ امن این نوبت» به کد credentials_missing نگاشت می‌شود',
     domain_scan_error_code($credentialsMessage) === 'credentials_missing', domain_scan_error_code($credentialsMessage));
 
+/* ── ۷) آماده‌سازی راه‌دور مقصد (فعال‌سازی WinRM بدون GPO) ──────────────────── */
+check('۲۴: کاتالوگ کدهای آماده‌سازی (SMB/تسک/بررسی) را با راه‌حل کامل دارد',
+    isset($catalog['prepare_smb_unreachable'], $catalog['prepare_task_failed'], $catalog['prepare_verify_failed'])
+    && count($catalog['prepare_smb_unreachable']['remedy']) >= 2
+    && count($catalog['prepare_task_failed']['remedy']) >= 2
+    && count($catalog['prepare_verify_failed']['remedy']) >= 2);
+$prepareSamples = [
+    'prepare_smb_unreachable' => 'PREPARE_SMB_UNREACHABLE: TCP 445 on PC-023 is not reachable',
+    'prepare_task_failed' => 'PREPARE_TASK_FAILED: schtasks /create failed: Access is denied.',
+    'prepare_verify_failed' => 'PREPARE_VERIFY_FAILED: CIM session could not be established after preparation',
+];
+$prepareMismatch = [];
+foreach ($prepareSamples as $expectedCode => $raw) {
+    $detected = domain_scan_error_code(domain_scan_friendly_error($raw));
+    if ($detected !== $expectedCode) {
+        $prepareMismatch[] = $expectedCode . '→' . $detected;
+    }
+}
+check('۲۵: خطاهای PREPARE_* اسکریپت آماده‌سازی به کدهای درست نگاشت می‌شوند', $prepareMismatch === [], implode(' | ', $prepareMismatch));
+
+$preparePanelScript = (string) file_get_contents($root . '/tools/prepare_targets.ps1');
+$prepareTargetScript = (string) file_get_contents($root . '/tools/prepare_remote_target.ps1');
+check('۲۶: اسکریپت سمت پنل (SMB، schtasks، بررسی CIM، پاک‌سازی) کامل است',
+    str_contains($preparePanelScript, 'PREPARE_SMB_UNREACHABLE')
+    && str_contains($preparePanelScript, 'schtasks.exe')
+    && str_contains($preparePanelScript, 'New-CimSession')
+    && str_contains($preparePanelScript, 'ITSM_SCAN_USER')
+    && str_contains($preparePanelScript, 'prepare_remote_target.ps1'));
+check('۲۷: اسکریپت سمت مقصد WinRM و قواعد فایروال WMI را فعال می‌کند',
+    str_contains($prepareTargetScript, 'Enable-PSRemoting')
+    && str_contains($prepareTargetScript, 'Windows Management Instrumentation (WMI-In)')
+    && str_contains($prepareTargetScript, 'prepare_result.json'));
+
+$actionsSource = (string) file_get_contents($root . '/actions/asset-actions.php');
+$permissionsSource = (string) file_get_contents($root . '/permissions.php');
+check('۲۸: اکشن domain_scan_prepare با مجوز asset.remote_prepare و ممیزی ثبت شده است',
+    str_contains($actionsSource, "domain_scan_prepare")
+    && str_contains($actionsSource, "require_permission('asset.remote_prepare')")
+    && str_contains($actionsSource, 'domain_targets_prepared')
+    && str_contains($permissionsSource, "'asset.remote_prepare'")
+    && str_contains($permissionsSource, 'perm_edit_v5'));
+check('۲۹: دکمهٔ «آماده‌سازی سیستم‌های مقصد» در صفحهٔ اسکن رندر می‌شود',
+    str_contains($indexSource, 'آماده‌سازی سیستم‌های مقصد (فعال‌سازی WinRM)')
+    && str_contains($indexSource, 'domain_scan_prepare_preflight')
+    && str_contains($indexSource, '__prepareHosts'));
+
 echo "\n" . ($fail === 0
     ? 'همهٔ ' . $pass . " بررسی مدیریت خطای استخراج موفق بود.\n"
     : $fail . ' بررسی ناموفق از ' . ($pass + $fail) . " مورد.\n");

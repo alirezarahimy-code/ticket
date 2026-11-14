@@ -700,6 +700,19 @@ function domain_scan_friendly_error(string $raw): string
         return 'اتصال از هیچ‌کدام از مسیرهای DCOM و WinRM برقرار نشد؛ روی سیستم مقصد، دسترسی WMI/DCOM (فایروال) یا WinRM آماده نیست. جزئیات فنی: '
             . preg_replace('/\s+/u', ' ', (string) $detailLimit);
     }
+    // خطاهای آماده‌سازی راه‌دور مقصد (tools/prepare_targets.ps1) — هر کدام علت و راه‌حل جدا دارند.
+    $prepareMap = [
+        'prepare_smb_unreachable' => 'مسیر SMB روی سیستم مقصد در دسترس نیست؛ آماده‌سازی راه‌دور ممکن نیست. جزئیات فنی: ',
+        'prepare_task_failed' => 'ساخت یا اجرای تسک آماده‌سازی روی سیستم مقصد ناموفق بود. جزئیات فنی: ',
+        'prepare_verify_failed' => 'آماده‌سازی انجام شد اما اتصال آزمایشی (CIM) برقرار نشد. جزئیات فنی: ',
+        'prepare_no_credentials' => 'اعتبارنامهٔ آماده‌سازی در دسترس نیست؛ نام کاربری و رمز را دوباره وارد کنید. جزئیات فنی: ',
+    ];
+    foreach ($prepareMap as $token => $prefix) {
+        if (str_contains($lower, strtolower($token))) {
+            $detailLimit = function_exists('mb_substr') ? mb_substr(trim($raw), 0, 180) : substr(trim($raw), 0, 180);
+            return $prefix . preg_replace('/\s+/u', ' ', (string) $detailLimit);
+        }
+    }
     $map = [
         'access is denied' => 'دسترسی رد شد؛ حسابی که در فرم همین نوبت وارد کرده‌اید باید عضو «Administrators محلی» همان کامپیوتر باشد.',
         '0x80070005' => 'دسترسی رد شد؛ حسابی که در فرم همین نوبت وارد کرده‌اید باید عضو «Administrators محلی» همان کامپیوتر باشد.',
@@ -735,7 +748,8 @@ function domain_scan_error_catalog(): array
             'remedy' => [
                 'این یعنی حساب، رمز و نام سیستم درست است اما هیچ مسیر شبکه‌ای برای خواندن WMI/CIM باز نیست؛ Domain Admin بودن حساب، به‌تنهایی فایروال خودِ مقصد را باز نمی‌کند.',
                 'اگر می‌خواهید مسیر DCOM کار کند: روی مقصدها با Group Policy قواعد ورودی «Windows Management Instrumentation (WMI-In)» و «Remote Service Management» را فعال کنید؛ TCP 135 و محدودهٔ Dynamic RPC (پیش‌فرض 49152-65535) باید از IP سرور پنل مجاز باشند.',
-                'اگر می‌خواهید مسیر WinRM کار کند: WinRM را روی خودِ مقصدها (نه فقط سرور پنل) با «winrm quickconfig» یا Enable-PSRemoting -Force و یا GPO فعال کنید؛ پورت TCP 5985 و قاعدهٔ ورودی «Windows Remote Management» لازم است؛ سپس در تنظیمات «اول WinRM، بعد DCOM» را انتخاب کنید.',
+                'ساده‌ترین راه: در همین صفحه دکمهٔ «آماده‌سازی سیستم‌های مقصد» را بزنید تا پنل با همان حساب، WinRM و قواعد فایروال WMI را روی مقصدها فعال کند (بدون دست‌کاری Group Policy)؛ سپس «تلاش دوباره» را بزنید.',
+                'راه دستی: WinRM را روی خودِ مقصدها (نه فقط سرور پنل) با «winrm quickconfig» یا Enable-PSRemoting -Force و یا GPO فعال کنید؛ پورت TCP 5985 و قاعدهٔ ورودی «Windows Remote Management» لازم است؛ سپس در تنظیمات «اول WinRM، بعد DCOM» را انتخاب کنید.',
                 'مطمئن شوید سرویس «Windows Management Instrumentation» روی مقصدها روشن است و با حساب اسکن، «آزمون حساب روی یک سیستم» را بزنید؛ اگر DCOM رد شد و WinRM وصل شد، همین حالت را در تنظیمات انتخاب کنید.',
             ],
         ],
@@ -745,6 +759,30 @@ function domain_scan_error_catalog(): array
                 'اعتبارنامه‌ها پس از ۲ ساعت (یا پایان نوبت استخراج) به‌صورت خودکار از نشست پاک می‌شوند و برای امنیت در دیتابیس ذخیره نمی‌شوند.',
                 'دوباره در صفحهٔ شناسنامه‌ها، سیستم‌های موردنظر را تیک بزنید، «استخراج اطلاعات سیستم‌های انتخاب‌شده» را بزنید و نام کاربری و رمز حساب را دوباره وارد کنید.',
                 'اگر با پیام HTTPS مواجه شدید، ابتدا سامانه را با آدرس HTTPS باز کنید؛ ارسال رمز فقط روی اتصال امن مجاز است.',
+            ],
+        ],
+        'prepare_smb_unreachable' => [
+            'title' => 'مسیر SMB روی مقصد بسته است؛ آماده‌سازی راه‌دور ممکن نیست',
+            'remedy' => [
+                'آماده‌سازی خودکار پنل از طریق SMB (پورت 445) و RPC (پورت 135) انجام می‌شود؛ اگر این مسیرها هم بسته باشند، هیچ راه‌دورِ دیگری وجود ندارد.',
+                'اگر فایروال مقصد روشن است، قواعد ورودی «File and Printer Sharing» و «Remote Service Management» را فعال کنید؛ اگر فایروال خاموش است، سرویس‌های Server و Workstation را بررسی کنید.',
+                'راه جایگزین: فعال‌سازی WinRM از طریق Group Policy روی کنترلر دامنه (Administrative Templates ← System ← Remoting: Allow remote server management through WinRM) یا دستی روی خودِ مقصد با Enable-PSRemoting -Force.',
+            ],
+        ],
+        'prepare_task_failed' => [
+            'title' => 'ساخت یا اجرای تسک آماده‌سازی روی مقصد ناموفق بود',
+            'remedy' => [
+                'حسابی که در فرم آماده‌سازی وارد می‌کنید باید روی مقصد عضو Administrators محلی باشد؛ Domain Admin بودن به‌تنهایی کافی نیست اگر از گروه Administrators محلی حذف شده باشد.',
+                'مطمئن شوید سرویس Task Scheduler روی مقصد روشن است و حساب اسکن قفل (lockout) نشده باشد؛ رمز اشتباه هم همین خطا را می‌دهد.',
+                'جزئیات فنیِ پیام سیستم را بخوانید؛ اگر خطا دربارهٔ دسترسی بود، حساب را اصلاح کنید و دوباره «آماده‌سازی» را بزنید.',
+            ],
+        ],
+        'prepare_verify_failed' => [
+            'title' => 'آماده‌سازی انجام شد اما اتصال آزمایشی برقرار نشد',
+            'remedy' => [
+                'اسکریپت مقصد WinRM را فعال کرده اما نشست CIM هنوز برقرار نشده؛ معمولاً چند ثانیه تا یک دقیقه طول می‌کشد تا سرویس WinRM کامل بالا بیاید.',
+                'چند دقیقه صبر کنید و «تلاش دوباره برای ناموفق‌ها» را بزنید؛ اگر هنوز خطا بود، روی مقصد سرویس WinRM را دستی بررسی کنید.',
+                'اگر مقصد Windows Server است، مطمئن شوید سرویس WinRM روی «Automatic» است و شنوندهٔ HTTP (پورت 5985) ساخته شده باشد (winrm enumerate listener).',
             ],
         ],
         'rpc_unavailable' => [
@@ -884,6 +922,9 @@ function domain_scan_error_code(string $message): string
         // رشته‌های تک‌علتی (مثل «دسترسی رد شد» یا «سرویس RPC/WMI») را هم در خود داشته باشد.
         'all_protocols' => ['هیچ‌کدام از مسیرهای DCOM و WinRM', 'ALL_PROTOCOLS_FAILED'],
         'credentials_missing' => ['اعتبارنامهٔ امن این نوبت'],
+        'prepare_smb_unreachable' => ['مسیر SMB روی سیستم مقصد'],
+        'prepare_task_failed' => ['ساخت یا اجرای تسک آماده‌سازی'],
+        'prepare_verify_failed' => ['آماده‌سازی انجام شد اما اتصال آزمایشی'],
         'winrm_unavailable' => ['مسیر WinRM/WSMan'],
         'rpc_unavailable' => ['سرویس RPC/WMI'],
         'access_denied' => ['دسترسی رد شد'],
@@ -1143,6 +1184,103 @@ function domain_scan_remote_inventory(string $host, array $credentials = []): ar
         return [];
     }
     return $row['inventory'];
+}
+
+function domain_scan_prepare_script_path(): string
+{
+    return __DIR__ . '/tools/prepare_targets.ps1';
+}
+
+function domain_scan_prepare_target_script_path(): string
+{
+    return __DIR__ . '/tools/prepare_remote_target.ps1';
+}
+
+/**
+ * پیش‌نیازهای آماده‌سازی راه‌دور مقصد (روش الف: SMB + تسک زمان‌بندی‌شده، بدون Group Policy).
+ * همان گیت‌های استخراج + وجود هر دو اسکریپت آماده‌سازی.
+ */
+function domain_scan_prepare_preflight(): ?string
+{
+    $problem = domain_scan_preflight();
+    if ($problem !== null) {
+        return $problem;
+    }
+    if (!is_file(domain_scan_prepare_script_path()) || !is_file(domain_scan_prepare_target_script_path())) {
+        return 'اسکریپت‌های آماده‌سازی سیستم‌های مقصد (tools/prepare_targets.ps1) پیدا نشد.';
+    }
+    return null;
+}
+
+/**
+ * آماده‌سازی یک یا چند سیستم مقصد برای استخراج: فعال‌سازی WinRM و قواعد فایروال WMI
+ * روی خودِ مقصد با اعتبارنامهٔ همین نوبت (روش SMB + تسک زمان‌بندی‌شده؛ بدون GPO).
+ * خروجی: [host => ['success' => bool, 'code' => string, 'message' => string]]
+ */
+function domain_scan_prepare_targets(array $hosts, array $credentials = []): array
+{
+    $answer = [];
+    $problem = domain_scan_prepare_preflight();
+    $jobs = [];
+    $user = trim((string) ($credentials['username'] ?? ''));
+    $pass = (string) ($credentials['password'] ?? '');
+    $domain = trim((string) setting('domain_scan_domain', ''));
+    if ($user === '' || $pass === '') {
+        $problem ??= 'برای این نوبت، نام کاربری و رمز حساب مجاز وارد نشده یا نشست آن منقضی شده است.';
+    }
+    if ($user !== '' && strpos($user, '\\') === false && strpos($user, '@') === false && $domain !== '') {
+        $user = $domain . '\\' . $user;
+    }
+    $env = [];
+    if ($user !== '') {
+        $env['ITSM_SCAN_USER'] = $user;
+        if ($pass !== '') {
+            $env['ITSM_SCAN_PASS'] = $pass;
+        }
+    }
+    $powershell = domain_scan_powershell_path();
+    $script = domain_scan_prepare_script_path();
+    foreach ($hosts as $host) {
+        $host = trim((string) $host);
+        if (!preg_match('/^[A-Za-z0-9._-]+$/', $host)) {
+            $answer[$host] = ['success' => false, 'code' => 'bad_hostname', 'message' => 'نام کامپیوتر نامعتبر است.'];
+            continue;
+        }
+        if ($problem !== null) {
+            $answer[$host] = ['success' => false, 'code' => 'unknown', 'message' => $problem];
+            continue;
+        }
+        $jobs[$host] = [
+            'cmd' => [$powershell, '-NoProfile', '-NonInteractive', '-ExecutionPolicy', 'Bypass', '-File', $script, '-ComputerName', $host],
+            'env' => $env,
+        ];
+    }
+    if ($jobs === []) {
+        return $answer;
+    }
+    $results = domain_scan_run_processes($jobs, 3, 150);
+    foreach ($jobs as $host => $_job) {
+        $row = $results[$host] ?? ['code' => -1, 'out' => '', 'err' => '', 'timed_out' => false, 'started' => false];
+        if ($row['timed_out']) {
+            $answer[$host] = ['success' => false, 'code' => 'timeout', 'message' => 'مهلت آماده‌سازی (۱۵۰ ثانیه) تمام شد؛ سیستم بسیار کند است یا تسک روی مقصد اجرا نشد.'];
+            continue;
+        }
+        $out = trim($row['out']);
+        $out = preg_replace('/^\xEF\xBB\xBF/', '', (string) $out) ?? (string) $out;
+        $jsonStart = strpos($out, '{');
+        $jsonEnd = strrpos($out, '}');
+        if ($jsonStart !== false && $jsonEnd !== false && $jsonEnd > $jsonStart) {
+            $out = substr($out, $jsonStart, $jsonEnd - $jsonStart + 1);
+        }
+        $decoded = $out !== '' ? json_decode($out, true, 512, JSON_INVALID_UTF8_SUBSTITUTE) : null;
+        if (is_array($decoded) && !empty($decoded['success'])) {
+            $answer[$host] = ['success' => true, 'code' => 'ok', 'message' => (string) ($decoded['message'] ?? 'آماده‌سازی موفق بود؛ WinRM فعال و اتصال آزمایشی برقرار شد.')];
+            continue;
+        }
+        $detail = domain_scan_friendly_error(trim($row['err']) !== '' ? $row['err'] : $row['out']);
+        $answer[$host] = ['success' => false, 'code' => domain_scan_error_code($detail), 'message' => $detail !== '' ? $detail : 'پاسخ خالی از PowerShell (کد خروج ' . $row['code'] . ').'];
+    }
+    return $answer;
 }
 
 function domain_scan_store_inventory(int $assetId, string $host, array $inventory, int $userId): int

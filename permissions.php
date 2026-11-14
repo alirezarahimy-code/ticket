@@ -113,6 +113,7 @@ function permission_catalog(): array
                 ['code' => 'asset.edit', 'label' => 'ویرایش'],
                 ['code' => 'asset.extract', 'label' => 'استخراج سخت‌افزار (همین سرور)'],
                 ['code' => 'asset.remote_extract', 'label' => 'ویرایش'],
+                ['code' => 'asset.remote_prepare', 'label' => 'آماده‌سازی سیستم‌های مقصد (فعال‌سازی WinRM)'],
                 ['code' => 'asset.history', 'label' => 'تاریخچهٔ دارایی'],
                 ['code' => 'asset.ping', 'label' => 'پینگ سیستم‌های انتخابی'],
                 ['code' => 'inventory.view', 'label' => 'فهرست موجودی'],
@@ -355,7 +356,7 @@ function permission_defaults_raw(): array
         'primary_admin' => permission_all_codes(),
         // ۱.۳۷.۷ — پیش‌فرض نقش قدیمی «admin» (قابل ویرایش از تنظیمات ← نقش‌ها).
         'supervisor' => array_values(array_unique(array_merge($common, ['ticket.view_all', 'ticket.edit', 'supervisor.panel', 'supervisor.decide', 'supervisor.reopen', 'analytics.view', 'asset.edit', 'asset.extract', 'asset.ping', 'domain.import', 'domain.scan', 'knowledge.manage', 'cddvd.edit', 'cddvd.view_all', 'traffic.destinations', 'logs.activity', 'food.dashboard', 'food.monitor', 'food.orders', 'food.reports', 'food.employees', 'food.guest', 'food.groups', 'food.groups_override']))),
-        'support_manager' => array_values(array_unique(array_merge($common, ['ticket.edit', 'ticket.assign', 'ticket.bulk', 'ticket.attach_asset', 'services.manage', 'service_cat.manage', 'service_field.manage', 'knowledge.manage', 'cddvd.view_all', 'traffic.destinations', 'analytics.view', 'asset.edit', 'asset.extract', 'asset.ping', 'asset.remote_extract', 'inventory.diagnostics', 'domain.import', 'domain.scan', 'audit.view', 'logs.view', 'logs.activity', 'logs.activity_export', 'food.dashboard', 'food.monitor', 'food.orders', 'food.reports', 'food.employees', 'food.guest', 'food.groups', 'food.groups_override', 'food.menu', 'food.menu_edit', 'settings.general', 'settings.domain', 'holidays.manage']))),
+        'support_manager' => array_values(array_unique(array_merge($common, ['ticket.edit', 'ticket.assign', 'ticket.bulk', 'ticket.attach_asset', 'services.manage', 'service_cat.manage', 'service_field.manage', 'knowledge.manage', 'cddvd.view_all', 'traffic.destinations', 'analytics.view', 'asset.edit', 'asset.extract', 'asset.ping', 'asset.remote_extract', 'asset.remote_prepare', 'inventory.diagnostics', 'domain.import', 'domain.scan', 'audit.view', 'logs.view', 'logs.activity', 'logs.activity_export', 'food.dashboard', 'food.monitor', 'food.orders', 'food.reports', 'food.employees', 'food.guest', 'food.groups', 'food.groups_override', 'food.menu', 'food.menu_edit', 'settings.general', 'settings.domain', 'holidays.manage']))),
         'inspector' => array_values(array_unique(array_merge($all, ['ticket.view_unit', 'ticket.view_all', 'ticket.edit', 'queue.view', 'assets.view', 'asset.view', 'asset.history', 'asset.ping', 'reports.view', 'analytics.view', 'audit.view', 'inventory.view', 'cddvd.submit_in', 'cddvd.edit', 'cddvd.view_all', 'cddvd.history', 'cddvd.export', 'traffic.manage']))),
         'manager' => array_values(array_unique(array_merge($common, ['ticket.edit', 'ticket.assign', 'ticket.bulk', 'ticket.attach_asset', 'knowledge.manage', 'asset.edit', 'asset.extract', 'asset.ping', 'analytics.view']))),
         'agent' => array_values(array_unique(array_merge($common, ['ticket.attach_asset', 'knowledge.manage', 'asset.edit', 'asset.extract', 'asset.ping']))),
@@ -564,6 +565,16 @@ function role_permissions_migrate_once(): void
             db()->exec("DELETE FROM role_permissions WHERE permission = 'cddvd.edit' AND role NOT IN ('primary_admin', 'supervisor', 'inspector', 'guard')");
             db()->exec("DELETE FROM role_permissions WHERE permission = 'foodorder.proxy'");
             save_setting('perm_edit_v4', '1');
+            role_permissions_flush_cache();
+        } catch (Throwable $exception) {
+            // Retry this additive permission reconciliation on the next request.
+        }
+    }
+    if (setting('perm_edit_v5') !== '1') {
+        try {
+            // آماده‌سازی راه‌دور مقصدها (فعال‌سازی WinRM) همان جمعیتی را می‌گیرد که استخراج از راه دور دارد.
+            db()->exec("INSERT IGNORE INTO role_permissions (role, permission) SELECT DISTINCT role, 'asset.remote_prepare' FROM role_permissions WHERE permission = 'asset.remote_extract'");
+            save_setting('perm_edit_v5', '1');
             role_permissions_flush_cache();
         } catch (Throwable $exception) {
             // Retry this additive permission reconciliation on the next request.

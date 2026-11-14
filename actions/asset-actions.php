@@ -13,6 +13,7 @@ declare(strict_types=1);
  *   domain_scan_batch         پردازش دستهٔ بعدیِ اسکن در جریان
  *   ping_assets               پینگ گروهی دارایی‌ها (پاسخ AJAX)
  *   domain_scan_retry         تلاش دوباره برای دستگاه‌های خطادار
+ *   domain_scan_prepare       آماده‌سازی راه‌دور مقصدها (فعال‌سازی WinRM، بدون GPO) — AJAX دسته‌ای
  *   domain_scan_test_selected آزمایش اتصال/اعتبار روی موارد انتخاب‌شده (بدون ذخیره)
  *   domain_scan_selected      اسکن کامل موارد انتخاب‌شده
  *   save_inventory_form       ذخیرهٔ فرم شناسنامه/اموال دستگاه
@@ -287,6 +288,82 @@ if (!defined('APP_ROOT')) {
             save_audit_required((int) $retryUser['id'], 'domain_inventory_retry', null, ['from_run' => $retryRunId, 'run_id' => $retry['run_id'], 'total' => $retry['total']]);
             flash('success', $retry['total'] . ' سیستم ناموفق در نوبت تازه #' . $retry['run_id'] . ' دوباره در صف استخراج قرار گرفت.');
             redirect('index.php?page=domain-scan&run=' . $retry['run_id']);
+        }
+
+        if ($action === 'domain_scan_prepare') {
+            // آماده‌سازی راه‌دور سیستم‌های مقصد (فعال‌سازی WinRM و قواعد فایروال WMI با اعتبارنامهٔ
+            // همین نوبت، بدون Group Policy). AJAX و دسته‌ای (حداکثر ۳ سیستم در هر درخواست) است؛
+            // رابط کاربری دسته‌ها را پشت‌سرهم می‌فرستد. این عملیات حساس است و حتماً ممیزی می‌شود.
+            $prepareUser = require_permission('asset.remote_prepare');
+            $prepareAjax = post_value('ajax') === '1';
+            $prepareFail = static function (string $message) use ($prepareAjax): void {
+                if ($prepareAjax) {
+                    header('Content-Type: application/json; charset=utf-8');
+                    http_response_code(400);
+                    echo json_encode(['ok' => false, 'error' => $message], JSON_UNESCAPED_UNICODE);
+                    exit;
+                }
+                flash('danger', $message);
+                redirect('index.php?page=domain-scan');
+            };
+            $scanUsername = trim((string) ($_POST['scan_username'] ?? ''));
+            $scanPassword = (string) ($_POST['scan_password'] ?? '');
+            try {
+                domain_scan_validate_credentials($scanUsername, $scanPassword);
+            } catch (Throwable $prepareCredException) {
+                $prepareFail($prepareCredException->getMessage());
+            }
+            $prepareProblem = domain_scan_prepare_preflight();
+            if ($prepareProblem !== null) {
+                $prepareFail($prepareProblem);
+            }
+            $prepareHosts = array_values(array_unique(array_filter(
+                array_map('trim', (array) ($_POST['hostnames'] ?? [])),
+                static fn (string $host): bool => $host !== '' && (bool) preg_match('/^[A-Za-z0-9._-]+$/', $host)
+            )));
+            if ($prepareHosts === []) {
+                $prepareFail('هیچ سیستمی برای آماده‌سازی انتخاب نشد.');
+            }
+            if (count($prepareHosts) > 3) {
+                $prepareFail('در هر نوبت حداکثر ۳ سیستم را آماده کنید.');
+            }
+            if (function_exists('set_time_limit')) {
+                @set_time_limit(300);
+            }
+            if (function_exists('session_write_close')) {
+                @session_write_close();
+            }
+            $prepareCredentials = ['username' => $scanUsername, 'password' => $scanPassword];
+            unset($scanPassword, $_POST['scan_password']);
+            $prepareResults = domain_scan_prepare_targets($prepareHosts, $prepareCredentials);
+            unset($prepareCredentials, $scanUsername);
+            if (session_status() !== PHP_SESSION_ACTIVE) {
+                session_start();
+            }
+            $prepareOk = 0;
+            $prepareRows = [];
+            foreach ($prepareHosts as $prepareHost) {
+                $prepareResult = $prepareResults[$prepareHost] ?? ['success' => false, 'code' => 'unknown', 'message' => 'نتیجه‌ای دریافت نشد.'];
+                if (!empty($prepareResult['success'])) {
+                    $prepareOk++;
+                }
+                $prepareRows[] = [
+                    'hostname' => $prepareHost,
+                    'name' => asset_display_name($prepareHost),
+                    'success' => (bool) $prepareResult['success'],
+                    'code' => (string) $prepareResult['code'],
+                    'message' => (string) $prepareResult['message'],
+                ];
+            }
+            system_log('info', 'domain_scan', 'آماده‌سازی سیستم‌های مقصد (فعال‌سازی WinRM)', ['hosts' => $prepareHosts, 'prepared' => $prepareOk]);
+            save_audit_required((int) $prepareUser['id'], 'domain_targets_prepared', null, ['hosts' => $prepareHosts, 'prepared' => $prepareOk, 'results' => $prepareRows]);
+            if ($prepareAjax) {
+                header('Content-Type: application/json; charset=utf-8');
+                echo json_encode(['ok' => true, 'prepared' => $prepareOk, 'total' => count($prepareHosts), 'results' => $prepareRows], JSON_UNESCAPED_UNICODE | JSON_INVALID_UTF8_SUBSTITUTE);
+                exit;
+            }
+            flash($prepareOk > 0 ? 'success' : 'danger', 'آماده‌سازی انجام شد: ' . $prepareOk . ' از ' . count($prepareHosts) . ' سیستم آماده شد.');
+            redirect('index.php?page=domain-scan');
         }
 
         if ($action === 'domain_scan_test_selected') {

@@ -1610,6 +1610,25 @@ if ($page === 'domain-scan') {
                     echo '<p class="alert danger">' . e((string) $retryPreflight) . '</p>';
                 }
             }
+            // آماده‌سازی راه‌دور مقصدها (فعال‌سازی WinRM و قواعد فایروال WMI با اعتبارنامهٔ همین نوبت،
+            // بدون Group Policy) — فقط برای سیستم‌های خطادارِ آنلاین و فقط با مجوز asset.remote_prepare.
+            $prepareHosts = [];
+            foreach ($scanRows as $scanRowForPrepare) {
+                if ((string) ($scanRowForPrepare['status'] ?? '') === 'error' && (int) ($scanRowForPrepare['online'] ?? 0) === 1) {
+                    $prepareHosts[] = (string) $scanRowForPrepare['hostname'];
+                }
+            }
+            $prepareHosts = array_values(array_unique(array_filter($prepareHosts, static fn (string $host): bool => $host !== '' && (bool) preg_match('/^[A-Za-z0-9._-]+$/', $host))));
+            if ($prepareHosts !== [] && user_can($scanPageUser, 'asset.remote_prepare')) {
+                $preparePreflight = domain_scan_prepare_preflight();
+                if ($preparePreflight === null) {
+                    echo '<form id="prepare-form" method="post" class="form-grid" style="margin:0 0 14px">' . csrf_field() . '<input type="hidden" name="action" value="domain_scan_prepare"><label>حساب مجاز ویندوز (DOMAIN\\user)<input name="scan_username" required autocomplete="off" placeholder="COMPANY\\inventory-scan"></label><label>رمز همان حساب<input type="password" name="scan_password" required autocomplete="new-password"></label><div class="full"><button class="button" id="prepare-btn" type="submit">آماده‌سازی سیستم‌های مقصد (فعال‌سازی WinRM) — ' . count($prepareHosts) . ' سیستم</button><small>با همان حساب، WinRM و قواعد فایروال WMI روی مقصدها فعال می‌شود؛ بدون دست‌کاری Group Policy. هر سیستم حدود ۱۵ تا ۳۰ ثانیه طول می‌کشد و نتیجهٔ هر سیستم همین‌جا نمایش داده می‌شود.</small></div></form><div id="prepare-results"></div>';
+                    echo '<script nonce="' . e(csp_nonce()) . '">window.__prepareHosts=' . json_encode($prepareHosts, JSON_UNESCAPED_UNICODE) . ';</script>';
+                    echo '<script nonce="' . e(csp_nonce()) . '">(function(){var f=document.getElementById("prepare-form");if(!f){return;}var hosts=window.__prepareHosts||[];var out=document.getElementById("prepare-results");var btn=document.getElementById("prepare-btn");f.addEventListener("submit",function(ev){ev.preventDefault();if(!hosts.length){return;}btn.disabled=true;out.innerHTML="";var i=0;function add(cls,txt){var p=document.createElement("p");p.className=cls;p.textContent=txt;out.appendChild(p);}function chunk(){if(i>=hosts.length){btn.disabled=false;add("alert success","آماده‌سازی کامل شد؛ حالا «تلاش دوباره برای ناموفق‌ها» را بزنید تا استخراج انجام شود.");return;}var part=hosts.slice(i,i+3);i+=3;var d=new FormData(f);d.set("ajax","1");part.forEach(function(h){d.append("hostnames[]",h);});fetch("index.php",{method:"POST",body:d,credentials:"same-origin"}).then(function(r){return r.json();}).then(function(j){if(!j||!j.ok){add("alert danger",(j&&j.error)?j.error:"خطا در آماده‌سازی.");}else{(j.results||[]).forEach(function(x){add(x.success?"alert success":"alert danger",(x.success?"✓ ":"✗ ")+(x.name||x.hostname)+" — "+x.message);});}chunk();}).catch(function(){add("alert danger","خطای ارتباط با سرور.");chunk();});}chunk();});})();</script>';
+                } else {
+                    echo '<p class="alert danger">' . e((string) $preparePreflight) . '</p>';
+                }
+            }
             echo '<p class="muted">بعد از انجام هر اصلاح روی سرور یا کلاینت‌ها، دکمهٔ «تلاش دوباره» فقط سیستم‌های خطادار را در نوبت تازه‌ای صف می‌کند؛ سیستم‌های موفق دوباره استخراج نمی‌شوند.</p><div class="scan-failure-grid">';
             foreach ($scanFailureGroups as $scanGroup) {
                 echo '<article class="scan-failure"><h3>' . e((string) $scanGroup['title']) . ' <span class="scan-failure-count">' . (int) $scanGroup['count'] . ' سیستم</span></h3>';
