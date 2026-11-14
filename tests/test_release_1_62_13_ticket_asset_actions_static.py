@@ -70,13 +70,13 @@ def test_asset_actions_file_sections_and_persian_descriptions():
     assert "اسکن دامین" in src and "پینگ گروهی" in src
     assert "defined('APP_ROOT')" in src and "http_response_code(404)" in src
     body = body_of("actions/asset-actions.php")
-    assert body.count("{") == body.count("}") == 64
+    assert body.count("{") == body.count("}") == 66
     assert "?>" not in body
     # دام‌های قطعی ممنوع؛ کلوژر بی‌نام و continue داخل حلقه مجاز و شناخته‌شده‌اند
     for trap in (r"\breturn\b", r"\bgoto\b", r"\bbreak;", r"__FILE__", r"__DIR__"):
         assert not re.search(trap, body), trap
     assert body.count("static function") == 1  # فقط کلوژر $pingFail
-    assert body.count("continue;") == 1        # فقط داخل حلقهٔ گزارش
+    assert body.count("continue;") == 2        # حلقهٔ گزارش + گارد کلیدهای داخلی (_clear_fields/_field_provenance)
 
 
 def test_version_manifest_and_package():

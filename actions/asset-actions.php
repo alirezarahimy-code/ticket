@@ -90,6 +90,10 @@ if (!defined('APP_ROOT')) {
                 $report['rows'][] = [$key, (string) count(inventory_rows($inventory['hardware'][$key] ?? $inventory[$key] ?? []))];
             }
             foreach ($values as $key => $value) {
+                if (strncmp((string) $key, '_', 1) === 0 || is_array($value)) {
+                    // کلیدهای داخلی (_clear_fields، _field_provenance) جزو فیلدهای شناسنامه نیستند.
+                    continue;
+                }
                 $text = trim((string) $value);
                 if ($text === '') {
                     $report['empty']++;
@@ -111,6 +115,9 @@ if (!defined('APP_ROOT')) {
                         'overwrite' => $overwrite,
                     ]);
                 }
+            }
+            if (session_status() !== PHP_SESSION_ACTIVE) {
+                session_start();
             }
             $_SESSION['asset_selftest'] = $report;
             system_log('info', 'inventory', 'اجرای تست استخراج شناسنامه', ['filled' => $report['filled'], 'score' => $report['hardware_score'], 'asset_id' => $report['asset_id']]);

@@ -15,16 +15,22 @@ function inventory_render_assets_content(
     int $onlineOrCollected,
     ?int $legacyCollected = null
 ): void {
-    // سازگاری با index.phpهای قدیمی که هنوز آرگومان canExtractLocalServer را
-    // به‌صورت هفتم می‌فرستند. در آن حالت آرگومان‌های بعدی یک خانه جابه‌جا هستند؛
-    // mismatch باعث TypeError در ورود به این تابع و خالی‌ماندن صفحهٔ شناسنامه‌ها می‌شد.
+    // سازگاری با callerهای قدیمی و «فعلی» که همهٔ آرگومان‌ها را به ترتیب «انجین»
+    // اصلی (canConfigureNetworkScan, networkScanEnabled, canSelectAssets,
+    // onlineCount, collectedCount) پشت سر canExtractLocalServer می‌فرستند و در انتها
+    // collectedCount را تکرار می‌کنند؛ در آن حالت $legacyCollected پر است و آرگومان
+    // هفتم همان canExtractLocalServer است. callerهای ۱۱تاییِ قدیمی (قبل از قابلیت
+    // استخراج محلی) آرگومان هفتم را canConfigureNetworkScan می‌فرستند؛ در آن حالت
+    // $legacyCollected خالی است و قابلیت استخراج محلی غیرفعال در نظر گرفته می‌شود.
     if ($legacyCollected !== null) {
+        $canExtractLocalServer = (bool) $configureOrLegacyExtract; // آرگومان هفتم = canExtractLocalServer در caller فعلی
         $canConfigureNetworkScan = $networkOrConfigure;
         $networkScanEnabled = $selectOrNetwork;
         $canSelectAssets = (bool) $selectOrOnline;
         $onlineCount = $onlineOrCollected;
         $collectedCount = $legacyCollected;
     } else {
+        $canExtractLocalServer = false; // caller قدیمی قابلیت استخراج محلی ندارد
         $canConfigureNetworkScan = $configureOrLegacyExtract;
         $networkScanEnabled = $networkOrConfigure;
         $canSelectAssets = $selectOrNetwork;
