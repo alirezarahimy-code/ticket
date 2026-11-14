@@ -20,7 +20,7 @@ declare(strict_types=1);
 $root = dirname(__DIR__);
 @chdir($root);
 
-const DIAG_VERSION = '1.1.0';
+const DIAG_VERSION = '1.2.0';
 $issues = 0;
 $warns = 0;
 $line = static function (string $s = ''): void { echo $s, PHP_EOL; };
@@ -287,7 +287,7 @@ foreach (['app.log', 'error.log'] as $name) {
 // ── ۳ب) probe قفل‌ها ─────────────────────────────────────────────────
 // اگر قفل print-queue در دست کسی باشد، Worker ساکت (بدون لاگ) صف را تخلیه نمی‌کند.
 $line("\n۳ب) probe قفل‌ها (بدون نگه‌داشتن قفل)");
-foreach (['food-print-queue.lock' => 'قفل صف چاپ', 'food-worker-process.lock' => 'قفل نمونهٔ Worker', 'food-ticket.lock' => 'قفل retry دستی'] as $lf => $label) {
+foreach (['food-print-queue.lock' => 'قفل صف چاپ', 'food-ticket.lock' => 'قفل retry دستی'] as $lf => $label) {
     $p = $root . '/storage/' . $lf;
     $fh = @fopen($p, 'c');
     if (!$fh) {
@@ -301,6 +301,19 @@ foreach (['food-print-queue.lock' => 'قفل صف چاپ', 'food-worker-process.
     } else {
         fclose($fh);
         $bad($label . ': هم‌اکنون قفل است — یک پروسهٔ گیرکرده آن را نگه داشته؛ تخلیهٔ صف چاپ تا آزادی قفل بی‌نتیجه است.');
+    }
+}
+// food-worker-process.lock نمونهٔ عادی است که Worker زنده آن را نگه می‌دارد؛
+// «قفل است» در اینجا یعنی Worker حداقل یک‌بار اجرا شده (نشانهٔ خوب)؛ «آزاد» یعنی Worker زنده نیست.
+$fh = @fopen($root . '/storage/food-worker-process.lock', 'c');
+if ($fh) {
+    if (@flock($fh, LOCK_EX | LOCK_NB)) {
+        @flock($fh, LOCK_UN);
+        fclose($fh);
+        $warn('قفل نمونهٔ Worker آزاد است — یعنی هیچ Worker در حال اجرایی آن را نگه نداشته (Worker زنده نیست؟)');
+    } else {
+        fclose($fh);
+        $ok('قفل نمونهٔ Worker در دست Worker زنده است (رفتار عادی).');
     }
 }
 
@@ -640,6 +653,92 @@ if ($dbOk && diag_table_exists('food_ticket_print_log')) {
     }
 }
 
+// ── ۴پ) ردیابی «فیش گروهی» پشت ردیف‌های pending ──────────────────────
+// فرضیهٔ اصلی: ردیف‌های pending اعضای اجراهای گروهی‌اند که به وضعیت done نرسیده‌اند؛
+// مسیر چاپ گروهی برای runهای غیر done ساکت برمی‌گردد (هیچ لاگی نمی‌زند).
+$line("\n۴پ) ردیابی «فیش گروهی» پشت ردیف‌های pending");
+if ($dbOk && diag_table_exists('food_ticket_events')) {
+    try {
+        $rows = db()->query('SELECT source_payload LIKE \'%"run_id":%\' AS has_run, COUNT(*) AS c FROM food_ticket_events WHERE print_status = \'pending\' GROUP BY source_payload LIKE \'%"run_id":%\'')->fetchAll();
+        foreach ($rows as $r) {
+            $line('  pending با run_id در payload: ' . ((int) $r['has_run'] === 1 ? 'بله' : 'خیر') . ' → ' . $r['c'] . ' ردیف');
+        }
+    } catch (Throwable $e) {
+        $warn('تفکیک run_id: ' . $e->getMessage());
+    }
+    $runIds = [];
+    try {
+        $rows = db()->query('SELECT DISTINCT CAST(JSON_UNQUOTE(JSON_EXTRACT(source_payload, \'$.run_id\')) AS UNSIGNED) AS rid FROM food_ticket_events WHERE print_status = \'pending\' AND source_payload LIKE \'%"run_id":%\'')->fetchAll(PDO::FETCH_COLUMN);
+        foreach ($rows as $rid) {
+            if ((int) $rid > 0) {
+                $runIds[] = (int) $rid;
+            }
+        }
+        sort($runIds);
+        $line('  run_id های درگیر: ' . ($runIds ? implode(', ', $runIds) : '(هیچ)'));
+    } catch (Throwable $e) {
+        $warn('JSON_EXTRACT روی run_id: ' . $e->getMessage());
+    }
+    if ($runIds !== [] && diag_table_exists('food_ticket_group_runs')) {
+        $marks = implode(',', array_fill(0, count($runIds), '?'));
+        try {
+            $st = db()->prepare('SELECT id, group_title, run_kind, status, members_total, printed_count, repeat_count, no_food_count, error_count, punch_date, punch_time FROM food_ticket_group_runs WHERE id IN (' . $marks . ')');
+            $st->execute($runIds);
+            $runRows = $st->fetchAll() ?: [];
+            $line('  وضعیت اجراهای گروهی مالک این pendingها:');
+            $stuck = 0;
+            foreach ($runRows as $r) {
+                if ((string) $r['status'] !== 'done') {
+                    $stuck++;
+                }
+                $line('    run #' . $r['id'] . ' | ' . mb_substr((string) ($r['group_title'] ?? ''), 0, 40)
+                    . ' | kind=' . $r['run_kind'] . ' | status=' . $r['status']
+                    . ' | اعضا=' . $r['members_total'] . ' | printed=' . $r['printed_count']
+                    . ' | no_food=' . $r['no_food_count'] . ' | repeat=' . $r['repeat_count']
+                    . ' | error=' . $r['error_count'] . ' | ' . $r['punch_date'] . ' ' . $r['punch_time']);
+            }
+            if ($stuck > 0) {
+                $bad("runهای status != done: {$stuck} اجرا — فیش‌های اعضای این اجراها به همین دلیل ساکت چاپ نمی‌شوند (قانون کد: run باید done باشد).");
+            }
+            $missing = count($runIds) - count($runRows);
+            if ($missing > 0) {
+                $bad("{$missing} run_id به هیچ اجرایی در food_ticket_group_runs وصل نیست — دادهٔ ناسازگار.");
+            }
+        } catch (Throwable $e) {
+            $warn('خواندن food_ticket_group_runs: ' . $e->getMessage());
+        }
+    } elseif ($runIds !== []) {
+        $warn('جدول food_ticket_group_runs وجود ندارد.');
+    }
+    try {
+        $rows = db()->query('SELECT COALESCE(status, \'?\') AS st, COUNT(*) AS c FROM food_ticket_group_runs WHERE punch_date = \'' . $tehranToday . '\' GROUP BY status')->fetchAll();
+        $rep = [];
+        foreach ($rows as $r) {
+            $rep[(string) $r['st']] = (int) $r['c'];
+        }
+        $line('  اجراهای گروهی امروز به تفکیک status: ' . json_encode($rep, JSON_UNESCAPED_UNICODE));
+    } catch (Throwable $e) {
+        $warn('وضعیت اجراهای امروز: ' . $e->getMessage());
+    }
+}
+// [food-groups] در app.log (اگر خطای عضوی رخ داده باشد اینجا ثبت می‌شود)
+$line("  ── خطوط [food-groups] در app.log امروز ──");
+$appLog = $root . '/storage/logs/app.log';
+if (is_file($appLog)) {
+    $c = (string) @file_get_contents($appLog);
+    $hits = [];
+    foreach (explode("\n", $c) as $l) {
+        if (str_contains($l, '[food-groups]')) {
+            $hits[] = $l;
+        }
+    }
+    $hitsToday = array_filter($hits, static fn ($l) => str_contains($l, $tehranToday));
+    $info('تعداد [food-groups] (کل): ' . count($hits) . ' | امروز: ' . count($hitsToday));
+    foreach (array_slice($hits, -10) as $l) {
+        $line('   | ' . mb_substr((string) $l, 0, 300));
+    }
+}
+
 // ── ۷) پروسه‌های php/httpd با زمان شروع ──────────────────────────────
 $line("\n۷) پروسه‌های php.exe و httpd.exe (+ زمان بوت سرور)");
 if (stripos(PHP_OS, 'WIN') === 0 && function_exists('shell_exec')) {
@@ -663,7 +762,8 @@ if (stripos(PHP_OS, 'WIN') === 0 && function_exists('shell_exec')) {
     $info('بررسی پروسه‌ها فقط روی ویندوز انجام می‌شود.');
 }
 
-// ── ۸) لاگ امروز سیستم (۲۰ خط آخر app.log) ────────────────────────────
+// ── ۸) لاگ امروز سیستم (۱۵ خط آخر app.log + خط خام آخر worker + همهٔ شروع‌ها) ──
+// خط کامل آخر را بدون برش چاپ می‌کنیم تا کلید "queue" داخل JSON دیده شود.
 $line("\n۸) آخرین ۱۵ خط app.log (همهٔ محتوا)");
 foreach (['app.log'] as $name) {
     $p = $root . '/storage/logs/' . $name;
@@ -683,7 +783,29 @@ foreach (['app.log'] as $name) {
     }
 }
 
-// ── ۹) جمع‌بندی ─────────────────────────────────────────────────────
+// خط خام آخر لاگ worker (بدون برش) — کلید "queue" داخل JSON دیده می‌شود
+$line("\n۹) خط خام آخر لاگ worker امروز + همهٔ خطوط start loop");
+if (is_file($logToday)) {
+    $logLinesRaw = @file($logToday, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES) ?: [];
+    $lastRaw = '';
+    foreach ($logLinesRaw as $l) {
+        if (trim((string) $l) !== '') {
+            $lastRaw = (string) $l;
+        }
+    }
+    $line('  آخرین خط (خام، تا 4000 کاراکتر):');
+    $line('   ' . mb_substr($lastRaw, 0, 4000));
+    $line('  همهٔ خطوط start loop امروز:');
+    foreach ($logLinesRaw as $l) {
+        if (str_contains((string) $l, 'start loop=')) {
+            $line('   ' . mb_substr((string) $l, 0, 180));
+        }
+    }
+} else {
+    $info('لاگ امروز موجود نیست.');
+}
+
+// ── ۱۰) جمع‌بندی ─────────────────────────────────────────────────────
 $line("\n==================================================");
 $line(" جمع‌بندی: FAIL = {$issues} | WARN = {$warns}");
 $line(' خروجی کامل این اسکریپت را (بدون حذف بخش‌ها) برای تحلیلگر بفرستید.');
