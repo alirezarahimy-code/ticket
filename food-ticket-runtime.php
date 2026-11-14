@@ -447,6 +447,7 @@ function food_ticket_print_group_run(array $event, array $config, array $tpl, in
                 ->execute(array_merge(['Group ticket retry limit reached.'], $staleIds));
         }
         // مانند صف فیش‌های فردی، رویدادی که به سقف تلاش رسیده دوباره چاپ نمی‌شود.
+        app_error_log('[food-print] group run=' . $runId . ' skipped: اعضای قابل‌چاپ به سقف تلاش رسیده‌اند (retry=' . $retry . ' >= ' . $maxRetry . ')؛ فیش گروهی چاپ نمی‌شود. برای بایگانی این اجرا از «چاپ مجدد خطاها» یا رفع دستی استفاده کنید.');
         return ['handled' => true, 'ids' => $ids];
     }
 
@@ -566,16 +567,21 @@ function food_ticket_process_print_queue(?array $config = null, int $limit = 30)
 
     $claimable = '(print_status IN ("pending", "print_error", "failed")
         OR (print_status = "printing" AND updated_at < DATE_SUB(NOW(), INTERVAL 30 MINUTE)))';
+    // ردیف‌های «مردهٔ» claimable (به سقف تلاش رسیده‌اند) هرگز قابل‌چاپِ موفق نیستند؛
+    // اگر در SELECT بمانند، با ORDER BY id ASC + LIMIT جلوتر از pendingهای تازه می‌ایستند
+    // و کل صف برای همیشه گرسنه می‌ماند (head-of-line starvation — گزارش ۱۴۰۴/۰۸/۲۳).
+    // ردیف‌های printing-stale از این فیلتر مستثنا هستند تا مسیر «چاپ نیمه‌کاره» حفظ شود.
+    $notDead = ' AND (print_status = "printing" OR GREATEST(COALESCE(retry_count, 0), COALESCE(print_attempts, 0)) < ' . (int) $maxRetry . ')';
     try {
         $sql = 'SELECT * FROM food_ticket_events
-            WHERE ' . $claimable . '
+            WHERE ' . $claimable . $notDead . '
               AND (next_retry_at IS NULL OR next_retry_at <= NOW())
             ORDER BY id ASC LIMIT ' . (int) $limit;
         $rows = db()->query($sql)->fetchAll();
     } catch (Throwable $e) {
         // بدون next_retry_at
         $rows = db()->query(
-            'SELECT * FROM food_ticket_events WHERE ' . $claimable . ' ORDER BY id ASC LIMIT ' . (int) $limit
+            'SELECT * FROM food_ticket_events WHERE ' . $claimable . $notDead . ' ORDER BY id ASC LIMIT ' . (int) $limit
         )->fetchAll();
     }
 
