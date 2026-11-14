@@ -12,6 +12,19 @@ declare(strict_types=1);
  */
 
 $root = dirname(__DIR__);
+// domain-scan.php بدون APP_ROOT بی‌صدا خارج می‌شود؛ بدون این تعریف، آزمون
+// بدون هیچ خروجی و با کد خروج صفر تمام می‌شد و عملاً هیچ بررسی‌ای انجام نمی‌شد.
+if (!defined('APP_ROOT')) {
+    define('APP_ROOT', $root);
+}
+// آزمون کاملاً آفلاین است: setting() (که در حالت عادی از دیتابیس می‌خواند) را
+// با مقدار پیش‌فرض جایگزین می‌کنیم تا domain_scan_failure_summary بدون دیتابیس کار کند.
+if (!function_exists('setting')) {
+    function setting(string $key, string $default = ''): string
+    {
+        return $default;
+    }
+}
 require $root . '/domain-scan.php';
 
 $pass = 0;
@@ -80,9 +93,11 @@ foreach ($groups as $group) {
     $byCode[$group['code']] = $group;
 }
 check('۸: کدهای تشخیص‌داده‌شده درست‌اند', isset($byCode['rpc_unavailable'], $byCode['access_denied'], $byCode['store_failed'], $byCode['not_reachable']), implode(',', array_keys($byCode)));
+// نام‌های نمایشی با حالت پیش‌فرض short_lower کوچک می‌شوند (asset_display_name)؛
+// پس انتظار تست هم شکل نمایشی است، نه نام خام ردیف.
 check('۹: نام سیستم‌های هر گروه ثبت می‌شود و ردیف موفق داخل هیچ گروهی نیست',
-    $byCode['rpc_unavailable']['hosts'] === ['PC-023', 'PC-024']
-    && !in_array('PC-028', array_merge(...array_map(static fn (array $g): array => $g['hosts'], $groups)), true),
+    $byCode['rpc_unavailable']['hosts'] === ['pc-023', 'pc-024']
+    && !in_array('pc-028', array_merge(...array_map(static fn (array $g): array => $g['hosts'], $groups)), true),
     implode('|', $byCode['rpc_unavailable']['hosts']));
 check('۱۰: راه‌حل هر گروه از کاتالوگ می‌آید و خالی نیست', count($byCode['access_denied']['remedy']) >= 3);
 check('۱۱: پیام واقعی سیستم در گزارش گروه دیده می‌شود', $byCode['store_failed']['messages'] !== []);
@@ -102,11 +117,27 @@ check('۱۶: اسکریپت PowerShell ترتیب پروتکل را می‌خو�
 
 /* ── ۵) اکشن «تلاش دوباره» و کارت راه‌حل در رابط کاربری ───────────────────── */
 $indexSource = (string) file_get_contents($root . '/index.php');
-check('۱۷: اکشن تلاش دوبارهٔ ناموفق‌ها در index.php ثبت شده است', str_contains($indexSource, "domain_scan_retry") && str_contains($indexSource, 'domain_scan_retry_failed'));
+$actionsSource = (string) file_get_contents($root . '/actions/asset-actions.php');
+// فرم تلاش دوباره در index.php است و هندلرش (domain_scan_retry_failed) در actions/asset-actions.php.
+check('۱۷: اکشن تلاش دوبارهٔ ناموفق‌ها در index.php و هندلرش در actions ثبت شده است', str_contains($indexSource, "domain_scan_retry") && str_contains($actionsSource, 'domain_scan_retry_failed'));
 check('۱۸: کارت «دلایل شکست استخراج و راه‌حل» در صفحهٔ اسکن رندر می‌شود', str_contains($indexSource, 'دلایل شکست استخراج و راه‌حل') && str_contains($indexSource, 'domain_scan_failure_summary'));
 check('۱۹: ترتیب پروتکل در تنظیمات قابل انتخاب است', str_contains($indexSource, 'domain_scan_protocols') && str_contains($indexSource, 'اول WinRM، بعد DCOM'));
 check('۲۰: «تلاش دوباره» فقط ردیف‌های خطادار را برمی‌دارد (نه آفلاین‌ها و نه موفق‌ها)',
     str_contains($source, 'WHERE run_id = ? AND status = "error" ORDER BY id ASC'));
+
+/* ── ۶) خطای سرتاسری «هیچ‌کدام از پروتکل‌ها کار نکرد» و اعتبارنامهٔ منقضی ───── */
+// ALL_PROTOCOLS_FAILED ممکن است در متن خود «Access is denied» هم داشته باشد؛
+// باید به کد سرتاسری all_protocols نگاشت شود، نه access_denied.
+$allProtocolsMessage = domain_scan_friendly_error('ALL_PROTOCOLS_FAILED: Dcom: Access is denied. (0x80070005); Wsman: The RPC server is unavailable. (0x800706BA)');
+check('۲۱: ALL_PROTOCOLS_FAILED به کد سرتاسری all_protocols نگاشت می‌شود (نه access_denied)',
+    domain_scan_error_code($allProtocolsMessage) === 'all_protocols', $allProtocolsMessage);
+check('۲۲: کاتالوگ کدهای all_protocols و credentials_missing را با راه‌حل کامل دارد',
+    isset($catalog['all_protocols'], $catalog['credentials_missing'])
+    && count($catalog['all_protocols']['remedy']) >= 3
+    && count($catalog['credentials_missing']['remedy']) >= 3);
+$credentialsMessage = 'اعتبارنامهٔ امن این نوبت در دسترس نیست؛ دوباره وارد کنید.';
+check('۲۳: پیام «اعتبارنامهٔ امن این نوبت» به کد credentials_missing نگاشت می‌شود',
+    domain_scan_error_code($credentialsMessage) === 'credentials_missing', domain_scan_error_code($credentialsMessage));
 
 echo "\n" . ($fail === 0
     ? 'همهٔ ' . $pass . " بررسی مدیریت خطای استخراج موفق بود.\n"

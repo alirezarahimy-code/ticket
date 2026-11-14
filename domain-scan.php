@@ -692,6 +692,14 @@ function domain_scan_friendly_error(string $raw): string
         $raw = (string) @mb_convert_encoding($raw, 'UTF-8', 'Windows-1256');
     }
     $lower = strtolower($raw);
+    // خطای سرتاسری «هیچ‌کدام از پروتکل‌ها کار نکرد» را پیش از تطبیق‌های تک‌مسیری
+    // خودش می‌سنجیم؛ در غیر این صورت پیام کبشده داخل آن (مثل «access is denied»)
+    // به‌اشتباه به یک کد تک‌علتی نگاشت می‌شود و گروه‌بندی شکست‌ها را گمراه می‌کند.
+    if (str_contains($lower, 'all_protocols_failed')) {
+        $detailLimit = function_exists('mb_substr') ? mb_substr(trim($raw), 0, 180) : substr(trim($raw), 0, 180);
+        return 'اتصال از هیچ‌کدام از مسیرهای DCOM و WinRM برقرار نشد؛ روی سیستم مقصد، دسترسی WMI/DCOM (فایروال) یا WinRM آماده نیست. جزئیات فنی: '
+            . preg_replace('/\s+/u', ' ', (string) $detailLimit);
+    }
     $map = [
         'access is denied' => 'دسترسی رد شد؛ حسابی که در فرم همین نوبت وارد کرده‌اید باید عضو «Administrators محلی» همان کامپیوتر باشد.',
         '0x80070005' => 'دسترسی رد شد؛ حسابی که در فرم همین نوبت وارد کرده‌اید باید عضو «Administrators محلی» همان کامپیوتر باشد.',
@@ -722,6 +730,23 @@ function domain_scan_friendly_error(string $raw): string
 function domain_scan_error_catalog(): array
 {
     return [
+        'all_protocols' => [
+            'title' => 'هیچ‌کدام از مسیرهای DCOM و WinRM روی مقصد باز نیست',
+            'remedy' => [
+                'این یعنی حساب، رمز و نام سیستم درست است اما هیچ مسیر شبکه‌ای برای خواندن WMI/CIM باز نیست؛ Domain Admin بودن حساب، به‌تنهایی فایروال خودِ مقصد را باز نمی‌کند.',
+                'اگر می‌خواهید مسیر DCOM کار کند: روی مقصدها با Group Policy قواعد ورودی «Windows Management Instrumentation (WMI-In)» و «Remote Service Management» را فعال کنید؛ TCP 135 و محدودهٔ Dynamic RPC (پیش‌فرض 49152-65535) باید از IP سرور پنل مجاز باشند.',
+                'اگر می‌خواهید مسیر WinRM کار کند: WinRM را روی خودِ مقصدها (نه فقط سرور پنل) با «winrm quickconfig» یا Enable-PSRemoting -Force و یا GPO فعال کنید؛ پورت TCP 5985 و قاعدهٔ ورودی «Windows Remote Management» لازم است؛ سپس در تنظیمات «اول WinRM، بعد DCOM» را انتخاب کنید.',
+                'مطمئن شوید سرویس «Windows Management Instrumentation» روی مقصدها روشن است و با حساب اسکن، «آزمون حساب روی یک سیستم» را بزنید؛ اگر DCOM رد شد و WinRM وصل شد، همین حالت را در تنظیمات انتخاب کنید.',
+            ],
+        ],
+        'credentials_missing' => [
+            'title' => 'اعتبارنامهٔ امن این نوبت دیگر در دسترس نیست',
+            'remedy' => [
+                'اعتبارنامه‌ها پس از ۲ ساعت (یا پایان نوبت استخراج) به‌صورت خودکار از نشست پاک می‌شوند و برای امنیت در دیتابیس ذخیره نمی‌شوند.',
+                'دوباره در صفحهٔ شناسنامه‌ها، سیستم‌های موردنظر را تیک بزنید، «استخراج اطلاعات سیستم‌های انتخاب‌شده» را بزنید و نام کاربری و رمز حساب را دوباره وارد کنید.',
+                'اگر با پیام HTTPS مواجه شدید، ابتدا سامانه را با آدرس HTTPS باز کنید؛ ارسال رمز فقط روی اتصال امن مجاز است.',
+            ],
+        ],
         'rpc_unavailable' => [
             'title' => 'سرویس RPC/WMI سیستم مقصد جواب نمی‌دهد',
             'remedy' => [
@@ -855,6 +880,10 @@ function domain_scan_error_code(string $message): string
         return 'unknown';
     }
     $prefixes = [
+        // این دو کد باید زودتر از هر چیز دیگری بررسی شوند: پیام آن‌ها ممکن است
+        // رشته‌های تک‌علتی (مثل «دسترسی رد شد» یا «سرویس RPC/WMI») را هم در خود داشته باشد.
+        'all_protocols' => ['هیچ‌کدام از مسیرهای DCOM و WinRM', 'ALL_PROTOCOLS_FAILED'],
+        'credentials_missing' => ['اعتبارنامهٔ امن این نوبت'],
         'winrm_unavailable' => ['مسیر WinRM/WSMan'],
         'rpc_unavailable' => ['سرویس RPC/WMI'],
         'access_denied' => ['دسترسی رد شد'],
@@ -1053,8 +1082,19 @@ function domain_scan_remote_inventory_many(array $hosts, int $concurrency = 4, a
             $answer[$host] = ['inventory' => [], 'error' => 'مهلت استخراج (۴ دقیقه) تمام شد؛ سیستم بسیار کند است یا WMI پاسخ نمی‌دهد.'];
             continue;
         }
-        $out = ltrim(trim($row['out']), "\xEF\xBB\xBF");
-        $decoded = $out !== '' ? json_decode($out, true) : null;
+        $out = trim($row['out']);
+        // BOM و هر متن اضافه‌ای که PowerShell پیش/پس از JSON می‌نویسد (هشدارها،
+        // پیام‌های بارگذاری ماژول یا خروجی‌های رنگی) را حذف می‌کنیم؛ وگرنه
+        // json_decode کل خروجی را رد می‌کند و استخراج به‌اشتباه شکست می‌خورد.
+        $out = preg_replace('/^\xEF\xBB\xBF/', '', (string) $out) ?? (string) $out;
+        $jsonStart = strpos($out, '{');
+        $jsonEnd = strrpos($out, '}');
+        if ($jsonStart !== false && $jsonEnd !== false && $jsonEnd > $jsonStart) {
+            $out = substr($out, $jsonStart, $jsonEnd - $jsonStart + 1);
+        }
+        // JSON_INVALID_UTF8_SUBSTITUTE: حضور یک کاراکتر نامعتبر (مثلاً از نام دستگاه‌های قدیمی)
+        // نباید کل استخراج را از کار بیندازد؛ آن کاراکتر با U+FFFD جایگزین می‌شود.
+        $decoded = $out !== '' ? json_decode($out, true, 512, JSON_INVALID_UTF8_SUBSTITUTE) : null;
         if (!is_array($decoded)) {
             $detail = domain_scan_friendly_error(trim($row['err']) !== '' ? $row['err'] : $row['out']);
             $answer[$host] = ['inventory' => [], 'error' => $detail !== '' ? $detail : 'پاسخ خالی از PowerShell (کد خروج ' . $row['code'] . ').'];
@@ -1137,17 +1177,17 @@ function domain_scan_store_inventory(int $assetId, string $host, array $inventor
         (string) ($inventory['mac_address'] ?? ''),
         (string) ($inventory['cpu'] ?? ''),
         max(0, (int) ($inventory['memory_mb'] ?? 0)),
-        json_encode($inventory['disks'] ?? [], JSON_UNESCAPED_UNICODE),
-        json_encode($inventory['software'] ?? [], JSON_UNESCAPED_UNICODE),
-        json_encode($inventory['hardware'] ?? [], JSON_UNESCAPED_UNICODE),
-        json_encode($inventory['peripherals'] ?? [], JSON_UNESCAPED_UNICODE),
+        json_encode($inventory['disks'] ?? [], JSON_UNESCAPED_UNICODE | JSON_INVALID_UTF8_SUBSTITUTE),
+        json_encode($inventory['software'] ?? [], JSON_UNESCAPED_UNICODE | JSON_INVALID_UTF8_SUBSTITUTE),
+        json_encode($inventory['hardware'] ?? [], JSON_UNESCAPED_UNICODE | JSON_INVALID_UTF8_SUBSTITUTE),
+        json_encode($inventory['peripherals'] ?? [], JSON_UNESCAPED_UNICODE | JSON_INVALID_UTF8_SUBSTITUTE),
         (string) ($inventory['antivirus'] ?? ''),
         $assetId,
     ]);
     sync_inventory_rows($assetId, $inventory, 'domain');
     if (inventory_asset_exists($assetId)) {
         $receivedInventory['received_at'] = date('c');
-        db()->prepare('INSERT INTO asset_inventory_history (asset_id, snapshot_json, collected_by) VALUES (?, ?, ?)')->execute([$assetId, json_encode($receivedInventory, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES), $userId > 0 ? $userId : null]);
+        db()->prepare('INSERT INTO asset_inventory_history (asset_id, snapshot_json, collected_by) VALUES (?, ?, ?)')->execute([$assetId, json_encode($receivedInventory, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_INVALID_UTF8_SUBSTITUTE), $userId > 0 ? $userId : null]);
     }
     // Refresh the mapped machine-derived fields on every successful scan. This intentionally
     // replaces hand edits in those auto-mapped fields; separate plaque/organizational fields are untouched.
