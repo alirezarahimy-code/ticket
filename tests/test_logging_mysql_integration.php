@@ -144,6 +144,9 @@ $event = ['event_id'=>logging_uuid(),'code'=>'SYS-DB-001','category'=>'system','
 $checks['system log inserts and creates one aggregated issue'] = logging_store_system($event)
     && (int) $pdo->query('SELECT COUNT(*) FROM system_logs')->fetchColumn() === 1
     && (int) $pdo->query('SELECT COUNT(*) FROM log_issues')->fetchColumn() === 1;
+if (!$checks['system log inserts and creates one aggregated issue']) {
+    throw new RuntimeException('System log insert failed; verify the integration fixture applied every required migration.');
+}
 $event['event_id'] = logging_uuid();
 $checks['repeated error increments the same issue'] = logging_store_system($event)
     && (int) $pdo->query('SELECT occurrences FROM log_issues')->fetchColumn() === 2;
