@@ -1,5 +1,5 @@
--- ثبت خط مبنای مهاجرت‌ها برای نصب‌هایی که از نسخهٔ ۱.۶۲.۷۷ یا بالاتر ارتقا می‌یابند.
--- نسخهٔ نصب‌شدهٔ معتبر نشان می‌دهد مهاجرت‌های تاریخی این زنجیره قبلاً اعمال شده‌اند؛ این مهاجرت فقط رجیستری را همگام می‌کند.
+-- ثبت خط مبنای مهاجرت‌های تاریخی برای نصب‌هایی که از نسخهٔ ۱.۶۲.۷۷ یا بالاتر ارتقا می‌یابند.
+-- ثبت نام همین فایل (032) عمداً انجام نمی‌شود؛ نصب‌کننده پس از اجرای موفق SQL آن را ثبت می‌کند.
 INSERT IGNORE INTO schema_updates (version, migration) VALUES
 ('1.62.83', '001-local-accounts.sql'),
 ('1.62.83', '002-traffic-notices.sql'),
@@ -31,5 +31,4 @@ INSERT IGNORE INTO schema_updates (version, migration) VALUES
 ('1.62.83', '028-logging-fingerprint-v2.sql'),
 ('1.62.83', '029-activity-result-default-unknown.sql'),
 ('1.62.83', '030-logging-notification-idempotency-and-ticket-history.sql'),
-('1.62.83', '031-food-worker-window.sql'),
-('1.62.83', '032-schema-updates-baseline.sql');
+('1.62.83', '031-food-worker-window.sql');
