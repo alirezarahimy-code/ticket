@@ -118,11 +118,22 @@ jobs:
             echo "Release «$RELEASE_TAG» از قبل هست — فایل‌ها به‌روزرسانی می‌شوند."
             gh release upload "$RELEASE_TAG" downloads/*.zip --clobber
           else
+            # عنوان از VERSION خوانده می‌شود، نه هارد‌کد. وگرنه Release نسخهٔ
+            # جدید با عنوان نسخهٔ قبلی منتشر می‌شود (یک بار همین اتفاق افتاد).
+            VERSION_LINE=$(head -1 VERSION 2>/dev/null | tr -d '\r\n')
+            TITLE="نسخهٔ ${VERSION_LINE}"
+            # پاراگراف اول یادداشت‌ها به عنوان اضافه می‌شود، اگر بود.
+            if [ -s "$NOTES" ]; then
+              FIRST_TITLE=$(grep -m1 '^# ' "$NOTES" | sed 's/^# //')
+              [ -n "$FIRST_TITLE" ] && TITLE="$FIRST_TITLE"
+            fi
+            echo "عنوان: $TITLE"
             echo "ساخت Release «$RELEASE_TAG»…"
             gh release create "$RELEASE_TAG" \
-              --title "نسخهٔ ۱.۶۲.۹۷ — کارت آزمون جامع و اصلاح هشدار مهاجرت" \
+              --title "$TITLE" \
               --notes-file "$NOTES" \
               --target "$TARGET_SHA" \
+              --latest \
               downloads/*.zip
           fi
 
