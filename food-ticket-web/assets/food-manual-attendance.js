@@ -6,7 +6,7 @@
   const S = {
     manualEmployees: [], manualItems: [], manualFilter: '', manualSelected: [],
     manualLoading: false, manualSaving: false, manualError: '', manualLoaded: false,
-    manualResults: [], manualWithTicket: true, manualPhysicalPrint: false, manualReason: '',
+    manualResults: [], manualWithTicket: true, manualPhysicalPrint: false, manualReason: '', manualMealType: 'lunch',
     manualDate: '',
   };
   const esc = (x) => String(x == null ? '' : x).replace(/[&<>"']/g, (m) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m]));
@@ -239,11 +239,15 @@
     const history = S.manualItems.length
       ? '<div class="table-wrap"><table class="table"><thead><tr><th>کارمند</th><th>وعده</th><th>ساعت</th><th>صدور فیش</th><th>چاپ فیزیکی</th><th>وضعیت چاپ</th></tr></thead><tbody>'
         + S.manualItems.map((item) => {
+          // ۱.۶۳.۲: چاپ‌نشدهٔ فیزیکی هنوز «تحویل‌شده در سامانه» است؛ برچسب
+          // قبلی («صادر شد؛ چاپ فیزیکی انجام نشد») زرد و گنگ بود و کاربر فکر
+          // می‌کرد فیش بی‌اثر است. تفکیک روشن: سامانه ثبت شد / کاغذ چاپ نشد.
           const statusText = item.ticket_issued && item.print_status === 'printed' && !item.physical_print
-            ? 'در سامانه چاپ‌شده؛ چاپ فیزیکی انجام نشد'
+            ? 'ثبت و تحویل در سامانه؛ بدون چاپ کاغذی'
             : (item.ticket_issued ? (MANUAL_PRINT_STATUS[item.print_status] || item.print_status || '—') : 'تردد دستی؛ بدون فیش');
+          const mealText = item.meal_type === 'dinner' ? 'شام' : (item.meal_type === 'lunch' ? 'ناهار' : (item.food || '—'));
           return '<tr><td>' + esc(item.name || '—') + (item.pc ? ' <small>(' + esc(item.pc) + ')</small>' : '') + '</td>'
-            + '<td>' + esc(item.food || (item.ticket_issued ? '—' : 'بدون فیش')) + '</td><td dir="ltr">' + esc(item.time || '—') + '</td>'
+            + '<td>' + esc(mealText) + (item.food ? ' <small>(' + esc(item.food) + ')</small>' : '') + '</td><td dir="ltr">' + esc(item.time || '—') + '</td>'
             + '<td>' + (item.ticket_issued ? 'صادر شد' : 'صادر نشد') + '</td><td>' + (item.physical_print ? 'بله' : 'خیر') + '</td>'
             + '<td><span class="status ' + (item.print_status === 'printed' ? 'ok' : (['failed', 'print_error'].includes(item.print_status) ? 'bad' : 'warn')) + '">'
             + esc(statusText) + '</span></td></tr>';
@@ -271,6 +275,10 @@
         + '<button type="button" class="btn ghost" data-manual-action="manual-select-visible"' + (eligibleVisible.length ? '' : ' disabled') + '>انتخاب افرادِ قابل‌انتخابِ نتیجه</button>'
         + '<button type="button" class="btn ghost" data-manual-action="manual-clear-selection"' + (chosenCount ? '' : ' disabled') + '>پاک‌کردن انتخاب</button><span class="muted">انتخاب‌شده: ' + chosenCount + ' نفر</span></div>'
         + (cancelableRows.length ? '<p class="muted" style="font-size:12px;margin:0">ابتدا افراد را با چک‌باکس انتخاب کنید، بعد «لغو فیش انتخاب‌شده‌ها» را بزنید. ردیف به «غذا سفارش داده ولی فیش چاپ نشده» برمی‌گردد و شخص غایب ثبت می‌شود.</p>' : '')
+        + '<label class="field">وعدهٔ غذایی<select id="fg-manual-meal"' + (S.manualSaving ? ' disabled' : '') + '>'
+        + '<option value="lunch"' + (S.manualMealType === 'lunch' ? ' selected' : '') + '>ناهار</option>'
+        + '<option value="dinner"' + (S.manualMealType === 'dinner' ? ' selected' : '') + '>شام</option>'
+        + '</select></label>'
         + '<fieldset class="manual-ticket-mode"><legend>نوع ثبت</legend>'
         + (canIssueTicket ? '<label><input type="radio" name="fg-manual-with-ticket" value="yes"' + (S.manualWithTicket ? ' checked' : '') + '> ثبت تردد با صدور فیش</label>' : '')
         + '<label><input type="radio" name="fg-manual-with-ticket" value="no"' + (!S.manualWithTicket ? ' checked' : '') + '> ثبت تردد بدون فیش</label>'
@@ -342,6 +350,10 @@
         return selectableRow(u);
       });
       drawManualAttendance();
+      return;
+    }
+    if (e.target && e.target.id === 'fg-manual-meal') {
+      S.manualMealType = e.target.value === 'dinner' ? 'dinner' : 'lunch';
       return;
     }
     if (e.target && e.target.id === 'fg-manual-print') {
@@ -447,6 +459,7 @@
       const userIds = S.manualSelected.map(Number).filter((id) => Number.isInteger(id) && id >= 0);
       const reason = (document.getElementById('fg-manual-reason') || {}).value || S.manualReason || '';
       const physicalPrint = S.manualWithTicket && !!S.manualPhysicalPrint;
+      const mealType = S.manualMealType === 'dinner' ? 'dinner' : 'lunch';
       if (!userIds.length) { say('حداقل یک کارمندِ قابل‌انتخاب را انتخاب کنید.'); return; }
       if (!reason.trim()) { say('علت ثبت دستی را وارد کنید.'); return; }
       S.manualReason = reason;
@@ -459,7 +472,7 @@
         for (let offset = 0; offset < userIds.length; offset += 100) {
           const batch = userIds.slice(offset, offset + 100);
           try {
-            latest = await callApi('/api/food-manual-attendance', { method: 'POST', body: JSON.stringify({ user_ids: batch, date: manualDateIso(), with_ticket: S.manualWithTicket, physical_print: physicalPrint, reason }) });
+            latest = await callApi('/api/food-manual-attendance', { method: 'POST', body: JSON.stringify({ user_ids: batch, date: manualDateIso(), with_ticket: S.manualWithTicket, physical_print: physicalPrint, meal_type: mealType, reason }) });
             results.push(...((latest && latest.results) || []));
           } catch (err) {
             const message = (err && err.message) || 'ارتباط با سرور برقرار نشد.';

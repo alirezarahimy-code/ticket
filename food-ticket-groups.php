@@ -2207,7 +2207,7 @@ function food_ticket_api_manual_attendance(string $date = ''): array
     array_unshift($employees, food_ticket_manual_attendance_guest_row());
 
     $q = db()->prepare(
-        'SELECT id, user_id, personnel_code, full_name, food_type, punch_time, event_type, print_status, source_payload, created_at '
+        'SELECT id, user_id, personnel_code, full_name, food_type, punch_time, event_type, print_status, COALESCE(meal_type, \'lunch\') AS meal_type, source_payload, created_at '
         . 'FROM food_ticket_events WHERE source_uid = ? AND punch_date = ? ORDER BY id DESC'
     );
     $q->execute(['manual-attendance', $date]);
@@ -2221,6 +2221,7 @@ function food_ticket_api_manual_attendance(string $date = ''): array
             'pc' => (string) ($row['personnel_code'] ?? ''),
             'name' => (string) ($row['full_name'] ?? ''),
             'food' => (string) ($row['food_type'] ?? ''),
+            'meal_type' => (string) ($row['meal_type'] ?? 'lunch'),
             'time' => substr((string) ($row['punch_time'] ?? ''), 0, 5),
             'event_type' => (string) ($row['event_type'] ?? ''),
             'print_status' => (string) ($row['print_status'] ?? ''),
@@ -2286,9 +2287,16 @@ function food_ticket_manual_attendance_clear_absence(int $userId, string $date, 
 }
 
 /** ثبت دستی یک تردد برای روز انتخاب‌شده (امروز یا روزهای قبل)؛ صدور فیش و چاپ فیزیکی دو انتخاب مستقل هستند. */
-function food_ticket_api_manual_attendance_save(int $userId, bool $withTicket, bool $physicalPrint, string $reason, array $actor, array &$orderMaps, string $date = ''): array
+function food_ticket_api_manual_attendance_save(int $userId, bool $withTicket, bool $physicalPrint, string $reason, array $actor, array &$orderMaps, string $date = '', string $mealType = 'lunch'): array
 {
     $targetDate = food_ticket_manual_attendance_date($date);
+    // ⚠️ ۱.۶۳.۲ — وعده همین‌جا نرمال می‌شود و در payload هر دو مسیر (کارمند و
+    // مهمان) می‌نشیند. پیش‌تر اصلاً نوشته نمی‌شد و ستون meal_type خالی می‌ماند؛
+    // گزارش‌ها همه را «ناهار» فرض می‌کردند و فیش مهمانِ شام هم در ناهار
+    // شمرده می‌شد.
+    $mealType = function_exists('food_order_meal_type')
+        ? food_order_meal_type($mealType)
+        : (in_array(strtolower(trim($mealType)), ['lunch', 'dinner'], true) ? strtolower(trim($mealType)) : 'lunch');
     $reason = trim($reason);
     if ($userId < 0) {
         throw new RuntimeException('یک کارمند را انتخاب کنید.');
@@ -2301,7 +2309,7 @@ function food_ticket_api_manual_attendance_save(int $userId, bool $withTicket, b
     }
     // ۱.۶۲.۹: شناسهٔ صفر یعنی «مهمان»؛ مسیر جداگانه بدون شرط سفارش/تکرار.
     if ($userId === 0) {
-        return food_ticket_api_manual_attendance_save_guest($withTicket, $physicalPrint, $reason, $actor, $targetDate);
+        return food_ticket_api_manual_attendance_save_guest($withTicket, $physicalPrint, $reason, $actor, $targetDate, $mealType);
     }
 
     $q = db()->prepare(
@@ -2460,6 +2468,7 @@ function food_ticket_api_manual_attendance_save(int $userId, bool $withTicket, b
             'ticket_key' => null,
             'event_type' => 'no_food',
             'print_status' => 'not_printed',
+            'meal_type' => $mealType,
             'last_error' => 'ثبت دستی تردد بدون صدور فیش؛ علت: ' . $reason,
             'source_payload' => json_encode([
                 'manual_attendance' => [
@@ -2744,6 +2753,7 @@ function food_ticket_api_manual_attendance_save(int $userId, bool $withTicket, b
         'with_ticket' => $withTicket,
         'physical_print' => $physicalPrint,
         'print_status' => $printStatus,
+        'meal_type' => $mealType,
         'message' => $message,
     ];
 }
@@ -2753,11 +2763,15 @@ function food_ticket_api_manual_attendance_save(int $userId, bool $withTicket, b
  * رویداد با user_id خالی، نام «مهمان» و نوع غذای «مهمان» ذخیره می‌شود تا در گزارش‌ها
  * کنار فیش‌های مهمانِ کارت‌خوان (event_type = guest) شمرده شود.
  */
-function food_ticket_api_manual_attendance_save_guest(bool $withTicket, bool $physicalPrint, string $reason, array $actor, string $date): array
+function food_ticket_api_manual_attendance_save_guest(bool $withTicket, bool $physicalPrint, string $reason, array $actor, string $date, string $mealType = 'lunch'): array
 {
     if (!$withTicket) {
         $physicalPrint = false;
     }
+    // ⚠️ ۱.۶۳.۲ — وعده باید همین‌جا نرمال شود. پیش‌تر معتبرسازی وعده فقط در
+    // مسیر کارمند اجرا می‌شد و مسیر مهمان اصلاً از آن رد نمی‌شد؛ مقدار خام
+    // (یا خالی) به ستون meal_type می‌رفت و در گزارش‌ها «ناهار» فرض می‌شد.
+    $mealType = function_exists('food_order_meal_type') ? food_order_meal_type($mealType) : (in_array(strtolower(trim($mealType)), ['lunch', 'dinner'], true) ? strtolower(trim($mealType)) : 'lunch');
     $now = function_exists('food_order_now') ? food_order_now()->format('H:i:s') : date('H:i:s');
     $recordedAt = function_exists('food_order_now') ? food_order_now()->format('Y-m-d H:i:s') : date('Y-m-d H:i:s');
     $config = $withTicket ? food_ticket_config(true) : [];
@@ -2770,6 +2784,7 @@ function food_ticket_api_manual_attendance_save_guest(bool $withTicket, bool $ph
             'with_ticket' => $withTicket,
             'physical_print' => $physicalPrint,
             'guest' => true,
+            'meal_type' => $mealType,
             'recorded_at' => $recordedAt,
         ],
     ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
@@ -2786,7 +2801,21 @@ function food_ticket_api_manual_attendance_save_guest(bool $withTicket, bool $ph
         'food_type' => $withTicket ? 'مهمان' : null,
         'ticket_key' => null,
         'event_type' => $withTicket ? 'guest' : 'no_food',
-        'print_status' => 'not_printed',
+        // ⚠️ ۱.۶۳.۲ — مقدار پیش‌فرض «not_printed» بود و هر دو گزارش تحویل
+        // (report_printed_delivery و reconciliation_served_counts) شرط
+        // print_status = 'printed' دارند؛ نتیجه: مهمانِ دستی در هیچ گزارشی
+        // دیده نمی‌شد — همان «۶ مهمان، صفر پرس تحویلی».
+        // معنای print_status در این سامانه «فیش در سامانه صادر شد» است، نه
+        // «کاغذ از چاپگر بیرون آمد»؛ مسیر کارمند هم دقیقاً همین کار را می‌کند
+        // (printed + delivered + food_ticket_mark_delivered_on_print).
+        //
+        // ⚠️ اما وقتی چاپ فیزیکی خواسته شده، ردیف باید «not_printed» بماند:
+        // food_ticket_enqueue_print گارد `print_status <> "printed"` دارد و
+        // اگر همین‌جا printed بنویسیم، فیش هیچ‌وقت وارد صف چاپ نمی‌شود.
+        'print_status' => ($withTicket && !$physicalPrint) ? 'printed' : 'not_printed',
+        // وعده از فرم می‌آید؛ پیش‌تر اصلاً فرستاده نمی‌شد و ستون خالی می‌ماند.
+        // ستون NOT NULL است — حتی ردیف «بدون فیش» هم وعدهٔ خودش را دارد.
+        'meal_type' => $mealType,
         'last_error' => $withTicket ? null : ('ثبت دستی تردد مهمان بدون صدور فیش؛ علت: ' . $reason),
         'source_payload' => $sourcePayload,
     ];
@@ -2805,10 +2834,18 @@ function food_ticket_api_manual_attendance_save_guest(bool $withTicket, bool $ph
             food_ticket_print_log($eventId, '', $sourceKey, '', 'ثبت دستی', 'manual_issued', 0, 'فیش مهمان صادر شد؛ چاپ فیزیکی انتخاب نشده است.');
         }
         $message = 'فیش مهمان صادر شد؛ چاپ فیزیکی انجام نشد.';
-        $printStatus = 'not_printed';
+        $printStatus = 'printed';
     } else {
         $message = 'تردد مهمان ثبت شد؛ فیش صادر نشد.';
         $printStatus = 'not_printed';
+    }
+
+    // ⚠️ ۱.۶۳.۲ — مهمانِ بدون چاپ فیزیکی هم «تحویل‌شده» است. مسیر کارمند
+    // همین را لحظهٔ ثبت انجام می‌دهد (food_ticket_mark_delivered_on_print)؛
+    // مسیر مهمان آن را نداشت، پس ردیف تا ابد delivery_status=pending ماند و
+    // گزارش تطبیق «۰ پرس مهمان» نشان داد.
+    if ($withTicket && !$physicalPrint && function_exists('food_ticket_mark_delivered_on_print')) {
+        food_ticket_mark_delivered_on_print($eventId);
     }
 
     food_ticket_audit('food_ticket_manual_attendance', [
@@ -2822,6 +2859,7 @@ function food_ticket_api_manual_attendance_save_guest(bool $withTicket, bool $ph
             'date' => $date,
             'with_ticket' => $withTicket,
             'physical_print' => $physicalPrint,
+            'meal_type' => $mealType,
             'reason' => $reason,
         ],
     ]);
@@ -2834,6 +2872,7 @@ function food_ticket_api_manual_attendance_save_guest(bool $withTicket, bool $ph
         'with_ticket' => $withTicket,
         'physical_print' => $physicalPrint,
         'print_status' => $printStatus,
+        'meal_type' => $mealType,
         'message' => $message,
     ];
 }
@@ -2867,6 +2906,11 @@ function food_ticket_api_manual_attendance_save_many(array $body, array $actor):
     if (!function_exists('user_can') || !user_can($actor, 'food.manual_attendance_edit')) {
         throw new RuntimeException('ویرایش ثبت دستی فیش/تردد مجاز نیست.');
     }
+    // ۱.۶۳.۲: وعده از فرم (ناهار/شام)؛ پیش‌تر فقط برای کارمند خوانده می‌شد
+    // و مسیر مهمان همیشه «ناهار» در گزارش‌ها فرض می‌شد.
+    $manualMealType = function_exists('food_order_meal_type')
+        ? food_order_meal_type($body['meal_type'] ?? 'lunch')
+        : (in_array(strtolower(trim((string) ($body['meal_type'] ?? ''))), ['lunch', 'dinner'], true) ? strtolower(trim((string) $body['meal_type'])) : 'lunch');
     $physicalPrint = $withTicket && !empty($body['physical_print']);
     $reason = (string) ($body['reason'] ?? '');
     $labels = [0 => ['name' => 'مهمان', 'pc' => '']];
@@ -2892,7 +2936,7 @@ function food_ticket_api_manual_attendance_save_many(array $body, array $actor):
     $orderMaps = [];
     foreach ($userIds as $userId) {
         try {
-            $results[] = food_ticket_api_manual_attendance_save($userId, $withTicket, $physicalPrint, $reason, $actor, $orderMaps, $date);
+            $results[] = food_ticket_api_manual_attendance_save($userId, $withTicket, $physicalPrint, $reason, $actor, $orderMaps, $date, $manualMealType);
         } catch (Throwable $exception) {
             $results[] = [
                 'ok' => false,
