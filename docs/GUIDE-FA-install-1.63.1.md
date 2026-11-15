@@ -34,21 +34,23 @@
 
 ### ۳) فایل را دانلود کنید
 
-**[⬇ دانلود بستهٔ میانی ۱.۶۳ ← ۱.۶۳.۱](https://github.com/alirezarahimy-code/ticket/releases/download/v1.63.1/ticket-update-1.63-to-1.63.1-r12-cancel-fix-20261115.zip)**
+**[⬇ دانلود بستهٔ میانی ۱.۶۳ ← ۱.۶۳.۱](https://github.com/alirezarahimy-code/ticket/releases/download/v1.63.1/ticket-update-1.63-to-1.63.1-r13-cancel-fix-20261115.zip)**
 
-```
-نام فایل : ticket-update-1.63-to-1.63.1-r12-cancel-fix-20261115.zip
-حجم     : 319,898 بایت  (حدود ۳۱۲ کیلوبایت)
-SHA-256 : 495b32a2f2fc48004e77a5a25cd09ae80a4c0f4d2523185846a6540dea012133
-```
+این راهنما **داخل خود بسته** هم منتشر می‌شود، پس حجم و هشِ دقیقِ همین زیپ
+را نمی‌تواند درست حمل کند (هر بار که راهنما تغییر کند، زیپ هم عوض می‌شود).
+
+حجم و SHA-256 را از صفحهٔ دانلود بردارید:
+
+- [`downloads/README-FA-downloads.md`](../downloads/README-FA-downloads.md)
+- [`downloads/RELEASE-ASSETS-1.63.1.txt`](../downloads/RELEASE-ASSETS-1.63.1.txt)
 
 **هش را بررسی کنید** (اختیاری ولی توصیه‌شده). در PowerShell:
 
 ```powershell
-Get-FileHash .\ticket-update-1.63-to-1.63.1-*.zip -Algorithm SHA256
+Get-FileHash .\ticket-update-1.63-to-1.63.1-r13-cancel-fix-*.zip -Algorithm SHA256
 ```
 
-باید دقیقاً همان رشتهٔ بالا باشد.
+خروجی را با مقدار `SHA-256` همان دو فایل بالا مقایسه کنید.
 
 ---
 

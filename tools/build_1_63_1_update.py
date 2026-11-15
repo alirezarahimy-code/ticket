@@ -25,6 +25,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import re
 import subprocess
 import zipfile
 from pathlib import Path
@@ -33,7 +34,7 @@ ROOT = Path(__file__).resolve().parent.parent
 RELEASE_VERSION = "1.63.1"
 REQUIRES_VERSION = "1.63"
 RELEASE_DATE = "2026-11-06"
-PACKAGE_NAME = "ticket-update-1.63-to-1.63.1-r12-cancel-fix-20261115.zip"
+PACKAGE_NAME = "ticket-update-1.63-to-1.63.1-r13-cancel-fix-20261115.zip"
 REPORT_NAME = "CHANGE-REPORT-FA-1.63.1.md"
 ZIP_DATE = (2026, 11, 6, 3, 0, 0)
 
@@ -212,6 +213,18 @@ def main() -> None:
             raise SystemExit(f"بی‌تغییر نسبت به ۱.۶۳ است و نباید حمل شود: {rel}")
         if rel not in base and rel not in ALLOWED_NEW_FILES and rel not in TEST_FILES:
             raise SystemExit(f"در نصب ۱.۶۳ نیست — افزودن فایل تازه به بستهٔ افزایشی: {rel}")
+        # ── نگهبانِ ارجاع به نسخهٔ کهنه ──────────────────────────────────
+        # یک بار پیش آمد که راهنمای داخل بستهٔ r12 هنوز به فایل r11 اشاره
+        # می‌کرد؛ آن فایل هم روی تگ باقی مانده بود، پس لینک کار می‌کرد و
+        # کاربر می‌توانست نسخهٔ قدیمی را دانلود کند. این نگهبان همان تله را
+        # می‌بندد: هر ارجاع به rN قدیمی‌تر داخل محتوای بسته = شکست ساخت.
+        if rel.endswith(('.md', '.txt', '.html', '.php', '.js')):
+            stale = sorted(set(re.findall(r'ticket-[A-Za-z0-9._-]*-?r(\d+)[A-Za-z0-9._-]*\.zip', cur.decode('utf-8', 'ignore'))))
+            current = re.search(r'-r(\d+)-', PACKAGE_NAME)
+            current_n = int(current.group(1)) if current else 0
+            old_ones = [n for n in stale if int(n) < current_n]
+            if old_ones:
+                raise SystemExit(f"ارجاع به بستهٔ کهنه r{','.join(old_ones)} در {rel} — قبل از ساخت اصلاح کن")
         payload[rel] = cur
 
     # آزمون‌ها (به‌روز‌شده، حتی اگر در ۱.۶۳ نبودند)
@@ -232,7 +245,7 @@ def main() -> None:
     payload["VERSION"] = (RELEASE_VERSION + "\n").encode("utf-8")
 
     manifest = {
-        "name": "cancel-fix-r12",
+        "name": "cancel-fix-r13",
         "version": RELEASE_VERSION,
         "date": RELEASE_DATE,
         "title": TITLE,
@@ -246,7 +259,8 @@ def main() -> None:
     manifest_bytes = json.dumps(manifest, ensure_ascii=False, indent=2).encode("utf-8")
 
     package_path = out_dir / PACKAGE_NAME
-    with zipfile.ZipFile(package_path, "w", zipfile.ZIP_DEFLATED) as zf:
+    tmp_path = out_dir / (PACKAGE_NAME + ".building")
+    with zipfile.ZipFile(tmp_path, "w", zipfile.ZIP_DEFLATED) as zf:
         def add(name: str, data: bytes) -> None:
             info = zipfile.ZipInfo(name, date_time=ZIP_DATE)
             info.compress_type = zipfile.ZIP_DEFLATED
@@ -257,7 +271,15 @@ def main() -> None:
         for name, data in sorted(payload.items()):
             add("files/" + name, data)
 
-    checksum = sha256_path(package_path)
+    checksum = sha256_path(tmp_path)
+    # پیش از جایگزینی بستهٔ منتشرشده، اسناد را با همین هش/حجم بسنج؛
+    # اگر کهنه باشند، بستهٔ سالم قبلی دست‌نخورده می‌ماند.
+    try:
+        check_doc_checksums(checksum, tmp_path.stat().st_size)
+    except SystemExit:
+        tmp_path.unlink(missing_ok=True)
+        raise
+    tmp_path.replace(package_path)
     (out_dir / (PACKAGE_NAME + ".sha256")).write_text(
         f"{checksum}  {PACKAGE_NAME}\n", encoding="ascii"
     )
@@ -267,6 +289,43 @@ def main() -> None:
     print(f"OK {PACKAGE_NAME}")
     print(f"Files: {len(payload)} | migrations: 0 | bytes: {package_path.stat().st_size}")
     print(f"SHA-256: {checksum}")
+
+
+def check_doc_checksums(checksum: str, size: int) -> None:
+    """نگهبانِ هش/حجم در اسناد تحویل.
+
+    یک بار پیش آمد که نام بسته در راهنما به r12 عوض شد ولی حجم و SHA-256
+    همان r11 ماند؛ کاربر هش را بررسی می‌کرد و رد می‌شد. حالا هر سند تحویلی
+    که نام همین بسته را می‌آورد، باید همین هش و همین حجم را هم بیاورد.
+    """
+    # هرگز راهنمای داخل بسته را نسنج: آن فایل خودش داخل زیپ است و
+    # نمی‌تواند هشِ زیپِ خودش را درست حمل کند (تناقض ذاتی). فقط اسنادِ
+    # بیرونِ بسته — همان‌هایی که کاربر پیش از دانلود می‌بیند.
+    docs = [
+        ROOT / "downloads" / "README-FA-downloads.md",
+        ROOT / "downloads" / "RELEASE-ASSETS-1.63.1.txt",
+    ]
+    size_str = f"{size:,}"
+    # فقط بررسی؛ هیچ سندی خودکار بازنویسی نمی‌شود. دو سند بیرونی جدا از
+    # بستهٔ کامل‌اند و هش/حجم خودشان را دارند — بازنویسی خودکار، هش بستهٔ
+    # کامل را با هش بستهٔ میانی یکی می‌کرد.
+    for doc in docs:
+        if not doc.is_file():
+            continue
+        text = doc.read_text(encoding="utf-8")
+        if PACKAGE_NAME not in text:
+            continue
+        if checksum not in text:
+            raise SystemExit(
+                f"هش SHA-256 بستهٔ میانی در {doc.relative_to(ROOT)} نیست یا کهنه است — "
+                f"هش درست: {checksum}"
+            )
+        # سند فارسی است: ارقام و جداکنندهٔ هزارگان فارسی‌اند.
+        norm = text.translate(str.maketrans("۰۱۲۳۴۵۶۷۸۹٬", "0123456789,"))
+        if size_str not in norm:
+            raise SystemExit(
+                f"حجم بستهٔ میانی ({size_str} بایت) در {doc.relative_to(ROOT)} نیست یا کهنه است."
+            )
 
 
 def build_report() -> str:

@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#102a23">
+  <title>دریافت به‌روزرسانی 1.62.94</title>
+  <style>:root{--lightningcss-light: ;--lightningcss-dark:initial;color-scheme:dark;color:#eaf3ed;font-synthesis:none;text-rendering:optimizelegibility;background:#0c1713;font-family:Tahoma,Segoe UI,sans-serif}*{box-sizing:border-box}body{background:radial-gradient(at 80% 0,#235844 0,#0000 42%),linear-gradient(145deg,#0c1713,#14251e 65%,#102019);place-items:center;min-height:100vh;margin:0;padding:24px;display:grid}main{background:#14231df2;border:1px solid #3d5b4b;border-radius:24px;width:min(860px,100%);padding:clamp(24px,5vw,48px);box-shadow:0 28px 90px #0007}.eyebrow{color:#9ed2ad;letter-spacing:.04em;font-size:13px;font-weight:700}.version{color:#fff;margin:16px 0 12px;font-size:clamp(42px,10vw,72px);line-height:1}.subtitle{color:#b9cabe;margin:0 0 28px;line-height:1.9}.features{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin:24px 0 30px;display:grid}.feature{background:#1b3026;border:1px solid #314c3d;border-radius:14px;padding:16px;line-height:1.7}.feature b{color:#dbf2e1;margin-bottom:4px;display:block}.feature span{color:#aebfb3;font-size:13px}.download{color:#07190f;background:#45a66f;border-radius:12px;justify-content:center;align-items:center;gap:10px;padding:14px 22px;font-weight:800;text-decoration:none;display:inline-flex;box-shadow:0 8px 24px #2c8a563d}.download:hover{background:#64c18b;transform:translateY(-1px)}.integrity{color:#aebfb3;text-align:left;overflow-wrap:anywhere;direction:ltr;margin:20px 0 0;font-size:12px;line-height:1.8}.integrity a,.previous a{color:#a9d9b7}.previous{color:#aebfb3;border:1px solid #31483b;border-radius:12px;margin-top:20px;padding:16px;font-size:13px;line-height:1.8}.notice{color:#8fa497;border-top:1px solid #31483b;margin-top:24px;padding-top:18px;font-size:12px;line-height:1.8}@media (width<=560px){.features{grid-template-columns:1fr}.download{width:100%}}</style>
+</head>
+<body>
+  <main>
+    <section aria-label="کاندید مرکز درخواست‌ها" style="margin:0 0 26px;padding:16px 18px;border:1px dashed #4a6b8a;border-radius:14px;background:#131e30;color:#b9cdea;font-size:13px;line-height:1.9">
+      <b style="color:#ffd97d">همچنین:</b> کاندید «مرکز درخواست‌ها 1.63» (فقط برای تست، <b>RC_CANDIDATE_NOT_FOR_PRODUCTION</b>، نیازمند غذا تا ۱٫۶۲٫۹۴ + ۰۳۶) — <a href="/request-center-rc-1.63.html" style="color:#ffd97d;font-weight:700">صفحهٔ دریافت مرکز درخواست‌ها ←</a>
+    </section>
+    <span class="eyebrow">بستهٔ میانی سامانه · ۱۰ نوامبر ۲۰۲۶ · نیازمند 1.62.93</span>
+    <h1 class="version">نسخهٔ 1.62.94</h1>
+    <p class="subtitle">مرج «پرس سفارش/تحویل واقعی پیمانکار»، ستون‌های مهمانِ جدا در «تطبیق روزانه»، کارت سوم «واحد مستقل» کنار مدیرعامل، اصلاح اعمال مجوز «ویرایش چارت» از گروه‌های دسترسی و رفع تناقض پیام تعطیل رسمی. این یک صفحهٔ تحویل در preview ایزوله است، نه نصب واقعی.</p>
+    <section class="features" aria-label="محتوای بسته">
+      <div class="feature"><b>۱) مرج سفارش/تحویل پیمانکار</b><span>یک عدد واحد <code>portion_quantity</code> در فرم؛ payload دو فیلدی قدیمی هنوز پذیرفته می‌شود. ثبت سفارش چیزی «تحویل» حساب نمی‌شود؛ <code>received_quantity</code> فقط هنگام «ثبت تحویل و بستن روز» نوشته می‌شود (انحراف on-order رسماً اعلام شده).</span></div>
+      <div class="feature"><b>۲) مهمان جدا از پرسنل</b><span>«کل سفارشات پرسنل» (فعال+لغو)، «تقاضای فعال پرسنل»، «لغوشدهٔ پرسنل»، «درخواست مهمان (نفرات)» (فقط فعال‌ها) و «مهمان توزیع‌شده». ستون‌های «تقاضای فعال» و «لغوشدهٔ مهمان» حذف شدند؛ Excel دقیقاً ۲۲ ستون و ردیف «خلاصهٔ ماهانه» هم‌راستا شد.</span></div>
+      <div class="feature"><b>۳) کارت سوم «واحد مستقل»</b><span>جایگاه <code>chart_side='center'</code> کنار مدیرعامل؛ یک واحد مستقل فعال مثل هر سمت دیگر؛ هیچ تغییر دیگری در چیدمان چارت ندادیم.</span></div>
+      <div class="feature"><b>۴) گروه‌های دسترسی</b><span>علت اصلی پیدا شد: <code>user_can_manage_organization()</code> به <code>org.manage</code> نگاه نمی‌کرد. حالا اعمال می‌شود — دارندهٔ مجوز (از نقش یا گروه) می‌تواند معاونت/مدیریت مستقل/اداره بسازد و درخت را ویرایش کند.</span></div>
+      <div class="feature"><b>۵) تعطیل رسمی ممانعت نمی‌کند</b><span>طبق تصمیم شما، ثبت/لغو سفارش در تعطیلات رسمی مثل روز عادی انجام می‌شود؛ فقط برچسب/عنوان «تعطیل» نمایش داده می‌شود. بستن سفارش توسط مدیر و تاریخ گذشته مثل قبل مسدود می‌کنند.</span></div>
+      <div class="feature"><b>۶) بدون RC و بدون مهاجرت</b><span>هیچ اثری از «مرکز درخواست‌ها» داخل بسته نیست؛ <code>VERSION</code> داخل بسته <code>1.62.94</code> است و با ۱٫۶۲٫۹۰ ← ۱٫۶۲٫۹۳ ← ۱٫۶۲٫۹۴ نصب می‌شود. VERSION ریشه و شاخهٔ RC دست‌نخورده.</span></div>
+    </section>
+    <a class="download" href="/ticket-update-1.62.93-to-1.62.94-food-guest-org-holiday-20261110.zip?v=20261110" download>⬇ دریافت بستهٔ 1.62.94 (ZIP)</a>
+    <p class="integrity">SHA-256: 751f2438b70e935cc49f7cf81a03cb94fede3a84c3cf28d11b5020f45339a45c<br><a href="/ticket-update-1.62.93-to-1.62.94-food-guest-org-holiday-20261110.zip.sha256" download>دریافت فایل checksum</a><br><a href="/CHANGE-REPORT-FA-1.62.94.md" download>دریافت گزارش تغییرات (CHANGE-REPORT-FA-1.62.94.md)</a></p>
+    <section class="previous">بسته‌های قبلی حفظ شده‌اند و بازنویسی نشده‌اند: <a href="/ticket-update-1.62.3-food-staff-report-theme-20261025.zip" download>دریافت ZIP نسخهٔ 1.62.3</a> · <a href="/ticket-update-1.62.3-food-staff-report-theme-20261025.zip.sha256" download>checksum نسخهٔ 1.62.3</a> · <a href="/ticket-update-1.62.2-food-dashboard-bulk-theme-fixes-20261025.zip" download>دریافت ZIP نسخهٔ 1.62.2</a></section>
+    <p class="notice" style="color:#f5c97b;border-top-color:#5a4632">⚠️ <b>اصلاحیهٔ ۱۰ نوامبر:</b> نسخهٔ اول این بسته از روی فایل‌های شاخهٔ RC ساخته شده بود و روی نصب واقعی ۱٫۶۲٫۹۳ همهٔ صفحه‌ها را به خطای عمومی می‌برد. <b>فایل‌های فعلی بازسازی‌شده روی پایهٔ واقعی (v1.62.88 + بسته‌های میانی ۱٫۶۲٫۹۰/۱٫۶۲٫۹۳) هستند</b> و فقط دلتای پنج محور را دارند؛ <code>lib/render.php</code> و <code>index.php</code>ِ RC دیگر داخل بسته نیستند و هر <code>require</code>ِ PHP داخل بسته روی پایهٔ ۱٫۶۲٫۹۳ موجود است. SHA-256 این فایل 751f2438…39a45c است.</p>
+    <p class="notice">بسته مستقل و آفلاین است و migration ندارد. نیازمند نصب نسخهٔ 1.62.93 پیش از آن است. ابتدا روی staging تست کنید؛ انتشار (تگ/merge به main) فقط با دستور مالک.</p>
+  </main>
+</body>
+</html>

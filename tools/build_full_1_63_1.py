@@ -28,10 +28,10 @@ from pathlib import Path, PurePosixPath, PureWindowsPath
 ROOT = Path(__file__).resolve().parent.parent
 BASE_COMMIT = "00e7e759bda9460dcb245812e2e6b617670efade"  # main — ۱.۶۲.۹۵
 DELTA_163 = ROOT / "downloads" / "ticket-update-1_62_96-to-1_63-request-center-rc-candidate-20261114-r16.zip"
-DELTA_1631 = ROOT / "downloads" / "ticket-update-1.63-to-1.63.1-r12-cancel-fix-20261115.zip"
+DELTA_1631 = ROOT / "downloads" / "ticket-update-1.63-to-1.63.1-r13-cancel-fix-20261115.zip"
 
 RELEASE_VERSION = "1.63.1"
-PACKAGE_NAME = "ticket-full-1.63.1-r12-20261115.zip"
+PACKAGE_NAME = "ticket-full-1.63.1-r13-20261115.zip"
 NOTE_NAME = "00-FULL-PACKAGE-1.63.1-FA.txt"
 ZIP_DATE = (2026, 11, 6, 4, 0, 0)
 PREFIX = "ticket/"
@@ -200,6 +200,26 @@ def build() -> Path:
     print(f"OK {PACKAGE_NAME}")
     print(f"Files: {len(files)} | bytes: {package_path.stat().st_size}")
     print(f"SHA-256: {checksum}")
+
+    # همان نگهبانِ بستهٔ میانی، برای بستهٔ کامل: اگر سند تحویلی نام این
+    # زیپ را می‌آورد ولی هش/حجم دیگری کنارش نشسته، ساخت شکست می‌خورد.
+    size_str = f"{package_path.stat().st_size:,}"
+    for doc in (ROOT / "downloads" / "README-FA-downloads.md",
+                ROOT / "downloads" / "RELEASE-ASSETS-1.63.1.txt"):
+        if not doc.is_file():
+            continue
+        text = doc.read_text(encoding="utf-8")
+        if PACKAGE_NAME not in text:
+            continue
+        if checksum not in text:
+            raise SystemExit(
+                f"هش بستهٔ کامل در {doc.relative_to(ROOT)} نیست یا کهنه است — هش درست: {checksum}"
+            )
+        norm = text.translate(str.maketrans("۰۱۲۳۴۵۶۷۸۹٬", "0123456789,"))
+        if size_str not in norm:
+            raise SystemExit(
+                f"حجم بستهٔ کامل ({size_str} بایت) در {doc.relative_to(ROOT)} نیست یا کهنه است."
+            )
     return package_path
 
 

@@ -24,15 +24,15 @@
 
 **اگر ۱.۶۳ را نصب کرده‌اید، فقط این را لازم دارید.**
 
-**[⬇ دانلود بستهٔ میانی ۱.۶۳.۱](https://github.com/alirezarahimy-code/ticket/releases/download/v1.63.1/ticket-update-1.63-to-1.63.1-r12-cancel-fix-20261115.zip)**
+**[⬇ دانلود بستهٔ میانی ۱.۶۳.۱](https://github.com/alirezarahimy-code/ticket/releases/download/v1.63.1/ticket-update-1.63-to-1.63.1-r13-cancel-fix-20261115.zip)**
 
 ```
-نام فایل : ticket-update-1.63-to-1.63.1-r12-cancel-fix-20261115.zip
-حجم     : 412,749 بایت
-SHA-256 : 454ee7494bebf6eca39ee33af1b01c83aafb135267a4204c187fc3269ac00829
+نام فایل : ticket-update-1.63-to-1.63.1-r13-cancel-fix-20261115.zip
+حجم     : 412,789 بایت
+SHA-256 : f990023eac317e526967efa4e56f9330bfddd8bf196b51e0463d4170fb5e2833
 ```
 
-**۳۱ فایل، بدون مهاجرت، بدون تغییر جدول. — نسخهٔ r9**
+**۳۲ فایل، بدون مهاجرت، بدون تغییر جدول. — نسخهٔ r13**
 
 ### نصب
 
@@ -54,15 +54,15 @@ SHA-256 : 454ee7494bebf6eca39ee33af1b01c83aafb135267a4204c187fc3269ac00829
 
 **اگر سامانه ندارید یا روی ۱.۶۲.x هستید.**
 
-**[⬇ دانلود بستهٔ کامل ۱.۶۳.۱](https://github.com/alirezarahimy-code/ticket/releases/download/v1.63.1/ticket-full-1.63.1-r12-20261115.zip)**
+**[⬇ دانلود بستهٔ کامل ۱.۶۳.۱](https://github.com/alirezarahimy-code/ticket/releases/download/v1.63.1/ticket-full-1.63.1-r13-20261115.zip)**
 
 ```
-نام فایل : ticket-full-1.63.1-r12-20261115.zip
-حجم     : 11,758,995 بایت
-SHA-256 : f825ee937d4ed6828a1e2badd7369c27cc2375cb528eb13d5f730bfd123b131a
+نام فایل : ticket-full-1.63.1-r13-20261115.zip
+حجم     : 11,777,997 بایت
+SHA-256 : 439724c82a3f722b0a90d337375f05a3aa0b858dab4d0840bcf9ee29ffb5308b
 ```
 
-**۱۰۹۸ فایل** — نسخهٔ r9 — شامل کل خط ۱.۶۲ (۹۵/۹۶/۹۷)، ۱.۶۳، و ۱.۶۳.۱.
+**۱۱۰۰ فایل** — نسخهٔ r13 — شامل کل خط ۱.۶۲ (۹۵/۹۶/۹۷)، ۱.۶۳، و ۱.۶۳.۱.
 
 ### نصب از صفر
 
@@ -80,7 +80,7 @@ SHA-256 : f825ee937d4ed6828a1e2badd7369c27cc2375cb528eb13d5f730bfd123b131a
 **[⬇ دانلود ۱.۶۳ (r16)](https://github.com/alirezarahimy-code/ticket/releases/download/v1.63/ticket-update-1_62_96-to-1_63-request-center-rc-candidate-20261114-r16.zip)**
 
 ```
-حجم     : 940,775 بایت
+حجم     : 412,789 بایت
 پیش‌نیاز : ۱.۶۲.۹۶
 ```
 
