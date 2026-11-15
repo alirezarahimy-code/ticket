@@ -24,15 +24,15 @@
 
 **اگر ۱.۶۳ را نصب کرده‌اید، فقط این را لازم دارید.**
 
-**[⬇ دانلود بستهٔ میانی ۱.۶۳.۱](https://github.com/alirezarahimy-code/ticket/releases/download/v1.63.1/ticket-update-1.63-to-1.63.1-r2-food-backfill-orphan-tickets-20261115.zip)**
+**[⬇ دانلود بستهٔ میانی ۱.۶۳.۱](https://github.com/alirezarahimy-code/ticket/releases/download/v1.63.1/ticket-update-1.63-to-1.63.1-r3-orphan-save-calendar-20261115.zip)**
 
 ```
-نام فایل : ticket-update-1.63-to-1.63.1-r2-food-backfill-orphan-tickets-20261115.zip
-حجم     : 385,685 بایت
-SHA-256 : f0c6e4bd0a3d1f3f4a60608b8d81209c53252dfbde02448a91541c7ef6d4da4d
+نام فایل : ticket-update-1.63-to-1.63.1-r3-orphan-save-calendar-20261115.zip
+حجم     : 388,123 بایت
+SHA-256 : 8ac060322b545d256e8335a3918754886f2ac58ce4c0639532a25d872fdc8004
 ```
 
-**۳۰ فایل، بدون مهاجرت، بدون تغییر جدول. — نسخهٔ r2**
+**۳۰ فایل، بدون مهاجرت، بدون تغییر جدول. — نسخهٔ r3**
 
 ### نصب
 
@@ -54,15 +54,15 @@ SHA-256 : f0c6e4bd0a3d1f3f4a60608b8d81209c53252dfbde02448a91541c7ef6d4da4d
 
 **اگر سامانه ندارید یا روی ۱.۶۲.x هستید.**
 
-**[⬇ دانلود بستهٔ کامل ۱.۶۳.۱](https://github.com/alirezarahimy-code/ticket/releases/download/v1.63.1/ticket-full-1.63.1-r2-20261115.zip)**
+**[⬇ دانلود بستهٔ کامل ۱.۶۳.۱](https://github.com/alirezarahimy-code/ticket/releases/download/v1.63.1/ticket-full-1.63.1-r3-20261115.zip)**
 
 ```
-نام فایل : ticket-full-1.63.1-r2-20261115.zip
-حجم     : 11,731,781 بایت
-SHA-256 : 7e750ed5d1606a2475be8dc73bf8779fb1ac6ed81e3f523f511ee28879d67298
+نام فایل : ticket-full-1.63.1-r3-20261115.zip
+حجم     : 11,734,221 بایت
+SHA-256 : 5dc9a5d85519583b37073ae9859341e513edafd5ca292207376de28c4d50b506
 ```
 
-**۱۰۹۸ فایل** — نسخهٔ r2 — شامل کل خط ۱.۶۲ (۹۵/۹۶/۹۷)، ۱.۶۳، و ۱.۶۳.۱.
+**۱۰۹۸ فایل** — نسخهٔ r3 — شامل کل خط ۱.۶۲ (۹۵/۹۶/۹۷)، ۱.۶۳، و ۱.۶۳.۱.
 
 ### نصب از صفر
 

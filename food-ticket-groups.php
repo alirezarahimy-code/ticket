@@ -1896,13 +1896,20 @@ function food_ticket_api_manual_attendance(string $date = ''): array
     food_ticket_manual_attendance_reconcile_date($date);
 
     // از همان نقشهٔ سفارش داخلی/فعال ناهار استفاده می‌شود که صدور فیش بررسی می‌کند.
-    // خطای دریافت سفارش‌ها باید درخواست را متوقف کند؛ فهرست همهٔ کاربران fallback مجاز نیست.
+    // سیاست: سفارش‌ها فهرست را «محدود» می‌کنند، نه «تعریف». اگر سفارش‌ها
+    // بارگذاری نشدند، به‌جای شکستن کل صفحه، فهرست را خالی نگه می‌داریم ولی
+    // ردیف‌های یتیم (فیشی که در صف چاپ ماند) را نشان می‌دهیم — وگرنه همان
+    // چیزی که باید اصلاح شود، پشت یک خطا پنهان می‌ماند و کاربر دکمه‌ای نمی‌بیند.
     $orderMaps = [];
-    $orderMap = food_ticket_group_order_map($orderMaps, $date);
-    if (!is_array($orderMap)) {
-        throw new RuntimeException('دریافت سفارش‌های روز انتخاب‌شده ناموفق بود؛ فهرست ثبت دستی نمایش داده نمی‌شود.');
+    $orderMap = null;
+    $orderMapError = '';
+    try {
+        $orderMap = food_ticket_group_order_map($orderMaps, $date);
+    } catch (Throwable $e) {
+        $orderMapError = $e->getMessage();
+        app_error_log('[food-manual] order map unavailable: ' . $orderMapError);
     }
-    $hasEligibleOrder = food_ticket_group_food_lookup($orderMap);
+    $hasEligibleOrder = food_ticket_group_food_lookup(is_array($orderMap) ? $orderMap : null);
 
     $attendanceByUser = [];
     $attendance = db()->prepare(
@@ -1927,8 +1934,27 @@ function food_ticket_api_manual_attendance(string $date = ''): array
         'SELECT id, employee_number, national_code, full_name, first_name, last_name, username, is_active FROM users '
         . 'WHERE is_active = 1 ORDER BY last_name, first_name, full_name, employee_number, id'
     )->fetchAll();
-    $people = array_values(array_filter($people ?: [], static function (array $row) use ($hasEligibleOrder): bool {
-        return $hasEligibleOrder($row) !== null;
+    // فیلتر سفارش: فقط کسانی که برای این روز سفارش دارند.
+    // استثنا: کسی که فیش یتیم دارد (در صف چاپ ماند) حتماً می‌ماند — وگرنه
+    // همان ردیفی که باید دستی ثبت شود، از فهرست حذف می‌شد و راه اصلاحش می‌بست.
+    $people = array_values(array_filter($people ?: [], static function (array $row) use ($hasEligibleOrder, $attendanceByUser, $orderMap): bool {
+        if ($hasEligibleOrder($row) !== null) {
+            return true;
+        }
+        $uid = (int) ($row['id'] ?? 0);
+        if ($uid <= 0) {
+            return false;
+        }
+        // ردیفی که در این روز رخداد دارد همیشه می‌ماند. دلیل: تصمیم «یتیم
+        // بودن» در food_ticket_event_is_orphan_ticket در دسترس همه نیست و
+        // نبودِ سفارش هم نباید ردیفِ موجود را از چشم بیندازد. کاربر باید
+        // ببیند چه ردیفی دارد تا بداند چرا قابل ثبت است یا نیست.
+        if (isset($attendanceByUser[$uid])) {
+            return true;
+        }
+        // اگر نقشهٔ سفارش در دسترس نیست، فهرست را به هیچ‌کس محدود نمی‌کنیم؛
+        // وگرنه یک خطای گذرای سفارش، کل صفحه را خالی نشان می‌دهد.
+        return $orderMap === null;
     }));
     $employees = array_map(static function (array $row) use ($attendanceByUser): array {
         $id = (int) ($row['id'] ?? 0);
@@ -2060,12 +2086,36 @@ function food_ticket_api_manual_attendance_save(int $userId, bool $withTicket, b
 
     // پیش از هر نوع ثبت دستی (با فیش یا بدون فیش)، وجود سفارش فعال ناهار را
     // با همان نقشه‌ای بررسی می‌کنیم که موتور صدور فیش از آن استفاده می‌کند.
-    $orderMap = food_ticket_group_order_map($orderMaps, $targetDate);
-    if (!is_array($orderMap)) {
-        throw new RuntimeException('دریافت سفارش‌های روز انتخاب‌شده ناموفق بود؛ ثبت دستی انجام نشد.');
+    //
+    // استثنا — «فیش یتیم»: ردیفی که در صف چاپ ماند از قبل با سفارش همان روز
+    // ساخته شده است. سفارشش دیگر لازم نیست؛ فقط باید تحویل ثبت شود. اگر اینجا
+    // هم سفارش اجباری می‌شد، همان روزی که سفارش‌ها در دسترس نیستند، هیچ فیش
+    // یتیمی قابل نجات نبود — و بدترین روز برای از دست دادنشان همان روز است.
+    $existingOrphan = null;
+    // جست‌وجو با user_id، نه کد ملی: ردیف‌های قدیمی ممکن است national_code
+    // نداشته باشند یا کلیدشان با کد پرسنلی ساخته شده باشد. شناسهٔ کاربر
+    // همیشه هست و همان چیزی است که فهرست ثبت دستی نشان می‌دهد.
+    $orphanQuery = db()->prepare(
+        'SELECT id, event_type, print_status, delivery_status, source_uid, source_key, source_payload '
+        . 'FROM food_ticket_events WHERE user_id = ? AND punch_date = ? AND event_type <> "unknown" '
+        . 'ORDER BY id DESC LIMIT 1'
+    );
+    $orphanQuery->execute([$userId, $targetDate]);
+    $orphanCandidate = $orphanQuery->fetch() ?: null;
+    if (food_ticket_event_is_orphan_ticket($orphanCandidate)) {
+        $existingOrphan = $orphanCandidate;
     }
-    $orderFood = food_ticket_group_food_lookup($orderMap)($person);
-    if (!is_string($orderFood) || trim($orderFood) === '') {
+    if ($existingOrphan === null) {
+        $orderMap = food_ticket_group_order_map($orderMaps, $targetDate);
+        if (!is_array($orderMap)) {
+            throw new RuntimeException('دریافت سفارش‌های روز انتخاب‌شده ناموفق بود؛ ثبت دستی انجام نشد.');
+        }
+    }
+    // فیش یتیم غذایش را از قبل دارد؛ نبودِ سفارش تازه دلیل رد نیست.
+    $orderFood = $existingOrphan !== null
+        ? (string) ($existingOrphan['food_type'] ?? '')
+        : food_ticket_group_food_lookup($orderMap)($person);
+    if ($existingOrphan === null && (!is_string($orderFood) || trim($orderFood) === '')) {
         throw new RuntimeException('برای این کارمند سفارش فعال ناهار در روز انتخاب‌شده پیدا نشد؛ ثبت دستی مجاز نیست.');
     }
 
@@ -2123,7 +2173,9 @@ function food_ticket_api_manual_attendance_save(int $userId, bool $withTicket, b
         ];
     } else {
         $config = food_ticket_config(true);
-        if ($employeeNumber === '') {
+        // کد پرسنلی برای «ساختن» فیش تازه لازم است. فیش یتیم از قبل ساخته
+        // شده و فقط باید تحویل ثبت شود؛ کمبود کد پرسنلی نباید نجاتش را ببندد.
+        if ($employeeNumber === '' && $existingOrphan === null) {
             throw new RuntimeException('برای این کارمند کد پرسنلی ثبت نشده است؛ صدور فیش ممکن نیست.');
         }
         $ticketKey = 'food:' . $targetDate . ':' . food_ticket_digits($person['national_code'] ?? '');
@@ -2136,9 +2188,12 @@ function food_ticket_api_manual_attendance_save(int $userId, bool $withTicket, b
             }
         }
 
-        $orderMap = food_ticket_group_order_map($orderMaps, $targetDate);
-        if (!is_array($orderMap)) {
-            throw new RuntimeException('دریافت سفارش‌های روز انتخاب‌شده ناموفق بود؛ ثبت دستی انجام نشد.');
+        // همان استثنای بالا: فیش یتیم سفارش تازه لازم ندارد.
+        if ($existingOrphan === null) {
+            $orderMap = food_ticket_group_order_map($orderMaps, $targetDate);
+            if (!is_array($orderMap)) {
+                throw new RuntimeException('دریافت سفارش‌های روز انتخاب‌شده ناموفق بود؛ ثبت دستی انجام نشد.');
+            }
         }
         $base = [
             'source_key' => hash('sha256', 'manual-food-ticket|' . $targetDate . '|' . $userId),
@@ -2149,7 +2204,14 @@ function food_ticket_api_manual_attendance_save(int $userId, bool $withTicket, b
             'personnel_code' => food_ticket_code($employeeNumber),
             'source_payload' => '',
         ];
-        $decision = food_ticket_decide_for_user($person, $targetDate, $base, $config, $orderMaps);
+        // فیش یتیم از موتور تصمیم نمی‌پرسد: غذایش از قبل مشخص است و فقط
+        // باید تحویل ثبت شود. پرسیدن از موتور اینجا همیشه «بدون سفارش» می‌داد
+        // و همان ردیفی که باید نجات پیدا کند، رد می‌شد.
+        if ($existingOrphan !== null) {
+            $decision = ['print' => true, 'payload' => $base];
+        } else {
+            $decision = food_ticket_decide_for_user($person, $targetDate, $base, $config, $orderMaps);
+        }
         if (empty($decision['print'])) {
             $message = match ((string) ($decision['event_type'] ?? '')) {
                 'no_food' => 'برای این کارمند سفارش غذا یا کد ملی معتبر برای این روز پیدا نشد؛ فیش صادر نشد.',
@@ -2218,8 +2280,11 @@ function food_ticket_api_manual_attendance_save(int $userId, bool $withTicket, b
         // تحویل نشده باشد تبدیل می‌شود. اگر Worker همان لحظه چاپش کرده باشد،
         // rowCount صفر می‌شود و خطا می‌دهیم — بهتر از بازنویسی فیش چاپ‌شده.
         if ($replaceOrphanTicket) {
+            // ticket_key عمداً بازنویسی نمی‌شود: ردیف یتیم کلید یکتای خودش را
+            // دارد (مثلاً از کد پرسنلی ساخته شده، نه کد ملی). اگر با کلید تازه
+            // و چه‌بسا خالی جایگزین شود، UNIQUE روی '' می‌شکند و ثبت رد می‌شود.
             $updated = db()->prepare(
-                'UPDATE food_ticket_events SET source_uid = ?, personnel_code = ?, full_name = ?, national_code = ?, food_type = ?, ticket_key = ?, '
+                'UPDATE food_ticket_events SET source_uid = ?, personnel_code = ?, full_name = ?, national_code = ?, food_type = ?, '
                 . 'event_type = "printed", print_status = ?, last_error = NULL, source_payload = ?, processed_at = NOW(), next_retry_at = NULL '
                 . 'WHERE id = ? AND print_status <> "printed" AND (delivery_status IS NULL OR delivery_status <> "delivered")'
             );
@@ -2230,11 +2295,18 @@ function food_ticket_api_manual_attendance_save(int $userId, bool $withTicket, b
                 . 'WHERE id = ? AND event_type = "no_food"'
             );
         }
-        $updated->execute([
-            'manual-attendance', food_ticket_code($employeeNumber), $fullName,
-            food_ticket_digits($person['national_code'] ?? ''), (string) ($payload['food_type'] ?? ''),
-            (string) ($payload['ticket_key'] ?? ''), $physicalPrint ? 'pending' : 'printed', $mergedPayload, $eventId,
-        ]);
+        $updated->execute($replaceOrphanTicket
+            ? [
+                'manual-attendance', food_ticket_code($employeeNumber), $fullName,
+                food_ticket_digits($person['national_code'] ?? ''),
+                (string) (($payload['food_type'] ?? '') ?: ($existingToday['food_type'] ?? '')),
+                $physicalPrint ? 'pending' : 'printed', $mergedPayload, $eventId,
+            ]
+            : [
+                'manual-attendance', food_ticket_code($employeeNumber), $fullName,
+                food_ticket_digits($person['national_code'] ?? ''), (string) ($payload['food_type'] ?? ''),
+                (string) ($payload['ticket_key'] ?? ''), $physicalPrint ? 'pending' : 'printed', $mergedPayload, $eventId,
+            ]);
         if ($updated->rowCount() !== 1) {
             throw new RuntimeException('رویداد تردد هم‌زمان تغییر کرده است؛ فهرست را تازه‌سازی و دوباره بررسی کنید.');
         }

@@ -195,8 +195,8 @@ function autoReceiptBackfillBox(){
   const head=`<h3 style="margin:0">ثبت خودکار فیش روزهای گذشته</h3>`;
   const intro=`<p class="notice">شام هر روز و ناهار روزهای تعطیل (پنجشنبه، جمعه، تعطیل رسمی) برای کسانی که سفارش داده‌اند <b>خودکار</b> ثبت می‌شود — اما این کار فقط یک بار در شبِ همان روز انجام می‌شود. اگر Worker آن شب خاموش بوده یا نصب نبوده، آن روز برای همیشه جا می‌ماند. این ابزار همان روزها را پر می‌کند: <b>بدون چاپ فیزیکی</b> و <b>بدون ساختن ردیف تکراری</b>.</p>`;
   const form=`<div class="actions" style="display:flex;gap:10px;flex-wrap:wrap;align-items:end">
-      <label class="field" style="margin:0">از تاریخ (شمسی)<input type="text" id="ft-backfill-from" inputmode="numeric" autocomplete="off" placeholder="۱۴۰۵/۰۸/۰۱" value="${esc(r.fromJalali||'')}"></label>
-      <label class="field" style="margin:0">تا تاریخ (شمسی)<input type="text" id="ft-backfill-to" inputmode="numeric" autocomplete="off" placeholder="۱۴۰۵/۰۸/۰۲" value="${esc(r.toJalali||'')}"></label>
+      <label class="field" style="margin:0">از تاریخ (شمسی)<input type="text" id="ft-backfill-from" data-jalali inputmode="numeric" autocomplete="off" placeholder="۱۴۰۵/۰۸/۰۱" value="${esc(r.fromJalali||'')}"></label>
+      <label class="field" style="margin:0">تا تاریخ (شمسی)<input type="text" id="ft-backfill-to" data-jalali inputmode="numeric" autocomplete="off" placeholder="۱۴۰۵/۰۸/۰۲" value="${esc(r.toJalali||'')}"></label>
       <button class="btn ghost" data-action="preview-auto-receipts">پیش‌نمایش</button>
       <button class="btn primary" data-action="run-auto-receipts">ثبت خودکار</button>
     </div>`;
@@ -838,7 +838,10 @@ function enhanceDateFields(){
   // تقویم مشترک سامانه (همان CD)
   if(window.ItsmJalali&&typeof window.ItsmJalali.enhanceAll==='function'){
     // فقط فیلدهای تاریخ سفارش/گزارش که هنوز picker ندارند
-    root.querySelectorAll('#order-filter input[name="date"], #emergency-window-settings-form input[name="date"], input[name="from"], input[name="to"]').forEach(el=>{
+    // کارت «ثبت خودکار فیش روزهای گذشته» هم تقویم بازشو می‌خواهد؛
+    // بدون data-jalali فقط یک کادر متنی ساده بود و کاربر مجبور می‌شد
+    // تاریخ را دستی تایپ کند (گزارش کاربر: «تقویم بازشو نداره»).
+    root.querySelectorAll('#order-filter input[name="date"], #emergency-window-settings-form input[name="date"], #ft-backfill-from, #ft-backfill-to, input[name="from"], input[name="to"]').forEach(el=>{
       if(el.closest('[data-jalali-picker]'))return;
       el.setAttribute('data-jalali-input','');
       el.autocomplete='off';
@@ -1013,7 +1016,7 @@ if(serviceMode){
 </script>
 <script src="assets/food-ticket-persistence.js?v=1"></script>
 <script src="assets/food-groups.js?v=18"></script>
-<script src="assets/food-manual-attendance.js?v=7"></script>
+<script src="assets/food-manual-attendance.js?v=8"></script>
 <script>if(view==='settings'&&state.settingsSection==='manual-attendance')render();</script>
 <script src="assets/food-designer.js?v=12"></script>
 <script src="assets/jalali-calendar.js?v=2"></script>

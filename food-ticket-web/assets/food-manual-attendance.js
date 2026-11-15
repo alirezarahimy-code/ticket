@@ -36,9 +36,13 @@
     return ['pending', 'printing', 'print_error', 'failed', 'held_absent', ''].indexOf(ps) !== -1;
   };
   const isReplaceableOrphan = (u) => isOrphanTicket(u) && S.manualWithTicket && canIssueManualTicket();
+  // شرط «کد پرسنلی لازم است» برای فیش یتیم اعمال نمی‌شود: آن ردیف قبلاً
+  // ساخته شده و فقط منتظر تحویل است؛ کد پرسنلی برای ساختن فیش تازه لازم بود.
+  // بدون این استثنا، کاربرانی که کد پرسنلی ندارند از انتخاب حذف می‌شدند و
+  // دکمهٔ «ثبت گروهی» برایشان هرگز ظاهر نمی‌شد.
   const selectableRow = (u) => !!u && (isGuestRow(u) || (!!u.active
     && (!u.today_record || isReplaceableNoTicket(u) || isReplaceableOrphan(u))
-    && (!S.manualWithTicket || !!u.pc)));
+    && (!S.manualWithTicket || !!u.pc || isReplaceableOrphan(u))));
   const manualDateIso = () => S.manualDate || isoToday();
   const jalaliFromIso = (iso) => {
     try {
