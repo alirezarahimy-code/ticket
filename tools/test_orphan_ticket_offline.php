@@ -86,7 +86,8 @@ ok(strpos($groupsSrc, '$replaceOrphanTicket = $existingToday !== null') !== fals
     'لایهٔ ۱: تشخیص تکراری، فیش یتیم را جدا می‌کند');
 ok(strpos($groupsSrc, '&& food_ticket_event_is_orphan_ticket($existingToday);') !== false,
     'لایهٔ ۱: از همان تابع مشترک استفاده می‌کند');
-ok(strpos($groupsSrc, 'if ($existingToday !== null && !$replaceNoFood && !$replaceOrphanTicket) {') !== false,
+ok(strpos($groupsSrc, '!$replaceOrphanTicket) {') !== false
+    && strpos($groupsSrc, 'if ($existingToday !== null && !$replaceOrphanNoTicket') !== false,
     'لایهٔ ۱: فیش یتیم از خطای «تکراری» مستثنا شده است');
 
 // لایهٔ ۲ — گارد ticket_key
@@ -233,7 +234,9 @@ if (is_file($groupsFile)) {
     ok(strpos($groups, '$decision = [\'print\' => true, \'payload\' => $base];') !== false,
         'فیش یتیم بدون پرسیدن از موتور تصمیم ثبت می‌شود');
     // ۵) ticket_key ردیف یتیم بازنویسی نمی‌شود.
-    ok(strpos($groups, '$updated->execute($replaceOrphanTicket') !== false,
+    // «تردّد بدون فیش» مسیر جداگانه‌ای دارد (replaceOrphanNoTicket) و عمداً
+    // ticket_key را دست نمی‌زند؛ بقیهٔ حالت‌ها از مسیر replaceOrphanTicket می‌آیند.
+    ok(strpos($groups, '$updated->execute($replaceOrphanNoTicket') !== false,
         'ticket_key ردیف یتیم حفظ می‌شود (UNIQUE نمی‌شکند)');
     // not_printed مقدار پیش‌فرض ستون است؛ ردیفی که هرگز به صف نرسید همین را
     // دارد و همان ردیفی است که کاربر باید نجاتش دهد. جا افتادنش یعنی
@@ -252,11 +255,35 @@ if (is_file($groupsFile)) {
     // «غذا سفارش داده ولی فیش چاپ نشده» بیاید و قابل صدور مجدد باشد.
     ok(strpos($groups, "event_type = \"printed\", print_status = \"not_printed\"") !== false,
         'لغو فیش ردیف را به «فیش چاپ‌نشده» می‌برد (قابل صدور مجدد)');
-    ok(strpos($groups, "event_type = \"no_food\", print_status = \"not_printed\"") === false,
+    // بررسی باید فقط داخل تابع لغو انجام شود: مسیر «تردّد بدون فیش» عمداً
+    // همین رشته را دارد (تبدیل ردیفِ لغوشده به no_food) و ربطی به لغو ندارد.
+    $cancelStart = strpos($groups, 'function food_ticket_cancel_ticket_for_user');
+    $cancelBody = $cancelStart !== false ? substr($groups, $cancelStart, 9000) : '';
+    ok($cancelBody !== '' && strpos($cancelBody, 'event_type = \"no_food\", print_status = \"not_printed\"') === false,
         'لغو، ردیف را «بدون فیش» نمی‌کند (وگرنه فیشی برای صدور نمی‌ماند)');
     // غیبت با گرفتن فیش پاک می‌شود.
     ok(strpos($groups, 'absenceClearedFor') !== false,
         'گرفتن فیش، رکورد غیبت همان روز را پاک می‌کند');
+    // ── محافظ‌های چرخهٔ ۲۴ ساعت گذشته (کشف‌شده در آزمون HTTP واقعی) ──
+    // ۱) هم‌ترازی نباید فیشِ لغوشده را دوباره «تحویل‌شده» کند. قبلاً
+    //    UPDATE بی‌قید روی هر ردیف manual-attendance اجرا می‌شد و باز
+    //    خواندن پنل لغو را باطل می‌کرد.
+    ok(strpos($groups, 'AND COALESCE(print_status, "") NOT IN ("not_printed", "print_error", "failed", "held_absent")') !== false,
+        'هم‌ترازی، ردیفِ لغوشده را دوباره تحویل‌شده نمی‌کند');
+    // ۲) هم‌ترازیِ «حضور دستی» نباید رکورد غیبتی را پاک کند که بعد از فیش
+    //    ثبت شده؛ وگرنه هر بازخوانی پنل تصمیم تازهٔ ادمین را می‌خورد.
+    $reconcileStart = strpos($groups, 'function food_ticket_manual_attendance_reconcile_range');
+    $reconcileBody = $reconcileStart !== false ? substr($groups, $reconcileStart, 7000) : '';
+    ok($reconcileBody !== '' && strpos($reconcileBody, 'a.created_at < e.created_at') !== false,
+        'هم‌ترازی، غیبتِ تازه‌تر از فیش را پاک نمی‌کند');
+    // ۳) نمایش «غایب» نباید فیشِ لغوشده را «حضور» بداند؛ فقط چاپ/تحویل
+    //    واقعی حضور را اثبات می‌کند.
+    ok(strpos($groups, 'ticket_proves_presence') !== false
+        && strpos($groups, '&& ($recPrint === \'printed\' || $recDelivery === \'delivered\')') !== false,
+        'پنل، فیشِ لغوشده را «حضور» نمی‌شمارد');
+    // ۴) «تردّد بدون فیش» نباید با ردیفِ لغوشده به بن‌بست بخورد.
+    ok(strpos($groups, '$replaceOrphanNoTicket') !== false,
+        'ردیف لغوشده جلوی «تردّد بدون فیش» را نمی‌گیرد');
     ok(strpos($groups, "!empty(\$absentUserIds[\$userId]) && empty(\$ticketedKeys[\$ticketKey])") !== false,
         'کسی که فیش دارد هرگز «غایب» شمرده نمی‌شود');
     // ── تردد نماینده: فیش‌دار نباید در فهرست غایبان بماند ──

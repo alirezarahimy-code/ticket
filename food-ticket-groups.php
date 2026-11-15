@@ -276,6 +276,13 @@ function food_ticket_manual_attendance_reconcile_range(string $fromDate, string 
     try {
         $tickets = db()->prepare(
             'UPDATE food_ticket_events SET '
+            // ⚠️ این UPDATE نباید «فیشِ لغوشده» را دوباره تحویل‌شده کند.
+            // پیش‌تر هر ردیف manual-attendance را بی‌قید به delivered می‌برد؛
+            // نتیجه: ادمین فیش را لغو می‌کرد، صفحه را باز می‌کرد (GET!)، و
+            // ردیف دوباره printed/delivered می‌شد — یعنی لغو عملاً باطل
+            // می‌شد و شخص هم از فهرست غایبان بیرون می‌افتاد. دو شرط لازم:
+            //   ۱) ردیف «یتیم» نباشد (لغو/شکست‌خورده) — food_ticket_event_is_orphan_ticket
+            //   ۲) print_status در وضعیت پایانیِ سالم باشد.
             . 'print_status = CASE WHEN source_uid = "manual-attendance" AND event_type = "printed" '
             . 'AND COALESCE(print_status, "") NOT IN ("pending", "printing") THEN "printed" ELSE print_status END, '
             . 'delivered_by = CASE WHEN delivery_status IS NULL OR delivery_status <> "delivered" THEN NULL ELSE delivered_by END, '
@@ -285,7 +292,10 @@ function food_ticket_manual_attendance_reconcile_range(string $fromDate, string 
             . 'OR (event_type = "printed" AND print_status = "printed")) '
             . 'AND (delivery_status IS NULL OR delivery_status <> "delivered" '
             . 'OR (source_uid = "manual-attendance" AND event_type = "printed" '
-            . 'AND COALESCE(print_status, "") NOT IN ("printed", "pending", "printing")))'
+            . 'AND COALESCE(print_status, "") NOT IN ("printed", "pending", "printing"))) '
+            // ردیفِ لغوشده (یتیم) از این همگام‌سازی مستثناست.
+            . 'AND COALESCE(print_status, "") NOT IN ("not_printed", "print_error", "failed", "held_absent") '
+            . 'AND (COALESCE(ticket_key, "") <> "" OR (source_uid = "manual-attendance" AND event_type = "printed"))'
         );
         $tickets->execute([$fromDate, $toDate]);
         $delivered = $tickets->rowCount();
@@ -303,12 +313,18 @@ function food_ticket_manual_attendance_reconcile_range(string $fromDate, string 
         // آفلاین tools/test_group_flow_offline.php) خطای نحوی می‌دهد. پس
         // شناسه‌ها را با SELECT می‌گیریم و با DELETE ... IN حذف می‌کنیم —
         // همان نتیجه، بدون وابستگی به دیالکت.
+        // ⚠️ «حضور دستی» فقط رکوردی را پاک می‌کند که پیش از آن ثبت شده باشد.
+        // اگر ادمین بعد از ثبت فیش، شخص را عمداً «غایب» بزند (مثلاً غذا را
+        // کس دیگری برداشته)، آن رکورد باید بماند. بدون شرط زمانی، هر بار
+        // بازشدن صفحه، تصمیمِ تازهٔ ادمین را بی‌صدا پاک می‌کرد — همان چیزی
+        // که باعث شد absence-save بگوید «۲ نفر ثبت شد» ولی جدول خالی بماند.
         $absences = db()->prepare(
             'SELECT a.id FROM food_ticket_daily_absence a, food_ticket_events e '
             . 'WHERE a.absence_date BETWEEN ? AND ? '
             . 'AND e.user_id = a.user_id AND e.punch_date = a.absence_date '
             . 'AND e.user_id IS NOT NULL '
-            . 'AND e.source_uid = "manual-attendance" AND e.event_type IN ("printed", "no_food")'
+            . 'AND e.source_uid = "manual-attendance" AND e.event_type IN ("printed", "no_food") '
+            . 'AND a.created_at < e.created_at'
         );
         $absences->execute([$fromDate, $toDate]);
         $manualIds = array_map('intval', $absences->fetchAll(\PDO::FETCH_COLUMN));
@@ -2155,25 +2171,28 @@ function food_ticket_api_manual_attendance(string $date = ''): array
             $name = $employeeNumber !== '' ? $employeeNumber : (trim((string) ($row['username'] ?? '')) ?: 'کاربر #' . $id);
         }
         $todayRecord = $attendanceByUser[$id] ?? null;
-        // ── فیش‌دار هرگز «غایب» نمایش داده نمی‌شود ──────────────────────
-        // رکورد غیبت ممکن است از قبل مانده باشد (فیش بعد از ثبت غیبت صادر
-        // شده) یا نمایندهٔ گروه تردد را بعداً ثبت کرده باشد. در هر حال کسی
-        // که فیش دارد غذا گرفته؛ نشان‌دادنش در ستون غایب همان ناسازگاری
-        // «تردد این روز ثبت شده» است که کاربر گزارش کرد.
-        // رکورد در دیتابیس پاک نمی‌شود (حذفش کار مسیر «ثبت دستی» است)؛ فقط
-        // نمایش اصلاح می‌شود تا داده از دست نرود.
-        $ticketOnly = false;
+        // ── آیا ردیفِ فیش، «حضور» را اثبات می‌کند؟ ──────────────────────
+        // فیشِ چاپ‌شده و تحویل‌شده یعنی غذا داده شد ⇒ حضور مسجّل است.
+        // ولی فیشی که چاپ نشده / تحویل نشده (همان ردیفِ «لغو شد» یا «در صف
+        // ماند») اثبات حضور نیست؛ کسی غذا نگرفته. اگر آن را «حاضر» بدانیم،
+        // بلافاصله بعد از لغو، شخص در فهرست غایبان دیده نمی‌شود و کاربر
+        // می‌گوید «به لیست غایبین اضافه نشد» — همان شکایت.
+        $ticketProvesPresence = false;
         if ($todayRecord !== null) {
             $recType = strtolower(trim((string) ($todayRecord['event_type'] ?? '')));
-            $ticketOnly = $recType !== 'no_food' && $recType !== 'unknown';
+            $recPrint = strtolower(trim((string) ($todayRecord['print_status'] ?? '')));
+            $recDelivery = strtolower(trim((string) ($todayRecord['delivery_status'] ?? '')));
+            $ticketProvesPresence = $recType !== 'no_food' && $recType !== 'unknown'
+                && ($recPrint === 'printed' || $recDelivery === 'delivered');
         }
         return [
             'id' => $id,
             'pc' => $employeeNumber,
             'name' => $name,
             'active' => (bool) ($row['is_active'] ?? false),
-            'is_absent' => isset($absentUsers[$id]) && !$ticketOnly,
+            'is_absent' => isset($absentUsers[$id]) && !$ticketProvesPresence,
             'absence_recorded' => isset($absentUsers[$id]),
+            'ticket_proves_presence' => $ticketProvesPresence,
             'today_record' => $todayRecord,
         ];
     }, $people ?: []);
@@ -2381,13 +2400,36 @@ function food_ticket_api_manual_attendance_save(int $userId, bool $withTicket, b
         && in_array((string) ($existingToday['event_type'] ?? ''), ['auto_printed', 'auto_guest', 'print'], true)
         && (string) ($existingToday['delivery_status'] ?? '') !== 'delivered';
     $replaceOrphanTicket = $replaceOrphanTicket || $replaceUndeliveredAuto;
-    if ($existingToday !== null && !$replaceNoFood && !$replaceOrphanTicket) {
-        $existingLabel = in_array((string) ($existingToday['event_type'] ?? ''), ['auto_printed', 'printed', 'print'], true)
-            ? 'فیش چاپ/تحویل‌شده' : 'تردد';
+
+    // ── «ثبت تردد بدون فیش» با مانعِ فیشِ لغوشده ──────────────────────���─
+    // ردیفی که لغو شده (یتیم: not_printed/pending) فیشی در دست کسی نیست؛
+    // غذا تحویل نشده. اگر همین ردیف جلوی «ثبت دستی بدون فیش» را بگیرد،
+    // کاربر برای کسی که فیشش را لغو کرده و فقط می‌خواهد حضورش ثبت شود،
+    // پیام گمراه‌کنندهٔ «فیش چاپ/تحویل‌شده ثبت شده» می‌گیرد. در این حالت
+    // ردیفِ یتیم تبدیل می‌شود (نه ردیف دوم) تا سابقه حفظ شود.
+    $replaceOrphanNoTicket = $existingToday !== null
+        && !$withTicket
+        && food_ticket_event_is_orphan_ticket($existingToday);
+    // «فقط تردد» روی ردیفی که فیشِ واقعی/تحویل‌شده دارد، همچنان ممنوع است —
+    // ولی پیام باید صادق باشد: غذا داده شده، نه اینکه «ثبت تکراری» است.
+    if ($existingToday !== null && !$replaceOrphanNoTicket && !$replaceNoFood && !$replaceOrphanTicket) {
+        $existingEventType = (string) ($existingToday['event_type'] ?? '');
+        $existingPrint = (string) ($existingToday['print_status'] ?? '');
+        $existingDelivery = (string) ($existingToday['delivery_status'] ?? '');
+        $isRealTicket = in_array($existingEventType, ['auto_printed', 'printed', 'print', 'guest', 'auto_guest'], true)
+            && ($existingPrint === 'printed' || $existingDelivery === 'delivered');
+        if ($isRealTicket) {
+            throw new RuntimeException(
+                'این کارمند فیشِ چاپ‌شده/تحویل‌شدهٔ همین روز را دارد؛ «تردد بدون فیش» برایش معنا ندارد. '
+                . 'اگر فیش اشتباه صادر شده: ردیفش را تیک بزنید، «لغو فیش انتخاب‌شده‌ها» را بزنید و بعد دوباره ثبت کنید. '
+                . 'وضعیت فعلی: ' . $existingPrint . '/' . $existingDelivery . '.'
+            );
+        }
+        $existingLabel = in_array($existingEventType, ['auto_printed', 'printed', 'print'], true) ? 'فیش' : 'تردد';
         throw new RuntimeException(
             'برای این کارمند در این روز ' . $existingLabel . ' ثبت شده است (ثبت تکراری مجاز نیست). '
             . 'برای اصلاح: ردیفش را تیک بزنید و «لغو فیش انتخاب‌شده‌ها» را بزنید، بعد دوباره ثبت کنید. '
-            . 'وضعیت فعلی: ' . (string) ($existingToday['event_type'] ?? 'نامشخص') . '.'
+            . 'وضعیت فعلی: ' . $existingEventType . '.'
         );
     }
 
@@ -2567,7 +2609,17 @@ function food_ticket_api_manual_attendance_save(int $userId, bool $withTicket, b
         // شرط WHERE عمداً سخت‌گیرانه است: ردیف «یتیم» فقط اگر هنوز چاپ نشده و
         // تحویل نشده باشد تبدیل می‌شود. اگر Worker همان لحظه چاپش کرده باشد،
         // rowCount صفر می‌شود و خطا می‌دهیم — بهتر از بازنویسی فیش چاپ‌شده.
-        if ($replaceOrphanTicket) {
+        if ($replaceOrphanNoTicket) {
+            // تبدیل «ردیفِ لغوشده» به «تردد بدون فیش»: ticket_key و
+            // print_status قبلاً توسط مسیر لغو خالی شده‌اند؛ فقط نوع رویداد
+            // و تحویل‌نشده بودن را صریح نگه می‌داریم.
+            $updated = db()->prepare(
+                'UPDATE food_ticket_events SET source_uid = ?, personnel_code = ?, full_name = ?, national_code = ?, food_type = ?, '
+                . 'event_type = "no_food", print_status = "not_printed", delivery_status = "pending", '
+                . 'last_error = NULL, source_payload = ?, processed_at = NOW(), next_retry_at = NULL '
+                . 'WHERE id = ? AND (delivery_status IS NULL OR delivery_status <> "delivered")'
+            );
+        } elseif ($replaceOrphanTicket) {
             // ticket_key عمداً بازنویسی نمی‌شود: ردیف یتیم کلید یکتای خودش را
             // دارد (مثلاً از کد پرسنلی ساخته شده، نه کد ملی). اگر با کلید تازه
             // و چه‌بسا خالی جایگزین شود، UNIQUE روی '' می‌شکند و ثبت رد می‌شود.
@@ -2597,7 +2649,14 @@ function food_ticket_api_manual_attendance_save(int $userId, bool $withTicket, b
                 . 'WHERE id = ? AND event_type = "no_food"'
             );
         }
-        $updated->execute($replaceOrphanTicket
+        $updated->execute($replaceOrphanNoTicket
+            ? [
+                'manual-attendance', food_ticket_code($employeeNumber), $fullName,
+                food_ticket_digits($person['national_code'] ?? ''),
+                (string) (($payload['food_type'] ?? '') ?: ($existingToday['food_type'] ?? '')),
+                $mergedPayload, $eventId,
+            ]
+            : ($replaceOrphanTicket
             ? [
                 'manual-attendance', food_ticket_code($employeeNumber), $fullName,
                 food_ticket_digits($person['national_code'] ?? ''),
@@ -2608,7 +2667,7 @@ function food_ticket_api_manual_attendance_save(int $userId, bool $withTicket, b
                 'manual-attendance', food_ticket_code($employeeNumber), $fullName,
                 food_ticket_digits($person['national_code'] ?? ''), (string) ($payload['food_type'] ?? ''),
                 (string) ($payload['ticket_key'] ?? ''), $physicalPrint ? 'pending' : 'printed', $mergedPayload, $eventId,
-            ]);
+            ]));
         if ($updated->rowCount() !== 1) {
             throw new RuntimeException('رویداد تردد هم‌زمان تغییر کرده است؛ فهرست را تازه‌سازی و دوباره بررسی کنید.');
         }
@@ -3470,6 +3529,15 @@ function food_ticket_cancel_ticket_for_user(int $userId, string $date, array $ac
     }
     if ($eventType === 'guest') {
         throw new RuntimeException('فیش مهمان از این مسیر لغو نمی‌شود.');
+    }
+    // ردیفی که همین حالا لغو شده (یتیم و بدون کلید) دوباره لغو نمی‌شود؛
+    // وگرنه هر بار لغو، یک رکورد غیبت تکراری می‌نویسد و سابقهٔ
+    // cancelled_ticket روی خودش بازنویسی می‌شود. کاربر هم بی‌دلیل پیام
+    // موفقیت می‌گیرد.
+    if (trim((string) ($event['ticket_key'] ?? '')) === ''
+        && in_array($printStatus, ['not_printed'], true)
+        && strtolower(trim((string) ($event['delivery_status'] ?? ''))) !== 'delivered') {
+        throw new RuntimeException('فیش این کارمند از قبل لغو شده است؛ برای صدور مجدد از «ثبت دستی با فیش» استفاده کنید.');
     }
     // فیشی که واقعاً چاپ و تحویل شده، لغوش فقط با دسترسی سطح بالاتر.
     $wasDelivered = strtolower(trim((string) ($event['delivery_status'] ?? ''))) === 'delivered';

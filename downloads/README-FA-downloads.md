@@ -24,12 +24,12 @@
 
 **اگر ۱.۶۳ را نصب کرده‌اید، فقط این را لازم دارید.**
 
-**[⬇ دانلود بستهٔ میانی ۱.۶۳.۱](https://github.com/alirezarahimy-code/ticket/releases/download/v1.63.1/ticket-update-1.63-to-1.63.1-r9-cancel-fix-20261115.zip)**
+**[⬇ دانلود بستهٔ میانی ۱.۶۳.۱](https://github.com/alirezarahimy-code/ticket/releases/download/v1.63.1/ticket-update-1.63-to-1.63.1-r10-cancel-fix-20261115.zip)**
 
 ```
-نام فایل : ticket-update-1.63-to-1.63.1-r9-cancel-fix-20261115.zip
-حجم     : 404,387 بایت
-SHA-256 : 70175bb1a722be5e7a0e55f26b164c08879f24668d50edd525302582ee317716
+نام فایل : ticket-update-1.63-to-1.63.1-r10-cancel-fix-20261115.zip
+حجم     : 407,303 بایت
+SHA-256 : d190eac44097c080b5373802eff77e8079ce63097622b22ccdd403a944baa7cb
 ```
 
 **۳۱ فایل، بدون مهاجرت، بدون تغییر جدول. — نسخهٔ r9**
@@ -54,12 +54,12 @@ SHA-256 : 70175bb1a722be5e7a0e55f26b164c08879f24668d50edd525302582ee317716
 
 **اگر سامانه ندارید یا روی ۱.۶۲.x هستید.**
 
-**[⬇ دانلود بستهٔ کامل ۱.۶۳.۱](https://github.com/alirezarahimy-code/ticket/releases/download/v1.63.1/ticket-full-1.63.1-r9-20261115.zip)**
+**[⬇ دانلود بستهٔ کامل ۱.۶۳.۱](https://github.com/alirezarahimy-code/ticket/releases/download/v1.63.1/ticket-full-1.63.1-r10-20261115.zip)**
 
 ```
-نام فایل : ticket-full-1.63.1-r9-20261115.zip
-حجم     : 11,750,550 بایت
-SHA-256 : 20ffab6dddbc79a3c8285f1458a650000c0c0259e317838e819b00c936b2c3e3
+نام فایل : ticket-full-1.63.1-r10-20261115.zip
+حجم     : 11,754,307 بایت
+SHA-256 : 2ca78534dc10da0d76158d1a41d7fbc16e347012f2267b98dc5fbe5c79ad8485
 ```
 
 **۱۰۹۸ فایل** — نسخهٔ r9 — شامل کل خط ۱.۶۲ (۹۵/۹۶/۹۷)، ۱.۶۳، و ۱.۶۳.۱.
