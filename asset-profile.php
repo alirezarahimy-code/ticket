@@ -193,8 +193,10 @@ function asset_profile_sections(): array
             'icon' => '🛡',
             'fields' => [
                 ['key' => 'antivirus', 'label' => 'آنتی‌ویروس', 'type' => 'text', 'auto' => true],
+                // ۱.۶۳.۴ — مدل کیس از Win32_SystemEnclosure خوانده می‌شود.
+                // «مدل پاور» را WMI استاندارد نمی‌دهد، پس دستی می‌ماند.
                 ['key' => 'power_model', 'label' => 'مدل پاور', 'type' => 'text'],
-                ['key' => 'case_model', 'label' => 'مدل کیس', 'type' => 'text'],
+                ['key' => 'case_model', 'label' => 'مدل کیس', 'type' => 'text', 'auto' => true],
             ],
         ],
         'h_ad' => [
@@ -636,12 +638,47 @@ function asset_profile_real_printers(mixed $printers): array
     return $rows;
 }
 
+/**
+ * ۱.۶۳.۴ — نوع رایانه را از دادهٔ سیستم مقصد استنتاج می‌کند: اگر سیستم‌عامل
+ * ویندوز باشد، کلاینت یا سرور؛ در غیر این صورت نام سیستم‌عامل.
+ * اگر داده‌ای نبود، همان مقدار ورودی حفظ می‌شود.
+ */
+function asset_profile_computer_type(array $inventory): string
+{
+    $os = trim((string) ($inventory['operating_system'] ?? ''));
+    $given = trim((string) ($inventory['computer_type'] ?? ''));
+    if ($os === '') {
+        return $given;
+    }
+    $lower = mb_strtolower($os);
+    if (str_contains($lower, 'windows')) {
+        // «Windows Server» فقط وقتی که خودِ سیستم‌عامل سرور باشد.
+        return str_contains($lower, 'server') ? 'Windows Server' : 'Windows client';
+    }
+    return $given !== '' && !preg_match('/(linux|darwin|freebsd) server/i', $given) ? $given : $os;
+}
+
 function asset_profile_auto_values(array $inventory): array
 {
     $hardware = is_array($inventory['hardware'] ?? null) ? $inventory['hardware'] : [];
     $os = is_array($hardware['operating_system'] ?? null) ? $hardware['operating_system'] : [];
     $processor = is_array($hardware['processor'] ?? null) ? $hardware['processor'] : [];
     $motherboard = is_array($hardware['motherboard'] ?? null) ? $hardware['motherboard'] : [];
+    // ۱.۶۳.۴ — قاب/کیس: PowerShell آن را در hardware.system_enclosure می‌گذارد.
+    $enclosure = [];
+    foreach ([
+        $hardware['system_enclosure'] ?? null,
+        $hardware['enclosure'] ?? null,
+        $hardware['extended_inventory']['enclosure'] ?? null,
+    ] as $enclosureCandidate) {
+        if (is_array($enclosureCandidate) && $enclosureCandidate !== []) {
+            $enclosureRows = inventory_rows($enclosureCandidate);
+            $enclosure = $enclosureRows[0] ?? $enclosureCandidate;
+            if ($enclosure !== []) {
+                break;
+            }
+        }
+    }
     $peripherals = is_array($inventory['peripherals'] ?? null) ? $inventory['peripherals'] : [];
     $disks = array_values(array_filter(inventory_rows($hardware['physical_disks'] ?? []), 'is_array'));
     usort($disks, static function (array $a, array $b): int {
@@ -833,7 +870,10 @@ function asset_profile_auto_values(array $inventory): array
         }
     }
     $values = [
-        'computer_type' => (string) ($inventory['computer_type'] ?? ''),
+        // ۱.۶۳.۴ — نوع رایانه از دادهٔ خودِ سیستم مقصد، نه از سیستم‌عامل سرور پنل.
+        // قبلاً inventory_base_inventory() مقدار میزبان PHP («Linux Server») را
+        // می‌گذاشت و برای یک کلاینت ویندوزی هم همان می‌ماند.
+        'computer_type' => asset_profile_computer_type($inventory),
         'hostname' => (string) ($inventory['hostname'] ?? ''),
         'os_name' => (string) ($inventory['operating_system'] ?? ''),
         // ۱.۶۳.۴ — سریال و مدل خودِ ماشین از BIOS/Computer خوانده می‌شود.
@@ -865,6 +905,12 @@ function asset_profile_auto_values(array $inventory): array
         'disk2_capacity' => $diskCapacity(1),
         'disk2_serial' => $diskAt(1, ['SerialNumber', 'serial_number']),
         'motherboard_model' => (string) inventory_value($motherboard, ['Manufacturer', 'manufacturer'], ''),
+        // کیس/قاب از Win32_SystemEnclosure؛ اگر Manufacturer و Model هر دو باشند
+        // کنار هم می‌آیند تا «HP – 103C_53307F G-D」 خوانا باشد.
+        'case_model' => trim(implode(' ', array_filter([
+            trim((string) inventory_value($enclosure, ['Manufacturer', 'manufacturer'], '')),
+            trim((string) inventory_value($enclosure, ['Model', 'model'], $inventory['model'] ?? '')),
+        ], static fn (string $part): bool => $part !== ''))),
         'motherboard_product' => (string) inventory_value($motherboard, ['Product', 'model'], ''),
         'motherboard_serial' => (string) inventory_value($motherboard, ['SerialNumber', 'serial_number'], ''),
         'cpu_model' => (string) ($inventory['cpu'] ?? ''),

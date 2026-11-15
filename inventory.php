@@ -164,6 +164,11 @@ function inventory_collection_status_keys(string $path): array
         'hardware.computer' => ['root/cimv2|Win32_ComputerSystem'],
         'hardware.processor' => ['root/cimv2|Win32_Processor'],
         'hardware.operating_system' => ['root/cimv2|Win32_OperatingSystem'],
+        // ۱.۶۳.۴ — قاب/کیس و محصول سیستم: قبلاً PowerShell این‌ها را می‌خواند
+        // (Win32_SystemEnclosure و Win32_ComputerSystemProduct) ولی هیچ نگاشتی
+        // به فیلد شناسنامه نداشتند، پس «مدل کیس» همیشه خالی می‌ماند.
+        'hardware.system_enclosure' => ['root/cimv2|Win32_SystemEnclosure'],
+        'hardware.system_product' => ['root/cimv2|Win32_ComputerSystemProduct'],
         'hardware.motherboard' => ['root/cimv2|Win32_BaseBoard'],
         'hardware.memory_modules' => ['root/cimv2|Win32_PhysicalMemory'],
         'hardware.physical_disks' => ['root/cimv2|Win32_DiskDrive'],

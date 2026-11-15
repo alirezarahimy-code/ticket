@@ -48,7 +48,12 @@ check('assets/food-org-groups.js وجود دارد', $js !== '');
 check('FoodOrgGroups در window', strpos($js, 'global.FoodOrgGroups') !== false);
 check('کش یک‌دقیقه‌ای دارد', strpos($js, 'CACHE_MS') !== false);
 check('در خطا گزارش را خالی نمی‌کند', strpos($js, 'فهرست بدون گروه‌بندی نمایش داده می‌شود') !== false);
-check('شمار کل بررسی می‌شود', strpos($js, 'همهٔ ردیف‌های گزارش در گروه‌ها حاضرند') !== false);
+// خلاصه/فوتر حذف شد، ولی تضمین «هر ردیف در یک گروه» باید بماند:
+// split() هر ردیف را بی‌قید در یکی از سبدها می‌ریزد و سبد «بدون معاونت» را
+// خودش می‌سازد؛ پس شمار ردیف‌های گروه‌ها همیشه = شمار ردیف‌های گزارش.
+check('هر ردیف در یک گروه می‌نشیند (split)', strpos($js, 'buckets[key].rows.push(row);') !== false);
+check('سبد «بدون معاونت» ساخته می‌شود', strpos($js, "'بدون معاونت سازمانی'") !== false);
+check('برچسب نوع از مسیر حذف شده', strpos($js, 'typeLabel(group.type)') === false);
 check('tooltip مسیر سازمانی', strpos($js, '__orgPath') !== false);
 check('ارقام فارسی/عربی در کد ملی', strpos($js, '۰-۹') !== false);
 
@@ -71,12 +76,23 @@ check('نسخه در URL', strpos($html, 'food-org-groups.js?v=1.63.4') !== fals
 
 echo "\n═══ ۷) CSS گروه‌ها ═══\n";
 $css = file_get_contents($root . '/assets/food-menu.css');
-foreach (['.fm-org-group', '.fm-org-group-head', '.fm-org-group-badge', '.fm-org-chip', '.fm-org-total'] as $sel) {
+foreach (['.fm-org-group', '.fm-org-group-head', '.fm-org-group-title', '.fm-org-group-count', '.fm-org-food'] as $sel) {
     check("{$sel} در CSS", strpos($css, $sel) !== false);
 }
-foreach (['management', 'liaison', 'company'] as $type) {
-    check("رنگ متمایز برای {$type}", strpos($css, "fm-org-type-{$type}") !== false);
-}
+// خواستهٔ کاربر: «بینشون دیگه هیچی نباشه» — نه چیپ خلاصه، نه برچسب نوع.
+check('نوار چیپ خلاصه حذف شده', strpos($js, 'fm-org-summary') === false);
+check('برچسب نوع کنار عنوان نیست', strpos($js, 'fm-org-group-badge') === false);
+check('واحد مستقل فقط نام خودش را می‌نویسد', strpos($lib, "'label'    => \$unit['name']") !== false);
+
+echo "\n═══ ۸) تفکیک غذای هر معاونت ═══\n";
+check('تابع foodBreakdown', strpos($js, 'function foodBreakdown(') !== false);
+check('foodKey در گزینه‌ها پشتیبانی می‌شود', strpos($js, 'options.foodKey') !== false);
+check('غذای تحویلی foodKey می‌دهد', strpos($menu, "foodKey: 'food_name'") !== false);
+check('سفارش‌های امروز foodKey می‌دهد', substr_count($menu, "foodKey: 'food_name'") >= 2);
+check('تجمیعی foodKey می‌دهد', strpos($html, "foodKey:'food'") !== false);
+check('غایبین foodKey می‌دهد', strpos($html, "foodKey:'food'") !== false);
+check('async def aggOrgList موجود است', strpos($html, 'function aggOrgList(') !== false);
+check('loadOrgMap موجود است', strpos($html, 'function loadOrgMap(') !== false);
 
 echo "\n" . str_repeat('─', 60) . "\n";
 echo "نتیجه: {$ok} موفق، {$fail} ناموفق\n";

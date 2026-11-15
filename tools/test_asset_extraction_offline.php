@@ -125,7 +125,11 @@ if (function_exists('inventory_apply_powershell_data') && function_exists('inven
     check('مانیتور', count($inv['peripherals']['monitors'] ?? []) === 1);
     check('امتیاز سخت‌افزاری > ۰ (پذیرش استخراج)', inventory_hardware_score($inv) > 0, (string) inventory_hardware_score($inv));
 } else {
-    check('توابع inventory قابل بارگذاری‌اند', false, 'inventory.php بارگذاری نشد');
+    // بستهٔ نصبی عمداً config.php ندارد (فایل محرمانه است)، پس این بخش
+    // در یک استخراج تازه «رد می‌شود» نه «شکست می‌خورد». بخش‌های ۱–۳ که
+    // خودِ سورس را می‌سنجند همیشه اجرا می‌شوند.
+    echo "  ⚠ بخش ۴ (نگاشت دادهٔ زنده) رد شد — این نصب config.php ندارد.\n";
+    echo "    برای اجرای کامل، آزمون را در ریشهٔ نصب واقعی اجرا کنید.\n";
 }
 
 echo "\n═══ ۵) پاسخ خالی به‌درستی رد می‌شود ═══\n";

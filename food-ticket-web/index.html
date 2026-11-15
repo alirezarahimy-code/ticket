@@ -727,6 +727,25 @@ function showAggregatePreview(){
  layer.innerHTML=`<div class="print-preview-box" style="min-width:760px"><div class="print-preview-head"><strong>پیش‌نمایش گزارش تجمیعی — ${esc(aggDateLabel())}</strong><div><button class="btn primary" data-action="native-print-report">چاپ</button> <button class="btn danger" data-action="close-print-preview">بستن</button></div></div><div class="agg-print-summary"><b>ناهار:</b> فعال ${toFaDigits(r.lunch_orders??0)} | لغوشده ${toFaDigits(r.cancelled_orders??0)} | مجموع ردیف ${toFaDigits(r.order_rows??0)}<br><b>شام:</b> فعال ${toFaDigits(r.dinner_orders??0)} | لغوشده ${toFaDigits(r.dinner_cancelled_orders??0)} | مجموع ردیف ${toFaDigits(r.dinner_order_rows??0)}<br><b>چاپ فیزیکی پرسنل:</b> ناهار ${toFaDigits(r.physical_printed_lunch??0)}، شام ${toFaDigits(r.physical_printed_dinner??0)}<br><b>فیش خودکار:</b> پرسنل ناهار ${toFaDigits(r.auto_printed_lunch??0)}، پرسنل شام ${toFaDigits(r.auto_printed_dinner??0)}، مهمان ناهار ${toFaDigits(r.auto_guest_printed_lunch??0)}، مهمان شام ${toFaDigits(r.auto_guest_printed_dinner??0)}<br><b>مبنای تطبیق ناهار (فیزیکی + ثبت خودکار):</b> ${toFaDigits(r.lunch_orders??0)} − ${toFaDigits(r.printed_final??0)} = ${toFaDigits(r.expected_absent??0)} غایب موردانتظار؛ غایب ثبت‌شده ${toFaDigits(r.absent??0)}؛ مغایرت: ${r.has_mismatch?'دارد':'ندارد'} (${toFaDigits(r.difference??0)}). فیش خودکار ثبت منطقی است و چاپ فیزیکی انجام نمی‌شود.</div><h3>فیش‌های ثبت‌شده</h3>${table(a.printed_people||[])}<h3>غایبین ناهار</h3>${table(a.absent_people||[])}</div>`;
  document.body.appendChild(layer);
 }
+/** نگاشت سازمانی را یک‌بار می‌گیرد و در state نگه می‌دارد (کش در ماژول). */
+function loadOrgMap(){
+ if(!window.FoodOrgGroups)return Promise.resolve(null);
+ if(state.__orgMap)return Promise.resolve(state.__orgMap);
+ return window.FoodOrgGroups.load(api).then(x=>{state.__orgMap=x;return x});
+}
+/** ۱.۶۳.۴ — فهرست گزارش تجمیعی، گروه‌بندی‌شده بر اساس معاونت. */
+function aggOrgList(rows,emptyText){
+ const map=state.__orgMap||null;
+ if(!map){
+  if(!window.__ftOrgMapLoading){
+   window.__ftOrgMapLoading=true;
+   loadOrgMap().then(()=>{window.__ftOrgMapLoading=false;if(view==='reports'&&state.reportTab==='aggregate')safeReportRender()});
+  }
+  return '<div class="notice">در حال دریافت چارت سازمانی…</div>';
+ }
+ return window.FoodOrgGroups.render(map,rows,function(list){return aggTable(list,emptyText)},
+   {unitLabel:'ردیف',uniquePeople:false,emptyText:emptyText,foodKey:'food'});
+}
 /** ۱.۶۳.۴ — غایبین ناهار گروه‌بندی‌شده بر اساس معاونت (تب گزارش‌گیری). */
 function absentByOrgHtml(rows){
  const map=state.__orgMap||null;
@@ -736,7 +755,7 @@ function absentByOrgHtml(rows){
  }
  const cols=[['date','تاریخ'],['meal_type','وعده'],['time','ساعت'],['pc','کد پرسنلی'],['name','نام'],['food','غذا'],['result','نتیجه']];
  const table=list=>`<div class="card table-wrap section-gap"><table class="table"><thead><tr>${cols.map(c=>`<th>${esc(c[1])}</th>`).join('')}</tr></thead><tbody>${list.map(e=>`<tr><td>${faDate(e.date)}</td><td>${reportMealLabel(e.meal_type)}</td><td>${e.time?timeLabel(e.time):'—'}</td><td>${esc(e.pc||'—')}</td><td>${esc(e.name)}</td><td>${esc(e.food||'—')}</td><td>${esc(e.result)}</td></tr>`).join('')}</tbody></table></div>`;
- return window.FoodOrgGroups.render(map,rows,table,{unitLabel:'نفر',uniquePeople:true,emptyText:'در این بازه غایبی ثبت نشده است.'});
+ return window.FoodOrgGroups.render(map,rows,table,{unitLabel:'نفر',uniquePeople:true,emptyText:'در این بازه غایبی ثبت نشده است.',foodKey:'food'});
 }
 function reportClassicView(){
  const dates=state.reportEvents.map(e=>isoDateFor(e.date)).filter(Boolean).sort();

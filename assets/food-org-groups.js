@@ -170,25 +170,55 @@
   }
 
   /**
-   * سربرگ هر گروه: فقط نام سرشاخه + نوعش + تعداد نفرات.
-   * (خواستهٔ کاربر: فقط ریشه سرگروه باشد، نه اداره‌های میانی.)
+   * سربرگ گروه — دقیقاً به سبک «نمایش بر اساس منو».
+   *
+   * خواستهٔ کاربر: «کافی تیترش اسم معاونت باشه و بینشون دیگه هیچی نباشه …
+   * مثل نمایش بر اساس منو.» پس نه برچسب نوع، نه مسیر اداره، نه چیپ خلاصه:
+   * فقط نام ریشه + شمار، بعد مستقیم فهرست اعضا.
+   *
+   * واحد مستقل هم فقط نام خودش را می‌نویسد («واحد بازرسی»)، نه «واحد مستقل
+   * (نمایندگی): واحد بازرسی».
    */
   function groupHeaderHtml(group, options) {
     options = options || {};
-    var count = group.rows.length;
-    var people = options.uniquePeople ? uniquePeopleCount(group.rows) : count;
-    var countLabel = options.unitLabel || 'ردیف';
-    var badge = typeLabel(group.type);
-    // ادارهٔ میانی سرگروه نمی‌شود؛ فقط به‌عنوان راهنما (tooltip) روی عنوان می‌آید،
-    // دقیقاً همان قاعدهٔ «فقط ریشه سرگروه باشد».
-    var pathHint = group.rows.length && group.rows[0].__orgPath
-      ? ' title="مسیر سازمانی نمونه: ' + escapeHtml(group.rows[0].__orgPath) + '"'
-      : '';
+    var count = options.uniquePeople ? uniquePeopleCount(group.rows) : group.rows.length;
+    var countLabel = options.unitLabel || 'نفر';
+    var breakdown = options.foodKey ? foodBreakdown(group.rows, options.foodKey) : '';
     return '<div class="fm-org-group-head">'
-      + '<span class="fm-org-group-title"' + pathHint + '>' + escapeHtml(group.label) + '</span>'
-      + '<span class="fm-org-group-badge fm-org-type-' + escapeHtml(group.type) + '">' + escapeHtml(badge) + '</span>'
-      + '<span class="fm-org-group-count">' + faNum(people) + ' ' + countLabel + '</span>'
-      + '</div>';
+      + '<span class="fm-org-group-title">' + escapeHtml(group.label) + '</span>'
+      + '<span class="fm-org-group-count">' + faNum(count) + ' ' + escapeHtml(countLabel) + '</span>'
+      + '</div>'
+      + (breakdown !== '' ? '<div class="fm-org-group-foods">' + breakdown + '</div>' : '');
+  }
+
+  /**
+   * تفکیک غذای هم‌گروه: «چلوکباب ۴ · قیمه ۲».
+   * همان چیزی که کاربر خواست: «به تفکیک ببینم اعضای معاونت‌ها چه غذاهایی
+   * سفارش دادن».
+   */
+  function foodBreakdown(rows, key) {
+    var counts = {};
+    var order = [];
+    (rows || []).forEach(function (row) {
+      var name = String((row && row[key]) || '').trim();
+      if (name === '') {
+        return;
+      }
+      if (!counts[name]) {
+        counts[name] = 0;
+        order.push(name);
+      }
+      counts[name]++;
+    });
+    if (!order.length) {
+      return '';
+    }
+    order.sort(function (a, b) {
+      return counts[b] - counts[a] || a.localeCompare(b, 'fa');
+    });
+    return order.map(function (name) {
+      return '<span class="fm-org-food">' + escapeHtml(name) + ' <b>' + faNum(counts[name]) + '</b></span>';
+    }).join('');
   }
 
   /** شمار افراد یکتا در گروه (برای گزارش‌هایی که یک نفر چند ردیف دارد). */
@@ -237,24 +267,15 @@
         + table(rows);
     }
     var groups = split(map, rows);
-    var summary = '<div class="fm-org-summary">'
-      + groups.map(function (group) {
-        return '<span class="fm-org-chip fm-org-type-' + escapeHtml(group.type) + '">'
-          + escapeHtml(group.label) + ' <b>' + faNum(options.uniquePeople ? uniquePeopleCount(group.rows) : group.rows.length) + '</b></span>';
-      }).join('')
-      + '</div>';
+    // بدون نوار خلاصه و بدون چیپ: «بینشون دیگه هیچی نباشه».
+    // فقط عنوان معاونت → فهرست اعضای همان معاونت، به‌ترتیب.
     var sections = groups.map(function (group) {
       return '<section class="fm-org-group">'
         + groupHeaderHtml(group, options)
         + table(group.rows)
         + '</section>';
     }).join('');
-    // شمار کل — تضمین می‌کند هیچ ردیفی در گروه‌بندی گم نشده باشد.
-    var total = groups.reduce(function (sum, group) { return sum + group.rows.length; }, 0);
-    var footer = '<div class="fm-org-total">جمع کل: <b>' + faNum(total) + '</b> '
-      + escapeHtml(options.unitLabel || 'ردیف') + ' در <b>' + faNum(groups.length) + '</b> گروه — '
-      + 'همهٔ ردیف‌های گزارش در گروه‌ها حاضرند.</div>';
-    return summary + sections + footer;
+    return sections;
   }
 
   global.FoodOrgGroups = {
