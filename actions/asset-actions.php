@@ -565,6 +565,11 @@ if (!defined('APP_ROOT')) {
             $set = implode(', ', array_map(static fn (string $key): string => $key . ' = ?', array_keys($fields)));
             try {
                 db()->prepare('UPDATE assets SET ' . $set . ', updated_at = NOW() WHERE id = ?')->execute([...array_values($fields), $assetId]);
+                // نام عوض شد ⇒ کلید هویت هم باید عوض شود، وگرنه رکورد بعدی با
+                // همین نام به‌عنوان «سیستم تازه» ثبت می‌شود و تکراری می‌سازد.
+                if (function_exists('asset_sync_identity_key')) {
+                    asset_sync_identity_key($assetId);
+                }
                 asset_profile_save($assetId, $_POST, (int) $inventoryUser['id']);
                 record_asset_history($assetId, 'inventory_manual_update', 'ویرایش شناسنامه سیستم', (int) $inventoryUser['id'], null, 'فرم شناسنامه سیستم ذخیره شد.', $asset, $fields);
                 save_audit_required((int) $inventoryUser['id'], 'asset_inventory_updated', null, ['asset_id' => $assetId, 'fields' => array_keys($fields)]);

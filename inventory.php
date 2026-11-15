@@ -681,6 +681,7 @@ function inventory_upsert_server_asset(array $inventory, int $userId): int
     $values = [$inventory['hostname'], $inventory['serial_number'], $inventory['manufacturer'], $inventory['model'], $inventory['operating_system'], $inventory['os_architecture'], $inventory['os_serial'], $inventory['ip_address'], $inventory['mac_address'], $inventory['cpu'], $inventory['memory_mb'], json_encode($inventory['disks'], JSON_UNESCAPED_UNICODE), json_encode($inventory['software'], JSON_UNESCAPED_UNICODE), json_encode($inventory['hardware'], JSON_UNESCAPED_UNICODE), json_encode($inventory['peripherals'], JSON_UNESCAPED_UNICODE), $inventory['domain_username'], $inventory['antivirus']];
     if ($assetId > 0) {
         db()->prepare('UPDATE assets SET hostname = ?, serial_number = ?, manufacturer = ?, model = ?, operating_system = ?, os_architecture = ?, os_serial = ?, ip_address = ?, mac_address = ?, cpu = ?, memory_mb = ?, disks_json = ?, software_json = ?, hardware_json = ?, peripherals_json = ?, domain_username = ?, antivirus = ?, source = "server_inventory", last_inventory_at = NOW() WHERE id = ?')->execute([...$values, $assetId]);
+                if (function_exists('asset_sync_identity_key')) { asset_sync_identity_key($assetId); }
     } else {
         db()->prepare('INSERT INTO assets (asset_tag, hostname, serial_number, manufacturer, model, operating_system, os_architecture, os_serial, ip_address, mac_address, cpu, memory_mb, disks_json, software_json, hardware_json, peripherals_json, domain_username, antivirus, source, last_inventory_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, "server_inventory", NOW())')->execute([$assetTag, ...$values]);
         $assetId = (int) db()->lastInsertId();
@@ -805,11 +806,14 @@ function inventory_collect_client_asset(array $user): ?int
                     $hostname = substr($storedHostname, 0, 190);
                 }
                 db()->prepare('UPDATE assets SET hostname = ?, owner_user_id = ?, department_id = COALESCE(?, department_id), ip_address = ?, domain_username = ? WHERE id = ?')->execute([$hostname, (int) ($user['id'] ?? 0), $departmentId, $clientIp, $username, $assetId]);
+                if (function_exists('asset_sync_identity_key')) { asset_sync_identity_key($assetId); }
             } elseif ($isLoginIdentity) {
                 // اصلاح رکوردهای قدیمی که ورود کاربر را اشتباهاً Inventory موفق علامت زده بودند.
                 db()->prepare('UPDATE assets SET hostname = ?, owner_user_id = ?, department_id = COALESCE(?, department_id), ip_address = ?, domain_username = ?, hardware_json = ?, last_inventory_at = NULL WHERE id = ?')->execute([$hostname, (int) ($user['id'] ?? 0), $departmentId, $clientIp, $username, $hardware, $assetId]);
+                if (function_exists('asset_sync_identity_key')) { asset_sync_identity_key($assetId); }
             } else {
                 db()->prepare('UPDATE assets SET hostname = ?, owner_user_id = ?, department_id = COALESCE(?, department_id), ip_address = ?, domain_username = ?, hardware_json = ? WHERE id = ?')->execute([$hostname, (int) ($user['id'] ?? 0), $departmentId, $clientIp, $username, $hardware, $assetId]);
+                if (function_exists('asset_sync_identity_key')) { asset_sync_identity_key($assetId); }
             }
         } else {
             // ثبت هویت ورود، Inventory سخت‌افزاری نیست؛ تاریخ جمع‌آوری عمداً خالی می‌ماند.

@@ -264,7 +264,7 @@ function domain_scan_asset_for(string $hostname): int
     $exists->execute([$tag]);
     $assetId = (int) ($exists->fetchColumn() ?: 0);
     if ($assetId > 0) {
-        db()->prepare('UPDATE assets SET hostname = ?, source = "domain", updated_at = NOW() WHERE id = ?')->execute([$hostname, $assetId]);
+        db()->prepare('UPDATE assets SET hostname = ?, hostname_key = ?, source = "domain", updated_at = NOW() WHERE id = ?')->execute([$hostname, asset_identity_key($hostname), $assetId]);
         return $assetId;
     }
     db()->prepare('INSERT INTO assets (asset_tag, hostname, hostname_key, computer_type, source) VALUES (?, ?, ?, "", "domain")')->execute([$tag, $hostname, asset_identity_key($hostname)]);
@@ -1444,6 +1444,9 @@ function domain_scan_store_inventory(int $assetId, string $host, array $inventor
         (string) ($inventory['antivirus'] ?? ''),
         $assetId,
     ]);
+    if (function_exists('asset_sync_identity_key')) {
+        asset_sync_identity_key($assetId);
+    }
     sync_inventory_rows($assetId, $inventory, 'domain');
     if (inventory_asset_exists($assetId)) {
         $receivedInventory['received_at'] = date('c');

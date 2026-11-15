@@ -30,7 +30,50 @@ function asset_hostname_style(): string
 }
 
 /**
- * هستهٔ نام: حذف بخش دامنه، پیشوند خودکار «DOMAIN-» و پسوند «$» حساب کامپیوتر.
+ * الگوی IPv4 برای تشخیص «IP چسبیده به نام».
+ * نکته: بخش آخر را عمداً محدود نمی‌کنیم (۲۵۹/۲۵۵/…) چون هدف «تشخیص»
+ * است نه اعتبارسنجی؛ اگر چهار بخش عددیِ نقطه‌دار دیدیم، IP است.
+ */
+const ASSET_IPV4_PATTERN = '((?:\d{1,3}\.){3}\d{1,3})';
+
+/** آیا این رشته یک آدرس IP خالص است؟ */
+function asset_is_ip(string $value): bool
+{
+    return filter_var($value, FILTER_VALIDATE_IP) !== false;
+}
+
+/** آیا این رشته یک نام کامل دامنه است (نه IP)؟ */
+function asset_is_domain_name(string $value): bool
+{
+    return $value !== '' && !asset_is_ip($value) && str_contains($value, '.');
+}
+
+/**
+ * حذف IP از هر جای رشته، بدون آسیب به بقیهٔ نام.
+ *
+ * چرا: روی شبکهٔ کاربر، reverse DNS برای کلاینت‌ها نامی مثل
+ * «clint 192.168.1.65» برمی‌گرداند — یعنی اسم و IP در یک فیلد. پیش‌تر
+ * قاعدهٔ «هرچه بعد از اولین نقطه است حذف شود» این را به «clint 192»
+ * تبدیل می‌کرد که نه اسم است نه IP: بدتر از خودِ مقدار خام.
+ * حالا اول IP برداشته می‌شود و بعد قاعدهٔ دامنه اعمال می‌شود.
+ */
+function asset_strip_ip(string $value): string
+{
+    // «ip.corp.local» — IP که یک نام دامنه دنبالش آمده: کل بخش دامنه هم می‌رود
+    $stripped = preg_replace('/[\s_-]*' . ASSET_IPV4_PATTERN . '(?:\.\S*)?/', '', $value);
+    if (is_string($stripped)) {
+        $value2 = $stripped === '' ? '' : $stripped;
+    }
+    // IP ساده با جداکنندهٔ فاصله/خط‌تیره/زیرخط یا در ابتدا/انتها
+    $stripped = preg_replace('/[\s_-]*' . ASSET_IPV4_PATTERN . '(?![\d.])/', '', $value2 ?? '');
+    $stripped = is_string($stripped) ? $stripped : $value;
+    // جداکننده‌های آویزان در ابتدا/انتها (مثل «pc1-» یا «-pc1»)
+    $stripped = trim($stripped, " \t\n\r\0\x0B-_.");
+    return trim($stripped);
+}
+
+/**
+ * هستهٔ نام: حذف IP چسبیده، بخش دامنه، پیشوند خودکار «DOMAIN-» و پسوند «$».
  * هیچ حرفی از نام اصلی حذف نمی‌شود جز این‌ها.
  */
 function asset_name_core(string $hostname): string
@@ -40,24 +83,55 @@ function asset_name_core(string $hostname): string
     if ($name === '') {
         return '';
     }
-    // آدرس IP یک نام است، نه «نام کامل دامنه» ⇒ دست‌نخورده برمی‌گردد
-    if (filter_var($name, FILTER_VALIDATE_IP) !== false || preg_match('/^\d{1,3}(\.\d{1,3}){3}$/', $name) === 1) {
+    // آدرس IP خالص یک نام است، نه «نام کامل دامنه» ⇒ دست‌نخورده برمی‌گردد
+    // (تنها جایی که IP نگه داشته می‌شود: وقتی چیز دیگری برای نشان‌دادن نباشد)
+    if (asset_is_ip($name)) {
         return $name;
+    }
+    // IP چسبیده به نام (clint 192.168.1.65 ⇒ clint) — پیش از قاعدهٔ دامنه
+    $name = asset_strip_ip($name);
+    if ($name === '') {
+        // فقط IP بود و جداکننده‌ها پاک شدند؛ همان IP اصلی را برگردان
+        return trim($hostname);
     }
     // نام کامل دامنه: هرچه بعد از اولین نقطه است حذف می‌شود (ADMINIT2.DOMAIN.LOCAL ⇒ ADMINIT2)
     $dot = strpos($name, '.');
     if ($dot !== false && $dot > 0) {
         $name = substr($name, 0, $dot);
     }
-    // پیشوند خودکارِ رکوردهای اسکن دامنه (چند بار، برای اطمینان)
+    // پیشوند خودکارِ رکوردهای اسکن دامنه و کلاینت‌ها (چند بار، برای اطمینان)
     for ($i = 0; $i < 3; $i++) {
         if (stripos($name, 'DOMAIN-') === 0) {
             $name = substr($name, 7);
         }
+        if (stripos($name, 'CLIENT-') === 0) {
+            $name = substr($name, 7);
+        }
     }
+    // پسوند دامنه بدون نقطه: reverse DNS معمولاً «نام» و «دامنه» را با فاصله
+    // می‌دهد (pc1 192.168.1.5 CORP). پس از حذف IP، کلمهٔ آخر اگر کاملاً
+    // حرفی و کوتاه باشد و نام بلندتری قبلش باشد، باقی‌ماندهٔ دامنه است.
+    $words = preg_split('/\s+/u', $name) ?: [];
+    while (count($words) > 1) {
+        $last = (string) end($words);
+        if (preg_match('/^[A-Za-z]{2,24}$/', $last) === 1) {
+            array_pop($words);
+            continue;
+        }
+        break;
+    }
+    $name = implode(' ', $words);
     // پسوند $ حساب کامپیوتر در Active Directory (مثل PC1$)
     $name = rtrim($name, '$');
-    $name = trim($name);
+    $name = trim($name, " \t\n\r\0\x0B-_");
+    // باقی‌ماندهٔ «آی‌پی خط‌تیره‌ای» (192-168-1-65): نام کامپیوتر نیست.
+    // به شکل نقطه‌دار برمی‌گردد تا دست‌کم گمراه‌کننده نباشد.
+    if (preg_match('/^(\d{1,3})-\d{1,3}-\d{1,3}-\d{1,3}$/', $name) === 1) {
+        $dotted = str_replace('-', '.', $name);
+        if (asset_is_ip($dotted)) {
+            return $dotted;
+        }
+    }
     return $name;
 }
 

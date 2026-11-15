@@ -72,7 +72,15 @@ function set_style(string $style): void
     $GLOBALS['FT_SETTINGS']['asset_hostname_style'] = $style;
 }
 
-foreach (['asset_hostname_style', 'asset_name_core', 'asset_display_name', 'asset_is_auto_domain_tag', 'asset_name_title', 'asset_name_attr', 'asset_tag_label'] as $fn) {
+// ثابت الگوی IPv4 از فایل ماژول (تابع نیست، grabFunction پیدا نمی‌کند)
+if (!defined('ASSET_IPV4_PATTERN')) {
+    if (preg_match("/const ASSET_IPV4_PATTERN = '([^']+)';/", $file, $mPattern) === 1) {
+        define('ASSET_IPV4_PATTERN', str_replace('\\\\', '\\', $mPattern[1]));
+    } else {
+        define('ASSET_IPV4_PATTERN', '((?:\\d{1,3}\\.){3}\\d{1,3})');
+    }
+}
+foreach (['asset_is_ip', 'asset_is_domain_name', 'asset_strip_ip', 'asset_hostname_style', 'asset_name_core', 'asset_display_name', 'asset_is_auto_domain_tag', 'asset_name_title', 'asset_name_attr', 'asset_tag_label'] as $fn) {
     eval(grabFunction($file, $fn));
 }
 
@@ -148,6 +156,30 @@ check('۳۴: تنظیم asset_hostname_style در صفحهٔ تنظیمات هس
 check('۳۵: مقدار تنظیم با whitelist ذخیره می‌شود (بدون مقدار دلخواه)',
     strpos($index, "valid_choice(post_value('asset_hostname_style'), ['short_lower', 'short', 'full'], 'short_lower')") !== false);
 check('۳۶: پیش‌فرض، حالت «فقط نام با حروف کوچک» است', asset_display_name('DC01.CORP.LOCAL') === 'dc01', asset_display_name('DC01.CORP.LOCAL'));
+
+/* ───── ۸) IP چسبیده به نام (۱.۶۳.۱) ───── */
+check('۳۷: «clint 192.168.1.65» ⇒ clint (IP حذف می‌شود، نه اینکه نام را ببرد)',
+    asset_display_name('clint 192.168.1.65') === 'clint', asset_display_name('clint 192.168.1.65'));
+check('۳۸: «clint-192.168.1.65» ⇒ clint',
+    asset_display_name('clint-192.168.1.65') === 'clint', asset_display_name('clint-192.168.1.65'));
+check('۳۹: «pc1 10.1.2.3» ⇒ pc1 (پیش‌تر «pc1 10» می‌شد)',
+    asset_display_name('pc1 10.1.2.3') === 'pc1', asset_display_name('pc1 10.1.2.3'));
+check('۴۰: «clint 192.168.1.65.corp.local» ⇒ clint',
+    asset_display_name('clint 192.168.1.65.corp.local') === 'clint', asset_display_name('clint 192.168.1.65.corp.local'));
+check('۴۱: «CLIENT 192.168.1.65» ⇒ client',
+    asset_display_name('CLIENT 192.168.1.65') === 'client', asset_display_name('CLIENT 192.168.1.65'));
+check('۴۲: «CLIENT-192.168.1.65» ⇒ client (پیشوند خودکار)',
+    asset_display_name('CLIENT-192.168.1.65') === 'client', asset_display_name('CLIENT-192.168.1.65'));
+check('۴۳: IP خالص دست‌نخورده می‌ماند (وقتی تنها شناسه است)',
+    asset_display_name('192.168.1.65') === '192.168.1.65', asset_display_name('192.168.1.65'));
+check('۴۴: «CLIENT-192-168-1-65» به IP نقطه‌دار برمی‌گردد، نه رشتهٔ خط‌تیره‌ای',
+    asset_display_name('CLIENT-192-168-1-65') === '192.168.1.65', asset_display_name('CLIENT-192-168-1-65'));
+check('۴۵: نام عادی با IP داخلش مختل نمی‌شود (reza-pc)',
+    asset_display_name('reza-pc') === 'reza-pc', asset_display_name('reza-pc'));
+check('۴۶: نام دامنه‌ای همچنان درست کوتاه می‌شود (حالت رگرسیون)',
+    asset_display_name('ADMINIT2.DOMAIN.LOCAL') === 'adminit2', asset_display_name('ADMINIT2.DOMAIN.LOCAL'));
+check('۴۷: حذف IP، بخش دامنه را هم پاک می‌کند (بدون باقی‌ماندهٔ «corp»)', asset_display_name('pc1 192.168.1.5 CORP') === 'pc1', asset_display_name('pc1 192.168.1.5 CORP'));
+check('۴۸: نام خالی همچنان خالی است (رگرسیون)', asset_display_name('') === '', asset_display_name(''));
 
 echo "\n" . ($fail === 0
     ? "همهٔ $pass بررسی نام کوتاه کامپیوترها (۱.۳۷.۵) موفق بود.\n"
