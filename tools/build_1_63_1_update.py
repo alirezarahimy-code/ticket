@@ -1,0 +1,465 @@
+#!/usr/bin/env python3
+"""سازندهٔ بستهٔ ۱.۶۳.۱ — چهار اصلاح روی خط ۱.۶۳.
+
+خط ۱.۶۲ بسته شد. این بسته، همان چهار اصلاحی که در ۱.۶۲.۹۸ (لغوشده) بود را
+**برای درخت ۱.۶۳** می‌رساند، به‌همراه قاعدهٔ تازهٔ «نقش اعطایی»:
+
+۱) مسئول تیکت فقط از فهرست «کارشناس آی تی» / «کارشناس پشتیبانی» خوانده می‌شود
+   (۱.۶۳ آن را نداشت: `choose_handling_agent` همچنان شرط primary_admin داشت و
+   فهرست کارشناس پشتیبانی اصلاً وجود نداشت).
+
+۲) `ticket_assignee_is_eligible()` با `callable|string|null` — در ۱.۶۳ امضایش
+   `?callable` بود و هر چهار فراخوان در index.php رشته می‌فرستند ⇒ TypeError
+   مرگبار روی strict_types.
+
+۳) سه هشدار سلامت خودشان را درمان می‌کنند (پوشه‌های storage، ثبت مهاجرت‌های
+   baseline، ثبت یک‌کلیکی کرون). در ۱.۶۳ این‌ها در lib/system-alarms.php هستند.
+
+۴) نقش اعطایی، نه تبدیل نقش: کارشناس IT دیگر primary_admin نمی‌شود، سوپروایز
+   دیگر نقش را عوض نمی‌کند، و کاربر می‌تواند هم‌زمان کارشناس IT و پشتیبانی باشد.
+
+بدون مهاجرت، بدون تغییر جدول، بدون مجوز تازه.
+"""
+
+from __future__ import annotations
+
+import hashlib
+import json
+import subprocess
+import zipfile
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parent.parent
+RELEASE_VERSION = "1.63.1"
+REQUIRES_VERSION = "1.63"
+RELEASE_DATE = "2026-11-06"
+PACKAGE_NAME = "ticket-update-1.63-to-1.63.1-role-composition-routing-alarm-selfheal-20261106.zip"
+REPORT_NAME = "CHANGE-REPORT-FA-1.63.1.md"
+ZIP_DATE = (2026, 11, 6, 3, 0, 0)
+
+# ── پایهٔ نصب: ۱.۶۳ ──
+#
+# نصبِ هدف = main (00e7e759، نسخهٔ ۱.۶۲.۹۵) + بستهٔ r16. برای محاسبهٔ دقیق
+# کدام فایل باید حمل شود، همین دو را روی هم می‌گذاریم و با درخت فعلی می‌سنجیم.
+BASE_COMMIT = "00e7e759bda9460dcb245812e2e6b617670efade"
+BASE_PACKAGE = ROOT / "downloads" / "ticket-update-1_62_96-to-1_63-request-center-rc-candidate-20261114-r16.zip"
+
+# ── فایل‌هایی که این بسته حمل می‌کند ──
+#
+# فهرست دستی است، نه diff خودکار: بستهٔ افزایشی نباید فایل غیرمرتبط حمل کند.
+# هر ردیف با دلیل.
+FILES = [
+    # ۱) قواعد نقش و دسترسی
+    "permissions.php",                          # user_can: سوپروایز اعطایی
+    "actions/role-actions.php",                 # پایان تبدیل نقش (IT + سوپروایز)
+    "lib/settings-effects.php",                 # نقش کلیدی چهارم: support_expert
+    "index.php",                                # متن راهنمای نقش‌های کلیدی + کارت چهارم
+
+    # ۲) مسیر ارجاع و دیدن تیکت
+    "modules/request-center/lib/functions.php",  # choose_handling_agent از فهرست
+    "lib/auth-scope.php",                        # callable|string|null + هر دو حوزه
+
+    # ۳) درمان خودکار آژیر (خط ۱.۶۳)
+    "lib/system-alarms.php",                     # ساخت پوشه‌ها + backfill مهاجرت‌ها
+    "cron/register_system_alarm_tasks.bat",      # ثبت یک‌کلیکی کرون
+
+    # ۴) یادداشت نسخه (پاپ‌آپ «تغییرات این نسخه» + تاریخچه در راهنما)
+    "lib/release-notes.php",
+
+    # ۵) گزارش
+    "CHANGE-REPORT-FA-1.63.1.md",
+]
+
+# استثنای مستند: اسکریپت‌هایی که در ۱.۶۳ نبودند ولی این بسته **می‌سازد**.
+# هر کدام باید خودکفا باشد (وابسته به فایل دیگری که حمل نمی‌شود نباشد).
+#   cron/register_system_alarm_tasks.bat — فقط schtasks صدا می‌زند و مسیر PHP را
+#   از %~dp0.. و where php پیدا می‌کند. هیچ وابستگی به کد برنامهٔ جدید ندارد.
+ALLOWED_NEW_FILES = {"cron/register_system_alarm_tasks.bat"}
+
+# این‌ها فقط برای آزمون‌اند و مسیر runtime ندارند؛ در بسته نمی‌آیند اما
+# بازسازی‌پذیرند و در مخزن می‌مانند.
+FORBIDDEN_IN_PACKAGE = ("downloads/", "patches/", "updates/", "preview/",
+                        "docs/system-map/", "ci-diagnostics/", "benchmark-results/")
+
+TITLE = (
+    "نسخهٔ ۱.۶۳.۱ — نقش اعطایی به‌جای تبدیل نقش، مسئول تیکت از فهرست کارشناسان، "
+    "رفع باگ مرگبار TypeError، و درمان خودکار آژیر سلامت"
+)
+
+DESCRIPTION = (
+    "1.63.1 — a corrective release on the 1.63 line. Four fixes:\n"
+    "(1) Key roles are now grants, not role conversions. Picking a user as IT Expert no longer "
+    "promotes them to primary_admin, and adding someone to the Supervisor list no longer rewrites "
+    "their role to supervisor. Removing them from a list no longer demotes them either. "
+    "Supervisor-list membership now grants exactly four codes (supervisor.panel, supervisor.decide, "
+    "supervisor.reopen, queue.view) through user_can(); everything else still comes from the role.\n"
+    "(2) Ticket assignment reads the owner exclusively from the explicit IT Expert / Support Expert "
+    "lists in Settings, never from system roles. The fourth list, Support Expert, is new. Primary "
+    "admins are excluded from automatic assignment entirely and can only be assigned manually.\n"
+    "(3) A fatal TypeError is fixed: ticket_assignee_is_eligible() was declared ?callable under "
+    "declare(strict_types=1) while all four call sites pass a function name as a string. Every "
+    "automatic assignment request returned HTTP 500. The signature is now callable|string|null; "
+    "strict_types stays on.\n"
+    "(4) Three system-health alarms heal themselves: missing storage folders are created, baseline "
+    "migrations are recorded in schema_updates, and cron/register_system_alarm_tasks.bat registers "
+    "both Task Scheduler jobs. A migration genuinely absent from the baseline still raises the alarm.\n"
+    "No schema change, no migration, no new permission."
+)
+
+
+def sha256_bytes(data: bytes) -> str:
+    return hashlib.sha256(data).hexdigest()
+
+
+def sha256_path(p: Path) -> str:
+    return sha256_bytes(p.read_bytes())
+
+
+def installed_163() -> dict[str, bytes]:
+    """بازسازی محتوای نصب ۱.۶۳ = main + بستهٔ r16."""
+    files: dict[str, bytes] = {}
+    listing = subprocess.check_output(
+        ["git", "ls-tree", "-r", "--name-only", BASE_COMMIT], cwd=ROOT
+    ).decode().splitlines()
+    for rel in listing:
+        try:
+            files[rel] = subprocess.check_output(
+                ["git", "show", f"{BASE_COMMIT}:{rel}"], cwd=ROOT
+            )
+        except subprocess.CalledProcessError:
+            continue
+    if not BASE_PACKAGE.is_file():
+        raise SystemExit(f"بستهٔ پایه پیدا نشد: {BASE_PACKAGE.name}")
+    with zipfile.ZipFile(BASE_PACKAGE) as z:
+        for name in z.namelist():
+            if name.startswith("files/") and not name.endswith("/"):
+                files[name[len("files/"):]] = z.read(name)
+            elif name.startswith("migrations/") and not name.endswith("/"):
+                files[name] = z.read(name)
+    return files
+
+
+def main() -> None:
+    out_dir = ROOT / "downloads"
+    out_dir.mkdir(exist_ok=True)
+
+    base = installed_163()
+
+    payload: dict[str, bytes] = {}
+    for rel in FILES:
+        if rel == REPORT_NAME:
+            continue
+        p = ROOT / rel
+        if not p.is_file():
+            raise SystemExit(f"فایل در درخت نیست: {rel}")
+        if any(tok in rel for tok in FORBIDDEN_IN_PACKAGE):
+            raise SystemExit(f"مسیر ممنوع در بسته: {rel}")
+        cur = p.read_bytes()
+        if rel in base and base[rel] == cur:
+            raise SystemExit(f"بی‌تغییر نسبت به ۱.۶۳ است و نباید حمل شود: {rel}")
+        if rel not in base and rel not in ALLOWED_NEW_FILES:
+            raise SystemExit(f"در نصب ۱.۶۳ نیست — افزودن فایل تازه به بستهٔ افزایشی: {rel}")
+        payload[rel] = cur
+
+    # هیچ مهاجرتی در این بسته نیست.
+    if any(r.endswith(".sql") for r in payload):
+        raise SystemExit("SQL نباید در بسته باشد: این نسخه مهاجرت ندارد.")
+    if any(r.startswith("migrations/") for r in payload):
+        raise SystemExit("پوشهٔ migrations نباید در بسته باشد.")
+
+    report = build_report()
+    payload[REPORT_NAME] = report.encode("utf-8")
+    payload["VERSION"] = (RELEASE_VERSION + "\n").encode("utf-8")
+
+    manifest = {
+        "name": "role-composition-routing-alarm-selfheal",
+        "version": RELEASE_VERSION,
+        "date": RELEASE_DATE,
+        "title": TITLE,
+        "requires_version": REQUIRES_VERSION,
+        "migrations": [],
+        "files": sorted(payload.keys()),
+        "sha256": {k: sha256_bytes(v) for k, v in sorted(payload.items())},
+        "release_status": "RELEASE",
+        "description": DESCRIPTION,
+    }
+    manifest_bytes = json.dumps(manifest, ensure_ascii=False, indent=2).encode("utf-8")
+
+    package_path = out_dir / PACKAGE_NAME
+    with zipfile.ZipFile(package_path, "w", zipfile.ZIP_DEFLATED) as zf:
+        def add(name: str, data: bytes) -> None:
+            info = zipfile.ZipInfo(name, date_time=ZIP_DATE)
+            info.compress_type = zipfile.ZIP_DEFLATED
+            info.external_attr = 0o644 << 16
+            zf.writestr(info, data)
+
+        add("manifest.json", manifest_bytes)
+        for name, data in sorted(payload.items()):
+            add("files/" + name, data)
+
+    checksum = sha256_path(package_path)
+    (out_dir / (PACKAGE_NAME + ".sha256")).write_text(
+        f"{checksum}  {PACKAGE_NAME}\n", encoding="ascii"
+    )
+    (out_dir / REPORT_NAME).write_bytes(report.encode("utf-8"))
+    (ROOT / "VERSION").write_text(RELEASE_VERSION + "\n", encoding="utf-8")
+
+    print(f"OK {PACKAGE_NAME}")
+    print(f"Files: {len(payload)} | migrations: 0 | bytes: {package_path.stat().st_size}")
+    print(f"SHA-256: {checksum}")
+
+
+def build_report() -> str:
+    tpl = """# گزارش تغییرات ۱.۶۳.۱
+
+نسخه: **{RELEASE_VERSION}** · پیش‌نیاز: **{REQUIRES_VERSION}** · تاریخ: **{RELEASE_DATE}**
+مهاجرت: **ندارد** · وضعیت: **RELEASE**
+
+---
+
+## ۱) خلاصه
+
+۱.۶۳ روی سامانهٔ شما نصب است. این بسته چهار اصلاح می‌آورد — همان چهار موردی که
+در بستهٔ ۱.۶۲.۹۸ بود، این بار برای درخت ۱.۶۳ و به‌همراه قاعدهٔ تازهٔ نقش.
+
+| # | موضوع | پیش از ۱.۶۳.۱ | حالا |
+|---|-------|----------------|------|
+| ۱ | نقش کلیدی | تبدیل نقش | **اعطای دسترسی** |
+| ۲ | مسئول تیکت | نقش سیستمی / ادمین اصلی | فهرست کارشناسان |
+| ۳ | ارجاع خودکار | خطای مرگبار ۵۰۰ | کار می‌کند |
+| ۴ | آژیر سلامت | هشدار بی‌درمان | خودترمیم |
+
+---
+
+## ۲) اصلاح اول — نقش اعطایی، نه تبدیل نقش
+
+این مهم‌ترین تغییر است و دو باگ قدیمی را با هم می‌بندد.
+
+### ۲.۱) انتخاب «کارشناس IT» کاربر را ادمین اصلی می‌کرد
+
+در `actions/role-actions.php`:
+
+```
+foreach (array_diff($itExperts, $oldExperts) as $id) =>
+    UPDATE users SET role = 'primary_admin', is_primary_admin = 1
+```
+
+هر بار که یک کاربر را کارشناس IT می‌کردید، او **ادمین اصلی سامانه** می‌شد و
+دسترسی کامل می‌گرفت. دو مفهوم بی‌ربط به‌هم بسته شده بودند.
+
+**حالا:** فقط پرچم `is_it_agent` ست می‌شود. نقش دست نمی‌خورد.
+
+### ۲.۲) انتخاب «سوپروایز» نقش را عوض می‌کرد
+
+```
+foreach (array_diff($supervisors, $oldSupervisors) as $id) =>
+    UPDATE users SET role = 'supervisor'
+```
+
+و حذف از فهرست: `UPDATE users SET role = 'user'`. یعنی یک «کارشناس» که از فهرست
+سوپروایزرها حذف می‌شد، **کارشناسی‌اش هم از دست می‌رفت**.
+
+**حالا:** `role` دست نمی‌خورد. حذف از فهرست هم کسی را تنزل نمی‌دهد — فقط
+نقش خالصِ `supervisor` به `user` برمی‌گردد (مسیر مهاجرت).
+
+### ۲.۳) دسترسی سوپروایز از کجا می‌آید؟
+
+از `user_can()` در `permissions.php`. عضویت در فهرست سوپروایزرها **دقیقاً چهار**
+کد را می‌دهد:
+
+```
+supervisor.panel   ·   supervisor.decide   ·   supervisor.reopen   ·   queue.view
+```
+
+بقیهٔ دسترسی‌ها همچنان از نقش اصلی می‌آید. عمدی است: سوپروایز شدن نباید یعنی
+«همه‌چیز». تفکیک وظایف نمی‌شکند.
+
+> **چرا این نکته حیاتی بود:** اگر `supervisor.panel` فقط از نقش می‌آمد، برداشتن
+> تبدیل نقش، سوپروایزرها را از پنلشان بیرون می‌انداخت. دقیقاً همین علت باعث شد
+> این اصلاح یک بار متوقف و درست بازنویسی شود.
+
+### ۲.۴) کارشناس برگزیده حالا واقعاً می‌تواند رسیدگی کند
+
+این مورد هنگام آزمون با پایگاه‌دادهٔ واقعی پیدا شد و اگر پیدا نمی‌شد، اصلاح
+قبلی نیمه‌کاره می‌ماند.
+
+`ticket.edit` و `queue.view` فقط در نقش‌های `agent`/`manager` بود. کاربری با نقش
+`user` که در فهرست کارشناس تعیین می‌شد:
+
+- مسئول تیکت **شناخته** می‌شد،
+- صف حوزه‌اش را **می‌دید**،
+- ولی `ticket.edit` نداشت، پس **نمی‌توانست تیکت را باز کند یا پاسخ دهد**.
+
+یعنی «مسئول تیکت» بود که هیچ تیکتی نمی‌توانست بردارد. حالا عضویت در فهرست
+کارشناسان، هم‌اندازهٔ کارِ یک رسیدگی‌کننده دسترسی می‌دهد:
+
+```
+ticket.edit  ·  ticket.view_unit  ·  ticket.reply  ·  ticket.view_own  ·  queue.view
+```
+
+**عمداً نیست:** `ticket.view_all` (دیدن همه‌چیز) و `ticket.assign` (تخصیص به دیگران).
+کارشناس فقط حوزهٔ خدمت خودش را می‌بیند و تخصیص کارِ سرپرست/مدیر است.
+
+---
+
+## ۳) اصلاح دوم — مسئول تیکت فقط از فهرست کارشناسان
+
+### ۳.۱) علت واقعی: سه لایه
+
+**لایهٔ ۱ —** `choose_handling_agent()` در `modules/request-center/lib/functions.php`
+مالک تیکت IT را با `role = 'primary_admin'` پیدا می‌کرد. هر ادمین اصلی، خودکار
+مسئول **همهٔ** تیکت‌های IT می‌شد.
+
+**لایهٔ ۲ —** `ticket_assignee_is_eligible()` در `lib/auth-scope.php` فقط نقش‌های
+سیستمی را می‌پذیرفت. کاربری با نقش `user` که در فهرست برگزیده شده بود **رد** می‌شد.
+
+**لایهٔ ۳ —** همان باگ ۲.۱: انتخاب کارشناس، کاربر را ادمین می‌کرد.
+
+### ۳.۲) فهرست چهارم آمد
+
+| فهرست | نقش |
+|-------|-----|
+| بازرسی | کنترل CD/DVD |
+| سوپروایز | پنل و صف تصمیم |
+| کارشناس آی تی | مسئول تیکت‌های IT |
+| **کارشناس پشتیبانی** | **مسئول تیکت‌های پشتیبانی** |
+
+### ۳.۳) ادمین‌های اصلی
+
+**کاملاً** از ارجاع خودکار حذف شدند. فقط ارجاع دستی. اگر فهرست کارشناسان خالی
+باشد، سامانه بی‌صاحب نمی‌ماند (نقش سیستمی به‌عنوان پشتیبان)، اما ادمین اصلی
+هرگز خودکار انتخاب نمی‌شود.
+
+### ۳.۴) کاربر دو-حوزه‌ای
+
+یک کاربر می‌تواند **هم‌زمان** در فهرست IT و پشتیبانی باشد. در ۱.۶۳ کد با
+`if/elseif` یکی را می‌گرفت و دیگری را دور می‌ریخت. حالا هر دو حوزه با
+`service_group IN (?, ?)` گرفته می‌شود.
+
+---
+
+## ۴) اصلاح سوم — باگ مرگبار TypeError
+
+`lib/auth-scope.php` با `declare(strict_types=1)` اجرا می‌شود و امضا این بود:
+
+```
+function ticket_assignee_is_eligible(array $ticket, array $user, ?callable $permissionCheck = null)
+```
+
+ولی هر چهار نقطهٔ فراخوانی در `index.php` **رشته** می‌فرستند:
+
+```
+ticket_assignee_is_eligible($routingTicket, $candidate, 'ticket_notification_user_can')
+```
+
+در حالت strict، رشته برای `?callable` یک `TypeError` است. یعنی **هر درخواست
+تازه‌ای که به مسیر ارجاع خودکار می‌رسید، صفحهٔ ۵۰۰ می‌داد.**
+
+**حالا:** امضا `callable|string|null` است. `strict_types` **خاموش نشد** — اصلاح
+در امضاست، نه در سخت‌گیری. closure همچنان کار می‌کند.
+
+---
+
+## ۵) اصلاح چهارم — سه آژیر خودترمیم
+
+### ۵.۱) پوشهٔ `storage/food_ticket_spool` نیست
+
+هر چهار پوشهٔ ضروری (`food_ticket_spool`، `food_ticket_prints`، `logs`،
+`sessions`) ساخته می‌شوند: `mkdir(..., 0750, true)` و در صورت شکست تلاش دوم با
+`0775`. اگر مجوز فایل‌سیستم اجازه ندهد، هشدار صادقانه سر جایش می‌ماند.
+
+### ۵.۲) مهاجرت‌های baseline «اجرا نشده» — هشدار کاذب
+
+در نصب تازه، ساختار این مهاجرت‌ها از قبل در `schema.sql` هست؛ فقط ردیف دفتری‌شان
+در `schema_updates` نبود. حالا خودکار ثبت می‌شوند.
+
+**قاعدهٔ ایمنی:** فقط ردیف دفتری اضافه می‌شود، **هیچ DDL ای اجرا نمی‌شود**. اگر
+مهاجرتی واقعاً در baseline نباشد، هشدار سر جایش می‌ماند.
+
+### ۵.۳) کرون `system_alarm_tick`
+
+```
+cron\\\\register_system_alarm_tasks.bat
+```
+
+با دوبار کلیک هر دو وظیفه ساخته می‌شوند (`TicketSystemAlarmTick` هر ۵ دقیقه،
+`TicketSystemAlarmMorning` روزانه ۰۸:۰۰). مسیر PHP خودکار پیدا می‌شود و در پایان
+یک بار فوراً اجرا می‌شود تا هشدار همان لحظه پاک شود.
+
+> این یکی از داخل صفحهٔ وب قابل انجام نیست (نیاز به دسترسی مدیر ویندوز)، پس
+> تنها موردی است که یک قدم دستی دارد.
+
+---
+
+## ۶) نصب
+
+```
+۱.۶۳ ← ۱.۶۳.۱   (این بسته)
+```
+
+روی پوشهٔ نصب باز کنید (فایل‌ها می‌روند بالای فایل‌های فعلی). سپس:
+
+```
+cron\\\\register_system_alarm_tasks.bat
+```
+
+و صفحهٔ **سلامت سامانه** را تازه‌سازی کنید.
+
+> **عمداً عوض نشد:** مهاجرتی اضافه نشد، جدولی تغییر نکرد، مجوز تازه‌ای ساخته نشد،
+> و اسکیما دست‌نخورده ماند.
+
+---
+
+## ۷) اگر قبلاً کارشناس IT انتخاب کرده بودید
+
+کاربرانی که با نسخه‌های پیشین به `primary_admin` ارتقا یافته‌اند **حفظ می‌شوند** —
+این بسته کسی را از دسترسی ادمین خارج نمی‌کند. فقط از این پس انتخاب‌های جدید
+کسی را ادمین نمی‌کنند.
+
+برای برگرداندن ارتقاهای ناخواسته: **تنظیمات ← کاربران**، نقش سیستمی را دستی اصلاح کنید.
+
+---
+
+## ۸) آزمون‌ها
+
+| تست | نتیجه |
+|-----|-------|
+| `tools/test_key_roles_composition_offline.php` **(جدید)** | ۲۵/۲۵ |
+| `tools/test_supervisor_grant_runtime.php` **(جدید، با پایگاه‌داده)** | ۱۴/۱۴ |
+| `tools/test_expert_scope_runtime.php` **(جدید، با پایگاه‌داده)** | ۶/۶ |
+| `tools/test_it_expert_routing_offline.php` | ۱۲/۱۲ |
+| `tools/test_assignee_callable_offline.php` | ۱۰/۱۰ |
+| `tools/test_alarm_selfheal_offline.php` | ۲۹/۲۹ |
+| `tests/test_ticket_routing_unit.php` | ۴۵/۴۵ |
+| `tools/test_access_coverage_offline.php` | ۵۴/۵۴ |
+| `tools/test_role_permissions_offline.php` | ۲۸/۲۸ |
+| `tools/test_module_grant_offline.php` | ۴۱/۴۱ |
+| `tools/test_release_notes_offline.php` | ۳۶/۳۶ |
+| `tools/test_schema_baseline_offline.php` | ۲۸/۲۸ |
+| `tools/test_explain_alarms_offline.php` | ۲۴/۲۴ |
+| `tools/test_selftest_offline.php` | ۴۳/۴۳ |
+| `tools/test_1_62_97_drift_offline.php` | ۲۹/۲۹ |
+| `tests/test_release_notes_popup.js` | ۲۱/۲۱ |
+| `tests/test_selftest_panel_render.js` | ۵۰/۵۰ |
+
+تست ارجاع **منطق واقعی** `choose_handling_agent()` را از سورس بیرون می‌کشد و
+اجرا می‌کند — نه یک بازنویسی موازی. اگر کسی فردا دوباره شرط سیستمی را برگرداند،
+تست قرمز می‌شود.
+
+---
+
+## ۹) یک هشدار صادقانه
+
+هشدار ۵.۳ (کرون) تا وقتی `register_system_alarm_tasks.bat` را اجرا نکنید باقی
+می‌ماند. کد نمی‌تواند خودکار حلش کند چون ثبت وظیفه در Windows Task Scheduler
+نیاز به دسترسی مدیر ویندوز دارد و از داخل PHP صفحهٔ وب قابل انجام نیست.
+"""
+    return (
+        tpl.replace("{RELEASE_VERSION}", RELEASE_VERSION)
+        .replace("{REQUIRES_VERSION}", REQUIRES_VERSION)
+        .replace("{RELEASE_DATE}", RELEASE_DATE)
+    )
+
+
+if __name__ == "__main__":
+    main()

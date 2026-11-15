@@ -66,9 +66,21 @@ if (!defined('APP_ROOT')) {
             }
             db()->beginTransaction();
             try {
+                // تصمیم مالک (۲۰۲۶-۱۱-۱۶): «سوپروایز» یک نقش **اعطایی** است، نه تبدیل
+                // نقش. کاربر نقش اصلی‌اش (agent، manager، inspector، user…) را نگه
+                // می‌دارد و فقط به فهرست سوپروایزرها اضافه می‌شود.
+                //
+                // دسترسی از کجا می‌آید؟ از user_can() در permissions.php: عضویت در این
+                // فهرست چهار کد سرپرستی (supervisor.panel / decide / reopen / queue.view)
+                // را می‌دهد. پس تغییر users.role لازم نیست و نباید انجام شود.
+                //
+                // پیش از این، حذف از فهرست نقش را به user برمی‌گرداند — یعنی کسی که
+                // کارشناس بود، با حذف از سوپروایزرها کارشناسی‌اش را هم از دست می‌داد.
                 foreach (array_diff($supervisors, $oldSupervisors) as $id) {
-                    db()->prepare('UPDATE users SET role = "supervisor" WHERE id = ? AND role NOT IN ("admin", "primary_admin")')->execute([$id]);
+                    db()->prepare('UPDATE users SET is_active = 1 WHERE id = ?')->execute([$id]);
                 }
+                // فقط نقش «supervisor» خالص (که از همین فهرست آمده) به user برمی‌گردد؛
+                // بقیهٔ نقش‌ها دست نمی‌خورند.
                 foreach (array_diff($oldSupervisors, $supervisors) as $id) {
                     db()->prepare('UPDATE users SET role = "user" WHERE id = ? AND role = "supervisor"')->execute([$id]);
                 }

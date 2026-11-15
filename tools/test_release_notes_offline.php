@@ -45,7 +45,19 @@ $history = release_notes_history();
 $versions = array_column($history, 'version');
 check('تاریخچه شامل ۱.۶۳ است', in_array('1.63', $versions, true), implode(',', $versions));
 check('تاریخچه شامل ۱.۶۲.۹۷ است', in_array('1.62.97', $versions, true), implode(',', $versions));
-check('تازه‌ترین نسخه اول می‌آید (۱.۶۳ بالای ۱.۶۲.۹۷)', ($versions[0] ?? '') === '1.63', implode(',', $versions));
+// قاعدهٔ واقعی: نزولی بودن نسخه‌ها — نه «اولی حتماً ۱.۶۳». با هر نسخهٔ تازه
+// (۱.۶۳.۱، ۱.۶۴…) این تست باید سبز بماند؛ پین‌کردن به یک نسخهٔ خاص، تست را
+// به «نگهبان گذشته» تبدیل می‌کند نه «نگهبان قاعده».
+$descending = true;
+for ($i = 1; $i < count($versions); $i++) {
+    if (version_compare($versions[$i - 1], $versions[$i], '<')) {
+        $descending = false;
+        break;
+    }
+}
+check('نسخه‌ها نزولی مرتب شده‌اند', $descending, implode(',', $versions));
+check('تازه‌ترین نسخه اول می‌آید', ($versions[0] ?? '') === array_values(array_filter(
+    $versions, fn ($v) => version_compare($v, '1.62.97', '>=')))[0] ?? '', implode(',', $versions));
 
 foreach ($history as $h) {
     $label = (string) ($h['version'] ?? '?');
@@ -83,7 +95,10 @@ $current63 = release_notes_current();
 check('روی ۱.۶۳، نسخهٔ جاری ۱.۶۳ است', ($current63['version'] ?? '') === '1.63');
 $page63 = release_notes_page_html();
 check('بعد از ۱.۶۳، بخش ۱.۶۲.۹۷ هنوز در صفحه هست', strpos($page63, 'آزمون جامع Worker') !== false);
-check('بعد از ۱.۶۳، هر دو بلوک رندر می‌شوند', substr_count($page63, 'release-notes-block"') === 2, 'blocks=' . substr_count($page63, 'release-notes-block"'));
+$expectedBlocks = count(release_notes_history());
+check('بعد از ۱.۶۳، همهٔ بلوک‌های نسخه رندر می‌شوند',
+    substr_count($page63, 'release-notes-block"') === $expectedBlocks,
+    'blocks=' . substr_count($page63, 'release-notes-block"') . ' / expected=' . $expectedBlocks);
 check('بعد از ۱.۶۳، برچسب «نسخهٔ نصب‌شده» یک‌بار است', substr_count($page63, 'نسخهٔ نصب‌شده') === 1);
 
 /* ── ۳-ب) رگرسیون: باگ «بستن کارت کار نمی‌کند» نباید برگردد ──────────── */
@@ -135,9 +150,14 @@ $historyHtml = release_notes_history_html();
 check('صفحهٔ تاریخچه هر دو نسخه را دارد',
     strpos($historyHtml, 'نسخهٔ ۱.۶۲.۹۷') !== false && strpos($historyHtml, 'نسخهٔ ۱.۶۳') !== false);
 check('صفحهٔ تاریخچه «نسخهٔ نصب‌شده» را یک‌بار نشان می‌دهد', substr_count($historyHtml, 'نسخهٔ نصب‌شده') === 1);
+// مجموع آیتم‌های **همهٔ** نسخه‌ها — با هر نسخهٔ تازه خودش را تنظیم می‌کند.
+$allItems = 0;
+foreach (release_notes_all() as $entry) {
+    $allItems += count((array) ($entry['items'] ?? []));
+}
 check('صفحهٔ تاریخچه همهٔ آیتم‌ها را دارد (کامل، نه خلاصه)',
-    substr_count($historyHtml, '<li>') === count((array) (release_notes_all()['1.62.97']['items'] ?? []))
-        + count((array) (release_notes_all()['1.63']['items'] ?? [])));
+    substr_count($historyHtml, '<li>') === $allItems,
+    'li=' . substr_count($historyHtml, '<li>') . ' / expected=' . $allItems);
 check('صفحهٔ تاریخچه به پاپ‌آپ وابسته نیست (localStorage ندارد)',
     strpos($historyHtml, 'localStorage') === false);
 

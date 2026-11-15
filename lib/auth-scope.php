@@ -230,15 +230,12 @@ function ticket_user_can_view(array $ticket, array $user, callable|string|null $
     // کارشناس برگزیده در تنظیمات ← نقش‌ها: درخواست حوزهٔ خودش را می‌بیند و
     // ویرایش می‌کند، حتی با نقش سیستمی user. (پیش از این فقط agent/manager
     // دیده می‌شدند، پس مسئولِ تعیین‌شده نمی‌توانست تیکت باز کند.)
-    $designated = '';
-    if (function_exists('user_is_key_role')) {
-        if (user_is_key_role($user, $ticketGroup === 'it' ? 'it_expert' : 'support_expert')
-            && in_array($ticketGroup, ['it', 'support'], true)) {
-            $designated = $ticketGroup;
+    // در هر دو فهرست بودن هم مجاز است — هر کدام حوزهٔ خودش را می‌دهد.
+    if (function_exists('user_is_key_role') && in_array($ticketGroup, ['it', 'support'], true)) {
+        $designatedRole = $ticketGroup === 'it' ? 'it_expert' : 'support_expert';
+        if (user_is_key_role($user, $designatedRole)) {
+            return $permissionCheck($user, 'ticket.view_unit') && $permissionCheck($user, 'ticket.edit');
         }
-    }
-    if ($designated !== '') {
-        return $permissionCheck($user, 'ticket.view_unit') && $permissionCheck($user, 'ticket.edit');
     }
     // ۱.۳۷.۸ — دسترسی‌های مشاهدهٔ درخواست از سطوح دسترسی نقش‌ها خوانده می‌شود:
     // ticket.view_own (درخواست‌های خودم)، ticket.view_unit (واحد/زیرمجموعه)، ticket.view_all (همهٔ درخواست‌ها).
@@ -469,6 +466,7 @@ function ticket_assignee_is_eligible(array $ticket, array $user, callable|string
     if (function_exists('user_is_key_role')
         && in_array($group, ['it', 'support'], true)
         && user_is_key_role($user, $group === 'it' ? 'it_expert' : 'support_expert')) {
+        // کاربری که در هر دو فهرست است، مسئول هر دو حوزه می‌شود.
         return ticket_user_can_view($ticket, $user, $permissionCheck) && $permissionCheck($user, 'ticket.edit');
     }
     if ($role === 'support_manager') {
@@ -546,15 +544,23 @@ function ticket_scope(array $user, string $alias = 't'): array
     // می‌بیند — حتی اگر نقش سیستمی‌اش agent/manager نباشد. بدون این، مسئولِ تعیین‌شده
     // از فهرستش هیچ تیکتی نمی‌دید و ارجاع خودکار عملاً بی‌اثر می‌شد.
     // مرز همچنان حوزهٔ خودش است (IT یا پشتیبانی) — نه دسترسی سراسری.
-    if (function_exists('key_role_user_ids')) {
-        $designatedGroup = '';
+    //
+    // تصمیم مالک (۲۰۲۶-۱۱-۱۶، تکمیل): کاربر می‌تواند **هم‌زمان** در هر دو فهرست باشد.
+    // پیش از این elseif بود، پس کسی که هم کارشناس IT و هم پشتیبانی بود فقط حوزهٔ اول
+    // را می‌دید. حالا هر دو حوزه با هم.
+    if (function_exists('key_role_user_ids') && $unit && !in_array($role, ['support_manager', 'agent', 'manager'], true)) {
+        $scopeGroups = [];
         if (in_array((int) ($user['id'] ?? 0), key_role_user_ids('it_expert'), true)) {
-            $designatedGroup = 'it';
-        } elseif (in_array((int) ($user['id'] ?? 0), key_role_user_ids('support_expert'), true)) {
-            $designatedGroup = 'support';
+            $scopeGroups[] = 'it';
         }
-        if ($designatedGroup !== '' && $unit && !in_array($role, ['support_manager', 'agent', 'manager'], true)) {
-            return ["WHERE {$alias}.service_group = ?", [$designatedGroup]];
+        if (in_array((int) ($user['id'] ?? 0), key_role_user_ids('support_expert'), true)) {
+            $scopeGroups[] = 'support';
+        }
+        if (count($scopeGroups) === 1) {
+            return ["WHERE {$alias}.service_group = ?", [$scopeGroups[0]]];
+        }
+        if (count($scopeGroups) > 1) {
+            return ["WHERE {$alias}.service_group IN (?, ?)", $scopeGroups];
         }
     }
     if (in_array($role, ['support_manager', 'agent', 'manager'], true)) {
