@@ -295,6 +295,13 @@ function food_ticket_manual_attendance_reconcile_range(string $fromDate, string 
             . 'AND COALESCE(print_status, "") NOT IN ("printed", "pending", "printing"))) '
             // ردیفِ لغوشده (یتیم) از این همگام‌سازی مستثناست.
             . 'AND COALESCE(print_status, "") NOT IN ("not_printed", "print_error", "failed", "held_absent") '
+            // ⚠️ فیشی که هنوز «در صف چاپ» است تحویل‌شده نیست. پیش‌تر این
+            // همگام‌سازی، ردیفِ pending را delivered می‌کرد؛ بعد Worker با
+            // محافظ «اگر تحویل شده، دوباره چاپ نکن» آن را بی‌صدا printed
+            // می‌کرد و **هیچ کاغذی از چاپگر بیرون نمی‌آمد**. کاربر فیش را
+            // «چاپ‌شده» می‌دید ولی دستش کاغذی نبود. تحویل فقط پس از چاپ
+            // موفق (food_ticket_mark_delivered_on_print در Worker) ثبت می‌شود.
+            . 'AND COALESCE(print_status, "") <> "pending" '
             . 'AND (COALESCE(ticket_key, "") <> "" OR (source_uid = "manual-attendance" AND event_type = "printed"))'
         );
         $tickets->execute([$fromDate, $toDate]);

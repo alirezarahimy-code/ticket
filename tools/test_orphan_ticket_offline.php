@@ -297,6 +297,13 @@ if (is_file($groupsFile)) {
     ok(strpos($groups, '$alreadyCancelled') !== false
         && strpos($groups, '$probePayload[\'cancelled_ticket\']') !== false,
         'تشخیص «قبلاً لغو شده» بر سابقهٔ cancelled_ticket تکیه می‌کند');
+    // ۷) فیشِ «در صف چاپ» (pending) هرگز تحویل‌شده شمرده نمی‌شود. پیش‌تر
+    //    همگام‌سازیِ خواندن پنل آن را delivered می‌کرد و بعد Worker با
+    //    محافظ «تحویل‌شده دوباره چاپ نشود» بی‌صدا printed می‌کرد —
+    //    کاغذی از چاپگر بیرون نمی‌آمد.
+    ok(strpos($groups, 'AND COALESCE(print_status, "") <> "pending" ') !== false,
+        'فیش در صف چاپ، تحویل‌شده شمرده نمی‌شود');
+
     ok(strpos($groups, "!empty(\$absentUserIds[\$userId]) && empty(\$ticketedKeys[\$ticketKey])") !== false,
         'کسی که فیش دارد هرگز «غایب» شمرده نمی‌شود');
     // ── تردد نماینده: فیش‌دار نباید در فهرست غایبان بماند ──
