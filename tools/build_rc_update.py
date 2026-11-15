@@ -144,10 +144,21 @@ def git(*args: str) -> str:
     ).stdout
 
 
+# فایل‌هایی که حتی اگر در این موج تغییر نکرده‌اند باید حمل شوند — چون کدِ
+# تغییرکرده به آن‌ها ارجاع می‌دهد. بی این فهرست، ارتقا با «فایل پیدا نشد»
+# می‌افتد (همان باگی که تب «تغییرات نسخه‌ها» در help-guide.php می‌ساخت).
+ALWAYS_SHIP = {
+    # index.php ← page=help&tab=releases این فایل را require می‌کند؛
+    # در بستهٔ ۱.۶۳ پیش‌تر تغییر نکرده بود و از قلم می‌افتاد.
+    "help-guide.php",
+}
+
+
 def changed_files() -> list[str]:
     # Fail closed if the exact base is absent.
     git("cat-file", "-e", f"{BASE_COMMIT}^{{commit}}")
     names = git("diff", "--diff-filter=ACMR", "--name-only", BASE_COMMIT, "HEAD").splitlines()
+    names = list(names) + sorted(ALWAYS_SHIP)
     keep = [n for n in names if n.strip() and not n.startswith(EXCLUDED_PREFIXES)]
     keep = [n for n in keep if n not in EXCLUDED_FILES]
     keep = [n for n in keep if n not in EXCLUDED_FOOD_PATHS and not n.startswith(EXCLUDED_FOOD_PREFIXES)]

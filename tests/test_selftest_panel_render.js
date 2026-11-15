@@ -74,7 +74,7 @@ const extract = (name) => {
   throw new Error('پایان «' + name + '» پیدا نشد');
 };
 
-const parts = ['esc', 'ST_LABELS', 'ST_CLASS', 'selftestBox', 'releaseNotesBanner', 'loadReleaseNotes'].map(extract).join('\n;\n');
+const parts = ['esc', 'ST_LABELS', 'ST_CLASS', 'selftestBox', '__ftRnState', 'releaseNotesBanner', 'loadReleaseNotes'].map(extract).join('\n;\n');
 
 const sandbox = {
   console,
@@ -234,6 +234,26 @@ check('بنر تغییرات: شمارش بقیه را می‌گوید', banner.
 check('بنر تغییرات: پاورقی را نشان می‌دهد', banner.includes('هیچ تغییری در مسیر چاپ'));
 check('بنر تغییرات: دکمهٔ بستن دارد', banner.includes('data-action="dismiss-release-notes"'));
 check('بنر تغییرات: شناسهٔ نسخه برای localStorage دارد', banner.includes('data-version="1.62.97"'));
+
+/* رگرسیون: باگ «بستن کار نمی‌کند» — بستن باید حافظهٔ درون‌برنامه‌ای هم داشته باشد،
+   وگرنه وقتی localStorage مسدود است بنر در render() بعدی برمی‌گردد. */
+sandbox.window.__ftReleaseNotes = { version: '1.62.97', title: 'x', label: '', date_fa: '', items: [], footnote: '' };
+sandbox.window.__ftRnDismissed = new Set(['1.62.97']);
+check('بنر تغییرات: بستن در حافظه، رندر بعدی را قطع می‌کند', releaseNotesBanner() === '');
+sandbox.window.__ftRnDismissed = new Set();
+sandbox.window.__ftRnSeen = { '1.62.97': 2 };
+check('بنر تغییرات: سقف دو نمایش در حافظه رعایت می‌شود', releaseNotesBanner() === '');
+/* وقتی localStorage در دسترس نیست، شمارندهٔ حافظه تنها مرجع است: پس از دو بار
+   باید بسته بماند — همان چیزی که در حالت ناشناس/سیاست سازمانی رخ می‌دهد. */
+sandbox.window.__ftRnSeen = {};
+sandbox.window.__ftRnDismissed = new Set();
+sandbox.localStorage = {
+  getItem() { throw new Error('storage blocked'); },
+  setItem() { throw new Error('storage blocked'); },
+};
+const bannerNoStorage = releaseNotesBanner();
+check('بنر تغییرات: با storage مسدود باز هم رندر می‌شود', bannerNoStorage !== '');
+check('بنر تغییرات: با storage مسدود شمارندهٔ حافظه یک شد', sandbox.window.__ftRnSeen['1.62.97'] === 1);
 
 /* escape امنیتی بنر */
 sandbox.window.__ftReleaseNotes = {

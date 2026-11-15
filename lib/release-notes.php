@@ -7,14 +7,22 @@ declare(strict_types=1);
  * قواعد:
  *  - محتوای release_notes_all() تنها منبع "چه عوض شد" برای کاربر نهایی است؛
  *    در هر انتشار جدید یک کلید نسخه جدید اضافه کنید (کلید = CONTENT of VERSION).
- *  - نمایش فقط برای کاربران واردشده (هر نقشی) است؛ هیچ مجوز اضافه‌ای لازم ندارد.
- *  - کارت داشبورد با localStorage به‌ازای هر نسخه قابل‌بستن است.
- *  - متن‌ها غیر فنی و برای کاربر نهایی نوشته می‌شوند؛ جزئیات فنی داخل بستهٔ
- *    به‌روزرسانی (CHANGE-REPORT) می‌ماند.
+ *  - نمایش فقط برای کاربران وارد‌شده (هر نقشی) است؛ هیچ مجوز اضافه‌ای لازم ندارد.
+ *  - کارت به‌صورت **پاپ‌آپ** نمایش داده می‌شود و **حداکثر دو بار** — پس از آن
+ *    دیگر خودکار باز نمی‌شود. تاریخچهٔ کامل همیشه در «راهنما ← تغییرات نسخه‌ها» هست.
+ *
+ * چرا پاپ‌آپ و چرا دو بار؟ (تصمیم مالک ۲۰۲۶-۱۱-۱۶)
+ *  کارتِ درون‌صفحه‌ای داشبورد با دکمهٔ بستن درست بسته نمی‌شد (CSS `display:flex`
+ *  بر `[hidden]` غلبه می‌کرد) و هر بار هم دوباره ظاهر می‌شد. راه‌حل: پاپ‌آپ واقعی
+ *  با شمارندهٔ نمایش در localStorage — دو نمایش، بعد تمام.
  */
+
 if (!defined('APP_ROOT')) {
     exit;
 }
+
+/** حداکثر تعداد نمایش خودکار پاپ‌آپ برای هر نسخه. */
+const RELEASE_NOTES_POPUP_MAX_VIEWS = 2;
 
 function release_notes_all(): array
 {
@@ -33,6 +41,7 @@ function release_notes_all(): array
                 ['icon' => '◆', 'text' => 'کنار هر ایراد، یک جملهٔ راه‌حل فارسی نوشته شده؛ دکمهٔ «کپی گزارش» هم متن کامل را برای ارسال به پشتیبانی کپی می‌کند.'],
                 ['icon' => '◆', 'text' => 'همان آزمون از خط فرمان هم در دسترس است و دقیقاً همان گزارش را می‌دهد: php tools\\prewindow_check.php --shared'],
                 ['icon' => '◆', 'text' => 'ابزار تأیید نصب: php tools\\verify_1_62_97.php — ده ثانیه‌ای می‌گوید کارت سر جایش است یا نه.'],
+                ['icon' => '◆', 'text' => 'مهاجرت ۰۳۳ در اسکیمای نصب تازه ثبت شد؛ دیگر هیچ نصب تازه‌ای هشدار کاذب «مهاجرت اجرا نشده» نمی‌گیرد.'],
             ],
             'footnote' => 'این نسخه مستقل از ۱.۶۳ نصب می‌شود (هر دو پیش‌نیاز ۱.۶۲.۹۶ دارند) و ترتیب نصب هیچ‌کدام دیگری را خراب نمی‌کند.',
         ],
@@ -83,7 +92,7 @@ function release_notes_current(): ?array
 
 /**
  * تاریخچهٔ نسخه‌های ثبت‌شده، تازه‌ترین اول.
- * برای صفحهٔ «تغییرات سامانه» استفاده می‌شود تا تغییرات نسخه‌های قبلی (مثل ۱.۶۲.۹۷)
+ * برای صفحهٔ «تغییرات نسخه‌ها» استفاده می‌شود تا تغییرات نسخه‌های قبلی (مثل ۱.۶۲.۹۷)
  * پس از نصب نسخهٔ بعدی هم قابل خواندن بماند.
  *
  * @return array<int,array> هر آیتم: version/label/date_fa/title/lead/items/footnote
@@ -121,7 +130,20 @@ function release_notes_render_items(array $items, int $limit = 0): string
     return $html;
 }
 
-/** کارت «تغییرات این نسخه» برای داشبورد؛ با دکمهٔ بستن و localStorage به‌ازای هر نسخه. */
+/**
+ * پاپ‌آپ «تغییرات این نسخه» برای داشبورد.
+ *
+ * رفتار (تصمیم مالک ۲۰۲۶-۱۱-۱۶):
+ *   • حداکثر RELEASE_NOTES_POPUP_MAX_VIEWS بار برای هر نسخه نمایش داده می‌شود.
+ *   • دکمهٔ «بستن» و کلید Esc و کلیک روی پس‌زمینه، آن را می‌بندد.
+ *   • شمارندهٔ نمایش در localStorage نگه داشته می‌شود؛ پس از دو بار، دیگر باز نمی‌شود.
+ *   • دکمهٔ «همهٔ تغییرات» به «راهنما ← تغییرات نسخه‌ها» می‌رود.
+ *
+ * نکتهٔ فنی: `dialog` عمداً بدون CSS `display` استفاده شده است. اگر روی خودِ عنصر
+ * `display:flex` بگذاریم، بر `[hidden]` غلبه می‌کند و بستن کار نمی‌کند — همان باگی
+ * که در نسخهٔ قبل رخ داد. اینجا نمایش/پنهان‌سازی کامل با `hidden` + CSS
+ * `[hidden]{display:none!important}` انجام می‌شود.
+ */
 function release_notes_dashboard_card(): string
 {
     $notes = release_notes_current();
@@ -131,32 +153,129 @@ function release_notes_dashboard_card(): string
     $version = (string) ($notes['version'] ?? '');
     $label = (string) ($notes['label'] ?? ('نسخهٔ ' . $version));
     $title = (string) ($notes['title'] ?? 'تغییرات این نسخه');
-    $teaser = release_notes_render_items((array) ($notes['items'] ?? []), 4);
+    $lead = (string) ($notes['lead'] ?? '');
+    $teaser = release_notes_render_items((array) ($notes['items'] ?? []), 5);
+    $maxViews = RELEASE_NOTES_POPUP_MAX_VIEWS;
 
-    return '<section class="release-notes-card" id="release-notes-card" data-release-version="' . e($version) . '" hidden>'
-        . '<div class="release-notes-card-body">'
-        . '<div class="release-notes-card-head"><span class="release-notes-badge">' . e($label) . '</span><strong>' . e($title) . '</strong></div>'
-        . '<ul class="release-notes-card-list">' . $teaser . '</ul>'
-        . '<a class="button secondary release-notes-card-link" href="index.php?page=release-notes">همهٔ تغییرات این نسخه ←</a>'
+    $historyUrl = 'index.php?page=help&tab=releases';
+    $nonce = e(csp_nonce());
+
+    return '<div class="release-notes-popup" id="release-notes-popup" data-release-version="' . e($version) . '"'
+        . ' data-max-views="' . (int) $maxViews . '" hidden>'
+        . '<div class="release-notes-popup-backdrop" data-rn-close="1"></div>'
+        . '<div class="release-notes-popup-panel" role="dialog" aria-modal="true" aria-labelledby="release-notes-popup-title">'
+        . '<div class="release-notes-popup-head">'
+        . '<span class="release-notes-badge">' . e($label) . '</span>'
+        . '<h2 id="release-notes-popup-title">' . e($title) . '</h2>'
+        . '<button type="button" class="release-notes-popup-close" data-rn-close="1" aria-label="بستن">✕</button>'
         . '</div>'
-        . '<button type="button" class="release-notes-dismiss" aria-label="بستن این کارت">✕</button>'
-        . '</section>'
+        . ($lead !== '' ? '<p class="release-notes-popup-lead">' . e($lead) . '</p>' : '')
+        . '<ul class="release-notes-popup-list">' . $teaser . '</ul>'
+        . '<div class="release-notes-popup-foot">'
+        . '<a class="button secondary" href="' . e($historyUrl) . '">همهٔ تغییرات نسخه‌ها ←</a>'
+        . '<button type="button" class="button" data-rn-close="1">بستن</button>'
+        . '</div>'
+        . '</div>'
+        . '</div>'
         . '<style>'
-        . '.release-notes-card{display:flex;gap:.75rem;align-items:flex-start;justify-content:space-between;position:relative;margin:0 0 1rem;padding:.9rem 1rem .9rem 2.4rem;border:1px solid rgba(127,127,127,.35);border-radius:14px;background:transparent;color:inherit;}'
-        . '.release-notes-card-head{display:flex;align-items:center;gap:.6rem;margin-bottom:.45rem;flex-wrap:wrap;}'
-        . '.release-notes-badge{display:inline-flex;align-items:center;padding:.15rem .7rem;border-radius:999px;font-size:.78rem;font-weight:700;border:1px solid rgba(127,127,127,.4);white-space:nowrap;}'
-        . '.release-notes-card-list{list-style:none;margin:.35rem 0 .6rem;padding:0;display:grid;gap:.3rem;font-size:.92rem;line-height:1.9;}'
-        . '.release-notes-card-list li{display:flex;gap:.5rem;}'
-        . '.release-notes-item-icon{opacity:.65;}'
-        . '.release-notes-card-link{text-decoration:none;}'
-        . '.release-notes-dismiss{position:absolute;left:.5rem;top:.5rem;border:0;background:transparent;color:inherit;opacity:.6;font-size:1rem;cursor:pointer;border-radius:8px;padding:.25rem .4rem;line-height:1;}'
-        . '.release-notes-dismiss:hover{opacity:1;background:rgba(127,127,127,.15);}'
-        . '@media print{.release-notes-card{display:none !important;}}'
+        . '.release-notes-popup{position:fixed;inset:0;z-index:9000;}'
+        . '.release-notes-popup[hidden]{display:none !important;}'
+        . '.release-notes-popup-backdrop{position:absolute;inset:0;background:rgba(15,23,42,.45);backdrop-filter:blur(2px);}'
+        . '.release-notes-popup-panel{position:relative;max-width:44rem;margin:6vh auto 0;background:#fff;color:#0f172a;'
+        . 'border-radius:16px;padding:1.1rem 1.3rem 1rem;box-shadow:0 24px 60px rgba(15,23,42,.28);max-height:84vh;overflow:auto;}'
+        . '.release-notes-popup-head{display:flex;align-items:center;gap:.6rem;flex-wrap:wrap;margin-bottom:.4rem;padding-inline-end:2rem;}'
+        . '.release-notes-popup-head h2{font-size:1.05rem;margin:0;}'
+        . '.release-notes-badge{display:inline-flex;align-items:center;padding:.15rem .7rem;border-radius:999px;font-size:.78rem;'
+        . 'font-weight:700;border:1px solid #0f766e;color:#0f766e;white-space:nowrap;}'
+        . '.release-notes-popup-lead{font-size:.92rem;line-height:1.9;margin:.2rem 0 .7rem;color:#334155;}'
+        . '.release-notes-popup-list{list-style:none;margin:0;padding:0;display:grid;gap:.45rem;font-size:.93rem;line-height:1.9;}'
+        . '.release-notes-popup-list li{display:flex;gap:.55rem;padding:.4rem .55rem;border-radius:10px;}'
+        . '.release-notes-popup-list li:nth-child(odd){background:#f6faf9;}'
+        . '.release-notes-item-icon{opacity:.6;margin-top:.1rem;color:#0f766e;}'
+        . '.release-notes-popup-close{position:absolute;inset-inline-start:1rem;top:1rem;border:0;background:transparent;'
+        . 'font-size:1rem;cursor:pointer;opacity:.55;border-radius:8px;padding:.2rem .45rem;line-height:1;}'
+        . '.release-notes-popup-close:hover{opacity:1;background:#f1f5f9;}'
+        . '.release-notes-popup-foot{display:flex;gap:.6rem;justify-content:flex-start;margin-top:.9rem;flex-wrap:wrap;}'
+        . '.release-notes-popup-foot .button{text-decoration:none;}'
+        . '@media print{.release-notes-popup{display:none !important;}}'
+        . '@media (max-width:600px){.release-notes-popup-panel{margin:2vh .6rem 0;max-height:94vh;}}'
         . '</style>'
-        . '<script nonce="' . e(csp_nonce()) . '">(function(){var card=document.getElementById("release-notes-card");if(!card){return;}var key="release-notes-dismissed:"+(card.getAttribute("data-release-version")||"");try{if(localStorage.getItem(key)==="1"){return;}}catch(_){}card.hidden=false;var btn=card.querySelector(".release-notes-dismiss");if(btn){btn.addEventListener("click",function(){try{localStorage.setItem(key,"1");}catch(_){}card.hidden=true;});}})();</script>';
+        . '<script nonce="' . $nonce . '">(function(){'
+        . 'var popup=document.getElementById("release-notes-popup");if(!popup){return;}'
+        . 'var version=popup.getAttribute("data-release-version")||"";'
+        . 'var maxViews=parseInt(popup.getAttribute("data-max-views")||"2",10)||2;'
+        . 'var seenKey="release-notes-popup-seen:"+version;'
+        . 'var dismissedKey="release-notes-popup-dismissed:"+version;'
+        . 'var seen=0;try{seen=parseInt(localStorage.getItem(seenKey)||"0",10)||0;}catch(_){}'
+        . 'var dismissed=false;try{dismissed=localStorage.getItem(dismissedKey)==="1";}catch(_){}'
+        . 'if(dismissed||seen>=maxViews){return;}'
+        . 'seen=seen+1;try{localStorage.setItem(seenKey,String(seen));}catch(_){}'
+        . 'function close(){popup.hidden=true;try{localStorage.setItem(dismissedKey,"1");}catch(_){}'
+        . 'document.removeEventListener("keydown",onKey);}'
+        . 'function onKey(ev){if(ev.key==="Escape"){close();}}'
+        . 'popup.hidden=false;document.addEventListener("keydown",onKey);'
+        . 'popup.addEventListener("click",function(ev){'
+        . 'var t=ev.target;if(t&&t.closest&&t.closest("[data-rn-close]")){ev.preventDefault();close();}'
+        . '});'
+        . '})();</script>';
 }
 
-/** متن کامل صفحهٔ «تغییرات این نسخه» (برای کاربران واردشدهٔ هر نقشی). */
+/**
+ * تبِ «تغییرات نسخه‌ها» برای صفحهٔ راهنما — `index.php?page=help&tab=releases`.
+ * تاریخچهٔ کامل و همیشگی؛ هیچ وابستگی‌ای به localStorage ندارد.
+ */
+function release_notes_history_html(): string
+{
+    $history = release_notes_history();
+    if ($history === []) {
+        return '<section class="page-heading"><div><span class="eyebrow">تغییرات سامانه</span><h1>تغییرات نسخه‌ها</h1>'
+            . '<p class="muted">برای هیچ نسخه‌ای یادداشتی ثبت نشده است.</p></div></section>';
+    }
+
+    $currentVersion = (string) (release_notes_current()['version'] ?? '');
+    $html = '<style>'
+        . '.release-notes-history{max-width:1100px;margin:0 auto;line-height:2;}'
+        . '.release-notes-block{border:1px solid #e2e8f0;border-radius:14px;padding:1rem 1.1rem;margin:0 0 1rem;background:#fff;}'
+        . '.release-notes-block-head{display:flex;align-items:center;gap:.5rem;flex-wrap:wrap;margin-bottom:.3rem;}'
+        . '.release-notes-block h2{font-size:1.05rem;margin:.2rem 0 .1rem;color:#0f766e;}'
+        . '.release-notes-block .release-notes-lead{color:#475569;font-size:.9rem;line-height:1.9;margin:.2rem 0 .6rem;}'
+        . '.release-notes-page-list{list-style:none;margin:0;padding:0;display:grid;gap:.4rem;}'
+        . '.release-notes-page-list li{display:flex;gap:.6rem;line-height:2;padding:.35rem .55rem;border-radius:10px;}'
+        . '.release-notes-page-list li:nth-child(odd){background:#f8fafc;}'
+        . '.release-notes-page-list .release-notes-item-icon{opacity:.6;margin-top:.1rem;color:#0f766e;}'
+        . '.release-notes-footnote{font-size:.85rem;color:#64748b;margin:.6rem 0 0;line-height:1.9;}'
+        . '.release-notes-current-tag{font-size:.72rem;font-weight:700;padding:.1rem .5rem;border-radius:999px;border:1px solid #94a3b8;color:#475569;}'
+        . '.release-notes-badge{display:inline-flex;align-items:center;padding:.15rem .7rem;border-radius:999px;font-size:.78rem;'
+        . 'font-weight:700;border:1px solid #0f766e;color:#0f766e;white-space:nowrap;}'
+        . '@media print{.release-notes-badge,.release-notes-current-tag{display:none !important;}}'
+        . '</style>'
+        . '<div class="release-notes-history">'
+        . '<section class="page-heading"><div><span class="eyebrow">راهنما</span><h1>تغییرات نسخه‌ها</h1>'
+        . '<p>هر کاری که در هر نسخه عوض شد، درست شد یا اضافه شد — تازه‌ترین بالا. '
+        . 'این صفحه همیشه در دسترس است، حتی اگر پاپ‌آپ اعلان را بسته باشید.</p></div>'
+        . '<div class="release-notes-page-meta"><small class="muted">' . e((string) count($history)) . ' نسخه ثبت‌شده</small></div></section>';
+
+    foreach ($history as $h) {
+        $v = (string) ($h['version'] ?? '');
+        $isCurrent = $v === $currentVersion;
+        $html .= '<section class="release-notes-block" id="release-notes-' . e(str_replace('.', '-', $v)) . '">'
+            . '<div class="release-notes-block-head">'
+            . '<span class="release-notes-badge">' . e((string) ($h['label'] ?? ('نسخهٔ ' . $v))) . '</span>'
+            . ($isCurrent ? '<span class="release-notes-current-tag">نسخهٔ نصب‌شده</span>' : '<span class="release-notes-current-tag">قبلی</span>')
+            . (($h['date_fa'] ?? '') !== '' ? '<small class="muted">' . e((string) $h['date_fa']) . '</small>' : '')
+            . '</div>'
+            . '<h2>' . e((string) ($h['title'] ?? 'تغییرات این نسخه')) . '</h2>'
+            . (($h['lead'] ?? '') !== '' ? '<p class="release-notes-lead">' . e((string) $h['lead']) . '</p>' : '')
+            . '<ul class="release-notes-page-list">' . release_notes_render_items((array) ($h['items'] ?? [])) . '</ul>'
+            . (($h['footnote'] ?? '') !== '' ? '<p class="release-notes-footnote">' . e((string) $h['footnote']) . '</p>' : '')
+            . '</section>';
+    }
+
+    $html .= '</div>';
+    return $html;
+}
+
+/** متن کامل صفحهٔ «تغییرات این نسخه» (برای کاربران وارد‌شدهٔ هر نقشی). */
 function release_notes_page_html(): string
 {
     $notes = release_notes_current();
@@ -171,43 +290,7 @@ function release_notes_page_html(): string
         return release_notes_page_single($notes);
     }
 
-    $currentVersion = (string) ($notes['version'] ?? '');
-    $html = '<style>'
-        . '.release-notes-block{border:1px solid rgba(127,127,127,.28);border-radius:14px;padding:1rem 1.1rem;margin:0 0 1rem;}'
-        . '.release-notes-block-head{display:flex;align-items:center;gap:.6rem;flex-wrap:wrap;margin-bottom:.2rem;}'
-        . '.release-notes-block h2{font-size:1.05rem;margin:.2rem 0 .1rem;}'
-        . '.release-notes-block .release-notes-lead{color:inherit;opacity:.75;font-size:.9rem;line-height:1.9;margin:.2rem 0 .6rem;}'
-        . '.release-notes-page-list{list-style:none;margin:0;padding:0;display:grid;gap:.5rem;}'
-        . '.release-notes-page-list li{display:flex;gap:.6rem;line-height:2;padding:.35rem .55rem;border-radius:10px;}'
-        . '.release-notes-page-list li:nth-child(odd){background:rgba(127,127,127,.07);}'
-        . '.release-notes-page-list .release-notes-item-icon{opacity:.6;margin-top:.1rem;}'
-        . '.release-notes-footnote{font-size:.85rem;opacity:.7;margin:.6rem 0 0;line-height:1.9;}'
-        . '.release-notes-current-tag{font-size:.72rem;font-weight:700;padding:.1rem .5rem;border-radius:999px;border:1px solid rgba(127,127,127,.45);}'
-        . '@media print{.release-notes-badge,.release-notes-current-tag{display:none !important;}}'
-        . '</style>';
-
-    $html .= '<section class="page-heading"><div><span class="eyebrow">تغییرات سامانه</span><h1>تغییرات نسخه‌ها</h1>'
-        . '<p>هر کاری که در هر نسخه عوض شد، درست شد یا اضافه شد — تازه‌ترین بالا.</p></div>'
-        . '<div class="release-notes-page-meta"><small class="muted">' . e((string) count($history)) . ' نسخه ثبت‌شده</small></div></section>';
-
-    foreach ($history as $h) {
-        $v = (string) ($h['version'] ?? '');
-        $isCurrent = $v === $currentVersion;
-        $html .= '<section class="release-notes-block">'
-            . '<div class="release-notes-block-head">'
-            . '<span class="release-notes-badge">' . e((string) ($h['label'] ?? ('نسخهٔ ' . $v))) . '</span>'
-            . ($isCurrent ? '<span class="release-notes-current-tag">نسخهٔ نصب‌شده</span>' : '')
-            . ($isCurrent ? '' : '<span class="release-notes-current-tag">قبلی</span>')
-            . '</div>'
-            . '<h2>' . e((string) ($h['title'] ?? 'تغییرات این نسخه')) . '</h2>'
-            . (($h['lead'] ?? '') !== '' ? '<p class="release-notes-lead">' . e((string) $h['lead']) . '</p>' : '')
-            . '<ul class="release-notes-page-list">' . release_notes_render_items((array) ($h['items'] ?? [])) . '</ul>'
-            . (($h['footnote'] ?? '') !== '' ? '<p class="release-notes-footnote">' . e((string) $h['footnote']) . '</p>' : '')
-            . '</section>';
-    }
-
-    $html .= '<p style="margin-top:.5rem"><a class="button secondary" href="index.php?page=help">راهنمای سامانه</a> <a class="button secondary" href="index.php">بازگشت به داشبورد</a></p>';
-    return $html;
+    return release_notes_history_html();
 }
 
 /** نمایش تک‌نسخه‌ای (وقتی فقط یک نسخه ثبت شده است). */
@@ -228,13 +311,15 @@ function release_notes_page_single(array $notes): string
         . '.release-notes-page-list li{display:flex;gap:.6rem;line-height:2.1;padding:.45rem .6rem;border-radius:10px;}'
         . '.release-notes-page-list li:nth-child(odd){background:rgba(127,127,127,.08);}'
         . '.release-notes-page-list .release-notes-item-icon{opacity:.6;margin-top:.1rem;}'
+        . '.release-notes-badge{display:inline-flex;align-items:center;padding:.15rem .7rem;border-radius:999px;font-size:.78rem;'
+        . 'font-weight:700;border:1px solid #0f766e;color:#0f766e;white-space:nowrap;}'
         . '@media print{.release-notes-page-meta,.release-notes-dismiss{display:none !important;}}'
         . '</style>'
         . '<section class="card form-card"><ul class="release-notes-page-list">' . $items . '</ul>';
     if ($footnote !== '') {
         $html .= '<p class="muted release-notes-footnote" style="margin-top:.75rem">' . e($footnote) . '</p>';
     }
-    $html .= '<p style="margin-top:.5rem"><a class="button secondary" href="index.php?page=help">راهنمای سامانه</a> <a class="button secondary" href="index.php">بازگشت به داشبورد</a></p>';
+    $html .= '<p style="margin-top:.5rem"><a class="button secondary" href="index.php?page=help&tab=releases">تغییرات نسخه‌ها</a> <a class="button secondary" href="index.php">بازگشت به داشبورد</a></p>';
     $html .= '</section>';
     return $html;
 }

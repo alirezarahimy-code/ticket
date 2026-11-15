@@ -950,7 +950,18 @@ if ($page === 'traffic-control-print') {
 
 if ($page === 'help') {
     $helpUser = require_login();
+    // تب‌های راهنما (تصمیم مالک ۲۰۲۶-۱۱-۱۶): «راهنمای کامل» و «تغییرات نسخه‌ها».
+    // تغییرات نسخه‌ها اینجا دائمی است — پاپ‌آپ داشبورد فقط دو بار باز می‌شود.
+    $helpTab = (string) ($_GET['tab'] ?? '');
+    if ($helpTab === 'releases') {
+        render_header('تغییرات نسخه‌ها', $helpUser);
+        echo help_tabs_nav_html('releases');
+        echo release_notes_history_html();
+        render_footer();
+        exit;
+    }
     render_header('راهنمای سامانه', $helpUser);
+    echo help_tabs_nav_html('guide');
     require __DIR__ . '/help-guide.php';
     render_footer();
     exit;

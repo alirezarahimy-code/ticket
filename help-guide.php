@@ -41,6 +41,7 @@
   <a href="#update-packages">۱۰-ج. کدام بستهٔ به‌روزرسانی را نصب کنم؟</a>
   <a href="#chatbot">۱۰-ب. آریا، بات سخنگوی سامانه</a>
   <a href="#faq">۱۲. پرسش‌های متداول</a>
+  <a href="index.php?page=help&amp;tab=releases">تغییرات نسخه‌ها (تاریخچهٔ کامل)</a>
 </nav>
 
 <h2 id="start">۱. ورود به سامانه و آشنایی با منو</h2>

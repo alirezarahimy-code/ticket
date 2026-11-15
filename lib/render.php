@@ -200,6 +200,38 @@ function inspection_food_reminder_markup(?array $user): string
     return '<div class="inspection-food-reminder" id="inspection-food-reminder" hidden aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="inspection-food-reminder-title" data-user-id="' . (int) ($user['id'] ?? 0) . '" data-timezone="' . e(date_default_timezone_get()) . '" data-server-now="' . $now->getTimestamp() . '" data-today-reminder-at="' . $todayReminder->getTimestamp() . '" data-next-reminder-at="' . $nextReminder->getTimestamp() . '" data-due-now="' . ($dueNow ? '1' : '0') . '"><section class="inspection-food-reminder-card"><div class="inspection-food-reminder-icon" aria-hidden="true">!</div><p class="inspection-food-reminder-heading">توجه</p><h2 id="inspection-food-reminder-title">آقای «' . e($name) . '» لطفا استعلام غایبین گروه های غذایی رو انجام بدید برای ثبت در گروه غذایی.</h2><button type="button" class="button inspection-food-reminder-dismiss">متوجه شدم</button></section></div>';
 }
 
+/**
+ * نوار تبِ صفحهٔ راهنما — «راهنمای کامل» و «تغییرات نسخه‌ها».
+ *
+ * تصمیم مالک ۲۰۲۶-۱۱-۱۶: کارت تغییرات نباید هر بار روی داشبورد باز شود.
+ * یک پاپ‌آپ حداکثر دو بار نشان داده می‌شود؛ مرجع همیشگی همان این تب است.
+ *
+ * @param string $active 'guide' یا 'releases'
+ */
+function help_tabs_nav_html(string $active = 'guide'): string
+{
+    $tabs = [
+        'guide' => ['index.php?page=help', 'راهنمای کامل سامانه'],
+        'releases' => ['index.php?page=help&tab=releases', 'تغییرات نسخه‌ها'],
+    ];
+    $html = '<nav class="help-tabs" aria-label="بخش‌های راهنما"><style>'
+        . '.help-tabs{display:flex;gap:.4rem;flex-wrap:wrap;max-width:1100px;margin:0 auto 1rem;'
+        . 'border-bottom:1px solid #e2e8f0;padding-bottom:.5rem;}'
+        . '.help-tabs a{display:inline-flex;align-items:center;padding:.45rem .95rem;border-radius:10px 10px 0 0;'
+        . 'text-decoration:none;color:#475569;font-weight:600;font-size:.92rem;border:1px solid transparent;border-bottom:0;}'
+        . '.help-tabs a:hover{background:#f8fafc;color:#0f766e;}'
+        . '.help-tabs a.active{background:#fff;color:#0f766e;border-color:#e2e8f0;'
+        . 'box-shadow:inset 0 -2px 0 #0f766e;}'
+        . '@media print{.help-tabs{display:none !important;}}'
+        . '</style>';
+    foreach ($tabs as $key => $tab) {
+        $html .= '<a href="' . e($tab[0]) . '"'
+            . ($key === $active ? ' class="active" aria-current="page"' : '')
+            . '>' . e($tab[1]) . '</a>';
+    }
+    return $html . '</nav>';
+}
+
 function render_footer(): void
 {
     $appName = setting('app_name', (string) cfg('app.name', 'سامانه درخواست پشتیبانی'));

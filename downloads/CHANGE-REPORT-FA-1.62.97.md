@@ -85,8 +85,9 @@ C:\xampp\php\php.exe tools\prewindow_check.php --shared
 | `tools/apply_migration_033.php` | **جدید** — ثبت امن ۰۳۳ (`--dry-run` پیش‌فرض، `--apply` صریح) |
 | `tools/test_schema_baseline_offline.php` | **جدید** — گارد ضدبازگشت هشدار کاذب (۲۷/۲۷) |
 | `tools/test_explain_alarms_offline.php` | **جدید** — اثبات فقط‌خواندنی بودن ابزار (۲۴/۲۴) |
-| `lib/release-notes.php` · `food-ticket-release-notes.php` | کارت «تغییرات این به‌روزرسانی» |
+| `lib/release-notes.php` · `food-ticket-release-notes.php` | «تغییرات این به‌روزرسانی» — پاپ‌آپ حداکثر دو بار |
 | `tools/test_1_62_97_drift_offline.php` | گارد دریفت — اثبات نبود عقب‌گرد (۲۹/۲۹) |
+| `tests/test_release_notes_popup.js` | گارد رفتار پاپ‌آپ — بستن و سقف دو نمایش (۲۱/۲۱) |
 | `tools/verify_1_62_97.php` | تأیید ۱۰ ثانیه‌ای نصب |
 
 بدون فایل حذف‌شده، بدون مهاجرت اجرایی، بدون تغییر مسیر چاپ یا ثبت فیش.

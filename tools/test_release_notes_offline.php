@@ -62,7 +62,15 @@ foreach ($history as $h) {
 $setVersion('1.62.97');
 $current = release_notes_current();
 check('روی ۱.۶۲.۹۷، نسخهٔ جاری همان ۱.۶۲.۹۷ است', ($current['version'] ?? '') === '1.62.97', (string) ($current['version'] ?? ''));
-check('کارت داشبورد روی ۱.۶۲.۹۷ رندر می‌شود', strpos(release_notes_dashboard_card(), 'release-notes-card') !== false);
+$card = release_notes_dashboard_card();
+check('پاپ‌آپ تغییرات روی ۱.۶۲.۹۷ رندر می‌شود', strpos($card, 'release-notes-popup') !== false);
+check('پاپ‌آپ ابتدا پنهان است (hidden)', strpos($card, 'id="release-notes-popup"') !== false && strpos($card, ' hidden>') !== false);
+check('سقف نمایش دو بار در HTML ست شده', strpos($card, 'data-max-views="2"') !== false);
+check('دکمهٔ بستن وجود دارد', strpos($card, 'data-rn-close="1"') !== false);
+check('کلید Esc هم می‌بندد', strpos($card, 'Escape') !== false);
+check('شمارندهٔ نمایش در localStorage ثبت می‌شود', strpos($card, 'release-notes-popup-seen:') !== false);
+check('پس از بستن، دیگر باز نمی‌شود (dismissed)', strpos($card, 'release-notes-popup-dismissed:') !== false);
+check('لینک به تب «تغییرات نسخه‌ها» در راهنما', strpos($card, 'page=help&amp;tab=releases') !== false || strpos($card, 'page=help&tab=releases') !== false);
 $page97 = release_notes_page_html();
 check('صفحهٔ تغییرات روی ۱.۶۲.۹۷ هر دو نسخه را دارد',
     strpos($page97, 'نسخهٔ ۱.۶۲.۹۷') !== false && strpos($page97, 'نسخهٔ ۱.۶۳') !== false);
@@ -77,6 +85,29 @@ $page63 = release_notes_page_html();
 check('بعد از ۱.۶۳، بخش ۱.۶۲.۹۷ هنوز در صفحه هست', strpos($page63, 'آزمون جامع Worker') !== false);
 check('بعد از ۱.۶۳، هر دو بلوک رندر می‌شوند', substr_count($page63, 'release-notes-block"') === 2, 'blocks=' . substr_count($page63, 'release-notes-block"'));
 check('بعد از ۱.۶۳، برچسب «نسخهٔ نصب‌شده» یک‌بار است', substr_count($page63, 'نسخهٔ نصب‌شده') === 1);
+
+/* ── ۳-ب) رگرسیون: باگ «بستن کارت کار نمی‌کند» نباید برگردد ──────────── */
+// ریشهٔ باگ: روی خودِ عنصرِ کارت `display:flex` گذاشته شده بود؛ این بر `[hidden]`
+// (که فقط display:none سطح مرورگر است) غلبه می‌کرد و بستن هیچ اثر بصری نداشت.
+$cardSrc = (string) file_get_contents(dirname(__DIR__) . '/lib/release-notes.php');
+// فقط قاعدهٔ پایه سنجیده می‌شود، نه @media print.
+$baseRule = '';
+if (preg_match('/\.release-notes-popup\{([^}]*)\}/', $cardSrc, $m) === 1) {
+    $baseRule = $m[1];
+}
+check(
+    'قاعدهٔ پایهٔ پاپ‌آپ display ندارد (باگ بستن)',
+    $baseRule !== '' && stripos($baseRule, 'display') === false,
+    $baseRule
+);
+check(
+    'قاعدهٔ [hidden] با !important محافظت شده',
+    strpos($cardSrc, '.release-notes-popup[hidden]{display:none !important;}') !== false
+);
+check(
+    'سقف نمایش از یک ثابت واحد می‌آید (۲)',
+    strpos($cardSrc, 'RELEASE_NOTES_POPUP_MAX_VIEWS = 2') !== false
+);
 
 /* ── ۴) نسخهٔ ناشناخته ⇒ آخرین یادداشت (رفتار قبلی حفظ شود) ──────────── */
 $setVersion('9.99.99');
@@ -95,6 +126,20 @@ check("مسیر صفحه در index.php هست (page=release-notes)", strpos($in
 $renderSrc = (string) file_get_contents(dirname(__DIR__) . '/lib/render.php');
 check('لینک «تغییرات سامانه» در فوتر هست', strpos($renderSrc, 'index.php?page=release-notes') !== false);
 check('کارت داشبورد در index.php صدا زده می‌شود', strpos($indexSrc, 'release_notes_dashboard_card()') !== false);
+
+/* ── ۷) تب «تغییرات نسخه‌ها» در راهنما ──────────────────────────────── */
+$helpSrc = (string) file_get_contents(dirname(__DIR__) . '/help-guide.php');
+check('تب «تغییرات نسخه‌ها» از فهرست راهنما لینک شده', strpos($helpSrc, 'tab=releases') !== false);
+
+$historyHtml = release_notes_history_html();
+check('صفحهٔ تاریخچه هر دو نسخه را دارد',
+    strpos($historyHtml, 'نسخهٔ ۱.۶۲.۹۷') !== false && strpos($historyHtml, 'نسخهٔ ۱.۶۳') !== false);
+check('صفحهٔ تاریخچه «نسخهٔ نصب‌شده» را یک‌بار نشان می‌دهد', substr_count($historyHtml, 'نسخهٔ نصب‌شده') === 1);
+check('صفحهٔ تاریخچه همهٔ آیتم‌ها را دارد (کامل، نه خلاصه)',
+    substr_count($historyHtml, '<li>') === count((array) (release_notes_all()['1.62.97']['items'] ?? []))
+        + count((array) (release_notes_all()['1.63']['items'] ?? [])));
+check('صفحهٔ تاریخچه به پاپ‌آپ وابسته نیست (localStorage ندارد)',
+    strpos($historyHtml, 'localStorage') === false);
 
 /* ── پاک‌سازی و خلاصه ────────────────────────────────────────────────── */
 @unlink(APP_ROOT . '/VERSION');
