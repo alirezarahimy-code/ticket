@@ -33,7 +33,7 @@ ROOT = Path(__file__).resolve().parent.parent
 RELEASE_VERSION = "1.63.1"
 REQUIRES_VERSION = "1.63"
 RELEASE_DATE = "2026-11-06"
-PACKAGE_NAME = "ticket-update-1.63-to-1.63.1-r7-cancel-selected-20261115.zip"
+PACKAGE_NAME = "ticket-update-1.63-to-1.63.1-r8-present-fix-20261115.zip"
 REPORT_NAME = "CHANGE-REPORT-FA-1.63.1.md"
 ZIP_DATE = (2026, 11, 6, 3, 0, 0)
 
@@ -231,7 +231,7 @@ def main() -> None:
     payload["VERSION"] = (RELEASE_VERSION + "\n").encode("utf-8")
 
     manifest = {
-        "name": "cancel-selected-r7",
+        "name": "present-fix-r8",
         "version": RELEASE_VERSION,
         "date": RELEASE_DATE,
         "title": TITLE,

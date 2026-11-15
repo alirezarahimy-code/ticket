@@ -168,7 +168,7 @@ if (is_file($htmlFile)) {
     ok(preg_match('/assets\/food-manual-attendance\.js\?v=(\d+)/', $html, $m) === 1,
         'food-manual-attendance.js با شمارهٔ نسخه بارگذاری می‌شود (کش‌شکنی)');
     $assetVer = isset($m[1]) ? (int) $m[1] : 0;
-    ok($assetVer >= 12, 'نسخهٔ کش حداقل ۱۲ است (v=' . $assetVer . ') — تغییر JS دیده می‌شود');
+    ok($assetVer >= 13, 'نسخهٔ کش حداقل ۱۳ است (v=' . $assetVer . ') — تغییر JS دیده می‌شود');
     // فیلد تاریخ «شمسی» است ولی API میلادی می‌خواهد. اگر تجزیه‌گر شمسی را
     // نشناسد، تاریخ بی‌صدا عوض نمی‌شود و فهرست روی «امروز» قفل می‌ماند —
     // نتیجه: فیش‌های یتیم دیروز هرگز دیده نمی‌شوند. کاربر همین را گزارش کرد.
@@ -251,6 +251,20 @@ if (is_file($groupsFile)) {
         'گرفتن فیش، رکورد غیبت همان روز را پاک می‌کند');
     ok(strpos($groups, "!empty(\$absentUserIds[\$userId]) && empty(\$ticketedKeys[\$ticketKey])") !== false,
         'کسی که فیش دارد هرگز «غایب» شمرده نمی‌شود');
+    // ── تردد نماینده: فیش‌دار نباید در فهرست غایبان بماند ──
+    // سناریوی کاربر: نماینده تردد را ثبت کرد، عضو فیش گرفت، ولی رکورد
+    // غیبت همان روز ماند و شخص در فهرست غایبان دیده شد.
+    ok(strpos($groups, 'food_absence_cleared_by_group_run') !== false,
+        'اجرای گروه، رکورد غیبتِ فیش‌دار را پاک می‌کند و Audit می‌گذارد');
+    ok(strpos($groups, 'absence_recorded') !== false,
+        'پنل غیبت، «رکورد موجود» را از «نمایش در فهرست غایبان» جدا نگه می‌دارد');
+    // حذف رکورد غیبت نباید با هر فیشی باشد — فقط فیش واقعیِ همین روز.
+    ok(strpos($groups, 'AND e.event_type IN ("printed", "repeat")') !== false,
+        'اثبات حضور با تردد نماینده، فقط فیش واقعی را می‌پذیرد (نه no_food)');
+    ok(strpos($groups, "AND a.created_at < r.created_at") !== false,
+        'غیبتی که ادمین بعد از تردد عمداً ثبت کرده، پاک نمی‌شود');
+    ok(strpos($groups, "'absent' => !\$isVisitor && !\$hasTicket && isset(\$absences[\$uid])") !== false,
+        'فیش‌دار در فهرست غایبان پنل گروه نمایش داده نمی‌شود');
     // لغو انتخابی، نه گروهی.
     ok(strpos($groups, 'markAbsent = false') !== false,
         'لغو فیش به‌طور پیش‌فرض غیبت ثبت نمی‌کند (کاربر خودش انتخاب می‌کند)');

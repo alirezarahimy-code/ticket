@@ -306,7 +306,41 @@ function food_ticket_manual_attendance_reconcile_range(string $fromDate, string 
             . 'e.source_uid = "manual-attendance" AND e.event_type IN ("printed", "no_food")'
         );
         $absences->execute([$fromDate, $toDate]);
-        $result = ['delivered' => $delivered, 'absences_cleared' => $absences->rowCount()];
+        $clearedByManual = $absences->rowCount();
+
+        // ── غیبتی که «تردد نماینده» نقض می‌کند ──────────────────────────
+        // کشیدن کارت گروه توسط نماینده یعنی او همان روز در محل حاضر بوده و
+        // برای اعضا غذا گرفته. اگر عضوی که فیش گرفته در فهرست غایبان بماند،
+        // دقیقاً همان «تردد این روز ثبت شده ولی غایب» می‌شود که کاربر دید.
+        //
+        // قاعدهٔ اثبات (سه شرط، هر سه لازم):
+        //   ۱) یک اجرای «first» با وضعیت «done» برای همان گروه و همان تاریخ
+        //      وجود دارد ⇒ نماینده واقعاً تردد ثبت کرده.
+        //   ۲) عضو برای همان تاریخ فیش واقعی دارد (نه no_food/unknown).
+        //   ۳) رکورد غیبت «قبل از» ثبتِ همان اجرا ساخته شده است.
+        // بدون شرط ۱، فیشِ چاپِ خودکارِ صبح هم غیبت را پاک می‌کرد و همان
+        // ناسازگاری «۲۳ غایب در برابر ۲۷ حاضر» برمی‌گشت که پیش‌تر اصلاح شد.
+        // شرط ۳ از حذفِ رکوردی که ادمین «بعد از» تردد عمداً ثبت کرده
+        // جلوگیری می‌کند — وگرنه هر بار بازکردن صفحه، تصمیم دستی را
+        // بی‌صدا برمی‌گرداند.
+        $clearedByGroup = 0;
+        try {
+            $groupProof = db()->prepare(
+                'DELETE a FROM food_ticket_daily_absence AS a '
+                . 'INNER JOIN food_ticket_group_runs AS r ON r.group_id = a.group_id AND r.punch_date = a.absence_date '
+                . 'INNER JOIN food_ticket_events AS e ON e.user_id = a.user_id AND e.punch_date = a.absence_date '
+                . 'WHERE a.absence_date BETWEEN ? AND ? '
+                . 'AND r.run_kind = "first" AND r.status = "done" '
+                . 'AND e.event_type IN ("printed", "repeat") '
+                . 'AND a.created_at < r.created_at'
+            );
+            $groupProof->execute([$fromDate, $toDate]);
+            $clearedByGroup = $groupProof->rowCount();
+        } catch (Throwable $groupEx) {
+            app_error_log('[food-absence] group-run reconcile skipped: ' . $groupEx->getMessage());
+        }
+
+        $result = ['delivered' => $delivered, 'absences_cleared' => $clearedByManual + $clearedByGroup];
         $done[$cacheKey] = $result;
         return $result;
     } catch (Throwable $exception) {
@@ -1451,6 +1485,7 @@ function food_ticket_group_try_process(array $item, array $config, array &$order
 
     $absenceClearedFor = [];
     $counts = ['printed' => 0, 'repeat' => 0, 'no_food' => 0, 'skipped' => 0, 'error' => 0, 'absent' => $plan['absent'], 'absence_cleared' => 0];
+
     $payloadJson = json_encode(
         [
             'group_id' => $groupId,
@@ -1519,22 +1554,6 @@ function food_ticket_group_try_process(array $item, array $config, array &$order
             if (!empty($decision['print'])) {
                 food_ticket_enqueue_print($eventId, $config);
                 $counts['printed']++;
-                // فیش گرفتن یعنی حضور. رکورد غیبت همان روز باید پاک شود،
-                // وگرنه شخص هم فیش دارد و هم در فهرست غایبان می‌ماند —
-                // همان ناسازگاری «تردد ثبت شده ولی غایب».
-                if (!isset($absenceClearedFor[$userId]) && function_exists('food_ticket_absence_ensure')
-                    && food_ticket_absence_ensure()) {
-                    try {
-                        $delAbs = db()->prepare('DELETE FROM food_ticket_daily_absence WHERE absence_date = ? AND user_id = ?');
-                        $delAbs->execute([$date, $userId]);
-                        if ($delAbs->rowCount() > 0) {
-                            $counts['absence_cleared'] = ($counts['absence_cleared'] ?? 0) + 1;
-                        }
-                    } catch (Throwable $absEx) {
-                        app_error_log('[food-groups] absence clear failed user=' . $userId . ': ' . $absEx->getMessage());
-                    }
-                    $absenceClearedFor[$userId] = true;
-                }
             } elseif ($decision['event_type'] === 'repeat') {
                 $counts['repeat']++;
             } elseif ($decision['event_type'] === 'no_food') {
@@ -1546,6 +1565,82 @@ function food_ticket_group_try_process(array $item, array $config, array &$order
             $counts['error']++;
             $summary['last_error'] = $ex->getMessage();
             app_error_log('[food-groups] member failed run=' . $runId . ' user=' . $userId . ': ' . $ex->getMessage());
+        }
+    }
+
+    // ── تردد نماینده یعنی حضور ─────────────────────────────────────────
+    // نماینده با کشیدن کارت گروه تردد را ثبت می‌کند؛ یعنی در محل حاضر بوده و
+    // برای اعضا غذا گرفته. اگر عضوی که امروز فیش گرفته در فهرست غایبان
+    // بماند، همان «تردد این روز ثبت شده ولی غایب» می‌شود.
+    //
+    // این پاک‌سازی پس از حلقه انجام می‌شود، نه در شاخهٔ چاپ: عضوی که فیشش
+    // از قبل موجود است با state=already_ticketed از شاخهٔ چاپ رد می‌شود و
+    // رکورد غیبتش هرگز پاک نمی‌شد — همان دو نفرِ گروه ۱.
+    //
+    // فقط اعضایی پاک می‌شوند که برای همین روز فیش واقعی دارند (printed یا
+    // repeat). کسی که «no_food» است یا اصلاً فیشی ندارد، غایب واقعی است و
+    // باید در فهرست بماند.
+    if (function_exists('food_ticket_absence_ensure') && food_ticket_absence_ensure()) {
+        try {
+            $ticketHolders = [];
+            foreach ($plan['rows'] as $planRow) {
+                $planState = (string) ($planRow['state'] ?? '');
+                $planUserId = (int) ($planRow['user_id'] ?? 0);
+                if ($planUserId <= 0 || $planState === 'absent' || $planState === 'inactive') {
+                    continue;
+                }
+                $planNat = (string) ($planRow['national_code'] ?? '');
+                if ($planNat === '') {
+                    continue;
+                }
+                $planKey = 'food:' . $date . ':' . $planNat;
+                if (!empty($ticketed[$planKey])) {
+                    $ticketHolders[$planUserId] = true;
+                }
+            }
+            // مهلتِ ثبت غیبت: تردد نماینده، فهرست را قفل می‌کند. رکوردی که
+            // «قبل» از تردد ساخته شده، با تردد باطل می‌شود (همان دو نفر).
+            // رکوردی که ادمین «بعد» از تردد عمداً ثبت کرده معتبر است و نباید
+            // با اجرای مجدد بی‌صدا پاک شود.
+            $runStartedAt = null;
+            try {
+                $runTimeQ = db()->prepare('SELECT created_at FROM food_ticket_group_runs WHERE id = ? LIMIT 1');
+                $runTimeQ->execute([$runId]);
+                $runStartedAt = (string) ($runTimeQ->fetchColumn() ?: '');
+            } catch (Throwable $runTimeEx) {
+                app_error_log('[food-groups] run time lookup failed: ' . $runTimeEx->getMessage());
+            }
+            if ($runStartedAt !== '' && $ticketHolders !== []) {
+                $absTimeQ = db()->prepare('SELECT user_id, created_at FROM food_ticket_daily_absence WHERE absence_date = ? AND user_id = ? LIMIT 1');
+                foreach ($ticketHolders as $holderId => $_) {
+                    $absTimeQ->execute([$date, (int) $holderId]);
+                    $absRow = $absTimeQ->fetch();
+                    // غیبتی که بعد از تردد ثبت شده، تصمیم آگاهانهٔ ادمین است.
+                    if ($absRow && (string) ($absRow['created_at'] ?? '') >= $runStartedAt) {
+                        unset($ticketHolders[$holderId]);
+                    }
+                }
+            }
+            if ($ticketHolders !== []) {
+                $delAbsent = db()->prepare('DELETE FROM food_ticket_daily_absence WHERE absence_date = ? AND user_id = ?');
+                foreach ($ticketHolders as $holderId => $_) {
+                    $delAbsent->execute([$date, (int) $holderId]);
+                    if ($delAbsent->rowCount() > 0) {
+                        $counts['absence_cleared'] = (int) $counts['absence_cleared'] + 1;
+                        food_ticket_audit('food_absence_cleared_by_group_run', [
+                            'target_type' => 'food_absence',
+                            'target_id' => (int) $holderId,
+                            'target_label' => 'کاربر ' . (int) $holderId . ' / ' . $date,
+                            'old' => 'absent',
+                            'new' => 'present',
+                            'reason' => 'تردد نمایندهٔ گروه — عضو برای همین روز فیش دارد.',
+                            'meta' => ['date' => $date, 'user_id' => (int) $holderId, 'group_id' => $groupId, 'run_id' => $runId],
+                        ]);
+                    }
+                }
+            }
+        } catch (Throwable $absEx) {
+            app_error_log('[food-groups] absence clear failed run=' . $runId . ': ' . $absEx->getMessage());
         }
     }
 
@@ -1576,6 +1671,7 @@ function food_ticket_group_try_process(array $item, array $config, array &$order
             'members_total' => $plan['total'], 'present' => $plan['present'], 'absent' => $plan['absent'],
             'eligible' => $plan['eligible'], 'printed' => $counts['printed'], 'repeat' => $counts['repeat'],
             'no_order' => $counts['no_food'], 'skipped' => $counts['skipped'], 'error' => $counts['error'],
+            'absence_cleared' => (int) $counts['absence_cleared'],
             'orders_available' => $orderMap !== null,
         ],
     ]);
@@ -1585,6 +1681,7 @@ function food_ticket_group_try_process(array $item, array $config, array &$order
     $summary['repeat'] = (int) ($summary['repeat'] ?? 0) + $counts['repeat'];
     $summary['no_food'] = (int) ($summary['no_food'] ?? 0) + $counts['no_food'];
     $summary['absent'] = (int) ($summary['absent'] ?? 0) + $counts['absent'];
+    $summary['absence_cleared'] = (int) ($summary['absence_cleared'] ?? 0) + (int) $counts['absence_cleared'];
     $summary['errors'] = (int) ($summary['errors'] ?? 0) + $counts['error'];
 
     // اگر عضوی خطا داشت، ردیف SOURCE_TABLE می‌ماند تا دور بعد فقط همان‌ها دوباره پردازش شوند.
@@ -2012,13 +2109,27 @@ function food_ticket_api_manual_attendance(string $date = ''): array
         if ($name === '') {
             $name = $employeeNumber !== '' ? $employeeNumber : (trim((string) ($row['username'] ?? '')) ?: 'کاربر #' . $id);
         }
+        $todayRecord = $attendanceByUser[$id] ?? null;
+        // ── فیش‌دار هرگز «غایب» نمایش داده نمی‌شود ──────────────────────
+        // رکورد غیبت ممکن است از قبل مانده باشد (فیش بعد از ثبت غیبت صادر
+        // شده) یا نمایندهٔ گروه تردد را بعداً ثبت کرده باشد. در هر حال کسی
+        // که فیش دارد غذا گرفته؛ نشان‌دادنش در ستون غایب همان ناسازگاری
+        // «تردد این روز ثبت شده» است که کاربر گزارش کرد.
+        // رکورد در دیتابیس پاک نمی‌شود (حذفش کار مسیر «ثبت دستی» است)؛ فقط
+        // نمایش اصلاح می‌شود تا داده از دست نرود.
+        $ticketOnly = false;
+        if ($todayRecord !== null) {
+            $recType = strtolower(trim((string) ($todayRecord['event_type'] ?? '')));
+            $ticketOnly = $recType !== 'no_food' && $recType !== 'unknown';
+        }
         return [
             'id' => $id,
             'pc' => $employeeNumber,
             'name' => $name,
             'active' => (bool) ($row['is_active'] ?? false),
-            'is_absent' => isset($absentUsers[$id]),
-            'today_record' => $attendanceByUser[$id] ?? null,
+            'is_absent' => isset($absentUsers[$id]) && !$ticketOnly,
+            'absence_recorded' => isset($absentUsers[$id]),
+            'today_record' => $todayRecord,
         ];
     }, $people ?: []);
     // ۱.۶۲.۹: «مهمان» همیشه اولین ردیف فهرست است و محدودیت سفارش/تکرار ندارد.
@@ -2984,6 +3095,15 @@ function food_ticket_api_absence_status(int $groupId, string $date, array $actor
     $absences = food_ticket_absence_load($date, $groupId);
     $locked = food_ticket_group_absence_locked($groupId, $date);
     $canOverride = food_ticket_can_override_absence($actor);
+    // فیش‌های همین روز برای اعضا: کسی که فیش دارد غذا گرفته و نباید در
+    // فهرست غایبان دیده شود. این همان علامت زردِ «تردد این روز ثبت شده»
+    // است که کاربر با وجود تردد نماینده می‌دید.
+    $ticketedForAbsence = [];
+    try {
+        $ticketedForAbsence = food_ticket_group_ticketed_keys($members, $date);
+    } catch (Throwable $ticketedEx) {
+        app_error_log('[food-absence] ticketed map failed: ' . $ticketedEx->getMessage());
+    }
     $membersOut = [];
     foreach ($members as $m) {
         $uid = (int) $m['id'];
@@ -2991,15 +3111,20 @@ function food_ticket_api_absence_status(int $groupId, string $date, array $actor
         $homeGroupId = (int) ($visit['home_group_id'] ?? 0);
         $isVisitor = $visit !== null && ($homeGroupId <= 0 || $homeGroupId !== $groupId);
         $splitAbs = food_person_name_split($m);
+        $memberNat = food_ticket_digits($m['national_code'] ?? '');
+        $hasTicket = $memberNat !== '' && !empty($ticketedForAbsence['food:' . $date . ':' . $memberNat]);
         $membersOut[] = [
             'id' => $uid,
             'pc' => (string) ($m['employee_number'] ?? ''),
             'name' => (string) ($m['full_name'] ?? ''),
             'first_name' => $splitAbs['first'],
             'last_name' => $splitAbs['last'],
-            'national_code' => food_ticket_digits($m['national_code'] ?? ''),
+            'national_code' => $memberNat,
             'active' => (bool) ($m['is_active'] ?? false),
-            'absent' => !$isVisitor && isset($absences[$uid]),
+            // فیش‌دار در فهرست غایبان نمی‌آید (رکورد در دیتابیس دست‌نخورده می‌ماند).
+            'absent' => !$isVisitor && !$hasTicket && isset($absences[$uid]),
+            'absence_recorded' => !$isVisitor && isset($absences[$uid]),
+            'has_ticket' => $hasTicket,
             'reason' => !$isVisitor ? (string) ($absences[$uid]['reason'] ?? '') : '',
             'visitor' => $isVisitor,
             'temporary_transfer' => $isVisitor && $homeGroupId > 0,
