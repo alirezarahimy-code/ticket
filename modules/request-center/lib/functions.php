@@ -154,6 +154,33 @@ function ticket_org_manager_rank_sql(): string
         : '';
 }
 
+function key_role_designated_agent_ids(string $serviceGroup): array
+{
+    $serviceGroup = in_array($serviceGroup, ['it', 'support'], true) ? $serviceGroup : 'it';
+    $role = $serviceGroup === 'it' ? 'it_expert' : 'support_expert';
+    if (!function_exists('key_role_user_ids')) {
+        return [];
+    }
+    return key_role_user_ids($role);
+}
+
+/**
+ * انتخاب خودکار مسئول رسیدگی.
+ *
+ * تصمیم مالک (۲۰۲۶-۱۱-۱۶): مسئول تیکت **فقط** از فهرست «کارشناس IT» و
+ * «کارشناس پشتیبانی» در تنظیمات ← نقش‌ها خوانده می‌شود. نقش سیستمی کاربر
+ * (ادمین اصلی، admin، manager) دیگر ملاک نیست.
+ *
+ * چرا این تغییر لازم بود: قبلاً «مالک حوزهٔ IT» با شرط
+ *   role = 'primary_admin' OR (role='admin' AND is_primary_admin=1)
+ * انتخاب می‌شد. پس هر ادمین اصلی سامانه — بی‌آنکه کسی بخواهد — خودکار
+ * مسئول همهٔ تیکت‌های IT می‌شد. بدتر: انتخاب کاربر در فهرست «کارشناس IT»
+ * او را به primary_admin ارتقا می‌داد (actions/role-actions.php)، پس این دو
+ * مفهوم به‌هم گره خورده بودند.
+ *
+ * حالا: فهرست صریح تنظیمات اولویت دارد؛ اگر خالی بود، همان نقش سیستمی
+ * به‌عنوان پشتیبان استفاده می‌شود تا سامانهٔ در حال کار بی‌صاحب نماند.
+ */
 function choose_handling_agent(string $serviceGroup, ?int $departmentId = null, int $requesterId = 0): ?int
 {
     $serviceGroup = in_array($serviceGroup, ['it', 'support'], true) ? $serviceGroup : 'it';
@@ -166,14 +193,38 @@ function choose_handling_agent(string $serviceGroup, ?int $departmentId = null, 
     // کاملاً حذف می‌شوند (نه فقط آخر صف). مدیرِ منصوبِ دستی (org_auto_role=0) همچنان ممکن است
     // با همان شرطِ department_id انتخاب شود. برای اصلاح ریشه‌ای، نقش‌ها از صفحهٔ سازمان ترمیم شوند.
     $orgManagerRank = ticket_org_manager_rank_sql();
+    $candidateFields = 'u.id, u.role, u.is_active, u.is_primary_admin, u.department_id, u.is_it_agent, hu.code AS handling_unit_code';
+    $routingTicket = ['requester_id' => $requesterId, 'service_group' => $serviceGroup, 'department_id' => $departmentId];
 
-    // مالک اصلی هر حوزه اولویت دارد: IT ← ادمین اصلی؛ پشتیبانی ← مدیر پشتیبانی.
+    // ── ۱) منبع اصلی: فهرست صریح «کارشناس IT» / «کارشناس پشتیبانی» از تنظیمات ──
+    // شناسه‌ها به‌ترتیب همان فهرست سنجیده می‌شوند (اولویت انتخاب ادمین) و
+    // علاوه بر آن، کمترین بارِ باز بین همان‌ها ملاک است.
+    $designated = key_role_designated_agent_ids($serviceGroup);
+    if ($designated !== []) {
+        $marks = implode(', ', array_fill(0, count($designated), '?'));
+        $designatedQuery = db()->prepare(
+            'SELECT ' . $candidateFields . ' FROM users u'
+            . ' LEFT JOIN handling_units hu ON hu.id = u.handling_unit_id'
+            . $loadJoin
+            . ' WHERE u.is_active = 1 AND u.id IN (' . $marks . ')'
+            . ticket_org_auto_role_sql()
+            . ' GROUP BY u.id, u.role, u.is_active, u.is_primary_admin, u.department_id, u.is_it_agent, hu.code'
+            . ' ORDER BY ' . $orgManagerRank . 'COUNT(t.id), u.id'
+        );
+        $designatedQuery->execute($designated);
+        foreach ($designatedQuery->fetchAll() as $candidate) {
+            if (ticket_assignee_is_eligible($routingTicket, $candidate, 'ticket_notification_user_can')) {
+                return (int) $candidate['id'];
+            }
+        }
+    }
+
+    // ── ۲) پشتیبان: نقش سیستمی همان حوزه، فقط اگر فهرست بالا خالی یا بی‌کاندید بود ──
+    // مالک اصلی هر حوزه: IT ← ادمین اصلی؛ پشتیبانی ← مدیر پشتیبانی.
     // اگر برای یک حوزه چند مالک فعال تعریف شده باشد، کمترین بارِ باز ملاک می‌شود.
     $ownerCondition = $serviceGroup === 'it'
         ? '(u.role = "primary_admin" OR (u.role = "admin" AND u.is_primary_admin = 1))'
         : 'u.role = "support_manager"';
-    $candidateFields = 'u.id, u.role, u.is_active, u.is_primary_admin, u.department_id, u.is_it_agent, hu.code AS handling_unit_code';
-    $routingTicket = ['requester_id' => $requesterId, 'service_group' => $serviceGroup, 'department_id' => $departmentId];
     $ownerQuery = db()->query('SELECT ' . $candidateFields . ' FROM users u LEFT JOIN handling_units hu ON hu.id = u.handling_unit_id' . $loadJoin . ' WHERE u.is_active = 1 AND ' . $ownerCondition . ' GROUP BY u.id, u.role, u.is_active, u.is_primary_admin, u.department_id, u.is_it_agent, hu.code ORDER BY ' . $orgManagerRank . 'COUNT(t.id), u.id');
     foreach ($ownerQuery->fetchAll() as $candidate) {
         if (ticket_assignee_is_eligible($routingTicket, $candidate, 'ticket_notification_user_can')) {

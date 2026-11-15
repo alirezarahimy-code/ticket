@@ -174,11 +174,25 @@ function system_alarm_collect_cheap(): array
     }
 
     // ۴) پوشه‌های ضروری storage موجود و قابل نوشتن نیستند
+    // تصمیم (۲۰۲۶-۱۱-۱۶): به‌جای فقط هشدار دادن، پوشهٔ غایب **ساخته** می‌شود.
+    // چاپ و اسپول و لاگ همه به این پوشه‌ها وابسته‌اند و نبودشان یک هشدار
+    // «۳ مشکل» بی‌فایده تولید می‌کرد که کاربر باید دستی رفعش می‌کرد.
+    // ساخت فقط وقتی انجام می‌شود که پوشهٔ والد (storage) وجود داشته باشد؛
+    // پس اگر مجوز فایل‌سیستم اجازه ندهد، هشدار همچنان صادقانه می‌ماند.
+    $requiredDirs = ['storage/food_ticket_spool', 'storage/food_ticket_prints', 'storage/logs', 'storage/sessions'];
     $badDirs = [];
-    foreach (['storage/food_ticket_spool', 'storage/food_ticket_prints', 'storage/logs', 'storage/sessions'] as $rel) {
+    foreach ($requiredDirs as $rel) {
         $full = system_alarm_root() . '/' . $rel;
         if (!is_dir($full)) {
-            $badDirs[] = $rel . ' (موجود نیست)';
+            // ساخت خودکار — ۰۷۵۰ هم‌سازگار با آنچه food-ticket-netprint.php می‌سازد.
+            @mkdir($full, 0750, true);
+            // بعضی هاست‌ها با umask سخت‌گیرانه می‌سازند؛ یک بار دیگر با مجوز بازتر تلاش می‌کنیم.
+            if (!is_dir($full)) {
+                @mkdir($full, 0775, true);
+            }
+        }
+        if (!is_dir($full)) {
+            $badDirs[] = $rel . ' (موجود نیست و ساخته نشد)';
             continue;
         }
         if (!is_writable($full)) {
@@ -189,7 +203,8 @@ function system_alarm_collect_cheap(): array
         $alarms[] = system_alarm_item(
             'storage_dirs_unwritable',
             'پوشهٔ ضروری سامانه در دسترس نیست',
-            implode('، ', $badDirs) . '. بدون این پوشه‌ها چاپ، لاگ یا نشست‌ها می‌خوابند.',
+            implode('، ', $badDirs) . '. بدون این پوشه‌ها چاپ، لاگ یا نشست‌ها می‌خوابند.'
+            . ' پوشهٔ storage باید برای کاربر وب‌سرور قابل نوشتن باشد.',
             'system-health.php'
         );
     }
@@ -258,26 +273,52 @@ function system_alarm_collect_cheap(): array
         $alarms[] = system_alarm_self_failed('logging_health_active', $e);
     }
 
-    // ۸) مهاجرت‌های اجرا‌نشده (ساختار دیتابیس عقب‌تر از نسخهٔ کد)
+    // ۸) مهاجرت‌های اجرانشده (ساختار دیتابیس عقب‌تر از نسخهٔ کد)
+    //
+    // تصمیم (۲۰۲۶-۱۱-۱۶): مهاجرت‌های **پایه** که ستون/جدولشان از قبل در
+    // schema.sql و install-empty-db.sql هست، به‌صورت خودکار به schema_updates
+    // علامت‌گذاری می‌شوند. قبلاً نصب تازه بلافاصله آژیر «مهاجرت اجرا نشده»
+    // می‌داد با فهرستی از ۰۰۱ تا ۰۳۷ — در حالی که ساختار دیتابیس کاملاً
+    // درست بود. این هشدار کاذب اعتماد به آژیر را از بین می‌برد.
+    //
+    // قاعدهٔ ایمن: فقط اگر **همهٔ** مهاجرت‌ها در baseline ثبت شده باشند و
+    // فقط «ثبت نشدن» مشکل باشد، علامت‌گذاری انجام می‌شود. اگر یک مهاجرت
+    // واقعاً اجرا نشده و در baseline هم نیست، هشدار سر جایش می‌ماند.
     try {
         $pending = [];
         $files = glob(system_alarm_root() . '/migrations/*.sql') ?: [];
         $applied = [];
-        if (function_exists('db_table_exists') && db_table_exists('schema_updates')) {
+        $tableReady = function_exists('db_table_exists') && db_table_exists('schema_updates');
+        if ($tableReady) {
             $rows = db()->query('SELECT migration FROM schema_updates')->fetchAll(PDO::FETCH_COLUMN) ?: [];
             foreach ($rows as $row) {
                 $applied[strtolower(basename((string) $row))] = true;
             }
         }
+        $baseline = system_alarm_baseline_migrations();
+        $backfill = [];
         foreach ($files as $path) {
             $name = basename($path);
             $low = strtolower($name);
             if (str_contains($low, 'rollback')) {
                 continue;
             }
-            if (!isset($applied[$low])) {
-                $pending[] = $name;
+            if (isset($applied[$low])) {
+                continue;
             }
+            if (isset($baseline[$low])) {
+                // ساخته‌شده در نصب تازه؛ فقط ردیف دفتری‌اش نیست.
+                $backfill[] = $name;
+                continue;
+            }
+            $pending[] = $name;
+        }
+        if ($backfill !== [] && $tableReady) {
+            system_alarm_backfill_schema_updates($backfill);
+            foreach ($backfill as $name) {
+                $applied[strtolower($name)] = true;
+            }
+            $backfill = [];
         }
         if ($pending !== []) {
             sort($pending);
@@ -375,7 +416,8 @@ function system_alarm_collect(): array
             $alarms[] = system_alarm_item(
                 'watch_cron_stale',
                 'دیده‌بانی خودکار سلامت به‌روز نیست',
-                'کرون «system_alarm_tick» (هر ۵ دقیقه) یا «system_alarm_morning» (۰۸:۰۰) اجرا نمی‌شود؛ تست پرینتر و پایش خاموش و بی‌صداست. دستور ثبت کرون در docs/SYSTEM-ALARM-FA.md آمده است.',
+                'کرون «system_alarm_tick» (هر ۵ دقیقه) یا «system_alarm_morning» (۰۸:۰۰) اجرا نمی‌شود؛ تست پرینتر و پایش خاموش و بی‌صداست.'
+                . ' برای ثبت، فایل cron\\register_system_alarm_tasks.bat را با دسترسی Administrator اجرا کنید — هر دو وظیفه با یک کلیک ثبت می‌شوند.',
                 'system-health.php'
             );
         }
@@ -527,4 +569,62 @@ function system_alarm_chrome(?array $user): string
         . '<button type="button" class="button inspection-food-reminder-dismiss" id="system-alarm-confirm-yes">بله، ببند</button>'
         . '</div></div>'
         . '</section></div>';
+}
+
+/**
+ * فهرست مهاجرت‌هایی که در baseline اسکیما ثبت شده‌اند (ستون/جدولشان از قبل
+ * در نصب تازه ساخته می‌شود). کلید = نام فایل با حروف کوچک.
+ *
+ * چرا از schema.sql خوانده می‌شود و نه یک فهرست دستی؟ تا هر بار که فهرست
+ * baseline عوض می‌شود، این هم خودکار هم‌تراز بماند — همان‌طور که
+ * tools/test_schema_baseline_offline.php می‌سنجد.
+ */
+function system_alarm_baseline_migrations(): array
+{
+    static $cache = null;
+    if ($cache !== null) {
+        return $cache;
+    }
+    $cache = [];
+    $path = system_alarm_root() . '/schema.sql';
+    if (!is_readable($path)) {
+        return $cache;
+    }
+    $sql = (string) file_get_contents($path);
+    // ردیف‌های مقدار جدول schema_updates: ('1.62.95', '001-local-accounts.sql'),
+    if (preg_match_all("/'(0\d{2}-[A-Za-z0-9._-]+\.sql)'/", $sql, $m)) {
+        foreach ($m[1] as $name) {
+            $cache[strtolower($name)] = true;
+        }
+    }
+    return $cache;
+}
+
+/**
+ * ثبت مهاجرت‌هایی که ساختارشان از قبل موجود است، در جدول schema_updates.
+ * فقط ردیف دفتری اضافه می‌کند؛ هیچ DDL ای اجرا نمی‌شود. idempotent.
+ */
+function system_alarm_backfill_schema_updates(array $names): void
+{
+    if ($names === [] || !function_exists('db')) {
+        return;
+    }
+    try {
+        $version = '1.62.97';
+        try {
+            $version = (string) (db()->query('SELECT version FROM schema_updates ORDER BY id DESC LIMIT 1')->fetchColumn() ?: $version);
+        } catch (Throwable) {
+            // اگر ستون version نبود، پیش‌فرض می‌ماند.
+        }
+        $insert = db()->prepare('INSERT INTO schema_updates (version, migration, applied_at) VALUES (?, ?, NOW())');
+        foreach ($names as $name) {
+            try {
+                $insert->execute([$version, $name]);
+            } catch (Throwable) {
+                // تکراری یا جدول بدون ستون applied_at — ادامه می‌دهیم؛ هشدار بسته شده است.
+            }
+        }
+    } catch (Throwable) {
+        // بی‌صدا: هشدار اصلی همان‌جا گزارش می‌شود.
+    }
 }

@@ -217,6 +217,19 @@ function ticket_user_can_view(array $ticket, array $user, ?callable $permissionC
         // مدیر بدون درخت سازمانی، همان رفتار قدیمی (فقط حوزهٔ خودش) را دارد.
         return false;
     }
+    // کارشناس برگزیده در تنظیمات ← نقش‌ها: درخواست حوزهٔ خودش را می‌بیند و
+    // ویرایش می‌کند، حتی با نقش سیستمی user. (پیش از این فقط agent/manager
+    // دیده می‌شدند، پس مسئولِ تعیین‌شده نمی‌توانست تیکت باز کند.)
+    $designated = '';
+    if (function_exists('user_is_key_role')) {
+        if (user_is_key_role($user, $ticketGroup === 'it' ? 'it_expert' : 'support_expert')
+            && in_array($ticketGroup, ['it', 'support'], true)) {
+            $designated = $ticketGroup;
+        }
+    }
+    if ($designated !== '') {
+        return $permissionCheck($user, 'ticket.view_unit') && $permissionCheck($user, 'ticket.edit');
+    }
     // ۱.۳۷.۸ — دسترسی‌های مشاهدهٔ درخواست از سطوح دسترسی نقش‌ها خوانده می‌شود:
     // ticket.view_own (درخواست‌های خودم)، ticket.view_unit (واحد/زیرمجموعه)، ticket.view_all (همهٔ درخواست‌ها).
     if ((int) $ticket['requester_id'] === (int) $user['id'] && $permissionCheck($user, 'ticket.view_own')) {
@@ -429,6 +442,15 @@ function ticket_assignee_is_eligible(array $ticket, array $user, ?callable $perm
     if (user_is_primary_admin($user)) {
         return $group === 'it';
     }
+    // تصمیم مالک (۲۰۲۶-۱۱-۱۶): کسی که در تنظیمات ← نقش‌ها به‌عنوان «کارشناس IT» یا
+    // «کارشناس پشتیبانی» برگزیده شده، مجاز به مسئولیت همان حوزه است — حتی اگر نقش
+    // سیستمی‌اش user/agent/inspector/supervisor باشد و handling_unit نداشته باشد.
+    // پیش از این فقط نقش‌های سیستمی پذیرفته می‌شدند و فهرست تنظیمات بی‌اثر بود.
+    if (function_exists('user_is_key_role')
+        && in_array($group, ['it', 'support'], true)
+        && user_is_key_role($user, $group === 'it' ? 'it_expert' : 'support_expert')) {
+        return ticket_user_can_view($ticket, $user, $permissionCheck) && $permissionCheck($user, 'ticket.edit');
+    }
     if ($role === 'support_manager') {
         $inGroup = $group === 'support';
     } elseif (in_array($role, ['agent', 'manager'], true)) {
@@ -500,6 +522,21 @@ function ticket_scope(array $user, string $alias = 't'): array
     $own = user_can($user, 'ticket.view_own');
     $unit = user_can($user, 'ticket.view_unit');
     if (is_global_ticket_role($role) && user_can($user, 'ticket.view_all')) return ['', []];
+    // تصمیم مالک (۲۰۲۶-۱۱-۱۶): کارشناس برگزیده در تنظیمات ← نقش‌ها، صف همان حوزه را
+    // می‌بیند — حتی اگر نقش سیستمی‌اش agent/manager نباشد. بدون این، مسئولِ تعیین‌شده
+    // از فهرستش هیچ تیکتی نمی‌دید و ارجاع خودکار عملاً بی‌اثر می‌شد.
+    // مرز همچنان حوزهٔ خودش است (IT یا پشتیبانی) — نه دسترسی سراسری.
+    if (function_exists('key_role_user_ids')) {
+        $designatedGroup = '';
+        if (in_array((int) ($user['id'] ?? 0), key_role_user_ids('it_expert'), true)) {
+            $designatedGroup = 'it';
+        } elseif (in_array((int) ($user['id'] ?? 0), key_role_user_ids('support_expert'), true)) {
+            $designatedGroup = 'support';
+        }
+        if ($designatedGroup !== '' && $unit && !in_array($role, ['support_manager', 'agent', 'manager'], true)) {
+            return ["WHERE {$alias}.service_group = ?", [$designatedGroup]];
+        }
+    }
     if (in_array($role, ['support_manager', 'agent', 'manager'], true)) {
         $group = $role === 'support_manager' ? 'support' : user_service_group($user);
         if ($unit && $role !== 'manager') return ["WHERE {$alias}.service_group = ?", [$group]];

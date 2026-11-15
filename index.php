@@ -1994,7 +1994,10 @@ if ($page === 'settings') {
     foreach ([
         'supervisor' => ['label' => 'سوپروایز', 'note' => 'دسترسی سوپروایزر: مشاهده و مدیریت درخواست‌ها، تأیید و بستن.'],
         'inspection' => ['label' => 'بازرسی', 'note' => 'مجوز ثبت ورود رسانه در کنترل CD/DVD.'],
-        'it_expert' => ['label' => 'کارشناس IT', 'note' => 'دسترسی ادمین اصلی سامانه.'],
+        'it_expert' => ['label' => 'کارشناس آی تی', 'note' => 'مسئول رسیدگی به تیکت‌های فناوری اطلاعات. فقط از همین فهرست انتخاب می‌شود.'],
+        // تصمیم مالک (۲۰۲۶-۱۱-۱۶): همتای «کارشناس آی تی» برای حوزهٔ پشتیبانی.
+        // مسئول تیکت‌های پشتیبانی فقط از این فهرست خوانده می‌شود.
+        'support_expert' => ['label' => 'کارشناس پشتیبانی', 'note' => 'مسئول رسیدگی به تیکت‌های پشتیبانی. فقط از همین فهرست انتخاب می‌شود.'],
     ] as $roleKey => $roleMeta) {
         $roleIds = key_role_user_ids($roleKey);
         $roleCards .= '<div class="key-role-block"><h3>' . e($roleMeta['label']) . '</h3><p class="muted">' . e($roleMeta['note']) . '</p><div class="form-grid">';
