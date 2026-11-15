@@ -51,7 +51,10 @@ jobs:
             RELEASE_TAG="v${PUSHED#publish-}"
           fi
           echo "release_tag=$RELEASE_TAG" >> "$GITHUB_OUTPUT"
-          echo "برچسب Release: $RELEASE_TAG"
+          # نسخهٔ واقعی از VERSION خوانده می‌شود — همان چیزی که در بسته است.
+          VERSION_LINE=$(head -1 VERSION | tr -d '\r\n')
+          echo "version=$VERSION_LINE" >> "$GITHUB_OUTPUT"
+          echo "برچسب Release: $RELEASE_TAG (نسخه: $VERSION_LINE)"
 
       - name: فهرست فایل‌های پیوست
         run: |
@@ -61,15 +64,45 @@ jobs:
           cat downloads/*.sha256
 
       - name: بررسی سالم بودن فایل‌های این نسخه
+        env:
+          RELEASE_VERSION: ${{ steps.cfg.outputs.version }}
         run: |
           set -euo pipefail
-          # فقط سه فایل این نسخه بررسی می‌شوند. پوشهٔ downloads/ بسته‌های
-          # تاریخی هم دارد که بعضی‌شان ناقص‌اند و نباید در این دروازه دخالت کنند.
+          # فایل‌های این نسخه از VERSION مشتق می‌شوند، نه هارد‌کد.
+          # چرا: فهرست ثابت یعنی هر انتشار بعدی یا رد می‌شود یا نسخهٔ قبلی را
+          # دوباره بررسی می‌کند — دقیقاً همان‌طور که برای ۱.۶۲.۹۸ اتفاق افتاد.
+          # قاعده: هر zip/sha256 که نامش نسخهٔ جاری را دارد + بستهٔ دلتای همان نسخه.
           fail=0
-          for pair in \
-            "ticket-full-1.62.97-20261116.zip" \
-            "ticket-update-1.62.96-to-1.62.97-food-worker-selftest-panel-20261115.zip" \
-            "ticket-update-1_62_96-to-1_63-request-center-rc-candidate-20261114-r16.zip"
+          shopt -s nullglob
+          TARGETS=()
+          # اگر فهرست صریح این نسخه هست، همان مرجع است.
+          # چرا لازم شد: بستهٔ ۱.۶۳ نامش «…-1_62_96-to-1_63-…» است (زیرخط، نه نقطه)
+          # و با هیچ الگوی نسخه‌ای پیدا نمی‌شود.
+          MANIFEST="downloads/RELEASE-ASSETS-$RELEASE_VERSION.txt"
+          if [ -f "$MANIFEST" ]; then
+            echo "── فهرست صریح: $MANIFEST ──"
+            while IFS= read -r line; do
+              line="$(echo "$line" | tr -d '\r' | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')"
+              [ -z "$line" ] && continue
+              case "$line" in \#*) continue;; esac
+              TARGETS+=("$line")
+            done < "$MANIFEST"
+          else
+            # تطبیق دقیق نسخه: بعد از شماره باید . یا - بیاید، وگرنه 1.63
+            # فایل‌های 1.63.1 را هم می‌گیرد (و برعکس RCهای قدیمی را).
+            for f in downloads/*.zip; do
+              case "$(basename "$f")" in
+                *-"$RELEASE_VERSION".zip|*"$RELEASE_VERSION"-*.zip) TARGETS+=("$(basename "$f")");;
+              esac
+            done
+          fi
+          if [ ${#TARGETS[@]} -eq 0 ]; then
+            echo "::error::هیچ بسته‌ای برای نسخهٔ $RELEASE_VERSION پیدا نشد"
+            exit 1
+          fi
+          echo "── فایل‌های نسخهٔ $RELEASE_VERSION ──"
+          printf '  %s\n' "${TARGETS[@]}"
+          for pair in "${TARGETS[@]}"
           do
             path="downloads/$pair"
             sc="$path.sha256"
@@ -102,12 +135,42 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           RELEASE_TAG: ${{ steps.cfg.outputs.release_tag }}
+          RELEASE_VERSION: ${{ steps.cfg.outputs.version }}
           TARGET_SHA: ${{ github.sha }}
         run: |
           set -euo pipefail
           shopt -s nullglob
 
-          NOTES="downloads/RELEASE-NOTES.md"
+          # فقط بسته‌های همین نسخه پیوست می‌شوند.
+          # پیش از این `downloads/*.zip` آپلود می‌شد — یعنی هر Release همهٔ
+          # بسته‌های تاریخی را دوباره سوار می‌کرد و لینک‌های نسخهٔ قبل هم
+          # زیر Release تازه ظاهر می‌شدند.
+          ATTACH=()
+          MANIFEST="downloads/RELEASE-ASSETS-$RELEASE_VERSION.txt"
+          if [ -f "$MANIFEST" ]; then
+            while IFS= read -r line; do
+              line="$(echo "$line" | tr -d '\r' | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')"
+              [ -z "$line" ] && continue
+              case "$line" in \#*) continue;; esac
+              ATTACH+=("downloads/$line")
+            done < "$MANIFEST"
+          else
+            for f in downloads/*.zip; do
+              case "$(basename "$f")" in
+                *-"$RELEASE_VERSION".zip|*"$RELEASE_VERSION"-*.zip) ATTACH+=("$f");;
+              esac
+            done
+          fi
+          if [ ${#ATTACH[@]} -eq 0 ]; then
+            echo "::error::هیچ فایلی برای پیوست نسخهٔ $RELEASE_VERSION نیست"
+            exit 1
+          fi
+          echo "── پیوست‌ها (${#ATTACH[@]}) ──"
+          printf '  %s\n' "${ATTACH[@]}"
+
+          # یادداشت مخصوص نسخه اگر بود، وگرنه یادداشت عمومی.
+          NOTES="downloads/RELEASE-NOTES-$RELEASE_VERSION.md"
+          [ -f "$NOTES" ] || NOTES="downloads/RELEASE-NOTES.md"
           if [ ! -f "$NOTES" ]; then
             echo "یادداشت نسخه نیست؛ از متن پیش‌فرض استفاده می‌شود."
             printf 'بستهٔ %s\n' "$RELEASE_TAG" > /tmp/notes.md
@@ -116,7 +179,7 @@ jobs:
 
           if gh release view "$RELEASE_TAG" >/dev/null 2>&1; then
             echo "Release «$RELEASE_TAG» از قبل هست — فایل‌ها به‌روزرسانی می‌شوند."
-            gh release upload "$RELEASE_TAG" downloads/*.zip --clobber
+            gh release upload "$RELEASE_TAG" "${ATTACH[@]}" --clobber
           else
             # عنوان از VERSION خوانده می‌شود، نه هارد‌کد. وگرنه Release نسخهٔ
             # جدید با عنوان نسخهٔ قبلی منتشر می‌شود (یک بار همین اتفاق افتاد).
@@ -134,7 +197,7 @@ jobs:
               --notes-file "$NOTES" \
               --target "$TARGET_SHA" \
               --latest \
-              downloads/*.zip
+              "${ATTACH[@]}"
           fi
 
       - name: گزارش لینک‌های مستقیم
