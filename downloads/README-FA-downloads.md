@@ -28,11 +28,11 @@
 
 ```
 نام فایل : ticket-update-1.63-to-1.63.1-role-composition-routing-alarm-selfheal-20261106.zip
-حجم     : 126,299 بایت
-SHA-256 : e9440077be678e09c9e0fb309169cc519c7c64dacb8d290afec497c8e9d62815
+حجم     : 171,459 بایت
+SHA-256 : 54536b44aa077e131c14ed455417c62ce1d7b73eebf8831f6d69b1d7100d50db
 ```
 
-**۱۱ فایل، بدون مهاجرت، بدون تغییر جدول.**
+**۲۱ فایل، بدون مهاجرت، بدون تغییر جدول.**
 
 ### نصب
 
@@ -55,11 +55,11 @@ SHA-256 : e9440077be678e09c9e0fb309169cc519c7c64dacb8d290afec497c8e9d62815
 
 ```
 نام فایل : ticket-full-1.63.1-20261106.zip
-حجم     : 11,688,386 بایت
-SHA-256 : b47d68ba294f75613d69d322db2ee60456376ba8842618b66f846ba0df965620
+حجم     : 11,698,111 بایت
+SHA-256 : 3b7d01ddba6a3c9ed677e4dcd3f457e838aad2d0ff70aa5c6e9cb4197b90ce29
 ```
 
-**۱۰۹۲ فایل** — شامل کل خط ۱.۶۲ (۹۵/۹۶/۹۷)، ۱.۶۳، و ۱.۶۳.۱.
+**۱۰۹۴ فایل** — شامل کل خط ۱.۶۲ (۹۵/۹۶/۹۷)، ۱.۶۳، و ۱.۶۳.۱.
 
 ### نصب از صفر
 
@@ -98,6 +98,24 @@ SHA-256 : b47d68ba294f75613d69d322db2ee60456376ba8842618b66f846ba0df965620
 | ۶ | کاربر دو-حوزه‌ای | فقط یک حوزه را می‌دید | هر دو حوزه با هم |
 | ۷ | ارجاع خودکار | **HTTP 500** (TypeError) | کار می‌کند |
 | ۸ | سه آژیر سلامت | فقط هشدار | خودشان را درمان می‌کنند |
+| ۹ | ادمین اصلی (خارج از فهرست) | با فهرست خالی، خودکار مسئول | **هرگز** مسئول نمی‌شود |
+| ۱۰ | ادمین اصلی (داخل فهرست، مثل علی) | فقط برای حوزهٔ IT پذیرفته می‌شد | نقش ادمینش می‌ماند و تیکت همان حوزه را حل می‌کند |
+| ۱۱ | دسترسی سوپروایز | چهار کد | فقط «فضای سوپروایزر» |
+| ۱۲ | تیکت‌های قبلاً بد ارجاع‌شده | — | ابزار `fix_ticket_assignments.php` |
+
+## تیکت‌هایی که قبلاً اشتباه ارجاع شده‌اند
+
+**خودکار جابه‌جا نمی‌شوند.** نسخهٔ ۱.۶۳.۱ فقط جلوی ارجاع‌های تازه را می‌گیرد.
+برای اصلاح:
+
+```bash
+php tools/fix_ticket_assignments.php            # فقط نشان بده
+php tools/fix_ticket_assignments.php --apply    # اعمال کن
+php tools/fix_ticket_assignments.php --apply --ticket 123   # فقط یک تیکت
+```
+
+فقط تیکت‌های **باز** را می‌بیند. مسئولی که در فهرست کارشناسان هست (مثل علی)
+رد می‌شود. هر تغییر در تاریخچهٔ تیکت ثبت می‌شود و همه‌چیز تراکنشی است.
 
 شرح کامل: [CHANGE-REPORT-FA-1.63.1.md](https://github.com/alirezarahimy-code/ticket/blob/arena/22d4eba7-ticket/downloads/CHANGE-REPORT-FA-1.63.1.md)
 
@@ -127,8 +145,9 @@ php tools/explain_alarms.php
 
 | دستور | انتظار |
 |-------|--------|
-| `php tools/test_supervisor_grant_runtime.php` | PASS=۱۴، FAIL=۰ |
+| `php tools/test_supervisor_grant_runtime.php` | PASS=۱۵، FAIL=۰ |
 | `php tools/test_expert_scope_runtime.php` | PASS=۶، FAIL=۰ |
+| `php tools/test_primary_admin_routing_runtime.php` | PASS=۱۲، FAIL=۰ |
 
 ---
 
