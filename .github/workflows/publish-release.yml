@@ -4,33 +4,29 @@ name: Publish release assets
 # چرا: آپلود مستقیم از محیط توسعه به uploads.github.com مسدود است،
 # ولی runner خودِ گیت‌هاب به آن دسترسی دارد.
 #
-# اجرا:
-#   gh workflow run publish-release.yml -f tag=v1.62.97
+# چرا trigger با tag و نه workflow_dispatch؟
+#   workflow_dispatch فقط روی شاخهٔ پیش‌فرض (main) در دسترس است و اجرا نمی‌شود
+#   اگر فایل workflow روی main نباشد. برای رویداد push، گیت‌هاب فایل
+#   workflow را از همان refی می‌خواند که push شده — پس با زدن یک tag روی
+#   شاخهٔ کاری، این workflow بدون نیاز به main اجرا می‌شود.
 #
-# فایل‌ها از شاخهٔ همین workflow خوانده می‌شوند (downloads/*.zip).
+# اجرا:
+#   git tag publish-1.62.97 <sha>
+#   git push origin publish-1.62.97
+#
+#   متغیرهای اختیاری از طریق commit message یا پیش‌فرض‌ها تعیین می‌شوند.
 
 on:
+  push:
+    tags:
+      - 'publish-*'
   workflow_dispatch:
     inputs:
-      tag:
+      release_tag:
         description: 'برچسب نسخه (مثلاً v1.62.97)'
         required: true
+        default: 'v1.62.97'
         type: string
-      title:
-        description: 'عنوان Release'
-        required: true
-        default: 'نسخهٔ ۱.۶۲.۹۷ — کارت آزمون جامع + اصلاح هشدار مهاجرت'
-        type: string
-      prerelease:
-        description: 'به‌عنوان پیش‌انتشار علامت بزن'
-        required: false
-        default: false
-        type: boolean
-      draft:
-        description: 'پیش‌نویس بساز (منتشر نکن)'
-        required: false
-        default: false
-        type: boolean
 
 permissions:
   contents: write
@@ -43,75 +39,107 @@ jobs:
         with:
           fetch-depth: 1
 
+      - name: تعیین برچسب Release
+        id: cfg
+        run: |
+          set -euo pipefail
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            RELEASE_TAG="${{ inputs.release_tag }}"
+          else
+            # publish-1.62.97  →  v1.62.97
+            PUSHED="${GITHUB_REF_NAME}"
+            RELEASE_TAG="v${PUSHED#publish-}"
+          fi
+          echo "release_tag=$RELEASE_TAG" >> "$GITHUB_OUTPUT"
+          echo "برچسب Release: $RELEASE_TAG"
+
       - name: فهرست فایل‌های پیوست
         run: |
           echo "── فایل‌های موجود ──"
           ls -la downloads/*.zip
+          echo "── checksum ها ──"
+          cat downloads/*.sha256
 
       - name: بررسی سالم بودن فایل‌ها
         run: |
           set -euo pipefail
+          shopt -s nullglob
           fail=0
-          while IFS= read -r line; do
-            hash="${line%%  *}"
-            file="${line##*  }"
-            if [ ! -f "$file" ]; then
-              echo "::error::فایل نیست: $file"
-              fail=1
-              continue
-            fi
-            actual=$(sha256sum "$file" | cut -d' ' -f1)
-            if [ "$actual" != "$hash" ]; then
-              echo "::error::SHA-256 نمی‌خواند: $file"
-              echo "  انتظار: $hash"
-              echo "  واقعی : $actual"
-              fail=1
-            else
-              echo "✓ $file"
-            fi
-          done < <(cat downloads/*.sha256)
+          count=0
+          for sc in downloads/*.sha256; do
+            # هر خط: "<hash>  <filename>"
+            while IFS= read -r line; do
+              [ -z "$line" ] && continue
+              hash=$(echo "$line" | awk '{print $1}')
+              file=$(echo "$line" | awk '{print $2}' | sed 's|^downloads/||')
+              path="downloads/$file"
+              if [ ! -f "$path" ]; then
+                echo "::error::فایل نیست: $path"
+                fail=1
+                continue
+              fi
+              actual=$(sha256sum "$path" | awk '{print $1}')
+              if [ "$actual" != "$hash" ]; then
+                echo "::error::SHA-256 نمی‌خواند: $path"
+                echo "  انتظار: $hash"
+                echo "  واقعی : $actual"
+                fail=1
+              else
+                echo "✓ $file  ($actual)"
+                count=$((count+1))
+              fi
+            done < "$sc"
+          done
+          echo "── $count فایل تأیید شد ──"
           exit $fail
 
-      - name: ساخت Release
+      - name: ساخت Release و پیوست فایل‌ها
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          RELEASE_TAG: ${{ steps.cfg.outputs.release_tag }}
+          TARGET_SHA: ${{ github.sha }}
         run: |
           set -euo pipefail
-          TAG="${{ inputs.tag }}"
-          TITLE="${{ inputs.title }}"
+          shopt -s nullglob
 
-          EXTRA=()
-          [ "${{ inputs.prerelease }}" = "true" ] && EXTRA+=(--prerelease)
-          [ "${{ inputs.draft }}" = "true" ] && EXTRA+=(--draft)
+          NOTES="downloads/RELEASE-NOTES.md"
+          if [ ! -f "$NOTES" ]; then
+            echo "یادداشت نسخه نیست؛ از متن پیش‌فرض استفاده می‌شود."
+            printf 'بستهٔ %s\n' "$RELEASE_TAG" > /tmp/notes.md
+            NOTES=/tmp/notes.md
+          fi
 
-          # اگر Release موجود است، فقط فایل‌ها را جایگزین کن
-          if gh release view "$TAG" >/dev/null 2>&1; then
-            echo "Release «$TAG» از قبل هست — فایل‌ها به‌روزرسانی می‌شوند."
-            gh release upload "$TAG" downloads/*.zip --clobber
+          if gh release view "$RELEASE_TAG" >/dev/null 2>&1; then
+            echo "Release «$RELEASE_TAG» از قبل هست — فایل‌ها به‌روزرسانی می‌شوند."
+            gh release upload "$RELEASE_TAG" downloads/*.zip --clobber
           else
-            echo "ساخت Release «$TAG»…"
-            gh release create "$TAG" \
-              --title "$TITLE" \
-              --notes-file downloads/RELEASE-NOTES.md \
-              "${EXTRA[@]}" \
+            echo "ساخت Release «$RELEASE_TAG»…"
+            gh release create "$RELEASE_TAG" \
+              --title "نسخهٔ ۱.۶۲.۹۷ — کارت آزمون جامع و اصلاح هشدار مهاجرت" \
+              --notes-file "$NOTES" \
+              --target "$TARGET_SHA" \
               downloads/*.zip
           fi
 
-      - name: گزارش لینک‌ها
+      - name: گزارش لینک‌های مستقیم
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          RELEASE_TAG: ${{ steps.cfg.outputs.release_tag }}
         run: |
           set -euo pipefail
-          REPO="${{ github.repository }}"
-          TAG="${{ inputs.tag }}"
-          echo "## لینک‌های دانلود مستقیم" >> "$GITHUB_STEP_SUMMARY"
-          echo "" >> "$GITHUB_STEP_SUMMARY"
-          for f in downloads/*.zip; do
-            name=$(basename "$f")
-            url="https://github.com/${REPO}/releases/download/${TAG}/${name}"
-            echo "- [\`$name\`]($url)" >> "$GITHUB_STEP_SUMMARY"
-            echo "  <$url>" >> "$GITHUB_STEP_SUMMARY"
-          done
-          echo "" >> "$GITHUB_STEP_SUMMARY"
-          echo "صفحهٔ Release: https://github.com/${REPO}/releases/tag/${TAG}" >> "$GITHUB_STEP_SUMMARY"
+          shopt -s nullglob
+          REPO="${GITHUB_REPOSITORY}"
+          {
+            echo "## لینک‌های دانلود مستقیم"
+            echo ""
+            for f in downloads/*.zip; do
+              name=$(basename "$f")
+              url="https://github.com/${REPO}/releases/download/${RELEASE_TAG}/${name}"
+              echo "- \`$name\`"
+              echo ""
+              echo "  <$url>"
+              echo ""
+            done
+            echo "صفحهٔ Release: https://github.com/${REPO}/releases/tag/${RELEASE_TAG}"
+          } >> "$GITHUB_STEP_SUMMARY"
           cat "$GITHUB_STEP_SUMMARY"
