@@ -1875,6 +1875,10 @@ function food_ticket_event_is_orphan_ticket(?array $event): bool
     }
     $printStatus = strtolower(trim((string) ($event['print_status'] ?? '')));
     $deliveryStatus = strtolower(trim((string) ($event['delivery_status'] ?? '')));
+    // «بدون فیش» ردیف عمدی است، نه فیشِ گم‌شده؛ فیشی ساخته نشده که در صف بماند.
+    if (strtolower(trim((string) ($event['event_type'] ?? ''))) === 'no_food') {
+        return false;
+    }
     // چاپ‌شده یا تحویل‌شده ⇒ فیش واقعی است؛ دست نزن.
     if ($printStatus === 'printed' || $deliveryStatus === 'delivered') {
         return false;
@@ -3122,6 +3126,134 @@ function food_ticket_api_delivery(int $eventId, string $action, string $reason, 
         $changed = food_ticket_deliver_event($eventId, $actor, $reason);
     }
     return ['ok' => true, 'changed' => $changed, 'id' => $eventId, 'delivery_status' => $action === 'undeliver' ? 'pending' : 'delivered'];
+}
+
+/**
+ * لغو فیش یک روز و برگرداندن شخص به وضعیت «تردد این روز ثبت نشده».
+ *
+ * ── چرا لازم است؟ ──────────────────────────────────────────────────────
+ * اگر فیشی به‌اشتباه چاپ شده باشد (شخص واقعاً نیامده)، تنها راه اصلاح
+ * این بود که فیش دست‌نخورده بماند و شخص در فهرست «دارای فیش» دیده شود.
+ * نتیجه: او در فهرست غایبان هم نمی‌آمد، چون غیبت ثبت نشده بود.
+ *
+ * ── چه می‌کند؟ ─────────────────────────────────────────────────────────
+ *   ۱) ردیف فیش را به event_type = "no_food" تبدیل می‌کند (فیش لغو شد).
+ *   ۲) delivery_status را pending و print_status را not_printed می‌کند.
+ *   ۳) سابقهٔ فیش قبلی را در source_payload نگه می‌دارد (حذف نمی‌شود).
+ *   ۴) گزینه‌ای (پیش‌فرض روشن) شخص را «غایب» همان روز ثبت می‌کند، پس
+ *      خودکار در فهرست غایبان می‌آید — همان چیزی که کاربر خواست.
+ *
+ * ⚠️ فیشی که سابقهٔ چاپ فیزیکی دارد فقط با دسترسی سطح بالاتر لغو می‌شود،
+ *    تا لغو تصادفیِ فیش واقعی رخ ندهد.
+ *
+ * @return array<string,mixed>
+ */
+function food_ticket_cancel_ticket_for_user(int $userId, string $date, array $actor, string $reason, bool $markAbsent = true): array
+{
+    if ($userId <= 0) {
+        throw new RuntimeException('یک کارمند را انتخاب کنید.');
+    }
+    $reason = trim($reason);
+    if ($reason === '' || mb_strlen($reason, 'UTF-8') > 300) {
+        throw new RuntimeException('برای لغو فیش، ثبت علت الزامی است (حداکثر ۳۰۰ نویسه).');
+    }
+    $date = food_ticket_manual_attendance_date($date);
+
+    if (!function_exists('user_can') || !user_can($actor, 'food.manual_attendance_edit')) {
+        throw new RuntimeException('ویرایش ثبت دستی فیش/تردد مجاز نیست.');
+    }
+
+    $q = db()->prepare(
+        'SELECT id, event_type, print_status, delivery_status, source_key, source_uid, source_payload, ticket_key, food_type '
+        . 'FROM food_ticket_events WHERE user_id = ? AND punch_date = ? AND event_type <> "unknown" '
+        . 'ORDER BY id DESC LIMIT 1'
+    );
+    $q->execute([$userId, $date]);
+    $event = $q->fetch() ?: null;
+    if ($event === null) {
+        throw new RuntimeException('برای این کارمند در این روز فیشی پیدا نشد.');
+    }
+    $eventId = (int) ($event['id'] ?? 0);
+    if ($eventId <= 0) {
+        throw new RuntimeException('ردیف فیش معتبر نیست.');
+    }
+    $printStatus = strtolower(trim((string) ($event['print_status'] ?? '')));
+    if ((string) ($event['event_type'] ?? '') === 'no_food') {
+        throw new RuntimeException('این ردیف از قبل «بدون فیش» است؛ چیزی برای لغو نیست.');
+    }
+    // فیشی که واقعاً چاپ و تحویل شده، لغوش فقط با دسترسی سطح بالاتر.
+    $wasDelivered = strtolower(trim((string) ($event['delivery_status'] ?? ''))) === 'delivered';
+    if ($wasDelivered && !food_ticket_can_override_absence($actor)) {
+        throw new RuntimeException('این فیش تحویل شده است؛ لغو آن دسترسی سطح بالاتر می‌خواهد.');
+    }
+
+    // سابقهٔ فیش قبلی حفظ می‌شود — نه پاک.
+    $oldPayload = json_decode((string) ($event['source_payload'] ?? ''), true);
+    if (!is_array($oldPayload)) {
+        $rawOld = (string) ($event['source_payload'] ?? '');
+        $oldPayload = $rawOld !== '' ? ['original_source_payload' => $rawOld] : [];
+    }
+    $oldPayload['cancelled_ticket'] = [
+        'event_type' => (string) ($event['event_type'] ?? ''),
+        'print_status' => $printStatus,
+        'delivery_status' => (string) ($event['delivery_status'] ?? ''),
+        'food_type' => (string) ($event['food_type'] ?? ''),
+        'ticket_key' => (string) ($event['ticket_key'] ?? ''),
+        'cancelled_at' => date('Y-m-d H:i:s'),
+        'actor_id' => (int) ($actor['id'] ?? 0),
+        'reason' => $reason,
+    ];
+    $payloadJson = json_encode($oldPayload, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_INVALID_UTF8_SUBSTITUTE);
+    if ($payloadJson === false) {
+        throw new RuntimeException('ثبت سابقهٔ لغو انجام نشد.');
+    }
+
+    // ticket_key باید خالی شود تا فیش لغوشده جای یکتای فیش فعلی را نگیرد.
+    $upd = db()->prepare(
+        'UPDATE food_ticket_events SET event_type = "no_food", print_status = "not_printed", '
+        . 'delivery_status = "pending", delivered_at = NULL, delivered_by = NULL, ticket_key = NULL, '
+        . 'last_error = ?, source_payload = ?, processed_at = NOW(), next_retry_at = NULL WHERE id = ?'
+    );
+    $upd->execute(['فیش لغو شد؛ علت: ' . $reason, $payloadJson, $eventId]);
+    if ($upd->rowCount() !== 1) {
+        throw new RuntimeException('ردیف هم‌زمان تغییر کرده است؛ فهرست را تازه کنید.');
+    }
+
+    $absenceSet = false;
+    if ($markAbsent && function_exists('food_ticket_absence_ensure') && food_ticket_absence_ensure()) {
+        try {
+            $ins = db()->prepare(
+                'INSERT INTO food_ticket_daily_absence (absence_date, group_id, user_id, reason, created_by) '
+                . 'VALUES (?, NULL, ?, ?, ?) ON DUPLICATE KEY UPDATE reason = VALUES(reason)'
+            );
+            $ins->execute([$date, $userId, mb_substr('لغو فیش — ' . $reason, 0, 300), (int) ($actor['id'] ?? 0) ?: null]);
+            $absenceSet = true;
+        } catch (Throwable $e) {
+            app_error_log('[food-cancel] absence insert failed: ' . $e->getMessage());
+        }
+    }
+
+    if (function_exists('food_ticket_audit')) {
+        food_ticket_audit('food_ticket_cancelled', [
+            'user_id' => $actor['id'] ?? null,
+            'target_type' => 'food_ticket_event',
+            'target_id' => $eventId,
+            'target_label' => 'کاربر ' . $userId . ' / ' . $date,
+            'old' => (string) ($event['event_type'] ?? ''),
+            'new' => 'no_food',
+            'reason' => $reason,
+            'meta' => ['date' => $date, 'user_id' => $userId, 'print_status' => $printStatus, 'delivered' => $wasDelivered],
+        ]);
+    }
+
+    return [
+        'ok' => true,
+        'user_id' => $userId,
+        'date' => $date,
+        'event_id' => $eventId,
+        'absence_set' => $absenceSet,
+        'message' => 'فیش لغو شد' . ($absenceSet ? ' و شخص غایب ثبت شد.' : '.'),
+    ];
 }
 
 function food_ticket_api_delete_group(int $id, int $actorId = 0): void

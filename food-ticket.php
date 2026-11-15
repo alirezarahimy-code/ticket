@@ -121,6 +121,10 @@ function food_ticket_route_edit_permission(string $route): ?string
     if (in_array($route, ['reprint-errors', 'delivery'], true)) {
         return $route === 'delivery' ? 'food.manual_attendance_edit' : 'food.printer_edit';
     }
+    // لغو فیش همان مجوز ثبت دستی را می‌خواهد (همان کسی که می‌تواند ثبت کند).
+    if ($route === 'cancel-ticket') {
+        return 'food.manual_attendance_edit';
+    }
     return null;
 }
 
@@ -5300,6 +5304,25 @@ function food_ticket_api_handle(string $route, array $user): never
                 food_ticket_api_json(['error' => 'لغو تحویل فقط با دسترسی سطح بالاتر امکان دارد.'], 403);
             }
             food_ticket_api_json(food_ticket_api_delivery((int) ($body['id'] ?? $body['event_id'] ?? 0), $action, trim((string) ($body['reason'] ?? '')), $user));
+        }
+        if ($_SERVER['REQUEST_METHOD'] === 'POST' && $route === 'cancel-ticket') {
+            // لغو فیش یک روز و برگرداندن شخص به «تردد این روز ثبت نشده».
+            // با mark_absent (پیش‌فرض ۱) شخص غایب ثبت می‌شود و خودکار در
+            // فهرست غایبان می‌آید.
+            $body = food_ticket_api_body();
+            $cancelUserId = (int) ($body['user_id'] ?? $body['id'] ?? 0);
+            $cancelDate = food_ticket_iso_date_input($body['date'] ?? '') ?? '';
+            if ($cancelDate === '') {
+                food_ticket_api_json(['error' => 'تاریخ معتبر نیست.'], 400);
+            }
+            $cancelMarkAbsent = !array_key_exists('mark_absent', $body) || (bool) filter_var($body['mark_absent'], FILTER_VALIDATE_BOOLEAN);
+            food_ticket_api_json(food_ticket_cancel_ticket_for_user(
+                $cancelUserId,
+                $cancelDate,
+                $user,
+                trim((string) ($body['reason'] ?? '')),
+                $cancelMarkAbsent
+            ));
         }
         if ($_SERVER['REQUEST_METHOD'] === 'POST' && $route === 'cleanup-source_row') {
             // پاک‌سازی ردیف‌های باقی‌مانده در SOURCE_TABLE برای فیش‌های ثبت‌شده (dry_run=1 فقط تشخیص).

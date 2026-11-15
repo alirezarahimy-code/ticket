@@ -28,10 +28,10 @@ from pathlib import Path, PurePosixPath, PureWindowsPath
 ROOT = Path(__file__).resolve().parent.parent
 BASE_COMMIT = "00e7e759bda9460dcb245812e2e6b617670efade"  # main — ۱.۶۲.۹۵
 DELTA_163 = ROOT / "downloads" / "ticket-update-1_62_96-to-1_63-request-center-rc-candidate-20261114-r16.zip"
-DELTA_1631 = ROOT / "downloads" / "ticket-update-1.63-to-1.63.1-r5-absence-integrity-20261115.zip"
+DELTA_1631 = ROOT / "downloads" / "ticket-update-1.63-to-1.63.1-r6-cancel-ticket-20261115.zip"
 
 RELEASE_VERSION = "1.63.1"
-PACKAGE_NAME = "ticket-full-1.63.1-r5-20261115.zip"
+PACKAGE_NAME = "ticket-full-1.63.1-r6-20261115.zip"
 NOTE_NAME = "00-FULL-PACKAGE-1.63.1-FA.txt"
 ZIP_DATE = (2026, 11, 6, 4, 0, 0)
 PREFIX = "ticket/"

@@ -11,7 +11,7 @@
 اگر روی سامانه‌تان **۱.۶۳** نصب است:
 
 1. **پشتیبان بگیرید** — پوشهٔ نصب + dump پایگاه داده.
-2. **[بستهٔ میانی](https://github.com/alirezarahimy-code/ticket/releases/download/v1.63.1/ticket-update-1.63-to-1.63.1-r5-absence-integrity-20261115.zip)** را دانلود کنید.
+2. **[بستهٔ میانی](https://github.com/alirezarahimy-code/ticket/releases/download/v1.63.1/ticket-update-1.63-to-1.63.1-r6-cancel-ticket-20261115.zip)** را دانلود کنید.
 3. **محتوای پوشهٔ `files/`** را روی پوشهٔ نصب کپی کنید (نه خودِ پوشهٔ `files` را).
 4. بررسی کنید `VERSION` حالا `1.63.1` است.
 5. `cron\register_system_alarm_tasks.bat` را با دسترسی Administrator اجرا کنید.

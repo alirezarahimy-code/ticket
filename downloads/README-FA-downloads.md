@@ -24,15 +24,15 @@
 
 **اگر ۱.۶۳ را نصب کرده‌اید، فقط این را لازم دارید.**
 
-**[⬇ دانلود بستهٔ میانی ۱.۶۳.۱](https://github.com/alirezarahimy-code/ticket/releases/download/v1.63.1/ticket-update-1.63-to-1.63.1-r5-absence-integrity-20261115.zip)**
+**[⬇ دانلود بستهٔ میانی ۱.۶۳.۱](https://github.com/alirezarahimy-code/ticket/releases/download/v1.63.1/ticket-update-1.63-to-1.63.1-r6-cancel-ticket-20261115.zip)**
 
 ```
-نام فایل : ticket-update-1.63-to-1.63.1-r5-absence-integrity-20261115.zip
-حجم     : 393,666 بایت
-SHA-256 : dbcf88e138f555e612ba1001f9015558fc607eabb7c1b0c08ef2e0a22efc524e
+نام فایل : ticket-update-1.63-to-1.63.1-r6-cancel-ticket-20261115.zip
+حجم     : 396,826 بایت
+SHA-256 : 2aee882ef246e579198b3d1371767dde8505afd8d815165b27b807d08ac299c3
 ```
 
-**۳۱ فایل، بدون مهاجرت، بدون تغییر جدول. — نسخهٔ r5**
+**۳۱ فایل، بدون مهاجرت، بدون تغییر جدول. — نسخهٔ r6**
 
 ### نصب
 
@@ -54,15 +54,15 @@ SHA-256 : dbcf88e138f555e612ba1001f9015558fc607eabb7c1b0c08ef2e0a22efc524e
 
 **اگر سامانه ندارید یا روی ۱.۶۲.x هستید.**
 
-**[⬇ دانلود بستهٔ کامل ۱.۶۳.۱](https://github.com/alirezarahimy-code/ticket/releases/download/v1.63.1/ticket-full-1.63.1-r5-20261115.zip)**
+**[⬇ دانلود بستهٔ کامل ۱.۶۳.۱](https://github.com/alirezarahimy-code/ticket/releases/download/v1.63.1/ticket-full-1.63.1-r6-20261115.zip)**
 
 ```
-نام فایل : ticket-full-1.63.1-r5-20261115.zip
-حجم     : 11,739,844 بایت
-SHA-256 : abff13f95f4917408ea081c5d19e561125b0d20975cd405fb80aad8b47a60cef
+نام فایل : ticket-full-1.63.1-r6-20261115.zip
+حجم     : 11,742,991 بایت
+SHA-256 : 3064dbfcf8fa4f937b142236f729837ad6ccd6303b562372cb4484185fc8e3a4
 ```
 
-**۱۰۹۸ فایل** — نسخهٔ r5 — شامل کل خط ۱.۶۲ (۹۵/۹۶/۹۷)، ۱.۶۳، و ۱.۶۳.۱.
+**۱۰۹۸ فایل** — نسخهٔ r6 — شامل کل خط ۱.۶۲ (۹۵/۹۶/۹۷)، ۱.۶۳، و ۱.۶۳.۱.
 
 ### نصب از صفر
 

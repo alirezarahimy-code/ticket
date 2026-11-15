@@ -168,7 +168,7 @@ if (is_file($htmlFile)) {
     ok(preg_match('/assets\/food-manual-attendance\.js\?v=(\d+)/', $html, $m) === 1,
         'food-manual-attendance.js با شمارهٔ نسخه بارگذاری می‌شود (کش‌شکنی)');
     $assetVer = isset($m[1]) ? (int) $m[1] : 0;
-    ok($assetVer >= 10, 'نسخهٔ کش حداقل ۱۰ است (v=' . $assetVer . ') — تغییر JS دیده می‌شود');
+    ok($assetVer >= 11, 'نسخهٔ کش حداقل ۱۱ است (v=' . $assetVer . ') — تغییر JS دیده می‌شود');
     // فیلد تاریخ «شمسی» است ولی API میلادی می‌خواهد. اگر تجزیه‌گر شمسی را
     // نشناسد، تاریخ بی‌صدا عوض نمی‌شود و فهرست روی «امروز» قفل می‌ماند —
     // نتیجه: فیش‌های یتیم دیروز هرگز دیده نمی‌شوند. کاربر همین را گزارش کرد.
@@ -237,6 +237,20 @@ if (is_file($groupsFile)) {
         ok(strpos((string) file_get_contents($jsOrphan), "'not_printed', 'pending', 'printing'") !== false,
             'کلاینت not_printed را هم یتیم می‌شمارد (هم‌تراز سرور)');
     }
+    // ── لغو فیش: برگرداندن شخص به «تردد ثبت نشده» + ثبت غیبت ──
+    ok(strpos($groups, 'function food_ticket_cancel_ticket_for_user') !== false,
+        'تابع لغو فیش وجود دارد');
+    ok(strpos($groups, "event_type = \"no_food\", print_status = \"not_printed\"") !== false,
+        'لغو فیش ردیف را به «بدون فیش» برمی‌گرداند');
+    ok(strpos($groups, 'cancelled_ticket') !== false,
+        'سابقهٔ فیش لغوشده در source_payload حفظ می‌شود');
+    ok(strpos($groups, 'INSERT INTO food_ticket_daily_absence') !== false,
+        'لغو فیش شخص را غایب ثبت می‌کند (خودکار در فهرست غایبان)');
+    // no_food ردیف عمدی است، نه فیش گم‌شده در صف.
+    ok(strpos($groups, "=== 'no_food') {\n        return false;") !== false
+        || strpos($groups, "=== 'no_food') {") !== false,
+        'ردیف no_food «یتیم» شمرده نمی‌شود (سرور)');
+
     // mount نباید بی‌صدا شکست بخورد.
     ok(strpos((string) file_get_contents($root . '/food-ticket-web/assets/food-manual-attendance.js'),
         'اتصال به سرور برقرار نشد؛ صفحه را از پنل اصلی باز کنید.') !== false,
