@@ -127,6 +127,12 @@
         const why = ps === 'print_error' || ps === 'failed' ? 'خطای چاپ' : 'در صف چاپ ماند';
         return '<span class="status warn">' + why + ' — قابل ثبت دستی</span>';
       }
+      // غایب ولی فیش چاپ‌شده: این ردیف «حاضر» نیست. چاپ فیش یعنی غذا
+      // سهمیه گرفت (شاید کسی دیگر برداشته)، نه اینکه شخص آمده باشد.
+      // پیش‌تر فقط «دارای فیش» نوشته می‌شد و کاربر فکر می‌کرد حاضر است.
+      if (u.is_absent) {
+        return '<span class="status bad">غایب است — فیشش چاپ شده</span>';
+      }
       return '<span class="status ok">دارای فیش این روز</span>';
     }
     if (record.source_uid === 'manual-attendance') return '<span class="status warn">ثبت دستی این روز</span>';
@@ -160,7 +166,12 @@
     // فیش‌های یتیم همین روز — برای دکمهٔ انتخاب گروهی.
     // چرا: رخداد پرینتر خراب یعنی ده‌ها نفر یک‌جا در صف ماندند؛ کلیک نفر‌به‌نفر
     // عملاً یعنی همان ثبت دستی که کاربر نمی‌خواهد.
-    const orphanRows = filtered.filter((u) => isOrphanTicket(u) && canIssueManualTicket());
+    // دکمهٔ گروهی از کل فهرست ساخته می‌شود، نه از نتیجهٔ جستجو.
+    // پیش‌تر اگر کاربر چیزی در «جستجوی زنده» تایپ کرده بود، ردیف‌های یتیم
+    // بیرون از نتیجهٔ جستجو می‌ماندند و دکمه ناپدید می‌شد — با اینکه ردیف
+    // یتیم در فهرست بود. (پیام «ردیف یتیم هست ولی نمایش داده نمی‌شود»
+    // دقیقاً همین حالت را نشان می‌داد.)
+    const orphanRows = S.manualEmployees.filter((u) => isOrphanTicket(u) && canIssueManualTicket());
     const orphanCount = orphanRows.length;
     // تشخیص: اگر دکمه نیامد، کاربر باید بتواند بگوید کدام شرط شکسته است.
     // بدون این، سه حالت (بدون داده / بدون مجوز / روز بدون یتیم) از هم
@@ -172,7 +183,7 @@
         return 'مجوز «ویرایش ثبت دستی» برای این کاربر فعال نیست.';
       }
       const anyOrphan = S.manualEmployees.some((u) => isOrphanTicket(u));
-      if (anyOrphan) return 'ردیف یتیم هست ولی در فهرست نمایش داده نمی‌شود.';
+      if (anyOrphan) return 'ردیف یتیم هست ولی نمایش داده نمی‌شود؛ صفحه را دوباره بارگذاری کنید.';
       const withRecord = S.manualEmployees.filter((u) => u && u.today_record).length;
       if (withRecord === 0) {
         return 'برای این روز هیچ ردیف فیشی ثبت نشده است؛ چیزی برای ثبت دستی نیست.';

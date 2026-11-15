@@ -140,8 +140,12 @@ echo "\n۴) دکمهٔ ثبت گروهی فیش‌های چاپ‌نشده\n";
 // ثبت دستی است که کاربر نمی‌خواهد؛ یک دکمه باید همه را انتخاب کند.
 ok(strpos($jsSrc, 'manual-select-orphans') !== false,
     'دکمهٔ «ثبت گروهی … فیشِ چاپ‌نشده» وجود دارد');
-ok(strpos($jsSrc, "const orphanRows = filtered.filter((u) => isOrphanTicket(u) && canIssueManualTicket());") !== false,
-    'شمارش فیش‌های یتیم فقط روی ردیف‌های واجد شرایط است');
+// شمارش از کل کارکنان است، نه از نتیجهٔ جستجو: اگر کاربر چیزی تایپ کرده
+// باشد، ردیف یتیم بیرون از نتیجه می‌ماند و دکمه ناپدید می‌شد.
+ok(strpos($jsSrc, "const orphanRows = S.manualEmployees.filter((u) => isOrphanTicket(u) && canIssueManualTicket());") !== false,
+    'شمارش فیش‌های یتیم از کل کارکنان است (مستقل از جستجو)');
+ok(strpos($jsSrc, "const orphanRows = filtered.filter(") === false,
+    'شمارش دیگر به نتیجهٔ جستجو وابسته نیست');
 ok(preg_match("/manual-select-orphans'\]?\)?.*?isOrphanTicket\(u\)/s", $jsSrc) === 1
    || strpos($jsSrc, "if (act === 'manual-select-orphans')") !== false,
     'هندلر دکمه فیش‌های یتیم را انتخاب می‌کند');
@@ -164,7 +168,7 @@ if (is_file($htmlFile)) {
     ok(preg_match('/assets\/food-manual-attendance\.js\?v=(\d+)/', $html, $m) === 1,
         'food-manual-attendance.js با شمارهٔ نسخه بارگذاری می‌شود (کش‌شکنی)');
     $assetVer = isset($m[1]) ? (int) $m[1] : 0;
-    ok($assetVer >= 9, 'نسخهٔ کش حداقل ۹ است (v=' . $assetVer . ') — تغییر JS دیده می‌شود');
+    ok($assetVer >= 10, 'نسخهٔ کش حداقل ۱۰ است (v=' . $assetVer . ') — تغییر JS دیده می‌شود');
     // فیلد تاریخ «شمسی» است ولی API میلادی می‌خواهد. اگر تجزیه‌گر شمسی را
     // نشناسد، تاریخ بی‌صدا عوض نمی‌شود و فهرست روی «امروز» قفل می‌ماند —
     // نتیجه: فیش‌های یتیم دیروز هرگز دیده نمی‌شوند. کاربر همین را گزارش کرد.
@@ -237,6 +241,24 @@ if (is_file($groupsFile)) {
     ok(strpos((string) file_get_contents($root . '/food-ticket-web/assets/food-manual-attendance.js'),
         'اتصال به سرور برقرار نشد؛ صفحه را از پنل اصلی باز کنید.') !== false,
         'mount در نبود API خطا نشان می‌دهد (بی‌صدا برنمی‌گردد)');
+    // ── فاجعهٔ داده: کسی که غایب بود از فهرست غایبان ناپدید می‌شد ──
+    // reconcile هر فیش printed را علامت «حاضر» می‌گرفت و رکورد غیبت را
+    // حذف می‌کرد. نتیجه: ۲۷ غایب حتمی → ۲۳ ردیف، و غایب‌ها «دارای فیش».
+    ok(strpos($groups, 'e.source_uid = "manual-attendance" AND e.event_type IN ("printed", "no_food")') !== false,
+        'غیبت فقط با «حضور دستی» پاک می‌شود، نه با هر فیش چاپ‌شده');
+    ok(strpos($groups, 'OR (e.event_type = "printed" AND e.print_status = "printed"))\'') === false,
+        'شرط پاک‌کنندهٔ غیبت دیگر هر فیش printed را شامل نمی‌شود');
+    ok(strpos($groups, "'is_absent' => isset(\$absentUsers[\$id])") !== false,
+        'API وضعیت غیبت را به کلاینت می‌فرستد (is_absent)');
+    $jsFile2 = $root . '/food-ticket-web/assets/food-manual-attendance.js';
+    if (is_file($jsFile2)) {
+        $js2 = (string) file_get_contents($jsFile2);
+        ok(strpos($js2, 'غایب است — فیشش چاپ شده') !== false,
+            'ردیف «غایب با فیش چاپ‌شده» حاضر نشان داده نمی‌شود');
+        // دکمهٔ گروهی نباید به نتیجهٔ جستجو وابسته باشد.
+        ok(strpos($js2, 'const orphanRows = S.manualEmployees.filter') !== false,
+            'دکمهٔ ثبت گروهی مستقل از فیلتر جستجو ساخته می‌شود');
+    }
 } else {
     echo "  ⏭  food-ticket-groups.php روی این نصب نیست\n";
 }

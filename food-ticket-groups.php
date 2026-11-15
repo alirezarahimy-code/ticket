@@ -290,12 +290,20 @@ function food_ticket_manual_attendance_reconcile_range(string $fromDate, string 
         $tickets->execute([$fromDate, $toDate]);
         $delivered = $tickets->rowCount();
 
+        // فقط «حضور دستی» غیبت را پاک می‌کند — نه هر فیشی.
+        //
+        // پیش‌تر هر فیش printed (حتی چاپِ خودکارِ صبح) رکورد غیبت را حذف
+        // می‌کرد. نتیجه: کسی که واقعاً غایب بود و فیشش صبح چاپ شده بود،
+        // از فهرست غایبان ناپدید می‌شد و در فهرست فیش‌ها «حاضر» دیده
+        // می‌شد — همان ناسازگاری ۲۳ در برابر ۲۷.
+        //
+        // قاعدهٔ درست: چاپ فیش یعنی «غذا داده شد»، نه «حاضر بود». فقط
+        // ثبت دستیِ تردد توسط ادمین، حضور را اثبات می‌کند.
         $absences = db()->prepare(
             'DELETE a FROM food_ticket_daily_absence AS a '
             . 'INNER JOIN food_ticket_events AS e ON e.user_id = a.user_id AND e.punch_date = a.absence_date '
             . 'WHERE a.absence_date BETWEEN ? AND ? AND e.user_id IS NOT NULL AND '
-            . '((e.source_uid = "manual-attendance" AND e.event_type IN ("printed", "no_food")) '
-            . 'OR (e.event_type = "printed" AND e.print_status = "printed"))'
+            . 'e.source_uid = "manual-attendance" AND e.event_type IN ("printed", "no_food")'
         );
         $absences->execute([$fromDate, $toDate]);
         $result = ['delivered' => $delivered, 'absences_cleared' => $absences->rowCount()];
@@ -1914,6 +1922,21 @@ function food_ticket_api_manual_attendance(string $date = ''): array
     }
     $hasEligibleOrder = food_ticket_group_food_lookup(is_array($orderMap) ? $orderMap : null);
 
+    // غیبت‌های همین روز: کلاینت باید بتواند «غایب» و «دارای فیش» را از هم
+    // تفکیک کند. بدون این، ردیفی که فیشش صبح چاپ شده بود «حاضر» دیده می‌شد.
+    $absentUsers = [];
+    if (function_exists('food_ticket_absence_ensure') && food_ticket_absence_ensure()) {
+        try {
+            $absq = db()->prepare('SELECT user_id FROM food_ticket_daily_absence WHERE absence_date = ?');
+            $absq->execute([$date]);
+            foreach ($absq->fetchAll() ?: [] as $absRow) {
+                $absentUsers[(int) ($absRow['user_id'] ?? 0)] = true;
+            }
+        } catch (Throwable $e) {
+            app_error_log('[food-manual] absence map failed: ' . $e->getMessage());
+        }
+    }
+
     $attendanceByUser = [];
     $attendance = db()->prepare(
         'SELECT id, user_id, event_type, print_status, delivery_status, source_uid FROM food_ticket_events '
@@ -1959,7 +1982,7 @@ function food_ticket_api_manual_attendance(string $date = ''): array
         // وگرنه یک خطای گذرای سفارش، کل صفحه را خالی نشان می‌دهد.
         return $orderMap === null;
     }));
-    $employees = array_map(static function (array $row) use ($attendanceByUser): array {
+    $employees = array_map(static function (array $row) use ($attendanceByUser, $absentUsers): array {
         $id = (int) ($row['id'] ?? 0);
         $employeeNumber = trim((string) ($row['employee_number'] ?? ''));
         $name = trim((string) ($row['full_name'] ?? ''));
@@ -1971,6 +1994,7 @@ function food_ticket_api_manual_attendance(string $date = ''): array
             'pc' => $employeeNumber,
             'name' => $name,
             'active' => (bool) ($row['is_active'] ?? false),
+            'is_absent' => isset($absentUsers[$id]),
             'today_record' => $attendanceByUser[$id] ?? null,
         ];
     }, $people ?: []);
