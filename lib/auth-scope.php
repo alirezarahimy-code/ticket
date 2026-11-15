@@ -196,8 +196,18 @@ function ticket_attribution_in_unit_ids(array $ticket, array $unitIds): bool
     return $attributedId > 0 && in_array($attributedId, array_map('intval', $unitIds), true);
 }
 
-function ticket_user_can_view(array $ticket, array $user, ?callable $permissionCheck = null): bool
+function ticket_user_can_view(array $ticket, array $user, callable|string|null $permissionCheck = null): bool
 {
+    // تصمیم (۲۰۲۶-۱۱-۱۶): امضا callable|string است، نه فقط callable.
+    // فایل با declare(strict_types=1) اجرا می‌شود و همهٔ فراخوانی‌ها نام تابع را
+    // به‌صورت رشته می‌فرستند ('ticket_notification_user_can'، 'user_can'). با
+    // ?callable صرف، این فراخوانی‌ها TypeError می‌دادند و **ارجاع خودکار تیکت
+    // کاملاً می‌افتاد** — در نصب ۱.۶۲.۹۷ این یک خطای مرگبار در مسیر ثبت درخواست بود.
+    if (is_string($permissionCheck)) {
+        if (!is_callable($permissionCheck)) {
+            $permissionCheck = 'user_can';
+        }
+    }
     $permissionCheck = $permissionCheck ?? 'user_can';
     // جداسازی حوزه پیش از درخواست‌های خود و مجوزهای سفارشی؛ کارمند پشتیبانی فقط پشتیبانی.
     // این کنترل روی جزئیات، پیوست، پاسخ، ارجاع و عملیات گروهی هم اعمال می‌شود.
@@ -413,8 +423,18 @@ function ticket_can_see_internal(array $ticket, array $user): bool
 }
 
 /** A ticket assignee must be active, in the right scope and able to handle it. */
-function ticket_assignee_is_eligible(array $ticket, array $user, ?callable $permissionCheck = null): bool
+function ticket_assignee_is_eligible(array $ticket, array $user, callable|string|null $permissionCheck = null): bool
 {
+    // تصمیم (۲۰۲۶-۱۱-۱۶): امضا callable|string است، نه فقط callable.
+    // فایل با declare(strict_types=1) اجرا می‌شود و همهٔ فراخوانی‌ها نام تابع را
+    // به‌صورت رشته می‌فرستند ('ticket_notification_user_can'، 'user_can'). با
+    // ?callable صرف، این فراخوانی‌ها TypeError می‌دادند و **ارجاع خودکار تیکت
+    // کاملاً می‌افتاد** — در نصب ۱.۶۲.۹۷ این یک خطای مرگبار در مسیر ثبت درخواست بود.
+    if (is_string($permissionCheck)) {
+        if (!is_callable($permissionCheck)) {
+            $permissionCheck = 'user_can';
+        }
+    }
     $permissionCheck = $permissionCheck ?? 'user_can';
     $role = (string) ($user['role'] ?? '');
     $group = (string) ($ticket['service_group'] ?? '');

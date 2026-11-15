@@ -132,16 +132,41 @@ function load_choose_handling_agent(): void
     if (function_exists('choose_handling_agent')) {
         return;
     }
-    $src = file_get_contents(APP_ROOT . '/modules/request-center/lib/functions.php');
+    // تابع در دو خط مختلف، دو جای مختلف است:
+    //   ۱.۶۲ → index.php  (تصمیم مالک: خط ۱.۶۲ درخت خودش را دارد)
+    //   ۱.۶۳ → modules/request-center/lib/functions.php
+    // تست نباید به محل وابسته باشد، وگرنه در یکی از دو خط می‌شکند.
+    $candidates = [
+        APP_ROOT . '/modules/request-center/lib/functions.php',
+        APP_ROOT . '/index.php',
+    ];
+    $src = false;
+    foreach ($candidates as $path) {
+        if (is_file($path)) {
+            $body = (string) file_get_contents($path);
+            if (str_contains($body, 'function choose_handling_agent(')) {
+                $src = $body;
+                break;
+            }
+        }
+    }
+    if ($src === false) {
+        throw new RuntimeException('choose_handling_agent در هیچ‌یک از دو مسیر شناخته‌شده نبود.');
+    }
     $start = strpos($src, 'function key_role_designated_agent_ids(');
-    $end = strpos($src, '/**', strpos($src, 'function choose_handling_agent('));
     if ($start === false) {
         throw new RuntimeException('key_role_designated_agent_ids در سورس پیدا نشد.');
     }
-    if ($end === false) {
+    $end = strpos($src, 'function ticket_allowed_transitions(');
+    if ($end === false || $end <= $start) {
         throw new RuntimeException('پایان choose_handling_agent پیدا نشد.');
     }
     $block = substr($src, $start, $end - $start);
+    // تا پایان تابع اصلی ببر و توضیح بعدی را نگه دار
+    $endFn = strpos($block, 'return null;\n}');
+    if ($endFn !== false) {
+        $block = substr($block, 0, $endFn + strlen('return null;\n}'));
+    }
     eval($block);
 }
 load_choose_handling_agent();
