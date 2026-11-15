@@ -1,0 +1,22 @@
+# راهنمای نصب ۱.۶۳.۱
+
+این راهنما منتقل شد تا همراه خود بسته هم منتشر شود:
+
+**📘 [`docs/GUIDE-FA-install-1.63.1.md`](../docs/GUIDE-FA-install-1.63.1.md)**
+
+---
+
+## خلاصهٔ سریع
+
+اگر روی سامانه‌تان **۱.۶۳** نصب است:
+
+1. **پشتیبان بگیرید** — پوشهٔ نصب + dump پایگاه داده.
+2. **[بستهٔ میانی](https://github.com/alirezarahimy-code/ticket/releases/download/v1.63.1/ticket-update-1.63-to-1.63.1-role-composition-routing-alarm-selfheal-20261106.zip)** را دانلود کنید.
+3. **محتوای پوشهٔ `files/`** را روی پوشهٔ نصب کپی کنید (نه خودِ پوشهٔ `files` را).
+4. بررسی کنید `VERSION` حالا `1.63.1` است.
+5. `cron\register_system_alarm_tasks.bat` را با دسترسی Administrator اجرا کنید.
+6. صفحهٔ **سلامت سامانه** را تازه‌سازی کنید.
+
+مرحلهٔ ۵ **با نصب بسته حل نمی‌شود** — کرون یک وظیفهٔ ویندوز است، نه یک فایل.
+
+برای جزئیات، سناریوی برگشت، و چک‌لیست کامل: [`docs/GUIDE-FA-install-1.63.1.md`](../docs/GUIDE-FA-install-1.63.1.md)
