@@ -45,30 +45,112 @@ document.addEventListener('click', function (event) {
         return String(value || '').toLocaleLowerCase('fa').trim();
     }
 
+    /**
+     * ── انتخابگر کاربر (۱.۶۳.۴) ───────────────────────────────────────────
+     *
+     * باگ قبلی: وقتی کاربری از قبل انتخاب شده بود (یا بعد از انتخاب یکی)،
+     * فیلد `readOnly` می‌شد. در HTML، input با readOnly **هیچ کاراکتری**
+     * نمی‌پذیرد — پس کاربر نمی‌توانست نام تازه‌ای تایپ کند. تنها راه، کلیک
+     * اول بود که فیلد را کامل پاک می‌کرد؛ و روی بعضی مرورگرها ترتیب رویدادها
+     * باعث می‌شد فقط یک کاراکتر جا بیفتد. نتیجه: «فقط یک حرف می‌شود تایپ کرد».
+     *
+     * رفتار تازه:
+     *   • فیلد هرگز readOnly نمی‌شود — همیشه می‌شود تایپ کرد.
+     *   • انتخاب فعلی با `pickedValue` نگه داشته می‌شود، نه با readOnly.
+     *   • تا وقتی متن عوض نشده، همان کاربر انتخاب‌شده معتبر است.
+     *   • با اولین کاراکتر تازه، انتخاب پاک می‌شود و جست‌وجو شروع می‌شود.
+     *   • جست‌وجو چندکلمه‌ای است: «علی رضا» هر ردیفی را پیدا می‌کند که هر
+     *     دو کلمه در نام/نام کاربری/واحدش باشد (ترتیب不重要 نیست).
+     *   • جست‌وجو «همه‌جا» است: «رضایی» علی رضایی را هم می‌آورد، نه فقط
+     *     ردیف‌هایی که با «ر» شروع می‌شوند. این همان چیزی است که کاربر
+     *     خواست: «ر» بزنم باید رضایی‌ها هم بیایند.
+     */
+    let pickedValue = broughtBy ? String(broughtBy.value || '') : '';
+    let pickedId = broughtById ? String(broughtById.value || '') : '0';
+
+    /** نرمال‌سازی برای تطبیق: کوچک‌کردن، ی/ک عربی، حذف اعراب و فاصلهٔ اضافه. */
+    function normalize(value) {
+        return String(value || '')
+            .toLocaleLowerCase('fa')
+            .replace(/[\u064A\u0649]/g, '\u06CC')   // ي ي ⇒ ی
+            .replace(/\u0643/g, '\u06A9')             // ك ⇒ ک
+            .replace(/[\u064B-\u0652\u0670]/g, '')   // اعراب
+            .replace(/\u0640/g, '')                    // کشیده
+            .replace(/\s+/g, ' ')
+            .trim();
+    }
+
+    /**
+     * آیا این ردیف با عبارت جست‌وجو می‌خواند؟
+     * همهٔ کلمه‌ها باید باشند، ولی در هر جای متن — نه فقط از ابتدا.
+     */
+    function matchesSearch(haystack, needle) {
+        const text = normalize(haystack);
+        if (needle === '') {
+            return true;
+        }
+        return needle.split(' ').every(function (word) {
+            return word !== '' && text.indexOf(word) !== -1;
+        });
+    }
+
+    /** آیا عبارت جست‌وجو عیناً همان انتخاب فعلی است؟ (یعنی چیزی تایپ نشده) */
+    function searchUnchanged() {
+        if (!broughtBy) {
+            return true;
+        }
+        return normalize(broughtBy.value) === normalize(pickedValue);
+    }
+
     function filterUsers() {
         if (!userOptions || !broughtBy) {
             return;
         }
         const search = normalize(broughtBy.value);
+        const unchanged = searchUnchanged();
         userOptions.hidden = false;
+        let visibleCount = 0;
         userOptions.querySelectorAll('.cd-dvd-user-option').forEach(function (option) {
-            const optionSearch = normalize(option.dataset.search || option.textContent);
-            option.hidden = option.classList.contains('external') ? search !== '' && !normalize('خارج').includes(search) : (search !== '' && !optionSearch.includes(search));
+            let show;
+            if (option.classList.contains('external')) {
+                // «خارج از سامانه» فقط وقتی دیده شود که چیزی تایپ شده و با
+                // عبارت می‌خواند؛ در حالت خالی بودن جست‌وجو اول فهرست است.
+                show = search === '' || matchesSearch('خارج سامانه بیرون', search);
+            } else if (search === '') {
+                show = true;
+            } else if (unchanged) {
+                // متن همان انتخاب فعلی است ⇒ همه را نشان بده تا کاربر
+                // بتواند عوض کند (و ردیف انتخاب‌شده هم دیده شود).
+                show = true;
+            } else {
+                show = matchesSearch(option.dataset.search || option.textContent, search);
+            }
+            option.hidden = !show;
+            if (show && !option.classList.contains('external')) {
+                visibleCount++;
+            }
         });
+        // اگر هیچ کاربری نماند، پیام روشن بده (به‌جای فهرست خالیِ گیج‌کننده).
+        const empty = userOptions.querySelector('.cd-dvd-user-empty');
+        if (empty) {
+            empty.hidden = !(visibleCount === 0 && search !== '' && !unchanged);
+        }
     }
 
     function selectUser(option) {
         if (!broughtBy || !broughtById) {
             return;
         }
-        broughtById.value = option.dataset.userId || '0';
-        if (option.dataset.userId === '-1') {
+        const id = option.dataset.userId || '0';
+        broughtById.value = id;
+        pickedId = id;
+        if (id === '-1') {
             broughtBy.value = '';
-            broughtBy.readOnly = false;
+            pickedValue = '';
             broughtBy.placeholder = 'نام شخص خارج از سامانه';
         } else {
             broughtBy.value = option.dataset.label || option.textContent.trim();
-            broughtBy.readOnly = true;
+            pickedValue = broughtBy.value;
             broughtBy.placeholder = 'انتخاب کاربر';
         }
         if (userOptions) {
@@ -80,31 +162,60 @@ document.addEventListener('click', function (event) {
         if (!userPicker || !userOptions || !broughtBy || !broughtById) {
             return;
         }
-        const selected = userOptions.querySelector('[data-user-id="' + broughtById.value + '"]');
-        if (selected && broughtById.value !== '-1') {
-            broughtBy.readOnly = true;
+        // پیام «پیدا نشد» یک‌بار ساخته می‌شود و در فهرست می‌ماند.
+        if (!userOptions.querySelector('.cd-dvd-user-empty')) {
+            const empty = document.createElement('div');
+            empty.className = 'cd-dvd-user-empty';
+            empty.hidden = true;
+            empty.textContent = 'کاربری با این عبارت پیدا نشد. املای دیگری را امتحان کنید یا «شخص خارج از سامانه» را انتخاب کنید.';
+            userOptions.appendChild(empty);
         }
-        broughtBy.addEventListener('focus', filterUsers);
-        broughtBy.addEventListener('click', function () {
-            if (broughtBy.readOnly) {
-                broughtBy.value = '';
-                broughtBy.readOnly = false;
-                broughtById.value = '0';
-                filterUsers();
-            }
+
+        // ⚠️ هرگز readOnly نمی‌شود: کاربر باید همیشه بتواند تایپ کند.
+        // مقدار اولیه (کاربر انتخاب‌شده) در pickedValue/pickedId نگه داشته شد.
+        broughtBy.readOnly = false;
+        // اگر مرورگر یا نسخهٔ قدیمی <select> را رندر کرده باشد، فقط هم‌گام‌سازی
+        // شناسه کافی است؛ فیلتر متنی برای آن معنا ندارد.
+        if (broughtBy.tagName === 'SELECT') {
+            return;
+        }
+
+        broughtBy.addEventListener('focus', function () {
+            filterUsers();
         });
+
         broughtBy.addEventListener('input', function () {
-            if (broughtBy.readOnly) {
-                broughtBy.readOnly = false;
+            // کاربر تایپ کرد ⇒ اگر متن با انتخاب فعلی یکی نیست، انتخاب پاک شود.
+            if (!searchUnchanged()) {
                 broughtById.value = '0';
+                pickedId = '0';
+                pickedValue = '';
             }
             filterUsers();
         });
+
+        // Escape فهرست را می‌بندد؛ Enter اولین ردیفِ دیده‌شده را انتخاب می‌کند.
+        broughtBy.addEventListener('keydown', function (event) {
+            if (event.key === 'Escape') {
+                userOptions.hidden = true;
+                return;
+            }
+            if (event.key === 'Enter') {
+                const firstVisible = Array.from(userOptions.querySelectorAll('.cd-dvd-user-option'))
+                    .find(function (option) { return !option.hidden && !option.classList.contains('external'); });
+                if (firstVisible && !userOptions.hidden) {
+                    event.preventDefault();
+                    selectUser(firstVisible);
+                }
+            }
+        });
+
         userOptions.querySelectorAll('.cd-dvd-user-option').forEach(function (option) {
             option.addEventListener('click', function () {
                 selectUser(option);
             });
         });
+
         document.addEventListener('click', function (event) {
             if (!userPicker.contains(event.target)) {
                 userOptions.hidden = true;

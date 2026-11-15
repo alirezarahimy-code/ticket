@@ -43,6 +43,8 @@
     deliveredReportMealCounts: { lunch: { employee_count: 0, guest_count: 0, total: 0 }, dinner: { employee_count: 0, guest_count: 0, total: 0 } },
     deliveredReportAutoCounts: { lunch: { staff: 0, guest: 0 }, dinner: { staff: 0, guest: 0 } },
     deliveredReportView: 'list',
+    deliveredReportOrgView: false,
+    ordersOrgView: false,
     deliveredReportDate: '',
     deliveredReportSort: { key: 'row', dir: 'asc' },
     statisticsSelectedSort: { key: 'row', dir: 'asc' },
@@ -623,6 +625,33 @@
         + ' <span class="fm-small">(' + faDigits(list.length) + ' فیش)</span></h4>' + deliveredReportTableHtml(list) + '</div>';
     }).join('');
   }
+  /**
+   * ۱.۶۳.۴ — غذای تحویلی به‌صورت گروه‌بندی‌شده بر اساس معاونت.
+   * سرگروه فقط سرشاخهٔ سازمانی است و همهٔ افراد آن معاونت زیرش می‌آیند.
+   */
+  var deliveredReportByOrgHtml = function (rows) {
+    var org = global.FoodOrgGroups;
+    if (!org) {
+      return '<div class="fm-alert warn">ماژول گروه‌بندی سازمانی بارگذاری نشد؛ فهرست بدون گروه‌بندی نمایش داده می‌شود.</div>' + deliveredReportTableHtml(rows);
+    }
+    if (!state.__orgMap) {
+      requestOrgMap(function () { safeReportRender(); });
+      return '<div class="fm-spinner">در حال دریافت چارت سازمانی…</div>';
+    }
+    return org.render(state.__orgMap, rows || [], function (list) {
+      return deliveredReportTableHtml(list);
+    }, { unitLabel: 'فیش' });
+  };
+  /** نگاشت سازمانی را یک‌بار می‌گیرد (endpoint مشترک همهٔ گزارش‌ها). */
+  function requestOrgMap(done) {
+    if (!global.FoodOrgGroups) return;
+    global.FoodOrgGroups.load(function (route) {
+      return request(route, {}).catch(function () { return null; });
+    }).then(function (map) {
+      state.__orgMap = map;
+      if (typeof done === 'function') done(map);
+    });
+  }
   function deliveredReportOrderedRows() {
     var rows = state.deliveredReport || [];
     if (state.deliveredReportView !== 'menu') return sortDeliveredReportRows(rows);
@@ -650,14 +679,14 @@
       var checked = state.deliveredReportFields.indexOf(column.key) >= 0 ? ' checked' : '';
       return '<label class="fm-report-field"><input type="checkbox" data-fm-delivery-field="' + column.key + '"' + checked + '><span>' + esc(column.label) + '</span></label>';
     }).join('');
-    var viewBar = '<div class="fm-view-switch"><button class="btn ' + (state.deliveredReportView === 'list' ? 'primary' : 'secondary') + '" type="button" data-fm-action="delivered-report-view" data-delivery-view="list">فهرست یکجا</button><button class="btn ' + (state.deliveredReportView === 'menu' ? 'primary' : 'secondary') + '" type="button" data-fm-action="delivered-report-view" data-delivery-view="menu">نمایش بر اساس منو</button></div>';
+    var viewBar = '<div class="fm-view-switch"><button class="btn ' + (state.deliveredReportView === 'list' ? 'primary' : 'secondary') + '" type="button" data-fm-action="delivered-report-view" data-delivery-view="list">فهرست یکجا</button><button class="btn ' + (state.deliveredReportView === 'menu' ? 'primary' : 'secondary') + '" type="button" data-fm-action="delivered-report-view" data-delivery-view="menu">نمایش بر اساس منو</button><button class="btn ' + (state.deliveredReportView === 'org' ? 'primary' : 'secondary') + '" type="button" data-fm-action="delivered-report-view" data-delivery-view="org">نمایش بر اساس معاونت</button></div>';
     var singleDate = state.deliveredReportDate || state.statisticsFrom || state.selectedDate || (state.status && state.status.today) || localTodayIso();
     var singleDateLabel = jalaliFromIso(singleDate) || '';
     var dateForm = '<form id="fm-delivery-date" class="fm-order-date"><label class="fm-field">تاریخ گزارش<input type="text" name="date" data-jalali inputmode="numeric" autocomplete="off" placeholder="۱۴۰۵/۰۷/۰۱" value="' + esc(faDigits(singleDateLabel)) + '" required></label><button class="btn primary" type="submit">نمایش گزارش</button><button class="btn secondary" type="button" data-fm-action="delivery-today">امروز</button></form>';
     var results = state.deliveredReportLoading
       ? '<div class="fm-spinner">در حال دریافت فهرست فیش‌های تحویل‌شده…</div>'
       : '<div class="fm-delivery-counts"><div><span>پرسنل تحویل‌شده</span><strong>' + faDigits(state.deliveredReportEmployeeCount) + '</strong></div><div><span>فیش مهمان</span><strong>' + faDigits(state.deliveredReportGuestCount) + '</strong></div><div><span>ناهار (پرسنل / مهمان)</span><strong>' + faDigits(state.deliveredReportMealCounts.lunch.employee_count) + ' / ' + faDigits(state.deliveredReportMealCounts.lunch.guest_count) + '</strong></div><div><span>شام (پرسنل / مهمان)</span><strong>' + faDigits(state.deliveredReportMealCounts.dinner.employee_count) + ' / ' + faDigits(state.deliveredReportMealCounts.dinner.guest_count) + '</strong></div></div><div class="fm-small fm-auto-receipt-note">ثبت خودکارِ بدون چاپ فیزیکی (ردیف‌های آن‌ها با برچسب «چاپ خودکار» در فهرست هم آمده‌اند): ناهار پرسنل ' + faDigits(state.deliveredReportAutoCounts.lunch.staff) + '، شام پرسنل ' + faDigits(state.deliveredReportAutoCounts.dinner.staff) + '، ناهار مهمان ' + faDigits(state.deliveredReportAutoCounts.lunch.guest) + '، شام مهمان ' + faDigits(state.deliveredReportAutoCounts.dinner.guest) + '.</div>'
-        + viewBar + '<div class="fm-table-wrap fm-delivery-report-results">' + (state.deliveredReportView === 'menu' ? deliveredReportByMenuHtml(state.deliveredReport) : deliveredReportTableHtml(state.deliveredReport)) + '</div>';
+        + viewBar + '<div class="fm-table-wrap fm-delivery-report-results">' + (state.deliveredReportView === 'menu' ? deliveredReportByMenuHtml(state.deliveredReport) : (state.deliveredReportView === 'org' ? deliveredReportByOrgHtml(state.deliveredReport) : deliveredReportTableHtml(state.deliveredReport))) + '</div>';
     var actionsEnabled = state.deliveredReportLoaded && !state.deliveredReportLoading;
     return '<section class="fm-card fm-daily-orders fm-printed-delivery-report"><div class="fm-toolbar"><div><h3>فیش‌های چاپ‌شده و غذای تحویل‌شده</h3><span class="fm-small">تاریخ: ' + esc(faDigits(singleDateLabel || '—')) + ' — فهرست شامل فیش‌های تحویل ثبت‌شده است؛ ردیف‌های «چاپ خودکار» به‌صورت سیستمی و بدون چاپ فیزیکی برای وعده‌های سلف‌بسته (شام و ناهارِ روزهای تعطیل) ثبت می‌شوند. وضعیت تحویل، وضعیت ثبت‌شده در سامانه است و تأیید مستقل دریافت غذا نیست.</span></div><div class="fm-actions"><button class="btn secondary" type="button" data-fm-action="delivered-report-export"' + (actionsEnabled ? '' : ' disabled') + '>استخراج Excel</button><button class="btn secondary" type="button" data-fm-action="delivered-report-print"' + (actionsEnabled ? '' : ' disabled') + '>چاپ</button></div></div>'
       + dateForm
@@ -780,8 +809,8 @@
     var viewButton = function (view, label) {
       return '<button class="btn ' + (state.ordersView === view ? 'primary' : 'secondary') + '" type="button" data-fm-action="orders-view" data-orders-view="' + view + '">' + label + '</button>';
     };
-    var viewBar = '<div class="fm-view-switch">' + viewButton('list', 'فهرست یکجا') + viewButton('menu', 'نمایش بر اساس منو') + '</div>';
-    var body = state.ordersView === 'menu' ? orderByMenuHtml(rows) : orderTableHtml(rows);
+    var viewBar = '<div class="fm-view-switch">' + viewButton('list', 'فهرست یکجا') + viewButton('menu', 'نمایش بر اساس منو') + viewButton('org', 'نمایش بر اساس معاونت') + '</div>';
+    var body = state.ordersView === 'menu' ? orderByMenuHtml(rows) : (state.ordersView === 'org' ? ordersByOrgHtml(rows) : orderTableHtml(rows));
     var fieldChecks = ORDER_COLUMNS.map(function (col) {
       var checked = state.orderReportFields.indexOf(col.key) >= 0 ? ' checked' : '';
       return '<label class="fm-report-field"><input type="checkbox" data-fm-order-field="' + col.key + '"' + checked + '><span>' + esc(col.label) + '</span></label>';
@@ -793,6 +822,23 @@
       + (state.loadingOrders ? '<div class="fm-spinner">در حال بارگذاری سفارش‌ها…</div>' : viewBar + '<div class="fm-table-wrap fm-manager-data-warning">' + (state.ordersLoaded ? summaryHtml(state.ordersSummary, rows.length) : '') + body + '</div>')
       + '</section>';
     return daily + renderGroupOrders();
+  }
+
+  /**
+   * ۱.۶۳.۴ — سفارش‌های امروز گروه‌بندی‌شده بر اساس معاونت.
+   */
+  function ordersByOrgHtml(rows) {
+    var org = global.FoodOrgGroups;
+    if (!org) {
+      return '<div class="fm-alert warn">ماژول گروه‌بندی سازمانی بارگذاری نشد؛ فهرست بدون گروه‌بندی نمایش داده می‌شود.</div>' + orderTableHtml(rows);
+    }
+    if (!state.__orgMap) {
+      requestOrgMap(function () { render(); });
+      return '<div class="fm-spinner">در حال دریافت چارت سازمانی…</div>';
+    }
+    return org.render(state.__orgMap, rows || [], function (list) {
+      return orderTableHtml(list);
+    }, { unitLabel: 'سفارش' });
   }
 
   function renderGroupOrders() {
@@ -2495,7 +2541,14 @@
       }
       if (act === 'confirm-impact') saveDay(true, state.pendingImpactExpected);
       if (act === 'cancel-impact') { state.pendingImpact = null; state.pendingImpactExpected = 0; state.pendingImpactMessage = ''; render(); }
-      if (act === 'orders-view') { state.ordersView = action.dataset.ordersView === 'menu' ? 'menu' : 'list'; state.ordersSortTouched = state.ordersSortTouched || state.ordersView === 'menu'; render(); }
+      if (act === 'orders-view') {
+        var ov2 = action.dataset.ordersView;
+        state.ordersView = ov2 === 'menu' ? 'menu' : (ov2 === 'org' ? 'org' : 'list');
+        state.ordersSortTouched = state.ordersSortTouched || state.ordersView === 'menu';
+        if (state.ordersView === 'org' && !state.__orgMap) requestOrgMap(function () { render(); });
+        render();
+        return;
+      }
       if (act === 'group-orders-view') { state.groupOrdersView = action.dataset.ordersView === 'menu' ? 'menu' : 'list'; render(); }
       if (act === 'orders-export') downloadOrders();
       if (act === 'orders-print') printOrders();
@@ -2507,7 +2560,12 @@
         state.deliveredReportRange = '';
         loadPrintedDeliveryReport(state.deliveredReportDate, state.deliveredReportDate);
       }
-      if (act === 'delivered-report-view') { state.deliveredReportView = action.dataset.deliveryView === 'menu' ? 'menu' : 'list'; render(); }
+      if (act === 'delivered-report-view') {
+        var dv = action.dataset.deliveryView;
+        state.deliveredReportView = dv === 'menu' ? 'menu' : (dv === 'org' ? 'org' : 'list');
+        if (state.deliveredReportView === 'org' && !state.__orgMap) requestOrgMap(function () { render(); });
+        render();
+      }
       if (act === 'delivered-report-export') exportPrintedDeliveryReport();
       if (act === 'delivered-report-print') printPrintedDeliveryReport();
       if (act === 'leftover-cancel' || act === 'leftover-backdrop') { if (act === 'leftover-backdrop' && event.target !== action) return; state.leftoverModal = null; state.error = ''; render(); return; }

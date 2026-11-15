@@ -1424,26 +1424,89 @@ function domain_scan_store_inventory(int $assetId, string $host, array $inventor
         }
     }
     $inventory = inventory_apply_collection_status_metadata($inventory, $previousStatus, 'domain');
-    db()->prepare('UPDATE assets SET hostname = ?, serial_number = ?, manufacturer = ?, model = ?, computer_type = ?, operating_system = ?, os_architecture = ?, os_serial = ?, ip_address = ?, mac_address = ?, cpu = ?, memory_mb = ?, disks_json = ?, software_json = ?, hardware_json = ?, peripherals_json = ?, antivirus = ?, source = "domain", last_inventory_at = NOW() WHERE id = ?')->execute([
-        $host,
-        (string) ($inventory['serial_number'] ?? ''),
-        (string) ($inventory['manufacturer'] ?? ''),
-        (string) ($inventory['model'] ?? ''),
-        (string) ($inventory['computer_type'] ?? 'Windows client'),
-        (string) ($inventory['operating_system'] ?? ''),
-        (string) ($inventory['os_architecture'] ?? ''),
-        (string) ($inventory['os_serial'] ?? ''),
-        (string) ($inventory['ip_address'] ?? ''),
-        (string) ($inventory['mac_address'] ?? ''),
-        (string) ($inventory['cpu'] ?? ''),
-        max(0, (int) ($inventory['memory_mb'] ?? 0)),
-        json_encode($inventory['disks'] ?? [], JSON_UNESCAPED_UNICODE | JSON_INVALID_UTF8_SUBSTITUTE),
-        json_encode($inventory['software'] ?? [], JSON_UNESCAPED_UNICODE | JSON_INVALID_UTF8_SUBSTITUTE),
-        json_encode($inventory['hardware'] ?? [], JSON_UNESCAPED_UNICODE | JSON_INVALID_UTF8_SUBSTITUTE),
-        json_encode($inventory['peripherals'] ?? [], JSON_UNESCAPED_UNICODE | JSON_INVALID_UTF8_SUBSTITUTE),
-        (string) ($inventory['antivirus'] ?? ''),
-        $assetId,
-    ]);
+    /**
+     * ۱.۶۳.۴ — نام کامپیوتر در استخراج **بازنویسی نمی‌شود**.
+     *
+     * چرا: `hostname` کلید هویت یکتای شناینامه است (uq_assets_hostname_key روی
+     * hostname_key). اگر اسکن نام تازه‌ای برگرداند که قبلاً به رکورد دیگری تعلق
+     * دارد (مثلاً جابه‌جایی دستگاه یا نام قدیمیِ مانده روی IP)، UPDATE با
+     * «Duplicate entry … for key uq_assets_hostname_key» شکست می‌خورد و کل
+     * استخراج — حتی فیلدهای سالم — از دست می‌رود. کاربر این را به‌صورت
+     * «استخراج خطا می‌دهد» می‌دید.
+     *
+     * رفتار تازه: نام فعلی حفظ می‌شود و نام مشاهده‌شده فقط وقتی ثبت می‌شود که
+     * رکورد نامی نداشته باشد. نام واقعیِ دستگاه همچنان در `hardware_json`
+     * (کلید `observed_hostname`) و در تاریخچهٔ استخراج می‌ماند تا ادمین خودش
+     * دربارهٔ تغییر پلاک تصمیم بگیرد.
+     */
+    $currentName = '';
+    try {
+        $nameQuery = db()->prepare('SELECT hostname FROM assets WHERE id = ? LIMIT 1');
+        $nameQuery->execute([$assetId]);
+        $currentName = trim((string) ($nameQuery->fetchColumn() ?: ''));
+    } catch (Throwable $nameError) {
+        $currentName = '';
+    }
+    $observedName = trim($host);
+    $writeName = $currentName !== '' ? $currentName : $observedName;
+    if ($observedName !== '' && strcasecmp($observedName, $currentName) !== 0) {
+        $inventory['observed_hostname'] = $observedName;
+        if (!is_array($inventory['hardware'] ?? null)) {
+            $inventory['hardware'] = [];
+        }
+        $inventory['hardware']['observed_hostname'] = $observedName;
+        $inventory['hardware']['hostname_mismatch'] = true;
+    }
+    try {
+            db()->prepare('UPDATE assets SET hostname = ?, serial_number = ?, manufacturer = ?, model = ?, computer_type = ?, operating_system = ?, os_architecture = ?, os_serial = ?, ip_address = ?, mac_address = ?, cpu = ?, memory_mb = ?, disks_json = ?, software_json = ?, hardware_json = ?, peripherals_json = ?, antivirus = ?, source = "domain", last_inventory_at = NOW() WHERE id = ?')->execute([
+                $writeName,
+                (string) ($inventory['serial_number'] ?? ''),
+                (string) ($inventory['manufacturer'] ?? ''),
+                (string) ($inventory['model'] ?? ''),
+                (string) ($inventory['computer_type'] ?? 'Windows client'),
+                (string) ($inventory['operating_system'] ?? ''),
+                (string) ($inventory['os_architecture'] ?? ''),
+                (string) ($inventory['os_serial'] ?? ''),
+                (string) ($inventory['ip_address'] ?? ''),
+                (string) ($inventory['mac_address'] ?? ''),
+                (string) ($inventory['cpu'] ?? ''),
+                max(0, (int) ($inventory['memory_mb'] ?? 0)),
+                json_encode($inventory['disks'] ?? [], JSON_UNESCAPED_UNICODE | JSON_INVALID_UTF8_SUBSTITUTE),
+                json_encode($inventory['software'] ?? [], JSON_UNESCAPED_UNICODE | JSON_INVALID_UTF8_SUBSTITUTE),
+                json_encode($inventory['hardware'] ?? [], JSON_UNESCAPED_UNICODE | JSON_INVALID_UTF8_SUBSTITUTE),
+                json_encode($inventory['peripherals'] ?? [], JSON_UNESCAPED_UNICODE | JSON_INVALID_UTF8_SUBSTITUTE),
+                (string) ($inventory['antivirus'] ?? ''),
+                $assetId,
+            ]);
+    } catch (PDOException $storeError) {
+        // کلید یکتای نام/هویت: یک برخورد نباید کل استخراج را از بین ببرد.
+        // نام فعلی را دست‌نخورده نگه می‌داریم و بقیهٔ فیلدها را بدون نام می‌نویسیم.
+        $isDuplicate = ((string) $storeError->getCode() === '23000') || (strpos($storeError->getMessage(), '1062') !== false);
+        if (!$isDuplicate) {
+            throw $storeError;
+        }
+        app_error_log('[domain-scan] hostname collision on asset ' . $assetId . ': ' . $storeError->getMessage());
+        $inventory['hardware']['hostname_collision'] = $observedName;
+        db()->prepare('UPDATE assets SET serial_number = ?, manufacturer = ?, model = ?, computer_type = ?, operating_system = ?, os_architecture = ?, os_serial = ?, ip_address = ?, mac_address = ?, cpu = ?, memory_mb = ?, disks_json = ?, software_json = ?, hardware_json = ?, peripherals_json = ?, antivirus = ?, source = "domain", last_inventory_at = NOW() WHERE id = ?')->execute([
+            (string) ($inventory['serial_number'] ?? ''),
+            (string) ($inventory['manufacturer'] ?? ''),
+            (string) ($inventory['model'] ?? ''),
+            (string) ($inventory['computer_type'] ?? 'Windows client'),
+            (string) ($inventory['operating_system'] ?? ''),
+            (string) ($inventory['os_architecture'] ?? ''),
+            (string) ($inventory['os_serial'] ?? ''),
+            (string) ($inventory['ip_address'] ?? ''),
+            (string) ($inventory['mac_address'] ?? ''),
+            (string) ($inventory['cpu'] ?? ''),
+            max(0, (int) ($inventory['memory_mb'] ?? 0)),
+            json_encode($inventory['disks'] ?? [], JSON_UNESCAPED_UNICODE | JSON_INVALID_UTF8_SUBSTITUTE),
+            json_encode($inventory['software'] ?? [], JSON_UNESCAPED_UNICODE | JSON_INVALID_UTF8_SUBSTITUTE),
+            json_encode($inventory['hardware'] ?? [], JSON_UNESCAPED_UNICODE | JSON_INVALID_UTF8_SUBSTITUTE),
+            json_encode($inventory['peripherals'] ?? [], JSON_UNESCAPED_UNICODE | JSON_INVALID_UTF8_SUBSTITUTE),
+            (string) ($inventory['antivirus'] ?? ''),
+            $assetId,
+        ]);
+    }
     if (function_exists('asset_sync_identity_key')) {
         asset_sync_identity_key($assetId);
     }

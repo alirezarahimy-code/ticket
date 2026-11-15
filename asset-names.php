@@ -282,6 +282,15 @@ function asset_sync_identity_key(int $assetId): void
     $asset = $row->fetch();
     if (!$asset) { return; }
     $key = asset_identity_key($asset['hostname'] ?? null, $asset['asset_tag'] ?? null);
-    db()->prepare('UPDATE assets SET hostname_key = ? WHERE id = ?')->execute([$key !== '' ? $key : null, $assetId]);
+    try {
+        db()->prepare('UPDATE assets SET hostname_key = ? WHERE id = ?')->execute([$key !== '' ? $key : null, $assetId]);
+    } catch (PDOException $keyError) {
+        // ۱.۶۳.۴ — کلید یکتای نام: اگر همین نام قبلاً روی رکورد دیگری ثبت شده باشد،
+        // ثبت کلید شکست می‌خورد. این وضعیت نباید کل ذخیرهٔ شناسنامه را از بین ببرد؛
+        // رکورد بدون به‌روزرسانی کلید می‌ماند و رخداد برای بررسی ثبت می‌شود.
+        if (function_exists('app_error_log')) {
+            app_error_log('[asset-names] hostname_key collision for asset ' . $assetId . ' (' . $key . '): ' . $keyError->getMessage());
+        }
+    }
 }
 }

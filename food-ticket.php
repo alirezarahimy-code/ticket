@@ -161,6 +161,8 @@ function food_ticket_route_allowed(array $user, string $route): bool
             'food-menu/printed-delivery', 'food-menu/printed-delivery-export', 'food-menu/employee-search',
             'food-menu/group-orders', 'food-menu/groups', 'food-menu/reconciliation',
             'food-menu/invoice-file', 'food-menu/reconciliation-export',
+            // ۱.۶۳.۴ — نگاشت سازمانی برای «نمایش بر اساس معاونت» در گزارش‌های غذا.
+            'food-menu/org-map',
         ];
         if ($route === 'food-menu/emergency-window-state') {
             return $method === 'GET' && user_can($user, 'food.emergency_window');

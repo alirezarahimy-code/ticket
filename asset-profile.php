@@ -120,6 +120,10 @@ function asset_profile_sections(): array
             'fields' => [
                 ['key' => 'os_name', 'label' => 'سیستم‌عامل', 'type' => 'text', 'auto' => true],
                 ['key' => 'hostname', 'label' => 'نام کامپیوتر', 'type' => 'text', 'auto' => true],
+                // ۱.۶۳.۴ — سریال و مدل خودِ دستگاه. قبلاً فقط سریال مادربرد/هارد/ویندوز
+                // در شناسنامه بود، پس سریالی که استخراج می‌خواند هیچ‌جا دیده نمی‌شد.
+                ['key' => 'machine_serial', 'label' => 'سریال دستگاه (BIOS)', 'type' => 'text', 'auto' => true],
+                ['key' => 'machine_model', 'label' => 'مدل دستگاه', 'type' => 'text', 'auto' => true],
                 ['key' => 'windows_serial', 'label' => 'شناسه ویندوز (SerialNumber؛ نه کلید محصول)', 'type' => 'text', 'auto' => true],
                 ['key' => 'os_version', 'label' => 'نسخه', 'type' => 'text', 'auto' => true],
                 ['key' => 'os_install_path', 'label' => 'محل نصب', 'type' => 'text', 'auto' => true],
@@ -292,6 +296,9 @@ function asset_profile_fill_from_asset(array $profile, array $asset): array
     $peripherals = is_array($peripherals) ? $peripherals : [];
     $derived = asset_profile_auto_values([
         'hostname' => $asset['hostname'] ?? '',
+        'serial_number' => $asset['serial_number'] ?? '',
+        'manufacturer' => $asset['manufacturer'] ?? '',
+        'model' => $asset['model'] ?? '',
         'computer_type' => $asset['computer_type'] ?? '',
         'operating_system' => $asset['operating_system'] ?? '',
         'os_serial' => $asset['os_serial'] ?? '',
@@ -318,6 +325,12 @@ function asset_profile_fill_from_asset(array $profile, array $asset): array
         'plaque_number' => $asset['plaque_number'] ?? null,
         'os_name' => $asset['operating_system'] ?? null,
         'hostname' => $asset['hostname'] ?? null,
+        // ۱.۶۳.۴ — اگر استخراج هنوز مقدار را در asset_profiles ننشانده باشد،
+        // همان مقداری که در جدول assets ذخیره شده در شناسنامه دیده می‌شود.
+        'machine_serial' => trim((string) ($asset['serial_number'] ?? '')) !== '' ? $asset['serial_number'] : null,
+        'machine_model' => trim(trim((string) ($asset['manufacturer'] ?? '')) . ' ' . trim((string) ($asset['model'] ?? ''))) !== ''
+            ? trim(trim((string) ($asset['manufacturer'] ?? '')) . ' ' . trim((string) ($asset['model'] ?? '')))
+            : null,
         'windows_serial' => $asset['os_serial'] ?? null,
         'os_install_date' => $asset['os_install_date'] ?? null,
         'user_count' => $asset['registered_users'] ?? null,
@@ -823,6 +836,9 @@ function asset_profile_auto_values(array $inventory): array
         'computer_type' => (string) ($inventory['computer_type'] ?? ''),
         'hostname' => (string) ($inventory['hostname'] ?? ''),
         'os_name' => (string) ($inventory['operating_system'] ?? ''),
+        // ۱.۶۳.۴ — سریال و مدل خودِ ماشین از BIOS/Computer خوانده می‌شود.
+        'machine_serial' => (string) ($inventory['serial_number'] ?? ''),
+        'machine_model' => trim((string) ($inventory['manufacturer'] ?? '') . ' ' . (string) ($inventory['model'] ?? '')),
         'windows_serial' => (string) inventory_value($os, ['SerialNumber', 'serial_number'], ($inventory['os_serial'] ?? '')),
         // نام فعلی از Win32_ComputerSystem.UserName می‌آید؛ RegisteredUser و فهرست پروفایل‌ها هویت فعلی نیستند.
         'user_login' => (function () use ($inventory, $hardware): string {
