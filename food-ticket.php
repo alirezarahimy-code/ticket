@@ -267,6 +267,11 @@ function food_ticket_route_allowed(array $user, string $route): bool
         'absence-save' => 'food.groups',
         'absence-clear' => 'food.groups',
         'delivery' => 'food.manual_attendance',
+        // لغو فیش: بدون این سطر، $routePermission برای مسیر null می‌ماند و
+        // food_ticket_route_allowed همیشه false برمی‌گرداند — یعنی حتی برای
+        // مدیر پشتیبانی که «ثبت دستی» و «ثبت غیبت» را دارد، دکمهٔ لغو بی‌صدا
+        // ۴۰۳ می‌گرفت و هیچ فیشی لغو نمی‌شد. (گزارش کاربر: «لغو عمل نمی‌کند»)
+        'cancel-ticket' => 'food.manual_attendance',
         'diag-source_row-delete' => 'food.db',
         // سازگاری: لینک قدیمی «آزمون اتصال منبع تردد»
         (function_exists('food_ticket_legacy_key') ? food_ticket_legacy_key('route_test') : 'test-source') => 'food.db',
@@ -5315,9 +5320,11 @@ function food_ticket_api_handle(string $route, array $user): never
             if ($cancelDate === '') {
                 food_ticket_api_json(['error' => 'تاریخ معتبر نیست.'], 400);
             }
-            // پیش‌فرض: فقط فیش لغو شود (ردیف «غذا سفارش داده ولی فیش چاپ نشده»).
-            // ثبت غیبت فقط اگر صریحاً خواسته شود.
-            $cancelMarkAbsent = array_key_exists('mark_absent', $body) && (bool) filter_var($body['mark_absent'], FILTER_VALIDATE_BOOLEAN);
+            // پیش‌فرض: هم فیش لغو شود (ردیف «غذا سفارش داده ولی فیش چاپ نشده»
+            // تا قابل صدور مجدد باشد) و هم شخص در فهرست غایبان بیاید.
+            // کاربر انتظار دارد بعد از لغو، از «غذا گرفته» خارج و در «غایبین» دیده شود.
+            $cancelMarkAbsent = !array_key_exists('mark_absent', $body)
+                || (bool) filter_var($body['mark_absent'], FILTER_VALIDATE_BOOLEAN);
             food_ticket_api_json(food_ticket_cancel_ticket_for_user(
                 $cancelUserId,
                 $cancelDate,

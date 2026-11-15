@@ -137,7 +137,11 @@
     const record = u.today_record;
     if (!record && !u.pc) return '<span class="status warn">بدون کد پرسنلی</span>';
     if (!record) return '<span class="status ok">تردد این روز ثبت نشده</span>';
-    if (record.event_type === 'printed') {
+    // auto_printed هم فیش واقعی است (چاپ خودکار شام/تعطیلات). پیش‌تر فقط
+    // 'printed' بررسی می‌شد، پس ردیفِ auto_printed به شاخهٔ آخر می‌افتاد و
+    // «تردد این روز ثبت شده» (زرد) نشان داده می‌شد — همان علامتی که کاربر
+    // برای دو نفرِ دارای فیش دید.
+    if (record.event_type === 'printed' || record.event_type === 'auto_printed' || record.event_type === 'print') {
       if (isOrphanTicket(u)) {
         const ps = String(record.print_status || '').toLowerCase();
         const why = ps === 'print_error' || ps === 'failed' ? 'خطای چاپ' : 'در صف چاپ ماند';
@@ -153,6 +157,9 @@
     }
     if (record.source_uid === 'manual-attendance') return '<span class="status warn">ثبت دستی این روز</span>';
     if (record.event_type === 'no_food') return '<span class="status warn">تردد/بدون فیش این روز</span>';
+    // «repeat» یعنی فیش از قبل صادر شده بود و این تردد دوباره فیش نساخت — نه
+    // اینکه شخص فیشی ندارد. برچسب صریح تا کاربر دنبال دکمهٔ ثبت دستی نگردد.
+    if (record.event_type === 'repeat') return '<span class="status ok">فیش این روز از قبل صادر شده</span>';
     return '<span class="status warn">تردد این روز ثبت شده</span>';
   }
 
@@ -404,14 +411,14 @@
       if (!window.confirm('فیش ' + targets.length + ' نفر لغو شود؟\n\n'
         + targets.slice(0, 12).map((t) => '• ' + t.name).join('\n')
         + (targets.length > 12 ? '\n… و ' + (targets.length - 12) + ' نفر دیگر' : '')
-        + '\n\nفیششان لغو می‌شود و به «غذا سفارش داده ولی فیش چاپ نشده» می‌روند.')) return;
+        + '\n\nفیش لغو می‌شود، شخص در فهرست غایبان می‌آید و در «غذا سفارش داده ولی فیش چاپ نشده» می‌ماند تا بتوانید دوباره صادرش کنید.')) return;
       S.manualSaving = true;
       S.manualError = '';
       drawManualAttendance();
       let done = 0; const failed = [];
       const chain = targets.reduce((promise, t) => promise.then(() => callApi('/api/cancel-ticket', {
         method: 'POST',
-        body: JSON.stringify({ user_id: t.id, date: manualDateIso(), reason, mark_absent: false }),
+        body: JSON.stringify({ user_id: t.id, date: manualDateIso(), reason, mark_absent: true }),
       }).then(() => { done++; }).catch((err) => { failed.push((t.name || t.id) + ': ' + ((err && err.message) || 'خطا')); })),
         Promise.resolve());
       chain.then(() => {

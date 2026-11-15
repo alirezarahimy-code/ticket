@@ -125,14 +125,22 @@ ok(strpos($jsSrc, "if (ps === 'printed' || ds === 'delivered') return false;") !
 // برچسب وضعیت نباید «دارای فیش این روز» باشد
 ok(strpos($jsSrc, 'قابل ثبت دستی') !== false,
     'برچسب «قابل ثبت دستی» اضافه شد');
-ok(preg_match('/if \(record\.event_type === \'printed\'\) \{\s*if \(isOrphanTicket\(u\)\)/s', $jsSrc) === 1,
-    'برچسب چاپ‌نشده، پیش از «دارای فیش» بررسی می‌شود');
+// auto_printed هم فیش واقعی است؛ پیش‌تر فقط 'printed' بررسی می‌شد و ردیفِ
+// چاپ خودکار به شاخهٔ آخر می‌افتاد و «تردد این روز ثبت شده» (زرد) می‌شد.
+ok(preg_match('/if \(record\.event_type === \'printed\' \|\| record\.event_type === \'auto_printed\'/', $jsSrc) === 1,
+    'auto_printed هم «دارای فیش» شمرده می‌شود (زرد نمایش داده نمی‌شود)');
+ok(strpos($jsSrc, "if (record.event_type === 'repeat') return") !== false,
+    'ردیف repeat با برچسب صریح «فیش از قبل صادر شده» نمایش داده می‌شود');
 
 // payload سرور باید delivery_status بدهد
 ok(strpos($groupsSrc, "'delivery_status' => (string) (\$row['delivery_status'] ?? '')") !== false,
     'payload فهرست، delivery_status را می‌فرستد (بدون آن فرانت نمی‌تواند تشخیص دهد)');
-ok(strpos($groupsSrc, 'SELECT id, user_id, event_type, print_status, delivery_status, source_uid FROM food_ticket_events') !== false,
-    'ستون delivery_status در کوئری فهرست خوانده می‌شود');
+ok(strpos($groupsSrc, 'SELECT id, user_id, event_type, print_status, delivery_status, source_uid, ticket_key FROM food_ticket_events') !== false,
+    'ستون‌های delivery_status و ticket_key در کوئری فهرست خوانده می‌شوند');
+// ردیفِ نمایشی باید «فیش‌دار» باشد، نه صرفاً آخرین ردیف: یک نفر می‌تواند
+// فیش صبح داشته باشد و تردد گروه (repeat) بعدازظهر بسازد.
+ok(strpos($groupsSrc, '$attendanceByUser[$userId] = $ticketRows[$userId] ?? $row;') !== false,
+    'پنل ردیفِ دارای فیش را بر آخرین ردیف ترجیح می‌دهد');
 
 // ─────────────────────────────────────────────────────────────────────
 echo "\n۴) دکمهٔ ثبت گروهی فیش‌های چاپ‌نشده\n";
@@ -168,7 +176,7 @@ if (is_file($htmlFile)) {
     ok(preg_match('/assets\/food-manual-attendance\.js\?v=(\d+)/', $html, $m) === 1,
         'food-manual-attendance.js با شمارهٔ نسخه بارگذاری می‌شود (کش‌شکنی)');
     $assetVer = isset($m[1]) ? (int) $m[1] : 0;
-    ok($assetVer >= 13, 'نسخهٔ کش حداقل ۱۳ است (v=' . $assetVer . ') — تغییر JS دیده می‌شود');
+    ok($assetVer >= 14, 'نسخهٔ کش حداقل ۱۴ است (v=' . $assetVer . ') — تغییر JS دیده می‌شود');
     // فیلد تاریخ «شمسی» است ولی API میلادی می‌خواهد. اگر تجزیه‌گر شمسی را
     // نشناسد، تاریخ بی‌صدا عوض نمی‌شود و فهرست روی «امروز» قفل می‌ماند —
     // نتیجه: فیش‌های یتیم دیروز هرگز دیده نمی‌شوند. کاربر همین را گزارش کرد.
@@ -266,8 +274,33 @@ if (is_file($groupsFile)) {
     ok(strpos($groups, "'absent' => !\$isVisitor && !\$hasTicket && isset(\$absences[\$uid])") !== false,
         'فیش‌دار در فهرست غایبان پنل گروه نمایش داده نمی‌شود');
     // لغو انتخابی، نه گروهی.
-    ok(strpos($groups, 'markAbsent = false') !== false,
-        'لغو فیش به‌طور پیش‌فرض غیبت ثبت نمی‌کند (کاربر خودش انتخاب می‌کند)');
+    // تصمیم مالک (۲۰۲۶-۱۱-۱۶): بعد از لغو، شخص باید هم از «غذا گرفته» خارج
+    // شود و هم در فهرست غایبان بیاید — «تولیست غایبین اضافه نشدن».
+    ok(strpos($groups, 'bool $markAbsent = true') !== false,
+        'لغو فیش به‌طور پیش‌فرض غیبت ثبت می‌کند (شخص در فهرست غایبان می‌آید)');
+    ok(strpos($groups, 'WHERE m.user_id = ? ORDER BY m.group_id LIMIT 1') !== false,
+        'رکورد غیبتِ لغو با group_id ساخته می‌شود (در پنل غایبین دیده می‌شود)');
+    // ── دو ریشهٔ شکایت «لغو عمل نمی‌کند» ──
+    // ۱) مسیر cancel-ticket در نگاشت دسترسی نبود ⇒ $routePermission=null ⇒
+    //    food_ticket_route_allowed همیشه false ⇒ ۴۰۳ بی‌صدا برای هر نقش غیرادمین.
+    $ticketSrc = (string) file_get_contents($root . '/food-ticket.php');
+    ok(strpos($ticketSrc, "'cancel-ticket' => 'food.manual_attendance'") !== false,
+        'مسیر cancel-ticket در نگاشت دسترسی هست (بدون آن ۴۰۳ بی‌صدا می‌داد)');
+    // ۲) ردیفِ لغوشده باید قابل ثبت مجدد باشد؛ $replaceOrphanTicket پیش از
+    //    تعریف استفاده می‌شد و همیشه false می‌ماند.
+    $orphanDef = strpos($groups, "\$replaceOrphanTicket = \$existingToday !== null");
+    $orphanUse = strpos($groups, 'if ($replaceOrphanTicket) {');
+    ok($orphanDef !== false && $orphanUse !== false && $orphanDef < $orphanUse,
+        '$replaceOrphanTicket پیش از استفاده تعریف می‌شود (وگرنه ردیف لغوشده دوباره صادر نمی‌شود)');
+    ok(strpos($groups, 'food_ticket_event_is_orphan_ticket($existingToday)') !== false,
+        'ردیفِ لغوشده (یتیم) مسیر تبدیل دارد');
+    // فیش خودکارِ تحویل‌نشده هم باید قابل تبدیل باشد (دو نفرِ زردرنگ).
+    ok(strpos($groups, '$replaceUndeliveredAuto') !== false
+        && strpos($groups, "['auto_printed', 'auto_guest', 'print']") !== false,
+        'فیش خودکارِ تحویل‌نشده قابل تبدیل به ثبت دستی است');
+    // و فیشِ تحویل‌شده هرگز بازنویسی نمی‌شود.
+    ok(strpos($groups, 'AND print_status <> ') !== false && strpos($groups, 'IS NULL OR delivery_status <> ') !== false,
+        'فیشِ تحویل‌شده بازنویسی نمی‌شود (محافظ)');
     ok(strpos($groups, 'cancelled_ticket') !== false,
         'سابقهٔ فیش لغوشده در source_payload حفظ می‌شود');
     ok(strpos($groups, 'INSERT INTO food_ticket_daily_absence') !== false,
