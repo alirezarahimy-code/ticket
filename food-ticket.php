@@ -5315,7 +5315,9 @@ function food_ticket_api_handle(string $route, array $user): never
             if ($cancelDate === '') {
                 food_ticket_api_json(['error' => 'تاریخ معتبر نیست.'], 400);
             }
-            $cancelMarkAbsent = !array_key_exists('mark_absent', $body) || (bool) filter_var($body['mark_absent'], FILTER_VALIDATE_BOOLEAN);
+            // پیش‌فرض: فقط فیش لغو شود (ردیف «غذا سفارش داده ولی فیش چاپ نشده»).
+            // ثبت غیبت فقط اگر صریحاً خواسته شود.
+            $cancelMarkAbsent = array_key_exists('mark_absent', $body) && (bool) filter_var($body['mark_absent'], FILTER_VALIDATE_BOOLEAN);
             food_ticket_api_json(food_ticket_cancel_ticket_for_user(
                 $cancelUserId,
                 $cancelDate,

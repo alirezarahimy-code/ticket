@@ -706,7 +706,9 @@ function food_ticket_group_plan(array $members, array $absentUserIds, array $tic
         $food = '';
         if (!(int) ($member['is_active'] ?? 0)) {
             $state = 'inactive';
-        } elseif (!empty($absentUserIds[$userId])) {
+        } elseif (!empty($absentUserIds[$userId]) && empty($ticketedKeys[$ticketKey])) {
+            // غایب فقط اگر فیش واقعی نداشته باشد. کسی که فیش گرفته قطعاً
+            // غذا گرفته؛ «غایب» بودنش با داده ناسازگار است.
             $state = 'absent';
         } elseif ($national === '') {
             $state = 'no_national';
@@ -1447,7 +1449,8 @@ function food_ticket_group_try_process(array $item, array $config, array &$order
         }
     }
 
-    $counts = ['printed' => 0, 'repeat' => 0, 'no_food' => 0, 'skipped' => 0, 'error' => 0, 'absent' => $plan['absent']];
+    $absenceClearedFor = [];
+    $counts = ['printed' => 0, 'repeat' => 0, 'no_food' => 0, 'skipped' => 0, 'error' => 0, 'absent' => $plan['absent'], 'absence_cleared' => 0];
     $payloadJson = json_encode(
         [
             'group_id' => $groupId,
@@ -1516,6 +1519,22 @@ function food_ticket_group_try_process(array $item, array $config, array &$order
             if (!empty($decision['print'])) {
                 food_ticket_enqueue_print($eventId, $config);
                 $counts['printed']++;
+                // فیش گرفتن یعنی حضور. رکورد غیبت همان روز باید پاک شود،
+                // وگرنه شخص هم فیش دارد و هم در فهرست غایبان می‌ماند —
+                // همان ناسازگاری «تردد ثبت شده ولی غایب».
+                if (!isset($absenceClearedFor[$userId]) && function_exists('food_ticket_absence_ensure')
+                    && food_ticket_absence_ensure()) {
+                    try {
+                        $delAbs = db()->prepare('DELETE FROM food_ticket_daily_absence WHERE absence_date = ? AND user_id = ?');
+                        $delAbs->execute([$date, $userId]);
+                        if ($delAbs->rowCount() > 0) {
+                            $counts['absence_cleared'] = ($counts['absence_cleared'] ?? 0) + 1;
+                        }
+                    } catch (Throwable $absEx) {
+                        app_error_log('[food-groups] absence clear failed user=' . $userId . ': ' . $absEx->getMessage());
+                    }
+                    $absenceClearedFor[$userId] = true;
+                }
             } elseif ($decision['event_type'] === 'repeat') {
                 $counts['repeat']++;
             } elseif ($decision['event_type'] === 'no_food') {
@@ -3148,7 +3167,7 @@ function food_ticket_api_delivery(int $eventId, string $action, string $reason, 
  *
  * @return array<string,mixed>
  */
-function food_ticket_cancel_ticket_for_user(int $userId, string $date, array $actor, string $reason, bool $markAbsent = true): array
+function food_ticket_cancel_ticket_for_user(int $userId, string $date, array $actor, string $reason, bool $markAbsent = false): array
 {
     if ($userId <= 0) {
         throw new RuntimeException('یک کارمند را انتخاب کنید.');
@@ -3178,8 +3197,13 @@ function food_ticket_cancel_ticket_for_user(int $userId, string $date, array $ac
         throw new RuntimeException('ردیف فیش معتبر نیست.');
     }
     $printStatus = strtolower(trim((string) ($event['print_status'] ?? '')));
-    if ((string) ($event['event_type'] ?? '') === 'no_food') {
-        throw new RuntimeException('این ردیف از قبل «بدون فیش» است؛ چیزی برای لغو نیست.');
+    $eventType = strtolower(trim((string) ($event['event_type'] ?? '')));
+    // ردیفی که از قبل «بدون فیش» است، چیزی برای لغو ندارد.
+    if ($eventType === 'no_food' && $printStatus === 'not_printed') {
+        throw new RuntimeException('این ردیف از قبل «غذا سفارش داده ولی فیش چاپ نشده» است؛ چیزی برای لغو نیست.');
+    }
+    if ($eventType === 'guest') {
+        throw new RuntimeException('فیش مهمان از این مسیر لغو نمی‌شود.');
     }
     // فیشی که واقعاً چاپ و تحویل شده، لغوش فقط با دسترسی سطح بالاتر.
     $wasDelivered = strtolower(trim((string) ($event['delivery_status'] ?? ''))) === 'delivered';
@@ -3208,9 +3232,17 @@ function food_ticket_cancel_ticket_for_user(int $userId, string $date, array $ac
         throw new RuntimeException('ثبت سابقهٔ لغو انجام نشد.');
     }
 
-    // ticket_key باید خالی شود تا فیش لغوشده جای یکتای فیش فعلی را نگیرد.
+    // event_type عمداً «printed» می‌ماند. چرا؟ کاربر می‌خواهد این افراد در
+    // فهرست «غذا سفارش داده ولی فیش چاپ نشده» بیایند تا بتوان فیششان را
+    // دوباره صادر کرد. اگر event_type را no_food می‌کردیم، ردیف عمدیِ
+    // «تردد بدون فیش» می‌شد و اصلاً فیشی برای صدور نمی‌ماند.
+    //
+    // print_status=not_printed + delivery=pending یعنی: فیش ساخته شده ولی
+    // هرگز چاپ نشده — همان تعریف «فیش یتیم» در food_ticket_event_is_orphan_ticket.
+    // سابقهٔ لغو در source_payload['cancelled_ticket'] می‌ماند.
+    // ticket_key خالی می‌شود تا جای یکتای فیش فعلی را آزاد کند.
     $upd = db()->prepare(
-        'UPDATE food_ticket_events SET event_type = "no_food", print_status = "not_printed", '
+        'UPDATE food_ticket_events SET event_type = "printed", print_status = "not_printed", '
         . 'delivery_status = "pending", delivered_at = NULL, delivered_by = NULL, ticket_key = NULL, '
         . 'last_error = ?, source_payload = ?, processed_at = NOW(), next_retry_at = NULL WHERE id = ?'
     );

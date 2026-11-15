@@ -1,2 +1,2 @@
-ticket-update-1.63-to-1.63.1-r6-cancel-ticket-20261115.zip
-ticket-full-1.63.1-r6-20261115.zip
+ticket-update-1.63-to-1.63.1-r7-cancel-selected-20261115.zip
+ticket-full-1.63.1-r7-20261115.zip

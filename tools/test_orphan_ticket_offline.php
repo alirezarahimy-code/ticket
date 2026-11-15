@@ -114,7 +114,8 @@ ok(strpos($jsSrc, 'const isOrphanTicket = (u) =>') !== false,
     'تابع isOrphanTicket در پنل تعریف شده است');
 ok(strpos($jsSrc, 'isReplaceableOrphan') !== false,
     'ردیف یتیم «قابل جایگزینی» است');
-ok(strpos($jsSrc, '|| isReplaceableOrphan(u))') !== false,
+ok(strpos($jsSrc, '|| isReplaceableOrphan(u) || isCancelableTicket(u)') !== false
+   || strpos($jsSrc, '|| isReplaceableOrphan(u))') !== false,
     'قابل انتخاب بودن ردیف، فیش یتیم را می‌پذیرد');
 ok(strpos($jsSrc, "'pending', 'printing', 'print_error', 'failed', 'held_absent', ''") !== false,
     'همان فهرست وضعیت‌های صف که سرور دارد');
@@ -146,8 +147,7 @@ ok(strpos($jsSrc, "const orphanRows = S.manualEmployees.filter((u) => isOrphanTi
     'شمارش فیش‌های یتیم از کل کارکنان است (مستقل از جستجو)');
 ok(strpos($jsSrc, "const orphanRows = filtered.filter(") === false,
     'شمارش دیگر به نتیجهٔ جستجو وابسته نیست');
-ok(preg_match("/manual-select-orphans'\]?\)?.*?isOrphanTicket\(u\)/s", $jsSrc) === 1
-   || strpos($jsSrc, "if (act === 'manual-select-orphans')") !== false,
+ok(strpos($jsSrc, "if (act === 'manual-select-orphans')") !== false,
     'هندلر دکمه فیش‌های یتیم را انتخاب می‌کند');
 ok(strpos($jsSrc, 'S.manualWithTicket = true;') !== false,
     'دکمه حالت «با فیش» را روشن می‌کند (وگرنه تبدیل انجام نمی‌شود)');
@@ -168,7 +168,7 @@ if (is_file($htmlFile)) {
     ok(preg_match('/assets\/food-manual-attendance\.js\?v=(\d+)/', $html, $m) === 1,
         'food-manual-attendance.js با شمارهٔ نسخه بارگذاری می‌شود (کش‌شکنی)');
     $assetVer = isset($m[1]) ? (int) $m[1] : 0;
-    ok($assetVer >= 11, 'نسخهٔ کش حداقل ۱۱ است (v=' . $assetVer . ') — تغییر JS دیده می‌شود');
+    ok($assetVer >= 12, 'نسخهٔ کش حداقل ۱۲ است (v=' . $assetVer . ') — تغییر JS دیده می‌شود');
     // فیلد تاریخ «شمسی» است ولی API میلادی می‌خواهد. اگر تجزیه‌گر شمسی را
     // نشناسد، تاریخ بی‌صدا عوض نمی‌شود و فهرست روی «امروز» قفل می‌ماند —
     // نتیجه: فیش‌های یتیم دیروز هرگز دیده نمی‌شوند. کاربر همین را گزارش کرد.
@@ -240,8 +240,20 @@ if (is_file($groupsFile)) {
     // ── لغو فیش: برگرداندن شخص به «تردد ثبت نشده» + ثبت غیبت ──
     ok(strpos($groups, 'function food_ticket_cancel_ticket_for_user') !== false,
         'تابع لغو فیش وجود دارد');
-    ok(strpos($groups, "event_type = \"no_food\", print_status = \"not_printed\"") !== false,
-        'لغو فیش ردیف را به «بدون فیش» برمی‌گرداند');
+    // لغو باید ردیف را به «فیش چاپ‌نشده» ببرد (نه «بدون فیش»)، تا در فهرست
+    // «غذا سفارش داده ولی فیش چاپ نشده» بیاید و قابل صدور مجدد باشد.
+    ok(strpos($groups, "event_type = \"printed\", print_status = \"not_printed\"") !== false,
+        'لغو فیش ردیف را به «فیش چاپ‌نشده» می‌برد (قابل صدور مجدد)');
+    ok(strpos($groups, "event_type = \"no_food\", print_status = \"not_printed\"") === false,
+        'لغو، ردیف را «بدون فیش» نمی‌کند (وگرنه فیشی برای صدور نمی‌ماند)');
+    // غیبت با گرفتن فیش پاک می‌شود.
+    ok(strpos($groups, 'absenceClearedFor') !== false,
+        'گرفتن فیش، رکورد غیبت همان روز را پاک می‌کند');
+    ok(strpos($groups, "!empty(\$absentUserIds[\$userId]) && empty(\$ticketedKeys[\$ticketKey])") !== false,
+        'کسی که فیش دارد هرگز «غایب» شمرده نمی‌شود');
+    // لغو انتخابی، نه گروهی.
+    ok(strpos($groups, 'markAbsent = false') !== false,
+        'لغو فیش به‌طور پیش‌فرض غیبت ثبت نمی‌کند (کاربر خودش انتخاب می‌کند)');
     ok(strpos($groups, 'cancelled_ticket') !== false,
         'سابقهٔ فیش لغوشده در source_payload حفظ می‌شود');
     ok(strpos($groups, 'INSERT INTO food_ticket_daily_absence') !== false,

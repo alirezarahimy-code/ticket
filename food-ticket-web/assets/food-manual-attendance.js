@@ -40,15 +40,18 @@
     // هم‌تراز با food_ticket_event_is_orphan_ticket() در سرور.
     return ['not_printed', 'pending', 'printing', 'print_error', 'failed', 'held_absent', ''].indexOf(ps) !== -1;
   };
-  // «قابل لغو»: فیشی برای این روز دارد که هنوز فیش یتیم نیست — یعنی چاپ
-  // شده یا در حال چاپ است. لغو آن ردیف را به «بدون فیش» برمی‌گرداند.
-  // فیش یتیم لازم نیست لغو شود؛ همان را می‌توان دستی ثبت کرد.
+  // «قابل لغو»: هر ردیفی که برای این روز چیزی ثبت کرده و فیشش
+  // چاپ‌نشده/یتیم نیست. یعنی: فیش چاپ‌شده، تردد بدون فیش، یا هر ردیف
+  // صف/تکرار. کاربرها باید بتوانند خودشان انتخاب کنند کدام را لغو کنند
+  // تا به وضعیت «غذا سفارش داده ولی فیش چاپ نشده» بروند.
+  // فیش یتیم (در صف چاپ مانده) لازم نیست لغو شود؛ همان با «ثبت گروهی»
+  // به فیش تبدیل می‌شود.
   const isCancelableTicket = (u) => {
     const r = u && u.today_record;
     if (!r) return false;
     if (isOrphanTicket(u)) return false;
-    const et = String(r.event_type || '').toLowerCase();
-    return et === 'printed' || et === 'print' || et === 'auto_printed';
+    if (r.event_type === 'guest') return false;
+    return true;
   };
   const isReplaceableOrphan = (u) => isOrphanTicket(u) && S.manualWithTicket && canIssueManualTicket();
   // شرط «کد پرسنلی لازم است» برای فیش یتیم اعمال نمی‌شود: آن ردیف قبلاً
@@ -56,8 +59,8 @@
   // بدون این استثنا، کاربرانی که کد پرسنلی ندارند از انتخاب حذف می‌شدند و
   // دکمهٔ «ثبت گروهی» برایشان هرگز ظاهر نمی‌شد.
   const selectableRow = (u) => !!u && (isGuestRow(u) || (!!u.active
-    && (!u.today_record || isReplaceableNoTicket(u) || isReplaceableOrphan(u))
-    && (!S.manualWithTicket || !!u.pc || isReplaceableOrphan(u))));
+    && (!u.today_record || isReplaceableNoTicket(u) || isReplaceableOrphan(u) || isCancelableTicket(u))
+    && (!S.manualWithTicket || !!u.pc || isReplaceableOrphan(u) || isCancelableTicket(u))));
   const manualDateIso = () => S.manualDate || isoToday();
   const jalaliFromIso = (iso) => {
     try {
@@ -187,6 +190,10 @@
     // ردیف‌هایی که «فیش دارند» و می‌توان لغوشان کرد تا به «تردد ثبت نشده»
     // برگردند و خودکار در فهرست غایبان بیایند.
     const cancelableRows = S.manualEmployees.filter((u) => isCancelableTicket(u) && canEdit);
+    const cancelChosenCount = S.manualSelected.filter((id) => {
+      const u = S.manualEmployees.find((x) => Number(x.id) === Number(id));
+      return isCancelableTicket(u);
+    }).length;
     const orphanRows = S.manualEmployees.filter((u) => isOrphanTicket(u) && canIssueManualTicket());
     const orphanCount = orphanRows.length;
     // تشخیص: اگر دکمه نیامد، کاربر باید بتواند بگوید کدام شرط شکسته است.
@@ -252,10 +259,11 @@
       + (canEdit ? '<div class="manual-select-actions">'
         + (orphanCount ? '<button type="button" class="btn primary" data-manual-action="manual-select-orphans">ثبت گروهی ' + orphanCount + ' فیشِ چاپ‌نشده</button>' : '')
         + (orphanDiag ? '<span class="muted" style="font-size:12px;align-self:center">' + esc(orphanDiag) + '</span>' : '')
-        + (cancelableRows.length ? '<button type="button" class="btn danger" data-manual-action="manual-cancel-tickets">لغو فیش ' + cancelableRows.length + ' نفر و ثبت غیبت</button>' : '')
+        + (cancelableRows.length ? '<button type="button" class="btn danger" data-manual-action="manual-cancel-selected"' + (cancelChosenCount ? '' : ' disabled') + '>لغو فیش انتخاب‌شده‌ها (' + cancelChosenCount + ' نفر)</button>' : '')
+        + (cancelableRows.length ? '<button type="button" class="btn ghost" data-manual-action="manual-select-cancelable">انتخاب همهٔ قابل‌لغوها (' + cancelableRows.length + ')</button>' : '')
         + '<button type="button" class="btn ghost" data-manual-action="manual-select-visible"' + (eligibleVisible.length ? '' : ' disabled') + '>انتخاب افرادِ قابل‌انتخابِ نتیجه</button>'
         + '<button type="button" class="btn ghost" data-manual-action="manual-clear-selection"' + (chosenCount ? '' : ' disabled') + '>پاک‌کردن انتخاب</button><span class="muted">انتخاب‌شده: ' + chosenCount + ' نفر</span></div>'
-        + (cancelableRows.length ? '<p class="muted" style="font-size:12px;margin:0">لغو فیش، ردیف را به «تردد این روز ثبت نشده» برمی‌گرداند و شخص را غایب ثبت می‌کند؛ پس در فهرست غایبان هم می‌آید.</p>' : '')
+        + (cancelableRows.length ? '<p class="muted" style="font-size:12px;margin:0">ابتدا افراد را با چک‌باکس انتخاب کنید، بعد «لغو فیش انتخاب‌شده‌ها» را بزنید. ردیف به «غذا سفارش داده ولی فیش چاپ نشده» برمی‌گردد و شخص غایب ثبت می‌شود.</p>' : '')
         + '<fieldset class="manual-ticket-mode"><legend>نوع ثبت</legend>'
         + (canIssueTicket ? '<label><input type="radio" name="fg-manual-with-ticket" value="yes"' + (S.manualWithTicket ? ' checked' : '') + '> ثبت تردد با صدور فیش</label>' : '')
         + '<label><input type="radio" name="fg-manual-with-ticket" value="no"' + (!S.manualWithTicket ? ' checked' : '') + '> ثبت تردد بدون فیش</label>'
@@ -362,36 +370,6 @@
     e.preventDefault();
     const act = b.dataset.manualAction;
     if (act === 'manual-reload') { S.manualLoaded = false; loadManualAttendance(); return; }
-    if (act === 'manual-cancel-tickets') {
-      // لغو فیش همهٔ ردیف‌های قابل‌لغوِ همین روز. شخص خودکار غایب ثبت می‌شود،
-      // پس از فهرست «دارای فیش» بیرون می‌رود و در فهرست غایبان می‌آید.
-      const targets = S.manualEmployees
-        .filter((u) => isCancelableTicket(u))
-        .map((u) => ({ id: Number(u.id), name: String(u.name || '') }));
-      if (!targets.length) { say('فیشی برای لغو پیدا نشد.'); return; }
-      const reason = 'لغو فیش — از صفحهٔ ثبت دستی';
-      if (!window.confirm('فیش ' + targets.length + ' نفر لغو شود؟\n\n'
-        + targets.slice(0, 10).map((t) => '• ' + t.name).join('\n')
-        + (targets.length > 10 ? '\n… و ' + (targets.length - 10) + ' نفر دیگر' : '')
-        + '\n\nاین افراد غایب ثبت می‌شوند و در فهرست غایبان می‌آیند.')) return;
-      S.manualSaving = true;
-      S.manualError = '';
-      drawManualAttendance();
-      let done = 0; const failed = [];
-      const chain = targets.reduce((promise, t) => promise.then(() => callApi('/api/cancel-ticket', {
-        method: 'POST',
-        body: JSON.stringify({ user_id: t.id, date: manualDateIso(), reason, mark_absent: true }),
-      }).then(() => { done++; }).catch((err) => { failed.push((t.name || t.id) + ': ' + ((err && err.message) || 'خطا')); })),
-        Promise.resolve());
-      chain.then(() => {
-        S.manualSaving = false;
-        S.manualLoaded = false;
-        if (failed.length) say('لغو شد: ' + done + ' | ناموفق: ' + failed.length);
-        else say(done + ' فیش لغو شد و افراد غایب ثبت شدند.');
-        loadManualAttendance();
-      });
-      return;
-    }
     if (act === 'manual-select-orphans') {
       // فقط ردیف‌هایی که فیش‌شان در صف مانده و هرگز چاپ نشده؛ فیش واقعی دست نمی‌خورد.
       const ids = S.manualEmployees
@@ -404,7 +382,46 @@
         S.manualReason = 'فیش‌های چاپ‌نشدهٔ صف چاپ به‌صورت گروهی ثبت شدند.';
       }
       drawManualAttendance();
-      say(ids.length + ' فیش چاپ‌نشده انتخاب شد. علت را بررسی و «ثبت» را بزنید.');
+      return;
+    }
+    if (act === 'manual-select-cancelable') {
+      // همهٔ ردیف‌های قابل‌لغوِ همین روز را تیک بزن.
+      const ids = S.manualEmployees
+        .filter((u) => isCancelableTicket(u) && canEdit)
+        .map((u) => Number(u.id));
+      S.manualSelected = Array.from(new Set(S.manualSelected.map(Number).concat(ids)));
+      drawManualAttendance();
+      return;
+    }
+    if (act === 'manual-cancel-selected') {
+      // فقط کسانی که کاربر خودش تیک زده — نه همهٔ آن روز.
+      const targets = S.manualSelected.map(Number)
+        .map((id) => S.manualEmployees.find((u) => Number(u.id) === id))
+        .filter((u) => isCancelableTicket(u))
+        .map((u) => ({ id: Number(u.id), name: String(u.name || '') }));
+      if (!targets.length) { say('ابتدا افراد را با چک‌باکس انتخاب کنید.'); return; }
+      const reason = 'لغو فیش — از صفحهٔ ثبت دستی';
+      if (!window.confirm('فیش ' + targets.length + ' نفر لغو شود؟\n\n'
+        + targets.slice(0, 12).map((t) => '• ' + t.name).join('\n')
+        + (targets.length > 12 ? '\n… و ' + (targets.length - 12) + ' نفر دیگر' : '')
+        + '\n\nفیششان لغو می‌شود و به «غذا سفارش داده ولی فیش چاپ نشده» می‌روند.')) return;
+      S.manualSaving = true;
+      S.manualError = '';
+      drawManualAttendance();
+      let done = 0; const failed = [];
+      const chain = targets.reduce((promise, t) => promise.then(() => callApi('/api/cancel-ticket', {
+        method: 'POST',
+        body: JSON.stringify({ user_id: t.id, date: manualDateIso(), reason, mark_absent: false }),
+      }).then(() => { done++; }).catch((err) => { failed.push((t.name || t.id) + ': ' + ((err && err.message) || 'خطا')); })),
+        Promise.resolve());
+      chain.then(() => {
+        S.manualSaving = false;
+        S.manualLoaded = false;
+        S.manualSelected = [];
+        if (failed.length) say('لغو شد: ' + done + ' | ناموفق: ' + failed.length);
+        else say(done + ' فیش لغو شد.');
+        loadManualAttendance();
+      });
       return;
     }
     if (act === 'manual-select-visible') {

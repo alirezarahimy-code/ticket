@@ -24,15 +24,15 @@
 
 **اگر ۱.۶۳ را نصب کرده‌اید، فقط این را لازم دارید.**
 
-**[⬇ دانلود بستهٔ میانی ۱.۶۳.۱](https://github.com/alirezarahimy-code/ticket/releases/download/v1.63.1/ticket-update-1.63-to-1.63.1-r6-cancel-ticket-20261115.zip)**
+**[⬇ دانلود بستهٔ میانی ۱.۶۳.۱](https://github.com/alirezarahimy-code/ticket/releases/download/v1.63.1/ticket-update-1.63-to-1.63.1-r7-cancel-selected-20261115.zip)**
 
 ```
-نام فایل : ticket-update-1.63-to-1.63.1-r6-cancel-ticket-20261115.zip
-حجم     : 396,826 بایت
-SHA-256 : 2aee882ef246e579198b3d1371767dde8505afd8d815165b27b807d08ac299c3
+نام فایل : ticket-update-1.63-to-1.63.1-r7-cancel-selected-20261115.zip
+حجم     : 397,953 بایت
+SHA-256 : 798bd70b355c29272c43ba18e7bc1f1038ff773f432da4b10c363472201417ef
 ```
 
-**۳۱ فایل، بدون مهاجرت، بدون تغییر جدول. — نسخهٔ r6**
+**۳۱ فایل، بدون مهاجرت، بدون تغییر جدول. — نسخهٔ r7**
 
 ### نصب
 
@@ -54,15 +54,15 @@ SHA-256 : 2aee882ef246e579198b3d1371767dde8505afd8d815165b27b807d08ac299c3
 
 **اگر سامانه ندارید یا روی ۱.۶۲.x هستید.**
 
-**[⬇ دانلود بستهٔ کامل ۱.۶۳.۱](https://github.com/alirezarahimy-code/ticket/releases/download/v1.63.1/ticket-full-1.63.1-r6-20261115.zip)**
+**[⬇ دانلود بستهٔ کامل ۱.۶۳.۱](https://github.com/alirezarahimy-code/ticket/releases/download/v1.63.1/ticket-full-1.63.1-r7-20261115.zip)**
 
 ```
-نام فایل : ticket-full-1.63.1-r6-20261115.zip
-حجم     : 11,742,991 بایت
-SHA-256 : 3064dbfcf8fa4f937b142236f729837ad6ccd6303b562372cb4484185fc8e3a4
+نام فایل : ticket-full-1.63.1-r7-20261115.zip
+حجم     : 11,744,118 بایت
+SHA-256 : 5afe68cc71eb26bc386dcb846b7dbd750aa28ccfc39d146e41f189ae7bf22bb3
 ```
 
-**۱۰۹۸ فایل** — نسخهٔ r6 — شامل کل خط ۱.۶۲ (۹۵/۹۶/۹۷)، ۱.۶۳، و ۱.۶۳.۱.
+**۱۰۹۸ فایل** — نسخهٔ r7 — شامل کل خط ۱.۶۲ (۹۵/۹۶/۹۷)، ۱.۶۳، و ۱.۶۳.۱.
 
 ### نصب از صفر
 
