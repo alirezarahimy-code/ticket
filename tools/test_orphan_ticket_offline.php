@@ -284,6 +284,19 @@ if (is_file($groupsFile)) {
     // ۴) «تردّد بدون فیش» نباید با ردیفِ لغوشده به بن‌بست بخورد.
     ok(strpos($groups, '$replaceOrphanNoTicket') !== false,
         'ردیف لغوشده جلوی «تردّد بدون فیش» را نمی‌گیرد');
+    // ۵) لغو باید ردیفِ فیش را بردارد، نه «آخرین ردیف». کسی که صبح فیش
+    //    خودکار گرفته و بعد تردد نماینده (repeat) ثبت شده، دو ردیف دارد؛
+    //    اگر آخرین ردیف برداشته شود هیچ فیشی لغو نمی‌شود و کاربر پیام
+    //    «قبلاً لغو شده» می‌گیرد — همان دو نفرِ دارای تردد.
+    ok(strpos($groups, '$candType === \'repeat\'') !== false,
+        'لغو، ردیف repeat را فیش نمی‌شمارد');
+    ok(strpos($groups, '$candKey !== \'\' && $candPrint !== \'not_printed\'') !== false,
+        'لغو، ردیفِ فیشِ واقعی را ترجیح می‌دهد');
+    // ۶) محافظ «لغو دوباره» نباید بر «کلید خالی + not_printed» تکیه کند؛
+    //    ردیف repeat هم همین مشخصات را دارد.
+    ok(strpos($groups, '$alreadyCancelled') !== false
+        && strpos($groups, '$probePayload[\'cancelled_ticket\']') !== false,
+        'تشخیص «قبلاً لغو شده» بر سابقهٔ cancelled_ticket تکیه می‌کند');
     ok(strpos($groups, "!empty(\$absentUserIds[\$userId]) && empty(\$ticketedKeys[\$ticketKey])") !== false,
         'کسی که فیش دارد هرگز «غایب» شمرده نمی‌شود');
     // ── تردد نماینده: فیش‌دار نباید در فهرست غایبان بماند ──

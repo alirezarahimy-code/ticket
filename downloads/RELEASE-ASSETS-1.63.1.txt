@@ -1,17 +1,17 @@
-# نسخه ۱.۶۳.۱ — چرخهٔ فیش غذا: لغو، غایب، ری‌آیشو (r10)
+# نسخه ۱.۶۳.۱ — چرخهٔ فیش غذا: لغو، غایب، ری‌آیشو (r11)
 
 ## دانلود مستقیم
 
 **بستهٔ میانی (۱.۶۳ → ۱.۶۳.۱) — این را نصب کنید:**
-https://github.com/alirezarahimy-code/ticket/raw/publish-1.63.1/downloads/ticket-update-1.63-to-1.63.1-r10-cancel-fix-20261115.zip
+https://github.com/alirezarahimy-code/ticket/raw/publish-1.63.1/downloads/ticket-update-1.63-to-1.63.1-r11-cancel-fix-20261115.zip
 
 **بستهٔ کامل (نصب تازه):**
-https://github.com/alirezarahimy-code/ticket/raw/publish-1.63.1/downloads/ticket-full-1.63.1-r10-20261115.zip
+https://github.com/alirezarahimy-code/ticket/raw/publish-1.63.1/downloads/ticket-full-1.63.1-r11-20261115.zip
 
 | بسته | حجم | SHA-256 |
 |---|---|---|
-| میانی | 407,303 بایت | `d190eac44097c080b5373802eff77e8079ce63097622b22ccdd403a944baa7cb` |
-| کامل | 11,754,307 بایت | `2ca78534dc10da0d76158d1a41d7fbc16e347012f2267b98dc5fbe5c79ad8485` |
+| میانی | 408,666 بایت | `c8067c3da55b9908a812ddacfb25ed58b5d9db61760fb150e57ea6ee963f4410` |
+| کامل | 11,756,151 بایت | `eb0c96ec292d6f1e552c881983ee6d8037a8d15905367d0e952fd22b3d8ad0ec` |
 
 ۳۱ فایل، بدون مهاجرت.
 
@@ -66,7 +66,7 @@ https://github.com/alirezarahimy-code/ticket/raw/publish-1.63.1/downloads/ticket
 
 ---
 
-## ۸) اصلاح‌های آزمون HTTP واقعی (r10)
+## ۸) اصلاح‌های آزمون HTTP واقعی (r11)
 
 همهٔ موارد زیر با اجرای سامانه روی PHP و درخواست واقعی HTTP کشف و رفع شدند
 (نه فقط آزمون واحد). هر مورد سناریوی واقعی خودتان است:

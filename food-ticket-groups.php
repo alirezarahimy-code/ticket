@@ -3507,13 +3507,43 @@ function food_ticket_cancel_ticket_for_user(int $userId, string $date, array $ac
         throw new RuntimeException('ویرایش ثبت دستی فیش/تردد مجاز نیست.');
     }
 
+    // ── کدام ردیف را لغو کنیم؟ ────────────────────────────────────────
+    // «آخرین ردیف» همیشه ردیفِ فیش نیست. کسی که صبح فیش خودکار گرفته و
+    // بعد نمایندهٔ گروه ترددش را ثبت کرده، دو ردیف دارد: ردیفِ فیش
+    // (auto_printed/printed + ticket_key) و ردیفِ repeat که فقط می‌گوید
+    // «فیش از قبل بود». اگر آخرین ردیف را برداریم، هیچ فیشی لغو نمی‌شود
+    // و کاربر پیام «قبلاً لغو شده» می‌گیرد — همان چیزی که برای دو نفرِ
+    // دارای تردد و در فهرست غایبین اتفاق افتاد.
+    //
+    // قاعده: اولین ردیفی که «فیشِ واقعی» است (کلید دارد یا نوعش فیش است)
+    // و هنوز لغو نشده؛ اگر هیچ‌کدام، آخرین ردیف غیر-repeat.
     $q = db()->prepare(
         'SELECT id, event_type, print_status, delivery_status, source_key, source_uid, source_payload, ticket_key, food_type '
         . 'FROM food_ticket_events WHERE user_id = ? AND punch_date = ? AND event_type <> "unknown" '
-        . 'ORDER BY id DESC LIMIT 1'
+        . 'ORDER BY id DESC'
     );
     $q->execute([$userId, $date]);
-    $event = $q->fetch() ?: null;
+    $event = null;
+    $fallbackEvent = null;
+    foreach ($q->fetchAll() ?: [] as $candidate) {
+        $candType = strtolower(trim((string) ($candidate['event_type'] ?? '')));
+        $candKey = trim((string) ($candidate['ticket_key'] ?? ''));
+        $candPrint = strtolower(trim((string) ($candidate['print_status'] ?? '')));
+        if ($candType === 'repeat') {
+            continue; // repeat فیش نیست؛ فقط می‌گوید فیش از قبل بود
+        }
+        if ($fallbackEvent === null) {
+            $fallbackEvent = $candidate;
+        }
+        // فیشِ واقعی = کلید دارد و در وضعیت «مرده» (لغوشده) نیست.
+        if ($candKey !== '' && $candPrint !== 'not_printed') {
+            $event = $candidate;
+            break;
+        }
+    }
+    if ($event === null) {
+        $event = $fallbackEvent;
+    }
     if ($event === null) {
         throw new RuntimeException('برای این کارمند در این روز فیشی پیدا نشد.');
     }
@@ -3534,7 +3564,17 @@ function food_ticket_cancel_ticket_for_user(int $userId, string $date, array $ac
     // وگرنه هر بار لغو، یک رکورد غیبت تکراری می‌نویسد و سابقهٔ
     // cancelled_ticket روی خودش بازنویسی می‌شود. کاربر هم بی‌دلیل پیام
     // موفقیت می‌گیرد.
-    if (trim((string) ($event['ticket_key'] ?? '')) === ''
+    // فقط ردیفی که «قبلاً فیش بوده و لغو شده» (سابقهٔ cancelled_ticket دارد)
+    // مشمول این محافظ است. تکیه بر «کلید خالی + not_printed» اشتباه بود:
+    // ردیفِ repeat هم همین مشخصات را دارد و کاربر برای فیشِ سالمِ خود
+    // پیام «قبلاً لغو شده» می‌گرفت.
+    $alreadyCancelled = false;
+    $probePayload = json_decode((string) ($event['source_payload'] ?? ''), true);
+    if (is_array($probePayload) && is_array($probePayload['cancelled_ticket'] ?? null)) {
+        $alreadyCancelled = true;
+    }
+    if ($alreadyCancelled
+        && trim((string) ($event['ticket_key'] ?? '')) === ''
         && in_array($printStatus, ['not_printed'], true)
         && strtolower(trim((string) ($event['delivery_status'] ?? ''))) !== 'delivered') {
         throw new RuntimeException('فیش این کارمند از قبل لغو شده است؛ برای صدور مجدد از «ثبت دستی با فیش» استفاده کنید.');
