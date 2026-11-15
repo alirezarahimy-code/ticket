@@ -60,37 +60,42 @@ jobs:
           echo "── checksum ها ──"
           cat downloads/*.sha256
 
-      - name: بررسی سالم بودن فایل‌ها
+      - name: بررسی سالم بودن فایل‌های این نسخه
         run: |
           set -euo pipefail
-          shopt -s nullglob
+          # فقط سه فایل این نسخه بررسی می‌شوند. پوشهٔ downloads/ بسته‌های
+          # تاریخی هم دارد که بعضی‌شان ناقص‌اند و نباید در این دروازه دخالت کنند.
           fail=0
-          count=0
-          for sc in downloads/*.sha256; do
-            # هر خط: "<hash>  <filename>"
-            while IFS= read -r line; do
-              [ -z "$line" ] && continue
-              hash=$(echo "$line" | awk '{print $1}')
-              file=$(echo "$line" | awk '{print $2}' | sed 's|^downloads/||')
-              path="downloads/$file"
-              if [ ! -f "$path" ]; then
-                echo "::error::فایل نیست: $path"
-                fail=1
-                continue
-              fi
-              actual=$(sha256sum "$path" | awk '{print $1}')
-              if [ "$actual" != "$hash" ]; then
-                echo "::error::SHA-256 نمی‌خواند: $path"
-                echo "  انتظار: $hash"
-                echo "  واقعی : $actual"
-                fail=1
-              else
-                echo "✓ $file  ($actual)"
-                count=$((count+1))
-              fi
-            done < "$sc"
+          for pair in \
+            "ticket-full-1.62.97-20261116.zip" \
+            "ticket-update-1.62.96-to-1.62.97-food-worker-selftest-panel-20261115.zip" \
+            "ticket-update-1_62_96-to-1_63-request-center-rc-candidate-20261114-r16.zip"
+          do
+            path="downloads/$pair"
+            sc="$path.sha256"
+            if [ ! -f "$path" ]; then
+              echo "::error::فایل نیست: $path"
+              fail=1
+              continue
+            fi
+            if [ ! -f "$sc" ]; then
+              echo "::error::checksum نیست: $sc"
+              fail=1
+              continue
+            fi
+            expected=$(awk '{print $1}' "$sc")
+            actual=$(sha256sum "$path" | awk '{print $1}')
+            size=$(stat -c%s "$path")
+            if [ "$actual" != "$expected" ]; then
+              echo "::error::SHA-256 نمی‌خواند: $pair"
+              echo "  انتظار: $expected"
+              echo "  واقعی : $actual"
+              fail=1
+            else
+              echo "✓ $pair  ($size بایت)"
+              echo "  $actual"
+            fi
           done
-          echo "── $count فایل تأیید شد ──"
           exit $fail
 
       - name: ساخت Release و پیوست فایل‌ها
