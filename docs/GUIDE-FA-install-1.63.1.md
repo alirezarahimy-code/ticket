@@ -34,7 +34,7 @@
 
 ### ۳) فایل را دانلود کنید
 
-**[⬇ دانلود بستهٔ میانی ۱.۶۳ ← ۱.۶۳.۱](https://github.com/alirezarahimy-code/ticket/releases/download/v1.63.1/ticket-update-1.63-to-1.63.1-r13-cancel-fix-20261115.zip)**
+**[⬇ دانلود بستهٔ میانی ۱.۶۳ ← ۱.۶۳.۱](https://github.com/alirezarahimy-code/ticket/raw/publish-1.63.1/downloads/ticket-update-1.63-to-1.63.1-r13-cancel-fix-20261115.zip)**
 
 این راهنما **داخل خود بسته** هم منتشر می‌شود، پس حجم و هشِ دقیقِ همین زیپ
 را نمی‌تواند درست حمل کند (هر بار که راهنما تغییر کند، زیپ هم عوض می‌شود).

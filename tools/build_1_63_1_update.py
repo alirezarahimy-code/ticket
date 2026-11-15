@@ -326,6 +326,16 @@ def check_doc_checksums(checksum: str, size: int) -> None:
             raise SystemExit(
                 f"حجم بستهٔ میانی ({size_str} بایت) در {doc.relative_to(ROOT)} نیست یا کهنه است."
             )
+        # لینک release/download فقط وقتی کار می‌کند که دارایی روی همان انتشار
+        # آپلود شده باشد. از این محیط آپلود دارایی ممکن نیست، پس سند نباید
+        # کاربر را به ۴۰۴ بفرستد؛ مسیر raw/tag همیشه فایل را می‌دهد.
+        bad_link = re.search(
+            r"releases/download/[^)\"'\s]*/" + re.escape(PACKAGE_NAME), text
+        )
+        if bad_link:
+            raise SystemExit(
+                f"لینک releases/download برای همین بسته در {doc.relative_to(ROOT)} — از raw/<tag>/ استفاده کن."
+            )
 
 
 def build_report() -> str:
