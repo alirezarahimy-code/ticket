@@ -1871,9 +1871,12 @@ function food_ticket_event_is_orphan_ticket(?array $event): bool
     if ($printStatus === 'printed' || $deliveryStatus === 'delivered') {
         return false;
     }
-    // فقط وضعیت‌های صف: pending / printing / print_error / failed
+    // وضعیت‌های صف: pending / printing / print_error / failed
     // held_absent یعنی عمداً متوقف شده (فرد غایب بود) — آن هم قابل جایگزینی است.
-    return in_array($printStatus, ['pending', 'printing', 'print_error', 'failed', 'held_absent', ''], true);
+    // not_printed هم باید باشد: مقدار پیش‌فرض ستون است و ردیفی که هیچ‌وقت به صف
+    // نرسید همین را دارد. نبودنش یعنی ردیف‌های قدیمی‌تر «یتیم» شمرده نمی‌شدند —
+    // همان ردیف‌هایی که کاربر می‌خواهد نجاتشان بدهد.
+    return in_array($printStatus, ['not_printed', 'pending', 'printing', 'print_error', 'failed', 'held_absent', ''], true);
 }
 
 /** ردیف مجازی «مهمان» که همیشه اول فهرست ثبت دستی می‌آید؛ چندبار در روز قابل ثبت است. */

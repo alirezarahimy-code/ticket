@@ -34,10 +34,10 @@
 
 ### ۳) فایل را دانلود کنید
 
-**[⬇ دانلود بستهٔ میانی ۱.۶۳ ← ۱.۶۳.۱](https://github.com/alirezarahimy-code/ticket/releases/download/v1.63.1/ticket-update-1.63-to-1.63.1-r3-orphan-save-calendar-20261115.zip)**
+**[⬇ دانلود بستهٔ میانی ۱.۶۳ ← ۱.۶۳.۱](https://github.com/alirezarahimy-code/ticket/releases/download/v1.63.1/ticket-update-1.63-to-1.63.1-r4-notprinted-orphan-diag-20261115.zip)**
 
 ```
-نام فایل : ticket-update-1.63-to-1.63.1-r3-orphan-save-calendar-20261115.zip
+نام فایل : ticket-update-1.63-to-1.63.1-r4-notprinted-orphan-diag-20261115.zip
 حجم     : 319,898 بایت  (حدود ۳۱۲ کیلوبایت)
 SHA-256 : 495b32a2f2fc48004e77a5a25cd09ae80a4c0f4d2523185846a6540dea012133
 ```

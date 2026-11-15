@@ -33,7 +33,9 @@
     const ps = String(r.print_status || '').toLowerCase();
     const ds = String(r.delivery_status || '').toLowerCase();
     if (ps === 'printed' || ds === 'delivered') return false;
-    return ['pending', 'printing', 'print_error', 'failed', 'held_absent', ''].indexOf(ps) !== -1;
+    // not_printed = مقدار پیش‌فرض ستون؛ ردیفی که هرگز به صف چاپ نرسید.
+    // هم‌تراز با food_ticket_event_is_orphan_ticket() در سرور.
+    return ['not_printed', 'pending', 'printing', 'print_error', 'failed', 'held_absent', ''].indexOf(ps) !== -1;
   };
   const isReplaceableOrphan = (u) => isOrphanTicket(u) && S.manualWithTicket && canIssueManualTicket();
   // شرط «کد پرسنلی لازم است» برای فیش یتیم اعمال نمی‌شود: آن ردیف قبلاً
@@ -160,6 +162,23 @@
     // عملاً یعنی همان ثبت دستی که کاربر نمی‌خواهد.
     const orphanRows = filtered.filter((u) => isOrphanTicket(u) && canIssueManualTicket());
     const orphanCount = orphanRows.length;
+    // تشخیص: اگر دکمه نیامد، کاربر باید بتواند بگوید کدام شرط شکسته است.
+    // بدون این، سه حالت (بدون داده / بدون مجوز / روز بدون یتیم) از هم
+    // قابل تفکیک نبودند و هر بار حدس می‌زدیم.
+    const orphanDiag = (function () {
+      if (orphanCount > 0) return '';
+      if (!S.manualLoaded) return '';
+      if (!canIssueManualTicket()) {
+        return 'مجوز «ویرایش ثبت دستی» برای این کاربر فعال نیست.';
+      }
+      const anyOrphan = S.manualEmployees.some((u) => isOrphanTicket(u));
+      if (anyOrphan) return 'ردیف یتیم هست ولی در فهرست نمایش داده نمی‌شود.';
+      const withRecord = S.manualEmployees.filter((u) => u && u.today_record).length;
+      if (withRecord === 0) {
+        return 'برای این روز هیچ ردیف فیشی ثبت نشده است؛ چیزی برای ثبت دستی نیست.';
+      }
+      return 'این ' + withRecord + ' ردیفِ این روز، همه چاپ‌شده یا تحویل‌شده‌اند؛ یتیمی باقی نمانده.';
+    })();
     const orphanSelected = orphanRows.filter((u) => selected.has(Number(u.id))).length;
     // تیک کنار «انتخاب»: با زدنش همهٔ افراد قابل‌انتخاب تیک می‌خورند و با برداشتنش همه بدون تیک می‌شوند.
     const allEligibleSelected = eligibleVisible.length > 0 && eligibleVisible.every((u) => selected.has(Number(u.id)));
@@ -205,6 +224,7 @@
       + '<label class="field">جستجوی زنده<input id="fg-manual-filter" type="search" value="' + esc(S.manualFilter) + '" placeholder="نام یا کد پرسنلی" autocomplete="off"></label>'
       + (canEdit ? '<div class="manual-select-actions">'
         + (orphanCount ? '<button type="button" class="btn primary" data-manual-action="manual-select-orphans">ثبت گروهی ' + orphanCount + ' فیشِ چاپ‌نشده</button>' : '')
+        + (orphanDiag ? '<span class="muted" style="font-size:12px;align-self:center">' + esc(orphanDiag) + '</span>' : '')
         + '<button type="button" class="btn ghost" data-manual-action="manual-select-visible"' + (eligibleVisible.length ? '' : ' disabled') + '>انتخاب افرادِ قابل‌انتخابِ نتیجه</button>'
         + '<button type="button" class="btn ghost" data-manual-action="manual-clear-selection"' + (chosenCount ? '' : ' disabled') + '>پاک‌کردن انتخاب</button><span class="muted">انتخاب‌شده: ' + chosenCount + ' نفر</span></div>'
         + '<fieldset class="manual-ticket-mode"><legend>نوع ثبت</legend>'
@@ -395,7 +415,13 @@
   window.FoodManualAttendanceUI = {
     html: manualAttendanceHtml,
     mount() {
-      if (!window.FOOD_TICKET_API_BASE) return;
+      // پیش‌تر اگر FOOD_TICKET_API_BASE نبود بی‌صدا برمی‌گشت و کاربر
+      // فهرستی خالی می‌دید بدون هیچ توضیحی. حالا خطا را نشان می‌دهیم.
+      if (!window.FOOD_TICKET_API_BASE && typeof api !== 'function') {
+        S.manualError = 'اتصال به سرور برقرار نشد؛ صفحه را از پنل اصلی باز کنید.';
+        drawManualAttendance();
+        return;
+      }
       if (!S.manualLoaded && !S.manualLoading) loadManualAttendance();
       else drawManualAttendance();
     },

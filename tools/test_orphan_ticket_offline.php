@@ -164,7 +164,7 @@ if (is_file($htmlFile)) {
     ok(preg_match('/assets\/food-manual-attendance\.js\?v=(\d+)/', $html, $m) === 1,
         'food-manual-attendance.js با شمارهٔ نسخه بارگذاری می‌شود (کش‌شکنی)');
     $assetVer = isset($m[1]) ? (int) $m[1] : 0;
-    ok($assetVer >= 8, 'نسخهٔ کش حداقل ۸ است (v=' . $assetVer . ') — تغییر JS دیده می‌شود');
+    ok($assetVer >= 9, 'نسخهٔ کش حداقل ۹ است (v=' . $assetVer . ') — تغییر JS دیده می‌شود');
     // فیلد تاریخ «شمسی» است ولی API میلادی می‌خواهد. اگر تجزیه‌گر شمسی را
     // نشناسد، تاریخ بی‌صدا عوض نمی‌شود و فهرست روی «امروز» قفل می‌ماند —
     // نتیجه: فیش‌های یتیم دیروز هرگز دیده نمی‌شوند. کاربر همین را گزارش کرد.
@@ -223,6 +223,20 @@ if (is_file($groupsFile)) {
     // ۵) ticket_key ردیف یتیم بازنویسی نمی‌شود.
     ok(strpos($groups, '$updated->execute($replaceOrphanTicket') !== false,
         'ticket_key ردیف یتیم حفظ می‌شود (UNIQUE نمی‌شکند)');
+    // not_printed مقدار پیش‌فرض ستون است؛ ردیفی که هرگز به صف نرسید همین را
+    // دارد و همان ردیفی است که کاربر باید نجاتش دهد. جا افتادنش یعنی
+    // ردیف‌های واقعی خرابیِ چاپگر «یتیم» شمرده نمی‌شدند.
+    ok(strpos($groups, "'not_printed', 'pending', 'printing'") !== false,
+        'سرور not_printed را هم یتیم می‌شمارد');
+    $jsOrphan = $root . '/food-ticket-web/assets/food-manual-attendance.js';
+    if (is_file($jsOrphan)) {
+        ok(strpos((string) file_get_contents($jsOrphan), "'not_printed', 'pending', 'printing'") !== false,
+            'کلاینت not_printed را هم یتیم می‌شمارد (هم‌تراز سرور)');
+    }
+    // mount نباید بی‌صدا شکست بخورد.
+    ok(strpos((string) file_get_contents($root . '/food-ticket-web/assets/food-manual-attendance.js'),
+        'اتصال به سرور برقرار نشد؛ صفحه را از پنل اصلی باز کنید.') !== false,
+        'mount در نبود API خطا نشان می‌دهد (بی‌صدا برنمی‌گردد)');
 } else {
     echo "  ⏭  food-ticket-groups.php روی این نصب نیست\n";
 }
