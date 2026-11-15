@@ -1,0 +1,117 @@
+name: Publish release assets
+
+# هدف: ساخت Release واقعی با فایل‌های پیوست، از داخل زیرساخت گیت‌هاب.
+# چرا: آپلود مستقیم از محیط توسعه به uploads.github.com مسدود است،
+# ولی runner خودِ گیت‌هاب به آن دسترسی دارد.
+#
+# اجرا:
+#   gh workflow run publish-release.yml -f tag=v1.62.97
+#
+# فایل‌ها از شاخهٔ همین workflow خوانده می‌شوند (downloads/*.zip).
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'برچسب نسخه (مثلاً v1.62.97)'
+        required: true
+        type: string
+      title:
+        description: 'عنوان Release'
+        required: true
+        default: 'نسخهٔ ۱.۶۲.۹۷ — کارت آزمون جامع + اصلاح هشدار مهاجرت'
+        type: string
+      prerelease:
+        description: 'به‌عنوان پیش‌انتشار علامت بزن'
+        required: false
+        default: false
+        type: boolean
+      draft:
+        description: 'پیش‌نویس بساز (منتشر نکن)'
+        required: false
+        default: false
+        type: boolean
+
+permissions:
+  contents: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: فهرست فایل‌های پیوست
+        run: |
+          echo "── فایل‌های موجود ──"
+          ls -la downloads/*.zip
+
+      - name: بررسی سالم بودن فایل‌ها
+        run: |
+          set -euo pipefail
+          fail=0
+          while IFS= read -r line; do
+            hash="${line%%  *}"
+            file="${line##*  }"
+            if [ ! -f "$file" ]; then
+              echo "::error::فایل نیست: $file"
+              fail=1
+              continue
+            fi
+            actual=$(sha256sum "$file" | cut -d' ' -f1)
+            if [ "$actual" != "$hash" ]; then
+              echo "::error::SHA-256 نمی‌خواند: $file"
+              echo "  انتظار: $hash"
+              echo "  واقعی : $actual"
+              fail=1
+            else
+              echo "✓ $file"
+            fi
+          done < <(cat downloads/*.sha256)
+          exit $fail
+
+      - name: ساخت Release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          TAG="${{ inputs.tag }}"
+          TITLE="${{ inputs.title }}"
+
+          EXTRA=()
+          [ "${{ inputs.prerelease }}" = "true" ] && EXTRA+=(--prerelease)
+          [ "${{ inputs.draft }}" = "true" ] && EXTRA+=(--draft)
+
+          # اگر Release موجود است، فقط فایل‌ها را جایگزین کن
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            echo "Release «$TAG» از قبل هست — فایل‌ها به‌روزرسانی می‌شوند."
+            gh release upload "$TAG" downloads/*.zip --clobber
+          else
+            echo "ساخت Release «$TAG»…"
+            gh release create "$TAG" \
+              --title "$TITLE" \
+              --notes-file downloads/RELEASE-NOTES.md \
+              "${EXTRA[@]}" \
+              downloads/*.zip
+          fi
+
+      - name: گزارش لینک‌ها
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          REPO="${{ github.repository }}"
+          TAG="${{ inputs.tag }}"
+          echo "## لینک‌های دانلود مستقیم" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          for f in downloads/*.zip; do
+            name=$(basename "$f")
+            url="https://github.com/${REPO}/releases/download/${TAG}/${name}"
+            echo "- [\`$name\`]($url)" >> "$GITHUB_STEP_SUMMARY"
+            echo "  <$url>" >> "$GITHUB_STEP_SUMMARY"
+          done
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "صفحهٔ Release: https://github.com/${REPO}/releases/tag/${TAG}" >> "$GITHUB_STEP_SUMMARY"
+          cat "$GITHUB_STEP_SUMMARY"
