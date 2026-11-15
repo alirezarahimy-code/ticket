@@ -164,6 +164,10 @@ function food_ticket_route_allowed(array $user, string $route): bool
         if ($route === 'food-menu/emergency-window') {
             return $method === 'POST' && user_can($user, 'food.emergency_window_edit');
         }
+        // ثبت خودکار فیش برای روزهای گذشته — نوشتن است، پس مجوز ویرایش منو.
+        if ($route === 'backfill-auto-receipts') {
+            return $method === 'POST' && user_can($user, 'food.menu_edit');
+        }
         if ($route === 'food-menu/emergency/lookup') {
             return $method === 'POST' && user_can($user, 'food.menu');
         }
@@ -5512,6 +5516,99 @@ function food_ticket_api_handle(string $route, array $user): never
 
         if ($_SERVER['REQUEST_METHOD'] === 'POST' && $route === 'self-test') {
             food_ticket_api_json(food_ticket_api_self_test());
+        }
+
+        // ── ثبت خودکار فیش برای روزهای گذشته ────────────────────────────
+        // چرا این مسیر لازم شد: گذر پایان‌روزِ Worker فقط «دیروز» و «امروز» را
+        // پر می‌کند. روزهایی که Worker نبود/خاموش بود/این کد را نداشت، برای
+        // همیشه سوراخ می‌مانند. این مسیر همان تابع واقعی سامانه را روی بازهٔ
+        // دلخواه اجرا می‌کند — نه یک بازنویسی موازی.
+        // idempotent است (کلید یکتای sha256)، پس اجرای دوباره بی‌خطر است.
+        if ($_SERVER['REQUEST_METHOD'] === 'POST' && $route === 'backfill-auto-receipts') {
+            $raw = (string) file_get_contents('php://input');
+            $body = json_decode($raw, true);
+            if (!is_array($body)) {
+                $body = $_POST;
+            }
+            $from = trim((string) ($body['from'] ?? ''));
+            $to   = trim((string) ($body['to'] ?? ''));
+            $apply = !empty($body['apply']);
+
+            $ok = static fn (string $d): bool => (bool) preg_match('/^\d{4}-\d{2}-\d{2}$/', $d)
+                && checkdate((int) substr($d, 5, 2), (int) substr($d, 8, 2), (int) substr($d, 0, 4));
+            if (!$ok($from) || !$ok($to)) {
+                food_ticket_api_json(['error' => 'بازهٔ تاریخ معتبر نیست (YYYY-MM-DD).'], 400);
+            }
+            if ($from > $to) {
+                food_ticket_api_json(['error' => 'تاریخ شروع بعد از پایان است.'], 400);
+            }
+            // سقف ۴۰۰ روز: جلوی اشتباه تایپی مثل ۱۴۰۰-۰۱-۰۱ را می‌گیرد.
+            $span = (new DateTimeImmutable($from))->diff(new DateTimeImmutable($to))->days;
+            if ($span > 400) {
+                food_ticket_api_json(['error' => 'بازه بیش از ۴۰۰ روز است.'], 400);
+            }
+            if (!function_exists('food_ticket_auto_receipts_run')) {
+                food_ticket_api_json(['error' => 'کتابخانهٔ ثبت خودکار فیش بارگذاری نشد.'], 500);
+            }
+            if (!food_ticket_auto_receipt_schema_ready()) {
+                food_ticket_api_json(['error' => 'ساختار ثبت خودکار آماده نیست (مهاجرت ۰۲۱).'], 400);
+            }
+
+            $days = [];
+            $sum = ['staff' => 0, 'guest' => 0, 'already' => 0, 'absence' => 0, 'real_event' => 0, 'locked' => 0];
+            $cursor = new DateTimeImmutable($from);
+            $end = new DateTimeImmutable($to);
+            while ($cursor <= $end) {
+                $d = $cursor->format('Y-m-d');
+                $cursor = $cursor->modify('+1 day');
+                if (!$apply) {
+                    // گزارش: فقط تعداد کاندید، بدون نوشتن.
+                    $q = db()->prepare("SELECT SUM(meal_type='dinner') AS d, SUM(meal_type='lunch') AS l
+                                        FROM food_orders WHERE food_date = ? AND status='active' AND meal_type IN ('lunch','dinner')");
+                    $q->execute([$d]);
+                    $c = $q->fetch() ?: [];
+                    $dn = (int) ($c['d'] ?? 0);
+                    $ln = (int) ($c['l'] ?? 0);
+                    if ($dn === 0 && $ln === 0) {
+                        continue;
+                    }
+                    $h = food_ticket_auto_receipt_holiday($d);
+                    $days[] = ['date' => $d, 'holiday' => (bool) $h['holiday'], 'dinner' => $dn,
+                               'lunch' => $h['holiday'] ? $ln : 0, 'lunch_skipped' => $h['holiday'] ? 0 : $ln];
+                    continue;
+                }
+                try {
+                    $r = food_ticket_auto_receipts_run($d);
+                } catch (Throwable $e) {
+                    $days[] = ['date' => $d, 'error' => $e->getMessage()];
+                    continue;
+                }
+                if (!empty($r['locked'])) {
+                    $sum['locked']++;
+                    $days[] = ['date' => $d, 'locked' => true];
+                    continue;
+                }
+                $sum['staff'] += (int) $r['staff_created'];
+                $sum['guest'] += (int) $r['guest_created'];
+                $sum['already'] += (int) $r['already_registered'];
+                $sum['absence'] += (int) $r['skipped_absence'];
+                $sum['real_event'] += (int) $r['skipped_real_event'];
+                $days[] = [
+                    'date' => $d,
+                    'holiday' => (bool) $r['holiday'],
+                    'created' => (int) $r['staff_created'] + (int) $r['guest_created'],
+                    'staff' => (int) $r['staff_created'],
+                    'guest' => (int) $r['guest_created'],
+                    'already' => (int) $r['already_registered'],
+                    'absence' => (int) $r['skipped_absence'],
+                    'real_event' => (int) $r['skipped_real_event'],
+                ];
+            }
+            food_ticket_api_json([
+                'from' => $from, 'to' => $to, 'apply' => $apply,
+                'days' => $days, 'totals' => $sum,
+                'created' => $sum['staff'] + $sum['guest'],
+            ]);
         }
         // آزمون جامع Worker/چاپ/مدیریت — همان کتابخانه‌ای که CLI استفاده می‌کند.
         // فقط‌خواندنی: هیچ فیشی چاپ نمی‌شود و هیچ تنظیمی تغییر نمی‌کند.
