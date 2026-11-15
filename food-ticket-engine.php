@@ -733,9 +733,15 @@ function food_ticket_decide_for_user(array $user, string $date, array $base, arr
         ];
     }
 
-    // یک فیش در روز برای هر نفر
+    // یک فیش در روز برای هر نفر.
+    // استثنا (رخداد پرینتر خراب ۱۴۰۵/۰۸/۲۵): اگر همان فیش در صف چاپ مانده و
+    // هرگز چاپ/تحویل نشده، «تکرار» نیست — یک فیش معطل است. مسیر ثبت دستی
+    // همان ردیف را تبدیل می‌کند، پس نباید repeat برگرداند وگرنه راه اصلاح بسته می‌شود.
     $ticketKey = 'food:' . $date . ':' . $national;
     $existingTicket = food_ticket_existing_ticket($ticketKey);
+    if ($existingTicket && function_exists('food_ticket_event_is_orphan_ticket') && food_ticket_event_is_orphan_ticket($existingTicket)) {
+        $existingTicket = null;
+    }
     if ($existingTicket) {
         return [
             'event_type' => 'repeat',

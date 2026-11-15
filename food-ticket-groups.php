@@ -1847,6 +1847,35 @@ function food_ticket_manual_attendance_date(string $date): string
     return $date;
 }
 
+/**
+ * آیا این رویداد «فیش یتیم» است — فیشی که در صف چاپ ماند و هرگز چاپ نشد؟
+ *
+ * چرا لازم شد (رخداد ۱۴۰۵/۰۸/۲۵): وقتی پرینتر خراب می‌شود، موتور چاپ رویداد را
+ * با event_type='printed' و print_status='pending' می‌سازد و در صف می‌گذارد.
+ * اگر Worker آن را چاپ نکند، آن ردیف **تا ابد** pending می‌ماند و
+ * delivery_status هم pending می‌ماند. کاربر باید بتواند همان غذا را دستی ثبت کند،
+ * ولی هر سه لایه او را «دارای فیش این روز» می‌دیدند و راهی برای اصلاح نبود.
+ *
+ * تعریف: هنوز چاپ نشده (print_status ≠ printed) و تحویل هم ثبت نشده
+ * (delivery_status ≠ delivered). یعنی هیچ‌کس نگفته این غذا تحویل داده شده.
+ * اگر فیش واقعاً چاپ شده باشد، print_status='printed' است و این تابع false می‌دهد.
+ */
+function food_ticket_event_is_orphan_ticket(?array $event): bool
+{
+    if (!is_array($event) || $event === []) {
+        return false;
+    }
+    $printStatus = strtolower(trim((string) ($event['print_status'] ?? '')));
+    $deliveryStatus = strtolower(trim((string) ($event['delivery_status'] ?? '')));
+    // چاپ‌شده یا تحویل‌شده ⇒ فیش واقعی است؛ دست نزن.
+    if ($printStatus === 'printed' || $deliveryStatus === 'delivered') {
+        return false;
+    }
+    // فقط وضعیت‌های صف: pending / printing / print_error / failed
+    // held_absent یعنی عمداً متوقف شده (فرد غایب بود) — آن هم قابل جایگزینی است.
+    return in_array($printStatus, ['pending', 'printing', 'print_error', 'failed', 'held_absent', ''], true);
+}
+
 /** ردیف مجازی «مهمان» که همیشه اول فهرست ثبت دستی می‌آید؛ چندبار در روز قابل ثبت است. */
 function food_ticket_manual_attendance_guest_row(): array
 {
@@ -1877,7 +1906,7 @@ function food_ticket_api_manual_attendance(string $date = ''): array
 
     $attendanceByUser = [];
     $attendance = db()->prepare(
-        'SELECT id, user_id, event_type, print_status, source_uid FROM food_ticket_events '
+        'SELECT id, user_id, event_type, print_status, delivery_status, source_uid FROM food_ticket_events '
         . 'WHERE punch_date = ? AND user_id IS NOT NULL AND event_type <> "unknown" ORDER BY id DESC'
     );
     $attendance->execute([$date]);
@@ -1887,6 +1916,7 @@ function food_ticket_api_manual_attendance(string $date = ''): array
             $attendanceByUser[$userId] = [
                 'event_type' => (string) ($row['event_type'] ?? ''),
                 'print_status' => (string) ($row['print_status'] ?? ''),
+                'delivery_status' => (string) ($row['delivery_status'] ?? ''),
                 'source_uid' => (string) ($row['source_uid'] ?? ''),
             ];
         }
@@ -2040,7 +2070,7 @@ function food_ticket_api_manual_attendance_save(int $userId, bool $withTicket, b
     }
 
     $duplicate = db()->prepare(
-        'SELECT id, event_type, print_status, source_uid, source_key, source_payload FROM food_ticket_events '
+        'SELECT id, event_type, print_status, delivery_status, source_uid, source_key, source_payload FROM food_ticket_events '
         . 'WHERE user_id = ? AND punch_date = ? AND event_type <> "unknown" ORDER BY id DESC LIMIT 1'
     );
     $duplicate->execute([$userId, $targetDate]);
@@ -2049,7 +2079,14 @@ function food_ticket_api_manual_attendance_save(int $userId, bool $withTicket, b
         && (string) ($existingToday['event_type'] ?? '') === 'no_food'
         && $withTicket
         && (string) ($existingToday['print_status'] ?? '') !== 'printed';
-    if ($existingToday !== null && !$replaceNoFood) {
+    // فیش یتیم: در صف چاپ ماند و هرگز چاپ نشد. کاربر باید بتواند دستی ثبتش کند،
+    // وگرنه غذا نه در گزارش تحویل می‌آید و نه راهی برای اصلاح هست.
+    // ردیف قبلی تبدیل می‌شود (نه ردیف دوم) تا سابقهٔ تردد حفظ شود و تکراری ساخته نشود.
+    $replaceOrphanTicket = $existingToday !== null
+        && !$replaceNoFood
+        && $withTicket
+        && food_ticket_event_is_orphan_ticket($existingToday);
+    if ($existingToday !== null && !$replaceNoFood && !$replaceOrphanTicket) {
         throw new RuntimeException('برای این کارمند در این روز تردد یا فیش ثبت شده است؛ ثبت تکراری مجاز نیست. وضعیت فعلی: ' . (string) ($existingToday['event_type'] ?? 'نامشخص') . '.');
     }
 
@@ -2091,7 +2128,12 @@ function food_ticket_api_manual_attendance_save(int $userId, bool $withTicket, b
         }
         $ticketKey = 'food:' . $targetDate . ':' . food_ticket_digits($person['national_code'] ?? '');
         if (food_ticket_digits($person['national_code'] ?? '') !== '' && ($existingTicket = food_ticket_existing_ticket($ticketKey))) {
-            throw new RuntimeException('برای این کارمند در این روز فیش وجود دارد؛ ثبت تکراری مجاز نیست. وضعیت فعلی: ' . (string) ($existingTicket['print_status'] ?? 'نامشخص') . '.');
+            // اگر همان فیش در صف چاپ مانده و هرگز چاپ نشده، جایگزینی‌اش در بلوک
+            // بعدی انجام می‌شود (همان ردیف تبدیل می‌شود، نه ردیف دوم). فقط فیش
+            // واقعاً چاپ‌شده/تحویل‌شده این‌جا جلوی ثبت را می‌گیرد.
+            if (!food_ticket_event_is_orphan_ticket($existingTicket)) {
+                throw new RuntimeException('برای این کارمند در این روز فیش وجود دارد؛ ثبت تکراری مجاز نیست. وضعیت فعلی: ' . (string) ($existingTicket['print_status'] ?? 'نامشخص') . '.');
+            }
         }
 
         $orderMap = food_ticket_group_order_map($orderMaps, $targetDate);
@@ -2132,7 +2174,7 @@ function food_ticket_api_manual_attendance_save(int $userId, bool $withTicket, b
         ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
     }
 
-    if ($replaceNoFood) {
+    if ($replaceNoFood || $replaceOrphanTicket) {
         $eventId = (int) ($existingToday['id'] ?? 0);
         $existingSourceKey = trim((string) ($existingToday['source_key'] ?? ''));
         if ($existingSourceKey !== '') {
@@ -2151,8 +2193,19 @@ function food_ticket_api_manual_attendance_save(int $userId, bool $withTicket, b
             'with_ticket' => true,
             'physical_print' => $physicalPrint,
             'recorded_at' => $recordedAt,
-            'converted_from_no_food' => true,
         ];
+        if ($replaceNoFood) {
+            $manualMeta['converted_from_no_food'] = true;
+        } else {
+            // سابقهٔ صف چاپ حفظ می‌شود تا معلوم بماند چرا دستی ثبت شده.
+            $manualMeta['converted_from_orphan_ticket'] = true;
+            $manualMeta['orphan_previous'] = [
+                'event_type' => (string) ($existingToday['event_type'] ?? ''),
+                'print_status' => (string) ($existingToday['print_status'] ?? ''),
+                'delivery_status' => (string) ($existingToday['delivery_status'] ?? ''),
+                'source_uid' => (string) ($existingToday['source_uid'] ?? ''),
+            ];
+        }
         if ($previousManual !== []) {
             $manualMeta['previous_manual_attendance'] = $previousManual;
         }
@@ -2161,11 +2214,22 @@ function food_ticket_api_manual_attendance_save(int $userId, bool $withTicket, b
         if ($eventId <= 0 || $mergedPayload === false) {
             throw new RuntimeException('رویداد قبلی برای تبدیل به فیش معتبر نیست.');
         }
-        $updated = db()->prepare(
-            'UPDATE food_ticket_events SET source_uid = ?, personnel_code = ?, full_name = ?, national_code = ?, food_type = ?, ticket_key = ?, '
-            . 'event_type = "printed", print_status = ?, last_error = NULL, source_payload = ?, processed_at = NOW(), next_retry_at = NULL '
-            . 'WHERE id = ? AND event_type = "no_food"'
-        );
+        // شرط WHERE عمداً سخت‌گیرانه است: ردیف «یتیم» فقط اگر هنوز چاپ نشده و
+        // تحویل نشده باشد تبدیل می‌شود. اگر Worker همان لحظه چاپش کرده باشد،
+        // rowCount صفر می‌شود و خطا می‌دهیم — بهتر از بازنویسی فیش چاپ‌شده.
+        if ($replaceOrphanTicket) {
+            $updated = db()->prepare(
+                'UPDATE food_ticket_events SET source_uid = ?, personnel_code = ?, full_name = ?, national_code = ?, food_type = ?, ticket_key = ?, '
+                . 'event_type = "printed", print_status = ?, last_error = NULL, source_payload = ?, processed_at = NOW(), next_retry_at = NULL '
+                . 'WHERE id = ? AND print_status <> "printed" AND (delivery_status IS NULL OR delivery_status <> "delivered")'
+            );
+        } else {
+            $updated = db()->prepare(
+                'UPDATE food_ticket_events SET source_uid = ?, personnel_code = ?, full_name = ?, national_code = ?, food_type = ?, ticket_key = ?, '
+                . 'event_type = "printed", print_status = ?, last_error = NULL, source_payload = ?, processed_at = NOW(), next_retry_at = NULL '
+                . 'WHERE id = ? AND event_type = "no_food"'
+            );
+        }
         $updated->execute([
             'manual-attendance', food_ticket_code($employeeNumber), $fullName,
             food_ticket_digits($person['national_code'] ?? ''), (string) ($payload['food_type'] ?? ''),
