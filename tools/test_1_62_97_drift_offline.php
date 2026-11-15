@@ -217,10 +217,13 @@ if ($lStart !== false) {
         $strippedHtml = substr($strippedHtml, 0, $lStart) . substr($strippedHtml, $lEnd);
     }
 }
-$strippedHtml = str_replace(
-    "if(act==='dismiss-release-notes'){const el=document.getElementById('ft-release-notes');const v=el?el.dataset.version:'';try{localStorage.setItem('ft-release-notes-dismissed:'+v,'1')}catch(e){}el&&el.remove();return}",
+// اکشن بستن بنر — با regex برداشته می‌شود تا با تغییرات جزئی بدنه (مثل افزودن
+// حافظهٔ درون‌برنامه‌ای) نشکند؛ فقط تا پایان همان if(act===...) حذف می‌شود.
+$strippedHtml = preg_replace(
+    "/if\(act==='dismiss-release-notes'\)\{.*?el&&el\.remove\(\);return\}/s",
     '',
-    $strippedHtml
+    $strippedHtml,
+    1
 );
 
 check(
