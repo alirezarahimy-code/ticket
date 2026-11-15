@@ -24,15 +24,15 @@
 
 **اگر ۱.۶۳ را نصب کرده‌اید، فقط این را لازم دارید.**
 
-**[⬇ دانلود بستهٔ میانی ۱.۶۳.۱](https://github.com/alirezarahimy-code/ticket/releases/download/v1.63.1/ticket-update-1.63-to-1.63.1-role-composition-routing-alarm-selfheal-20261106.zip)**
+**[⬇ دانلود بستهٔ میانی ۱.۶۳.۱](https://github.com/alirezarahimy-code/ticket/releases/download/v1.63.1/ticket-update-1.63-to-1.63.1-r2-food-backfill-orphan-tickets-20261115.zip)**
 
 ```
-نام فایل : ticket-update-1.63-to-1.63.1-role-composition-routing-alarm-selfheal-20261106.zip
-حجم     : 383,935 بایت
-SHA-256 : 624ea80e90cff0a56a17ad69a9a12417af39fa78b37a617002e34231a08db430
+نام فایل : ticket-update-1.63-to-1.63.1-r2-food-backfill-orphan-tickets-20261115.zip
+حجم     : 383,927 بایت
+SHA-256 : 765eb1700fe2a74c901fb11969ae52cd7ed2b8f063cd76ef647ab7a809024b14
 ```
 
-**۳۰ فایل، بدون مهاجرت، بدون تغییر جدول.**
+**۳۰ فایل، بدون مهاجرت، بدون تغییر جدول. — نسخهٔ r2**
 
 ### نصب
 
@@ -54,15 +54,15 @@ SHA-256 : 624ea80e90cff0a56a17ad69a9a12417af39fa78b37a617002e34231a08db430
 
 **اگر سامانه ندارید یا روی ۱.۶۲.x هستید.**
 
-**[⬇ دانلود بستهٔ کامل ۱.۶۳.۱](https://github.com/alirezarahimy-code/ticket/releases/download/v1.63.1/ticket-full-1.63.1-20261106.zip)**
+**[⬇ دانلود بستهٔ کامل ۱.۶۳.۱](https://github.com/alirezarahimy-code/ticket/releases/download/v1.63.1/ticket-full-1.63.1-r2-20261115.zip)**
 
 ```
-نام فایل : ticket-full-1.63.1-20261106.zip
-حجم     : 11,730,036 بایت
-SHA-256 : bae93161f6eb81b5399c2d37721c67b2cf60d9ab3e5dc6f3c2500dcd1b147066
+نام فایل : ticket-full-1.63.1-r2-20261115.zip
+حجم     : 11,730,029 بایت
+SHA-256 : d65c1f37c9ca437f2483abce864ccd5ad641eaf70802c6970d432d4060c32ae3
 ```
 
-**۱۰۹۸ فایل** — شامل کل خط ۱.۶۲ (۹۵/۹۶/۹۷)، ۱.۶۳، و ۱.۶۳.۱.
+**۱۰۹۸ فایل** — نسخهٔ r2 — شامل کل خط ۱.۶۲ (۹۵/۹۶/۹۷)، ۱.۶۳، و ۱.۶۳.۱.
 
 ### نصب از صفر
 
