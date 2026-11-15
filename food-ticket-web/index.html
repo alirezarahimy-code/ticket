@@ -195,8 +195,8 @@ function autoReceiptBackfillBox(){
   const head=`<h3 style="margin:0">ثبت خودکار فیش روزهای گذشته</h3>`;
   const intro=`<p class="notice">شام هر روز و ناهار روزهای تعطیل (پنجشنبه، جمعه، تعطیل رسمی) برای کسانی که سفارش داده‌اند <b>خودکار</b> ثبت می‌شود — اما این کار فقط یک بار در شبِ همان روز انجام می‌شود. اگر Worker آن شب خاموش بوده یا نصب نبوده، آن روز برای همیشه جا می‌ماند. این ابزار همان روزها را پر می‌کند: <b>بدون چاپ فیزیکی</b> و <b>بدون ساختن ردیف تکراری</b>.</p>`;
   const form=`<div class="actions" style="display:flex;gap:10px;flex-wrap:wrap;align-items:end">
-      <label class="field" style="margin:0">از تاریخ<input type="date" id="ft-backfill-from" value="${esc(r.from||'')}"></label>
-      <label class="field" style="margin:0">تا تاریخ<input type="date" id="ft-backfill-to" value="${esc(r.to||'')}"></label>
+      <label class="field" style="margin:0">از تاریخ (شمسی)<input type="text" id="ft-backfill-from" inputmode="numeric" autocomplete="off" placeholder="۱۴۰۵/۰۸/۰۱" value="${esc(r.fromJalali||'')}"></label>
+      <label class="field" style="margin:0">تا تاریخ (شمسی)<input type="text" id="ft-backfill-to" inputmode="numeric" autocomplete="off" placeholder="۱۴۰۵/۰۸/۰۲" value="${esc(r.toJalali||'')}"></label>
       <button class="btn ghost" data-action="preview-auto-receipts">پیش‌نمایش</button>
       <button class="btn primary" data-action="run-auto-receipts">ثبت خودکار</button>
     </div>`;
@@ -222,18 +222,41 @@ function autoReceiptBackfillBox(){
     ${r.apply?'<p class="notice" style="margin-top:10px">هیچ چاپ فیزیکی انجام نشد. فیش‌ها در «گزارش تحویل غذا» دیده می‌شوند.</p>':''}
   </div>`;
 }
+// ورودی این کارت «شمسی» است (۱۴۰۵/۰۸/۰۱) چون کاربر ایرانی است و
+// type="date" مرورگر تقویم میلادی نشان می‌دهد. سرور میلادی (YYYY-MM-DD)
+// می‌خواهد، پس اینجا تبدیل می‌کنیم. بدون این، خطای «بازهٔ تاریخ معتبر نیست»
+// می‌داد — دقیقاً همان چیزی که کاربر گزارش کرد.
+function jalaliToIso(value){
+  const J=window.ItsmJalali;
+  const parts=J&&J.parse?J.parse(value):null;
+  if(!J||!parts)return '';
+  const g=J.j2g(parts[0],parts[1],parts[2]);
+  if(!g||!g[0])return '';
+  const pad=n=>String(n).padStart(2,'0');
+  return g[0]+'-'+pad(g[1])+'-'+pad(g[2]);
+}
+function isoToJalali(iso){
+  const J=window.ItsmJalali;
+  if(!J||!iso)return '';
+  const m=String(iso).match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  if(!m)return '';
+  const j=J.g2j(Number(m[1]),Number(m[2]),Number(m[3]));
+  return j&&j[0]?j[0]+'/'+String(j[1]).padStart(2,'0')+'/'+String(j[2]).padStart(2,'0'):'';
+}
 function runAutoReceiptBackfill(apply){
-  const from=document.getElementById('ft-backfill-from')?.value||'';
-  const to=document.getElementById('ft-backfill-to')?.value||'';
-  if(!from||!to){toast('تاریخ شروع و پایان را بدهید.');return}
+  const fromJalali=(document.getElementById('ft-backfill-from')?.value||'').trim();
+  const toJalali=(document.getElementById('ft-backfill-to')?.value||'').trim();
+  if(!fromJalali||!toJalali){toast('تاریخ شروع و پایان را بدهید.');return}
+  const from=jalaliToIso(fromJalali), to=jalaliToIso(toJalali);
+  if(!from||!to){toast('تاریخ شمسی معتبر نیست. نمونه: ۱۴۰۵/۰۸/۰۱');return}
   if(from>to){toast('تاریخ شروع بعد از پایان است.');return}
   if(!serviceMode){toast('این کار فقط از سرور (حالت سرویس) ممکن است.');return}
-  window.__ftBackfill={...window.__ftBackfill,from,to,__loading:true,__error:'',__done:false};
+  window.__ftBackfill={fromJalali,toJalali,from,to,__loading:true,__error:'',__done:false};
   render();
   api('/backfill-auto-receipts',{method:'POST',body:JSON.stringify({from,to,apply:!!apply})})
-    .then(x=>{window.__ftBackfill={from,to,apply:!!apply,__done:true,days:x.days||[],totals:x.totals||{},created:x.created||0};render();
+    .then(x=>{window.__ftBackfill={fromJalali,toJalali,from,to,apply:!!apply,__done:true,days:x.days||[],totals:x.totals||{},created:x.created||0};render();
       toast(apply?(x.created||0)+' فیش ثبت شد.':( (x.days||[]).length+' روز بررسی شد.'))})
-    .catch(e=>{window.__ftBackfill={from,to,__error:e.message||String(e)};render()});
+    .catch(e=>{window.__ftBackfill={fromJalali,toJalali,__error:e.message||String(e)};render()});
 }
 function selftestBox(){
   const r=window.__ftSelfTest;
@@ -990,7 +1013,7 @@ if(serviceMode){
 </script>
 <script src="assets/food-ticket-persistence.js?v=1"></script>
 <script src="assets/food-groups.js?v=18"></script>
-<script src="assets/food-manual-attendance.js?v=6"></script>
+<script src="assets/food-manual-attendance.js?v=7"></script>
 <script>if(view==='settings'&&state.settingsSection==='manual-attendance')render();</script>
 <script src="assets/food-designer.js?v=12"></script>
 <script src="assets/jalali-calendar.js?v=2"></script>

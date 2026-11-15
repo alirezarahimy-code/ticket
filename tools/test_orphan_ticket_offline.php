@@ -164,7 +164,25 @@ if (is_file($htmlFile)) {
     ok(preg_match('/assets\/food-manual-attendance\.js\?v=(\d+)/', $html, $m) === 1,
         'food-manual-attendance.js با شمارهٔ نسخه بارگذاری می‌شود (کش‌شکنی)');
     $assetVer = isset($m[1]) ? (int) $m[1] : 0;
-    ok($assetVer >= 6, 'نسخهٔ کش حداقل ۶ است (v=' . $assetVer . ') — تغییر JS دیده می‌شود');
+    ok($assetVer >= 7, 'نسخهٔ کش حداقل ۷ است (v=' . $assetVer . ') — تغییر JS دیده می‌شود');
+    // فیلد تاریخ «شمسی» است ولی API میلادی می‌خواهد. اگر تجزیه‌گر شمسی را
+    // نشناسد، تاریخ بی‌صدا عوض نمی‌شود و فهرست روی «امروز» قفل می‌ماند —
+    // نتیجه: فیش‌های یتیم دیروز هرگز دیده نمی‌شوند. کاربر همین را گزارش کرد.
+    $jsFile = $root . '/food-ticket-web/assets/food-manual-attendance.js';
+    if (is_file($jsFile)) {
+        $js = (string) file_get_contents($jsFile);
+        ok(strpos($js, 'ItsmJalali') !== false,
+            'تجزیه‌گر تاریخ ورودی، شمسی را می‌شناسد (ItsmJalali)');
+        ok(strpos($js, 'j2g') !== false,
+            'تبدیل شمسی → میلادی در فیلد تاریخ ثبت دستی انجام می‌شود');
+        // کارت «ثبت خودکار فیش روزهای گذشته» هم باید شمسی بگیرد. با
+        // type="date" تقویم میلادی باز می‌شد و کاربر «۱ آبان» را میلادی
+        // وارد می‌کرد؛ سرور آن را با «بازهٔ تاریخ معتبر نیست» رد می‌کرد.
+        ok(strpos($html, 'از تاریخ (شمسی)') !== false,
+            'کارت backfill برچسب «شمسی» دارد (نه تقویم میلادی)');
+        ok(strpos($html, 'jalaliToIso') !== false,
+            'کارت backfill تاریخ شمسی را پیش از ارسال به میلادی تبدیل می‌کند');
+    }
 } else {
     echo "  ⏭  index.html روی این نصب نیست — بررسی کش انجام نشد\n";
 }

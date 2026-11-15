@@ -47,9 +47,34 @@
         .format(d).replace(/[^0-9/]/g, '').replace(/(\d{2})\/(\d{2})\/(\d{4})/, '$3/$1/$2');
     } catch (e) { return String(iso || ''); }
   };
+  // ورودی این فیلد «شمسی» است (۱۴۰۵/۰۸/۰۱)، ولی API میلادی می‌خواهد.
+  // پیش‌تر اینجا فقط میلادی تجزیه می‌شد و سال شمسی ۱۴۰۵ زیر ۱۷۰۰ رد می‌شد؛
+  // نتیجه: تاریخ بی‌صدا عوض نمی‌شد و فهرست همیشه روی «امروز» می‌ماند.
+  // یعنی فیش‌های یتیم دیروز هیچ‌وقت دیده نمی‌شدند.
   const isoFromDateInput = (value) => {
-    try { if (typeof isoDateFor === 'function') return isoDateFor(value) || ''; } catch (e) { /* ignore */ }
-    const digits = String(value || '').replace(/[۰-۹]/g, (d) => String('۰۱۲۳۴۵۶۷۸۹'.indexOf(d))).replace(/\D/g, '');
+    const raw = String(value == null ? '' : value).trim();
+    if (!raw) return '';
+    // ۱) میلادی از قبل آماده (YYYY-MM-DD)
+    const isoDirect = raw.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+    if (isoDirect) {
+      const y = Number(isoDirect[1]);
+      return y >= 1700 && y <= 2200 ? raw : '';
+    }
+    // ۲) شمسی (۱۴۰۵/۰۸/۰۱ یا 1405-8-1) → میلادی
+    const J = typeof window !== 'undefined' ? window.ItsmJalali : null;
+    if (J && typeof J.parse === 'function' && typeof J.j2g === 'function') {
+      const parts = J.parse(raw);
+      if (parts) {
+        const g = J.j2g(parts[0], parts[1], parts[2]);
+        if (g && g[0]) {
+          const pad = (n) => String(n).padStart(2, '0');
+          return g[0] + '-' + pad(g[1]) + '-' + pad(g[2]);
+        }
+      }
+      return '';
+    }
+    // ۳) بدون کتابخانهٔ تقویم: فقط میلادیِ بدون جداکننده
+    const digits = raw.replace(/[۰-۹]/g, (d) => String('۰۱۲۳۴۵۶۷۸۹'.indexOf(d))).replace(/\D/g, '');
     if (digits.length !== 8 || Number(digits.slice(0, 4)) < 1700) return '';
     return digits.slice(0, 4) + '-' + digits.slice(4, 6) + '-' + digits.slice(6, 8);
   };
