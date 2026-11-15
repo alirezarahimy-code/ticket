@@ -307,6 +307,39 @@ function food_ticket_manual_attendance_reconcile_range(string $fromDate, string 
         $tickets->execute([$fromDate, $toDate]);
         $delivered = $tickets->rowCount();
 
+        // ── ۱.۶۳.۲: تعمیر خودکار مهمان‌های ثبت‌دستیِ قدیمی ──────────────
+        //
+        // پیش از این اصلاح، مسیر «مهمان» ردیف را با print_status='not_printed'
+        // می‌ساخت، در حالی که هر دو گزارش تحویل شرط print_status='printed'
+        // دارند. نتیجه: مهمان در پایگاه‌داده بود ولی در هیچ گزارشی دیده
+        // نمی‌شد. کد اصلاح شد، اما ردیف‌های قدیمی همان‌طور خراب مانده‌اند.
+        //
+        // این UPDATE آن‌ها را خودکار درست می‌کند تا کاربر مجبور نباشد ابزار
+        // CLI اجرا کند: هر بار که گزارش تحویل باز می‌شود (که همیشه
+        // reconcile_range را صدا می‌زند) ردیف‌های قدیمی هم تعمیر می‌شوند.
+        //
+        // گاردها عیناً همان گاردهای tools/fix_manual_guest_tickets.php است:
+        //   • فقط ثبت دستی (نه کارت‌خوان)
+        //   • فقط مهمان (نه کارمند — مسیر کارمند متفاوت است)
+        //   • فقط هرگز-چاپ‌نشده (print_job_id IS NULL) — ردیفی که در صف چاپ
+        //     است یا چاپش شکست خورده دست نمی‌خورد
+        //   • فقط تحویل‌نشده
+        //   • چاپ فیزیکی درخواست نشده باشد (source_payload.physical_print)
+        $legacyGuests = db()->prepare(
+            'UPDATE food_ticket_events SET print_status = "printed", '
+            . 'delivery_status = "delivered", delivered_at = COALESCE(delivered_at, NOW()) '
+            . 'WHERE punch_date BETWEEN ? AND ? '
+            . 'AND source_uid = "manual-attendance" AND event_type = "guest" '
+            . 'AND print_status = "not_printed" '
+            . 'AND (delivery_status IS NULL OR delivery_status <> "delivered") '
+            . 'AND print_job_id IS NULL '
+            // چاپ فیزیکی: اگر در source_payload ثبت شده باشد، ردیف واقعاً در
+            // صف چاپ بوده و نباید تحویل‌شده علامت بخورد.
+            . 'AND COALESCE(source_payload, "") NOT LIKE "%\"physical_print\":true%" '
+        );
+        $legacyGuests->execute([$fromDate, $toDate]);
+        $delivered += $legacyGuests->rowCount();
+
         // فقط «حضور دستی» غیبت را پاک می‌کند — نه هر فیشی.
         //
         // پیش‌تر هر فیش printed (حتی چاپِ خودکارِ صبح) رکورد غیبت را حذف

@@ -110,7 +110,8 @@ check('۱۲: حالت «حروف اصلی»: ADMINIT2.DOMAIN.LOCAL ⇒ ADMINIT2'
 set_style('full');
 check('۱۳: حالت «نام کامل»: همان ADMINIT2.DOMAIN.LOCAL قبلی برمی‌گردد', asset_display_name('ADMINIT2.DOMAIN.LOCAL') === 'ADMINIT2.DOMAIN.LOCAL');
 set_style('چیز_نامعتبر');
-check('۱۴: مقدار نامعتبر در تنظیمات ⇒ بازگشت به پیش‌فرض adminit2', asset_display_name('ADMINIT2.DOMAIN.LOCAL') === 'adminit2', asset_display_name('ADMINIT2.DOMAIN.LOCAL'));
+// ۱.۶۳.۳: پیش‌فرض از short_lower به short عوض شد تا نام دقیقاً مثل سیستم‌عامل باشد.
+check('۱۴: مقدار نامعتبر در تنظیمات ⇒ بازگشت به پیش‌فرض ADMINIT2 (حفظ حروف)', asset_display_name('ADMINIT2.DOMAIN.LOCAL') === 'ADMINIT2', asset_display_name('ADMINIT2.DOMAIN.LOCAL'));
 set_style('short_lower');
 
 /* ───── ۴) شناسهٔ رکورد (asset_tag) ───── */
@@ -154,8 +155,12 @@ check('۳۳: ستون assets.source برای مقدار domain گسترده می
 /* ───── ۷) تنظیمات: انتخاب حالت نمایش ───── */
 check('۳۴: تنظیم asset_hostname_style در صفحهٔ تنظیمات هست', strpos($index, 'name="asset_hostname_style"') !== false);
 check('۳۵: مقدار تنظیم با whitelist ذخیره می‌شود (بدون مقدار دلخواه)',
-    strpos($index, "valid_choice(post_value('asset_hostname_style'), ['short_lower', 'short', 'full'], 'short_lower')") !== false);
-check('۳۶: پیش‌فرض، حالت «فقط نام با حروف کوچک» است', asset_display_name('DC01.CORP.LOCAL') === 'dc01', asset_display_name('DC01.CORP.LOCAL'));
+    strpos($index, "valid_choice(post_value('asset_hostname_style'), ['short_lower', 'short', 'full'], 'short')") !== false);
+// ۱.۶۳.۳: پیش‌فرض «حفظ حروف اصلی» است تا نام با برچسب کیس یکی باشد.
+// برای سنجش «پیش‌فرض»، باید تنظیم ذخیره‌شده برداشته شود؛ وگرنه آزمون
+// مقدار قبلی (short_lower) را می‌سنجد نه رفتار پیش‌فرض را.
+unset($GLOBALS['FT_SETTINGS']['asset_hostname_style']);
+check('۳۶: پیش‌فرض، حالت «فقط نام با حروف اصلی» است', asset_display_name('DC01.CORP.LOCAL') === 'DC01', asset_display_name('DC01.CORP.LOCAL'));
 
 /* ───── ۸) IP چسبیده به نام (۱.۶۳.۱) ───── */
 check('۳۷: «clint 192.168.1.65» ⇒ clint (IP حذف می‌شود، نه اینکه نام را ببرد)',
@@ -166,10 +171,11 @@ check('۳۹: «pc1 10.1.2.3» ⇒ pc1 (پیش‌تر «pc1 10» می‌شد)',
     asset_display_name('pc1 10.1.2.3') === 'pc1', asset_display_name('pc1 10.1.2.3'));
 check('۴۰: «clint 192.168.1.65.corp.local» ⇒ clint',
     asset_display_name('clint 192.168.1.65.corp.local') === 'clint', asset_display_name('clint 192.168.1.65.corp.local'));
-check('۴۱: «CLIENT 192.168.1.65» ⇒ client',
-    asset_display_name('CLIENT 192.168.1.65') === 'client', asset_display_name('CLIENT 192.168.1.65'));
-check('۴۲: «CLIENT-192.168.1.65» ⇒ client (پیشوند خودکار)',
-    asset_display_name('CLIENT-192.168.1.65') === 'client', asset_display_name('CLIENT-192.168.1.65'));
+// پیش‌فرض ۱.۶۳.۳ = حفظ حروف؛ پس «CLIENT» با همان حروف می‌ماند.
+check('۴۱: «CLIENT 192.168.1.65» ⇒ CLIENT (IP حذف، حروف حفظ)',
+    asset_display_name('CLIENT 192.168.1.65') === 'CLIENT', asset_display_name('CLIENT 192.168.1.65'));
+check('۴۲: «CLIENT-192.168.1.65» ⇒ CLIENT (پیشوند خودکار حذف)',
+    asset_display_name('CLIENT-192.168.1.65') === 'CLIENT', asset_display_name('CLIENT-192.168.1.65'));
 check('۴۳: IP خالص دست‌نخورده می‌ماند (وقتی تنها شناسه است)',
     asset_display_name('192.168.1.65') === '192.168.1.65', asset_display_name('192.168.1.65'));
 check('۴۴: «CLIENT-192-168-1-65» به IP نقطه‌دار برمی‌گردد، نه رشتهٔ خط‌تیره‌ای',
@@ -177,7 +183,7 @@ check('۴۴: «CLIENT-192-168-1-65» به IP نقطه‌دار برمی‌گرد
 check('۴۵: نام عادی با IP داخلش مختل نمی‌شود (reza-pc)',
     asset_display_name('reza-pc') === 'reza-pc', asset_display_name('reza-pc'));
 check('۴۶: نام دامنه‌ای همچنان درست کوتاه می‌شود (حالت رگرسیون)',
-    asset_display_name('ADMINIT2.DOMAIN.LOCAL') === 'adminit2', asset_display_name('ADMINIT2.DOMAIN.LOCAL'));
+    asset_display_name('ADMINIT2.DOMAIN.LOCAL') === 'ADMINIT2', asset_display_name('ADMINIT2.DOMAIN.LOCAL'));
 check('۴۷: حذف IP، بخش دامنه را هم پاک می‌کند (بدون باقی‌ماندهٔ «corp»)', asset_display_name('pc1 192.168.1.5 CORP') === 'pc1', asset_display_name('pc1 192.168.1.5 CORP'));
 check('۴۸: نام خالی همچنان خالی است (رگرسیون)', asset_display_name('') === '', asset_display_name(''));
 

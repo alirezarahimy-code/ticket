@@ -19,14 +19,29 @@ declare(strict_types=1);
  *     در «شناسنامه رایانه» هم قابل دیدن است.
  *
  * حالت نمایش با تنظیم «ظاهر نام کامپیوترها» در تنظیمات ← اطلاعات سامانه قابل تغییر است:
- *   short_lower (پیش‌فرض) = adminit2   |   short = ADMINIT2   |   full = ADMINIT2.DOMAIN.LOCAL
+ *   short (پیش‌فرض، حروف اصلی) = ADMINIT2   |   short_lower = adminit2   |   full = ADMINIT2.DOMAIN.LOCAL
+ *
+ * ۱.۶۳.۳: پیش‌فرض از short_lower به short عوض شد تا نام دقیقاً همان چیزی
+ * باشد که روی کیس/سیستم‌عامل نوشته شده. کوچک‌کردن انتخابی مانده است. ارقام
+ * نام هم دیگر فارسی نمی‌شوند (نگاه کنید به lib/fa-digits.php).
  */
 
 /** حالت نمایش نام کامپیوتر: short_lower | short | full */
 function asset_hostname_style(): string
 {
-    $style = (string) setting('asset_hostname_style', 'short_lower');
-    return in_array($style, ['short_lower', 'short', 'full'], true) ? $style : 'short_lower';
+    // ⚠️ ۱.۶۳.۳ — پیش‌فرض از short_lower به short عوض شد.
+    //
+    // کاربر نام کامپیوترها را با الگوی «MBA4-01» تا «MBA4-150» روی کیس
+    // برچسب زده است و می‌خواهد در شناسنامه **دقیقاً همان چیزی** را ببیند که
+    // در سیستم‌عامل/Active Directory هست، نه نسخهٔ کوچک‌شده. کوچک‌کردن
+    // حروف، شناسایی چشمی و کپی‌کردن نام را سخت می‌کرد (MBA4-01 ≠ mba4-01
+    // برای کسی که برچسب را می‌خواند).
+    //
+    // کوچک‌کردن همچنان به‌صورت انتخاب در تنظیمات هست؛ فقط پیش‌فرضِ تازه
+    // «حفظ حروف اصلی» است. نصب‌هایی که قبلاً short_lower را صریح ذخیره
+    // کرده‌اند، همان را حفظ می‌کنند.
+    $style = (string) setting('asset_hostname_style', 'short');
+    return in_array($style, ['short_lower', 'short', 'full'], true) ? $style : 'short';
 }
 
 /**

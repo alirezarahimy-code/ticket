@@ -35,7 +35,7 @@ ROOT = Path(__file__).resolve().parent.parent
 RELEASE_VERSION = "1.63.1"
 REQUIRES_VERSION = "1.63"
 RELEASE_DATE = "2026-11-06"
-PACKAGE_NAME = "ticket-1.63.1-r1-asset-names-20261115.zip"
+PACKAGE_NAME = "ticket-1.63.1-r2-asset-names-20261115.zip"
 REPORT_NAME = "CHANGE-REPORT-FA-asset-names.md"
 ZIP_DATE = (2026, 11, 6, 3, 0, 0)
 
@@ -44,13 +44,19 @@ BASE_PACKAGE = ROOT / "downloads" / "ticket-full-1.63.1-r13-20261115.zip"
 FILES = [
     "asset-names.php",
     "actions/asset-actions.php",
+    "actions/settings-actions.php",
     "inventory.php",
     "domain-scan.php",
     "index.php",
+    # ۱.۶۳.۳ — لایهٔ فارسی‌سازی ارقام نباید نام کامپیوتر را عوض کند
+    "lib/fa-digits.php",
+    "asset-inventory-page.php",
     "tools/normalize_asset_hostnames.php",
     "tools/test_asset_hostname_cleanup_offline.php",
     "tools/test_asset_names_offline.php",
+    "tools/test_asset_name_exact_offline.php",
     "docs/ASSET-HOSTNAME-DISPLAY-FA.md",
+    "docs/ASSET-NAME-EXACT-FA.md",
 ]
 
 FORBIDDEN_IN_PACKAGE = ("downloads/", "patches/", "updates/", "preview/",

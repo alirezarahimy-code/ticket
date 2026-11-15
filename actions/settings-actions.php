@@ -190,7 +190,7 @@ if (!defined('APP_ROOT')) {
             save_setting('app_name', $appName);
             if (post_value('settings_section') === 'general' && array_key_exists('asset_hostname_style', $_POST)) {
                 // ۱.۳۷.۵ — حالت نمایش نام کامپیوترها: adminit2 (پیش‌فرض) | ADMINIT2 | ADMINIT2.DOMAIN.LOCAL
-                save_setting('asset_hostname_style', valid_choice(post_value('asset_hostname_style'), ['short_lower', 'short', 'full'], 'short_lower'));
+                save_setting('asset_hostname_style', valid_choice(post_value('asset_hostname_style'), ['short_lower', 'short', 'full'], 'short'));
             }
             if (post_value('settings_section') === 'ticket') {
                 $autoCloseDays = array_key_exists('ticket_auto_close_days', $_POST) ? max(0, min(30, (int) post_value('ticket_auto_close_days'))) : 3;

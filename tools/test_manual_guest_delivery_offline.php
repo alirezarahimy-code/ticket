@@ -228,7 +228,56 @@ chk(
     'تاریخچهٔ ثبت دستی وعده را به رابط برمی‌گرداند'
 );
 
-// ── ۱۰) ابزار تعمیر ────────────────────────────────────────────────────
+// ── ۱۰) تعمیر خودکار مهمان‌های قدیمی ──────────────────────────────────
+// کاربر نباید مجبور باشد برای ۶ مهمانِ ثبت‌شده ابزار CLI اجرا کند. هر بار که
+// گزارش تحویل باز می‌شود، reconcile_range صدا زده می‌شود و باید ردیف‌های
+// قدیمیِ خراب را هم خودش درست کند — با همان گاردهای ابزار تعمیر.
+$reconcileBody = body_of($groups, 'food_ticket_manual_attendance_reconcile_range');
+chk($reconcileBody !== null, 'تابع همگام‌سازی خودکار پیدا شد');
+if ($reconcileBody !== null) {
+    chk(
+        strpos($reconcileBody, '$legacyGuests') !== false,
+        'همگام‌سازی خودکار، مهمان‌های قدیمی را تعمیر می‌کند'
+    );
+    chk(
+        strpos($reconcileBody, "event_type = \"guest\"") !== false,
+        'تعمیر خودکار فقط مهمان را هدف می‌گیرد (نه کارمند)'
+    );
+    chk(
+        strpos($reconcileBody, 'print_job_id IS NULL') !== false,
+        'تعمیر خودکار ردیفِ در صف چاپ یا چاپ‌شکست‌خورده را دست نمی‌زند'
+    );
+    chk(
+        strpos($reconcileBody, 'physical_print') !== false,
+        'تعمیر خودکار چاپ فیزیکی را از روی source_payload بررسی می‌کند'
+    );
+    chk(
+        strpos($reconcileBody, 'AND print_status = "not_printed"') !== false,
+        'تعمیر خودکار فقط ردیف هرگز-چاپ‌نشده را تغییر می‌دهد'
+    );
+    chk(
+        strpos($reconcileBody, 'delivery_status <> "delivered"') !== false
+        || strpos($reconcileBody, 'delivery_status IS NULL') !== false,
+        'تعمیر خودکار ردیف تحویل‌شده را دوباره نمی‌نویسد (idempotent)'
+    );
+    chk(
+        strpos($reconcileBody, 'BETWEEN ? AND ?') !== false,
+        'تعمیر خودکار فقط در بازهٔ گزارش کار می‌کند'
+    );
+}
+
+// گزارش تحویل باید این همگام‌سازی را صدا بزند — وگرنه تعمیر خودکار هرگز
+// اجرا نمی‌شود و کاربر همچنان به ابزار CLI وابسته است.
+chk(
+    strpos($order, 'food_ticket_manual_attendance_reconcile_range') !== false,
+    'گزارش «غذای تحویلی» همگام‌سازی خودکار را صدا می‌زند'
+);
+chk(
+    strpos($recon, 'food_ticket_manual_attendance_reconcile_range') !== false,
+    'گزارش «تطبیق» همگام‌سازی خودکار را صدا می‌زند'
+);
+
+// ── ۱۱) ابزار تعمیر ────────────────────────────────────────────────────
 $toolFile = $root . '/tools/fix_manual_guest_tickets.php';
 chk(is_file($toolFile), 'ابزار تعمیر ردیف‌های قدیمی وجود دارد');
 if (is_file($toolFile)) {
