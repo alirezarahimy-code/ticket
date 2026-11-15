@@ -56,8 +56,11 @@ FILES = [
     "index.php",                                # متن راهنمای نقش‌های کلیدی + کارت چهارم
 
     # ۲) مسیر ارجاع و دیدن تیکت
-    "modules/request-center/lib/functions.php",  # choose_handling_agent از فهرست
-    "lib/auth-scope.php",                        # callable|string|null + هر دو حوزه
+    "modules/request-center/lib/functions.php",  # choose_handling_agent از فهرست، حذف لایهٔ ادمین
+    "lib/auth-scope.php",                        # callable|string|null + هر دو حوزه + گروه تیکت
+
+    # ۲.۵) ارجاع دستی: حوزه را فهرست تعیین می‌کند، نه نقش ادمین اصلی
+    "modules/request-center/Actions/ticket-actions.php",
 
     # ۳) درمان خودکار آژیر (خط ۱.۶۳)
     "lib/system-alarms.php",                     # ساخت پوشه‌ها + backfill مهاجرت‌ها
@@ -66,7 +69,10 @@ FILES = [
     # ۴) یادداشت نسخه (پاپ‌آپ «تغییرات این نسخه» + تاریخچه در راهنما)
     "lib/release-notes.php",
 
-    # ۵) گزارش
+    # ۵) ابزار یک‌بارمصرف: اصلاح ارجاع‌های قدیمی به ادمین‌های اصلی
+    "tools/fix_ticket_assignments.php",
+
+    # ۶) گزارش
     "CHANGE-REPORT-FA-1.63.1.md",
 ]
 
@@ -74,7 +80,26 @@ FILES = [
 # هر کدام باید خودکفا باشد (وابسته به فایل دیگری که حمل نمی‌شود نباشد).
 #   cron/register_system_alarm_tasks.bat — فقط schtasks صدا می‌زند و مسیر PHP را
 #   از %~dp0.. و where php پیدا می‌کند. هیچ وابستگی به کد برنامهٔ جدید ندارد.
-ALLOWED_NEW_FILES = {"cron/register_system_alarm_tasks.bat"}
+# آزمون‌هایی که در ۱.۶۳ نسخهٔ کهنه دارند و باید به‌روز برسند.
+# چرا در بستهٔ افزایشی؟ چون خودِ ۱.۶۳ آن‌ها را حمل می‌کند و اگر به‌روز نشوند،
+# کاربر روی نصب خودش تست قدیمی را اجرا می‌کند و نتیجهٔ قرمز می‌گیرد.
+TEST_FILES = [
+    "tools/test_key_roles_composition_offline.php",
+    "tools/test_it_expert_routing_offline.php",
+    "tools/test_assignee_callable_offline.php",
+    "tools/test_alarm_selfheal_offline.php",
+    "tools/test_release_notes_offline.php",
+    "tools/test_supervisor_grant_runtime.php",
+    "tools/test_expert_scope_runtime.php",
+    "tools/test_primary_admin_routing_runtime.php",
+]
+
+ALLOWED_NEW_FILES = {
+    "cron/register_system_alarm_tasks.bat",
+    # ابزار یک‌بارمصرف اصلاح ارجاع‌های قدیمی. مستقل است و به فایل جدیدی
+    # وابسته نیست (فقط bootstrap، ماژول مرکز درخواست‌ها و خودِ جداول).
+    "tools/fix_ticket_assignments.php",
+}
 
 # این‌ها فقط برای آزمون‌اند و مسیر runtime ندارند؛ در بسته نمی‌آیند اما
 # بازسازی‌پذیرند و در مخزن می‌مانند.
@@ -155,11 +180,18 @@ def main() -> None:
         if any(tok in rel for tok in FORBIDDEN_IN_PACKAGE):
             raise SystemExit(f"مسیر ممنوع در بسته: {rel}")
         cur = p.read_bytes()
-        if rel in base and base[rel] == cur:
+        if rel in base and base[rel] == cur and rel not in TEST_FILES:
             raise SystemExit(f"بی‌تغییر نسبت به ۱.۶۳ است و نباید حمل شود: {rel}")
-        if rel not in base and rel not in ALLOWED_NEW_FILES:
+        if rel not in base and rel not in ALLOWED_NEW_FILES and rel not in TEST_FILES:
             raise SystemExit(f"در نصب ۱.۶۳ نیست — افزودن فایل تازه به بستهٔ افزایشی: {rel}")
         payload[rel] = cur
+
+    # آزمون‌ها (به‌روز‌شده، حتی اگر در ۱.۶۳ نبودند)
+    for rel in TEST_FILES:
+        p_test = ROOT / rel
+        if not p_test.is_file():
+            raise SystemExit(f"فایل آزمون نیست: {rel}")
+        payload[rel] = p_test.read_bytes()
 
     # هیچ مهاجرتی در این بسته نیست.
     if any(r.endswith(".sql") for r in payload):
@@ -324,11 +356,34 @@ ticket.edit  ·  ticket.view_unit  ·  ticket.reply  ·  ticket.view_own  ·  qu
 | کارشناس آی تی | مسئول تیکت‌های IT |
 | **کارشناس پشتیبانی** | **مسئول تیکت‌های پشتیبانی** |
 
-### ۳.۳) ادمین‌های اصلی
+### ۳.۳) ادمین‌های اصلی — قانون لازم‌الاجرا
 
-**کاملاً** از ارجاع خودکار حذف شدند. فقط ارجاع دستی. اگر فهرست کارشناسان خالی
-باشد، سامانه بی‌صاحب نمی‌ماند (نقش سیستمی به‌عنوان پشتیبان)، اما ادمین اصلی
-هرگز خودکار انتخاب نمی‌شود.
+**هیچ ادمین اصلی، به‌خودی‌خود، مسئول انجام تیکت نمی‌شود.** این قانون در سه جا
+اعمال شد:
+
+| جا | قبل | حالا |
+|----|-----|------|
+| لایهٔ پشتیبانِ ارجاع خودکار | با فهرست خالی، ادمین اصلی مسئول می‌شد | حذف شد |
+| لایهٔ کارشناس/مدیر واحد | ادمین اصلی با واحد هم‌نام رد می‌شد؟ نه | صریحاً رد می‌شود |
+| سه مسیر ارجاع دستی | شرط «ادمین اصلی ⇒ حوزهٔ IT» | تابع مشترک `ticket_assignee_group_ok()` |
+
+پیش از این، لایهٔ پشتیبان این شرط را داشت:
+
+```sql
+u.role = "primary_admin" OR (u.role = "admin" AND u.is_primary_admin = 1)
+```
+
+یعنی با خالی بودن فهرست، **هر ادمین اصلی فعال** خودکار مسئول همهٔ تیکت‌های IT
+می‌شد. این بلوک حذف شد.
+
+**استثنای قانونی (مورد «علی»):** اگر ادمین اصلی **در فهرست کارشناس آی تی یا
+کارشناس پشتیبانی باشد**، نقش ادمینش حفظ می‌شود و تیکت‌های همان حوزه به او
+ارجاع داده می‌شود. این دو با هم منافات ندارند: «نقش ادمین» و «مسئول تیکت»
+دو چیز جدا هستند.
+
+پیش از این، ادمین اصلی حتی وقتی در فهرست بود، فقط برای حوزهٔ **IT** پذیرفته
+می‌شد (`return $group === 'it'`) — یعنی ادمین اصلی‌ای که کارشناس پشتیبانی
+بود، برای تیکت پشتیبانی رد می‌شد. حالا حوزه را فهرست تعیین می‌کند، نه نقش.
 
 ### ۳.۴) کاربر دو-حوزه‌ای
 
@@ -388,6 +443,28 @@ cron\\\\register_system_alarm_tasks.bat
 
 > این یکی از داخل صفحهٔ وب قابل انجام نیست (نیاز به دسترسی مدیر ویندوز)، پس
 > تنها موردی است که یک قدم دستی دارد.
+
+---
+
+## ۵.۵) تیکت‌هایی که قبلاً اشتباه ارجاع شده‌اند
+
+**این انتقال خودکار نیست.** نسخهٔ ۱.۶۳.۱ فقط جلوی ارجاع‌های *تازه* را می‌گیرد.
+تیکتی که دیروز به یک ادمین اصلی ارجاع داده شده، تاریخچه و اعلان دارد و سامانه
+نباید بی‌اجازهٔ شما آن را جابه‌جا کند.
+
+برای اصلاح، یک ابزار همراه بسته است:
+
+```
+php tools\fix_ticket_assignments.php            ← فقط نشان می‌دهد
+php tools\fix_ticket_assignments.php --apply    ← اعمال می‌کند
+```
+
+- فقط تیکت‌های **باز** را می‌بیند؛ حل‌شده و بسته دست نمی‌خورند.
+- مسئولی که **در فهرست کارشناسان هست** را رد می‌کند (مثل علی).
+- اگر کارشناس واجدی پیدا نشود، هشدار می‌دهد و دست نمی‌زند.
+- هر تغییر در تاریخچهٔ تیکت ثبت می‌شود.
+- همه‌چیز در یک تراکنش: اگر خطایی بدهد، هیچ تغییری ذخیره نمی‌شود.
+- `--ticket 123` فقط همان تیکت را.
 
 ---
 

@@ -68,10 +68,21 @@ $permissions = (string) file_get_contents(APP_ROOT . '/permissions.php');
 if (!str_contains($permissions, 'function user_can_supervisor_grants')) {
     skip('توابع دسترسی در این بسته نیست — این بخش در مخزن معنا دارد.');
 } else {
+    // تصمیم مالک (۲۰۲۶-۱۱-۱۶): «دسترسی‌های اضافی سوپروایزر هم گرفته شود.»
     ok(
-        str_contains($permissions, "'supervisor.panel', 'supervisor.decide', 'supervisor.reopen', 'queue.view'"),
-        'فهرست اعطای سوپروایز دقیقاً چهار کد است'
+        str_contains($permissions, "return ['supervisor.panel'];"),
+        'فهرست اعطای سوپروایز فقط پنل است (اضافی‌ها گرفته شد)'
     );
+    // فقط بدنهٔ تابع سنجیده می‌شود، نه توضیحات (توضیح عمداً نام کدها را می‌آورد).
+    $supBlock = '';
+    if (preg_match('/function user_can_supervisor_grants\(\): array\s*\{\s*return \[([^\]]*)\]/', $permissions, $m)) {
+        $supBlock = $m[1];
+    }
+    ok($supBlock !== '', 'بلوک اعطای سوپروایز پیدا شد');
+    ok(!str_contains($supBlock, 'supervisor.decide'), 'supervisor.decide از اعطای فهرست حذف شد');
+    ok(!str_contains($supBlock, 'supervisor.reopen'), 'supervisor.reopen از اعطای فهرست حذف شد');
+    ok(!preg_match('/function user_can_supervisor_grants\(\): array\s*\{\s*return \[[^\]]*queue\.view/s', $permissions),
+        'queue.view از اعطای سوپروایز حذف شد');
     ok(
         str_contains($permissions, 'user_is_key_role($user, \'supervisor\')'),
         'user_can() عضویت در فهرست سوپروایزر را می‌سنجد'
@@ -84,7 +95,7 @@ if (!str_contains($permissions, 'function user_can_supervisor_grants')) {
         );
     }
     ok(
-        str_contains($permissions, 'تفکیک وظایف نشکند'),
+        str_contains($permissions, 'دسترسی‌های اضافی سوپروایزر'),
         'دلیل تصمیم در کد مستند است'
     );
 }
@@ -110,6 +121,31 @@ if (!str_contains($permissions, 'function user_can_expert_grants')) {
         'هر دو فهرست کارشناس این اعطا را می‌گیرند'
     );
 }
+
+echo "\n=== ۲.۷) قانون: ادمین اصلی پیش‌فرض مسئول نمی‌شود ===\n";
+$authScopeSrc = (string) file_get_contents(APP_ROOT . '/lib/auth-scope.php');
+
+ok(
+    !preg_match('/if \(user_is_primary_admin\(\$user\)\) \{\s*return \$group === \'it\';/', $authScopeSrc),
+    'شرط قدیمی «ادمین اصلی ⇒ همیشه مجاز برای IT» حذف شد'
+);
+ok(
+    str_contains($authScopeSrc, "\$isDesignated"),
+    'ادمین اصلی فقط از مسیر «تعیین‌شده در فهرست» می‌گذرد'
+);
+ok(
+    str_contains($authScopeSrc, 'function ticket_assignee_group_ok'),
+    'تابع مشترک ticket_assignee_group_ok وجود دارد (یک نقطهٔ حقیقت)'
+);
+$fnSrc = (string) file_get_contents(APP_ROOT . '/modules/request-center/lib/functions.php');
+ok(
+    !preg_match('/ownerCondition = \$serviceGroup === \'it\'\s*\?\s*\'\(u\.role = "primary_admin"/', $fnSrc),
+    'لایهٔ پشتیبان دیگر ادمین اصلی را نامزد نمی‌کند'
+);
+ok(
+    str_contains($fnSrc, 'هیچ ادمین اصلی نباید پیش‌فرض'),
+    'قانون در کد مستند است'
+);
 
 echo "\n=== ۳) حضور هم‌زمان در هر دو فهرست کارشناس ===\n";
 

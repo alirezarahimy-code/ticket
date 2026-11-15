@@ -220,15 +220,26 @@ function choose_handling_agent(string $serviceGroup, ?int $departmentId = null, 
     }
 
     // ── ۲) پشتیبان: نقش سیستمی همان حوزه، فقط اگر فهرست بالا خالی یا بی‌کاندید بود ──
-    // مالک اصلی هر حوزه: IT ← ادمین اصلی؛ پشتیبانی ← مدیر پشتیبانی.
-    // اگر برای یک حوزه چند مالک فعال تعریف شده باشد، کمترین بارِ باز ملاک می‌شود.
-    $ownerCondition = $serviceGroup === 'it'
-        ? '(u.role = "primary_admin" OR (u.role = "admin" AND u.is_primary_admin = 1))'
-        : 'u.role = "support_manager"';
-    $ownerQuery = db()->query('SELECT ' . $candidateFields . ' FROM users u LEFT JOIN handling_units hu ON hu.id = u.handling_unit_id' . $loadJoin . ' WHERE u.is_active = 1 AND ' . $ownerCondition . ' GROUP BY u.id, u.role, u.is_active, u.is_primary_admin, u.department_id, u.is_it_agent, hu.code ORDER BY ' . $orgManagerRank . 'COUNT(t.id), u.id');
-    foreach ($ownerQuery->fetchAll() as $candidate) {
-        if (ticket_assignee_is_eligible($routingTicket, $candidate, 'ticket_notification_user_can')) {
-            return (int) $candidate['id'];
+    //
+    // قانون لازم‌الاجرا (تصمیم مالک، ۲۰۲۶-۱۱-۱۶): «هیچ ادمین اصلی نباید پیش‌فرض
+    // مسئول انجام تیکت شود.» پس لایهٔ پشتیبان **هرگز** ادمین اصلی برنمی‌گرداند،
+    // ولو اینکه فهرست کارشناسان خالی باشد.
+    //
+    // پیش از این، این شرط برای حوزهٔ IT وجود داشت:
+    //     (u.role = "primary_admin" OR (u.role = "admin" AND u.is_primary_admin = 1))
+    // یعنی با خالی بودن فهرست، هر ادمین اصلی فعال خودکار مسئول همهٔ تیکت‌های IT
+    // می‌شد — همان چیزی که مالک بارها گفت نباید بشود. حذف شد.
+    //
+    // پشتیبانِ مجاز برای IT: کارشناس/مدیر همان واحد (لایهٔ ۳).
+    // پشتیبانِ مجاز برای پشتیبانی: مدیر پشتیبانی، سپس کارشناس/مدیر واحد.
+    // اگر هیچ‌کدام نبود، درخواست در manager_review بی‌صاحب می‌ماند تا ارجاع دستی شود.
+    $ownerCondition = $serviceGroup === 'support' ? 'u.role = "support_manager"' : '1 = 0';
+    if ($ownerCondition !== '1 = 0') {
+        $ownerQuery = db()->query('SELECT ' . $candidateFields . ' FROM users u LEFT JOIN handling_units hu ON hu.id = u.handling_unit_id' . $loadJoin . ' WHERE u.is_active = 1 AND ' . $ownerCondition . ' GROUP BY u.id, u.role, u.is_active, u.is_primary_admin, u.department_id, u.is_it_agent, hu.code ORDER BY ' . $orgManagerRank . 'COUNT(t.id), u.id');
+        foreach ($ownerQuery->fetchAll() as $candidate) {
+            if (ticket_assignee_is_eligible($routingTicket, $candidate, 'ticket_notification_user_can')) {
+                return (int) $candidate['id'];
+            }
         }
     }
 
@@ -239,6 +250,8 @@ function choose_handling_agent(string $serviceGroup, ?int $departmentId = null, 
         . 'LEFT JOIN handling_units hu ON hu.id = u.handling_unit_id'
         . $loadJoin
         . ' WHERE u.is_active = 1 AND u.role IN ("agent", "manager") AND hu.code = ?'
+        // قانون: ادمین اصلی هرگز کارشناس شناخته نمی‌شود، حتی اگر واحدش هم‌نام باشد.
+        . ' AND COALESCE(u.is_primary_admin, 0) = 0'
         // مدیر عادی فقط مسئول همان معاونت/واحدِ ثبت‌شده روی درخواست است؛ از معاونت دیگری انتخاب نشود.
         . ' AND (u.role <> "manager" OR (? > 0 AND u.department_id = ?))'
         // تصمیم مالک (۲۰۲۶-۱۱-۱۱): مدیران چارت سازمانی از ارجاع خودکار حذف‌اند؛ فقط انتصاب دستی روی یک درخواست ممکن است.

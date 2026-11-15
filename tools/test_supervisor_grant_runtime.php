@@ -60,16 +60,21 @@ setset('role_it_expert_ids', '');
 setset('role_support_expert_ids', '');
 setset('role_inspection_ids', '');
 
-$agent = ['id' => 99, 'role' => 'agent', 'is_active' => 1, 'is_primary_admin' => 0,
+// نقش «user» عمداً: نقش agent خودش queue.view دارد و تست نمی‌توانست تفکیک کند
+// که آن دسترسی از نقش آمده یا از فهرست سوپروایزر. با user، هر دسترسیِ اضافه
+// حتماً از اعطای فهرست آمده است.
+$agent = ['id' => 99, 'role' => 'user', 'is_active' => 1, 'is_primary_admin' => 0,
           'department_id' => 1, 'handling_unit_id' => null];
 
 echo "=== الف) نقش اصلی دست نمی‌خورد ===\n";
 ok(user_is_key_role($agent, 'supervisor'), 'کاربر ۹۹ در فهرست سوپروایزر شناسایی می‌شود');
 ok(trim((string) setting('role_supervisor_ids')) === '99', 'تنظیم فهرست واقعاً ۹۹ است');
 
-echo "\n=== ب) چهار دسترسی سرپرستی با نقش agent ===\n";
-foreach (['supervisor.panel','supervisor.decide','supervisor.reopen','queue.view'] as $perm) {
-    ok(user_can($agent, $perm), "user_can($perm) = true");
+echo "\n=== ب) فقط پنل — دسترسی‌های اضافی گرفته شد (نقش user) ===\n";
+// تصمیم مالک (۲۰۲۶-۱۱-۱۶): «دسترسی‌های اضافی سوپروایزر هم گرفته شود.»
+ok(user_can($agent, 'supervisor.panel'), 'user_can(supervisor.panel) = true — تنها دسترسی اعطایی');
+foreach (['supervisor.decide', 'supervisor.reopen', 'queue.view'] as $perm) {
+    ok(!user_can($agent, $perm), "user_can($perm) = false — دسترسی اضافی گرفته شد");
 }
 
 echo "\n=== ج) دسترسی‌های سنگین نمی‌آید ===\n";
@@ -89,6 +94,7 @@ ok(user_can($legacy, 'supervisor.panel'), 'نقش supervisor هنوز پنل د�
 echo "\n=== و) حذف از فهرست، دسترسی را می‌گیرد و نقش را نه ===\n";
 setset('role_supervisor_ids', '');
 ok(!user_can($agent, 'supervisor.panel'), 'پس از حذف: supervisor.panel = false');
+ok(trim((string) setting('role_supervisor_ids')) === '', 'فهرست خالی شد');
 
 echo "\n" . str_repeat('═', 60) . "\nPASS=$pass | FAIL=$fail\n";
 exit($fail === 0 ? 0 : 1);

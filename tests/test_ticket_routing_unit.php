@@ -152,8 +152,13 @@ foreach ($users as $candidate) {
 if ($primaryAdmin !== null) {
     $adminOther = ['requester_id'=>1, 'service_group'=>'it', 'department_id'=>5];
     $adminSelf = ['requester_id'=>(int) $primaryAdmin['id'], 'service_group'=>'it', 'department_id'=>5];
-    check_ticket(ticket_assignee_is_eligible($adminOther, $primaryAdmin, 'user_can'), 'primary admin stays eligible for other people tickets');
-    check_ticket(!ticket_assignee_is_eligible($adminSelf, $primaryAdmin, 'user_can'), 'primary admin cannot be assigned to their own ticket');
+    // قانون لازم‌الاجرا (تصمیم مالک، ۲۰۲۶-۱۱-۱۶): «هیچ ادمین اصلی نباید پیش‌فرض
+    // مسئول انجام تیکت شود.» پیش از این، این تست خلاف قانون را تأیید می‌کرد:
+    // ادمین اصلی برای تیکت دیگران واجد بود. حالا فقط اگر در فهرست کارشناسان باشد.
+    check_ticket(!ticket_assignee_is_eligible($adminOther, $primaryAdmin, 'user_can'),
+        'primary admin is NOT eligible by role alone (not in any expert list)');
+    check_ticket(!ticket_assignee_is_eligible($adminSelf, $primaryAdmin, 'user_can'),
+        'primary admin cannot be assigned to their own ticket');
 }
 
 // ۴) درخواست بدون ثبت‌کنندهٔ مشخص (requester_id = 0) نباید بسته شود؛

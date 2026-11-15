@@ -456,16 +456,33 @@ function ticket_assignee_is_eligible(array $ticket, array $user, callable|string
     if (!$allowSelfAssignment && ticket_user_is_requester($ticket, $user)) {
         return false;
     }
+    // ── قانون لازم‌الاجرا (تصمیم مالک، ۲۰۲۶-۱۱-۱۶) ──────────────────────────
+    //
+    // «ادمین اصلی بودن» **به‌خودی‌خود** هیچ حقی برای مسئولیت تیکت نمی‌دهد.
+    // هیچ ادمین اصلی نباید پیش‌فرض مسئول انجام تیکت شود — فقط اگر در فهرست
+    // «کارشناس آی تی» یا «کارشناس پشتیبانی» تنظیمات ← کاربران معرفی شده باشد.
+    //
+    // این قانون **مرز خودکار و دستی را جدا نمی‌کند**: ارجاع خودکار و ارجاع
+    // دستی هر دو از همین تابع می‌گذرند، پس یک ادمینِ خارج از فهرست حتی با
+    // ارجاع دستی هم به‌عنوان مسئول پذیرفته نمی‌شود.
+    //
+    // اگر ادمین اصلی **در فهرست باشد** (مثل کاربر علی)، نقش ادمینش حفظ می‌شود
+    // و تیکت‌های همان حوزه هم به او ارجاع می‌شود — این دو با هم منافات ندارند.
+    $isDesignated = function_exists('user_is_key_role')
+        && in_array($group, ['it', 'support'], true)
+        && user_is_key_role($user, $group === 'it' ? 'it_expert' : 'support_expert');
+
     if (user_is_primary_admin($user)) {
-        return $group === 'it';
+        // بدون شرط حوزه! فهرست، حوزه را تعیین می‌کند نه نقش.
+        return $isDesignated
+            && ticket_user_can_view($ticket, $user, $permissionCheck)
+            && $permissionCheck($user, 'ticket.edit');
     }
     // تصمیم مالک (۲۰۲۶-۱۱-۱۶): کسی که در تنظیمات ← نقش‌ها به‌عنوان «کارشناس IT» یا
     // «کارشناس پشتیبانی» برگزیده شده، مجاز به مسئولیت همان حوزه است — حتی اگر نقش
     // سیستمی‌اش user/agent/inspector/supervisor باشد و handling_unit نداشته باشد.
     // پیش از این فقط نقش‌های سیستمی پذیرفته می‌شدند و فهرست تنظیمات بی‌اثر بود.
-    if (function_exists('user_is_key_role')
-        && in_array($group, ['it', 'support'], true)
-        && user_is_key_role($user, $group === 'it' ? 'it_expert' : 'support_expert')) {
+    if ($isDesignated) {
         // کاربری که در هر دو فهرست است، مسئول هر دو حوزه می‌شود.
         return ticket_user_can_view($ticket, $user, $permissionCheck) && $permissionCheck($user, 'ticket.edit');
     }
@@ -482,6 +499,47 @@ function ticket_assignee_is_eligible(array $ticket, array $user, callable|string
         return false;
     }
     return ticket_user_can_view($ticket, $user, $permissionCheck) && $permissionCheck($user, 'ticket.edit');
+}
+
+/**
+ * آیا این کاربر به حوزهٔ خدمتِ این درخواست تعلق دارد؟
+ *
+ * قانون لازم‌الاجرا (تصمیم مالک، ۲۰۲۶-۱۱-۱۶): «ادمین اصلی بودن» به‌خودی‌خود
+ * هیچ حقی برای مسئولیت تیکت نمی‌دهد. حوزه را **فهرست تنظیمات** تعیین می‌کند
+ * (کارشناس آی تی / کارشناس پشتیبانی)، نه نقش سیستمی.
+ *
+ * پیش از این، هر سه مسیر ارجاع دستی شرط «ادمین اصلی ⇒ حوزهٔ IT» را جداگانه
+ * تکرار می‌کردند؛ نتیجه: ادمینِ خارج از فهرست هم پذیرفته می‌شد و ادمینِ
+ * داخل فهرست هم فقط برای IT. یک نقطهٔ حقیقت بهتر است.
+ */
+function ticket_assignee_group_ok(array $ticket, array $user): bool
+{
+    $group = (string) ($ticket['service_group'] ?? 'it');
+    if (!in_array($group, ['it', 'support'], true)) {
+        return false;
+    }
+    // ۱) کارشناس تعیین‌شده: حوزه را فهرست تعیین می‌کند — نه نقش.
+    if (function_exists('user_is_key_role')) {
+        if ($group === 'it' && user_is_key_role($user, 'it_expert')) {
+            return true;
+        }
+        if ($group === 'support' && user_is_key_role($user, 'support_expert')) {
+            return true;
+        }
+    }
+    // ۲) نقش‌های سیستمی همان حوزه.
+    $role = (string) ($user['role'] ?? '');
+    if ($role === 'support_manager') {
+        return $group === 'support';
+    }
+    if (in_array($role, ['agent', 'manager'], true)) {
+        // ادمین اصلی هرگز از این مسیر رد نمی‌شود، حتی اگر واحدش هم‌نام باشد.
+        if (function_exists('user_is_primary_admin') && user_is_primary_admin($user)) {
+            return false;
+        }
+        return (string) ($user['handling_unit_code'] ?? '') === $group;
+    }
+    return false;
 }
 
 /** Current rating belongs to the latest resolution, including same-second events. */

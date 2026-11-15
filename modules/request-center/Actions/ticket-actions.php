@@ -868,10 +868,8 @@ if (!defined('APP_ROOT')) {
                 $assigneeDepartmentOk = $assigneeRole !== 'manager'
                     || ((int) ($ticket['department_id'] ?? 0) > 0
                         && (int) ($assigneeRow['department_id'] ?? 0) === (int) ($ticket['department_id'] ?? 0));
-                $assigneeGroupOk = $assigneeRow
-                    && ((user_is_primary_admin($assigneeRow) && $ticketGroupForAssign === 'it')
-                        || ($assigneeRole === 'support_manager' && $ticketGroupForAssign === 'support')
-                        || (in_array($assigneeRole, ['agent', 'manager'], true) && $assigneeHu === $ticketGroupForAssign));
+                // قانون: حوزه را فهرست کارشناسان تعیین می‌کند، نه نقش ادمین اصلی.
+                $assigneeGroupOk = $assigneeRow && ticket_assignee_group_ok($ticket, $assigneeRow);
                 if (!$assigneeRow || !ticket_assignee_is_eligible($ticket, $assigneeRow, 'ticket_notification_user_can') || !$assigneeGroupOk || !$assigneeDepartmentOk) {
                     throw new RuntimeException('کارشناس انتخاب‌شده به این درخواست تعلق ندارد.');
                 }
@@ -1020,10 +1018,8 @@ if (!defined('APP_ROOT')) {
                  $assigneeRow = $assigneeQuery->fetch();
                  $assigneeRole = (string) ($assigneeRow['role'] ?? '');
                  $assigneeHu = (string) ($assigneeRow['handling_unit_code'] ?? '');
-                 $assigneeGroupOk = $assigneeRow
-                     && ((user_is_primary_admin($assigneeRow) && $ticketGroupForAssign === 'it')
-                         || ($assigneeRole === 'support_manager' && $ticketGroupForAssign === 'support')
-                         || (in_array($assigneeRole, ['agent', 'manager'], true) && $assigneeHu === $ticketGroupForAssign));
+                 // قانون: حوزه را فهرست کارشناسان تعیین می‌کند، نه نقش ادمین اصلی.
+                 $assigneeGroupOk = $assigneeRow && ticket_assignee_group_ok($ticket, $assigneeRow);
                  $assigneeDepartmentOk = $assigneeRole !== 'manager'
                      || ((int) ($ticket['department_id'] ?? 0) > 0
                          && (int) ($assigneeRow['department_id'] ?? 0) === (int) $ticket['department_id']);
@@ -1352,10 +1348,8 @@ if (!defined('APP_ROOT')) {
             $assigneeRow = $assigneeQuery->fetch();
             $assigneeRole = (string) ($assigneeRow['role'] ?? '');
             $assigneeHu = (string) ($assigneeRow['handling_unit_code'] ?? '');
-            $assigneeGroupOk = $assigneeRow
-                && ((user_is_primary_admin($assigneeRow) && $ticketGroupForAssign === 'it')
-                    || ($assigneeRole === 'support_manager' && $ticketGroupForAssign === 'support')
-                    || (in_array($assigneeRole, ['agent', 'manager'], true) && $assigneeHu === $ticketGroupForAssign));
+            // قانون: حوزه را فهرست کارشناسان تعیین می‌کند، نه نقش ادمین اصلی.
+            $assigneeGroupOk = $assigneeRow && ticket_assignee_group_ok($ticket, $assigneeRow);
             $assigneeDepartmentOk = $assigneeRole !== 'manager'
                 || ((int) ($ticket['department_id'] ?? 0) > 0 && (int) ($assigneeRow['department_id'] ?? 0) === (int) $ticket['department_id']);
             if (!$assigneeRow || !ticket_assignee_is_eligible($ticket, $assigneeRow, 'ticket_notification_user_can') || !$assigneeGroupOk || !$assigneeDepartmentOk) {
