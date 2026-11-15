@@ -20,7 +20,7 @@
 
 **همه‌چیز از پیش داخلش هست.** نیازی به اعمال بستهٔ ۹۶ یا ۹۷ روی آن نیست.
 
-**[📄 ticket-full-1.62.97-20261116.zip (۱۳ مگابایت)](https://github.com/alirezarahimy-code/ticket/blob/477dacd64aa8d287c39dbae7e2f958e8510d5782/downloads/ticket-full-1.62.97-20261116.zip)**
+**[📄 ticket-full-1.62.97-20261116.zip (۱۳ مگابایت)](https://github.com/alirezarahimy-code/ticket/blob/arena/22d4eba7-ticket/downloads/ticket-full-1.62.97-20261116.zip)**
 
 
 | | |
@@ -33,7 +33,7 @@
 
 ## ۲) بستهٔ میان‌بر — از ۱.۶۲.۹۶ به ۱.۶۲.۹۷
 
-**[📄 ticket-update-1.62.96-to-1.62.97-…zip (۲۰۹ کیلوبایت)](https://github.com/alirezarahimy-code/ticket/blob/477dacd64aa8d287c39dbae7e2f958e8510d5782/downloads/ticket-update-1.62.96-to-1.62.97-food-worker-selftest-panel-20261115.zip)**
+**[📄 ticket-update-1.62.96-to-1.62.97-…zip (۲۰۹ کیلوبایت)](https://github.com/alirezarahimy-code/ticket/blob/arena/22d4eba7-ticket/downloads/ticket-update-1.62.96-to-1.62.97-food-worker-selftest-panel-20261115.zip)**
 
 
 | | |
@@ -46,7 +46,7 @@
 
 ## ۳) کاندید ۱.۶۳ (فقط برای تست)
 
-**[📄 ticket-update-1_62_96-to-1_63-…r16.zip (۹۱۹ کیلوبایت)](https://github.com/alirezarahimy-code/ticket/blob/477dacd64aa8d287c39dbae7e2f958e8510d5782/downloads/ticket-update-1_62_96-to-1_63-request-center-rc-candidate-20261114-r16.zip)**
+**[📄 ticket-update-1_62_96-to-1_63-…r16.zip (۹۱۹ کیلوبایت)](https://github.com/alirezarahimy-code/ticket/blob/arena/22d4eba7-ticket/downloads/ticket-update-1_62_96-to-1_63-request-center-rc-candidate-20261114-r16.zip)**
 
 
 | | |
