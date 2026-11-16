@@ -81,10 +81,11 @@ check("'ola_policy_id' => $replyOla['policy_id']" in ticket_actions
       "reply transitions persist OLA deadlines after resuming from waiting_user")
 check("'cancelled' => []" in workflow_service and "'cancelled' => 'لغوشده به درخواست ثبت‌کننده'" in bootstrap,
       "cancelled is a terminal, human-readable ticket status")
-check("$ownerCondition = $serviceGroup === 'it'" in index
+check("$ownerCondition = $serviceGroup === 'support' ? 'u.role = \"support_manager\"' : '1 = 0';" in index
       and "AND hu.code = ?" in index
       and "$fallback->execute([$serviceGroup, $departmentId, $departmentId]);" in index
-      and "u.department_id = ?" in index,
+      and "u.department_id = ?" in index
+      and "ticket_assignee_is_eligible($routingTicket, $candidate, 'ticket_notification_user_can')" in index,
       "automatic fallback stays within the requested handling unit and department")
 check("status ENUM('new','manager_review','assigned','in_progress','waiting_user','pending','resolved','closed','cancelled','rejected')" in schema
       and "cancel_requested_at DATETIME NULL" in schema
