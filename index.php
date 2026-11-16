@@ -1994,10 +1994,10 @@ if ($page === 'settings') {
     foreach ([
         'supervisor' => ['label' => 'سوپروایز', 'note' => 'دسترسی سوپروایزر: مشاهده و مدیریت درخواست‌ها، تأیید و بستن.'],
         'inspection' => ['label' => 'بازرسی', 'note' => 'مجوز ثبت ورود رسانه در کنترل CD/DVD.'],
-        'it_expert' => ['label' => 'کارشناس آی تی', 'note' => 'مسئول رسیدگی به تیکت‌های فناوری اطلاعات. فقط از همین فهرست انتخاب می‌شود.'],
+        'it_expert' => ['label' => 'کارشناس آی تی', 'note' => 'مسئول رسیدگی به درخواست‌های فناوری اطلاعات. فقط از همین فهرست انتخاب می‌شود.'],
         // تصمیم مالک (۲۰۲۶-۱۱-۱۶): همتای «کارشناس آی تی» برای حوزهٔ پشتیبانی.
         // مسئول تیکت‌های پشتیبانی فقط از این فهرست خوانده می‌شود.
-        'support_expert' => ['label' => 'کارشناس پشتیبانی', 'note' => 'مسئول رسیدگی به تیکت‌های پشتیبانی. فقط از همین فهرست انتخاب می‌شود.'],
+        'support_expert' => ['label' => 'کارشناس پشتیبانی', 'note' => 'مسئول رسیدگی به درخواست‌های پشتیبانی. فقط از همین فهرست انتخاب می‌شود.'],
     ] as $roleKey => $roleMeta) {
         $roleIds = key_role_user_ids($roleKey);
         $roleCards .= '<div class="key-role-block"><h3>' . e($roleMeta['label']) . '</h3><p class="muted">' . e($roleMeta['note']) . '</p><div class="form-grid">';
@@ -2163,7 +2163,7 @@ if ($page === 'settings') {
         echo '</div>';
     }
     echo '</div>';
-    echo '<div id="key-roles" class="settings-subform"' . ($canSettingsKeyRolesEdit ? '' : ' inert') . '><h3>نقش‌های کلیدی</h3><p class="muted">برای هر نقش حداکثر دو کاربر انتخاب کنید. هیچ‌کدام از این نقش‌ها <strong>نقش اصلی کاربر را عوض نمی‌کند</strong>؛ فقط دسترسی اضافه می‌کند. «کارشناس آی تی» و «کارشناس پشتیبانی» مسئول رسیدگی به تیکت‌های همان حوزه هستند (فقط از همین فهرست خوانده می‌شوند)، «سوپروایز» فضای سوپروایزر و صف تصمیم‌ها را می‌دهد، و «بازرسی» مجوز ثبت ورود رسانه در CD/DVD را.</p><form method="post">' . csrf_field() . '<input type="hidden" name="action" value="save_key_roles">' . $roleCards . (user_is_primary_admin($user) ? '' : '<p class="muted">تعیین یا حذف کارشناس IT فقط توسط ادمین اصلی انجام می‌شود.</p>') . '<button class="button" type="submit">ذخیره نقش‌های کلیدی</button></form></div>';
+    echo '<div id="key-roles" class="settings-subform"' . ($canSettingsKeyRolesEdit ? '' : ' inert') . '><h3>نقش‌های کلیدی</h3><p class="muted">برای هر نقش حداکثر دو کاربر انتخاب کنید. هیچ‌کدام از این نقش‌ها <strong>نقش اصلی کاربر را عوض نمی‌کند</strong>؛ فقط دسترسی اضافه می‌کند. «کارشناس آی تی» و «کارشناس پشتیبانی» مسئول رسیدگی به درخواست‌های همان حوزه هستند (فقط از همین فهرست خوانده می‌شوند)، «سوپروایز» فضای سوپروایزر و صف تصمیم‌ها را می‌دهد، و «بازرسی» مجوز ثبت ورود رسانه در CD/DVD را.</p><form method="post">' . csrf_field() . '<input type="hidden" name="action" value="save_key_roles">' . $roleCards . (user_is_primary_admin($user) ? '' : '<p class="muted">تعیین یا حذف کارشناس IT فقط توسط ادمین اصلی انجام می‌شود.</p>') . '<button class="button" type="submit">ذخیره نقش‌های کلیدی</button></form></div>';
     echo '</div>';
     }
 
