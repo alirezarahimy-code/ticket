@@ -35,7 +35,7 @@ def test_release_asset_manifest_is_safe_complete_and_hash_verified() -> None:
         assert actual_hash == expected_hash, f"SHA-256 mismatch: {name}"
 
     workflow = (ROOT / ".github" / "workflows" / "publish-release.yml").read_text(encoding="utf-8")
-    assert workflow.count("RELEASE-ASSET-MANIFEST-$RELEASE_VERSION.txt") == 2
+    assert workflow.count("RELEASE-ASSET-MANIFEST-$RELEASE_VERSION.txt") == 3
     assert 'git rev-parse "$RELEASE_TAG^{commit}"' in workflow
     assert 'gh release edit "$RELEASE_TAG" --title "$TITLE" --notes-file "$NOTES"' in workflow
 
@@ -48,3 +48,9 @@ def test_release_asset_manifest_is_safe_complete_and_hash_verified() -> None:
     assert 'if [ "${{ github.event_name }}" = "push" ] && git ls-remote' not in workflow
     assert 'if [ "$release_commit" != "$GITHUB_SHA" ]; then' in workflow
     assert 'TITLE="نسخهٔ ${RELEASE_VERSION}"' in workflow
+
+    # The release must publish and report only manifest-selected ZIPs and their checksums.
+    assert 'ATTACH+=("downloads/$line" "downloads/$line.sha256")' in workflow
+    assert 'ATTACH+=("$f" "$f.sha256")' in workflow
+    assert 'RELEASE_ASSETS+=("$line" "$line.sha256")' in workflow
+    assert 'for name in "${RELEASE_ASSETS[@]}"; do' in workflow
