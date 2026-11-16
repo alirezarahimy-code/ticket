@@ -41,7 +41,7 @@ class TicketWorkflowSafetyTests(unittest.TestCase):
         self.assertIn("new RequestCenterWorkflowService(db())", update)
         chooser = section(source('modules/request-center/lib/functions.php'), 'function choose_handling_agent(', 'function ticket_allowed_transitions(')
         self.assertIn('u.role IN ("agent", "manager") AND hu.code = ?', chooser)
-        self.assertEqual(chooser.count("ticket_assignee_is_eligible($routingTicket, $candidate"), 2)
+        self.assertEqual(chooser.count("ticket_assignee_is_eligible($routingTicket, $candidate"), 3)
         self.assertIn("ticket_assignee_is_eligible($ticket, $assigneeRow", update)
 
     def test_requester_and_nonhandler_reply_guards(self):
