@@ -528,16 +528,109 @@ function csrf_discard_legacy_cookie(): void
     unset($_COOKIE['itsm_csrf']);
 }
 
-function require_csrf(): void
+/**
+ * توکن CSRF را می‌سنجد و در صورت ناسازگاری، به‌جای «بن‌بست ۴۱۹»، کاربر را
+ * با پیام روشن به صفحهٔ قبل برمی‌گرداند.
+ *
+ * چرا این تغییر: کاربری که نشستش را زیر HTTPS ساخته بود و بعد سامانه را با
+ * HTTP باز کرد، کوکی `Secure` را از دست می‌داد. نشست تازه بدون توکن شروع
+ * می‌شد، ولی صفحهٔ قدیمی توکن قدیمی را در فرم داشت ⇒ هر ارسال «درخواست
+ * نامعتبر است» می‌گرفت و راه برگشتی هم نبود، چون خودِ صفحه یک بن‌بست بود.
+ *
+ * حالا توکن تازه کاشته می‌شود و کاربر یک‌بار به همان صفحه برمی‌گردد؛ صفحهٔ
+ * تازه فرم را با توکن درست می‌سازد و عملیات با یک کلیک دیگر انجام می‌شود.
+ * محافظت CSRF دست‌نخورده است: درخواست مشکوک **اجرا نمی‌شود**، فقط کاربر
+ * با پیام روشن به فرم برمی‌گردد. اگر درخواست از نوع AJAX/API باشد (که
+ * ریدایرکت را دنبال نمی‌کند) همان ۴۱۹ با بدنهٔ JSON برگردانده می‌شود.
+ */
+function require_csrf(bool $allow_retry = true): void
 {
     $expected = csrf_token();
     $provided = (string) ($_POST['csrf'] ?? ($_SERVER['HTTP_X_CSRF_TOKEN'] ?? ''));
     if ($expected === '' || $provided === '' || !hash_equals($expected, $provided)) {
         if (function_exists('activity_log')) {
-            try { activity_log(['action_code' => 'csrf_419', 'action_label' => 'درخواست امنیتی نامعتبر', 'module' => (string) ($_GET['page'] ?? 'request'), 'result' => 'denied', 'meta' => ['method' => (string) ($_SERVER['REQUEST_METHOD'] ?? 'POST')]]); } catch (Throwable) {}
+            try { activity_log(['action_code' => 'csrf_419', 'action_label' => 'درخواست امنیتی نامعتبر', 'module' => (string) ($_GET['page'] ?? 'request'), 'result' => 'denied', 'meta' => ['method' => (string) ($_SERVER['REQUEST_METHOD'] ?? 'POST'), 'had_cookie' => isset($_COOKIE[session_name()])]]); } catch (Throwable) {}
         }
         http_response_code(419);
-        exit('درخواست نامعتبر است. صفحه را تازه‌سازی کنید.');
+        if (csr_request_wants_json() || !$allow_retry) {
+            header('Content-Type: application/json; charset=utf-8');
+            exit(json_encode(['error' => 'توکن امنیتی منقضی شده است. صفحه را تازه‌سازی کنید.'], JSON_UNESCAPED_UNICODE));
+        }
+        csrf_rotate_after_mismatch();
+        if (function_exists('flash')) {
+            flash('warning', 'به‌دلیل پایان اعتبار نشست امنیتی، آن عملیات انجام نشد. صفحه تازه شد؛ همین کار را یک‌بار دیگر بزنید.');
+        }
+        csrf_redirect_back();
+        exit;
     }
+}
+
+/** آیا این درخواست پاسخ JSON می‌خواهد؟ (fetch/XHR یا مسیر API) */
+function csr_request_wants_json(): bool
+{
+    $accept = strtolower((string) ($_SERVER['HTTP_ACCEPT'] ?? ''));
+    if (str_contains($accept, 'application/json')) {
+        return true;
+    }
+    if (strtolower((string) ($_SERVER['HTTP_X_REQUESTED_WITH'] ?? '')) === 'xmlhttprequest') {
+        return true;
+    }
+    $uri = (string) ($_SERVER['REQUEST_URI'] ?? '');
+    return str_contains($uri, 'food_api=') || str_contains($uri, '/api/');
+}
+
+/**
+ * پس از ناسازگاری توکن، توکن تازه می‌سازد تا صفحهٔ بعدی با مقدار درست
+ * ساخته شود. توکن قدیمی دیگر معتبر نیست (بازنویسی می‌شود).
+ */
+function csrf_rotate_after_mismatch(): void
+{
+    if (session_status() !== PHP_SESSION_ACTIVE) {
+        return;
+    }
+    $_SESSION['csrf'] = bin2hex(random_bytes(32));
+}
+
+/**
+ * بازگشت به همان صفحه‌ای که فرم را نشان داده بود.
+ *
+ * مرجع، فیلد `_return` فرم است؛ اگر نبود، Referer؛ اگر آن هم نبود، صفحهٔ
+ * اصلی. فقط مسیرهای داخلی همین دامنه پذیرفته می‌شوند (جلوگیری از open
+ * redirect) — همان قاعده‌ای که redirect() در db-core دارد.
+ */
+function csrf_redirect_back(): void
+{
+    $target = trim((string) ($_POST['_return'] ?? ''));
+    if ($target === '') {
+        $target = trim((string) ($_SERVER['HTTP_REFERER'] ?? ''));
+    }
+    // اگر مرجعی نبود، همان صفحهٔ جاری (که فرم را نشان داده) مقصد است —
+    // نه index.php، چون کاربر باید سرِ همان فرمی برگردد که داشت پر می‌کرد.
+    if ($target === '') {
+        $self = (string) ($_SERVER['REQUEST_URI'] ?? '');
+        $target = $self !== '' ? $self : 'index.php';
+    }
+    // فقط مسیر نسبی یا URL روی همین میزبان
+    if (preg_match('#^https?://#i', $target) === 1) {
+        $host = (string) ($_SERVER['HTTP_HOST'] ?? '');
+        $parts = parse_url($target);
+        if (!is_array($parts) || (string) ($parts['host'] ?? '') !== $host) {
+            $target = 'index.php';
+        } else {
+            $target = (string) ($parts['path'] ?? 'index.php');
+            if (!empty($parts['query'])) {
+                $target .= '?' . $parts['query'];
+            }
+        }
+    }
+    if ($target === '' || str_contains($target, '//') || str_contains(strtolower($target), 'javascript:')) {
+        $target = 'index.php';
+    }
+    if (function_exists('redirect')) {
+        redirect($target);
+        return;
+    }
+    header('Location: ' . $target, true, 303);
+    exit;
 }
 

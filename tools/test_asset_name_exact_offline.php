@@ -174,9 +174,11 @@ chk(
     'MBA4-01 192.168.10.11 ⇒ MBA4-01',
     asset_display_name('MBA4-01 192.168.10.11')
 );
+// ۱.۶۳.۱-r15 — IP خالص به‌عنوان نام نمایش داده نمی‌شود؛ فقط در tooltip.
 chk(
-    asset_display_name('192.168.10.11') === '192.168.10.11',
-    'IP خالص دست‌نخورده می‌ماند (تنها شناسه)'
+    asset_display_name('192.168.10.11') === '',
+    'IP خالص به‌عنوان نام نمایش داده نمی‌شود (تنها شناسه)',
+    asset_display_name('192.168.10.11')
 );
 
 /* ═══ ۸) رابط: تنظیمات و صفحه‌ها با پیش‌فرض جدید هماهنگ‌اند ═════════ */
@@ -211,23 +213,28 @@ $pages = [
     'modules/request-center/Pages/create.php' => 'فرم ثبت تیکت',
     'modules/request-center/Pages/detail.php' => 'جزئیات تیکت',
 ];
+// ۱.۶۳.۱-r15 — دسترسی نمایشی از asset_display_name به asset_name_or رفت.
+// asset_display_name عمداً در حالت «نام واقعی نداریم» رشتهٔ خالی می‌دهد،
+// و asset_name_or همان را به برچسب صادقانه «نام ثبت نشده» تبدیل می‌کند.
+// هر دو از یک قاعده تغذیه می‌شوند، پس وجود هرکدام کافی است.
 foreach ($pages as $file => $label) {
     $src = (string) file_get_contents($root . '/' . $file);
-    $hasDisplay = strpos($src, 'asset_display_name') !== false;
-    chk($hasDisplay, "{$label} از asset_display_name استفاده می‌کند");
+    $hasDisplay = strpos($src, 'asset_display_name') !== false || strpos($src, 'asset_name_or') !== false;
+    chk($hasDisplay, "{$label} از تابع نمایشی نام استفاده می‌کند");
 }
 
 // فرم ثبت تیکت: گزینه‌ها با asset_display_name ساخته می‌شوند
 $createPage = (string) file_get_contents($root . '/modules/request-center/Pages/create.php');
 // کد واقعی: echo '<option value="' . (int) $asset['id'] . '" ...>' . e(asset_display_name($asset['hostname']) . ...
 chk(
-    strpos($createPage, "e(asset_display_name(\$asset['hostname'])") !== false,
+    strpos($createPage, "e(asset_display_name(\$asset['hostname'])") !== false
+    || strpos($createPage, "e(asset_name_or(\$asset['hostname'])") !== false,
     'گزینه‌های کمبوی «سیستم مرتبط» با نام نمایشی ساخته می‌شوند'
 );
 
 // جزئیات شناسنامه هم نام نمایشی دارد (پیش‌تر خام بود)
 chk(
-    (bool) preg_match('/<dt>نام کامپیوتر<\/dt><dd[^>]*>\' \. e\(asset_display_name\(/', $index),
+    (bool) preg_match('/<dt>نام کامپیوتر<\/dt><dd[^>]*>\' \. e\(asset_(display_name|name_or)\(/', $index),
     'ردیف «نام کامپیوتر» در جزئیات شناسنامه از نام نمایشی استفاده می‌کند'
 );
 

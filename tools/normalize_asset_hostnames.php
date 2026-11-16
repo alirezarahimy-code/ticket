@@ -44,6 +44,9 @@ if (!function_exists('asset_display_name')) {
 
 $args = array_slice($argv ?? [], 1);
 $apply = in_array('--apply', $args, true);
+// --from-inventory : نام واقعی را از hardware_json بردار (اگر اسکن آن را ثبت کرده باشد)
+//   پیش از این، فقط «نمایش» تمیز می‌شد و نام جعلی در پایگاه‌داده می‌ماند.
+$fromInventory = in_array('--from-inventory', $args, true);
 $onlyIds = [];
 foreach ($args as $i => $arg) {
     if ($arg === '--ids' && isset($args[$i + 1])) {
@@ -100,7 +103,42 @@ foreach ($rows as $row) {
         continue;
     }
     $clean = asset_name_core($raw);
-    $planned[] = ['row' => $row, 'from' => $raw, 'to' => $clean];
+    $planned[] = ['row' => $row, 'from' => $raw, 'to' => $clean, 'source' => 'core'];
+}
+
+// ── نام واقعی از hardware_json ───────────────────────────────────────────────
+// اگر اسکن دامنه نام واقعی ویندوز را ثبت کرده باشد (`reported_hostname` یا
+// `hardware.computer.Name`)، همان اولویت دارد و جای نام جعلی را می‌گیرد.
+if ($fromInventory) {
+    $rowsAll = db()->query('SELECT id, hostname, hardware_json FROM assets ORDER BY id')->fetchAll();
+    foreach ($rowsAll as $row) {
+        if ($onlyIds && !in_array((int) $row['id'], $onlyIds, true)) {
+            continue;
+        }
+        $hw = json_decode((string) ($row['hardware_json'] ?? ''), true);
+        if (!is_array($hw)) {
+            continue;
+        }
+        $real = trim((string) ($hw['reported_hostname'] ?? ''));
+        if ($real === '') {
+            $real = trim((string) ($hw['hardware']['computer'][0]['Name'] ?? ($hw['hardware']['computer']['Name'] ?? '')));
+        }
+        if ($real === '' || preg_match('/^[A-Za-z0-9][A-Za-z0-9._-]{0,62}$/', $real) !== 1) {
+            continue;
+        }
+        $cur = trim((string) ($row['hostname'] ?? ''));
+        if (strcasecmp($cur, $real) === 0) {
+            continue;
+        }
+        // اگر نام جاری «واقعی» است، دست نمی‌زنیم — فقط جعلی را عوض می‌کنیم.
+        $isPlaceholder = filter_var($cur, FILTER_VALIDATE_IP) !== false
+            || stripos($cur, 'CLIENT-') === 0
+            || preg_match('/\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}/', $cur) === 1;
+        if (!$isPlaceholder && $cur !== '') {
+            continue;
+        }
+        $planned[] = ['row' => ['id' => $row['id']], 'from' => $cur, 'to' => $real, 'source' => 'inventory'];
+    }
 }
 
 echo "═" . str_repeat("═", 78) . "\n";

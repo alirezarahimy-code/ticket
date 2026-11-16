@@ -66,7 +66,7 @@ if (!defined('ASSET_IPV4_PATTERN')) {
     }
 }
 
-foreach (['asset_is_ip', 'asset_is_domain_name', 'asset_strip_ip', 'asset_hostname_style', 'asset_name_core', 'asset_display_name', 'asset_is_auto_domain_tag', 'asset_name_title', 'asset_attr_name'] as $fn) {
+foreach (['asset_is_ip', 'asset_is_domain_name', 'asset_strip_ip', 'asset_hostname_style', 'asset_name_core', 'asset_display_name', 'asset_name_or', 'asset_is_auto_domain_tag', 'asset_name_title', 'asset_attr_name'] as $fn) {
     if (function_exists($fn)) {
         continue;
     }
@@ -149,9 +149,9 @@ foreach ([
 /* ───── ۴) فقط IP: دست‌نخورده ───── */
 foreach (['192.168.1.65', '10.0.0.5', '127.0.0.1'] as $ip) {
     check(
-        '5: IP خالص «' . $ip . '» دست‌نخورده',
-        asset_display_name($ip) === $ip,
-        asset_display_name($ip)
+        '5: IP خالص «' . $ip . '» به‌عنوان نام نمایش داده نمی‌شود',
+        asset_display_name($ip) === '',
+        var_export(asset_display_name($ip), true)
     );
 }
 
@@ -168,10 +168,20 @@ check('9: نام خالی ⇒ خالی', asset_display_name('') === '', asset_di
 check('10: فقط فاصله ⇒ خالی', asset_display_name('   ') === '', asset_display_name('   '));
 
 /* ───── ۷) IP خط‌تیره‌ای (شکل نام خودکار کلاینت) ───── */
+// ۱.۶۳.۱-r15 — رفتار عوض شد و آگاهانه. قبلاً این ورودی «192.168.1.65»
+// برمی‌گرداند و همان IP در ستون «نام» می‌نشست — همان چیزی که کاربر گزارش
+// داد («client 192.168.1.25»). اسم واقعی ماشین این نیست؛ این رشته را خودِ
+// سامانه هنگام ورود کاربر ساخته. حالا خالی برمی‌گردد تا نمایش از
+// Win32_ComputerSystem.Name پر شود و تا آن موقع «نام ثبت نشده» بگوید.
 check(
-    '11: «CLIENT-192-168-1-65» به IP نقطه‌دار برمی‌گردد',
-    asset_display_name('CLIENT-192-168-1-65') === '192.168.1.65',
-    asset_display_name('CLIENT-192-168-1-65')
+    '11: «CLIENT-192-168-1-65» هیچ IP‌ای به‌عنوان نام نمی‌دهد',
+    asset_display_name('CLIENT-192-168-1-65') === '',
+    var_export(asset_display_name('CLIENT-192-168-1-65'), true)
+);
+check(
+    '11-ب: جایگزین نمایشی «نام ثبت نشده» است',
+    asset_name_or('CLIENT-192-168-1-65') === 'نام ثبت نشده',
+    asset_name_or('CLIENT-192-168-1-65')
 );
 
 /* ───── ۸) باقی‌ماندهٔ دامنه پس از IP ───── */
@@ -219,7 +229,8 @@ check('21: فرم شناسنامه (asset-actions) کلید هویت را پس �
 
 /* ───── ۱۱) کمبوی سیستم مرتبط از همان تابع استفاده می‌کند ───── */
 $createSrc = (string) file_get_contents($root . '/modules/request-center/Pages/create.php');
-check('22: کمبوی «سیستم مرتبط» از asset_display_name استفاده می‌کند', str_contains($createSrc, 'asset_display_name('));
+check('22: کمبوی «سیستم مرتبط» از تابع نمایشی نام استفاده می‌کند',
+    str_contains($createSrc, 'asset_display_name(') || str_contains($createSrc, 'asset_name_or('));
 
 echo "\n" . ($fail === 0
     ? "همهٔ {$pass} بررسی پاک‌سازی نام کامپیوتر موفق بود.\n"

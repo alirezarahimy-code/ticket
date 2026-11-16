@@ -140,12 +140,14 @@ function asset_name_core(string $hostname): string
     $name = rtrim($name, '$');
     $name = trim($name, " \t\n\r\0\x0B-_");
     // باقی‌ماندهٔ «آی‌پی خط‌تیره‌ای» (192-168-1-65): نام کامپیوتر نیست.
-    // به شکل نقطه‌دار برمی‌گردد تا دست‌کم گمراه‌کننده نباشد.
+    //
+    // این شکل از خودِ سامانه هم می‌آید: هنگام ورود کاربر که نام واقعی را
+    // نمی‌دانیم، `CLIENT-192-168-1-25` ساخته می‌شود. قبلاً این تابع آن را به
+    // «192.168.1.25» تبدیل و برمی‌گرداند و همان IP در ستون «نام» می‌نشست —
+    // یعنی همان چیزی که کاربر می‌دید. حالا رشتهٔ خالی برمی‌گردد تا فراخوان
+    // بفهمد «نام واقعی نداریم» و از مسیر Win32_ComputerSystem.Name پر شود.
     if (preg_match('/^(\d{1,3})-\d{1,3}-\d{1,3}-\d{1,3}$/', $name) === 1) {
-        $dotted = str_replace('-', '.', $name);
-        if (asset_is_ip($dotted)) {
-            return $dotted;
-        }
+        return '';
     }
     return $name;
 }
@@ -157,13 +159,41 @@ function asset_display_name(?string $hostname): string
     if ($raw === '') {
         return '';
     }
-    $style = asset_hostname_style();
-    if ($style === 'full') {
-        return $raw;
+    // IP خالص «نام کامپیوتر» نیست؛ شناسه است. طبق قرارداد، آدرس فقط در
+    // tooltip می‌آید و در ستون «نام» مقداری جز نام ماشین نمی‌نشیند.
+    // (تابع asset_name_core دست‌نخورده می‌ماند، چون کلید هویت از آن ساخته
+    //  می‌شود و خالی‌کردنش رکوردهای IP-محور را به هم می‌ریخت.)
+    if (asset_is_ip($raw)) {
+        return '';
     }
     $core = asset_name_core($raw);
+    $style = asset_hostname_style();
+    if ($style === 'full') {
+        // «نام کامل دامنه» یعنی نام میزبان + دامنه — **نه** رشتهٔ خام.
+        // قبلاً همین‌جا `return $raw` بود و نتیجه این بود که هر مقدار آلوده
+        // (مثل «client 192.168.1.25» که reverse DNS چپانده) دست‌نخورده به
+        // کاربر نشان داده می‌شد و IP هم داخل نام می‌ماند. قاعدهٔ «IP هرگز در
+        // نام دیده نمی‌شود» نباید به حالت نمایش وابسته باشد.
+        if ($core === '' || asset_is_ip($core)) {
+            return $core !== '' ? $core : '';
+        }
+        // دامنه را از مقدار خام برمی‌داریم (اگر واقعاً دامنه‌ای بوده)، ولی
+        // هستهٔ نام را همان هستهٔ تمیزشده می‌گذاریم.
+        $domain = '';
+        if (preg_match('/^[^\s]+\.[A-Za-z][A-Za-z0-9.-]*$/', $raw) === 1) {
+            $dot = strpos($raw, '.');
+            if ($dot !== false) {
+                $domain = substr($raw, $dot);
+            }
+        }
+        return $core . $domain;
+    }
     if ($core === '') {
-        return $raw;
+        // نام واقعی قابل استخراج نیست (مثلاً CLIENT-192-168-1-25 که خودمان
+        // ساختیم، یا IP خالص). «نمایش» نباید همان IP را برگرداند، چون کاربر
+        // آن را به‌عنوان نام کامپیوتر می‌خواند. رشتهٔ خالی می‌دهیم تا فراخوان
+        // جایگزین مناسب بگذارد (asset_name_title / «نام ثبت نشده»).
+        return '';
     }
     return $style === 'short_lower' ? (function_exists('mb_strtolower') ? mb_strtolower($core, 'UTF-8') : strtolower($core)) : $core;
 }
@@ -181,13 +211,36 @@ function asset_is_auto_domain_tag(?string $tag, ?string $hostname = null): bool
     return true;
 }
 
+/**
+ * نامی که همیشه چیزی برای نشان‌دادن دارد.
+ *
+ * `asset_display_name()` وقتی نام واقعی قابل استخراج نیست رشتهٔ خالی می‌دهد
+ * (مثلاً رکوردی که فقط `CLIENT-192-168-1-25` دارد). هر جای رابط کاربری که
+ * این مقدار را مستقیم چاپ می‌کرد، یک سلول خالی می‌شد. این تابع همان حالت را
+ * به یک برچسب صادقانه تبدیل می‌کند — بدون IP و بدون ادعای دروغ.
+ *
+ * @param string $fallback برچسبی که وقتی نام واقعی نیست نشان داده می‌شود.
+ */
+function asset_name_or(?string $hostname, string $fallback = 'نام ثبت نشده'): string
+{
+    $shown = asset_display_name($hostname);
+    return $shown !== '' ? $shown : $fallback;
+}
+
 /** متن tooltip: نام کامل (اگر با نام نمایشی یکی نباشد). */
 function asset_name_title(?string $hostname, ?string $tag = null): string
 {
     $raw = trim((string) $hostname);
     $parts = [];
-    if ($raw !== '' && $raw !== asset_display_name($raw)) {
-        $parts[] = $raw;
+    $shown = asset_display_name($raw);
+    if ($raw !== '' && $raw !== $shown) {
+        // نام خام فقط وقتی در tooltip می‌آید که خودش IP نباشد؛ وگرنه همان
+        // قاعدهٔ «IP هیچ‌جا به‌عنوان نام دیده نمی‌شود» نقض می‌شد.
+        if (asset_is_ip($raw)) {
+            $parts[] = 'آدرس: ' . $raw;
+        } elseif (preg_match('/\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}/', $raw) !== 1) {
+            $parts[] = $raw;
+        }
     }
     $tag = trim((string) $tag);
     if ($tag !== '' && !asset_is_auto_domain_tag($tag)) {

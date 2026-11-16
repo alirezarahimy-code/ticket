@@ -85,7 +85,26 @@ if (!defined('APP_ROOT')) {
                 redirect('index.php');
             }
             record_login_failure($username);
-            flash('danger', 'نام کاربری یا رمز عبور صحیح نیست.');
+            // ۱.۶۳.۱-r15 — پیام گمراه‌کننده «رمز اشتباه» رفع شد.
+            //
+            // قبلاً هر شکستی — از جمله «دامنه اصلاً پیکربندی نشده» یا «سرور
+            // LDAP در دسترس نیست» — همان «نام کاربری یا رمز عبور صحیح نیست»
+            // را می‌داد. کاربر رمزش را عوض می‌کرد و باز هم رد می‌شد، چون
+            // مشکل اصلاً رمز نبود. حالا علت واقعی گفته می‌شود.
+            $localSameName = db()->prepare('SELECT id, auth_source, is_active FROM users WHERE username = ? LIMIT 1');
+            $localSameName->execute([$username]);
+            $existing = $localSameName->fetch();
+            if (!ldap_cfg('enabled', false)) {
+                flash('danger', 'ورود دامینی فعال نیست: در «تنظیمات ← دامنه (LDAP)» گزینهٔ فعال و آدرس سرور را پر کنید. ورود محلی (ادمین) کار می‌کند.');
+            } elseif (!function_exists('ldap_connect')) {
+                flash('danger', 'پسوند LDAP در PHP فعال نیست؛ ورود دامینی ممکن نیست. در php.ini خط extension=ldap را فعال و سرویس را ری‌استارت کنید.');
+            } elseif (trim((string) ldap_cfg('host', '')) === '') {
+                flash('danger', 'آدرس سرور دامنه (LDAP) در تنظیمات خالی است.');
+            } elseif (is_array($existing) && (string) ($existing['auth_source'] ?? '') === 'local') {
+                flash('danger', 'این نام کاربری روی سامانه به‌صورت «محلی» ثبت شده است، نه دامینی. ورود دامینی فقط برای حساب‌های Active Directory فعال است.');
+            } else {
+                flash('danger', 'نام کاربری یا رمز عبور دامینی صحیح نیست، یا سرور دامنه در دسترس نیست. جزئیات فنی در storage/logs/app.log با برچسب «ITSM LDAP authentication» ثبت شد.');
+            }
             redirect('index.php?page=login');
         }
 

@@ -544,6 +544,17 @@ function inventory_apply_powershell_data(array $inventory, array $data): array
     $inventory['serial_number'] = (string) ($bios['SerialNumber'] ?? '');
     $inventory['manufacturer'] = (string) ($computer['Manufacturer'] ?? '');
     $inventory['model'] = (string) ($computer['Model'] ?? '');
+    // ۱.۶۳.۱-r15 — نام واقعی کامپیوتر از خودِ ویندوز.
+    //
+    // قبلاً نام میزبان فقط از AD (`dnshostname`) می‌آمد. برای کلاینت‌هایی که
+    // رکورد DNS معتبر ندارند، آن مقدار چیزی مثل «client 192.168.1.25» است یا
+    // کلاً خالی می‌ماند — یعنی اسم واقعی ماشین هیچ‌وقت خوانده نمی‌شد، در حالی
+    // که Win32_ComputerSystem.Name همین را می‌دهد. حالا آن را جدا نگه می‌داریم و
+    // مسیر ذخیره، جای نام جعلی با آن را پر می‌کند.
+    $reportedName = trim((string) inventory_value($computer, ['Name', 'name', 'csname']));
+    if ($reportedName !== '' && preg_match('/^[A-Za-z0-9][A-Za-z0-9._-]{0,62}$/', $reportedName) === 1) {
+        $inventory['reported_hostname'] = $reportedName;
+    }
     $inventory['cpu'] = (string) ($processor['Name'] ?? '') !== '' ? (string) $processor['Name'] : $inventory['cpu'];
     $inventory['memory_mb'] = (int) round(((int) ($computer['TotalPhysicalMemory'] ?? 0)) / 1048576);
     $inventory['domain_username'] = (string) ($computer['UserName'] ?? $inventory['domain_username']);

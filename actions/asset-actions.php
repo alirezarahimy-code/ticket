@@ -187,7 +187,7 @@ if (!defined('APP_ROOT')) {
             foreach (domain_scan_queue_rows($runId, 1000) as $queueRow) {
                 $batchRows[] = [
                     'hostname' => (string) $queueRow['hostname'],
-                    'name' => asset_display_name((string) $queueRow['hostname']),
+                    'name' => asset_name_or((string) $queueRow['hostname']),
                     'status' => (string) $queueRow['status'],
                     'online' => (int) $queueRow['online'],
                     'message' => (string) ($queueRow['message'] ?? ''),
@@ -351,7 +351,7 @@ if (!defined('APP_ROOT')) {
                 }
                 $prepareRows[] = [
                     'hostname' => $prepareHost,
-                    'name' => asset_display_name($prepareHost),
+                    'name' => asset_name_or($prepareHost),
                     'success' => (bool) $prepareResult['success'],
                     'code' => (string) $prepareResult['code'],
                     'message' => (string) $prepareResult['message'],

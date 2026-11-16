@@ -77,8 +77,14 @@ function domain_scan_validate_credentials(string $username, string $password): v
 function domain_scan_credential_key(): string
 {
     $appKey = trim((string) cfg('app.key', ''));
-    if ($appKey === '' || !function_exists('openssl_encrypt') || !function_exists('openssl_decrypt')) {
-        throw new RuntimeException('رمزگذاری امن اعتبارنامهٔ اسکن روی سرور پیکربندی نشده است.');
+    // پیام خطا باید بگوید **کدام** شرط برقرار نیست. قبلاً هر سه حالت یک پیام
+    // کلی «رمزگذاری امن پیکربندی نشده است» می‌دادند و کاربر نمی‌دانست باید
+    // app.key را پر کند یا پسوند openssl را در php.ini فعال کند.
+    if (!function_exists('openssl_encrypt') || !function_exists('openssl_decrypt')) {
+        throw new RuntimeException('پسوند OpenSSL در PHP فعال نیست؛ رمز حساب اسکن نمی‌تواند رمز شود. در php.ini خط extension=openssl را فعال و سرویس وب را ری‌استارت کنید.');
+    }
+    if ($appKey === '') {
+        throw new RuntimeException('کلید برنامه (app.key) در config.php خالی است؛ برای رمزگذاری اعتبارنامهٔ اسکن ابتدا آن را پر کنید.');
     }
     return hash('sha256', 'ticket-domain-scan:' . $appKey, true);
 }
@@ -244,6 +250,28 @@ function ldap_domain_computers(int $limit = 0): array
     } while ($cookie !== '');
     usort($computers, static fn (array $a, array $b): int => strcasecmp($a['hostname'], $b['hostname']));
     return $computers;
+}
+
+/**
+ * آیا این نام، «نام ساختگی» است — یعنی نام واقعی کامپیوتر نیست؟
+ *
+ * دو الگو: IP خام (۱۹۲.۱۶۸.۱.۲۵)، و پیشوند CLIENT- که خودِ سامانه هنگام
+ * ورود کاربر می‌سازد وقتی نام واقعی را نمی‌داند (CLIENT-192-168-1-25).
+ * همچنین مقداری که IP داخلش چسبیده («client 192.168.1.25»).
+ */
+function domain_scan_name_is_placeholder(string $name): bool
+{
+    $name = trim($name);
+    if ($name === '') {
+        return true;
+    }
+    if (filter_var($name, FILTER_VALIDATE_IP) !== false) {
+        return true;
+    }
+    if (stripos($name, 'CLIENT-') === 0) {
+        return true;
+    }
+    return preg_match('/\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}/', $name) === 1;
 }
 
 function domain_scan_asset_for(string $hostname): int
@@ -1012,7 +1040,7 @@ function domain_scan_failure_summary(array $rows): array
         $groups[$code]['count']++;
         if (count($groups[$code]['hosts']) < 12 && trim((string) ($row['hostname'] ?? '')) !== '') {
             $hostLine = trim((string) $row['hostname']);
-            $groups[$code]['hosts'][] = function_exists('asset_display_name') ? asset_display_name($hostLine) : $hostLine;
+            $groups[$code]['hosts'][] = function_exists('asset_name_or') ? asset_name_or($hostLine) : $hostLine;
         }
         if ($message !== '' && !in_array($message, $groups[$code]['messages'], true) && count($groups[$code]['messages']) < 3) {
             $groups[$code]['messages'][] = $message;
@@ -1448,7 +1476,31 @@ function domain_scan_store_inventory(int $assetId, string $host, array $inventor
         $currentName = '';
     }
     $observedName = trim($host);
-    $writeName = $currentName !== '' ? $currentName : $observedName;
+    // ۱.۶۳.۱-r15 — اینجا سه نام داریم و باید درست انتخاب شوند:
+    //
+    //   $currentName  = آنچه امروز در assets.hostname نشسته (ممکن است نام جعلی
+    //                   «client 192.168.1.25» یا «CLIENT-192-168-1-25» باشد)
+    //   $observedName = نامی که از AD/صف آمده (همان جعلی، یا نام درست)
+    //   $realName     = Win32_ComputerSystem.Name از خودِ ویندوز مقصد
+    //
+    // قاعدهٔ قبلی «هر نام موجودی را حفظ کن» محافظه‌کارانه بود ولی یک تله داشت:
+    // اگر رکورد اول با نام جعلی ساخته شده باشد، آن نام جعلی **هرگز** با نام
+    // واقعی جایگزین نمی‌شد — و کاربر تا ابد «client 192.168.1.25» می‌دید.
+    //
+    // قاعدهٔ تازه: نام واقعی ویندوز بالاترین اولویت را دارد. اگر نبود، نام
+    // جاری حفظ می‌شود. اگر نام جاری فقط جعلی است (IP دارد یا CLIENT-<ip> است)
+    // و نام واقعی نداریم، دست‌کم همان جعلی می‌ماند — نه اینکه چیزی خراب شود.
+    $realName = trim((string) ($inventory['reported_hostname'] ?? ''));
+    $currentIsFake = $currentName !== '' && domain_scan_name_is_placeholder($currentName);
+    if ($realName !== '') {
+        $writeName = $realName;
+    } elseif ($currentName !== '' && !$currentIsFake) {
+        $writeName = $currentName;
+    } elseif ($observedName !== '' && !domain_scan_name_is_placeholder($observedName)) {
+        $writeName = $observedName;
+    } else {
+        $writeName = $currentName !== '' ? $currentName : $observedName;
+    }
     if ($observedName !== '' && strcasecmp($observedName, $currentName) !== 0) {
         $inventory['observed_hostname'] = $observedName;
         if (!is_array($inventory['hardware'] ?? null)) {

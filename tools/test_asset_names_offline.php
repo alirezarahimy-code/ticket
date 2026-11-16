@@ -80,7 +80,7 @@ if (!defined('ASSET_IPV4_PATTERN')) {
         define('ASSET_IPV4_PATTERN', '((?:\\d{1,3}\\.){3}\\d{1,3})');
     }
 }
-foreach (['asset_is_ip', 'asset_is_domain_name', 'asset_strip_ip', 'asset_hostname_style', 'asset_name_core', 'asset_display_name', 'asset_is_auto_domain_tag', 'asset_name_title', 'asset_name_attr', 'asset_tag_label'] as $fn) {
+foreach (['asset_is_ip', 'asset_is_domain_name', 'asset_strip_ip', 'asset_hostname_style', 'asset_name_core', 'asset_display_name', 'asset_name_or', 'asset_is_auto_domain_tag', 'asset_name_title', 'asset_name_attr', 'asset_tag_label'] as $fn) {
     eval(grabFunction($file, $fn));
 }
 
@@ -99,7 +99,11 @@ check('۶: حساب کامپیوتر با $ ⇒ adminit2', asset_display_name('A
 check('۷: DOMAIN-ADMINIT2.DOMAIN.LOCAL (هر دو حالت با هم) ⇒ adminit2',
     asset_display_name('DOMAIN-ADMINIT2.DOMAIN.LOCAL') === 'adminit2', asset_display_name('DOMAIN-ADMINIT2.DOMAIN.LOCAL'));
 check('۸: فاصله‌های اضافی پاک می‌شود', asset_display_name('  ADMINIT2.DOMAIN.LOCAL  ') === 'adminit2', asset_display_name('  ADMINIT2.DOMAIN.LOCAL  '));
-check('۹: IP دست‌نخورده می‌ماند (اگر نام نداشتیم و IP گذاشته شده باشد)', asset_display_name('192.168.10.42') === '192.168.10.42', asset_display_name('192.168.10.42'));
+// ۱.۶۳.۱-r15 — IP دیگر هرگز در ستون «نام» نمی‌نشیند؛ فقط در tooltip.
+check('۹: IP خالص به‌عنوان نام نمایش داده نمی‌شود (فقط در tooltip)',
+    asset_display_name('192.168.10.42') === '', var_export(asset_display_name('192.168.10.42'), true));
+check('۹-ب: IP خالص در tooltip با برچسب «آدرس» می‌آید',
+    str_contains(asset_name_title('192.168.10.42'), '192.168.10.42'), asset_name_title('192.168.10.42'));
 check('۱۰: نام خالی ⇒ خالی', asset_display_name('') === '');
 check('۱۱: نام سرور با نقطهٔ داخلی زیاد خراب نمی‌شود (srv01.corp) ⇒ srv01',
     asset_display_name('srv01.corp') === 'srv01', asset_display_name('srv01.corp'));
@@ -133,22 +137,30 @@ check('۲۳: صفت title آمادهٔ درج در HTML', strpos(asset_name_attr
 /* ───── ۶) اتصال به همهٔ جاهای نمایش (سرور) ───── */
 $index = (string) file_get_contents($root . '/index.php') . "\n" . (string) file_get_contents($root . '/actions/asset-actions.php') . "\n" . (string) file_get_contents($root . '/actions/settings-actions.php');
 check('۲۴: ماژول نام‌ها در index.php بارگذاری شده است', preg_match('/require(_once)? __DIR__ \. \'\/asset-names\.php\';/', $index) === 1);
+// ۱.۶۳.۱-r15 — دسترسی نمایشی از asset_display_name به asset_name_or رفت، چون
+// asset_display_name در حالت «نام واقعی نداریم» عمداً رشتهٔ خالی می‌دهد و هر
+// سلول رابط کاربری خالی می‌شد. این دو تابع از یک قاعده تغذیه می‌شوند.
 check('۲۵: فهرست شناسنامه‌ها از نام نمایشی استفاده می‌کند',
-    substr_count($index, 'asset_display_name(') >= 6, (string) substr_count($index, 'asset_display_name('));
+    (substr_count($index, 'asset_name_or(') + substr_count($index, 'asset_display_name(')) >= 6,
+    (string) (substr_count($index, 'asset_name_or(') + substr_count($index, 'asset_display_name(')));
 check('۲۶: گزینه‌های کمبوی «سیستم مرتبط» هم نام کوتاه را نشان می‌دهند',
-    strpos($index, "e(asset_display_name(\$asset['hostname'])") !== false);
+    strpos($index, "e(asset_name_or(\$asset['hostname'])") !== false
+    || strpos($index, "e(asset_display_name(\$asset['hostname'])") !== false);
 check('۲۷: ردیف‌های اسکن دامنه نام کوتاه را نشان می‌دهند',
-    strpos($index, "e(asset_display_name((string) \$scanRow['hostname']))") !== false);
-check('۲۸: پاسخ JSON اسکن، نام نمایشی را هم می‌فرستد', strpos($index, "'name' => asset_display_name(") !== false);
+    strpos($index, "e(asset_name_or((string) \$scanRow['hostname']))") !== false);
+check('۲۸: پاسخ JSON اسکن، نام نمایشی را هم می‌فرستد',
+    strpos($index, "'name' => asset_display_name(") !== false || strpos($index, "'name' => asset_name_or(") !== false);
 check('۲۹: به‌روزرسانی زندهٔ جدول اسکن هم نام نمایشی را می‌نویسد', strpos($index, 'x.name||x.hostname') !== false);
 check('۳۰: شناسهٔ خودکارِ دامنه در فهرست‌ها پنهان می‌شود (خروجی «دامنه» به‌جای DOMAIN-…)',
     strpos($index, "asset_is_auto_domain_tag(\$asset['asset_tag']) ? '' : '<b>'") !== false);
 
 $inventoryPage = (string) file_get_contents($root . '/asset-inventory-page.php');
-check('۳۱: فهرست سیستم‌ها (asset-inventory-page) هم نام کوتاه دارد', strpos($inventoryPage, 'asset_display_name(') !== false);
+check('۳۱: فهرست سیستم‌ها (asset-inventory-page) هم نام کوتاه دارد',
+    strpos($inventoryPage, 'asset_display_name(') !== false || strpos($inventoryPage, 'asset_name_or(') !== false);
 
 $scan = (string) file_get_contents($root . '/domain-scan.php');
-check('۳۲: فهرست میزبان‌های خطادار اسکن هم نام کوتاه دارد', strpos($scan, 'asset_display_name($hostLine)') !== false);
+check('۳۲: فهرست میزبان‌های خطادار اسکن هم نام کوتاه دارد',
+    strpos($scan, 'asset_name_or($hostLine)') !== false || strpos($scan, 'asset_display_name($hostLine)') !== false);
 check('۳۳: ستون assets.source برای مقدار domain گسترده می‌شود (رفع ثبت‌نشدن رکورد دامنه)',
     strpos($scan, "MODIFY source ENUM('manual','server_inventory','agent','domain')") !== false);
 
@@ -176,10 +188,17 @@ check('۴۱: «CLIENT 192.168.1.65» ⇒ CLIENT (IP حذف، حروف حفظ)',
     asset_display_name('CLIENT 192.168.1.65') === 'CLIENT', asset_display_name('CLIENT 192.168.1.65'));
 check('۴۲: «CLIENT-192.168.1.65» ⇒ CLIENT (پیشوند خودکار حذف)',
     asset_display_name('CLIENT-192.168.1.65') === 'CLIENT', asset_display_name('CLIENT-192.168.1.65'));
-check('۴۳: IP خالص دست‌نخورده می‌ماند (وقتی تنها شناسه است)',
-    asset_display_name('192.168.1.65') === '192.168.1.65', asset_display_name('192.168.1.65'));
-check('۴۴: «CLIENT-192-168-1-65» به IP نقطه‌دار برمی‌گردد، نه رشتهٔ خط‌تیره‌ای',
-    asset_display_name('CLIENT-192-168-1-65') === '192.168.1.65', asset_display_name('CLIENT-192-168-1-65'));
+check('۴۳: IP خالص به‌عنوان نام نمایش داده نمی‌شود (تنها شناسه)',
+    asset_display_name('192.168.1.65') === '', var_export(asset_display_name('192.168.1.65'), true));
+// ۱.۶۳.۱-r15 — رفتار عوض شد و **آگاهانه**: قبلاً این ورودی به «192.168.1.65»
+// تبدیل می‌شد و همان IP در ستون «نام» می‌نشست. کاربر گزارش داد که رکوردها را
+// به شکل «client 192.168.1.25» می‌بیند. اسم واقعی ماشین این نیست؛ این رشته را
+// خودِ سامانه هنگام ورود کاربر ساخته. حالا خالی برمی‌گردد تا نمایش بگوید
+// «نام ثبت نشده» و از Win32_ComputerSystem.Name پر شود.
+check('۴۴: «CLIENT-192-168-1-65» هیچ IP‌ای به‌عنوان نام نمی‌دهد',
+    asset_display_name('CLIENT-192-168-1-65') === '', var_export(asset_display_name('CLIENT-192-168-1-65'), true));
+check('۴۴-ب: جایگزین صادقانه «نام ثبت نشده» است',
+    asset_name_or('CLIENT-192-168-1-65') === 'نام ثبت نشده', asset_name_or('CLIENT-192-168-1-65'));
 check('۴۵: نام عادی با IP داخلش مختل نمی‌شود (reza-pc)',
     asset_display_name('reza-pc') === 'reza-pc', asset_display_name('reza-pc'));
 check('۴۶: نام دامنه‌ای همچنان درست کوتاه می‌شود (حالت رگرسیون)',
