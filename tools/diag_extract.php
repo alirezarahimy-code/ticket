@@ -94,6 +94,64 @@ diag_line('اسکریپت SMB', is_file($root . '/tools/collect_via_smb.ps1'), '
 diag_line('تنظیم روش دوم SMB', setting('domain_scan_smb_fallback', '1') !== '0', setting('domain_scan_smb_fallback', '1') !== '0' ? 'روشن' : 'خاموش — در تنظیمات ← اسکن دامنه روشن کنید');
 fwrite(STDOUT, "\n");
 
+/*
+ * ۰.۵) آیا این سرور اصولاً عضو دامنه است؟
+ *
+ * چرا این پرسش اول از همه است: اگر سرویس‌دهندهٔ سامانه عضو دامنه نباشد،
+ * ماشین حسابش یک حساب محلی است. ویندوز روی هر مقصد، توکن چنین حسابی را در
+ * اتصال شبکه‌ای فیلتر می‌کند (UAC remote restrictions) — این رفتار مستند
+ * مایکروسافت است و هیچ کدی در سمت پنل آن را دور نمی‌زند. نتیجهٔ عملی:
+ * همان حساب همان ابزاری را که TNI یا ادمین‌یار دارند، اینجا نخواهد داشت و
+ * خطای «Access is denied» طبیعی است، نه باگ.
+ *
+ * توجه: ادمین‌یار برای جمع‌آوری از «همهٔ رایانه‌ها» روش دیگری هم دارد و خودش
+ * آن را روش *پیشنهادی* می‌نامد: اجرای خودِ نرم‌افزار روی هر کلاینت (از پوشهٔ
+ * شبکه‌ای یا فلش) و ذخیرهٔ نتیجه در یک فایل/بانک مشترک. آن روش به هیچ
+ * مجوز از راه دوری نیاز ندارد. برای Ticket همان کار با client-agent انجام
+ * می‌شود (بخش ۷.۸ راهنما).
+ */
+fwrite(STDOUT, "۰.۵) عضویت سرور در دامنه (تعیین‌کننده‌ترین عامل)\n");
+if (PHP_OS_FAMILY !== 'Windows') {
+    fwrite(STDOUT, "  ! این سرور ویندوز نیست. با PHP روی Linux، مسیر WMI/SMB از این میزبان عملاً معنا ندارد؛\n");
+    fwrite(STDOUT, "    برای استخراج ۱۵۰ کلاینت از client-agent روی خود کلاینت‌ها استفاده کنید.\n\n");
+} else {
+    $csFile = sys_get_temp_dir() . '/itsm_ds_' . bin2hex(random_bytes(4)) . '.ps1';
+    @file_put_contents($csFile, 'try { $cs = Get-CimInstance Win32_ComputerSystem -ErrorAction Stop; [ordered]@{ domain = [string]$cs.Domain; part = [bool]$cs.PartOfDomain; user = [string]$cs.UserName } | ConvertTo-Json -Compress } catch { "{}" }');
+    $pipes = [];
+    $proc = @proc_open([$ps, '-NoProfile', '-NonInteractive', '-ExecutionPolicy', 'Bypass', '-File', $csFile], [0 => ['pipe', 'r'], 1 => ['pipe', 'w'], 2 => ['pipe', 'w']], $pipes);
+    $csOut = '';
+    if (is_resource($proc)) {
+        fclose($pipes[0]);
+        $csOut = trim((string) stream_get_contents($pipes[1]));
+        stream_get_contents($pipes[2]);
+        fclose($pipes[1]);
+        fclose($pipes[2]);
+        proc_close($proc);
+    }
+    @unlink($csFile);
+    $csData = json_decode($csOut, true);
+    $partOfDomain = is_array($csData) && !empty($csData['part']);
+    $domainName = is_array($csData) ? trim((string) ($csData['domain'] ?? '')) : '';
+    diag_line('عضو دامنه', $partOfDomain, $partOfDomain ? $domainName : ('WORKGROUP' . ($domainName !== '' ? ' (' . $domainName . ')' : '')));
+    if (!$partOfDomain) {
+        fwrite(STDOUT, "      ⚠ این سرور عضو دامنه نیست — و این تقریباً همیشه ریشهٔ «Access is denied» است.\n");
+        fwrite(STDOUT, "        • ویندوز توکن حساب محلی را در اتصال شبکه‌ای فیلتر می‌کند (UAC remote restrictions).\n");
+        fwrite(STDOUT, "          تنها راه‌های دور زدنش: LocalAccountTokenFilterPolicy=1 روی هر مقصد، یا حساب Administrator داخلی.\n");
+        fwrite(STDOUT, "        • راه تمیزتر: همین سامانه را روی یک سرور عضو دامنه اجرا کنید و با یک حساب دامنه‌ای\n");
+        fwrite(STDOUT, "          که روی کلاینت‌ها در Administrators است استخراج کنید. آن‌گاه روش SMB این بسته کار می‌کند.\n");
+        fwrite(STDOUT, "        • راه بدون هیچ مجوز از راه دور (روشی که خودِ ادمین‌یار پیشنهاد می‌کند):\n");
+        fwrite(STDOUT, "          client-agent/Collect-Inventory.ps1 روی هر کلاینت اجرا شود و نتیجه را با توکن به\n");
+        fwrite(STDOUT, "          api/inventory.php بفرستد. برای ۱۵۰ کلاینت این قابل‌اعتمادترین راه است.\n");
+    }
+    fwrite(STDOUT, "\n");
+}
+
+// ۰.۶) حساب اجرای سرویس وب Web (IIS) — با چه هویتی احراز هویت می‌شود
+fwrite(STDOUT, "۰.۶) هویت سرویس وب\n");
+$phpUser = getenv('USERNAME') ?: (getenv('USER') ?: '');
+diag_line('حساب اجرای PHP', $phpUser !== '', $phpUser !== '' ? $phpUser : 'نامشخص');
+fwrite(STDOUT, "\n");
+
 // ۱) نام و DNS
 fwrite(STDOUT, "۱) نام و DNS\n");
 $ip = @gethostbyname($host);
