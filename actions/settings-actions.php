@@ -188,6 +188,28 @@ if (!defined('APP_ROOT')) {
                 throw new RuntimeException('نام سامانه نمی‌تواند خالی باشد.');
             }
             save_setting('app_name', $appName);
+            if (post_value('settings_section') === 'general' && array_key_exists('security_cookie_both_protocols', $_POST)) {
+                // ۱.۶۳.۱-r16 — «کار با هر دو پروتکل http و https».
+                // روشن‌کردنش پرچم Secure را از کوکی نشست برمی‌دارد تا مرورگر
+                // آن را روی http هم بفرستد. هزینه‌اش صادقانه در UI نوشته شده:
+                // روی http کوکی رمزنگاری نمی‌شود. فقط برای شبکهٔ داخلی.
+                // فیلد مخفی «0» همیشه فرستاده می‌شود و چک‌باکس «1» وقتی تیک
+                // است. PHP برای نام‌های تکراری آخرین مقدار را می‌گیرد، پس
+                // post_value همان «1» تیک‌خورده است. ولی اگر فرم بدون چک‌باکس
+                // ارسال شود، فقط «0» می‌آید. این طور می‌شود خاموشش کرد —
+                // بدون آن، یک بار روشن‌کردن همیشگی بود.
+                $rawBoth = $_POST['security_cookie_both_protocols'] ?? '0';
+                if (is_array($rawBoth)) {
+                    $rawBoth = (string) end($rawBoth);
+                }
+                $both = in_array(strtolower(trim((string) $rawBoth)), ['1', 'true', 'on', 'yes'], true) ? '1' : '0';
+                save_setting('security_cookie_both_protocols', $both);
+                save_audit_required((int) $settingsUser['id'], 'security_cookie_protocol_mode_updated', null, ['both_protocols' => $both === '1']);
+                flash('success', $both === '1'
+                    ? 'حالت «هر دو پروتکل» روشن شد. از این پس ورود با http و https هر دو کار می‌کند.'
+                    : 'حالت «هر دو پروتکل» خاموش شد. کوکی نشست فقط روی https فرستاده می‌شود.');
+                redirect('index.php?page=settings#general');
+            }
             if (post_value('settings_section') === 'general' && array_key_exists('asset_hostname_style', $_POST)) {
                 // ۱.۳۷.۵ — حالت نمایش نام کامپیوترها: adminit2 (پیش‌فرض) | ADMINIT2 | ADMINIT2.DOMAIN.LOCAL
                 save_setting('asset_hostname_style', valid_choice(post_value('asset_hostname_style'), ['short_lower', 'short', 'full'], 'short'));

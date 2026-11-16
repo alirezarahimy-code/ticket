@@ -32,8 +32,34 @@ if (PHP_SAPI !== 'cli' && !headers_sent()) {
     header('Referrer-Policy: strict-origin-when-cross-origin');
     header('Permissions-Policy: camera=(), microphone=(), geolocation=()');
     header("Content-Security-Policy: default-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data:; script-src 'self' 'nonce-{$cspNonce}'; object-src 'none'; base-uri 'self'; frame-ancestors 'self'");
+    // ── HSTS: چرا پیش‌فرض کوتاه شد ─────────────────────────────────────
+    //
+    // HSTS به مرورگر می‌گوید «این دامنه را برای همیشه فقط با HTTPS باز کن».
+    // مقدار قبلی `max-age=31536000; includeSubDomains` یعنی **یک سال**، و
+    // includeSubDomains همهٔ زیردامنه‌ها را هم قفل می‌کرد. نتیجه برای کسی که
+    // می‌خواهد هم با http داخلی و هم با https کار کند: مرورگر http را خودش
+    // به https پرت می‌کند و راه برگشتی نیست تا وقتی آن رکورد منقضی شود.
+    // (این حالت در مرورگر ذخیره می‌شود، پاک‌کردن کوکی هم کافی نیست.)
+    //
+    // تنظیم `security.hsts` رفتار را کنترل می‌کند:
+    //   'off'      ⇒ هیچ هدر HSTS فرستاده نمی‌شود (برای کار با هر دو پروتکل)
+    //   'short'    ⇒ max-age=300 بدون includeSubDomains (پیش‌فرض تازه)
+    //   'standard' ⇒ max-age=31536000 بدون includeSubDomains
+    //   'strict'   ⇒ max-age=31536000; includeSubDomains (رفتار قبلی)
+    //
+    // پیش‌فرض 'short' است: در برابر downgrade محافظت می‌کند ولی اگر کاربر
+    // اشتباه کرد، در ۵ دقیقه برمی‌گردد — نه یک سال.
     if (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') {
-        header('Strict-Transport-Security: max-age=31536000; includeSubDomains');
+        $hsts = strtolower(trim((string) cfg('security.hsts', 'short')));
+        $hstsHeader = match ($hsts) {
+            'off', 'none', '0', 'false' => '',
+            'standard' => 'max-age=31536000',
+            'strict' => 'max-age=31536000; includeSubDomains',
+            default => 'max-age=300',
+        };
+        if ($hstsHeader !== '') {
+            header('Strict-Transport-Security: ' . $hstsHeader);
+        }
     }
     // Additional security headers
     header('X-XSS-Protection: 1; mode=block');

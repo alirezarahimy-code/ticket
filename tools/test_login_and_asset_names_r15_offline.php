@@ -150,6 +150,51 @@ check('ورود: پیام عمومی قبلی دیگر تنها گزینه نی�
 check('استخراج: OpenSSL نبودن پیام جدا دارد', str_contains($scan, 'پسوند OpenSSL در PHP فعال نیست'));
 check('استخراج: app.key خالی پیام جدا دارد', str_contains($scan, 'کلید برنامه (app.key) در config.php خالی است'));
 
+echo "\n═══ ۳.۵) کار با هر دو پروتکل http و https ═══\n";
+
+$sessionSrc = $session;
+check('تنظیم «هر دو پروتکل» در نشست خوانده می‌شود', str_contains($sessionSrc, 'security_cookie_both_protocols'));
+check('روشن‌بودن آن پرچم Secure را برمی‌دارد', str_contains($sessionSrc, '$secure = $isHttps && !$bothProtocols;'));
+
+// اثبات رفتاری: پرچم Secure برای هر مقدار تنظیم
+$logic = null;
+if (preg_match('/\$isHttps = .*?\n.*?\$secure = \$isHttps && !\$bothProtocols;/s', $sessionSrc, $m) === 1) {
+    $logic = $m[0];
+}
+check('منطق تصمیم قابل استخراج است', $logic !== null);
+if ($logic !== null) {
+    $results = [];
+    foreach (['0' => true, '1' => false, 'true' => false, 'on' => false, 'yes' => false, 'false' => true] as $val => $wantSecure) {
+        $tmp3 = tempnam(sys_get_temp_dir(), 'ck') . '.php';
+        file_put_contents($tmp3, "<?php\n\$_SERVER['HTTPS']='on';\n\$GLOBALS['__v']=" . var_export((string) $val, true) . ";\n"
+            . "function setting(\$k, \$d=null){ return \$GLOBALS['__v']; }\n"
+            . $logic . "\necho \$secure ? 'SECURE' : 'OPEN';\n");
+        $got = trim((string) shell_exec(escapeshellarg(PHP_BINARY) . ' ' . escapeshellarg($tmp3) . ' 2>&1'));
+        @unlink($tmp3);
+        $results[] = $got === ($wantSecure ? 'SECURE' : 'OPEN');
+    }
+    check('روشن=آزاد و خاموش=Secure (۶ حالت)', !in_array(false, $results, true), implode(',', array_map('intval', $results)));
+}
+
+$core = (string) file_get_contents($root . '/lib/db-core.php');
+check('HSTS قابل تنظیم است (نه hardcode)', str_contains($core, "cfg('security.hsts'"));
+check('HSTS پیش‌فرض کوتاه است (۵ دقیقه)', str_contains($core, "default => 'max-age=300'"));
+check('HSTS includeSubDomains فقط در strict', substr_count($core, "'max-age=31536000; includeSubDomains'") === 1);
+check('حالت off هیچ هدر HSTS نمی‌فرستد', str_contains($core, "'off', 'none', '0', 'false' => ''"));
+
+$settingsSrc = (string) file_get_contents($root . '/actions/settings-actions.php');
+$indexSrc = (string) file_get_contents($root . '/index.php');
+check('تنظیم از رابط کاربری ذخیره می‌شود', str_contains($settingsSrc, "save_setting('security_cookie_both_protocols'"));
+// به‌جای تطبیق رشته در سورس (که کوتیشن‌های فرار مشکل می‌سازند)، همان قطعهٔ
+// فرم را از index.php بیرون می‌کشیم و رفتارش را می‌سنجیم.
+$formStart = strpos($indexSrc, 'security_cookie_both_protocols');
+$formChunk = $formStart !== false ? substr($indexSrc, max(0, $formStart - 400), 900) : '';
+check('فیلد مخفی «0» هست تا خاموش‌کردن هم کار کند',
+    (bool) preg_match('/hidden[^>]*security_cookie_both_protocols[^>]*value=.?0/', $formChunk), $formChunk === '' ? 'قطعه پیدا نشد' : '');
+check('چک‌باکس روشن‌کردن هست',
+    (bool) preg_match('/checkbox[^>]*security_cookie_both_protocols[^>]*value=.?1/', $formChunk));
+check('پیام ذخیره، اثر کار را توضیح می‌دهد', str_contains($settingsSrc, 'هر دو پروتکل'));
+
 echo "\n═══ ۴) ابزار تشخیص ═══\n";
 $diag = (string) file_get_contents($root . '/tools/diagnose_login_and_assets.php');
 check('ابزار تشخیص وجود دارد', $diag !== '');

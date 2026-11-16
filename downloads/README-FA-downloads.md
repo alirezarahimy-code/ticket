@@ -68,15 +68,19 @@
 
 **اگر ۱.۶۳ را نصب کرده‌اید، فقط این را لازم دارید.**
 
-**[⬇ دانلود بستهٔ میانی ۱.۶۳.۱ r15](https://github.com/alirezarahimy-code/ticket/raw/publish-1.63.1/downloads/ticket-update-1.63-to-1.63.1-r15-login-names-20261115.zip)**
+**[⬇ دانلود بستهٔ میانی ۱.۶۳.۱ r16](https://github.com/alirezarahimy-code/ticket/raw/publish-1.63.1/downloads/ticket-update-1.63-to-1.63.1-r16-dual-protocol-20261115.zip)**
 
 ```
-نام فایل : ticket-update-1.63-to-1.63.1-r15-login-names-20261115.zip
-حجم     : 807,629 بایت (~۷۸۹ کیلوبایت)
-SHA-256 : 1210a2ffeb09583ce1601eeb46f5a8a3683527ece61c0f66effdb3e65b9db553
+نام فایل : ticket-update-1.63-to-1.63.1-r16-dual-protocol-20261115.zip
+حجم     : 820,810 بایت (~۸۰۲ کیلوبایت)
+SHA-256 : 531dbab90f41e00208f40a2478edc3b1bdd385627bb2c4ae44570ffb7f396ffa
 ```
 
-**۶۴ فایل، بدون مهاجرت، بدون تغییر جدول. — نسخهٔ r15**
+**۶۵ فایل، بدون مهاجرت، بدون تغییر جدول. — نسخهٔ r16**
+
+**r16 — کار با هر دو پروتکل http و https:** یک چک‌باکس در
+**تنظیمات ← اطلاعات سامانه**. HSTS هم از یک سال به ۵ دقیقه آمد تا مرورگر
+دیگر قفل نشود. (بخش ۸.۱۵ گزارش)
 
 **r15 سه ایراد تازه را هم بست** (بخش‌های ۸.۱۲ تا ۸.۱۴ گزارش):
 
