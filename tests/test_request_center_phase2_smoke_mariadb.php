@@ -455,7 +455,7 @@ try {
     $createdTicketId = (int) ($ticketRow['id'] ?? 0);
     $detail = smoke_http('http://' . $address . '/request-center.php?id=' . $createdTicketId, ['Cookie: ' . $cookie]);
     // عنوان تیکت «نمایشی» است؛ لایهٔ سراسریِ ارقام آن را «RC phase-۳ …» چاپ می‌کند. مقایسه با نرمال‌سازی ارقام:
-    smoke_check($detail['status'] === 200 && str_contains($detail['body'], smoke_persian_digits('RC phase-3 independent POST smoke')), 'independent ticket detail renders the created request (status ' . $detail['status'] . ')');
+    smoke_check($detail['status'] === 200 && str_contains($detail['body'], smoke_persian_digits('RC phase-3 independent POST smoke')), 'independent ticket detail renders the created request (status ' . $detail['status'] . '; body=' . substr(trim(strip_tags($detail['body'])), 0, 700) . ')');
     smoke_check(str_contains($detail['body'], 'name="action" value="reply"'), 'independent ticket detail exposes the reply operation');
     $workspaceProbes = [
         ['requester', 'request-center.php?workspace=requester'],
