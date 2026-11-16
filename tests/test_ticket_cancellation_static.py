@@ -144,8 +144,8 @@ check("function ticket_is_waiting_status" in bootstrap
       and "WHERE `status` = 'pending'" in migration_pending,
       "pending is treated as waiting_user for SLA/OLA and normalized by migration")
 def strip_php_comments(source: str) -> str:
-    source = re.sub(r"/\\*.*?\\*/", "", source, flags=re.S)
-    return re.sub(r"(?m)^\\s*//.*$", "", source)
+    source = re.sub(r"/\*.*?\*/", "", source, flags=re.S)
+    return re.sub(r"(?m)^\s*//.*$", "", source)
 
 
 index_user_text = strip_php_comments(index)
