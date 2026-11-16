@@ -85,6 +85,25 @@ def test_1632_r21_is_a_valid_cumulative_installable_package():
     digest = hashlib.sha256(PACKAGE.read_bytes()).hexdigest()
     sidecar = (DOWNLOADS / f"{NAME}.sha256").read_text(encoding="ascii")
     assert digest in sidecar
+
+    asset_manifest = (DOWNLOADS / "RELEASE-ASSETS-1.63.2.txt").read_text(encoding="ascii")
+    asset_names = [
+        line.strip()
+        for line in asset_manifest.splitlines()
+        if line.strip() and not line.lstrip().startswith("#")
+    ]
+    assert asset_names == [NAME]
+    assert (DOWNLOADS / asset_names[0]).is_file()
+
+    release_notes = DOWNLOADS / "RELEASE-NOTES-1.63.2.md"
+    assert release_notes.is_file()
+    release_note_text = release_notes.read_text(encoding="utf-8")
+    assert release_note_text.startswith("# نسخهٔ ۱.۶۳.۲")
+    assert NAME in release_note_text
+    assert digest in release_note_text
+    assert "۱.۶۲.۸۸" in release_note_text
+    assert "مستقیماً" in release_note_text
+
     check_download_page_lists_only_latest_package()
     page = (DOWNLOADS / "index.html").read_text(encoding="utf-8")
     assert "نسخهٔ ۱.۶۳.۲" in page

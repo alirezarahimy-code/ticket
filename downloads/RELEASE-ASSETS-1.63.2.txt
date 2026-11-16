@@ -1,12 +1,1 @@
-# نسخهٔ ۱.۶۳.۲ — r21: شناسنامه و TENTER
-
-بستهٔ به‌روزرسانی تجمعی از ۱.۶۳ به ۱.۶۳.۲؛ پیش‌نیاز: ۱.۶۳؛ مهاجرت: ندارد.
-
-- نام فایل: ticket-update-1.63-to-1.63.2-r21-assets-tenter-20261106.zip
-- حجم: 948,032 بایت
-- فایل‌های نصب: 92
-- SHA-256: 3d799234e5e4b3935194d06913d082584661c270b03d31894ddc62ed425b04e3
-- گزارش: CHANGE-REPORT-FA-1.63.2-r21-assets-tenter.md
-- راهنما: ../docs/GUIDE-FA-install-1.63.2.md
-
-صفحهٔ دانلود: `downloads/index.html`
+ticket-update-1.63-to-1.63.2-r21-assets-tenter-20261106.zip

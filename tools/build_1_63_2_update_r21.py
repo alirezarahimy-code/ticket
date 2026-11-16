@@ -258,21 +258,11 @@ def main() -> None:
             if sha256(data) != final_manifest["sha256"][relative]:
                 raise SystemExit(f"هش فایل داخل ZIP نمی‌خواند: {relative}")
 
+    # The publish-release workflow consumes one asset filename per non-comment
+    # line; keep this generated manifest machine-readable.
     (DOWNLOADS / "RELEASE-ASSETS-1.63.2.txt").write_text(
-        f"""# نسخهٔ ۱.۶۳.۲ — r21: شناسنامه و TENTER
-
-بستهٔ به‌روزرسانی تجمعی از ۱.۶۳ به ۱.۶۳.۲؛ پیش‌نیاز: ۱.۶۳؛ مهاجرت: ندارد.
-
-- نام فایل: {PACKAGE_NAME}
-- حجم: {len(package_bytes):,} بایت
-- فایل‌های نصب: {len(files)}
-- SHA-256: {digest}
-- گزارش: {REPORT_NAME}
-- راهنما: ../{GUIDE_NAME}
-
-صفحهٔ دانلود: `downloads/index.html`
-""",
-        encoding="utf-8",
+        f"{PACKAGE_NAME}\n",
+        encoding="ascii",
     )
     (DOWNLOADS / "index.html").write_text(
         render_download_page(len(package_bytes), digest, len(files)), encoding="utf-8"
