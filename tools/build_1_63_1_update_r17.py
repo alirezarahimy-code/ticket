@@ -157,6 +157,8 @@ FILES = [
     # اجراکنندهٔ .bat: php.exe را خودش پیدا می‌کند (روی IIS در PATH نیست).
     "tools/RUN-DIAG-EXTRACT.bat",
     "tools/GET-DIAG-EXTRACT.bat",
+    "tools/test_source_time_delete_offline.php",
+    "tools/repair_source_rows.php",
     "tools/INSTALL-UPDATE-FILES.bat",
 ]
 
@@ -226,6 +228,8 @@ ALLOWED_NEW_FILES = {
     "docs/DIAG-EXTRACT-READING-REPORT-FA.md",
     "tools/RUN-DIAG-EXTRACT.bat",
     "tools/GET-DIAG-EXTRACT.bat",
+    "tools/test_source_time_delete_offline.php",
+    "tools/repair_source_rows.php",
     "tools/INSTALL-UPDATE-FILES.bat",
 }
 

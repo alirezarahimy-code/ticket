@@ -1842,8 +1842,38 @@ function food_ticket_source_delete_where(array $item): ?string
         }
         $text = (string) $value;
         if ($isTemporal) {
-            // مسیر PowerShell نوع ستون را برنمی‌گرداند؛ ستون تاریخ/زمان با قالب Access (#...#) نوشته می‌شود.
-            // در Jet، مقایسهٔ ستون تاریخ با رشتهٔ ساده تطبیق نمی‌دهد و دلیل «۰ تطبیق» همین بود.
+            /*
+             * ۱.۶۳.۱-r18 — اصلاح «ردیف از جدول تردد حذف نمی‌شود».
+             *
+             * پیش‌تر همهٔ ستون‌های ردیف در شرط می‌آمدند. جدول تردد ستون
+             * تاریخ/ساعت دارد و مقدار آن از ODBC به‌صورت «YYYY-MM-DD HH:MM:SS»
+             * برمی‌گردد، در حالی که Access آن را با کسری از ثانیه ذخیره
+             * می‌کند. نتیجه: `C_Time = #...12:34:56#` هیچ ردیفی تطبیق
+             * نمی‌داد و هر سه استراتژی حذف شکست می‌خوردند — ردیف می‌ماند،
+             * درست همان چیزی که کاربر دید.
+             *
+             * حالا ستون زمان با بازهٔ یک‌ثانیه‌ای مقایسه می‌شود، نه برابری
+             * دقیق. ستون تاریخ (اگر Date خالص باشد) همان برابری می‌ماند.
+             */
+            $kind = food_ticket_source_column_kind((string) $key);
+            if ($kind === 'time' || $kind === 'datetime') {
+                $seconds = food_ticket_source_seconds_of_day($text);
+                if ($seconds !== null) {
+                    /*
+                     * تاریخِ همراه هم لازم است، حتی برای ستون «زمان»:
+                     * Access مقدار ساعت‌تنها را به‌صورت #1899-12-30 HH:MM:SS#
+                     * ذخیره می‌کند. اگر آن تاریخ را دور بریزیم و فقط
+                     * #HH:MM:SS# بنویسیم، Jet ممکن است این را «امروز»
+                     * تفسیر کند و ردیف دیگری تطبیق بخورد.
+                     *
+                     * پس هر تاریخی که در مقدار اصلی هست حفظ می‌شود؛ اگر
+                     * نیست، فقط ساعت مقایسه می‌شود (ستون Short Text).
+                     */
+                    $day = (preg_match('/(\d{4}-\d{2}-\d{2})/', $text, $dm) === 1) ? $dm[1] : null;
+                    $parts[] = food_ticket_source_time_where($identifier, $seconds, $day);
+                    continue;
+                }
+            }
             $parts[] = $identifier . ' = ' . food_ticket_source_sql_literal($text);
             continue;
         }
@@ -1941,6 +1971,126 @@ function food_ticket_source_is_temporal(string $columnKey, string $type): bool
         'c_date', 'c_time', 'c_datetime', 'c_timestamp', 'punchdate', 'punchtime', 'punch_date', 'punch_time',
         'date', 'time', 'datetime', 'created_at', 'updated_at', 'insert_date', 'insert_time',
     ], true);
+}
+
+/**
+ * نوع یک ستون تاریخ‌مانند را از نامش تشخیص می‌دهد: time / date / datetime / null.
+ *
+ * چرا لازم شد: در جدول تردد ستون‌های C_Date و C_Time جدا هستند و Access
+ * مقدار را با کسری از ثانیه ذخیره می‌کند. برابری دقیق روی زمان هیچ ردیفی
+ * تطبیق نمی‌داد و ردیف تردد برای همیشه در جدول می‌ماند.
+ */
+function food_ticket_source_column_kind(string $key): ?string
+{
+    $k = strtolower(trim($key));
+    if ($k === '') {
+        return null;
+    }
+    // زمان خالص: c_time، punchtime، punch_time، time، insert_time
+    if (preg_match('/(^|_)(c_)?time$|(^|_)time$|punchtime/', $k) === 1 && !preg_match('/datetime|timestamp/', $k)) {
+        return 'time';
+    }
+    // تاریخ+زمان در یک ستون
+    if (preg_match('/datetime|timestamp|created_at|updated_at/', $k) === 1) {
+        return 'datetime';
+    }
+    // تاریخ خالص: c_date، punch_date، date
+    if (preg_match('/(^|_)(c_)?date$|(^|_)date$|punchdate/', $k) === 1) {
+        return 'date';
+    }
+    return null;
+}
+
+/**
+ * «HH:MM:SS» (یا هر قالبی که ساعت را دارد) را به ثانیهٔ روز تبدیل می‌کند.
+ * null = زمان قابل تشخیص نیست، پس باید مسیر برابری دقیق طی شود.
+ */
+function food_ticket_source_seconds_of_day(string $value): ?int
+{
+    $text = trim(food_ticket_normalize_digits($value));
+    if ($text === '') {
+        return null;
+    }
+    // YYYY-MM-DD HH:MM:SS  یا  YYYY-MM-DDTHH:MM:SS
+    if (preg_match('/(\d{1,2}):(\d{2}):(\d{2})/', $text, $m) === 1) {
+        $h = (int) $m[1];
+        $i = (int) $m[2];
+        $s = (int) $m[3];
+        if ($h > 23 || $i > 59 || $s > 59) {
+            return null;
+        }
+        return $h * 3600 + $i * 60 + $s;
+    }
+    // فقط HH:MM بدون ثانیه
+    if (preg_match('/^(\d{1,2}):(\d{2})$/', $text, $m) === 1) {
+        return (int) $m[1] * 3600 + (int) $m[2] * 60;
+    }
+    return null;
+}
+
+/**
+ * برای یک ثانیهٔ روز، یک عبارت مقایسه‌ای می‌سازد که همان ثانیه را بگیرد
+ * حتی وقتی Access کسری از ثانیه ذخیره کرده است.
+ *
+ * روش: میانهٔ همان ثانیه (s + 0.5) با بازهٔ یک‌ثانیه‌ای. در Jet/Access
+ * می‌توان از #HH:MM:SS# استفاده کرد و بازه را با TimeValue ساخت، ولی
+ * ساده‌ترین شکل قابل‌حمل: مقایسه با ستون زمانِ عددیِ روز از طریق
+ * توابع تاریخ. اینجا از الگوی زیر استفاده می‌کنیم که در Jet پشتیبانی
+ * می‌شود و به کسر ثانیه حساس نیست:
+ *
+ *     C_Time >= #HH:MM:SS# AND C_Time < #HH:MM:(SS+1)#
+ *
+ * و چون این تابع فقط «کران پایین» برمی‌گرداند، فراخواننده هر دو طرف را
+ * با food_ticket_source_time_literal_range می‌سازد.
+ */
+function food_ticket_source_time_literal_sod(int $seconds): string
+{
+    $seconds = max(0, min(86399, $seconds));
+    $h = intdiv($seconds, 3600);
+    $i = intdiv($seconds % 3600, 60);
+    $s = $seconds % 60;
+    return sprintf('#%02d:%02d:%02d#', $h, $i, $s);
+}
+
+/**
+ * بازهٔ «همان ثانیه» برای ستون زمان: s <= Time < s+1
+ *
+ * چرا بازه و نه برابری: Access مقدار زمان را با کسری از ثانیه ذخیره
+ * می‌کند و ODBC همان کسر را برنمی‌گرداند. `Time = #12:34:56#` هیچ ردیفی
+ * نمی‌گیرد، ولی `>= 12:34:56 AND < 12:34:57` همان ردیف را می‌گیرد —
+ * بدون این‌که ردیف مجاور را قربانی کند.
+ *
+ * @return array{0:string,1:string} [کران پایین, کران بالا]
+ */
+function food_ticket_source_time_between(int $seconds): array
+{
+    $seconds = max(0, min(86399, $seconds));
+    $end = min(86399, $seconds + 1);
+    // ثانیهٔ ۸۶۳۹۹ (۲۳:۵۹:۵۹): کران بالا نمی‌تواند ۲۴:۰۰:۰۰ باشد؛
+    // از = استفاده می‌کنیم که همان یک ثانیه را بگیرد.
+    return [$seconds, $end];
+}
+
+/**
+ * عبارت SQL بازهٔ زمانی برای ستون تاریخ/زمانِ Access.
+ * $column نام ستون، $seconds ثانیهٔ روز، $withDate تاریخ YYYY-MM-DD یا null.
+ */
+function food_ticket_source_time_where(string $column, int $seconds, ?string $date = null): string
+{
+    [$from, $to] = food_ticket_source_time_between($seconds);
+    $datePrefix = '';
+    if ($date !== null && preg_match('/^\d{4}-\d{2}-\d{2}$/', $date) === 1) {
+        $datePrefix = $date . ' ';
+    }
+    $lo = $datePrefix . trim(food_ticket_source_time_literal_sod($from), '#');
+    if ($to <= $from) {
+        // ۲۳:۵۹:۵۹ — ثانیهٔ آخر شب؛ کران بالای نیم‌باز وجود ندارد.
+        // کسری از ثانیه را با «بزرگ‌تر یا مساوی» می‌گیریم و همان‌جا متوقف می‌شویم:
+        // ردیف بعدی این جدول نیمه‌شب روز بعد است، پس بازهٔ باز امن است.
+        return '(' . $column . ' >= #' . $lo . '#)';
+    }
+    $hi = $datePrefix . trim(food_ticket_source_time_literal_sod($to), '#');
+    return '(' . $column . ' >= #' . $lo . '# AND ' . $column . ' < #' . $hi . '#)';
 }
 
 /** یک کلید تاریخ/زمان را به شکل «#YYYY-MM-DD HH:MM:SS#» برای Jet/Access می‌نویسد (کوتاه‌ترین شکل ممکن). */

@@ -79,6 +79,11 @@ foreach ([
     'food_ticket_source_sql_literal',
     'food_ticket_source_column_sql_literal',
     'food_ticket_source_primary_key',
+    'food_ticket_source_column_kind',
+    'food_ticket_source_seconds_of_day',
+    'food_ticket_source_time_literal_sod',
+    'food_ticket_source_time_between',
+    'food_ticket_source_time_where',
     'food_ticket_source_delete_where',
     'food_ticket_source_minimal_where',
     'food_ticket_source_delete_candidates',
@@ -138,7 +143,20 @@ $datetimeItem = [
 ];
 $where = food_ticket_source_delete_where($datetimeItem);
 check('۴: ستون تاریخ با قالب #...# نوشته شد', is_string($where) && str_contains($where, '[C_Date] = #2026-10-06 00:00:00#'), (string) $where);
-check('۵: ستون ساعت با قالب #...# نوشته شد', is_string($where) && str_contains($where, '[C_Time] = #1899-12-30 14:39:40#'), (string) $where);
+/*
+ * ۱.۶۳.۱-r18 — انتظار عوض شد، چون رفتار عمداً اصلاح شد.
+ *
+ * پیش‌تر `C_Time = #1899-12-30 14:39:40#` ساخته می‌شد (برابری دقیق) و هیچ
+ * ردیفی تطبیق نمی‌خورد، چون Access کسری از ثانیه ذخیره می‌کند. حالا بازهٔ
+ * یک‌ثانیه‌ای ساخته می‌شود و تاریخ 1899-12-30 هم حفظ می‌شود.
+ */
+check(
+    '۵: ستون ساعت با بازهٔ یک‌ثانیه‌ای نوشته شد (نه برابری دقیق)',
+    is_string($where)
+        && str_contains($where, '[C_Time] >= #1899-12-30 14:39:40#')
+        && str_contains($where, '[C_Time] < #1899-12-30 14:39:41#'),
+    (string) $where
+);
 check('۶: متن ستون یادداشت نقل‌قول‌شده است', is_string($where) && str_contains($where, "[Note] = 'ورود از درب شمالی'"), (string) $where);
 
 /* ───────── ۴) انواع ستون‌ها: numeric بدون نقل‌قول، memo حذف شود ───────── */
