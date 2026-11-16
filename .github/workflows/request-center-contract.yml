@@ -2,7 +2,7 @@ name: Request Center Contract
 
 on:
   pull_request:
-    branches: [ main ]
+    branches: [ main, arena/22d4eba7-ticket ]
     paths:
       - 'request-center.php'
       - 'modules/request-center/**'
@@ -34,6 +34,9 @@ on:
       - 'tests/fixtures/request-center-session-seed.php'
       - 'tests/test_ticket_workflow_safety_static.py'
       - 'tests/test_ticket_cancellation_static.py'
+      - 'tests/test_release_asset_manifest.py'
+      - 'downloads/RELEASE-ASSET-MANIFEST-1.63.1.txt'
+      - '.github/workflows/publish-release.yml'
       - 'tests/test_ticket_three_views_static.py'
       - 'tests/test_ticket_lifecycle_guide_static.py'
       - 'tests/test_ldap_secret_and_legacy_status_static.py'
@@ -190,7 +193,7 @@ jobs:
           CI_DB_USER: root
           CI_DB_PASS: ci-ephemeral-root-password
       - name: Existing workflow safety contracts
-        run: python -m pytest -q tests/test_ticket_workflow_safety_static.py tests/test_ticket_cancellation_static.py tests/test_ticket_three_views_static.py tests/test_ticket_lifecycle_guide_static.py tests/test_ldap_secret_and_legacy_status_static.py
+        run: python -m pytest -q tests/test_ticket_workflow_safety_static.py tests/test_ticket_cancellation_static.py tests/test_ticket_three_views_static.py tests/test_ticket_lifecycle_guide_static.py tests/test_ldap_secret_and_legacy_status_static.py tests/test_release_asset_manifest.py
       - name: Existing ticket routing unit tests
         run: php tests/test_ticket_routing_unit.php
 
