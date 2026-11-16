@@ -725,8 +725,49 @@ function domain_scan_friendly_error(string $raw): string
     // به‌اشتباه به یک کد تک‌علتی نگاشت می‌شود و گروه‌بندی شکست‌ها را گمراه می‌کند.
     if (str_contains($lower, 'all_protocols_failed')) {
         $detailLimit = function_exists('mb_substr') ? mb_substr(trim($raw), 0, 180) : substr(trim($raw), 0, 180);
-        return 'اتصال از هیچ‌کدام از مسیرهای DCOM و WinRM برقرار نشد؛ روی سیستم مقصد، دسترسی WMI/DCOM (فایروال) یا WinRM آماده نیست. جزئیات فنی: '
-            . preg_replace('/\s+/u', ' ', (string) $detailLimit);
+        // ۱.۶۳.۱-r17 — پیام بر اساس علت واقعی داخل آن نوشته می‌شود.
+        //
+        // قبلاً همهٔ حالت‌ها یک متن می‌گرفتند: «دسترسی WMI/DCOM (فایروال) یا
+        // WinRM آماده نیست». برای کسی که دقیقاً «Access is denied» گرفته بود
+        // این گمراه‌کننده بود: فایروال کاملاً باز بود. تفکیک واقعی این است:
+        //
+        //   Access is denied (0x80070005)  ⇒ بسته رسیده، احراز هویت شده، ولی
+        //                                     توکن مدیریتی فیلتر شده (UAC از
+        //                                     راه دور) یا حساب ادمین محلی نیست.
+        //   RPC server unavailable (800706BA) ⇒ پورت/فایروال، یا سرویس WMI خاموش.
+        //   cannot connect … WinRM         ⇒ خود مقصد WinRM/شنونده ندارد.
+        $head = 'اتصال از هیچ‌کدام از مسیرهای DCOM و WinRM برقرار نشد. ';
+        if (str_contains($lower, 'access is denied') || str_contains($lower, '0x80070005')) {
+            $head .= 'علت از متن خطا مشخص است: «Access is denied» یعنی شبکه و فایروال مشکلی ندارند و بسته به مقصد رسیده است؛ ویندوز توکن مدیریتی حساب را از راه دور فیلتر کرده (UAC از راه دور) یا این حساب روی همین مقصد در گروه Administrators محلی نیست. سامانه به‌طور خودکار مسیر SMB را هم آزموده است؛ اگر آن هم ناموفق بود، روی مقصد بررسی کنید. ';
+        } elseif (str_contains($lower, 'rpc server is unavailable') || str_contains($lower, '0x800706ba')) {
+            $head .= 'علت از متن خطا: «RPC server is unavailable» یعنی بسته به مقصد نرسیده — فایروال مقصد، سرویس WMI خاموش، یا پورت‌های ۱۳۵/۴۹۱۵۲-۶۵۵۳۵ بسته است. ';
+        } else {
+            $head .= 'روی سیستم مقصد، دسترسی WMI/DCOM (فایروال) یا WinRM آماده نیست. ';
+        }
+        return $head . 'جزئیات فنی: ' . preg_replace('/\s+/u', ' ', (string) $detailLimit);
+    }
+    // ۱.۶۳.۱-r17 — خطاهای مسیر SMB. باید **پیش از** نقشهٔ عمومی «access is denied»
+    // بیایند، وگرنه علت واقعی با توصیهٔ WMI پوشیده می‌شود.
+    //
+    // نکتهٔ مهم: کلیدها عمداً «پیشوند دقیق کد» هستند، نه متن آزاد. اولین نسخه
+    // از 'TCP 445' و 'schtasks /create' استفاده می‌کرد و متن خطاهای
+    // PREPARE_* (که همان کلمات را دارند) را می‌دزدید؛ نتیجه این بود که خطای
+    // آماده‌سازی به‌اشتباه «روش SMB هم ناموفق بود» گزارش می‌شد.
+    $smbMap = [
+        'SMB_ACCESS_DENIED' => 'روش SMB هم ناموفق بود: حساب واردشده روی این مقصد ادمین محلی نیست یا C$ در دسترس نیست. این تنها شرطی است که TNI هم دارد.',
+        'SMB_UNREACHABLE' => 'روش SMB هم ناموفق بود: پورت 445 روی مقصد بسته است (فایروال یا سرویس File and Printer Sharing).',
+        'SMB_TASK_FAILED' => 'روش SMB هم ناموفق بود: تسک زمان‌بندی‌شده روی مقصد ساخته/اجرا نشد (سرویس Task Scheduler و قاعدهٔ Remote Service Management).',
+        'SMB_COLLECT_TIMEOUT' => 'روش SMB هم ناموفق بود: عامل روی مقصد در مهلت مقرر نتیجه نداد.',
+        'SMB_COLLECT_BAD_JSON' => 'روش SMB هم ناموفق بود: خروجی عامل روی مقصد خوانا نبود.',
+        'SMB_COLLECTOR_MISSING' => 'فایل tools/collect_server_inventory.ps1 در بستهٔ سامانه پیدا نشد.',
+        'SMB_BAD_HOST' => 'نام کامپیوتر مقصد برای مسیر SMB نامعتبر است.',
+        'SMB_NO_CREDENTIALS' => 'اعتبارنامهٔ مسیر SMB در دسترس نیست؛ نام کاربری و رمز را دوباره وارد کنید.',
+    ];
+    foreach ($smbMap as $token => $message) {
+        // لنگر شروع لازم است: PREPARE_SMB_UNREACHABLE نیز شامل SMB_UNREACHABLE است.
+        if (str_starts_with($raw, $token)) {
+            return $message . ' جزئیات فنی: ' . preg_replace('/\s+/u', ' ', (string) (function_exists('mb_substr') ? mb_substr(trim($raw), 0, 180) : substr(trim($raw), 0, 180)));
+        }
     }
     // خطاهای آماده‌سازی راه‌دور مقصد (tools/prepare_targets.ps1) — هر کدام علت و راه‌حل جدا دارند.
     $prepareMap = [
@@ -779,9 +820,14 @@ function domain_scan_error_catalog(): array
             'title' => 'هیچ‌کدام از مسیرهای DCOM و WinRM روی مقصد باز نیست',
             'remedy' => [
                 'این یعنی حساب، رمز و نام سیستم درست است اما هیچ مسیر شبکه‌ای برای خواندن WMI/CIM باز نیست؛ Domain Admin بودن حساب، به‌تنهایی فایروال خودِ مقصد را باز نمی‌کند.',
+                // ۱.۶۳.۱-r17 — تفکیک دو خطایی که کاربران یکی می‌گیرند ولی درمانشان
+                // کاملاً متفاوت است. این بخش، پرتکرارترین شکایت «ولی TNI همین کار را
+                // می‌کند» را با یک پیام دقیق پاسخ می‌دهد.
+                'اگر متن خطا «Access is denied» است (نه «RPC server unavailable»): شبکه و فایروال درست‌اند و بسته به مقصد رسیده؛ ویندوز توکن مدیریتی را فیلتر کرده است. در این حالت WMI از راه دور هر کاری بکنید کار نمی‌کند و باید یا UAC از راه دور اصلاح شود یا حرفه‌ای‌تر، از مسیر SMB استفاده کنید (پایین).',
+                'روش درست — همان روشی که Total Network Inventory و Administrator Yar عملاً به کار می‌برند: سامانه روی مقصد، عامل را از C$ کپی می‌کند و با تسک SYSTEM اجرا می‌کند؛ WMI آن‌گاه محلی است و توکن کامل. در نسخهٔ ۱.۶۳.۱-r17 این مسیر خودکار است: هر مقصدی که DCOM/WinRM ردش کند، بار دوم از راه SMB آزموده می‌شود. شرطش فقط دو چیز است: حساب روی مقصد در گروه Administrators محلی باشد و TCP 445 از سرور پنل به مقصد باز باشد.',
+                'اگر بالاتر از پیام «روش SMB هم ناموفق بود» دیدید، علتش در همان پیام صریح است: «cannot open \\\\PC\\C$» یعنی حساب روی آن مقصد ادمین محلی نیست؛ «TCP 445 … not reachable» یعنی پورت بسته یا فایروال مقصد مانع است.',
                 'اگر می‌خواهید مسیر DCOM کار کند: روی مقصدها با Group Policy قواعد ورودی «Windows Management Instrumentation (WMI-In)» و «Remote Service Management» را فعال کنید؛ TCP 135 و محدودهٔ Dynamic RPC (پیش‌فرض 49152-65535) باید از IP سرور پنل مجاز باشند.',
-                'ساده‌ترین راه: در همین صفحه دکمهٔ «آماده‌سازی سیستم‌های مقصد» را بزنید تا پنل با همان حساب، WinRM و قواعد فایروال WMI را روی مقصدها فعال کند (بدون دست‌کاری Group Policy)؛ سپس «تلاش دوباره» را بزنید.',
-                'راه دستی: WinRM را روی خودِ مقصدها (نه فقط سرور پنل) با «winrm quickconfig» یا Enable-PSRemoting -Force و یا GPO فعال کنید؛ پورت TCP 5985 و قاعدهٔ ورودی «Windows Remote Management» لازم است؛ سپس در تنظیمات «اول WinRM، بعد DCOM» را انتخاب کنید.',
+                'ساده‌ترین راه وقتی SMB هم بسته است: دکمهٔ «آماده‌سازی سیستم‌های مقصد» را بزنید تا پنل با همان حساب، WinRM و قواعد فایروال WMI را روی مقصدها فعال کند (بدون دست‌کاری Group Policy)؛ سپس «تلاش دوباره» را بزنید.',
                 'مطمئن شوید سرویس «Windows Management Instrumentation» روی مقصدها روشن است و با حساب اسکن، «آزمون حساب روی یک سیستم» را بزنید؛ اگر DCOM رد شد و WinRM وصل شد، همین حالت را در تنظیمات انتخاب کنید.',
             ],
         ],
@@ -974,11 +1020,14 @@ function domain_scan_error_code(string $message): string
         return 'unknown';
     }
     $prefixes = [
-        // این دو کد باید زودتر از هر چیز دیگری بررسی شوند: پیام آن‌ها ممکن است
-        // رشته‌های تک‌علتی (مثل «دسترسی رد شد» یا «سرویس RPC/WMI») را هم در خود داشته باشد.
-        'all_protocols' => ['هیچ‌کدام از مسیرهای DCOM و WinRM', 'ALL_PROTOCOLS_FAILED'],
-        'credentials_missing' => ['اعتبارنامهٔ امن این نوبت'],
-        'prepare_smb_unreachable' => ['مسیر SMB روی سیستم مقصد'],
+        // ۱.۶۳.۱-r17 — کدهای مسیر SMB. **اول از همه** می‌آیند: پیامشان
+        // ممکن است «Access is denied» یا «TCP 445» را هم داشته باشد، و اگر
+        // دیرتر بررسی شوند به‌اشتباه به کد عمومی access_denied می‌افتند.
+        // با پیشوند ثابت خودِ اسکریپت تطبیق داده می‌شوند، نه با متن آزاد.
+        'smb_access_denied' => ['SMB_ACCESS_DENIED', 'cannot open \\', 'cannot create C:\\ITSM'],
+        'smb_unreachable' => ['SMB_UNREACHABLE'],
+        'smb_task_failed' => ['SMB_TASK_FAILED', 'SMB_COLLECT_TIMEOUT'],
+        'smb_bad_output' => ['SMB_COLLECT_BAD_JSON', 'SMB_COLLECTOR_MISSING', 'SMB_BAD_HOST', 'SMB_NO_CREDENTIALS'],
         'prepare_task_failed' => ['ساخت یا اجرای تسک آماده‌سازی'],
         'prepare_verify_failed' => ['آماده‌سازی انجام شد اما اتصال آزمایشی'],
         'prepare_gpo_not_domain' => ['سرور پنل عضو دامنه نیست'],
@@ -988,6 +1037,11 @@ function domain_scan_error_code(string $message): string
         'winrm_unavailable' => ['مسیر WinRM/WSMan'],
         'rpc_unavailable' => ['سرویس RPC/WMI'],
         'access_denied' => ['دسترسی رد شد'],
+        // این دو کد باید زودتر از هر چیز دیگری بررسی شوند: پیام آن‌ها ممکن است
+        // رشته‌های تک‌علتی (مثل «دسترسی رد شد» یا «سرویس RPC/WMI») را هم در خود داشته باشد.
+        'all_protocols' => ['هیچ‌کدام از مسیرهای DCOM و WinRM', 'ALL_PROTOCOLS_FAILED'],
+        'credentials_missing' => ['اعتبارنامهٔ امن این نوبت'],
+        'prepare_smb_unreachable' => ['مسیر SMB روی سیستم مقصد'],
         'bad_credentials' => ['نام کاربری یا رمز'],
         'no_computer_info' => ['اطلاعاتی از سیستم مقصد'],
         'hardware_empty' => ['دادهٔ سخت‌افزاری قابل‌استفاده'],
@@ -1001,9 +1055,37 @@ function domain_scan_error_code(string $message): string
         'empty_output' => ['پاسخ خالی از PowerShell'],
         'store_failed' => ['ذخیرهٔ اطلاعات ناموفق'],
     ];
+    // ۱.۶۳.۱-r17 — کدهای SMB با «شروع پیام» تطبیق داده می‌شوند، نه «هر جای آن».
+    //
+    // تله‌ای که در آزمون پیدا شد: پیشوند خطای آماده‌سازی، PREPARE_SMB_UNREACHABLE
+    // است و رشتهٔ SMB_UNREACHABLE را **داخل خود دارد**. با تطبیق آزاد، خطای
+    // آماده‌سازی به‌اشتباه smb_unreachable تشخیص داده می‌شد. خطای واقعی SMB هم
+    // همیشه با کد خودش شروع می‌شود (اسکریپت با «SMB_X: …» throw می‌کند)، پس
+    // لنگرِ شروع هم دقیق‌تر است و هم ارزان‌تر.
     foreach ($prefixes as $code => $needles) {
+        if (str_starts_with($code, 'smb_')) {
+            foreach ($needles as $needle) {
+                if (str_starts_with($message, $needle)) {
+                    return $code;
+                }
+            }
+            continue;
+        }
         foreach ($needles as $needle) {
             if (str_contains($message, $needle)) {
+                return $code;
+            }
+        }
+    }
+    // اگر پیام با هیچ پیشوند SMB شروع نشد ولی خودِ کد داخلش بود (مثلاً وقتی
+    // domain_scan_friendly_error متن فارسی را جلوتر گذاشته باشد)، همان کد
+    // برمی‌گردد — ولی فقط برای کدهای SMB، تا با PREPARE_* تصادم نکند.
+    foreach ($prefixes as $code => $needles) {
+        if (!str_starts_with($code, 'smb_')) {
+            continue;
+        }
+        foreach ($needles as $needle) {
+            if (str_contains($message, $needle . ':') || str_contains($message, ' ' . $needle . ':')) {
                 return $code;
             }
         }
@@ -1229,6 +1311,123 @@ function domain_scan_remote_inventory_many(array $hosts, int $concurrency = 4, a
         $inventory = inventory_apply_powershell_data($inventory, $decoded);
         if (inventory_hardware_score($inventory) === 0) {
             $answer[$host] = ['inventory' => [], 'error' => 'دادهٔ سخت‌افزاری قابل‌استفاده از سیستم مقصد دریافت نشد؛ پاسخ اتصال به‌تنهایی Inventory موفق نیست.'];
+            continue;
+        }
+        $answer[$host] = ['inventory' => $inventory, 'error' => ''];
+    }
+    return $answer;
+}
+
+/** مسیر اسکریپت استخراج از راه SMB (اجرای عامل روی خود مقصد). */
+function domain_scan_smb_script_path(): string
+{
+    return __DIR__ . '/tools/collect_via_smb.ps1';
+}
+
+/**
+ * استخراج شناسنامه با روش «اجرای محلی روی مقصد» از راه SMB — ۱.۶۳.۱-r17.
+ *
+ * این همان روشی است که Total Network Inventory و Administrator Yar عملاً
+ * استفاده می‌کنند: عامل روی مقصد کپی و با سرویس/SYSTEM اجرا می‌شود. چرا لازم است،
+ * با ترجمهٔ خطای واقعی کاربر:
+ *
+ *   «Dcom: Access is denied»  ⇒ بسته به مقصد رسیده و احراز هویت شده، ولی توکن
+ *                                مدیریتی فیلتر شده (UAC از راه دور) یا حساب
+ *                                روی مقصد عضو Administrators نیست.
+ *   «Wsman: The client cannot connect…» ⇒ WinRM روی مقصد فعال/شنونده نیست.
+ *
+ * هر دو، مشکل «مجوزدهی از راه دور» است. با اجرای عامل روی مقصد به‌عنوان SYSTEM،
+ * هر دو از میان می‌روند: WMI محلی است و توکن کامل.
+ *
+ * @param array{host:array<string,array{error:string}>} $failedOnly فقط مقصدهای ناموفق
+ * @return array<string,array{inventory:array<string,mixed>,error:string}>
+ */
+function domain_scan_remote_inventory_via_smb(array $hosts, int $concurrency = 3, array $credentials = []): array
+{
+    $answer = [];
+    $problem = domain_scan_preflight();
+    $script = domain_scan_smb_script_path();
+    if ($problem === null && !is_file($script)) {
+        $problem = 'اسکریپت tools/collect_via_smb.ps1 پیدا نشد.';
+    }
+    $user = trim((string) ($credentials['username'] ?? ''));
+    $pass = (string) ($credentials['password'] ?? '');
+    $domain = trim((string) setting('domain_scan_domain', ''));
+    if ($problem === null && ($user === '' || $pass === '')) {
+        $problem = 'برای این نوبت، نام کاربری و رمز حساب مجاز استخراج وارد نشده یا نشست آن منقضی شده است.';
+    }
+    if ($user !== '' && strpos($user, '\\') === false && strpos($user, '@') === false && $domain !== '') {
+        $user = $domain . '\\' . $user;
+    }
+    $env = ['ITSM_SCAN_USER' => $user, 'ITSM_SCAN_PASS' => $pass];
+    $powershell = domain_scan_powershell_path();
+    $localNames = domain_scan_local_names();
+    $jobs = [];
+    foreach ($hosts as $host) {
+        $host = trim((string) $host);
+        if (!preg_match('/^[A-Za-z0-9._-]+$/', $host)) {
+            $answer[$host] = ['inventory' => [], 'error' => 'نام کامپیوتر نامعتبر است.'];
+            continue;
+        }
+        if ($problem !== null) {
+            $answer[$host] = ['inventory' => [], 'error' => $problem];
+            continue;
+        }
+        // همین سرور از مسیر محلی خوانده می‌شود؛ فرستادن عامل به خودش بی‌معنی است.
+        if (in_array(strtolower($host), $localNames, true)) {
+            $answer[$host] = ['inventory' => [], 'error' => 'این میزبان خودِ سرور سامانه است؛ از «استخراج محلی» استفاده کنید.'];
+            continue;
+        }
+        $jobs[$host] = [
+            'cmd' => [$powershell, '-NoProfile', '-NonInteractive', '-ExecutionPolicy', 'Bypass', '-File', $script, '-ComputerName', $host],
+            'env' => $env,
+        ];
+    }
+    if ($jobs === []) {
+        return $answer;
+    }
+    $results = domain_scan_run_processes($jobs, $concurrency, 240);
+    foreach ($jobs as $host => $_job) {
+        $row = $results[$host] ?? ['code' => -1, 'out' => '', 'err' => '', 'timed_out' => false, 'started' => false];
+        if ($row['timed_out']) {
+            $answer[$host] = ['inventory' => [], 'error' => 'مهلت استخراج از راه SMB (۴ دقیقه) تمام شد؛ سیستم کند است یا تسک روی مقصد اجرا نشد.'];
+            continue;
+        }
+        $out = trim($row['out']);
+        $out = preg_replace('/^\xEF\xBB\xBF/', '', (string) $out) ?? (string) $out;
+        $start = strpos($out, '{');
+        $end = strrpos($out, '}');
+        if ($start !== false && $end !== false && $end > $start) {
+            $out = substr($out, $start, $end - $start + 1);
+        }
+        $decoded = $out !== '' ? json_decode($out, true, 512, JSON_INVALID_UTF8_SUBSTITUTE) : null;
+        if (!is_array($decoded) || !isset($decoded['computer'])) {
+            $detail = domain_scan_friendly_error(trim($row['err']) !== '' ? $row['err'] : $row['out']);
+            $answer[$host] = ['inventory' => [], 'error' => $detail !== '' ? $detail : 'پاسخ خالی از اسکریپت SMB (کد خروج ' . $row['code'] . ').'];
+            continue;
+        }
+        $inventory = inventory_base_inventory();
+        $inventory['hostname'] = $host;
+        $inventory['serial_number'] = '';
+        $inventory['manufacturer'] = '';
+        $inventory['model'] = '';
+        $inventory['computer_type'] = 'Windows client';
+        $inventory['operating_system'] = '';
+        $inventory['os_architecture'] = '';
+        $inventory['os_serial'] = '';
+        $inventory['mac_address'] = '';
+        $inventory['cpu'] = '';
+        $inventory['memory_mb'] = 0;
+        $inventory['domain_username'] = '';
+        $inventory['antivirus'] = '';
+        $inventory['disks'] = [];
+        $inventory['software'] = [];
+        $inventory['peripherals'] = ['printers' => [], 'scanners' => [], 'monitors' => [], 'keyboards' => [], 'mice' => []];
+        $inventory['hardware'] = [];
+        $inventory['ip_address'] = domain_scan_resolve_ipv4($host);
+        $inventory = inventory_apply_powershell_data($inventory, $decoded);
+        if (inventory_hardware_score($inventory) === 0) {
+            $answer[$host] = ['inventory' => [], 'error' => 'دادهٔ سخت‌افزاری قابل‌استفاده از سیستم مقصد دریافت نشد.'];
             continue;
         }
         $answer[$host] = ['inventory' => $inventory, 'error' => ''];
@@ -1633,6 +1832,41 @@ function domain_scan_process(int $runId, int $limit, int $userId, array $credent
             } catch (Throwable $exception) {
                 app_error_log('[domain-scan] remote inventory: ' . $exception->getMessage());
             }
+            // ۱.۶۳.۱-r17 — مسیر دوم برای مقصدهایی که WMI/DCOM ردشان می‌کند.
+            //
+            // خطای «Dcom: Access is denied» ثابت می‌کند بسته رسیده و احراز هویت
+            // شده؛ مشکل مجوز از راه دور است، نه شبکه. TNI و AdminYar این حالت را
+            // با کپی عامل روی ADMIN$ و اجرای آن به‌عنوان SYSTEM حل می‌کنند. همان
+            // مسیر اینجا هم هست، ولی نتیجهٔ زنده را جایگزین نمی‌کند: فقط مقصدهایی
+            // که در مسیر اول شکست خورده‌اند دوباره از راه SMB آزموده می‌شوند.
+            // اگر حساب روی مقصد ادمین محلی نباشد، این مسیر هم صریحاً همان را می‌گوید.
+            $needSmb = [];
+            $smbMode = strtolower(trim((string) setting('domain_scan_smb_fallback', '1')));
+            foreach ($onlineItems as $item) {
+                $hostKey = (string) $item['hostname'];
+                $rowFailed = ($remote[$hostKey]['inventory'] ?? []) === [];
+                if ($rowFailed && $smbMode !== '0' && $smbMode !== 'off') {
+                    $needSmb[] = $hostKey;
+                }
+            }
+            if ($needSmb !== []) {
+                try {
+                    $smbRemote = domain_scan_remote_inventory_via_smb($needSmb, 3, $credentials);
+                    $smbRecovered = 0;
+                    foreach ($smbRemote as $hostKey => $smbRow) {
+                        if (($smbRow['inventory'] ?? []) !== []) {
+                            $remote[$hostKey] = $smbRow;
+                            $remote[$hostKey]['method'] = 'smb';
+                            $smbRecovered++;
+                        }
+                    }
+                    if ($smbRecovered > 0) {
+                        system_log('info', 'domain_scan', 'استخراج با روش SMB/SYSTEM جبران شد', ['run' => $runId, 'recovered' => $smbRecovered, 'hosts' => array_keys(array_filter($smbRemote, static fn (array $r): bool => ($r['inventory'] ?? []) !== []))]);
+                    }
+                } catch (Throwable $exception) {
+                    app_error_log('[domain-scan] smb fallback: ' . $exception->getMessage());
+                }
+            }
             foreach ($onlineItems as $item) {
                 $queueId = (int) $item['id'];
                 $assetId = (int) ($item['asset_id'] ?? 0);
@@ -1651,9 +1885,12 @@ function domain_scan_process(int $runId, int $limit, int $userId, array $credent
                     $filled = domain_scan_store_inventory($assetId, $host, $row['inventory'], $userId);
                     if ($assetId > 0) {
                         asset_profile_apply_auto($assetId, ['ad_online' => 1, 'ad_last_seen' => date('Y-m-d H:i:s'), 'ad_scanned_at' => date('Y-m-d H:i:s')], $userId, true);
-                        record_asset_history($assetId, 'inventory_collected', 'استخراج از شبکه دامنه', $userId, null, 'اطلاعات سخت‌افزاری از طریق دامنه دریافت شد.');
+                        record_asset_history($assetId, 'inventory_collected', 'استخراج از شبکه دامنه', $userId, null, (($row['method'] ?? '') === 'smb') ? 'اطلاعات سخت‌افزاری با اجرای عامل روی خود سیستم (SMB/SYSTEM) دریافت شد.' : 'اطلاعات سخت‌افزاری از طریق دامنه دریافت شد.');
                     }
-                    db()->prepare('UPDATE domain_scan_queue SET status = "done", online = 1, message = ? WHERE id = ?')->execute([$filled > 0 ? ($filled . ' فیلد شناسنامه پر شد') : 'اطلاعات تازه‌ای نبود', $queueId]);
+                    // ۱.۶۳.۱-r17 — روش موفق را در پیام صف می‌نویسیم. تا وقتی کاربر
+                    // نمی‌داند کدام مسیر کار کرد، هر اختلال بعدی دوباره از صفر شروع می‌شود.
+                    $methodLabel = (($row['method'] ?? '') === 'smb') ? ' (از طریق SMB)' : '';
+                    db()->prepare('UPDATE domain_scan_queue SET status = "done", online = 1, message = ? WHERE id = ?')->execute([($filled > 0 ? ($filled . ' فیلد شناسنامه پر شد') : 'اطلاعات تازه‌ای نبود') . $methodLabel, $queueId]);
                     db()->prepare('UPDATE domain_scan_runs SET online = online + 1, done = done + 1 WHERE id = ?')->execute([$runId]);
                 } catch (Throwable $exception) {
                     db()->prepare('UPDATE domain_scan_queue SET status = "error", online = 1, message = ? WHERE id = ?')->execute([substr('ذخیرهٔ اطلاعات ناموفق: ' . $exception->getMessage(), 0, 250), $queueId]);

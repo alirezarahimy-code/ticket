@@ -42,7 +42,7 @@ function inventory_render_assets_content(
         echo '<form method="post" class="inline-action">' . csrf_field() . '<input type="hidden" name="action" value="import_domain_assets"><button class="button secondary" type="submit">ورود کامپیوترهای دامنه</button></form>';
     }
     if ($canExtractLocalServer) {
-        echo '<form method="post" class="inline-action inventory-local-extract-form">' . csrf_field() . '<input type="hidden" name="action" value="collect_inventory"><button class="button secondary" type="submit" title="فقط میزبانی را می‌خواند که PHP سامانه روی آن اجرا شده است">استخراج محلی همین سیستم</button><label class="muted"><input type="checkbox" name="overwrite" value="1"> بازنویسی فیلدهای خودکارِ پُر</label></form>';
+        echo '<form method="post" class="inline-action inventory-local-extract-form">' . csrf_field() . '<input type="hidden" name="action" value="collect_inventory"><button class="button secondary" type="submit" title="اطلاعات سخت‌افزاری فقط میزبانِ اجرای PHP (سرور سامانه) را می‌خواند؛ برای رایانه‌های دیگر از «استخراج اطلاعات سیستم‌های انتخاب‌شده» یا صفحهٔ «اسکن دامنه» استفاده کنید.">استخراج محلی سرور سامانه</button><small class="muted" style="display:block">این دکمه فقط سرور سامانه را می‌خواند، نه رایانهٔ شما.</small><label class="muted"><input type="checkbox" name="overwrite" value="1"> بازنویسی فیلدهای خودکارِ پُر</label></form>';
     }
     if ($canExtractAssets && $canConfigureNetworkScan) {
         echo '<a class="button secondary" href="index.php?page=settings#domain-scan">حساب استخراج شبکه</a>';

@@ -80,7 +80,16 @@ if (!defined('ASSET_IPV4_PATTERN')) {
         define('ASSET_IPV4_PATTERN', '((?:\\d{1,3}\\.){3}\\d{1,3})');
     }
 }
-foreach (['asset_is_ip', 'asset_is_domain_name', 'asset_strip_ip', 'asset_hostname_style', 'asset_name_core', 'asset_display_name', 'asset_name_or', 'asset_is_auto_domain_tag', 'asset_name_title', 'asset_name_attr', 'asset_tag_label'] as $fn) {
+
+// ۱.۶۳.۱-r17 — الگوی MAC (ستون «نام» آلوده به MAC)
+if (!defined('ASSET_MAC_PATTERN')) {
+    if (preg_match("/const ASSET_MAC_PATTERN = '([^']+)';/", $file, $mMac) === 1) {
+        define('ASSET_MAC_PATTERN', str_replace('\\\\', '\\', $mMac[1]));
+    } else {
+        define('ASSET_MAC_PATTERN', '(?<![0-9A-Za-z])(?:[0-9A-Fa-f]{2}[:-]){5}[0-9A-Fa-f]{2}(?![0-9A-Za-z])');
+    }
+}
+foreach (['asset_is_ip', 'asset_is_mac', 'asset_strip_ip', 'asset_strip_mac', 'asset_is_domain_name', 'asset_hostname_style', 'asset_name_core', 'asset_display_name', 'asset_name_or', 'asset_is_auto_domain_tag', 'asset_name_title', 'asset_name_attr', 'asset_tag_label'] as $fn) {
     eval(grabFunction($file, $fn));
 }
 

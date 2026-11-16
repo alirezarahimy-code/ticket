@@ -195,6 +195,36 @@ check('چک‌باکس روشن‌کردن هست',
     (bool) preg_match('/checkbox[^>]*security_cookie_both_protocols[^>]*value=.?1/', $formChunk));
 check('پیام ذخیره، اثر کار را توضیح می‌دهد', str_contains($settingsSrc, 'هر دو پروتکل'));
 
+echo "\n═══ ۳.۶) نام آلوده به MAC — ۱.۶۳.۱-r17 ═══\n";
+
+// asset-names.php همین بالاتر (بخش ۲) کامل بارگذاری شده است؛
+// دوباره‌سازی توابع نه لازم است و نه درست — بازتعریف، نسخهٔ آزمون را
+// جای نسخهٔ واقعی می‌گذاشت و همان باگ را پنهان می‌کرد.
+$GLOBALS['__style'] = 'short';
+
+// دقیقاً همان چیزی که کاربر دید: نام + IP + MAC در یک رشته
+check('۱: «bazresi-pc 192.168.1.65 00-1A-…» ⇒ bazresi-pc',
+    (function () { return function_exists('asset_display_name') ? asset_display_name('bazresi-pc 192.168.1.65 00-1A-2B-3C-4D-5E') : ''; })() === 'bazresi-pc',
+    function_exists('asset_display_name') ? asset_display_name('bazresi-pc 192.168.1.65 00-1A-2B-3C-4D-5E') : 'تابع در دسترس نیست');
+check('۲: MAC با دونقطه هم حذف می‌شود',
+    function_exists('asset_display_name') && asset_display_name('bazresi-pc 192.168.1.65 AA:BB:CC:DD:EE:FF') === 'bazresi-pc');
+check('۳: MAC تنها بدون IP هم حذف می‌شود',
+    function_exists('asset_display_name') && asset_display_name('bazresi-pc 00-1A-2B-3C-4D-5E') === 'bazresi-pc');
+check('۴: MAC خالص هرگز نام نمایش داده نمی‌شود',
+    function_exists('asset_display_name') && asset_display_name('00-1A-2B-3C-4D-5E') === '');
+check('۵: MAC خالص ⇒ «نام ثبت نشده»',
+    function_exists('asset_name_or') && asset_name_or('00:1A:2B:3C:4D:5E') === 'نام ثبت نشده');
+check('۶: IP+MAC خالص هیچ‌کدام نام نمی‌شوند',
+    function_exists('asset_display_name') && asset_display_name('192.168.1.65 00-1A-2B-3C-4D-5E') === '');
+check('۷: نام واقعی که شبیه MAC نیست آسیب نمی‌بیند',
+    function_exists('asset_display_name') && asset_display_name('PC-12AB34CD') === 'PC-12AB34CD');
+check('۸: MBA4-01 دست‌نخورده می‌ماند (رگرسیون مهم)',
+    function_exists('asset_display_name') && asset_display_name('MBA4-01') === 'MBA4-01');
+check('۹: کلید هویت پس از حذف MAC تکراری نمی‌سازد',
+    function_exists('asset_identity_key') && asset_identity_key('bazresi-pc 192.168.1.65 00-1A-2B-3C-4D-5E') === asset_identity_key('bazresi-pc'));
+check('۱۰: الگوی MAC و توابعش در asset-names.php هست',
+    str_contains($names, 'ASSET_MAC_PATTERN') && str_contains($names, 'function asset_strip_mac') && str_contains($names, 'function asset_is_mac'));
+
 echo "\n═══ ۴) ابزار تشخیص ═══\n";
 $diag = (string) file_get_contents($root . '/tools/diagnose_login_and_assets.php');
 check('ابزار تشخیص وجود دارد', $diag !== '');

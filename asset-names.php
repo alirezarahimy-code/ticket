@@ -51,6 +51,42 @@ function asset_hostname_style(): string
  */
 const ASSET_IPV4_PATTERN = '((?:\d{1,3}\.){3}\d{1,3})';
 
+/**
+ * الگوی MAC آدرس — ۱.۶۳.۱-r17.
+ *
+ * مسئلهٔ کاربر: در ستون «نام»، «192.168.1.65 00-1A-2B-3C-4D-5E» دیده می‌شد.
+ * علت: قاعدهٔ «IP را از نام بردار» فقط IPv4 را می‌شناخت و MAC را نه؛ بعد از
+ * حذف IP، MAC تنها بازمانده بود و به‌عنوان «نام کامپیوتر» چاپ می‌شد.
+ * ریشهٔ داده هم reverse DNS معیوب شبکه است که نام را «نام IP MAC» برمی‌گرداند.
+ *
+ * سه شکل رایج پشتیبانی می‌شود: خط‌تیره (00-1A-2B-…)، دونقطه (00:1A:2B:…)
+ * و بدون جداکننده (001A2B3C4D5E). مرز کلمه لازم است تا نامی مثل
+ * «PC-12AB34CD» قربانی نشود.
+ */
+const ASSET_MAC_PATTERN = '(?<![0-9A-Za-z])(?:[0-9A-Fa-f]{2}[:-]){5}[0-9A-Fa-f]{2}(?![0-9A-Za-z])';
+
+/** آیا این رشته یک آدرس MAC است؟ (تنها MAC، بدون چیز دیگر) */
+function asset_is_mac(string $value): bool
+{
+    return preg_match('/^' . ASSET_MAC_PATTERN . '$/', trim($value)) === 1;
+}
+
+/** حذف هر MAC از داخل رشته — مثل asset_strip_ip ولی برای MAC. */
+function asset_strip_mac(string $value): string
+{
+    $stripped = preg_replace('/[\s_-]*' . ASSET_MAC_PATTERN . '/', '', $value);
+    if (!is_string($stripped)) {
+        return $value;
+    }
+    // MAC بدون جداکننده (001A2B3C4D5E) فقط وقتی حذف می‌شود که کلمهٔ مستقل باشد؛
+    // وگرنه ممکن است بخشی از یک نام واقعی باشد.
+    $stripped = preg_replace('/(?<![0-9A-Za-z])[0-9A-Fa-f]{12}(?![0-9A-Za-z])/', '', $stripped);
+    if (!is_string($stripped)) {
+        return $value;
+    }
+    return trim(trim($stripped, " \t\n\r\0\x0B-_.:"));
+}
+
 /** آیا این رشته یک آدرس IP خالص است؟ */
 function asset_is_ip(string $value): bool
 {
@@ -103,11 +139,27 @@ function asset_name_core(string $hostname): string
     if (asset_is_ip($name)) {
         return $name;
     }
+    // ۱.۶۳.۱-r17 — MAC خالص هم نام کامپیوتر نیست؛ ولی asset_name_core کلید
+    // هویت را می‌سازد و باید مقداری برگرداند. رشتهٔ خالی می‌دهیم تا فراخوان
+    // («نام ثبت نشده») جایش را بگیرد، نه اینکه MAC به‌عنوان نام چاپ شود.
+    if (asset_is_mac($name)) {
+        return '';
+    }
     // IP چسبیده به نام (clint 192.168.1.65 ⇒ clint) — پیش از قاعدهٔ دامنه
     $name = asset_strip_ip($name);
+    // ۱.۶۳.۱-r17 — MAC چسبیده به نام هم بخشی از نام نیست.
+    // ترتیب مهم است: اول IP، بعد MAC. اگر برعکس بود، در رشتهٔ
+    // «pc 192.168.1.65 00-1A-2B-3C-4D-5E» حذف IP جداکننده‌ها را جا می‌گذاشت
+    // و MAC با فاصلهٔ اضافه باقی می‌ماند.
+    $name = asset_strip_mac($name);
     if ($name === '') {
-        // فقط IP بود و جداکننده‌ها پاک شدند؛ همان IP اصلی را برگردان
-        return trim($hostname);
+        // فقط نشانی بود و چیزی از نام نماند. کلید هویت نمی‌تواند خالی بماند،
+        // پس IP را برمی‌گردانیم — ولی نمایش، خودش IP را نشان نمی‌دهد
+        // (asset_display_name آن را به «نام ثبت نشده» تبدیل می‌کند).
+        if (preg_match('/' . ASSET_IPV4_PATTERN . '/', $hostname, $addressMatch) === 1) {
+            return $addressMatch[1];
+        }
+        return '';
     }
     // نام کامل دامنه: هرچه بعد از اولین نقطه است حذف می‌شود (ADMINIT2.DOMAIN.LOCAL ⇒ ADMINIT2)
     $dot = strpos($name, '.');
@@ -193,6 +245,16 @@ function asset_display_name(?string $hostname): string
         // ساختیم، یا IP خالص). «نمایش» نباید همان IP را برگرداند، چون کاربر
         // آن را به‌عنوان نام کامپیوتر می‌خواند. رشتهٔ خالی می‌دهیم تا فراخوان
         // جایگزین مناسب بگذارد (asset_name_title / «نام ثبت نشده»).
+        return '';
+    }
+    // ۱.۶۳.۱-r17 — هسته هم نباید IP باشد.
+    //
+    // asset_name_core برای ساختن کلید هویت ناچار است مقداری برگرداند، پس در
+    // حالت «فقط نشانی» (مثل «192.168.1.65 00-1A-2B-3C-4D-5E») همان IP را
+    // می‌دهد. اگر اینجا جلویش گرفته نشود، همان IP به‌عنوان «نام» چاپ می‌شود و
+    // قاعدهٔ «IP هرگز نام نیست» نقض می‌شود. شاخهٔ full از قبل همین بررسی را
+    // داشت؛ شاخهٔ short نداشت.
+    if (asset_is_ip($core) || asset_is_mac($core)) {
         return '';
     }
     return $style === 'short_lower' ? (function_exists('mb_strtolower') ? mb_strtolower($core, 'UTF-8') : strtolower($core)) : $core;

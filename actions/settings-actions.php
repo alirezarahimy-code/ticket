@@ -245,6 +245,11 @@ if (!defined('APP_ROOT')) {
                 save_setting('domain_scan_password', '');
                 // ترتیب پروتکل اتصال برای استخراج از راه دور (۱.۳۷): برای شبکه‌هایی که DCOM بسته است.
                 save_setting('domain_scan_protocols', valid_choice(post_value('domain_scan_protocols'), ['', 'Dcom,Wsman', 'Wsman,Dcom', 'Dcom', 'Wsman'], ''));
+                // ۱.۶۳.۱-r17 — مسیر دوم SMB. پیش‌فرض روشن است: مقصدی که
+                // DCOM/WinRM ردش کند، بار دوم با کپی عامل روی C$ و اجرای SYSTEM
+                // آزموده می‌شود. این تنها کاری است که حالت «Access is denied» را
+                // بدون تغییر سیاست‌های دامنه حل می‌کند.
+                save_setting('domain_scan_smb_fallback', post_value('domain_scan_smb_fallback') === '0' ? '0' : '1');
             }
             if (post_value('settings_section') === 'login_branding') {
                 foreach (['login_title' => 120, 'login_intro' => 500, 'login_art_title' => 100, 'login_art_text' => 300, 'login_note_title' => 100, 'login_note_text' => 300] as $loginKey => $maxLength) {
