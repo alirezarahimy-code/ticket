@@ -51,11 +51,11 @@ def test_admin_category_no_longer_uses_null_module_as_wildcard():
 
 
 def test_ticket_timeline_supports_search_and_safe_details():
-    source = read('index.php')
+    source = read('modules/request-center/Pages/detail.php')
     assert "$_GET['event_q']" in source
     assert 'CAST(e.details AS CHAR) LIKE ?' in source
-    assert 'activity_log_meta_lines(json_encode($visibleDetails' in source
-    assert "if ($staff) $safeKeys" in source
+    assert "activity_log_meta_lines((string) $visibleJson)" in source
+    assert "if ($canSeeInternal)" in source
     assert '$eventPageSize = 100;' in source and '$eventOffset = ($eventPage - 1) * $eventPageSize;' in source
     assert 'eventPages > 1' in source
 

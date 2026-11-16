@@ -160,8 +160,13 @@ check('۲۷: ردیف‌های اسکن دامنه نام کوتاه را نشا
 check('۲۸: پاسخ JSON اسکن، نام نمایشی را هم می‌فرستد',
     strpos($index, "'name' => asset_display_name(") !== false || strpos($index, "'name' => asset_name_or(") !== false);
 check('۲۹: به‌روزرسانی زندهٔ جدول اسکن هم نام نمایشی را می‌نویسد', strpos($index, 'x.name||x.hostname') !== false);
-check('۳۰: شناسهٔ خودکارِ دامنه در فهرست‌ها پنهان می‌شود (خروجی «دامنه» به‌جای DOMAIN-…)',
-    strpos($index, "asset_is_auto_domain_tag(\$asset['asset_tag']) ? '' : '<b>'") !== false);
+$inventoryStart = strpos($index, "if (\$page === 'inventory')");
+$inventoryEnd = strpos($index, "if (\$page === 'assets')", $inventoryStart === false ? 0 : $inventoryStart);
+$inventoryList = $inventoryStart !== false && $inventoryEnd !== false ? substr($index, $inventoryStart, $inventoryEnd - $inventoryStart) : '';
+check('۳۰: نام سیستم در فهرست شناسنامه بدون تگ خودکار/دستی نمایش داده می‌شود',
+    strpos($inventoryList, "asset_name_attr(\$asset['hostname'])") !== false
+    && !str_contains($inventoryList, 'asset-tag-chip')
+    && !str_contains($inventoryList, "asset_is_auto_domain_tag(\$asset['asset_tag']) ? '' : '<b>'"));
 
 $inventoryPage = (string) file_get_contents($root . '/asset-inventory-page.php');
 check('۳۱: فهرست سیستم‌ها (asset-inventory-page) هم نام کوتاه دارد',

@@ -98,7 +98,7 @@ class SecurityTest
 
         $root = dirname(__DIR__);
         $schema = file_get_contents($root . '/schema.sql');
-        $rebuild = file_get_contents($root . '/rebuild-final.sql');
+        $rebuild = file_get_contents($root . '/docs/architecture/rebuild-final.sql');
         if (!is_string($schema) || !is_string($rebuild)
             || !preg_match_all('/CREATE TABLE IF NOT EXISTS\s+([a-z][a-z0-9_]*)/i', $schema, $schemaMatches)
             || !preg_match('/DROP TABLE IF EXISTS(.*?);/is', $rebuild, $dropMatch)) {
@@ -174,11 +174,12 @@ class SecurityTest
     {
         echo "Testing input validation...\n";
         
-        // Test that validation functions exist in index.php
+        // The shared allowlist validator lives in lib/http-input.php after the module split.
+        $inputContent = file_get_contents(__DIR__ . '/../lib/http-input.php');
         $indexContent = file_get_contents(__DIR__ . '/../index.php');
         
-        if (strpos($indexContent, 'function valid_choice') === false) {
-            $this->fail('valid_choice function not found in index.php');
+        if (!is_string($inputContent) || strpos($inputContent, 'function valid_choice') === false) {
+            $this->fail('valid_choice function not found in lib/http-input.php');
             return;
         }
         
@@ -194,11 +195,12 @@ class SecurityTest
     {
         echo "Testing file upload security...\n";
         
-        // Test that upload functions exist in index.php
+        // Request Center attachment storage is in its shared functions module after the split.
+        $attachmentContent = file_get_contents(__DIR__ . '/../modules/request-center/lib/functions.php');
         $indexContent = file_get_contents(__DIR__ . '/../index.php');
         
-        if (strpos($indexContent, 'function store_attachment') === false) {
-            $this->fail('store_attachment function not found in index.php');
+        if (!is_string($attachmentContent) || strpos($attachmentContent, 'function store_attachment') === false) {
+            $this->fail('store_attachment function not found in Request Center shared functions');
             return;
         }
         

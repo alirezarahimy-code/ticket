@@ -9,6 +9,7 @@ import re
 import zipfile
 from pathlib import Path
 from download_page_helpers import check_download_page_lists_only_latest_package
+from request_center_action_helpers import action_source
 
 ROOT = Path(__file__).resolve().parents[1]
 PACKAGE_NAME = "ticket-update-1.62.14-service-actions-split-20261025.zip"
@@ -35,21 +36,20 @@ def read(rel):
 
 def test_index_requires_service_actions_in_original_order():
     src = read("index.php")
-    assert src.count(REQUIRE_LINE) == 1
-    assert BANNER in src
-    # ترتیب اجرای قبلی حفظ شده: اموال < درخواست‌ها < خدمات < چارت سازمانی
-    a = src.index("require __DIR__ . '/actions/asset-actions.php';")
-    t = src.index("require __DIR__ . '/actions/ticket-actions.php';")
-    s = src.index(REQUIRE_LINE)
-    o = src.index("require __DIR__ . '/actions/org-actions.php';")
-    assert a < t < s < o
-    # هیچ‌کدام از ۷ اکشن دیگر در index.php نیستند
+    dispatch_line = "require __DIR__ . '/modules/request-center/Actions/dispatch.php';"
+    asset_line = "require __DIR__ . '/actions/asset-actions.php';"
+    assert dispatch_line in src and asset_line in src
+    dispatch = read("modules/request-center/Actions/dispatch.php")
+    assert "require __DIR__ . '/ticket-actions.php';" in dispatch
+    assert "require __DIR__ . '/service-actions.php';" in dispatch
+    assert src.index(dispatch_line) < src.index(asset_line)
+    assert "require dirname(__DIR__) . '/modules/request-center/Actions/service-actions.php';" in read("actions/service-actions.php")
     for action in SERVICE_ACTIONS:
         assert f"if ($action === '{action}')" not in src, action
 
 
 def test_service_actions_file_structure_and_persian_descriptions():
-    src = read("actions/service-actions.php")
+    src, _ = action_source("actions/service-actions.php")
     assert src.startswith("<?php\n\ndeclare(strict_types=1);\n")
     # محافظ دسترسی مستقیم
     assert "if (!defined('APP_ROOT')) {" in src and GUARD_END in src

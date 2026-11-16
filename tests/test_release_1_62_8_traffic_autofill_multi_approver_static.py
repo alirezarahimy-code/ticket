@@ -3,6 +3,7 @@
 1) the previous-visit auto-fill works from national code AND full name AND phone;
 2) each meeting destination stores 1 to 3 approvers, selectable at registration."""
 import json
+import re
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -94,7 +95,7 @@ def test_bulk_preview_button_moved_next_to_clear_selection():
         footer = script.split('fm-bulk-footer', 1)[1].split("'", 1)[0] + script.split('fm-bulk-footer', 1)[1]
         assert "پیش‌نمایش و بررسی" not in script.split('fm-bulk-footer', 1)[1].split('</div>', 1)[0], path
         assert "var previewDisabled" in script, path
-    assert 'food-menu.js?v=1.62.96' in read("food-ticket-web/index.html")
+    assert re.search(r'food-menu\.js\?v=[A-Za-z0-9._-]+', read("food-ticket-web/index.html"))
 
 
 def test_help_guide_documents_both_features():

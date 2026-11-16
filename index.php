@@ -758,7 +758,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         // ───── گروه اکشن: تصمیم لغو سفارش غذا — خارج از دامنهٔ Request Center ─────
         require __DIR__ . '/actions/food-order-actions.php';
 
-        // ───── گروه اکشن: تصمیم‌های سرپرست و امتیازدهی — ۳ اکشن درخواست‌ها ─────
+        // ───── گروه اکشن: تصمیم‌های سرپرست و امتیازدهی — ۴ اکشن درخواست‌ها ─────
         // Request Center owns its POST action registry; this include is the legacy-context adapter.
         require __DIR__ . '/modules/request-center/Actions/dispatch.php';
 
@@ -1454,7 +1454,7 @@ if ($page === 'inventory') {
              } else {
                  $netBadge = '<small class="net-badge unknown">پینگ نشده</small>';
              }
-             echo '<a class="table-row" href="index.php?page=inventory&id=' . (int) $asset['id'] . '"><span class="ticket-title">' . (asset_is_auto_domain_tag($asset['asset_tag']) ? '' : '<b>' . e($asset['asset_tag']) . '</b>') . '<strong' . asset_name_attr($asset['hostname'], $asset['asset_tag']) . '>' . e(asset_name_or($asset['hostname'])) . '</strong>' . (asset_is_auto_domain_tag($asset['asset_tag']) ? '<small class="asset-tag-chip">دامنه</small>' : '') . $netBadge . '</span><span>' . e($asset['department_name'] ?: 'بدون معاونت') . '</span><span>' . e($asset['operating_system']) . '</span><span>' . e($asset['last_inventory_at'] ? persian_date($asset['last_inventory_at']) : 'ثبت نشده') . '</span></a>';
+             echo '<a class="table-row" href="index.php?page=inventory&id=' . (int) $asset['id'] . '"><span class="ticket-title">' . '<strong' . asset_name_attr($asset['hostname']) . '>' . e(asset_name_or($asset['hostname'])) . '</strong>' . $netBadge . '</span><span>' . e($asset['department_name'] ?: 'بدون معاونت') . '</span><span>' . e($asset['operating_system']) . '</span><span>' . e($asset['last_inventory_at'] ? persian_date($asset['last_inventory_at']) : 'ثبت نشده') . '</span></a>';
          }
         echo '</section>';
         render_footer();
@@ -1501,18 +1501,14 @@ if ($page === 'inventory') {
     render_header('شناسنامه سیستم', $inventoryUser);
     $canExtractThisAsset = user_can($inventoryUser, 'domain.scan');
     $extractPreflight = $canExtractThisAsset ? domain_scan_preflight() : null;
-    $canExtractLocalThisAsset = PHP_OS_FAMILY === 'Windows' && user_can($inventoryUser, 'asset.extract') && (is_global_ticket_role($inventoryUser['role']) || user_service_group($inventoryUser) === 'it') && inventory_asset_is_local($asset);
     $assetActions = '';
-    if ($canExtractLocalThisAsset) {
-        $assetActions .= '<form method="post" class="inline-action inventory-local-extract-form">' . csrf_field() . '<input type="hidden" name="action" value="collect_inventory"><button class="button" type="submit" title="فقط میزبان اجرای PHP (سرور سامانه)">استخراج محلی سرور سامانه</button><label class="muted"><input type="checkbox" name="overwrite" value="1"> بازنویسی فیلدهای خودکارِ پُر</label></form>';
-    }
     if ($canExtractThisAsset && $extractPreflight === null) {
         $assetActions .= '<a class="button secondary" href="#extract-inventory">استخراج شبکه‌ای</a>';
         if (user_can($inventoryUser, 'settings.domain')) {
             $assetActions .= '<a class="button secondary" href="index.php?page=settings#domain-scan">تنظیمات اسکن شبکه</a>';
         }
     }
-    echo '<section class="page-heading asset-heading"><div><a class="back-link" href="index.php?page=inventory">← بازگشت به سیستم‌ها</a><h1>شناسنامه رایانه ' . e(asset_name_or($asset['hostname'])) . '</h1><p>' . e(asset_name_title($asset['hostname'], $asset['asset_tag']) ?: $asset['asset_tag']) . ' • مالک: ' . e($asset['owner_name'] ?: 'بدون مالک') . '</p><p class="muted">آخرین برداشت سخت‌افزاری: ' . e($lastInventoryLabel) . '</p><small class="muted">ثبت این زمان کامل‌بودن همهٔ فیلدها را تضمین نمی‌کند؛ در برداشت ناقص ممکن است مقدار پیشین باقی بماند. استخراج محلی برای جایگزینی فیلدهای خودکارِ پُر به تأیید «بازنویسی» نیاز دارد.</small>' . $collectionStatusHtml . '</div><div class="actions">' . $assetActions . '<a class="button secondary" href="index.php?page=asset-history&id=' . $inventoryId . '">تاریخچه</a></div></section>';
+    echo '<section class="page-heading asset-heading"><div><a class="back-link" href="index.php?page=inventory">← بازگشت به سیستم‌ها</a><h1' . asset_name_attr($asset['hostname']) . '>شناسنامه رایانه ' . e(asset_name_or($asset['hostname'])) . '</h1><p>مالک: ' . e($asset['owner_name'] ?: 'بدون مالک') . '</p><p class="muted">آخرین برداشت سخت‌افزاری: ' . e($lastInventoryLabel) . '</p><small class="muted">ثبت این زمان کامل‌بودن همهٔ فیلدها را تضمین نمی‌کند؛ در برداشت ناقص ممکن است مقدار پیشین باقی بماند. برداشت شبکه‌ایِ موفق فیلدهای ماشینی را تازه می‌کند؛ اطلاعات اداری و دستی جداگانه حفظ می‌شوند.</small>' . $collectionStatusHtml . '</div><div class="actions">' . $assetActions . '<a class="button secondary" href="index.php?page=asset-history&id=' . $inventoryId . '">تاریخچه</a></div></section>';
     if ($canExtractThisAsset) {
         if ($extractPreflight !== null) {
             echo '<section id="extract-inventory" class="card form-card inventory-extract-card"><h2>استخراج شبکه‌ای</h2><p class="alert danger">' . e((string) $extractPreflight) . '</p></section>';
@@ -1570,7 +1566,7 @@ if ($page === 'asset-history') {
     $historyQuery = db()->prepare('SELECT h.*, u.full_name, t.subject, t.id AS ticket_id FROM asset_history_events h LEFT JOIN users u ON u.id = h.user_id LEFT JOIN tickets t ON t.id = h.ticket_id WHERE h.asset_id = ? ORDER BY h.created_at DESC');
     $historyQuery->execute([$historyId]);
     render_header('تاریخچه سیستم', $historyUser);
-    echo '<section class="page-heading"><div><a class="back-link" href="index.php?page=inventory&id=' . $historyId . '">← بازگشت به شناسنامه</a><h1>تاریخچه کامل ' . e(asset_name_or($asset['hostname'])) . '</h1><p>' . e(asset_name_title($asset['hostname'], $asset['asset_tag']) ?: $asset['asset_tag']) . ' • ' . e($asset['owner_name'] ?: 'بدون مالک') . '</p></div></section><section class="card event-log system-history"><h3>تمام تغییرات، برداشت‌ها و حل مشکلات</h3><div class="event-list">';
+    echo '<section class="page-heading"><div><a class="back-link" href="index.php?page=inventory&id=' . $historyId . '">← بازگشت به شناسنامه</a><h1>تاریخچه کامل ' . e(asset_name_or($asset['hostname'])) . '</h1><p>مالک: ' . e($asset['owner_name'] ?: 'بدون مالک') . '</p></div></section><section class="card event-log system-history"><h3>تمام تغییرات، برداشت‌ها و حل مشکلات</h3><div class="event-list">';
     foreach ($historyQuery->fetchAll() as $event) { echo '<div class="event-item"><span class="event-dot"></span><div><strong>' . e($event['title']) . '</strong><small>' . e($event['full_name'] ?: 'سامانه') . ' • ' . e(persian_date($event['created_at'])) . ($event['subject'] ? ' • درخواست: ' . e(ticket_number((int) $event['ticket_id'])) : '') . '</small><p>' . e($event['details'] ?: '') . '</p></div></div>'; }
     echo '</div></section>';
     render_footer();
@@ -1725,7 +1721,6 @@ if ($page === 'assets') {
     $canImportAssets = user_can($assetUser, 'domain.import');
     $canPingAssets = user_can($assetUser, 'asset.ping') && (is_global_ticket_role($assetUser['role']) || user_service_group($assetUser) === 'it');
     $canExtractAssets = user_can($assetUser, 'domain.scan');
-    $canExtractLocalServer = PHP_OS_FAMILY === 'Windows' && user_can($assetUser, 'asset.extract') && (is_global_ticket_role($assetUser['role']) || user_service_group($assetUser) === 'it');
     $canConfigureNetworkScan = user_can($assetUser, 'settings.domain');
     $networkScanEnabled = domain_scan_preflight() === null;
     $canSelectAssets = $canPingAssets || $canExtractAssets;
@@ -1736,7 +1731,7 @@ if ($page === 'assets') {
         $collectedCount += !empty($assetRow['last_inventory_at']) ? 1 : 0;
     }
     render_header('دارایی‌ها', $assetUser);
-    inventory_render_assets_content($assetRows, $assetSearch, $networkFilter, $canImportAssets, $canPingAssets, $canExtractAssets, $canExtractLocalServer, $canConfigureNetworkScan, $networkScanEnabled, $canSelectAssets, $onlineCount, $collectedCount);
+    inventory_render_assets_content($assetRows, $assetSearch, $networkFilter, $canImportAssets, $canPingAssets, $canExtractAssets, $canConfigureNetworkScan, $networkScanEnabled, $canSelectAssets, $onlineCount, $collectedCount);
     render_footer();
     exit;
 }
@@ -1762,14 +1757,7 @@ if ($page === 'asset') {
     $peripherals = json_decode((string) $asset['peripherals_json'], true) ?: [];
     render_header('شناسنامه دارایی', $assetUser);
     $manualPeripherals = is_array($peripherals['manual_entries'] ?? null) ? $peripherals['manual_entries'] : [];
-    $canExtractLocalAsset = PHP_OS_FAMILY === 'Windows' && user_can($assetUser, 'asset.extract') && (is_global_ticket_role($assetUser['role']) || user_service_group($assetUser) === 'it') && inventory_asset_is_local($asset);
-    $localExtractButton = $canExtractLocalAsset
-        ? '<form method="post" class="inline-action">' . csrf_field() . '<input type="hidden" name="action" value="collect_inventory"><button class="button" type="submit" title="فقط میزبان اجرای PHP (سرور سامانه)">استخراج محلی سرور سامانه</button></form>'
-        : '';
-     echo '<section class="page-heading"><div><a class="back-link" href="index.php?page=assets">← بازگشت به دارایی‌ها</a><h1>' . e(asset_name_or($asset['hostname'])) . '</h1><p>' . e(asset_name_title($asset['hostname'], $asset['asset_tag']) ?: $asset['asset_tag']) . ' • آخرین جمع‌آوری: ' . e($asset['last_inventory_at'] ? persian_date($asset['last_inventory_at']) : 'ثبت نشده') . '</p></div><div class="actions">' . $localExtractButton . '<a class="button secondary" href="index.php?page=inventory&id=' . $assetId . '">ویرایش شناسنامه</a><a class="button secondary" href="index.php?page=asset-history&id=' . $assetId . '">تاریخچه سیستم</a></div></section>';
-    if ($canExtractLocalAsset) {
-        echo '<p class="muted">این استخراج روی میزبانی اجرا می‌شود که PHP سامانه روی آن نصب است؛ اگر سامانه را روی همین کامپیوتر اجرا کرده‌اید، همین دستگاه خوانده می‌شود.</p>';
-    }
+    echo '<section class="page-heading"><div><a class="back-link" href="index.php?page=assets">← بازگشت به دارایی‌ها</a><h1' . asset_name_attr($asset['hostname']) . '>' . e(asset_name_or($asset['hostname'])) . '</h1><p>آخرین جمع‌آوری: ' . e($asset['last_inventory_at'] ? persian_date((string) $asset['last_inventory_at']) : 'ثبت نشده') . '</p></div><div class="actions"><a class="button secondary" href="index.php?page=inventory&id=' . $assetId . '">ویرایش شناسنامه</a><a class="button secondary" href="index.php?page=asset-history&id=' . $assetId . '">تاریخچه سیستم</a></div></section>';
     echo '<section class="asset-facts"><div class="card detail-card"><h3>مشخصات اصلی</h3><dl><dt>شناسه</dt><dd>' . e($asset['asset_tag']) . '</dd><dt>نام کامپیوتر</dt><dd' . asset_name_attr($asset['hostname'], $asset['asset_tag']) . '>' . e(asset_name_or($asset['hostname'])) . '</dd><dt>سریال</dt><dd>' . e($asset['serial_number']) . '</dd><dt>واحد</dt><dd>' . e($asset['department_name'] ?: 'بدون واحد') . '</dd><dt>کاربر دامنه</dt><dd>' . e($asset['domain_username']) . '</dd><dt>سیستم‌عامل</dt><dd>' . e($asset['operating_system']) . '</dd><dt>آنتی‌ویروس</dt><dd>' . e($asset['antivirus']) . '</dd><dt>IP</dt><dd>' . e($asset['ip_address']) . '</dd><dt>MAC</dt><dd>' . e($asset['mac_address']) . '</dd><dt>پردازنده</dt><dd>' . e($asset['cpu']) . '</dd><dt>حافظه</dt><dd>' . e((string) $asset['memory_mb']) . ' MB</dd></dl></div><div class="card detail-card"><h3>سخت‌افزار تکمیلی</h3><pre class="json-view">' . e(json_encode(array_merge($hardware, ['disks' => $disks]), JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES)) . '</pre></div><div class="card detail-card"><h3>تجهیزات و اقلام دستی</h3><pre class="json-view">' . e(json_encode(array_merge($peripherals, ['printer_scanner_monitor_case' => $peripherals['case'] ?? ($manualPeripherals['case'] ?? [])]), JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES)) . '</pre></div><div class="card detail-card"><h3>نرم‌افزارهای نصب‌شده</h3><pre class="json-view">' . e(json_encode($software, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES)) . '</pre></div></section>';
     render_footer();
     exit;
@@ -1994,10 +1982,10 @@ if ($page === 'settings') {
     foreach ([
         'supervisor' => ['label' => 'سوپروایز', 'note' => 'دسترسی سوپروایزر: مشاهده و مدیریت درخواست‌ها، تأیید و بستن.'],
         'inspection' => ['label' => 'بازرسی', 'note' => 'مجوز ثبت ورود رسانه در کنترل CD/DVD.'],
-        'it_expert' => ['label' => 'کارشناس آی تی', 'note' => 'مسئول رسیدگی به تیکت‌های فناوری اطلاعات. فقط از همین فهرست انتخاب می‌شود.'],
+        'it_expert' => ['label' => 'کارشناس آی تی', 'note' => 'مسئول رسیدگی به درخواست‌های فناوری اطلاعات. فقط از همین فهرست انتخاب می‌شود.'],
         // تصمیم مالک (۲۰۲۶-۱۱-۱۶): همتای «کارشناس آی تی» برای حوزهٔ پشتیبانی.
         // مسئول تیکت‌های پشتیبانی فقط از این فهرست خوانده می‌شود.
-        'support_expert' => ['label' => 'کارشناس پشتیبانی', 'note' => 'مسئول رسیدگی به تیکت‌های پشتیبانی. فقط از همین فهرست انتخاب می‌شود.'],
+        'support_expert' => ['label' => 'کارشناس پشتیبانی', 'note' => 'مسئول رسیدگی به درخواست‌های پشتیبانی. فقط از همین فهرست انتخاب می‌شود.'],
     ] as $roleKey => $roleMeta) {
         $roleIds = key_role_user_ids($roleKey);
         $roleCards .= '<div class="key-role-block"><h3>' . e($roleMeta['label']) . '</h3><p class="muted">' . e($roleMeta['note']) . '</p><div class="form-grid">';
@@ -2190,7 +2178,7 @@ if ($page === 'settings') {
         echo '</div>';
     }
     echo '</div>';
-    echo '<div id="key-roles" class="settings-subform"' . ($canSettingsKeyRolesEdit ? '' : ' inert') . '><h3>نقش‌های کلیدی</h3><p class="muted">برای هر نقش حداکثر دو کاربر انتخاب کنید. هیچ‌کدام از این نقش‌ها <strong>نقش اصلی کاربر را عوض نمی‌کند</strong>؛ فقط دسترسی اضافه می‌کند. «کارشناس آی تی» و «کارشناس پشتیبانی» مسئول رسیدگی به تیکت‌های همان حوزه هستند (فقط از همین فهرست خوانده می‌شوند)، «سوپروایز» فضای سوپروایزر و صف تصمیم‌ها را می‌دهد، و «بازرسی» مجوز ثبت ورود رسانه در CD/DVD را.</p><form method="post">' . csrf_field() . '<input type="hidden" name="action" value="save_key_roles">' . $roleCards . (user_is_primary_admin($user) ? '' : '<p class="muted">تعیین یا حذف کارشناس IT فقط توسط ادمین اصلی انجام می‌شود.</p>') . '<button class="button" type="submit">ذخیره نقش‌های کلیدی</button></form></div>';
+    echo '<div id="key-roles" class="settings-subform"' . ($canSettingsKeyRolesEdit ? '' : ' inert') . '><h3>نقش‌های کلیدی</h3><p class="muted">برای هر نقش حداکثر دو کاربر انتخاب کنید. هیچ‌کدام از این نقش‌ها <strong>نقش اصلی کاربر را عوض نمی‌کند</strong>؛ فقط دسترسی اضافه می‌کند. «کارشناس آی تی» و «کارشناس پشتیبانی» مسئول رسیدگی به درخواست‌های همان حوزه هستند (فقط از همین فهرست خوانده می‌شوند)، «سوپروایز» فضای سوپروایزر و صف تصمیم‌ها را می‌دهد، و «بازرسی» مجوز ثبت ورود رسانه در CD/DVD را.</p><form method="post">' . csrf_field() . '<input type="hidden" name="action" value="save_key_roles">' . $roleCards . (user_is_primary_admin($user) ? '' : '<p class="muted">تعیین یا حذف کارشناس IT فقط توسط ادمین اصلی انجام می‌شود.</p>') . '<button class="button" type="submit">ذخیره نقش‌های کلیدی</button></form></div>';
     echo '</div>';
     }
 

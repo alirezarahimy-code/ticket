@@ -69,10 +69,11 @@ def test_index_require_order_keeps_backup_group_position():
         "actions/cd-dvd-actions.php",
         "actions/backup-actions.php",
         "actions/notification-actions.php",
-        "actions/supervisor-actions.php",
+        "modules/request-center/Actions/dispatch.php",
     ]
     positions = [src.index(f"require __DIR__ . '/{rel}';") for rel in order]
-    assert positions == sorted(positions), "ترتیب require گروه پشتیبان‌گیری عوض شده است"
+    assert positions == sorted(positions), "ترتیب گروه پشتیبان‌گیری و واگذاری اکشن‌های Request Center عوض شده است"
+    assert "require __DIR__ . '/supervisor-actions.php';" in read("modules/request-center/Actions/dispatch.php")
 
 
 def test_bootstrap_is_loader_and_lib_order_is_preserved():

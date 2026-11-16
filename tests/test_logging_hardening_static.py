@@ -57,7 +57,7 @@ def test_unknown_error_title_has_mbstring_fallback():
 
 def test_full_rebuild_drops_every_schema_table():
     schema = (ROOT / "schema.sql").read_text(encoding="utf-8")
-    rebuild = (ROOT / "rebuild-final.sql").read_text(encoding="utf-8")
+    rebuild = (ROOT / "docs/architecture/rebuild-final.sql").read_text(encoding="utf-8")
     import re
     tables = set(re.findall(r"CREATE TABLE IF NOT EXISTS\s+([a-z][a-z0-9_]*)", schema, re.I))
     drop_match = re.search(r"DROP TABLE IF EXISTS(.*?);", rebuild, re.S | re.I)

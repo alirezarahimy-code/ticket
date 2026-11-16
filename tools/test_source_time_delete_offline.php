@@ -79,12 +79,16 @@ $w2 = food_ticket_source_time_where('C_Time', 0);
 $check('نیمه‌شب: 00:00:00 تا 00:00:01', str_contains($w2, '#00:00:00#') && str_contains($w2, '#00:00:01#'), $w2);
 
 $w3 = food_ticket_source_time_where('C_Time', 86399);
-$check('۲۳:۵۹:۵۹ بازهٔ معتبر می‌سازد', $w3 !== '' && !str_contains($w3, '< #23:59:59#'), $w3);
-$check('۲۳:۵۹:۵۹ کران بالای بی‌معنی ندارد', str_contains($w3, '>='), $w3);
+$check('۲۳:۵۹:۵۹ در ستونِ صرفاً زمان کران پایین معتبر دارد', $w3 !== '' && str_contains($w3, '>= #23:59:59#'), $w3);
+$check('۲۳:۵۹:۵۹ مقدار ۲۴:۰۰:۰۰ ناممکن تولید نمی‌کند', !str_contains($w3, '24:00:00'), $w3);
 
 $w4 = food_ticket_source_time_where('[Punch]', 29700, '2026-11-16');
 $check('datetime تاریخ هم دارد', str_contains($w4, '#2026-11-16 08:15:00#'), $w4);
 $check('datetime کران بالا با تاریخ', str_contains($w4, '#2026-11-16 08:15:01#'), $w4);
+$w5 = food_ticket_source_time_where('[Punch]', 86399, '2026-11-16');
+$check('datetime در ثانیهٔ آخر تا نیمه‌شب روز بعد محدود می‌شود', str_contains($w5, '< #2026-11-17 00:00:00#'), $w5);
+$w6 = food_ticket_source_time_where('[Punch]', 86399, '2026-02-30');
+$check('تاریخ نامعتبر به شرطِ حذفِ باز (فقط ساعت) تبدیل نمی‌شود', $w6 === '(1 = 0)', $w6);
 
 echo "\n۴) تاریخ خالص دست‌نخورده می‌ماند\n";
 $check('ستون date بازهٔ زمانی نمی‌گیرد', food_ticket_source_column_kind('C_Date') !== 'time');

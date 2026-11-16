@@ -208,10 +208,10 @@ class FoodOrdersStaticTests(unittest.TestCase):
 
         panel_html = read("food-ticket-web/index.html")
         self.assertIn('href="assets/food-order.css?v=16"', panel_html)
-        self.assertIn('href="assets/food-menu.css?v=36"', panel_html)
+        self.assertRegex(panel_html, r'href="assets/food-menu\.css\?v=\d+"')
         self.assertIn('src="assets/jalali-calendar.js?v=2"', panel_html)
         self.assertIn('src="assets/food-order-calendar.js?v=1"', panel_html)
-        self.assertIn('src="assets/food-menu.js?v=1.62.96"', panel_html)
+        self.assertRegex(panel_html, r'src="assets/food-menu\.js\?v=[A-Za-z0-9._-]+"')
         self.assertIn("FoodMenuUI.mount()", panel_html)
         for path in (
             "assets/food-order.css",
@@ -304,7 +304,7 @@ class FoodOrdersStaticTests(unittest.TestCase):
         self.assertIn(".fo-modal .fo-form-field input", panel_css)
 
     def test_panel_assets_are_synchronized(self) -> None:
-        for name in ("food-menu.js", "food-menu.css", "food-order.css", "food-order-calendar.js", "jalali-calendar.js"):
+        for name in ("food-menu.js", "food-menu.css", "food-org-groups.js", "food-order.css", "food-order-calendar.js", "jalali-calendar.js"):
             self.assertEqual(read(f"assets/{name}"), read(f"food-ticket-web/assets/{name}"))
 
     def test_day_impact_confirmation_locks_and_reuses_the_confirmed_plan(self) -> None:

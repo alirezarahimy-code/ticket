@@ -716,6 +716,21 @@ function domain_scan_mark_reachability(int $assetId, bool $online, int $userId):
     db()->prepare('INSERT INTO asset_profiles (asset_id, ad_online, ad_last_seen, ad_scanned_at, updated_by) VALUES (?, ?, ?, ?, ?)')->execute([$assetId, $online ? 1 : 0, $online ? $now : null, $now, $userId > 0 ? $userId : null]);
 }
 
+/** Build ping fallback IPs using the queue hostname as the key, not the asset hostname. */
+function domain_scan_queue_fallback_ips(array $items, array $assetIpsById): array
+{
+    $fallbackIps = [];
+    foreach ($items as $item) {
+        $hostname = strtolower(trim((string) ($item['hostname'] ?? '')));
+        $assetId = (int) ($item['asset_id'] ?? 0);
+        $ip = trim((string) ($assetIpsById[$assetId] ?? ''));
+        if ($hostname !== '' && filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4) !== false) {
+            $fallbackIps[$hostname] = $ip;
+        }
+    }
+    return $fallbackIps;
+}
+
 /** پیام خطای PowerShell/WMI را به فارسی قابل‌فهم تبدیل می‌کند. */
 function domain_scan_friendly_error(string $raw): string
 {
@@ -1815,15 +1830,17 @@ function domain_scan_process(int $runId, int $limit, int $userId, array $credent
             }
         }
         // IP ثبت‌شده در شناسنامه: اگر نام کامپیوتر در DNS حل نشد، از آن استفاده می‌شود.
+        // کلید باید نامِ صف باشد؛ AD ممکن است FQDN بدهد درحالی‌که شناسنامه نام کوتاه دارد.
         $fallbackIps = [];
         if ($assetIds !== []) {
-            $ipQuery = db()->prepare('SELECT LOWER(hostname) AS h, ip_address FROM assets WHERE id IN (' . implode(',', array_fill(0, count($assetIds), '?')) . ')');
+            $assetIds = array_values(array_unique($assetIds));
+            $ipQuery = db()->prepare('SELECT id, ip_address FROM assets WHERE id IN (' . implode(',', array_fill(0, count($assetIds), '?')) . ')');
             $ipQuery->execute($assetIds);
+            $assetIpsById = [];
             foreach ($ipQuery->fetchAll() as $row) {
-                if (trim((string) $row['ip_address']) !== '') {
-                    $fallbackIps[(string) $row['h']] = trim((string) $row['ip_address']);
-                }
+                $assetIpsById[(int) $row['id']] = trim((string) ($row['ip_address'] ?? ''));
             }
+            $fallbackIps = domain_scan_queue_fallback_ips($items, $assetIpsById);
         }
         // ۱) پینگ هم‌زمان همهٔ سیستم‌های این نوبت
         $pingResults = domain_scan_ping_hosts($hosts, $fallbackIps);

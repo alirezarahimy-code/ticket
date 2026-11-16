@@ -19,6 +19,7 @@ if (PHP_SAPI === 'cli' && !is_file($root . '/config.php')) {
 if (is_file($root . '/config.php')) { require_once $root . '/config.php'; }
 if (!function_exists('db')) { fwrite(STDERR, "تابع db() در دسترس نیست.\n"); exit(1); }
 require_once $root . '/asset-names.php';
+require_once $root . '/lib/asset-dedupe.php';
 
 $apply    = in_array('--apply', $argv, true);
 $enforce  = in_array('--enforce', $argv, true);
@@ -67,30 +68,13 @@ try {
 
     // ── ۲) پیدا کردن گروه‌های تکراری
     //
-    // ۱.۶۳.۱-r19 — دو کلید برای تشخیص، نه یکی:
-    //   الف) hostname_key — همان نام کامپیوتر؛ تکرارهای ناشی از درج بدون کلید.
-    //   ب) serial_number  — سریال سخت‌افزار؛ رکوردهایی که با نام‌های مختلف یا
-    //      IP خام برای **همان دستگاه** ساخته شده‌اند فقط با این کلید پیدا
-    //      می‌شوند — همان چیزی که ۱۲۵ را در برابر ۸۹ می‌گذارد.
+    // سه منبع مستقل و قابل‌گزارش:
+    //   الف) hostname_key — نام کامپیوتر
+    //   ب) serial_number  — سریال سخت‌افزار
+    //   ج) mac_address    — MAC معتبر؛ برای رکوردهای قدیمی که سریال ندارند
     //
-    // گروه‌ها با union-find ادغام می‌شوند تا رکوردی که هم‌نام و هم‌سریال است
-    // دو بار پردازش نشود و زنجیره‌ها (A~B با نام، B~C با سریال) یک گروه شوند.
-    $parent = [];
-    $findRoot = static function (int $x) use (&$parent): int {
-        while (($parent[$x] ?? $x) !== $x) { $x = $parent[$x]; }
-        return $x;
-    };
-    $linkIds = static function (array $ids) use (&$parent): void {
-        if (count($ids) < 2) { return; }
-        foreach ($ids as $id) { if (!isset($parent[$id])) { $parent[$id] = $id; } }
-        $first = $ids[0];
-        foreach ($ids as $id) {
-            $ra = $first; while (($parent[$ra] ?? $ra) !== $ra) { $ra = $parent[$ra]; }
-            $rb = $id;    while (($parent[$rb] ?? $rb) !== $rb) { $rb = $parent[$rb]; }
-            if ($ra !== $rb) { $parent[max($ra, $rb)] = min($ra, $rb); }
-        }
-    };
-
+    // MACهای خالی/نامعتبر/صفر/همه-F کنار گذاشته می‌شوند. در خروجی گزارش،
+    // تعداد هر منبع جداست تا پیش از --apply قابل بررسی باشد.
     $nameRows = $pdo->query(<<<'SQL'
         SELECT hostname_key AS k, GROUP_CONCAT(id ORDER BY id SEPARATOR ',') AS ids
           FROM assets
@@ -112,26 +96,39 @@ try {
     SQL)->fetchAll(PDO::FETCH_ASSOC);
     $serialGroups = count($serialRows);
 
-    foreach (array_merge($nameRows, $serialRows) as $row) {
-        $linkIds(array_map('intval', explode(',', (string) $row['ids'])));
-    }
+    $normalizedMac = "REPLACE(REPLACE(REPLACE(REPLACE(UPPER(TRIM(COALESCE(mac_address,''))),':',''),'-',''),'.',''),' ','')";
+    $macRowsAll = $pdo->query(<<<SQL
+        SELECT {$normalizedMac} AS k,
+               GROUP_CONCAT(id ORDER BY id SEPARATOR ',') AS ids,
+               COUNT(DISTINCT CASE
+                   WHEN serial_number IS NOT NULL
+                    AND UPPER(TRIM(serial_number)) NOT IN ({$junkSerials})
+                    AND CHAR_LENGTH(TRIM(serial_number)) >= 4
+                   THEN UPPER(TRIM(serial_number)) ELSE NULL END) AS serial_variants
+          FROM assets
+         WHERE mac_address IS NOT NULL
+           AND {$normalizedMac} REGEXP '^[0-9A-F]{12}$'
+           AND SUBSTRING({$normalizedMac}, 2, 1) REGEXP '^[02468ACE]$'
+           AND {$normalizedMac} NOT IN ('000000000000', 'FFFFFFFFFFFF', '020000000000')
+         GROUP BY {$normalizedMac}
+        HAVING COUNT(*) > 1
+    SQL)->fetchAll(PDO::FETCH_ASSOC);
+    // Never auto-merge a shared MAC when records have conflicting valid
+    // hardware serials; report the conflict for human review instead.
+    $macFilter = asset_dedupe_filter_mac_groups($macRowsAll);
+    $macRows = $macFilter['rows'];
+    $macConflictRows = $macFilter['conflict_rows'];
+    $macConflictGroups = $macFilter['conflicts'];
+    $macGroups = count($macRows);
 
-    $components = [];
-    foreach (array_keys($parent) as $id) {
-        $components[$findRoot((int) $id)][] = (int) $id;
-    }
-    $groups = [];
-    foreach ($components as $ids) {
-        if (count($ids) < 2) { continue; }
-        sort($ids);
-        $groups[] = ['cnt' => (string) count($ids), 'ids' => implode(',', $ids), 'keeper' => (string) $ids[0]];
-    }
-    usort($groups, static fn(array $a, array $b): int => (int) $b['cnt'] <=> (int) $a['cnt']);
+    // The same function is exercised by tools/test_asset_dedupe_offline.php;
+    // test and production cannot drift into different union-find implementations.
+    $groups = asset_dedupe_group_rows($nameRows, $serialRows, $macRows);
 
     $totalDupes = 0;
     foreach ($groups as $g) { $totalDupes += (int) $g['cnt'] - 1; }
     $out(sprintf('۲) گروه‌های تکراری: %d گروه، %d رکورد اضافه.', count($groups), $totalDupes));
-    $out(sprintf('   • از روی نام: %d گروه   • از روی سریال سخت‌افزار: %d گروه', $keyGroups, $serialGroups));
+    $out(sprintf('   • از روی نام: %d گروه   • سریال: %d گروه   • MAC بدون تعارض سریال: %d گروه   • MAC با سریال‌های متعارض (فقط گزارش): %d', $keyGroups, $serialGroups, $macGroups, $macConflictGroups));
     foreach (array_slice($groups, 0, 30) as $g) {
         $labels = [];
         try {
@@ -144,6 +141,20 @@ try {
         $out(sprintf('   • نگه: #%s  ←  %s', $g['keeper'], implode(' | ', $labels)));
     }
     if (count($groups) > 30) { $out('   … و ' . (count($groups) - 30) . ' گروه دیگر.'); }
+    foreach (array_slice($macConflictRows, 0, 20) as $row) {
+        $ids = array_values(array_filter(array_map('intval', explode(',', (string) ($row['ids'] ?? ''))), static fn (int $id): bool => $id > 0));
+        if (count($ids) < 2) { continue; }
+        try {
+            $q = $pdo->query('SELECT id, hostname FROM assets WHERE id IN (' . implode(',', $ids) . ') ORDER BY id');
+            $labels = [];
+            foreach ($q->fetchAll(PDO::FETCH_ASSOC) as $assetRow) {
+                $labels[] = '#' . $assetRow['id'] . '=' . (((string) ($assetRow['hostname'] ?? '')) !== '' ? (string) $assetRow['hostname'] : '(بی‌نام)');
+            }
+            $out('   • MAC مشترک با سریال‌های متعارض؛ ادغام نمی‌شود: ' . implode(' | ', $labels));
+        } catch (Throwable $e) {
+        }
+    }
+    if (count($macConflictRows) > 20) { $out('   … و ' . (count($macConflictRows) - 20) . ' گروه متعارض دیگر.'); }
 
     if (!$apply || $totalDupes === 0) {
         $out('');

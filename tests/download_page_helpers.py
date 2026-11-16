@@ -8,16 +8,19 @@
 روی نسخهٔ ۱.۶۲.۳۶ گیر کرد، در حالی که سامانه روی ۱.۶۲.۵۹ بود.
 
 اکنون همهٔ این تست‌ها یک بررسی مشترک و **نسخه‌آگنوستیک** دارند:
-تازه‌ترین بسته از `downloads/*.zip` (بر اساس نسخهٔ manifest و سپس زمان داخلی ZIP)
-باید در صفحه باشد، لینک SHA-256 داشته باشد و هیچ بستهٔ قدیمی‌تری در صفحه نباشد.
+فهرست بسته‌های منتشرشده را از لینک‌های واقعی صفحه می‌خوانند و آرشیوهای تاریخی یا
+نامزدهای موجود در `downloads/` را انتشار فرض نمی‌کنند. صفحه باید دقیقاً یک ZIP
+معتبر، لینک SHA-256 و گزارش تغییرات داشته باشد.
 """
 
 from __future__ import annotations
 
+import html
 import json
 import re
-import zipfile
 from pathlib import Path
+from urllib.parse import unquote, urlsplit
+import zipfile
 
 ROOT = Path(__file__).resolve().parent.parent
 DOWNLOADS = ROOT / "downloads"
@@ -56,13 +59,38 @@ def update_packages() -> list[dict]:
     return packages
 
 
+def published_package_names() -> list[str]:
+    """ZIPهایی را برمی‌گرداند که صفحهٔ دانلود واقعاً به آن‌ها لینک داده است.
+
+    `downloads/` همچنین آرشیوهای تاریخی و بسته‌های نامزدِ انتشار دارد. حضور یک ZIP
+    در پوشه به‌تنهایی به معنای انتشار آن نیست؛ لینک صفحهٔ دانلود مرجع عمومی است.
+    """
+    page = PAGE.read_text(encoding="utf-8")
+    hrefs = re.findall(r"<a\b[^>]*\bhref\s*=\s*(['\"])(.*?)\1", page, re.I | re.S)
+    names: list[str] = []
+    for _, raw_href in hrefs:
+        href = html.unescape(raw_href.strip())
+        path = unquote(urlsplit(href).path)
+        name = Path(path).name
+        if name.lower().endswith(".zip") and name not in names:
+            names.append(name)
+    return names
+
+
+def published_packages() -> list[dict]:
+    """بسته‌های معتبر و موجود که صفحهٔ دانلود به آن‌ها لینک داده است."""
+    available = {package["name"]: package for package in update_packages()}
+    names = published_package_names()
+    missing = [name for name in names if name not in available]
+    assert not missing, "صفحهٔ دانلود به ZIP ناموجود یا بدون manifest لینک داده است: " + ", ".join(missing)
+    return [available[name] for name in names]
+
+
 def latest_package() -> dict:
-    """جدیدترین بسته: بیشترین نسخه، و در نسخه‌های برابر، تازه‌ترین محتوا."""
-    packages = update_packages()
-    assert packages, "هیچ بستهٔ به‌روزرسانی با manifest در downloads/ نیست"
-    best_version = max(version_tuple(p["version"]) for p in packages)
-    newest = [p for p in packages if version_tuple(p["version"]) == best_version]
-    return max(newest, key=lambda p: (p["newest_member"], p["name"]))
+    """بستهٔ یگانهٔ منتشرشده در صفحهٔ دانلود؛ آرشیوها/نامزدها مبنای انتشار نیستند."""
+    packages = published_packages()
+    assert packages, "صفحهٔ دانلود هیچ بستهٔ ZIP معتبری را منتشر نکرده است"
+    return max(packages, key=lambda p: (version_tuple(p["version"]), p["newest_member"], p["name"]))
 
 
 def latest_package_name() -> str:
@@ -70,24 +98,18 @@ def latest_package_name() -> str:
 
 
 def check_download_page_lists_only_latest_package() -> None:
-    """صفحهٔ دانلود: فقط جدیدترین بسته، همراه لینک SHA-256 و گزارش تغییرات."""
+    """صفحهٔ دانلود دقیقاً یک ZIP منتشرشده، checksum معتبر و گزارش تغییرات دارد."""
     page = PAGE.read_text(encoding="utf-8")
+    names = published_package_names()
+    assert len(names) == 1, f"صفحهٔ دانلود باید فقط یک بستهٔ جاری داشته باشد؛ لینک‌ها: {names}"
     latest = latest_package()
     name = latest["name"]
     stem = name[: -len(".zip")]
 
-    assert name in page, f"صفحهٔ دانلود جدیدترین بستهٔ {latest['version']} ({name}) را نشان نمی‌دهد"
-    assert f"{stem}.zip.sha256" in page, "لینک SHA-256 جدیدترین بسته در صفحه نیست"
+    assert f"{stem}.zip.sha256" in page, "لینک SHA-256 بستهٔ جاری در صفحه نیست"
+    checksum = DOWNLOADS / f"{name}.sha256"
+    assert checksum.is_file(), f"فایل SHA-256 بستهٔ جاری وجود ندارد: {checksum.name}"
     assert "CHANGE-REPORT" in page, "لینک گزارش تغییرات در صفحه نیست"
-
-    older = [
-        package["name"]
-        for package in update_packages()
-        if package["name"] != name
-        and version_tuple(package["version"]) < version_tuple(latest["version"])
-        and package["name"] in page
-    ]
-    assert not older, "صفحهٔ دانلود بسته‌های قدیمی‌تر را هم نشان می‌دهد: " + ", ".join(sorted(older))
 
 
 def read(relative: str) -> str:

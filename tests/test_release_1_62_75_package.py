@@ -133,6 +133,11 @@ SUPERSEDED_BY_LATER_RELEASE = {
     "help-guide.php",
     # ۱.۶۲.۸۱ بند ۱۱ (ممیزی دورهٔ‌ای سامانه) را به سند معماری افزود.
     "docs/ARCHITECTURE-FA.md",
+    # 1.63.1 Request Center commits changed host navigation and these source files.
+    # 1.63.1-r19/r16 are local source snapshots, not approval to publish an updater ZIP.
+    "assets/app.js",
+    "assets/style.css",
+    "permissions.php",
     # ۱.۶۲.۸۴ قاعدهٔ تفکیک وظایف را داخل ticket_handler_level() نشاند و دو تابع
     # ticket_view_mode() و ticket_can_see_internal() را افزود، تا نمای صفحه تابع
     # نسبت کاربر با همان درخواست باشد نه نقش سراسری او.

@@ -43,7 +43,7 @@ def test_route_passes_selected_date_instead_of_today_guard():
 def test_save_many_forwards_date_to_each_save():
     groups = read("food-ticket-groups.php")
     assert "$date = food_ticket_manual_attendance_date((string) ($body['date'] ?? ''));" in groups
-    assert "$reason, $actor, $orderMaps, $date);" in groups
+    assert "$reason, $actor, $orderMaps, $date, $manualMealType);" in groups
 
 
 def test_ui_has_jalali_date_field_with_calendar():
@@ -83,7 +83,7 @@ def test_save_many_accepts_guest_id_zero():
     assert "if ($userId === false || (int) $userId < 0)" in groups
     assert "$labels = [0 => ['name' => 'مهمان', 'pc' => '']];" in groups
     assert "if ($userId === 0) {" in groups
-    assert "return food_ticket_api_manual_attendance_save_guest($withTicket, $physicalPrint, $reason, $actor, $targetDate);" in groups
+    assert "return food_ticket_api_manual_attendance_save_guest($withTicket, $physicalPrint, $reason, $actor, $targetDate, $mealType);" in groups
 
 
 def test_ui_pins_guest_row_and_sends_id_zero():
@@ -106,7 +106,7 @@ def test_guest_event_schema_support_already_exists():
 def test_destination_forms_fit_four_fields_on_one_line():
     style = read("assets/style.css")
     assert style.count("grid-template-columns: repeat(4, minmax(0, 1fr)) auto") >= 2
-    assert re.search(r"assets/style\.css\?v=3\.4\.\d+", read("index.php"))  # از ۱.۶۲.۱۰ نسخهٔ CSS جلوتر می‌رود
+    assert re.search(r"assets/style\.css\?v=3\.4\.\d+", read("lib/render.php"))  # لینک اصلی CSS اکنون در renderer مشترک است
     # موبایل همچنان تک‌ستونه می‌ماند
     assert "@media (max-width: 760px)" in style
 

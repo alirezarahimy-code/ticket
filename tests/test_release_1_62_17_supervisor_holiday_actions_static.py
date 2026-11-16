@@ -10,6 +10,7 @@ import re
 import zipfile
 from pathlib import Path
 from download_page_helpers import check_download_page_lists_only_latest_package
+from request_center_action_helpers import action_source
 
 ROOT = Path(__file__).resolve().parents[1]
 PACKAGE_NAME = "ticket-update-1.62.17-supervisor-holiday-actions-split-20261025.zip"
@@ -17,11 +18,12 @@ UPDATE_DIR = "updates/2026-10-25-release-162-17-supervisor-holiday-actions-split
 GUARD_END = "    exit;\n}\n\n"
 
 SUPERVISOR_ACTIONS = [
-    "food_order_cancel_decide",
+    "supervisor_assign_ticket",
     "supervisor_decision",
     "supervisor_reopen",
     "rate_ticket",
 ]
+FOOD_ORDER_ACTIONS = ["food_order_cancel_decide"]
 HOLIDAY_ACTIONS = [
     "toggle_holiday",
     "add_holiday",
@@ -38,23 +40,34 @@ def read(rel):
 
 def test_index_requires_both_files_in_original_order():
     src = read("index.php")
-    sup = "require __DIR__ . '/actions/supervisor-actions.php';"
-    hol = "require __DIR__ . '/actions/holiday-actions.php';"
-    assert src.count(sup) == 1 and src.count(hol) == 1
-    # ترتیب اجرای قبلی حفظ شده: اعلان‌ها < سرپرستی/امتیازدهی < اموال < درخواست‌ها < خدمات < تعطیلات < ارتباط دارایی
-    a = src.index("require __DIR__ . '/actions/asset-actions.php';")
-    t = src.index("require __DIR__ . '/actions/ticket-actions.php';")
-    s = src.index("require __DIR__ . '/actions/service-actions.php';")
-    # (از ۱.۶۲.۱۹ گروه ارتباط دارایی هم به actions/bulk-actions.php منتقل شد)
-    assert src.index(sup) < a < t < s < src.index(hol) < src.index("require __DIR__ . '/actions/bulk-actions.php';")
-    for action in SUPERVISOR_ACTIONS + HOLIDAY_ACTIONS:
+    dispatch_line = "require __DIR__ . '/modules/request-center/Actions/dispatch.php';"
+    food_order_line = "require __DIR__ . '/actions/food-order-actions.php';"
+    holiday_line = "require __DIR__ . '/actions/holiday-actions.php';"
+    asset_line = "require __DIR__ . '/actions/asset-actions.php';"
+    assert dispatch_line in src and food_order_line in src and holiday_line in src and asset_line in src
+    # Food cancellation decisions are owned by the food module, not Request Center.
+    # The remaining Request Center actions are dispatched together; holidays stay
+    # in the legacy path, with the registry preserving supervisor < ticket < service < bulk.
+    assert src.index(food_order_line) < src.index(dispatch_line) < src.index(asset_line) < src.index(holiday_line)
+    dispatch = read("modules/request-center/Actions/dispatch.php")
+    rc_order = ["supervisor-actions.php", "ticket-actions.php", "service-actions.php", "bulk-actions.php"]
+    rc_positions = [dispatch.index(f"require __DIR__ . '/{name}';") for name in rc_order]
+    assert rc_positions == sorted(rc_positions)
+    for action in SUPERVISOR_ACTIONS + HOLIDAY_ACTIONS + FOOD_ORDER_ACTIONS:
         assert f"if ($action === '{action}')" not in src, action
+
+
+def test_food_cancellation_action_stays_with_food_module():
+    src = read("actions/food-order-actions.php")
+    for action in FOOD_ORDER_ACTIONS:
+        assert src.count(f"if ($action === '{action}')") == 1, action
+    assert "if ($action === 'food_order_cancel_decide')" not in read("modules/request-center/Actions/supervisor-actions.php")
 
 
 def test_action_files_structure_and_persian_descriptions():
     for rel, actions in (("actions/supervisor-actions.php", SUPERVISOR_ACTIONS),
                          ("actions/holiday-actions.php", HOLIDAY_ACTIONS)):
-        src = read(rel)
+        src, _ = action_source(rel)
         assert src.startswith("<?php\n\ndeclare(strict_types=1);\n"), rel
         assert "if (!defined('APP_ROOT')) {" in src and GUARD_END in src, rel
         for action in actions:

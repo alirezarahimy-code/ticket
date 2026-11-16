@@ -98,7 +98,7 @@ def test_legacy_csrf_cookie_is_actively_cleared():
 
 def test_require_csrf_still_compares_in_constant_time():
     source = read("lib/logging-csrf.php")
-    start = source.index("function require_csrf(): void")
+    start = source.index("function require_csrf(bool $allow_retry = true): void")
     body = source[start:start + 1200]
     assert "hash_equals(" in body, "مقایسهٔ توکن باید با hash_equals باشد"
     assert "419" in body, "پاسخ درخواست نامعتبر باید ۴۱۹ بماند"

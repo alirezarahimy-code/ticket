@@ -2079,14 +2079,23 @@ function food_ticket_source_time_where(string $column, int $seconds, ?string $da
 {
     [$from, $to] = food_ticket_source_time_between($seconds);
     $datePrefix = '';
-    if ($date !== null && preg_match('/^\d{4}-\d{2}-\d{2}$/', $date) === 1) {
+    $validDate = null;
+    if ($date !== null && preg_match('/^(\d{4})-(\d{2})-(\d{2})$/', $date, $dm) === 1) {
+        if (!checkdate((int) $dm[2], (int) $dm[3], (int) $dm[1])) {
+            // تاریخ نامعتبر نباید شرط را به «فقط ساعت» تنزل دهد و رکورد دیگری را حذف کند.
+            return '(1 = 0)';
+        }
+        $validDate = $date;
         $datePrefix = $date . ' ';
     }
     $lo = $datePrefix . trim(food_ticket_source_time_literal_sod($from), '#');
     if ($to <= $from) {
-        // ۲۳:۵۹:۵۹ — ثانیهٔ آخر شب؛ کران بالای نیم‌باز وجود ندارد.
-        // کسری از ثانیه را با «بزرگ‌تر یا مساوی» می‌گیریم و همان‌جا متوقف می‌شویم:
-        // ردیف بعدی این جدول نیمه‌شب روز بعد است، پس بازهٔ باز امن است.
+        // ۲۳:۵۹:۵۹ — اگر تاریخ کامل داریم، کران بالا نیمه‌شب روز بعد است؛
+        // در ستونِ صرفاً زمان، خودِ کران پایین آخرین ثانیهٔ ممکن را می‌گیرد.
+        if ($validDate !== null) {
+            $nextDate = (new DateTimeImmutable($validDate))->modify('+1 day')->format('Y-m-d');
+            return '(' . $column . ' >= #' . $lo . '# AND ' . $column . ' < #' . $nextDate . ' 00:00:00#)';
+        }
         return '(' . $column . ' >= #' . $lo . '#)';
     }
     $hi = $datePrefix . trim(food_ticket_source_time_literal_sod($to), '#');
@@ -2230,8 +2239,21 @@ function food_ticket_source_minimal_where(array $item): ?string
     }
     if ($timeKey !== null) {
         $timeType = (string) ($types[$timeKey] ?? '');
-        $timeLiteral = food_ticket_source_column_sql_literal((string) $time, $timeKey, $timeType);
-        $parts[] = food_ticket_ident((string) ($columns[$timeKey] ?? $timeKey)) . ' = ' . $timeLiteral;
+        $timeColumn = food_ticket_ident((string) ($columns[$timeKey] ?? $timeKey));
+        $timeText = (string) $time;
+        $timeKind = food_ticket_source_column_kind((string) $timeKey);
+        $seconds = food_ticket_source_is_temporal((string) $timeKey, $timeType)
+            && ($timeKind === 'time' || $timeKind === 'datetime')
+            ? food_ticket_source_seconds_of_day($timeText)
+            : null;
+        if ($seconds !== null) {
+            // مسیر fallback هم باید کسری ثانیهٔ Access را تحمل کند؛ برابری دقیق دوباره همان ردیف را جا می‌گذارد.
+            $day = preg_match('/(\d{4}-\d{2}-\d{2})/', $timeText, $dm) === 1 ? $dm[1] : null;
+            $parts[] = food_ticket_source_time_where($timeColumn, $seconds, $day);
+        } else {
+            $timeLiteral = food_ticket_source_column_sql_literal($timeText, $timeKey, $timeType);
+            $parts[] = $timeColumn . ' = ' . $timeLiteral;
+        }
     }
     return $parts ? implode(' AND ', $parts) : null;
 }

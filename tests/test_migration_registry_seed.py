@@ -11,8 +11,16 @@ FRESH_INSTALL_DATA_REPAIR_MIGRATIONS = {
 }
 
 
+def _version_tuple(value: str) -> tuple[int, ...]:
+    if not re.fullmatch(r"\d+(?:\.\d+){1,3}", value):
+        raise AssertionError(f"Invalid migration version: {value!r}")
+    parts = tuple(int(part) for part in value.split("."))
+    return parts + (0,) * (4 - len(parts))
+
+
 def test_fresh_install_schemas_seed_every_forward_migration():
     version = (ROOT / "VERSION").read_text(encoding="utf-8").strip()
+    current_version = _version_tuple(version)
     expected = {
         p.name for p in (ROOT / "migrations").glob("*.sql")
         if "rollback" not in p.name.lower()
@@ -30,9 +38,16 @@ def test_fresh_install_schemas_seed_every_forward_migration():
         )
         assert match, f"{schema_name} does not seed the schema_updates baseline"
         rows = re.findall(r"\('([^']+)'\s*,\s*'([^']+)'\)", match.group(1))
-        versions = {row[0] for row in rows}
-        actual = {row[1] for row in rows}
-        assert versions == {version}, f"{schema_name} baseline version mismatch: {versions}"
+        migration_versions = [row[0] for row in rows]
+        migration_names = [row[1] for row in rows]
+        assert migration_versions, f"{schema_name} has an empty migration baseline"
+        assert all(_version_tuple(item) <= current_version for item in migration_versions), (
+            f"{schema_name} records a migration from a future version: {migration_versions}"
+        )
+        assert len(migration_names) == len(set(migration_names)), (
+            f"{schema_name} records a migration more than once"
+        )
+        actual = set(migration_names)
         assert actual == expected, (
             f"{schema_name} migration registry baseline mismatch; "
             f"missing={sorted(expected - actual)}, extra={sorted(actual - expected)}"

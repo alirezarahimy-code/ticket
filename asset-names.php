@@ -428,7 +428,7 @@ function asset_resolve_id(?string $hostname, ?string $tag = null, ?string $seria
  *
  * @return array{key:string,match:string,value:string}
  */
-function asset_stable_identity(?string $hostname, ?string $serial = null, ?string $mac = null): array
+function asset_identity_serial_value(?string $serial): string
 {
     $serial = strtoupper(trim((string) $serial));
     $junkSerials = [
@@ -436,13 +436,35 @@ function asset_stable_identity(?string $hostname, ?string $serial = null, ?strin
         'NONE', 'N/A', '0', '00000000', 'NOT SPECIFIED', 'CHASSIS SERIAL NUMBER',
         '0123456789', 'SERIAL', 'UNKNOWN',
     ];
-    if ($serial !== '' && !in_array($serial, $junkSerials, true) && strlen($serial) >= 4) {
-        return ['key' => 'sn:' . $serial, 'match' => 'serial', 'value' => $serial];
+    return $serial !== '' && !in_array($serial, $junkSerials, true) && strlen($serial) >= 4 ? $serial : '';
+}
+
+function asset_identity_mac_value(?string $mac): string
+{
+    $raw = trim((string) $mac);
+    // Remove only ordinary MAC separators. Arbitrary text must not become a
+    // plausible address merely because its non-hex characters were discarded.
+    $compact = preg_replace('/[:.\- ]/', '', $raw);
+    if (!is_string($compact) || preg_match('/^[0-9A-Fa-f]{12}$/', $compact) !== 1) {
+        return '';
     }
-    $mac = strtoupper((string) preg_replace('/[^0-9A-Fa-f]/', '', trim((string) $mac)));
+    $mac = strtoupper($compact);
     $junkMacs = ['', '000000000000', 'FFFFFFFFFFFF', '020000000000'];
-    if ($mac !== '' && preg_match('/^[0-9A-F]{12}$/', $mac) === 1 && !in_array($mac, $junkMacs, true)) {
-        return ['key' => 'mac:' . $mac, 'match' => 'mac', 'value' => $mac];
+    if (in_array($mac, $junkMacs, true) || (hexdec(substr($mac, 0, 2)) & 1) !== 0) {
+        return '';
+    }
+    return $mac;
+}
+
+function asset_stable_identity(?string $hostname, ?string $serial = null, ?string $mac = null): array
+{
+    $serialValue = asset_identity_serial_value($serial);
+    if ($serialValue !== '') {
+        return ['key' => 'sn:' . $serialValue, 'match' => 'serial', 'value' => $serialValue];
+    }
+    $macValue = asset_identity_mac_value($mac);
+    if ($macValue !== '') {
+        return ['key' => 'mac:' . $macValue, 'match' => 'mac', 'value' => $macValue];
     }
     $nameKey = asset_identity_key($hostname);
     if ($nameKey !== '') {
@@ -454,35 +476,32 @@ function asset_stable_identity(?string $hostname, ?string $serial = null, ?strin
 /**
  * پیدا کردن رکورد موجود با اولویت هویت پایدار، نه نام.
  *
- * مسیرهای استخراج باید این را به‌جای asset_resolve_id() صدا بزنند: با آن،
- * تعویض IP یا تغییر نام کامپیوتر رکورد تازه نمی‌سازد و همان شناسنامه
- * به‌روز می‌شود.
+ * ترتیبِ بررسی، سریال → MAC → نام است. نکتهٔ مهم: اگر یک سریال معتبر
+ * در جدول پیدا نشد، MAC هم امتحان می‌شود؛ این حالت هنگام تعویض مادربرد
+ * پیش می‌آید (سریال BIOS عوض می‌شود، اما کارت شبکه/نام همان است).
  *
- * @return array{id:int,matched_by:string} id=0 یعنی رکوردی نبود
+ * @return array{id:int,matched_by:string} id=0 یعنی هیچ تطبیقی نبود
  */
 function asset_resolve_by_machine(?string $hostname, ?string $serial = null, ?string $mac = null): array
 {
-    $identity = asset_stable_identity($hostname, $serial, $mac);
-    if ($identity['key'] === '') {
-        return ['id' => 0, 'matched_by' => ''];
-    }
-
-    if ($identity['match'] === 'serial') {
+    $serialValue = asset_identity_serial_value($serial);
+    if ($serialValue !== '') {
         $q = db()->prepare('SELECT id FROM assets WHERE UPPER(TRIM(serial_number)) = ? ORDER BY id ASC LIMIT 1');
-        $q->execute([$identity['value']]);
+        $q->execute([$serialValue]);
         $id = (int) ($q->fetchColumn() ?: 0);
         if ($id > 0) {
             return ['id' => $id, 'matched_by' => 'serial'];
         }
     }
 
-    if ($identity['match'] === 'mac') {
+    $macValue = asset_identity_mac_value($mac);
+    if ($macValue !== '') {
         $q = db()->prepare(
             "SELECT id FROM assets
-             WHERE REPLACE(REPLACE(REPLACE(UPPER(COALESCE(mac_address,'')),':',''),'-',''),'.','') = ?
+             WHERE REPLACE(REPLACE(REPLACE(REPLACE(UPPER(COALESCE(mac_address,'')),':',''),'-',''),'.',''),' ','') = ?
              ORDER BY id ASC LIMIT 1"
         );
-        $q->execute([$identity['value']]);
+        $q->execute([$macValue]);
         $id = (int) ($q->fetchColumn() ?: 0);
         if ($id > 0) {
             return ['id' => $id, 'matched_by' => 'mac'];

@@ -30,17 +30,19 @@ def read(rel):
 
 def test_index_requires_all_four_files_in_original_order():
     src = read("index.php")
-    order = ["account-actions", "food-brand-actions", "cd-dvd-actions",
-             "notification-actions", "supervisor-actions"]
+    order = ["account-actions", "food-brand-actions", "cd-dvd-actions", "notification-actions"]
     positions = []
     for name in order:
         line = f"require __DIR__ . '/actions/{name}.php';"
         assert src.count(line) == 1, name
         positions.append(src.index(line))
     assert positions == sorted(positions)
-    # از ۱.۶۲.۲۰ (برش ۹) گروه پشتیبان‌گیری در فایل جدا است؛ جایگاهش همان است (بین CD/DVD و اعلان‌ها)
+    # از ۱.۶۲.۲۰ گروه پشتیبان‌گیری جداست؛ بعدها supervisor به رجیستری Request Center منتقل شد.
     backup = src.index("require __DIR__ . '/actions/backup-actions.php';")
     assert positions[2] < backup < positions[3]
+    dispatch_line = "require __DIR__ . '/modules/request-center/Actions/dispatch.php';"
+    assert dispatch_line in src and positions[3] < src.index(dispatch_line)
+    assert "require __DIR__ . '/supervisor-actions.php';" in read("modules/request-center/Actions/dispatch.php")
     assert "if ($action === 'system_update')" in read("actions/backup-actions.php")
     for actions in FILES_AND_ACTIONS.values():
         for action in actions:

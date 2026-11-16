@@ -52,6 +52,7 @@ DROP TABLE IF EXISTS
     ticket_ratings,
     ticket_messages,
     tickets,
+    request_center_appointments,
     service_catalog_fields,
     service_catalog,
     categories,

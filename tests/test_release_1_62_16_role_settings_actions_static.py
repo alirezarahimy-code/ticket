@@ -30,11 +30,13 @@ SETTINGS_ACTIONS = [
     "save_settings",
     # ۱.۶۲.۵۲ (چند شرکت): نام‌های نمایشی شرکت‌ها ذخیره می‌شود.
     "save_org_company_names",
+    # ۱.۶۳.۱-r19 source addition; it is not part of the immutable 1.62.16 ZIP.
+    "reset_assets",
 ]
 
 # اکشن‌هایی که در بستهٔ منتشرشدهٔ جاری هم توضیح سرآیند ندارند؛ افزودن توضیح، فایل
 # را از نسخهٔ روی سرور جدا می‌کرد، پس فقط ثبت شده است.
-UNDOCUMENTED_HEADER_ACTIONS = {"save_org_company_names"}
+UNDOCUMENTED_HEADER_ACTIONS = {"save_org_company_names", "reset_assets"}
 
 
 def read(rel):

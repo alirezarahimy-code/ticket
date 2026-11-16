@@ -42,9 +42,10 @@ def test_food_print_page_treats_layout_design_as_optional():
 
 def test_shared_header_does_not_fail_when_layout_designer_is_absent_or_unavailable():
     source = (ROOT / "index.php").read_text()
+    shared_render = (ROOT / "lib/render.php").read_text()
     assert "if (is_file(__DIR__ . '/admin-layout-design.php'))" in source
     assert "if (function_exists('admin_layout_design_api_handle'))" in source
-    assert "page layout enhancement skipped" in source
+    assert "page layout enhancement skipped" in shared_render
 
 
 def test_food_panel_skips_invalid_empty_search_replacements_and_catches_transform_errors():

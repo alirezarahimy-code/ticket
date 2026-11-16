@@ -640,7 +640,7 @@
     }
     return org.render(state.__orgMap, rows || [], function (list) {
       return deliveredReportTableHtml(list);
-    }, { unitLabel: 'فیش' });
+    }, { unitLabel: 'فیش', foodKey: 'food_name' });
   };
   /** نگاشت سازمانی را یک‌بار می‌گیرد (endpoint مشترک همهٔ گزارش‌ها). */
   function requestOrgMap(done) {
@@ -838,7 +838,7 @@
     }
     return org.render(state.__orgMap, rows || [], function (list) {
       return orderTableHtml(list);
-    }, { unitLabel: 'سفارش' });
+    }, { unitLabel: 'سفارش', foodKey: 'food_name' });
   }
 
   function renderGroupOrders() {

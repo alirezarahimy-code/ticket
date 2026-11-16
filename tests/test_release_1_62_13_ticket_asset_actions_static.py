@@ -5,6 +5,7 @@ import re
 import zipfile
 from pathlib import Path
 from download_page_helpers import check_download_page_lists_only_latest_package
+from request_center_action_helpers import action_source
 
 ROOT = Path(__file__).resolve().parents[1]
 PACKAGE_NAME = "ticket-update-1.62.13-ticket-asset-actions-split-fix1-20261025.zip"
@@ -26,25 +27,28 @@ def read(name: str) -> str:
 
 
 def body_of(name: str) -> str:
-    src = read(name)
+    src, _ = action_source(name)
     assert src.count(GUARD_END) == 1, name
     return src.split(GUARD_END, 1)[1]
 
 
 def test_index_requires_both_files_in_place_and_in_order():
     src = read("index.php")
-    t = "require __DIR__ . '/actions/ticket-actions.php';"
-    a = "require __DIR__ . '/actions/asset-actions.php';"
-    assert t in src and a in src
-    # ترتیب اجرای قبلی حفظ شده: اموال قبل از درخواست‌ها، هر دو قبل از گروه خدمات
-    # (از ۱.۶۲.۱۴ گروه خدمات هم به actions/service-actions.php منتقل شد)
-    assert src.index(a) < src.index(t) < src.index("require __DIR__ . '/actions/service-actions.php';")
+    dispatch = "require __DIR__ . '/modules/request-center/Actions/dispatch.php';"
+    asset = "require __DIR__ . '/actions/asset-actions.php';"
+    assert dispatch in src and asset in src
+    # Request Center owns ticket/service actions; the legacy front controller
+    # keeps the separate asset dispatcher in its original POST execution path.
+    assert src.index(dispatch) < src.index(asset)
+    rc_dispatch = read("modules/request-center/Actions/dispatch.php")
+    assert "require __DIR__ . '/ticket-actions.php';" in rc_dispatch
+    assert "require dirname(__DIR__) . '/modules/request-center/Actions/ticket-actions.php';" in read("actions/ticket-actions.php")
     for action in TICKET_ACTIONS + ASSET_ACTIONS:
         assert f"if ($action === '{action}')" not in src, action
 
 
 def test_ticket_actions_file_sections_and_persian_descriptions():
-    src = read("actions/ticket-actions.php")
+    src, _ = action_source("actions/ticket-actions.php")
     for action in TICKET_ACTIONS:
         assert f"if ($action === '{action}')" in src, action
     # شرح فارسی بخش‌ها در سرآیند (خواستهٔ کاربر)
@@ -70,13 +74,17 @@ def test_asset_actions_file_sections_and_persian_descriptions():
     assert "اسکن دامین" in src and "پینگ گروهی" in src
     assert "defined('APP_ROOT')" in src and "http_response_code(404)" in src
     body = body_of("actions/asset-actions.php")
-    assert body.count("{") == body.count("}") == 66
+    assert body.count("{") == body.count("}"), "بدنهٔ اکشن‌های دارایی آکولاد نامتوازن دارد"
     assert "?>" not in body
     # دام‌های قطعی ممنوع؛ کلوژر بی‌نام و continue داخل حلقه مجاز و شناخته‌شده‌اند
     for trap in (r"\breturn\b", r"\bgoto\b", r"\bbreak;", r"__FILE__", r"__DIR__"):
         assert not re.search(trap, body), trap
-    assert body.count("static function") == 1  # فقط کلوژر $pingFail
-    assert body.count("continue;") == 2        # حلقهٔ گزارش + گارد کلیدهای داخلی (_clear_fields/_field_provenance)
+    # Later scan/prepare actions add anonymous failure closures; named functions
+    # remain unsafe in this include-based dispatcher body.
+    for closure in ("$pingFail", "$prepareFail", "$gpoFail"):
+        assert f"{closure} = static function" in body
+    assert not re.search(r"\bfunction\s+[A-Za-z_]", body)
+    assert body.count("continue;") == 2  # حلقهٔ گزارش + گارد کلیدهای داخلی (_clear_fields/_field_provenance)
 
 
 def test_version_manifest_and_package():

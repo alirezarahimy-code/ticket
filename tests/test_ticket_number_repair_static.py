@@ -109,11 +109,16 @@ def test_chatbot_still_recognises_the_internal_reference():
 
 def test_list_pages_prime_the_number_cache_instead_of_querying_per_row():
     """هر فهرستی که ticket_no را با SELECT آورده، نباید در حلقه کوئری جدا بزند."""
-    source = read("index.php")
-    assert source.count("ticket_number_cache_prime(") >= 4, (
+    list_sources = {
+        "$queueRows": read("modules/request-center/Pages/queue.php"),
+        "$reportRows": read("modules/request-center/Pages/reports.php"),
+        "$supervisorRows": read("modules/request-center/Pages/supervisor.php"),
+        "$tickets": read("modules/request-center/lib/endpoints.php"),
+    }
+    assert sum(source.count("ticket_number_cache_prime(") for source in list_sources.values()) >= 4, (
         "صف کار، گزارش، پنل سوپروایزر و فهرست اصلی باید کش را پر کنند"
     )
-    for variable in ("$queueRows", "$reportRows", "$supervisorRows", "$tickets"):
+    for variable, source in list_sources.items():
         assert f"ticket_number_cache_prime({variable})" in source, (
             f"فهرست {variable} هنوز به ازای هر ردیف کوئری می‌زند"
         )
@@ -131,14 +136,14 @@ def test_cache_prime_helper_exists_and_tolerates_bad_rows():
 
 
 def test_bulk_update_has_a_selection_cap():
-    source = read("actions/bulk-actions.php")
+    source = read("modules/request-center/Actions/bulk-actions.php")
     assert "count($ticketIds) > 200" in source, (
         "عملیات گروهی باید سقف داشته باشد تا قفل‌های تراکنش طولانی نشوند"
     )
 
 
 def test_bulk_update_reports_tickets_that_were_already_in_the_target_status():
-    source = read("actions/bulk-actions.php")
+    source = read("modules/request-center/Actions/bulk-actions.php")
     assert "$bulkAlready" in source
     assert "درخواست از قبل در همین وضعیت بود." in source, (
         "تیکت هم‌وضعیت باید در گزارش دیده شود تا مجموع جور دربیاید"

@@ -29,7 +29,16 @@ class NoDuplicatePhpFunctionsTest(unittest.TestCase):
             if any(part in SKIP_DIRS for part in path.relative_to(ROOT).parts):
                 continue
             source = path.read_text(encoding='utf-8', errors='ignore')
-            names = FUNCTION_RE.findall(source)
+            # Method names are scoped to their class, so two constructors in
+            # separate classes are legal. This guard targets global functions,
+            # which are the declarations that collide when files are included.
+            names = []
+            for match in FUNCTION_RE.finditer(source):
+                line_start = source.rfind('\n', 0, match.start()) + 1
+                declaration_prefix = source[line_start:match.start()]
+                if re.search(r'\b(?:public|protected|private)\b[^;{}]*$', declaration_prefix):
+                    continue
+                names.append(match.group(1))
             duplicates = [
                 f'{name} ({count} بار)'
                 for name, count in collections.Counter(names).items()

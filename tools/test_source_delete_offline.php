@@ -185,10 +185,23 @@ $jalaliTextDate = [
 ];
 $minimal = (string) food_ticket_source_minimal_where($jalaliTextDate);
 check('۱۰: تاریخ متنی شمسی نقل‌قول‌شده نوشته شد (نه SQL خراب)', str_contains($minimal, "[C_Date] = '1404/07/14'"), $minimal);
-check('۱۱: ساعت استاندارد با قالب #...#', str_contains($minimal, '[C_Time] = #1899-12-30 14:39:40#'), $minimal);
+check(
+    '۱۱: fallback ساعت بازهٔ یک‌ثانیه‌ای می‌سازد، نه برابری دقیق',
+    str_contains($minimal, '[C_Time] >= #14:39:40#')
+        && str_contains($minimal, '[C_Time] < #14:39:41#')
+        && !preg_match('/\[C_Time\]\s*=\s*#/', $minimal),
+    $minimal
+);
 
 $isoMinimal = (string) food_ticket_source_minimal_where($datetimeItem);
-check('۱۲: شناسهٔ کمینه شامل uid و هر دو ستون زمان است', str_contains($isoMinimal, "[L_UID] = '0377'") && str_contains($isoMinimal, '[C_Date] = #2026-10-06 00:00:00#'), $isoMinimal);
+check(
+    '۱۲: شناسهٔ کمینه، UID و تاریخ را همراه بازهٔ زمان نگه می‌دارد',
+    str_contains($isoMinimal, "[L_UID] = '0377'")
+        && str_contains($isoMinimal, '[C_Date] = #2026-10-06 00:00:00#')
+        && str_contains($isoMinimal, '[C_Time] >= #1899-12-30 14:39:40#')
+        && str_contains($isoMinimal, '[C_Time] < #1899-12-30 14:39:41#'),
+    $isoMinimal
+);
 
 $noUidItem = ['row' => ['x' => 1], 'columns' => [], 'uid' => '', 'card' => '', 'date_raw' => '2026-10-06', 'time_raw' => '10:00:00'];
 check('۱۳: بدون uid/کارت → شرط کمینه ساخته نمی‌شود', food_ticket_source_minimal_where($noUidItem) === null);

@@ -262,6 +262,26 @@ function inventory_merge_missing_values(array $fresh, array $previous, ?array $s
     return $fresh;
 }
 
+/**
+ * Bind asset INSERT values in the canonical schema order.
+ *
+ * Both the local collector and the inventory API build their remaining values
+ * with hostname at index 0. The SQL column prefix is always
+ * (asset_tag, hostname, hostname_key); the values after that prefix therefore
+ * start at index 1. Keeping the slice here prevents a repeated hostname from
+ * silently shifting every later bind and causing PDO parameter-count errors.
+ */
+function inventory_asset_insert_params(string $assetTag, array $values): array
+{
+    $values = array_values($values);
+    if (!array_key_exists(0, $values)) {
+        throw new InvalidArgumentException('Inventory asset INSERT requires hostname at values[0].');
+    }
+    $hostname = (string) $values[0];
+    $hostnameKey = function_exists('asset_identity_key') ? asset_identity_key($hostname) : '';
+    return [$assetTag, $hostname, $hostnameKey, ...array_slice($values, 1)];
+}
+
 function inventory_saved_asset_snapshot(array $asset): array
 {
     $decode = static function (mixed $json): array {
@@ -720,7 +740,7 @@ function inventory_upsert_server_asset(array $inventory, int $userId): int
         db()->prepare('UPDATE assets SET hostname = ?, serial_number = ?, manufacturer = ?, model = ?, operating_system = ?, os_architecture = ?, os_serial = ?, ip_address = ?, mac_address = ?, cpu = ?, memory_mb = ?, disks_json = ?, software_json = ?, hardware_json = ?, peripherals_json = ?, domain_username = ?, antivirus = ?, source = "server_inventory", last_inventory_at = NOW() WHERE id = ?')->execute([...$values, $assetId]);
                 if (function_exists('asset_sync_identity_key')) { asset_sync_identity_key($assetId); }
     } else {
-        db()->prepare('INSERT INTO assets (asset_tag, hostname, hostname_key, serial_number, manufacturer, model, operating_system, os_architecture, os_serial, ip_address, mac_address, cpu, memory_mb, disks_json, software_json, hardware_json, peripherals_json, domain_username, antivirus, source, last_inventory_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, "server_inventory", NOW())')->execute([$assetTag, $values[0], (function_exists('asset_identity_key') ? asset_identity_key((string) $values[0]) : ''), ...$values]);
+        db()->prepare('INSERT INTO assets (asset_tag, hostname, hostname_key, serial_number, manufacturer, model, operating_system, os_architecture, os_serial, ip_address, mac_address, cpu, memory_mb, disks_json, software_json, hardware_json, peripherals_json, domain_username, antivirus, source, last_inventory_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, "server_inventory", NOW())')->execute(inventory_asset_insert_params($assetTag, $values));
         $assetId = (int) db()->lastInsertId();
     }
     if (function_exists('asset_sync_identity_key')) { asset_sync_identity_key($assetId); }

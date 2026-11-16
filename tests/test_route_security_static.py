@@ -16,16 +16,24 @@ def section(source: str, start: str, end: str) -> str:
 
 
 def test_new_ticket_page_requires_ticket_create_permission():
-    index = read("index.php")
-    page = section(index, "if ($page === 'new-ticket') {", "\nif ($page === 'ticket') {")
-    assert "$user = require_permission('ticket.create');" in page
+    page = read("modules/request-center/Pages/create.php")
+    route = section(page, "if ($page === 'new-ticket') {", "    $cdDvdRequestRecord = null;")
+    assert "$user = require_login();" in route
+    assert "user_can($user, 'ticket.create')" in route
+    assert "request_center_error_page(403" in route
 
 
 def test_post_action_dispatch_enforces_csrf_before_handlers():
-    index = read("index.php")
-    dispatch = section(index, "if ($_SERVER['REQUEST_METHOD'] === 'POST') {", "\nif ($page === 'chatbot-api')")
-    assert "require_csrf();" in dispatch
-    assert dispatch.index("require_csrf();") < dispatch.index("$action = (string) ($_POST['action'] ?? '');")
+    post_protocol = read("lib/http-post.php")
+    begin = section(post_protocol, "function post_context_begin()", "\n/**")
+    assert begin.index("require_csrf();") < begin.index("$action = (string) ($_POST['action'] ?? '');")
+
+    legacy = read("index.php")
+    legacy_dispatch = section(legacy, "if ($_SERVER['REQUEST_METHOD'] === 'POST') {", "\nif ($page === 'chatbot-api')")
+    assert legacy_dispatch.index("post_context_begin();") < legacy_dispatch.index("require __DIR__ . '/modules/request-center/Actions/dispatch.php';")
+
+    independent = read("modules/request-center/post-handler.php")
+    assert independent.index("post_context_begin();") < independent.index("require __DIR__ . '/Actions/dispatch.php';")
 
 
 def test_food_ticket_api_requires_login_and_csrf_for_post():

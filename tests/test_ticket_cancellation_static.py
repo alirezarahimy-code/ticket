@@ -1,3 +1,4 @@
+import re
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -81,11 +82,13 @@ check("'ola_policy_id' => $replyOla['policy_id']" in ticket_actions
       "reply transitions persist OLA deadlines after resuming from waiting_user")
 check("'cancelled' => []" in workflow_service and "'cancelled' => 'لغوشده به درخواست ثبت‌کننده'" in bootstrap,
       "cancelled is a terminal, human-readable ticket status")
-check("$ownerCondition = $serviceGroup === 'it'" in index
+owner_fallback = "$ownerCondition = $serviceGroup === 'support' ? 'u.role = \"support_manager\"' : '1 = 0';"
+check(owner_fallback in index
       and "AND hu.code = ?" in index
       and "$fallback->execute([$serviceGroup, $departmentId, $departmentId]);" in index
-      and "u.department_id = ?" in index,
-      "automatic fallback stays within the requested handling unit and department")
+      and "u.department_id = ?" in index
+      and "COALESCE(u.is_primary_admin, 0) = 0" in index,
+      "automatic fallback stays in the requested handling unit/department and excludes primary admins")
 check("status ENUM('new','manager_review','assigned','in_progress','waiting_user','pending','resolved','closed','cancelled','rejected')" in schema
       and "cancel_requested_at DATETIME NULL" in schema
       and "cancel_requested_by INT UNSIGNED NULL" in schema
@@ -141,10 +144,17 @@ check("function ticket_is_waiting_status" in bootstrap
       and "SET `status` = 'waiting_user'" in migration_pending
       and "WHERE `status` = 'pending'" in migration_pending,
       "pending is treated as waiting_user for SLA/OLA and normalized by migration")
-index_user_text = "\n".join(line for line in index.splitlines() if not line.lstrip().startswith("//"))
+def strip_php_comments(source: str) -> str:
+    source = re.sub(r"/\*.*?\*/", " ", source, flags=re.S)
+    return "\n".join(line for line in source.splitlines() if not line.lstrip().startswith("//"))
+
+
+index_user_text = strip_php_comments(index)
+bootstrap_user_text = strip_php_comments(bootstrap)
+permissions_user_text = strip_php_comments(permissions)
 check("تیکت" not in index_user_text
-      and "تیکت" not in bootstrap
-      and "تیکت" not in permissions
+      and "تیکت" not in bootstrap_user_text
+      and "تیکت" not in permissions_user_text
       and "ثبت درخواست" in index
       and "سامانه درخواست پشتیبانی" in index,
       "user-facing texts use «درخواست» instead of «تیکت» (code identifiers stay Latin)")

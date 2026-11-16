@@ -197,7 +197,17 @@ def test_every_migration_index_exists_in_both_schema_files():
         for table, index in sorted(wanted):
             if table not in known:
                 continue
-            if not re.search(rf"`?{re.escape(index)}`?\s*\(", bodies.get(table, ""), re.I):
+            body = bodies.get(table, "")
+            has_named_index = re.search(rf"`?{re.escape(index)}`?\s*\(", body, re.I) is not None
+            # Migration 035 creates this named index only if no unique index on
+            # categories.code exists. Both fresh schemas declare code UNIQUE inline,
+            # which is semantically equivalent and correctly makes that DDL a no-op.
+            inline_unique_category_code = (
+                table == "categories"
+                and index == "uq_categories_code"
+                and re.search(r"^\s*`?code`?\s+[^,\n]*\bUNIQUE\b", body, re.I | re.M) is not None
+            )
+            if not has_named_index and not inline_unique_category_code:
                 missing.append(f"{table}.{index}")
         assert not missing, (
             f"{name} این ایندکس‌های مهاجرت را ندارد: {missing}"
@@ -305,7 +315,7 @@ def test_both_schema_files_seed_the_same_structural_rows():
 
 def test_full_rebuild_drops_every_table_in_both_schema_files():
     """``rebuild-final.sql`` نباید جدولی را جا بیندازد، وگرنه بازسازی ناقص است."""
-    rebuild = _strip_sql_comments((ROOT / "rebuild-final.sql").read_text(encoding="utf-8"))
+    rebuild = _strip_sql_comments((ROOT / "docs/architecture/rebuild-final.sql").read_text(encoding="utf-8"))
     m = re.search(r"DROP\s+TABLE\s+IF\s+EXISTS(.*?);", rebuild, re.S | re.I)
     assert m is not None, "rebuild-final.sql دستور DROP TABLE IF EXISTS ندارد"
     dropped = {t.strip().strip("`").lower() for t in m.group(1).split(",") if t.strip()}
