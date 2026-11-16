@@ -38,3 +38,11 @@ def test_release_asset_manifest_is_safe_complete_and_hash_verified() -> None:
     assert workflow.count("RELEASE-ASSET-MANIFEST-$RELEASE_VERSION.txt") == 2
     assert 'git rev-parse "$RELEASE_TAG^{commit}"' in workflow
     assert 'gh release edit "$RELEASE_TAG" --title "$TITLE" --notes-file "$NOTES"' in workflow
+
+    # Manual dispatch must not bypass release/source integrity checks.
+    assert 'INPUT_RELEASE_TAG: ${{ inputs.release_tag }}' in workflow
+    assert 'RELEASE_TAG="${INPUT_RELEASE_TAG:?release_tag input is required}"' in workflow
+    assert 'if [ "$RELEASE_TAG" != "v$VERSION_LINE" ]; then' in workflow
+    assert 'if git ls-remote --exit-code --tags origin "refs/tags/$RELEASE_TAG" >/dev/null 2>&1; then' in workflow
+    assert 'if [ "${{ github.event_name }}" = "push" ] && git ls-remote' not in workflow
+    assert 'if [ "$release_commit" != "$GITHUB_SHA" ]; then' in workflow
