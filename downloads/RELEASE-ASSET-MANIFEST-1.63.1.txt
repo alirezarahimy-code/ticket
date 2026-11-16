@@ -1,0 +1,4 @@
+# Machine-readable ZIP manifest for 1.63.1 r14.
+# One safe downloads/ basename per line; SHA-256 sidecars are mandatory.
+ticket-update-1.63-to-1.63.1-r14-org-profile-20261115.zip
+ticket-full-1.63.1-r14-20261115.zip
