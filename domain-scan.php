@@ -755,6 +755,8 @@ function domain_scan_friendly_error(string $raw): string
     // آماده‌سازی به‌اشتباه «روش SMB هم ناموفق بود» گزارش می‌شد.
     $smbMap = [
         'SMB_ACCESS_DENIED' => 'روش SMB هم ناموفق بود: حساب واردشده روی این مقصد ادمین محلی نیست یا C$ در دسترس نیست. این تنها شرطی است که TNI هم دارد.',
+        'SMB_NOT_ADMIN' => 'روش SMB: با این حساب به مقصد وارد شدیم، ولی باز کردن C$ رد شد — یعنی این حساب روی همین کامپیوتر عضو «Administrators محلی» نیست. این تنها شرطی است که TNI هم دارد و هیچ نرم‌افزاری بدون آن موفق نمی‌شود.',
+        'SMB_BAD_CREDENTIALS' => 'روش SMB: نام کاربری یا رمز یا نام دامنه نادرست است — ویندوز نتوانست با این حساب وارد مقصد شود. نام دامنه را با خروجی بخش ۰.۵ (نام واقعی دامنه) بسنجید.',
         'SMB_UNREACHABLE' => 'روش SMB هم ناموفق بود: پورت 445 روی مقصد بسته است (فایروال یا سرویس File and Printer Sharing).',
         'SMB_TASK_FAILED' => 'روش SMB هم ناموفق بود: تسک زمان‌بندی‌شده روی مقصد ساخته/اجرا نشد (سرویس Task Scheduler و قاعدهٔ Remote Service Management).',
         'SMB_COLLECT_TIMEOUT' => 'روش SMB هم ناموفق بود: عامل روی مقصد در مهلت مقرر نتیجه نداد.',
@@ -1036,7 +1038,7 @@ function domain_scan_error_code(string $message): string
         // ممکن است «Access is denied» یا «TCP 445» را هم داشته باشد، و اگر
         // دیرتر بررسی شوند به‌اشتباه به کد عمومی access_denied می‌افتند.
         // با پیشوند ثابت خودِ اسکریپت تطبیق داده می‌شوند، نه با متن آزاد.
-        'smb_access_denied' => ['SMB_ACCESS_DENIED', 'cannot open \\', 'cannot create C:\\ITSM'],
+        'smb_access_denied' => ['SMB_ACCESS_DENIED', 'SMB_NOT_ADMIN', 'SMB_BAD_CREDENTIALS', 'cannot open \\', 'cannot create C:\\ITSM'],
         'smb_unreachable' => ['SMB_UNREACHABLE'],
         'smb_task_failed' => ['SMB_TASK_FAILED', 'SMB_COLLECT_TIMEOUT'],
         'smb_bad_output' => ['SMB_COLLECT_BAD_JSON', 'SMB_COLLECTOR_MISSING', 'SMB_BAD_HOST', 'SMB_NO_CREDENTIALS'],
@@ -1861,7 +1863,29 @@ function domain_scan_process(int $runId, int $limit, int $userId, array $credent
                     $needSmb[] = $hostKey;
                 }
             }
+            /*
+             * ۱.۶۳.۱-r17-و — پیش‌سنجی TCP 445 پیش از آزمون WMI.
+             *
+             * خروجی واقعی کاربر این را نشان داد: سرور عضو دامنه است، حساب
+             * ادمین دامنه است، رمز درست است، فایروال خاموش است، ۴۴۵ باز
+             * است — و باز هم مسیر اول «Access is denied» می‌گیرد، چون
+             * WMI از راه دور برای این حساب مجاز نشده یا UAC از راه دور
+             * توکن را فیلتر می‌کند. در آن شرایط آزمون WMI فقط وقت و
+             * خطای گمراه‌کننده تولید می‌کند.
+             *
+             * ولی شرط «فقط مقصدهای ناموفق» را نگه می‌داریم: اگر WMI برای
+             * مقصدی کار می‌کند، همان نتیجه می‌ماند. تغییر فقط این است که
+             * پس از شکستِ WMI، به‌جای پیام «استخراج ناموفق»، همان مقصد
+             * با روش SMB دوباره آزموده می‌شود — که از قبل بود — و این بار
+             * خطای SMB با جزئیات واقعی گزارش می‌شود، نه پیام عمومی.
+             */
             if ($needSmb !== []) {
+                $smbScript = domain_scan_smb_script_path();
+                if (!is_file($smbScript)) {
+                    // بی‌صدا شکست نمی‌خوریم: نبودِ فایل باید در لاگ و در پیام دیده شود.
+                    app_error_log('[domain-scan] smb fallback skipped: missing ' . $smbScript);
+                    system_log('error', 'domain_scan', 'روش SMB اجرا نشد: tools/collect_via_smb.ps1 روی سرور نیست', ['run' => $runId, 'missing' => 'tools/collect_via_smb.ps1']);
+                }
                 try {
                     $smbRemote = domain_scan_remote_inventory_via_smb($needSmb, 3, $credentials);
                     $smbRecovered = 0;

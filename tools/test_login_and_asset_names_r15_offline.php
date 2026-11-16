@@ -315,6 +315,43 @@ check('۵۷: نصب‌کنندهٔ فایل‌ها منتشر شده است', $i
 check('۵۸: collect_via_smb.ps1 را کپی می‌کند', str_contains($instBat, 'collect_via_smb.ps1'));
 check('۵۹: بعد از کپی بررسی می‌کند که سر جایش هست', str_contains($instBat, 'بررسی نهایی'));
 
+echo "\n═══ ۳.۱۱) فرض «همه‌چیز درست است» (r17-و) ═══\n";
+// کاربر گفت: سرور عضو دامنه، حساب ادمین دامنه، رمز درست، فایروال خاموش.
+// پس هیچ پیامی نباید «پیش‌نیاز را بررسی کنید» بگوید بی‌دلیل.
+check('۶۰: چهار ترکیب واقعی CIM سنجیده می‌شود', str_contains($diagSrc, "foreach (\$mode in @('explicit','implicit'))"));
+check('۶۱: رمز CIM از خط فرمان رد نمی‌شود', !str_contains($diagSrc, "'-Pass',\n        \$pass"));
+check('۶۲: رمز CIM از محیط فرآیند می‌رود', str_contains($diagSrc, 'ITSM_DIAG_PASS_INNER'));
+check('۶۳: آزمون با هویت سرور از آزمون با حساب جدا می‌شود', str_contains($diagSrc, 'با هویت سرور — '));
+// «Access is denied» با هویت سرور، به استخراج پنل ربطی ندارد
+check('۶۴: بی‌اعتبارنامه بودن آزمون صریح گفته می‌شود', str_contains($diagSrc, 'این آزمون با هویت خودِ سرور بود'));
+// پیام‌های قطعی «ادمین نیست» باید تفکیک شوند
+check('۶۵: خطای رمز/دامنه از خطای مجوز جدا می‌شود', str_contains($diagSrc, 'این خطای «مجوز» نیست، خطای «هویت» است'));
+$smbPs = (string) @file_get_contents($root . '/tools/collect_via_smb.ps1');
+check('۶۶: اسکریپت SMB رمز غلط را از نبود ادمینی جدا می‌کند', str_contains($smbPs, 'SMB_BAD_CREDENTIALS'));
+check('۶۷: کد SMB_NOT_ADMIN اضافه شده است', str_contains($smbPs, 'SMB_NOT_ADMIN'));
+$ds2 = (string) file_get_contents($root . '/domain-scan.php');
+check('۶۸: SMB_NOT_ADMIN در پنل نگاشت دارد', str_contains($ds2, "'smb_not_admin'") || str_contains($ds2, "'SMB_NOT_ADMIN'"));
+check('۶۹: SMB_BAD_CREDENTIALS در پنل نگاشت دارد', str_contains($ds2, "'SMB_BAD_CREDENTIALS'"));
+// نبود فایل SMB نباید بی‌صدا باشد
+check('۷۰: نبود فایل SMB در لاگ ثبت می‌شود', str_contains($ds2, 'smb fallback skipped: missing'));
+check('۷۱: نبود فایل SMB در system_log می‌آید', str_contains($ds2, 'روش SMB اجرا نشد'));
+// جمع‌بندی پویا
+check('۷۲: جمع‌بندی از نتیجهٔ واقعی ساخته می‌شود', str_contains($diagSrc, '$verdict[] ='));
+check('۷۳: تحلیل «همه‌چیز درست است» هست', str_contains($diagSrc, 'همه‌چیز درست است، پس چرا؟'));
+check('۷۴: هویت واقعی پروسه سنجیده می‌شود', str_contains($diagSrc, 'هویت واقعی این پروسه'));
+
+// باگ واقعی: lib/logging-csrf.php هندلر سراسری استثنا نصب می‌کند و در CLI
+// با «[FATAL] PDOException …» خارج می‌شود. پس try/catch دور bootstrap
+// هیچ‌وقت اجرا نمی‌شد و ابزار خودش می‌مرد.
+check('۷۵: دیتابیس پیش از bootstrap سنجیده می‌شود', str_contains($diagSrc, '$dbProblem = \'\''));
+check('۷۶: ساختار database در config درست خوانده می‌شود', str_contains($diagSrc, "\$cfgProbe['database']"));
+check('۷۷: اگر دیتابیس نبود، bootstrap لود نمی‌شود', str_contains($diagSrc, "is_file(\$bootFile) && \$dbProblem === ''"));
+check('۷۸: علت دیتابیس صریح چاپ می‌شود', str_contains($diagSrc, 'دیتابیس پاسخ نداد'));
+// باگ سوم: bootstrap.php اگر config.php نباشد header+exit می‌زند و ساکت
+// می‌میرد. ابزار باید خودش این را پیش از لود کردن ببیند.
+check('۷۹: نبود config.php پیش از bootstrap سنجیده می‌شود', str_contains($diagSrc, '$configOk = is_file($configFile)'));
+check('۸۰: پیام نبود config.php راهنمای نصب می‌دهد', str_contains($diagSrc, 'install.php را اجرا کنید'));
+
 echo "\n═══ ۴) ابزار تشخیص ═══\n";
 $diag = (string) file_get_contents($root . '/tools/diagnose_login_and_assets.php');
 check('ابزار تشخیص وجود دارد', $diag !== '');

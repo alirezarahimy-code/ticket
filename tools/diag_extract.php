@@ -50,7 +50,57 @@ $root = dirname(__DIR__);
 $bootOk = false;
 $bootError = '';
 $bootFile = $root . '/bootstrap.php';
-if (is_file($bootFile)) {
+
+/*
+ * چرا پیش‌بررسی دیتابیس لازم شد — یک باگ واقعی که همین‌جا پیدا شد:
+ *
+ * lib/logging-csrf.php با set_exception_handler یک هندلر سراسری نصب می‌کند.
+ * آن هندلر در CLI پیام «[FATAL] PDOException … | Request-ID: …» می‌دهد و
+ * exit(1) می‌کند. نتیجه: اگر bootstrap را داخل try/catch بگذاریم و دیتابیس
+ * بالا نباشد، پیام FATAL آن‌ها چاپ می‌شود و catch ما هرگز اجرا نمی‌شود.
+ * ابزار تشخیص، خودش می‌مرد و هیچ اطلاعاتی نمی‌داد.
+ *
+ * پس پیش از لود کردن bootstrap، خودمان اتصال را می‌سنجیم. اگر برقرار نشد،
+ * bootstrap اصلاً لود نمی‌شود — چون تنها چیزی که از آن لازم داریم خواندن
+ * تنظیمات از دیتابیس است، و همان در دسترس نیست.
+ */
+$dbProblem = '';
+$configFile = $root . '/config.php';
+if (is_file($configFile)) {
+    try {
+        $cfgProbe = @include $configFile;
+        if (is_array($cfgProbe)) {
+            // ساختار واقعی: $config['database'] = ['host','port','name','user','password']
+            // نسخهٔ اول این کد کلیدهای تخت (db_host) را می‌خواند که وجود ندارند،
+            // پس شرط سکوت می‌کرد و bootstrap در هر حال لود می‌شد. همان باگ.
+            $dbArr = is_array($cfgProbe['database'] ?? null) ? $cfgProbe['database'] : $cfgProbe;
+            $dbHost = (string) ($dbArr['host'] ?? 'localhost');
+            $dbName = (string) ($dbArr['name'] ?? '');
+            $dbUser = (string) ($dbArr['user'] ?? '');
+            $dbPass = (string) ($dbArr['password'] ?? '');
+            $dbPort = (int) ($dbArr['port'] ?? 3306);
+            if ($dbName === '') {
+                $dbProblem = 'نام دیتابیس در config.php خوانده نشد';
+            } else {
+                $probeDsn = 'mysql:host=' . $dbHost . ';port=' . $dbPort . ';dbname=' . $dbName . ';charset=utf8mb4';
+                new PDO($probeDsn, $dbUser, $dbPass, [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION, PDO::ATTR_TIMEOUT => 3]);
+            }
+        }
+    } catch (Throwable $dbEx) {
+        $dbProblem = $dbEx->getMessage();
+    }
+}
+
+/*
+ * این هم یک باگ واقعی: bootstrap.php اگر config.php نباشد، header+exit می‌زند
+ * — بی‌هیچ پیامی. یعنی ابزار تشخیص در نصب ناقص، ساکت می‌مرد. الان هر دو شرط
+ * را پیش از لود کردن بررسی می‌کنیم.
+ */
+$configOk = is_file($configFile);
+if (!$configOk && $bootError === '') {
+    $bootError = 'config.php پیدا نشد — سامانه نصب نشده است (install.php را اجرا کنید)';
+}
+if (is_file($bootFile) && $dbProblem === '' && $configOk === true) {
     ob_start();
     try {
         require_once $bootFile;
@@ -59,8 +109,13 @@ if (is_file($bootFile)) {
         $bootError = $e->getMessage();
     }
     ob_end_clean();
+} elseif ($dbProblem !== '') {
+    $bootError = 'دیتابیس پاسخ نداد: ' . $dbProblem;
 } else {
-    $bootError = 'bootstrap.php پیدا نشد — این فایل باید در ریشهٔ سامانه باشد';
+    // اگر configOk قبلاً پیام خودش را نگذاشته باشد، این‌جا فقط حالت bootstrap است.
+    if ($bootError === '') {
+        $bootError = 'bootstrap.php پیدا نشد — این فایل باید در ریشهٔ سامانه باشد';
+    }
 }
 
 if (!function_exists('setting')) {
@@ -456,40 +511,61 @@ fwrite(STDOUT, "۳) اتصال واقعی WMI/CIM (همان کاری که است
 if (PHP_OS_FAMILY !== 'Windows') {
     fwrite(STDOUT, "  ! این بخش فقط روی سرور ویندوز معنی دارد.\n\n");
 } else {
+    /*
+     * چهار ترکیب واقعی آزموده می‌شود، نه یکی.
+     *
+     * خروجی واقعی کاربر این را نشان داد: با نام کاربری خالی، DCOM
+     * «Access is denied» داد و من آن را به «توکن فیلتر شده» تعبیر کردم.
+     * ولی آزمون نامعتبر بود — رمز خالی بود و هیچ اعتبارنامه‌ای فرستاده
+     * نشد. با حساب ادمین دامنه‌ای که خودِ کاربر می‌گوید درست است، همین
+     * اتصال باید موفق شود.
+     *
+     * پس:
+     *   بومی    — بدون اعتبارنامه، با هویت خودِ سرور (همان کاری که پنل می‌کند)
+     *   صریح    — با اعتبارنامه‌ای که کاربر داده (همان کاری که باید بکند)
+     * و هر دو، یک‌بار Dcom و یک‌بار Wsman.
+     *
+     * رمز از محیط فرآیند می‌رود، نه از خط فرمان: خط فرمان هر فرآیند در
+     * Task Manager و WMI خواناست.
+     */
     $probe = <<<'PWSH'
-param([string]$ComputerName,[string]$User,[string]$Pass)
+param([string]$ComputerName)
+$user = $env:ITSM_DIAG_USER
+$pass = $env:ITSM_DIAG_PASS_INNER
 $out = @()
-foreach ($proto in @('Dcom','Wsman')) {
-    $row = [ordered]@{ protocol = $proto; ok = $false; error = '' }
-    try {
-        $opt = New-CimSessionOption -Protocol $proto
-        $args = @{ ComputerName = $ComputerName; SessionOption = $opt; OperationTimeoutSec = 20; ErrorAction = 'Stop' }
-        if (-not [string]::IsNullOrWhiteSpace($User)) {
-            $args.Credential = New-Object System.Management.Automation.PSCredential($User, (ConvertTo-SecureString $Pass -AsPlainText -Force))
+$hasCred = -not [string]::IsNullOrWhiteSpace($user)
+foreach ($mode in @('explicit','implicit')) {
+    if ($mode -eq 'explicit' -and -not $hasCred) { continue }
+    foreach ($proto in @('Dcom','Wsman')) {
+        $row = [ordered]@{ mode = $mode; protocol = $proto; ok = $false; error = '' }
+        try {
+            $opt = New-CimSessionOption -Protocol $proto
+            $args = @{ ComputerName = $ComputerName; SessionOption = $opt; OperationTimeoutSec = 20; ErrorAction = 'Stop' }
+            if ($mode -eq 'explicit') {
+                $args.Credential = New-Object System.Management.Automation.PSCredential($user, (ConvertTo-SecureString $pass -AsPlainText -Force))
+            }
+            $session = New-CimSession @args
+            $null = Get-CimInstance -CimSession $session -ClassName Win32_ComputerSystem -ErrorAction Stop
+            $row.ok = $true
+            Remove-CimSession -CimSession $session -ErrorAction SilentlyContinue
+        } catch {
+            $row.error = $_.Exception.Message
         }
-        $session = New-CimSession @args
-        $null = Get-CimInstance -CimSession $session -ClassName Win32_ComputerSystem -ErrorAction Stop
-        $row.ok = $true
-        Remove-CimSession -CimSession $session -ErrorAction SilentlyContinue
-    } catch {
-        $row.error = $_.Exception.Message
+        $out += [pscustomobject]$row
     }
-    $out += [pscustomobject]$row
 }
-$out | ConvertTo-Json -Compress
+$out | ConvertTo-Json -Compress -Depth 3
 PWSH;
     $scriptFile = sys_get_temp_dir() . '/itsm_diag_' . bin2hex(random_bytes(4)) . '.ps1';
     @file_put_contents($scriptFile, $probe);
     $cmd = [$ps, '-NoProfile', '-NonInteractive', '-ExecutionPolicy', 'Bypass', '-File', $scriptFile, '-ComputerName', $host];
-    if ($user !== '') {
-        $cmd[] = '-User';
-        $cmd[] = $user;
-        $cmd[] = '-Pass';
-        $cmd[] = $pass;
+    $cimEnv = @getenv();
+    if (!is_array($cimEnv)) { $cimEnv = null; } else {
+        $cimEnv['ITSM_DIAG_USER'] = $user;
+        $cimEnv['ITSM_DIAG_PASS_INNER'] = $pass;
     }
-    $env = null;
     $pipes = [];
-    $proc = @proc_open($cmd, [0 => ['pipe', 'r'], 1 => ['pipe', 'w'], 2 => ['pipe', 'w']], $pipes, null, $env);
+    $proc = @proc_open($cmd, [0 => ['pipe', 'r'], 1 => ['pipe', 'w'], 2 => ['pipe', 'w']], $pipes, null, $cimEnv);
     $stdout = '';
     $stderr = '';
     if (is_resource($proc)) {
@@ -505,23 +581,50 @@ PWSH;
     if (!is_array($rows)) {
         fwrite(STDOUT, "  ! PowerShell خروجی خوانا نداد: " . substr(trim($stderr . ' ' . $stdout), 0, 300) . "\n");
     } else {
+        if (!is_array($rows) || (isset($rows['protocol']))) { $rows = [$rows]; }
+        $anyExplicitOk = false;
         foreach ($rows as $row) {
             $proto = (string) ($row['protocol'] ?? '?');
+            $mode = (string) ($row['mode'] ?? 'implicit');
             $ok = !empty($row['ok']);
             $err = trim((string) ($row['error'] ?? ''));
-            diag_line($proto, $ok, $ok ? 'اتصال موفق — مسیر اول کار می‌کند' : substr($err, 0, 150));
+            if ($ok && $mode === 'explicit') { $anyExplicitOk = true; }
+            $label = ($mode === 'explicit' ? 'با اعتبارنامه — ' : 'با هویت سرور — ') . $proto;
+            diag_line($label, $ok, $ok ? 'موفق' : substr($err, 0, 130));
             if (!$ok && $err !== '') {
                 if (stripos($err, 'Access is denied') !== false || stripos($err, '0x80070005') !== false) {
-                    fwrite(STDOUT, "      ⇒ «Access is denied»: بسته رسیده و احراز هویت شده است. علت، فیلتر شدن توکن مدیریتی است (UAC از راه دور) یا اینکه حساب روی همین مقصد در Administrators نیست. فایروال مقصر نیست.\n");
+                    if ($mode === 'implicit') {
+                        fwrite(STDOUT, "      ⇒ این آزمون با هویت خودِ سرور بود، نه با حساب شما. «Access is denied»\n");
+                        fwrite(STDOUT, "        در این حالت طبیعی است و به استخراج پنل ربطی ندارد. خط پایین مهم است.\n");
+                    } else {
+                        fwrite(STDOUT, "      ⇒ با حساب خودتان هم رد شد. دو علت ممکن: حساب روی همین مقصد در\n");
+                        fwrite(STDOUT, "        Administrators محلی نیست، یا DCOM از راه دور برایش مجاز نشده\n");
+                        fwrite(STDOUT, "        (Remote Enable روی namespace). فایروال مقصر نیست.\n");
+                    }
                 } elseif (stripos($err, 'RPC server is unavailable') !== false || stripos($err, '0x800706BA') !== false) {
-                    fwrite(STDOUT, "      ⇒ «RPC server is unavailable»: بسته نرسیده است. فایروال مقصد، سرویس WMI/Winmgmt خاموش، یا پورت‌های ۱۳۵/۴۹۱۵۲-۶۵۵۳۵ بسته.\n");
+                    fwrite(STDOUT, "      ⇒ «RPC server is unavailable»: بسته نرسیده است. فایروال مقصد، سرویس WMI/Winmgmt، یا پورت‌های ۱۳۵/۴۹۱۵۲-۶۵۵۳۵.\n");
                 } elseif (stripos($err, 'cannot connect') !== false || stripos($err, 'WSMan') !== false) {
-                    fwrite(STDOUT, "      ⇒ WinRM روی مقصد فعال یا شنونده ندارد (winrm quickconfig).\n");
+                    if (stripos($err, '0x80090311') !== false) {
+                        fwrite(STDOUT, "      ⇒ «0x80090311 / no logon servers»: این کامپیوتر نتوانست بلیت Kerberos بگیرد.\n");
+                        fwrite(STDOUT, "        یعنی نام دامنه‌ای که فرستادیم با دامنهٔ واقعی نمی‌خواند. با\n");
+                        fwrite(STDOUT, "        «دامنهٔ‌\‌حساب» درست اجرا کنید. (بخش ۰.۵ نام واقعی دامنه را چاپ کرد.)\n");
+                    } else {
+                        fwrite(STDOUT, "      ⇒ WinRM روی مقصد فعال یا شنونده ندارد (winrm quickconfig). مهم نیست اگر Dcom کار می‌کند.\n");
+                    }
                 }
             }
         }
+        if ($user === '') {
+            fwrite(STDOUT, "  ! نام کاربری نداده‌اید؛ فقط آزمون «هویت سرور» اجرا شد.\n");
+            fwrite(STDOUT, "    برای آزمون واقعی با حساب ادمین دامنه:\n");
+            fwrite(STDOUT, "      php tools/diag_extract.php {$host} DOMAIN\\\\user\n\n");
+        } elseif (!$anyExplicitOk) {
+            fwrite(STDOUT, "  ! هیچ‌کدام از دو پروتکل با حساب شما موفق نشد — پس مسیر WMI از این سرور\n");
+            fwrite(STDOUT, "    به این مقصد بسته است. ولی روش SMB (بخش ۴) ممکن است کار کند.\n\n");
+        } else {
+            fwrite(STDOUT, "  ✓ با حساب شما دست‌کم یک پروتکل موفق شد — مسیر اول از این سرور کار می‌کند.\n\n");
+        }
     }
-    fwrite(STDOUT, "\n");
 }
 
 // ۶) SMB با اعتبارنامه — اثبات ادمین محلی بودن
@@ -625,8 +728,24 @@ PWSH;
             fwrite(STDOUT, "      ✗ فایل نتیجه ساخته شد ولی JSON معتبر نبود (خروجی ناقص).\n");
         }
     } else {
-        diag_line('TCP 445', !empty($smb['tcp445']), !empty($smb['tcp445']) ? 'باز' : 'بسته — فایروال مقصد یا سرویس File and Printer Sharing');
-        diag_line('بازکردن \\\\' . $host . '\\C$', !empty($smb['cshare']), !empty($smb['cshare']) ? 'موفق' : 'ناموفق — حساب روی این مقصد ادمین محلی نیست یا Remote UAC جلوی دسترسی محلی را گرفته');
+        // اعتبارنامه را جدا می‌سنجیم، پیش از هر چیز: خطای «رمز/دامنه غلط» و
+        // «ادمین محلی نیست» در ویندوز پیام یکسان «Access is denied» دارند،
+        // ولی درمان‌شان کاملاً متفاوت است.
+        if (!empty($smb['tcp445'])) {
+            diag_line('TCP 445', true, 'باز');
+        } else {
+            diag_line('TCP 445', false, 'بسته — فایروال مقصد یا سرویس File and Printer Sharing');
+        }
+        $cshareOk = !empty($smb['cshare']);
+        $cshareDetail = $smb['detail'] ?? '';
+        if ($cshareOk) {
+            diag_line('بازکردن \\\\' . $host . '\\C$', true, 'موفق — حساب روی این مقصد ادمین محلی است');
+        } elseif (preg_match('/logon failure|unknown user|bad password|0x8007052e|1326|1907/i', (string) $cshareDetail)) {
+            diag_line('بازکردن \\\\' . $host . '\\C$', false, 'ورود با این حساب ممکن نشد — نام کاربری، رمز یا نام دامنه نادرست است');
+            fwrite(STDOUT, "      ⇒ این خطای «مجوز» نیست، خطای «هویت» است. نام دامنه را با بخش ۰.۵ بسنجید.\n");
+        } else {
+            diag_line('بازکردن \\\\' . $host . '\\C$', false, 'ورود انجام شد ولی C$ رد شد — حساب ادمین محلی نیست');
+        }
         diag_line('ساخت C:\\ITSM', !empty($smb['admin']), !empty($smb['admin']) ? 'موفق — یعنی روش دوم SMB قابل اجراست' : 'ناموفق');
         if (trim((string) ($smb['detail'] ?? '')) !== '') {
             fwrite(STDOUT, "      جزئیات: " . substr(trim((string) $smb['detail']), 0, 300) . "\n");
@@ -635,8 +754,99 @@ PWSH;
     fwrite(STDOUT, "\n");
 }
 
-// جمع‌بندی
+/*
+ * ۵) وقتی همهٔ پیش‌نیازها درست است و باز هم کار نمی‌کند
+ *
+ * این بخش برای حالتی نوشته شد که کاربر می‌گوید: سرور عضو دامنه است،
+ * حساب ادمین دامنه است، رمز درست است، فایروال‌ها خاموش‌اند. در آن حالت
+ * هر پیامی که «پیش‌نیاز را بررسی کنید» بگوید بی‌فایده است. پس اینجا فقط
+ * چیزهایی سنجیده می‌شود که با وجود همهٔ آن‌ها باز هم می‌توانند شکسته
+ * باشند و در خطا دیده نمی‌شوند.
+ */
+if (PHP_OS_FAMILY === 'Windows') {
+    fwrite(STDOUT, "۵) تحلیل «همه‌چیز درست است، پس چرا؟»\n");
+    $deepPs = <<<'PWSH'
+$out = [ordered]@{}
+$out.latfp = -1
+try {
+    $v = (Get-ItemProperty -Path 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System' -Name 'LocalAccountTokenFilterPolicy' -ErrorAction Stop).LocalAccountTokenFilterPolicy
+    $out.latfp = [int]$v
+} catch { $out.latfp = -1 }
+$out.wmiService = ''
+try {
+    $svc = Get-CimInstance Win32_Service -Filter "Name='Winmgmt'" -ErrorAction Stop
+    $out.wmiService = [string]$svc.State
+} catch { }
+$out.identity = [string]([Security.Principal.WindowsIdentity]::GetCurrent().Name)
+$out | ConvertTo-Json -Compress
+PWSH;
+    $deepFile = sys_get_temp_dir() . '/itsm_deep_' . bin2hex(random_bytes(4)) . '.ps1';
+    @file_put_contents($deepFile, $deepPs);
+    $deepPipes = [];
+    $deepProc = @proc_open([$ps, '-NoProfile', '-NonInteractive', '-ExecutionPolicy', 'Bypass', '-File', $deepFile], [0 => ['pipe', 'r'], 1 => ['pipe', 'w'], 2 => ['pipe', 'w']], $deepPipes);
+    $deepOut = '';
+    if (is_resource($deepProc)) {
+        fclose($deepPipes[0]);
+        $deepOut = trim((string) stream_get_contents($deepPipes[1]));
+        stream_get_contents($deepPipes[2]);
+        fclose($deepPipes[1]);
+        fclose($deepPipes[2]);
+        proc_close($deepProc);
+    }
+    @unlink($deepFile);
+    $deep = json_decode($deepOut, true);
+    if (is_array($deep)) {
+        $latfp = (int) ($deep['latfp'] ?? -1);
+        if ($latfp === 1) {
+            diag_line('LocalAccountTokenFilterPolicy', true, 'روشن (=1) — حساب محلی هم مدیر کامل می‌ماند');
+        } elseif ($latfp === 0) {
+            diag_line('LocalAccountTokenFilterPolicy', true, 'صفر — فقط حساب محلی را فیلتر می‌کند، حساب دامنه‌ای را نه');
+        } else {
+            diag_line('LocalAccountTokenFilterPolicy', true, 'تعریف نشده (پیش‌فرض) — برای حساب دامنه‌ای بی‌اثر است');
+        }
+        $wmiSvc = trim((string) ($deep['wmiService'] ?? ''));
+        if ($wmiSvc !== '') {
+            diag_line('سرویس Winmgmt روی سرور', strtolower($wmiSvc) === 'running', $wmiSvc);
+        }
+        $ident = trim((string) ($deep['identity'] ?? ''));
+        if ($ident !== '') {
+            $isLocalAcct = (stripos($ident, '\\') === false);
+            diag_line('هویت واقعی این پروسه', true, $ident . ($isLocalAcct ? '  (حساب محلی)' : ''));
+            if ($isLocalAcct && $user === '') {
+                fwrite(STDOUT, "      ⚠ این پروسه با حساب محلی اجرا می‌شود، پس آزمون بخش ۳ به نام شما نبود.\n");
+                fwrite(STDOUT, "        با «دامنه\\\\حساب» اجرا کنید تا آزمون واقعی باشد.\n");
+            }
+        }
+    } else {
+        fwrite(STDOUT, "  ! تحلیل عمیق اجرا نشد.\n");
+    }
+    fwrite(STDOUT, "\n");
+}
+
+/*
+ * جمع‌بندی — از نتیجهٔ واقعی ساخته می‌شود، نه از سه بند ثابت.
+ *
+ * نسخهٔ قبلی همین‌جا به کاربر می‌گفت «حساب ادمین محلی نیست» و او در پاسخ
+ * می‌گفت حسابش ادمین دامنه است و رمزش هم درست است. حق با او بود: بندها
+ * ثابت بودند و به آنچه آزمون واقعاً دیده بود کاری نداشتند.
+ */
 fwrite(STDOUT, "=== جمع‌بندی ===\n");
-fwrite(STDOUT, "  • اگر TCP 445 باز است و بخش ۴ موفق: روش دوم (SMB/SYSTEM) باید کار کند و استخراج خودکار در r17 از آن استفاده می‌کند.\n");
-fwrite(STDOUT, "  • اگر بخش ۴ ناموفق ولی 445 باز است: حساب روی همان مقصد در گروه Administrators محلی نیست. این شرط TNI هم هست؛ هیچ ابزاری بدون آن موفق نمی‌شود.\n");
-fwrite(STDOUT, "  • اگر 135 باز است ولی DCOM «Access is denied» می‌دهد: UAC از راه دور توکن را فیلتر می‌کند. با LocalAccountTokenFilterPolicy=1 روی مقصد رفع می‌شود، یا بدون تغییر سیاست، از روش SMB استفاده کنید.\n\n");
+$verdict = [];
+if (PHP_OS_FAMILY !== 'Windows') {
+    $verdict[] = 'این سرور ویندوز نیست، پس مسیر WMI/SMB از آن معنا ندارد.';
+} else {
+    if (!$partOfDomain) {
+        $verdict[] = 'سرور عضو دامنه نیست — با حساب محلی، استخراج از راه دور کار نمی‌کند.';
+    }
+    if ($smbScriptMissing) {
+        $verdict[] = 'فایل tools\\collect_via_smb.ps1 روی سرور نیست؛ تا وقتی نباشد روش SMB برای هیچ مقصدی اجرا نمی‌شود. این را اول درست کنید.';
+    }
+    if ($user === '') {
+        $verdict[] = 'نام کاربری و رمز داده نشد، پس بخش‌های ۳ و ۴ آزمون واقعی نبودند. با «دامنه\\حساب» دوباره اجرا کنید.';
+    }
+    $verdict[] = 'یافته‌های بالا را به ترتیب ببینید: اول بخش ۰ (فایل‌ها)، بعد ۳ (اعتبارنامه)، بعد ۴ (ادمین محلی).';
+}
+foreach ($verdict as $line) {
+    fwrite(STDOUT, '  • ' . $line . "\n");
+}
+fwrite(STDOUT, "\n");

@@ -78,9 +78,20 @@ try {
     try {
         $drive = New-PSDrive -Name $driveName -PSProvider FileSystem -Root "\\$ComputerName\C$" -Credential $cred -ErrorAction Stop
     } catch {
+        # تفکیک دو خطای کاملاً متفاوت که پیام ویندوز یکی نشانشان می‌دهد:
+        #   • حساب اشتباه / رمز اشتباه / نام دامنه غلط  ⇒ کاربر یا رمز مشکل دارد
+        #   • حساب درست ولی ادمین محلی نیست            ⇒ مجوز مشکل دارد
+        # پیام خام «Access is denied» برای هر دو یکی است، پس خودمان تفکیک می‌کنیم.
+        $raw = $_.Exception.Message
         # خطای SMB با کد 5 یعنی اعتبارنامه/ادمین محلی؛ با کد 53/67 یعنی مسیر.
         # پیام PowerShell خام برای کاربر بی‌معنی است، پس علت را صریح می‌گوییم.
-        Fail 'SMB_ACCESS_DENIED' "cannot open \\$ComputerName\C$ with the supplied account (must be a local administrator on the target): $($_.Exception.Message)"
+        if ($raw -match 'logon failure|unknown user name|bad password|0x8007052e|1326|1907') {
+            Fail 'SMB_BAD_CREDENTIALS' "the supplied account could not log on to $ComputerName — check the domain name and the account: $raw"
+        }
+        if ($raw -match '0x80070005|access is denied|5') {
+            Fail 'SMB_NOT_ADMIN' "logged on to $ComputerName but \\$ComputerName\C$ was refused — the account is not a local administrator there: $raw"
+        }
+        Fail 'SMB_ACCESS_DENIED' "cannot open \\$ComputerName\C$ with the supplied account: $raw"
     }
 
     $remoteDir = "$($drive.Name):\ITSM"
