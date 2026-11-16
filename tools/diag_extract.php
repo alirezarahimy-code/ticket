@@ -34,7 +34,42 @@ if (PHP_SAPI !== 'cli') {
 }
 
 $root = dirname(__DIR__);
-require_once $root . '/bootstrap.php';
+
+/*
+ * ── چرا bootstrap اجباری نیست ────────────────────────────────────────────
+ * این ابزار پیش از هر چیز برای وقتی است که «استخراج کار نمی‌کند». اگر
+ * bootstrap را اجباری کنیم، در همان حالتی که MySQL بالا نیست یا config.php
+ * خراب است، ابزار با PDOException می‌میرد و کاربر هیچ اطلاعاتی نمی‌گیرد —
+ * دقیقاً وقتی که بیشترین نیاز را دارد.
+ *
+ * پس bootstrap اختیاری است: اگر بالا آمد، از تنظیمات سامانه (نام دامنه،
+ * وضعیت روش SMB و مسیر PowerShell) استفاده می‌کنیم؛ اگر نه، با پیش‌فرض‌های
+ * امن کار می‌کنیم و صریح می‌گوییم چرا. ابزار تشخیصی باید از خودِ سامانه
+ * مقاوم‌تر باشد، نه ضعیف‌تر.
+ */
+$bootOk = false;
+$bootError = '';
+$bootFile = $root . '/bootstrap.php';
+if (is_file($bootFile)) {
+    ob_start();
+    try {
+        require_once $bootFile;
+        $bootOk = true;
+    } catch (Throwable $e) {
+        $bootError = $e->getMessage();
+    }
+    ob_end_clean();
+} else {
+    $bootError = 'bootstrap.php پیدا نشد — این فایل باید در ریشهٔ سامانه باشد';
+}
+
+if (!function_exists('setting')) {
+    // پیش‌فرض‌های امن وقتی تنظیمات خوانده نمی‌شود: روش SMB روشن و دامنه خالی.
+    function setting(string $key, $default = null)
+    {
+        return $default;
+    }
+}
 
 $host = trim((string) ($argv[1] ?? ''));
 if ($host === '' || !preg_match('/^[A-Za-z0-9._-]+$/', $host)) {
@@ -152,6 +187,14 @@ diag_line('PowerShell', $ps !== 'powershell.exe' || PHP_OS_FAMILY === 'Windows',
 diag_line('اسکریپت جمع‌آوری', is_file($root . '/tools/collect_server_inventory.ps1'), 'tools/collect_server_inventory.ps1');
 diag_line('اسکریپت SMB', is_file($root . '/tools/collect_via_smb.ps1'), 'tools/collect_via_smb.ps1');
 diag_line('تنظیم روش دوم SMB', setting('domain_scan_smb_fallback', '1') !== '0', setting('domain_scan_smb_fallback', '1') !== '0' ? 'روشن' : 'خاموش — در تنظیمات ← اسکن دامنه روشن کنید');
+if ($bootOk) {
+    diag_line('اتصال به سامانه', true, 'bootstrap خوانده شد');
+} else {
+    diag_line('اتصال به سامانه', false, 'بدون bootstrap — تنظیمات سامانه خوانده نشد');
+    fwrite(STDOUT, "      علت: " . substr($bootError, 0, 200) . "\n");
+    fwrite(STDOUT, "      ⚠ بقیهٔ آزمون‌ها کار می‌کنند و همین‌ها معمولاً مشکل را نشان می‌دهند.\n");
+    fwrite(STDOUT, "        فقط نام دامنه و وضعیت روش SMB از تنظیمات خوانده نمی‌شود.\n");
+}
 fwrite(STDOUT, "\n");
 
 /*
