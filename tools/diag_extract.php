@@ -185,7 +185,33 @@ diag_line('shell_exec', function_exists('shell_exec'), function_exists('shell_ex
 $ps = function_exists('domain_scan_powershell_path') ? domain_scan_powershell_path() : 'powershell.exe';
 diag_line('PowerShell', $ps !== 'powershell.exe' || PHP_OS_FAMILY === 'Windows', $ps);
 diag_line('اسکریپت جمع‌آوری', is_file($root . '/tools/collect_server_inventory.ps1'), 'tools/collect_server_inventory.ps1');
-diag_line('اسکریپت SMB', is_file($root . '/tools/collect_via_smb.ps1'), 'tools/collect_via_smb.ps1');
+$smbScriptCandidates = [
+    $root . '/tools/collect_via_smb.ps1',
+    $root . '/files/tools/collect_via_smb.ps1',   // ساختار بستهٔ به‌روزرسانی، استخراج‌نشده
+    dirname($root) . '/files/tools/collect_via_smb.ps1',
+];
+$smbScript = '';
+foreach ($smbScriptCandidates as $cand) {
+    if (is_file($cand)) { $smbScript = $cand; break; }
+}
+diag_line('اسکریپت SMB', $smbScript !== '', $smbScript !== '' ? $smbScript : 'tools/collect_via_smb.ps1 پیدا نشد');
+$smbScriptMissing = ($smbScript === '');
+if ($smbScript === '') {
+    /*
+     * این یکی بی‌صدا کل روش دوم را از کار می‌انداخت: domain_scan_remote_inventory_via_smb()
+     * پیش از هر کاری is_file() می‌زند و اگر نباشد، همهٔ مقصدها خطا می‌گیرند
+     * بدون این‌که کسی بفهمد علت فایل گم‌شده است. کاربر ۷۱ فایل بسته را دیده،
+     * ولی این فایل را روی سرور نداشته و پیام خطا هم چیزی از فایل نگفته بود.
+     */
+    fwrite(STDOUT, "      ⚠ این فایل حیاتی است: بدون آن، «روش دوم SMB» برای هر مقصدی\n");
+    fwrite(STDOUT, "        بی‌صدا شکست می‌خورد و علتش هم در پیام خطا نمی‌آید.\n");
+    fwrite(STDOUT, "        از بستهٔ به‌روزرسانی بردارید: files\\tools\\collect_via_smb.ps1 → tools\\\n");
+}
+// اگر مسیر جایگزینی پیدا شد ولی در tools\ نیست، به سامانه بگوییم چه کند
+if ($smbScript !== '' && !is_file($root . '/tools/collect_via_smb.ps1')) {
+    fwrite(STDOUT, "      ⚠ فایل هست ولی جای درستی نیست — کپی کنید:\n");
+    fwrite(STDOUT, "        copy \"" . $smbScript . "\" \"" . $root . "\\tools\\\"\n");
+}
 diag_line('تنظیم روش دوم SMB', setting('domain_scan_smb_fallback', '1') !== '0', setting('domain_scan_smb_fallback', '1') !== '0' ? 'روشن' : 'خاموش — در تنظیمات ← اسکن دامنه روشن کنید');
 if ($bootOk) {
     diag_line('اتصال به سامانه', true, 'bootstrap خوانده شد');
@@ -236,6 +262,57 @@ if (PHP_OS_FAMILY !== 'Windows') {
     $partOfDomain = is_array($csData) && !empty($csData['part']);
     $domainName = is_array($csData) ? trim((string) ($csData['domain'] ?? '')) : '';
     diag_line('عضو دامنه', $partOfDomain, $partOfDomain ? $domainName : ('WORKGROUP' . ($domainName !== '' ? ' (' . $domainName . ')' : '')));
+
+    /*
+     * عضویت دامنه به‌تنهایی کافی نیست. خروجی واقعی کاربر نشان داد سرور
+     * عضو یک دامنه است و DCOM باز هم «Access is denied» می‌دهد، ولی
+     * WinRM خطای 0x80090311 («no logon servers») می‌دهد. آن خطا یعنی
+     * ویندوز نتوانست بلیت Kerberos بگیرد — پس DC در دسترس نبوده یا نام
+     * کاربری که فرستادیم حساب دامنه نبوده.
+     *
+     * پس همان‌جا این را هم می‌سنجیم: آیا سرور سامانه خودش DC را می‌بیند؟
+     */
+    if ($partOfDomain && $domainName !== '') {
+        $dcFile = sys_get_temp_dir() . '/itsm_dc_' . bin2hex(random_bytes(4)) . '.ps1';
+        /*
+         * dwa آزمون، چون Win32_NTDomain روی بعضی نصب‌ها لیست خالی می‌دهد:
+         *  ۱) خودِ نام DC را از رکوردهای DNS بپرس (همان کاری که nltest می‌کند)
+         *  ۲) اگر نشد، از Win32_NTDomain بخوان
+         * هیچ‌جا نام دامنه هاردکد نمی‌شود؛ همان دامنه‌ای که بخش ۰.۵ خواند.
+         */
+        $dcPs = 'try { '
+            . '$dc = ""; '
+            . 'try { $r = Resolve-DnsName -Name ("_ldap._tcp.dc._msdcs." + $env:ITSM_DIAG_DOMAIN) -Type SRV -ErrorAction Stop; $dc = @($r | Where-Object { $_.NameTarget } | ForEach-Object { $_.NameTarget.TrimEnd(".") } | Select-Object -First 1) } catch { }; '
+            . 'if (-not $dc) { try { $n = Get-CimInstance Win32_NTDomain -ErrorAction Stop | Select-Object -First 1; $dc = ([string]$n.DomainControllerName).TrimStart("\\") } catch { } } '
+            . 'if ($dc) { [ordered]@{ dc = [string]$dc } | ConvertTo-Json -Compress } else { "{}" } '
+            . '} catch { "{}" }';
+        @file_put_contents($dcFile, $dcPs);
+        $dcPipes = [];
+        $dcEnv = @getenv();
+        if (!is_array($dcEnv)) { $dcEnv = null; } else { $dcEnv['ITSM_DIAG_DOMAIN'] = $domainName; }
+        $dcProc = @proc_open([$ps, '-NoProfile', '-NonInteractive', '-ExecutionPolicy', 'Bypass', '-File', $dcFile], [0 => ['pipe', 'r'], 1 => ['pipe', 'w'], 2 => ['pipe', 'w']], $dcPipes, null, $dcEnv);
+        $dcOut = '';
+        if (is_resource($dcProc)) {
+            fclose($dcPipes[0]);
+            $dcOut = trim((string) stream_get_contents($dcPipes[1]));
+            stream_get_contents($dcPipes[2]);
+            fclose($dcPipes[1]);
+            fclose($dcPipes[2]);
+            proc_close($dcProc);
+        }
+        @unlink($dcFile);
+        $dc = json_decode($dcOut, true);
+        $dcName = is_array($dc) ? trim((string) ($dc['dc'] ?? '')) : '';
+        $dcName = ltrim($dcName, '\\');
+        if ($dcName !== '') {
+            diag_line('کنترل‌کنندهٔ دامنه', true, $dcName);
+        } else {
+            diag_line('کنترل‌کنندهٔ دامنه', false, 'پیدا نشد — همین ریشهٔ خطای 0x80090311 است');
+            fwrite(STDOUT, "      ⚠ سرور عضو دامنه است ولی نمی‌تواند DC را ببیند. یعنی نمی‌تواند\n");
+            fwrite(STDOUT, "        بلیت Kerberos بگیرد — و هر اتصال دامنه‌ای با همین خطا برمی‌گردد.\n");
+            fwrite(STDOUT, "        بررسی کنید: DNS سرور سامانه باید به DC اشاره کند، نه به DNS اینترنت.\n");
+        }
+    }
     if (!$partOfDomain) {
         fwrite(STDOUT, "      ⚠ این سرور عضو دامنه نیست — و این تقریباً همیشه ریشهٔ «Access is denied» است.\n");
         fwrite(STDOUT, "        • ویندوز توکن حساب محلی را در اتصال شبکه‌ای فیلتر می‌کند (UAC remote restrictions).\n");
@@ -274,7 +351,20 @@ diag_line('SAPI', true, PHP_SAPI);
 // آیا Apache با LocalSystem بالا آمده؟ روی XAMPP پیش‌فرض همین است.
 if ($isWindows) {
     $svcFile = sys_get_temp_dir() . '/itsm_svc_' . bin2hex(random_bytes(4)) . '.ps1';
-    @file_put_contents($svcFile, 'try { Get-CimInstance Win32_Service -Filter "Name=\'Apache2.4\'" -ErrorAction Stop | Select-Object -First 1 -Property Name,StartName,State | ConvertTo-Json -Compress } catch { "{}" }');
+    /*
+     * نام سرویس Apache در XAMPP ثابت نیست: روی ویندوز کلاینت معمولاً
+     * Apache2.4 است، ولی اگر با XAMPP Control Panel نصب شده باشد Apache2.4
+     * می‌ماند و اگر کسی نسخهٔ ۲.۲ نصب کرده باشد Apache2.2. روی ویندوز
+     * Server 2016 — که این کاربر دارد — گاهی نام کاملاً دیگری است.
+     * پس به‌جای حدس زدن یک نام، هر سرویسی را می‌گیریم که apache/httpd در
+     * نام یا مسیرش باشد.
+     */
+    $svcPs = 'try { '
+        . '$all = @(Get-CimInstance Win32_Service -ErrorAction Stop); '
+        . '$hit = $all | Where-Object { $_.Name -match "^(Apache|httpd)" -or $_.DisplayName -match "Apache" -or $_.PathName -match "apache" } | Select-Object -First 1; '
+        . 'if ($hit) { [ordered]@{ Name = [string]$hit.Name; StartName = [string]$hit.StartName; State = [string]$hit.State } | ConvertTo-Json -Compress } else { "{}" } '
+        . '} catch { "{}" }';
+    @file_put_contents($svcFile, $svcPs);
     $svcPipes = [];
     $svcProc = @proc_open([$ps, '-NoProfile', '-NonInteractive', '-ExecutionPolicy', 'Bypass', '-File', $svcFile], [0 => ['pipe', 'r'], 1 => ['pipe', 'w'], 2 => ['pipe', 'w']], $svcPipes);
     $svcOut = '';
@@ -301,9 +391,41 @@ if ($isWindows) {
             fwrite(STDOUT, "      ⚠ Apache با NetworkService/LocalService اجرا می‌شود — بدون دسترسی شبکه‌ای به کلاینت‌ها.\n");
         }
     } elseif ($svcOut === '{}' || $svcOut === '') {
-        diag_line('حساب سرویس Apache', false, 'سرویس Apache2.4 پیدا نشد — شاید نام دیگری دارد');
-        fwrite(STDOUT, "      نام سرویس واقعی را ببینید:  sc query state= all | findstr /i apache\n");
-        fwrite(STDOUT, "      یا در XAMPP Control Panel → Config → Service and Port Settings\n");
+        /*
+         * شاید Apache به‌عنوان سرویس نصب نشده باشد — XAMPP اجازه می‌دهد
+         * Apache را فقط از Control Panel اجرا کنید، و در آن حالت هیچ سرویسی
+         * وجود ندارد. آن‌وقت هویت Apache همان هویت کاربری است که Control
+         * Panel را باز کرده، نه LocalSystem. این تفاوت مهم است و باید
+         * صریح گفته شود.
+         */
+        diag_line('سرویس Apache', false, 'سرویس ویندوزی برای Apache پیدا نشد');
+        // لیست واقعی سرویس‌ها را خودمان نشان می‌دهیم تا کاربر دستور تایپ نکند.
+        $listFile = sys_get_temp_dir() . '/itsm_svclist_' . bin2hex(random_bytes(4)) . '.ps1';
+        @file_put_contents($listFile, 'try { Get-CimInstance Win32_Service -ErrorAction Stop | Where-Object { $_.PathName -match "xampp|apache" } | ForEach-Object { $_.Name + "  |  " + $_.StartName + "  |  " + $_.State } } catch { }');
+        $listPipes = [];
+        $listProc = @proc_open([$ps, '-NoProfile', '-NonInteractive', '-ExecutionPolicy', 'Bypass', '-File', $listFile], [0 => ['pipe', 'r'], 1 => ['pipe', 'w'], 2 => ['pipe', 'w']], $listPipes);
+        $listOut = '';
+        if (is_resource($listProc)) {
+            fclose($listPipes[0]);
+            $listOut = trim((string) stream_get_contents($listPipes[1]));
+            stream_get_contents($listPipes[2]);
+            fclose($listPipes[1]);
+            fclose($listPipes[2]);
+            proc_close($listProc);
+        }
+        @unlink($listFile);
+        if ($listOut !== '') {
+            fwrite(STDOUT, "      سرویس‌های مرتبط با xampp/apache روی این سیستم:\n");
+            foreach (array_slice(preg_split('/\R/', $listOut), 0, 6) as $svcLine) {
+                if (trim($svcLine) !== '') { fwrite(STDOUT, "        " . trim($svcLine) . "\n"); }
+            }
+        } else {
+            fwrite(STDOUT, "      Apache احتمالاً به‌عنوان سرویس نصب نشده است (XAMPP Control Panel آن را\n");
+            fwrite(STDOUT, "      مستقیم اجرا می‌کند). در این حالت هویت Apache همان کاربری است که\n");
+            fwrite(STDOUT, "      Control Panel را باز کرده — و برای استخراج از راه دور کافی نیست.\n");
+        }
+        fwrite(STDOUT, "      اگر Apache از Control Panel اجرا می‌شود، برای دیدن هویت واقعی‌اش:\n");
+        fwrite(STDOUT, "        Task Manager → Details → ستون User Name را اضافه کنید → httpd.exe\n");
     }
 }
 fwrite(STDOUT, "\n");
@@ -480,7 +602,28 @@ PWSH;
     @unlink($resultFile);
     @rmdir($sandbox);
     if (!is_array($smb)) {
-        fwrite(STDOUT, "  ! نتیجهٔ آزمون SMB خوانده نشد.\n");
+        /*
+         * «نتیجه خوانده نشد» پیام بی‌مصرفی است: کاربر نمی‌داند PowerShel
+         * اجرا شد یا نه، رمز پذیرفته شد یا نه. سه حالت ممکن را جدا می‌کنیم.
+         */
+        fwrite(STDOUT, "  ! نتیجهٔ آزمون SMB خوانده نشد — دلیلش را بررسی می‌کنیم:\n");
+        if ($smbScriptMissing) {
+            fwrite(STDOUT, "      ✗ tools\\collect_via_smb.ps1 روی سرور نیست. (این بخش به آن وابسته نیست،\n");
+            fwrite(STDOUT, "        ولی استخراج واقعی هست — بالاتر توضیح داده شد.)\n");
+        }
+        if (!is_file($probeFile)) {
+            fwrite(STDOUT, "      ✗ فایل آزمون موقت ساخته نشد — پوشهٔ temp قابل نوشتن نیست.\n");
+            fwrite(STDOUT, "        مسیر: " . sys_get_temp_dir() . "\n");
+        } elseif (!is_file($resultFile)) {
+            fwrite(STDOUT, "      ✗ PowerShell خروجی را ننوشت. سه علت رایج:\n");
+            fwrite(STDOUT, "        • سیاست اجرای گروه (ExecutionPolicy) در سطح ماشین مسدود است\n");
+            fwrite(STDOUT, "        • نام کاربری به شکل درست نبود — این تست «" . $user . "» را فرستاد\n");
+            fwrite(STDOUT, "        • کنترل حساب کاربری (UAC) اجرای این اسکریپت را بست\n");
+            fwrite(STDOUT, "        آزمون دستی همین کار را بکنید و پیام را ببینید:\n");
+            fwrite(STDOUT, "          powershell -NoProfile -Command \"Test-Path \\\\" . $host . "\\C$\"\n");
+        } else {
+            fwrite(STDOUT, "      ✗ فایل نتیجه ساخته شد ولی JSON معتبر نبود (خروجی ناقص).\n");
+        }
     } else {
         diag_line('TCP 445', !empty($smb['tcp445']), !empty($smb['tcp445']) ? 'باز' : 'بسته — فایروال مقصد یا سرویس File and Printer Sharing');
         diag_line('بازکردن \\\\' . $host . '\\C$', !empty($smb['cshare']), !empty($smb['cshare']) ? 'موفق' : 'ناموفق — حساب روی این مقصد ادمین محلی نیست یا Remote UAC جلوی دسترسی محلی را گرفته');

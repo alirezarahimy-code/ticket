@@ -153,9 +153,11 @@ FILES = [
     # دستور اجرای گام‌به‌گام ابزار تشخیص. کاربر باید بدون حدس، در پوشهٔ درست
     # cmd باز کند و php را پیدا کند؛ این سند همان است.
     "docs/DIAG-EXTRACT-COMMANDS-FA.md",
+    "docs/DIAG-EXTRACT-READING-REPORT-FA.md",
     # اجراکنندهٔ .bat: php.exe را خودش پیدا می‌کند (روی IIS در PATH نیست).
     "tools/RUN-DIAG-EXTRACT.bat",
     "tools/GET-DIAG-EXTRACT.bat",
+    "tools/INSTALL-UPDATE-FILES.bat",
 ]
 
 # استثنای مستند: اسکریپت‌هایی که در ۱.۶۳ نبودند ولی این بسته **می‌سازد**.
@@ -221,8 +223,10 @@ ALLOWED_NEW_FILES = {
     # سند فقط مستندات است و .bat فقط همان diag_extract.php را صدا می‌زند که
     # همین بسته حمل می‌کند.
     "docs/DIAG-EXTRACT-COMMANDS-FA.md",
+    "docs/DIAG-EXTRACT-READING-REPORT-FA.md",
     "tools/RUN-DIAG-EXTRACT.bat",
     "tools/GET-DIAG-EXTRACT.bat",
+    "tools/INSTALL-UPDATE-FILES.bat",
 }
 
 # این‌ها فقط برای آزمون‌اند و مسیر runtime ندارند؛ در بسته نمی‌آیند اما

@@ -289,6 +289,32 @@ check('۴۲: ساختار بستهٔ به‌روزرسانی را می‌شنا�
 check('۴۳: اگر فایل از قبل هست، بازنویسی نمی‌کند', str_contains($getBat, 'به‌روزرسانی نمی‌شود'));
 check('۴۴: پوشهٔ درست را بررسی می‌کند (index.php)', str_contains($getBat, 'index.php'));
 
+echo "\n═══ ۳.۱۰) یافته‌های خروجی واقعی کاربر (r17-ه) ═══\n";
+// خروجی واقعی نشان داد tools\collect_via_smb.ps1 روی سرور نبود — و بی‌آن،
+// روش دوم SMB برای همهٔ مقصدها بی‌صدا شکست می‌خورد.
+check('۴۵: نبودِ اسکریپت SMB صریح گزارش می‌شود', str_contains($diagSrc, 'این فایل حیاتی است'));
+check('۴۶: مسیرهای جایگزین بسته بررسی می‌شوند', str_contains($diagSrc, '$smbScriptCandidates'));
+check('۴۷: دستور کپی درست چاپ می‌شود', str_contains($diagSrc, 'copy '));
+// 0x80090311 در خروجی واقعی آمد و هیچ نگاشتی نداشت
+$ds = (string) file_get_contents($root . '/domain-scan.php');
+check('۴۸: 0x80090311 نگاشت دارد', str_contains($ds, "'0x80090311' =>"));
+check('۴۹: «no logon servers» نگاشت دارد', str_contains($ds, "'no logon servers' =>"));
+check('۵۰: راه‌حل nltest پیشنهاد می‌شود', str_contains($ds, 'nltest /dsgetdc'));
+// عضویت دامنه کافی نیست: باید خودِ DC هم دیده شود
+check('۵۱: DC از سرور سامانه سنجیده می‌شود', str_contains($diagSrc, 'کنترل‌کنندهٔ دامنه'));
+check('۵۲: هشدار DNS به DC اشاره می‌کند', str_contains($diagSrc, 'DNS سرور سامانه باید به DC اشاره کند'));
+// نام سرویس Apache روی Server 2016 با Apache2.4 ثابت نبود
+check('۵۳: سرویس Apache با الگو پیدا می‌شود، نه نام ثابت', str_contains($diagSrc, '-match "^(Apache|httpd)"'));
+check('۵۴: اگر سرویس نبود، لیست واقعی چاپ می‌شود', str_contains($diagSrc, 'سرویس‌های مرتبط با xampp/apache'));
+check('۵۵: حالت Control Panel (بدون سرویس) توضیح داده می‌شود', str_contains($diagSrc, 'Task Manager → Details'));
+// «نتیجه خوانده نشد» باید خودش علت را بگوید
+check('۵۶: شکست SMB خودتشخیصی می‌دهد', str_contains($diagSrc, 'دلیلش را بررسی می‌کنیم'));
+// نصب‌کنندهٔ فایل‌ها
+$instBat = (string) @file_get_contents($root . '/tools/INSTALL-UPDATE-FILES.bat');
+check('۵۷: نصب‌کنندهٔ فایل‌ها منتشر شده است', $instBat !== '');
+check('۵۸: collect_via_smb.ps1 را کپی می‌کند', str_contains($instBat, 'collect_via_smb.ps1'));
+check('۵۹: بعد از کپی بررسی می‌کند که سر جایش هست', str_contains($instBat, 'بررسی نهایی'));
+
 echo "\n═══ ۴) ابزار تشخیص ═══\n";
 $diag = (string) file_get_contents($root . '/tools/diagnose_login_and_assets.php');
 check('ابزار تشخیص وجود دارد', $diag !== '');
