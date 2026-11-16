@@ -9,7 +9,7 @@
 | سنجه | مقدار |
 |---|---|
 | فایل‌های کد تولیدی | 694 |
-| خطوط | 174,852 |
+| خطوط | 174,942 |
 | آدرس‌ها (بلوک) | 8,284 |
 | موضوع‌های قابل جست‌وجو | 41 صفحه + 102 مجوز + 85 جدول |
 | بازبینی‌شده | 0 آدرس (0.0%) — 0 خط (0.0%) |
@@ -34,7 +34,7 @@
 | **logging dashboard** | `logging-dashboard` | — | `PAGE-033.57` <sub>index.php:1015</sub><br>`ASSET-017.01` <sub>assets/logging-dashboard.css:1</sub><br>`PAGE-037.04` <sub>logging-dashboard.php:114</sub><br>`PAGE-037.02` <sub>logging-dashboard.php:4</sub> | 11 |
 | **release notes** | `release-notes` | — | `PAGE-033.53` <sub>index.php:970</sub><br>`CORE-020.07` <sub>lib/release-notes.php:177</sub><br>`CORE-020.03` <sub>lib/release-notes.php:112</sub><br>`CORE-020.01` <sub>lib/release-notes.php:1</sub> | 12 |
 | **system health** | `system-health` | — | `PAGE-033.58` <sub>index.php:1019</sub><br>`PAGE-079.28` <sub>system-health.php:947</sub><br>`PAGE-079.03` <sub>system-health.php:25</sub><br>`PAGE-079.04` <sub>system-health.php:43</sub> | 36 |
-| **اعلان‌ها** | `notifications` | — | `PAGE-033.55` <sub>index.php:988</sub><br>`ACT-010.03` <sub>actions/notification-actions.php:23</sub><br>`PAGE-033.54` <sub>index.php:980</sub><br>`DB-004.30` <sub>install-empty-db.sql:443</sub> | 50 |
+| **اعلان‌ها** | `notifications` | — | `PAGE-033.55` <sub>index.php:988</sub><br>`ACT-010.03` <sub>actions/notification-actions.php:23</sub><br>`PAGE-033.54` <sub>index.php:980</sub><br>`DB-004.30` <sub>install-empty-db.sql:443</sub> | 51 |
 | **به‌روزرسانی و پشتیبان‌گیری** | `backup` | `backup.view` | `PAGE-005.04` <sub>backup.php:32</sub><br>`PAGE-005.02` <sub>backup.php:6</sub><br>`PAGE-005.03` <sub>backup.php:12</sub><br>`PAGE-005.05` <sub>backup.php:78</sub> | 45 |
 | **تاریخچه CD/DVD** | `cd-dvd-history` | `cddvd.history` | `PAGE-033.49` <sub>index.php:940</sub><br>`CORE-022.05` <sub>lib/settings-effects.php:57</sub> | 12 |
 | **تاریخچه دارایی** | `asset-history` | `asset.history` | `PAGE-033.68` <sub>index.php:1558</sub><br>`CORE-022.05` <sub>lib/settings-effects.php:57</sub> | 5 |
@@ -57,7 +57,7 @@
 | **مدیریت بات** | `chatbot-admin` | `chatbot.manage` | `PAGE-033.64` <sub>index.php:1315</sub><br>`CORE-022.05` <sub>lib/settings-effects.php:57</sub> | 8 |
 | **مدیریت سازمان** | `organization` | `org.view` | `PAGE-074.39` <sub>organization.php:486</sub><br>`PAGE-033.72` <sub>index.php:1766</sub><br>`PAGE-033.27` <sub>index.php:467</sub><br>`PAGE-074.02` <sub>organization.php:4</sub> | 194 |
 | **پروفایل کاربری** | `profile` | `profile.edit` | `PAGE-033.43` <sub>index.php:897</sub><br>`PAGE-004.16` <sub>asset-profile.php:509</sub><br>`CORE-022.05` <sub>lib/settings-effects.php:57</sub> | 13 |
-| **پنل سوپروایزر** | `supervisor` | `supervisor.panel` | `PAGE-063.03` <sub>modules/request-center/Pages/supervisor.php:16</sub><br>`PAGE-045.03` <sub>modules/request-center/Actions/supervisor-actions.php:26</sub><br>`PAGE-077.15` <sub>request-center.php:188</sub><br>`PAGE-063.01` <sub>modules/request-center/Pages/supervisor.php:1</sub> | 106 |
+| **پنل سوپروایزر** | `supervisor` | `supervisor.panel` | `PAGE-063.03` <sub>modules/request-center/Pages/supervisor.php:16</sub><br>`PAGE-045.03` <sub>modules/request-center/Actions/supervisor-actions.php:26</sub><br>`PAGE-077.15` <sub>request-center.php:188</sub><br>`PAGE-063.01` <sub>modules/request-center/Pages/supervisor.php:1</sub> | 107 |
 | **چاپ کنترل تردد** | `traffic-control-print` | `traffic.view` | `PAGE-033.51` <sub>index.php:947</sub> | 7 |
 | **کاتالوگ خدمات** | `services` | `services.view` | `PAGE-061.03` <sub>modules/request-center/Pages/services.php:12</sub><br>`PAGE-077.16` <sub>request-center.php:192</sub><br>`PAGE-061.06` <sub>modules/request-center/Pages/services.php:147</sub><br>`PAGE-061.07` <sub>modules/request-center/Pages/services.php:171</sub> | 26 |
 | **کنترل CD/DVD** | `cd-dvd` | `cddvd.view` | `PAGE-033.48` <sub>index.php:936</sub><br>`PAGE-007.33` <sub>cd-dvd.php:406</sub><br>`PAGE-007.19` <sub>cd-dvd.php:153</sub><br>`PAGE-007.39` <sub>cd-dvd.php:555</sub> | 72 |
@@ -184,7 +184,7 @@
 
 | جدول | آدرس‌های اصلی | کل |
 |---|---|---|
-| `activity_logs` | `DB-004.28` <sub>install-empty-db.sql:397</sub><br>`DB-007.19` <sub>migrations/003-sync-schema-151.sql:298</sub><br>`DB-044.25` <sub>schema.sql:376</sub> | 71 |
+| `activity_logs` | `DB-004.28` <sub>install-empty-db.sql:397</sub><br>`DB-007.19` <sub>migrations/003-sync-schema-151.sql:298</sub><br>`DB-044.25` <sub>schema.sql:376</sub> | 70 |
 | `api_rate_limits` | `DB-004.67` <sub>install-empty-db.sql:1140</sub><br>`DB-007.58` <sub>migrations/003-sync-schema-151.sql:949</sub><br>`DB-044.67` <sub>schema.sql:1153</sub> | 8 |
 | `asset_dedupe_backup_016` | `DB-020.20` <sub>migrations/016-auto-asset-finish.sql:53</sub><br>`DB-020.22` <sub>migrations/016-auto-asset-finish.sql:57</sub><br>`DB-020.19` <sub>migrations/016-auto-asset-finish.sql:52</sub> | 4 |
 | `asset_graphics_adapters` | `DB-004.40` <sub>install-empty-db.sql:616</sub><br>`DB-007.30` <sub>migrations/003-sync-schema-151.sql:475</sub><br>`DB-044.37` <sub>schema.sql:595</sub> | 16 |
@@ -238,7 +238,7 @@
 | `log_issues` | `DB-004.116` <sub>install-empty-db.sql:1502</sub><br>`DB-030.02` <sub>migrations/025-logging-issues-alerts.sql:4</sub><br>`DB-044.105` <sub>schema.sql:1453</sub> | 33 |
 | `logging_health_alerts` | `DB-004.117` <sub>install-empty-db.sql:1528</sub><br>`DB-030.03` <sub>migrations/025-logging-issues-alerts.sql:29</sub><br>`DB-044.106` <sub>schema.sql:1479</sub> | 14 |
 | `login_attempts` | `DB-004.31` <sub>install-empty-db.sql:461</sub><br>`DB-007.22` <sub>migrations/003-sync-schema-151.sql:343</sub><br>`DB-044.28` <sub>schema.sql:440</sub> | 14 |
-| `notifications` | `PAGE-033.55` <sub>index.php:988</sub><br>`ACT-010.03` <sub>actions/notification-actions.php:23</sub><br>`PAGE-033.54` <sub>index.php:980</sub> | 50 |
+| `notifications` | `PAGE-033.55` <sub>index.php:988</sub><br>`ACT-010.03` <sub>actions/notification-actions.php:23</sub><br>`PAGE-033.54` <sub>index.php:980</sub> | 51 |
 | `ola_policies` | `DB-004.46` <sub>install-empty-db.sql:771</sub><br>`DB-007.36` <sub>migrations/003-sync-schema-151.sql:624</sub><br>`DB-044.43` <sub>schema.sql:750</sub> | 28 |
 | `org_companies` | `DB-004.06` <sub>install-empty-db.sql:37</sub><br>`DB-023.02` <sub>migrations/018-org-company-separation.sql:3</sub><br>`DB-044.03` <sub>schema.sql:16</sub> | 13 |
 | `org_unit_managers` | `DB-004.10` <sub>install-empty-db.sql:77</sub><br>`DB-007.05` <sub>migrations/003-sync-schema-151.sql:32</sub><br>`DB-044.07` <sub>schema.sql:56</sub> | 38 |
@@ -258,7 +258,7 @@
 | `ticket_messages` | `DB-004.25` <sub>install-empty-db.sql:360</sub><br>`DB-007.16` <sub>migrations/003-sync-schema-151.sql:264</sub><br>`DB-044.22` <sub>schema.sql:339</sub> | 28 |
 | `ticket_number_seq` | `DB-004.66` <sub>install-empty-db.sql:1134</sub><br>`DB-007.57` <sub>migrations/003-sync-schema-151.sql:945</sub><br>`DB-040.03` <sub>migrations/035-request-center-appointments.sql:36</sub> | 26 |
 | `ticket_ola_alerts` | `DB-004.47` <sub>install-empty-db.sql:789</sub><br>`DB-007.37` <sub>migrations/003-sync-schema-151.sql:641</sub><br>`DB-044.44` <sub>schema.sql:768</sub> | 14 |
-| `ticket_ratings` | `DB-004.26` <sub>install-empty-db.sql:372</sub><br>`DB-007.17` <sub>migrations/003-sync-schema-151.sql:275</sub><br>`DB-044.23` <sub>schema.sql:351</sub> | 21 |
+| `ticket_ratings` | `DB-004.26` <sub>install-empty-db.sql:372</sub><br>`DB-007.17` <sub>migrations/003-sync-schema-151.sql:275</sub><br>`DB-044.23` <sub>schema.sql:351</sub> | 22 |
 | `ticket_sla_alerts` | `DB-004.32` <sub>install-empty-db.sql:469</sub><br>`DB-007.23` <sub>migrations/003-sync-schema-151.sql:350</sub><br>`DB-044.29` <sub>schema.sql:448</sub> | 15 |
 | `tickets` | `DB-004.24` <sub>install-empty-db.sql:292</sub><br>`DB-007.15` <sub>migrations/003-sync-schema-151.sql:198</sub><br>`DB-044.21` <sub>schema.sql:271</sub> | 216 |
 | `tmp_asset_dedupe_map` | `DB-020.17` <sub>migrations/016-auto-asset-finish.sql:39</sub><br>`DB-020.18` <sub>migrations/016-auto-asset-finish.sql:45</sub><br>`DB-020.16` <sub>migrations/016-auto-asset-finish.sql:38</sub> | 8 |
@@ -288,7 +288,7 @@
 
 | ناحیه | معنی | فایل | بلوک | خط |
 |---|---|---|---|---|
-| `TEST` | TEST | 252 | 1,960 | 28,745 |
+| `TEST` | TEST | 252 | 1,960 | 28,835 |
 | `TOOL` | TOOL | 152 | 1,452 | 40,124 |
 | `DB` | DB | 86 | 1,385 | 8,274 |
 | `PAGE` | صفحات (ریشه) | 84 | 1,609 | 57,771 |
@@ -305,12 +305,12 @@
 
 | نشانه | معنی | بلوک |
 |---|---|---|
-| `write_no_tx` | نوشتن بدون تراکنش | 951 |
+| `write_no_tx` | نوشتن بدون تراکنش | 952 |
 | `error_suppression` | سرکوب @ | 388 |
 | `dangerous_call` | فراخوانی خطرناک | 280 |
 | `sql_concat` | الحاق در SQL | 236 |
 | `raw_input` | ورودی خام | 221 |
-| `long` | >۱۲۰ خط | 174 |
+| `long` | >۱۲۰ خط | 175 |
 | `silent_catch` | catch بی‌صدا | 163 |
 | `unescaped_echo` | چاپ بدون فرار | 39 |
 | `very_long` | >۳۰۰ خط | 29 |
@@ -319,13 +319,13 @@
 
 | # | آدرس | مسیر:خط | لنگر | ریسک | نشانه‌ها | وضعیت |
 |---|---|---|---|---|---|---|
-| 1 | `TEST-198.36` | `tests/test_request_center_t12_scenarios.php:719` | مسیر: rated | 20 | catch بی‌صدا، الحاق در SQL، سرکوب @، فراخوانی خطرناک، نوشتن بدون تراکنش، >۳۰۰ خط | ⬜ در نوبت |
+| 1 | `TEST-198.36` | `tests/test_request_center_t12_scenarios.php:799` | مسیر: rated | 20 | catch بی‌صدا، الحاق در SQL، سرکوب @، فراخوانی خطرناک، نوشتن بدون تراکنش، >۳۰۰ خط | ⬜ در نوبت |
 | 2 | `TOOL-043.01` | `tools/diag_connection.php:1` | بلوک رویه‌ای 1-258 | 20 | catch بی‌صدا، الحاق در SQL، چاپ بدون فرار، سرکوب @، فراخوانی خطرناک، >۱۲۰ خط | ⬜ در نوبت |
 | 3 | `PAGE-025.02` | `food-ticket-selftest.php:20` | food_ticket_selftest_run | 19 | catch بی‌صدا، الحاق در SQL، سرکوب @، فراخوانی خطرناک، >۳۰۰ خط | ⬜ در نوبت |
 | 4 | `TOOL-002.01` | `tools/asset_dedupe.php:1` | بلوک رویه‌ای 1-301 | 19 | catch بی‌صدا، الحاق در SQL، چاپ بدون فرار، فراخوانی خطرناک، >۳۰۰ خط | ⬜ در نوبت |
 | 5 | `TEST-219.13` | `tests/test_system_update_migration_failure_gates.php:147` | بلوک رویه‌ای 147-232 | 17 | catch بی‌صدا، الحاق در SQL، سرکوب @، فراخوانی خطرناک، نوشتن بدون تراکنش | ⬜ در نوبت |
 | 6 | `PAGE-033.73` | `index.php:1957` | مسیر: settings | 16 | catch بی‌صدا، الحاق در SQL، ورودی خام، سرکوب @، نوشتن بدون تراکنش، >۳۰۰ خط | ⬜ در نوبت |
-| 7 | `TEST-191.08` | `tests/test_request_center_phase2_smoke_mariadb.php:153` | بلوک رویه‌ای 153-939 | 16 | الحاق در SQL، سرکوب @، فراخوانی خطرناک، نوشتن بدون تراکنش، >۳۰۰ خط | ⬜ در نوبت |
+| 7 | `TEST-191.08` | `tests/test_request_center_phase2_smoke_mariadb.php:158` | بلوک رویه‌ای 158-949 | 16 | الحاق در SQL، سرکوب @، فراخوانی خطرناک، نوشتن بدون تراکنش، >۳۰۰ خط | ⬜ در نوبت |
 | 8 | `TOOL-109.01` | `tools/test_food_group_representative.php:1` | بلوک رویه‌ای 1-517 | 16 | catch بی‌صدا، الحاق در SQL، چاپ بدون فرار، نوشتن بدون تراکنش، >۳۰۰ خط | ⬜ در نوبت |
 | 9 | `ACT-014.09` | `actions/settings-actions.php:319` | مسیر: reset_assets | 15 | catch بی‌صدا، الحاق در SQL، سرکوب @، فراخوانی خطرناک | ⬜ در نوبت |
 | 10 | `TOOL-055.01` | `tools/explain_alarms.php:1` | بلوک رویه‌ای 1-219 | 15 | catch بی‌صدا، چاپ بدون فرار، سرکوب @، فراخوانی خطرناک، نوشتن بدون تراکنش، >۱۲۰ خط | ⬜ در نوبت |
@@ -3221,18 +3221,18 @@
 </details>
 
 <details>
-<summary><b>TEST-191</b> — <code>tests/test_request_center_phase2_smoke_mariadb.php</code> (939 خط، 8 آدرس، بازبینی‌شده 0/8)</summary>
+<summary><b>TEST-191</b> — <code>tests/test_request_center_phase2_smoke_mariadb.php</code> (949 خط، 8 آدرس، بازبینی‌شده 0/8)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
 | `TEST-191.01` | 1–32 | ناحیه | `بلوک رویه‌ای 1-32` | 0 | ⬜ |
-| `TEST-191.02` | 33–38 | تابع | `smoke_persian_digits` | 0 | ⬜ |
-| `TEST-191.03` | 40–46 | تابع | `smoke_check` | 0 | ⬜ |
-| `TEST-191.04` | 48–73 | تابع | `smoke_http_post` | 6 | ⬜ |
-| `TEST-191.05` | 75–118 | تابع | `smoke_http_multipart_post` | 6 | ⬜ |
-| `TEST-191.06` | 120–131 | تابع | `smoke_wait_server` | 1 | ⬜ |
-| `TEST-191.07` | 133–152 | تابع | `smoke_http` | 6 | ⬜ |
-| `TEST-191.08` | 153–939 | ناحیه | `بلوک رویه‌ای 153-939` | **16** | ⬜ |
+| `TEST-191.02` | 33–43 | تابع | `smoke_latin_digits` | 0 | ⬜ |
+| `TEST-191.03` | 45–51 | تابع | `smoke_check` | 0 | ⬜ |
+| `TEST-191.04` | 53–78 | تابع | `smoke_http_post` | 6 | ⬜ |
+| `TEST-191.05` | 80–123 | تابع | `smoke_http_multipart_post` | 6 | ⬜ |
+| `TEST-191.06` | 125–136 | تابع | `smoke_wait_server` | 1 | ⬜ |
+| `TEST-191.07` | 138–157 | تابع | `smoke_http` | 6 | ⬜ |
+| `TEST-191.08` | 158–949 | ناحیه | `بلوک رویه‌ای 158-949` | **16** | ⬜ |
 
 </details>
 
@@ -3374,7 +3374,7 @@
 </details>
 
 <details>
-<summary><b>TEST-198</b> — <code>tests/test_request_center_t12_scenarios.php</code> (1,025 خط، 36 آدرس، بازبینی‌شده 0/36)</summary>
+<summary><b>TEST-198</b> — <code>tests/test_request_center_t12_scenarios.php</code> (1,105 خط، 36 آدرس، بازبینی‌شده 0/36)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
@@ -3399,21 +3399,21 @@
 | `TEST-198.19` | 213–225 | تابع | `t12s_snapshot_table` | 5 | ⬜ |
 | `TEST-198.20` | 227–240 | تابع | `t12s_snapshot` | 0 | ⬜ |
 | `TEST-198.21` | 242–247 | تابع | `t12s_ts_diff_tol` | 0 | ⬜ |
-| `TEST-198.22` | 249–333 | تابع | `t12s_compare` | 5 | ⬜ |
-| `TEST-198.23` | 335–349 | تابع | `t12s_rebuild_all` | 4 | ⬜ |
-| `TEST-198.24` | 351–362 | تابع | `t12s_sessions` | 0 | ⬜ |
-| `TEST-198.25` | 364–364 | تابع | `t12s_clone_log_tail` | 1 | ⬜ |
-| `TEST-198.26` | 366–395 | تابع | `t12s_create_ticket` | 0 | ⬜ |
-| `TEST-198.27` | 397–400 | تابع | `t12s_pdo` | 0 | ⬜ |
-| `TEST-198.28` | 402–407 | تابع | `t12s_expect_redirect` | 0 | ⬜ |
-| `TEST-198.29` | 409–429 | تابع | `t12s_run_pair` | 0 | ⬜ |
-| `TEST-198.30` | 431–478 | تابع | `t12s_finish` | 1 | ⬜ |
-| `TEST-198.31` | 481–556 | تابع | `t12s_finish_feature_only` | 1 | ⬜ |
-| `TEST-198.32` | 557–574 | ناحیه | `بلوک رویه‌ای 557-574` | 1 | ⬜ |
-| `TEST-198.33` | 575–575 | ناحیه | `Both databases must exist BEFORE the web servers s` | 0 | ⬜ |
-| `TEST-198.34` | 576–576 | ناحیه | `bootstrap performs a schema check on EVERY request` | 0 | ⬜ |
-| `TEST-198.35` | 577–718 | ناحیه | `while a clone database is absent.` | **11** | ⬜ |
-| `TEST-198.36` | 719–1025 | ناحیه | `مسیر: rated` | **20** | ⬜ |
+| `TEST-198.22` | 249–379 | تابع | `t12s_compare` | 7 | ⬜ |
+| `TEST-198.23` | 381–395 | تابع | `t12s_rebuild_all` | 4 | ⬜ |
+| `TEST-198.24` | 397–408 | تابع | `t12s_sessions` | 0 | ⬜ |
+| `TEST-198.25` | 410–410 | تابع | `t12s_clone_log_tail` | 1 | ⬜ |
+| `TEST-198.26` | 412–441 | تابع | `t12s_create_ticket` | 0 | ⬜ |
+| `TEST-198.27` | 443–446 | تابع | `t12s_pdo` | 0 | ⬜ |
+| `TEST-198.28` | 448–453 | تابع | `t12s_expect_redirect` | 0 | ⬜ |
+| `TEST-198.29` | 455–475 | تابع | `t12s_run_pair` | 0 | ⬜ |
+| `TEST-198.30` | 477–559 | تابع | `t12s_finish` | 1 | ⬜ |
+| `TEST-198.31` | 562–637 | تابع | `t12s_finish_feature_only` | 1 | ⬜ |
+| `TEST-198.32` | 638–655 | ناحیه | `بلوک رویه‌ای 638-655` | 1 | ⬜ |
+| `TEST-198.33` | 656–656 | ناحیه | `Both databases must exist BEFORE the web servers s` | 0 | ⬜ |
+| `TEST-198.34` | 657–657 | ناحیه | `bootstrap performs a schema check on EVERY request` | 0 | ⬜ |
+| `TEST-198.35` | 658–798 | ناحیه | `while a clone database is absent.` | **11** | ⬜ |
+| `TEST-198.36` | 799–1105 | ناحیه | `مسیر: rated` | **20** | ⬜ |
 
 </details>
 

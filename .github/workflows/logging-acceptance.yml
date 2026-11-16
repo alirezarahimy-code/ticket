@@ -55,12 +55,30 @@ jobs:
             php "$test"
           done
       - name: MySQL/MariaDB integration tests (dedicated disposable database)
+        id: mysql_integration
         env:
           ITSM_TEST_ALLOW_DESTRUCTIVE: 'YES'
           ITSM_TEST_DSN: 'mysql:host=127.0.0.1;port=3306;dbname=itsm_logging_test;charset=utf8mb4'
           ITSM_TEST_DB_USER: root
           ITSM_TEST_DB_PASS: test-root-password
-        run: php tests/test_logging_mysql_integration.php
+        shell: bash
+        run: |
+          set +e
+          php tests/test_logging_mysql_integration.php 2>&1 | tee "$RUNNER_TEMP/logging-mysql-integration.log"
+          code=${PIPESTATUS[0]}
+          set -e
+          exit "$code"
+      - name: Surface MySQL Logging integration failure detail
+        if: failure() && steps.mysql_integration.outcome == 'failure'
+        run: |
+          python3 - "$RUNNER_TEMP/logging-mysql-integration.log" <<'PY'
+          from pathlib import Path
+          import sys
+          path = Path(sys.argv[1])
+          text = path.read_text(encoding="utf-8", errors="replace") if path.is_file() else "Logging integration test log was not created"
+          message = text[-3500:].replace("%", "%25").replace("\r", "%0D").replace("\n", "%0A")
+          print(f"::error title=MySQL Logging integration diagnostic::{message}")
+          PY
       - name: Python Logging/static contract tests
         run: >-
           python -m pytest -q

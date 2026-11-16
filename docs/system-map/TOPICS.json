@@ -322,18 +322,18 @@
         "DB-007.269"
       ],
       "related": [
+        "TEST-198.36",
         "TEST-191.08",
         "TEST-119.08",
-        "TEST-198.35",
         "TOOL-012.02",
         "CRON-001.09",
         "PAGE-033.30",
         "PAGE-065.02",
-        "TEST-119.01",
         "TEST-198.22",
+        "TEST-119.01",
         "CRON-015.01"
       ],
-      "total": 50
+      "total": 51
     },
     {
       "id": "page:backup",
@@ -985,14 +985,14 @@
         "PAGE-033.73",
         "TEST-191.08",
         "PAGE-054.03",
+        "TEST-198.35",
         "TOOL-012.02",
         "PAGE-075.26",
         "TEST-199.07",
         "PAGE-047.02",
-        "ACT-012.03",
-        "ACT-017.07"
+        "ACT-012.03"
       ],
-      "total": 106
+      "total": 107
     },
     {
       "id": "page:traffic-control-print",
@@ -3157,7 +3157,7 @@
         "TEST-119.06",
         "PAGE-033.30"
       ],
-      "total": 71
+      "total": 70
     },
     {
       "id": "table:api_rate_limits",
@@ -4493,14 +4493,14 @@
         "DB-007.265"
       ],
       "related": [
+        "TEST-198.36",
         "TEST-191.08",
         "TEST-119.08",
-        "TEST-198.35",
         "TOOL-012.02",
         "CRON-001.09",
         "PAGE-033.30"
       ],
-      "total": 50
+      "total": 51
     },
     {
       "id": "table:ola_policies",
@@ -5005,12 +5005,12 @@
       "related": [
         "TEST-198.36",
         "TEST-191.08",
+        "TEST-198.35",
         "PAGE-063.03",
         "CRON-013.01",
-        "TOOL-101.06",
-        "PAGE-051.03"
+        "TOOL-101.06"
       ],
-      "total": 21
+      "total": 22
     },
     {
       "id": "table:ticket_sla_alerts",
@@ -51940,14 +51940,14 @@
       "path": "tests/test_request_center_phase2_smoke_mariadb.php",
       "area": "TEST",
       "line": 33,
-      "anchor": "smoke_persian_digits",
+      "anchor": "smoke_latin_digits",
       "risk": 0,
-      "lines": 6
+      "lines": 11
     },
     "TEST-191.03": {
       "path": "tests/test_request_center_phase2_smoke_mariadb.php",
       "area": "TEST",
-      "line": 40,
+      "line": 45,
       "anchor": "smoke_check",
       "risk": 0,
       "lines": 7
@@ -51955,7 +51955,7 @@
     "TEST-191.04": {
       "path": "tests/test_request_center_phase2_smoke_mariadb.php",
       "area": "TEST",
-      "line": 48,
+      "line": 53,
       "anchor": "smoke_http_post",
       "risk": 6,
       "lines": 26
@@ -51963,7 +51963,7 @@
     "TEST-191.05": {
       "path": "tests/test_request_center_phase2_smoke_mariadb.php",
       "area": "TEST",
-      "line": 75,
+      "line": 80,
       "anchor": "smoke_http_multipart_post",
       "risk": 6,
       "lines": 44
@@ -51971,7 +51971,7 @@
     "TEST-191.06": {
       "path": "tests/test_request_center_phase2_smoke_mariadb.php",
       "area": "TEST",
-      "line": 120,
+      "line": 125,
       "anchor": "smoke_wait_server",
       "risk": 1,
       "lines": 12
@@ -51979,7 +51979,7 @@
     "TEST-191.07": {
       "path": "tests/test_request_center_phase2_smoke_mariadb.php",
       "area": "TEST",
-      "line": 133,
+      "line": 138,
       "anchor": "smoke_http",
       "risk": 6,
       "lines": 20
@@ -51987,10 +51987,10 @@
     "TEST-191.08": {
       "path": "tests/test_request_center_phase2_smoke_mariadb.php",
       "area": "TEST",
-      "line": 153,
-      "anchor": "بلوک رویه‌ای 153-939",
+      "line": 158,
+      "anchor": "بلوک رویه‌ای 158-949",
       "risk": 16,
-      "lines": 787
+      "lines": 792
     },
     "TEST-192.01": {
       "path": "tests/test_request_center_phase3_lifecycle_static.py",
@@ -52877,13 +52877,13 @@
       "area": "TEST",
       "line": 249,
       "anchor": "t12s_compare",
-      "risk": 5,
-      "lines": 85
+      "risk": 7,
+      "lines": 131
     },
     "TEST-198.23": {
       "path": "tests/test_request_center_t12_scenarios.php",
       "area": "TEST",
-      "line": 335,
+      "line": 381,
       "anchor": "t12s_rebuild_all",
       "risk": 4,
       "lines": 15
@@ -52891,7 +52891,7 @@
     "TEST-198.24": {
       "path": "tests/test_request_center_t12_scenarios.php",
       "area": "TEST",
-      "line": 351,
+      "line": 397,
       "anchor": "t12s_sessions",
       "risk": 0,
       "lines": 12
@@ -52899,7 +52899,7 @@
     "TEST-198.25": {
       "path": "tests/test_request_center_t12_scenarios.php",
       "area": "TEST",
-      "line": 364,
+      "line": 410,
       "anchor": "t12s_clone_log_tail",
       "risk": 1,
       "lines": 1
@@ -52907,7 +52907,7 @@
     "TEST-198.26": {
       "path": "tests/test_request_center_t12_scenarios.php",
       "area": "TEST",
-      "line": 366,
+      "line": 412,
       "anchor": "t12s_create_ticket",
       "risk": 0,
       "lines": 30
@@ -52915,7 +52915,7 @@
     "TEST-198.27": {
       "path": "tests/test_request_center_t12_scenarios.php",
       "area": "TEST",
-      "line": 397,
+      "line": 443,
       "anchor": "t12s_pdo",
       "risk": 0,
       "lines": 4
@@ -52923,7 +52923,7 @@
     "TEST-198.28": {
       "path": "tests/test_request_center_t12_scenarios.php",
       "area": "TEST",
-      "line": 402,
+      "line": 448,
       "anchor": "t12s_expect_redirect",
       "risk": 0,
       "lines": 6
@@ -52931,7 +52931,7 @@
     "TEST-198.29": {
       "path": "tests/test_request_center_t12_scenarios.php",
       "area": "TEST",
-      "line": 409,
+      "line": 455,
       "anchor": "t12s_run_pair",
       "risk": 0,
       "lines": 21
@@ -52939,15 +52939,15 @@
     "TEST-198.30": {
       "path": "tests/test_request_center_t12_scenarios.php",
       "area": "TEST",
-      "line": 431,
+      "line": 477,
       "anchor": "t12s_finish",
       "risk": 1,
-      "lines": 48
+      "lines": 83
     },
     "TEST-198.31": {
       "path": "tests/test_request_center_t12_scenarios.php",
       "area": "TEST",
-      "line": 481,
+      "line": 562,
       "anchor": "t12s_finish_feature_only",
       "risk": 1,
       "lines": 76
@@ -52955,15 +52955,15 @@
     "TEST-198.32": {
       "path": "tests/test_request_center_t12_scenarios.php",
       "area": "TEST",
-      "line": 557,
-      "anchor": "بلوک رویه‌ای 557-574",
+      "line": 638,
+      "anchor": "بلوک رویه‌ای 638-655",
       "risk": 1,
       "lines": 18
     },
     "TEST-198.33": {
       "path": "tests/test_request_center_t12_scenarios.php",
       "area": "TEST",
-      "line": 575,
+      "line": 656,
       "anchor": "Both databases must exist BEFORE the web servers start: the ",
       "risk": 0,
       "lines": 1
@@ -52971,7 +52971,7 @@
     "TEST-198.34": {
       "path": "tests/test_request_center_t12_scenarios.php",
       "area": "TEST",
-      "line": 576,
+      "line": 657,
       "anchor": "bootstrap performs a schema check on EVERY request and retur",
       "risk": 0,
       "lines": 1
@@ -52979,15 +52979,15 @@
     "TEST-198.35": {
       "path": "tests/test_request_center_t12_scenarios.php",
       "area": "TEST",
-      "line": 577,
+      "line": 658,
       "anchor": "while a clone database is absent.",
       "risk": 11,
-      "lines": 142
+      "lines": 141
     },
     "TEST-198.36": {
       "path": "tests/test_request_center_t12_scenarios.php",
       "area": "TEST",
-      "line": 719,
+      "line": 799,
       "anchor": "مسیر: rated",
       "risk": 20,
       "lines": 307

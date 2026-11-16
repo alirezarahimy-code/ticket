@@ -30,10 +30,15 @@ $serverLogPath = tempnam(sys_get_temp_dir(), 'rc-smoke-server-');
 $server = null;
 $pipes = [];
 
-/** ارقامِ «متن نمایشی» را مثل لایهٔ سراسریِ صفحه (lib/fa-digits.php) به فارسی تبدیل می‌کند. */
-function smoke_persian_digits(string $text): string
+/** Normalize Persian/Arabic digits in display text so assertions cover content, not typography. */
+function smoke_latin_digits(string $text): string
 {
-    static $map = ['0' => '۰', '1' => '۱', '2' => '۲', '3' => '۳', '4' => '۴', '5' => '۵', '6' => '۶', '7' => '۷', '8' => '۸', '9' => '۹'];
+    static $map = [
+        '۰' => '0', '۱' => '1', '۲' => '2', '۳' => '3', '۴' => '4',
+        '۵' => '5', '۶' => '6', '۷' => '7', '۸' => '8', '۹' => '9',
+        '٠' => '0', '١' => '1', '٢' => '2', '٣' => '3', '٤' => '4',
+        '٥' => '5', '٦' => '6', '٧' => '7', '٨' => '8', '٩' => '9',
+    ];
     return strtr($text, $map);
 }
 
@@ -455,8 +460,12 @@ try {
     // 7) Phase 3 — exercise all four independent workspaces and their operational pages.
     $createdTicketId = (int) ($ticketRow['id'] ?? 0);
     $detail = smoke_http('http://' . $address . '/request-center.php?id=' . $createdTicketId, ['Cookie: ' . $cookie]);
-    // عنوان تیکت «نمایشی» است؛ لایهٔ سراسریِ ارقام آن را «RC phase-۳ …» چاپ می‌کند. مقایسه با نرمال‌سازی ارقام:
-    smoke_check($detail['status'] === 200 && str_contains($detail['body'], smoke_persian_digits('RC phase-3 independent POST smoke')), 'independent ticket detail renders the created request (status ' . $detail['status'] . ')');
+    // The global digit layer intentionally preserves machine-like tokens such as "phase-3".
+    // Normalize either display digit set and assert the actual ticket subject is rendered.
+    $detailBodyLatin = smoke_latin_digits($detail['body']);
+    $detailSubjectVisible = str_contains($detailBodyLatin, 'RC phase-3 independent POST smoke');
+    $detailExcerpt = substr(preg_replace('/\\s+/', ' ', strip_tags($detailBodyLatin)) ?? '', 0, 240);
+    smoke_check($detail['status'] === 200 && $detailSubjectVisible, 'independent ticket detail renders the created request (status ' . $detail['status'] . ', subject visible ' . ($detailSubjectVisible ? 'yes' : 'no') . '; body: ' . $detailExcerpt . ')');
     smoke_check(str_contains($detail['body'], 'name="action" value="reply"'), 'independent ticket detail exposes the reply operation');
     $workspaceProbes = [
         ['requester', 'request-center.php?workspace=requester'],

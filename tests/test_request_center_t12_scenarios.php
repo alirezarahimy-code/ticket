@@ -481,7 +481,10 @@ function t12s_finish(string $name, callable $body, array &$apps, string $rootUse
     $diffs = $comparison['diffs'];
     $tolerated = $comparison['tolerated'];
     if ($name === '07b-priority-by-manager') {
-        $featureTicket = $pair['snapshots']['feature']['tickets'][0] ?? [];
+        $legacy = $pair['snapshots']['legacy'];
+        $feature = $pair['snapshots']['feature'];
+        $legacyTicket = $legacy['tickets'][0] ?? [];
+        $featureTicket = $feature['tickets'][0] ?? [];
         if (($featureTicket['service_group'] ?? '') !== 'it'
             || ($featureTicket['status'] ?? '') !== 'in_progress'
             || (int) ($featureTicket['assigned_to'] ?? 0) !== 106
@@ -493,7 +496,6 @@ function t12s_finish(string $name, callable $body, array &$apps, string $rootUse
         } else {
             $tolerated[] = '07b: out-of-group support manager could not change the IT ticket; status, assignee and priority remained unchanged';
         }
-        $feature = $pair['snapshots']['feature'];
         $featureActions = array_column($feature['activity_logs'], 'action_code');
         if (!in_array('post_action_failed', $featureActions, true)) {
             $diffs[] = '07b: denied cross-group write did not leave a failure audit record';
@@ -511,6 +513,21 @@ function t12s_finish(string $name, callable $body, array &$apps, string $rootUse
         }
         if (count($feature['messages']) !== 1) {
             $diffs[] = '07b: denied cross-group write changed the single seeded ticket message';
+        }
+        if ($diffs !== []) {
+            $stateFields = array_flip(['service_group', 'status', 'assigned_to', 'priority', 'department_id', 'category_id', 'service_id', 'sla_minutes', 'ola_policy_id']);
+            t12s_log('T12-SCENARIO 07b state: ' . json_encode([
+                'legacy' => array_intersect_key($legacyTicket, $stateFields),
+                'feature' => array_intersect_key($featureTicket, $stateFields),
+                'legacy_priority_status' => $pair['extras']['legacy']['priority_status'] ?? null,
+                'feature_priority_status' => $pair['extras']['feature']['priority_status'] ?? null,
+                'legacy_notifications' => $legacy['notifications'],
+                'feature_notifications' => $feature['notifications'],
+                'legacy_events' => $legacy['events'],
+                'feature_events' => $feature['events'],
+                'legacy_activity_logs' => $legacy['activity_logs'],
+                'feature_activity_logs' => $feature['activity_logs'],
+            ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
         }
     }
     $evidence = [
@@ -719,14 +736,13 @@ try {
             return [t12s_snapshot($pdo), ['update_status' => $r['status']]];
         }, $apps, $rootUser, $rootPass, $host, $port, $mysql);
         $results[] = t12s_finish('07b-priority-by-manager', function (string $side, array $app, array $sess) {
-            $tid = t12s_create_ticket($side, $app, $sess, [
-                'category_id' => 2,
-                'service_id' => 2,
-                'service_group' => 'it',
-                'asset_id' => 1,
-            ]);
+            // Create the same baseline support ticket on each checkout, then classify it
+            // as IT directly. This isolates the cross-group write from intentional
+            // legacy/feature differences in auto-assignment during IT ticket creation.
+            $tid = t12s_create_ticket($side, $app, $sess);
             $pdo = t12s_pdo($app);
-            $pdo->exec("UPDATE tickets SET status = 'in_progress', assigned_to = 106, assigned_at = NOW() - INTERVAL 1 HOUR WHERE id = " . (int) $tid);
+            $prepare = $pdo->prepare("UPDATE tickets SET service_group = 'it', department_id = 2, category_id = 2, service_id = 2, asset_id = 1, status = 'in_progress', assigned_to = 106, assigned_at = NOW() - INTERVAL 1 HOUR, priority = 'normal' WHERE id = ?");
+            $prepare->execute([(int) $tid]);
             $r = t12s_post($app['base_url'] . '/index.php', $sess['supmgr'][$side], 'update_ticket', ['ticket_id' => $tid, 'priority' => 'urgent']);
             return [t12s_snapshot($pdo), ['priority_status' => $r['status']]];
         }, $apps, $rootUser, $rootPass, $host, $port, $mysql);
