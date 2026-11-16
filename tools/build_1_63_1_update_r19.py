@@ -268,8 +268,8 @@ FORBIDDEN_IN_PACKAGE = ("downloads/", "patches/", "updates/", "preview/",
                         "docs/system-map/", "ci-diagnostics/", "benchmark-results/")
 
 TITLE = (
-    "نسخهٔ ۱.۶۳.۱ (r14) — نقش اعطایی، مسئول تیکت، آژیر خودترمیم، "
-    "چرخهٔ فیش غذا، انتخاب‌گر شخص، گروه‌بندی معاونت، و شناسنامهٔ کامل"
+    "نسخهٔ ۱.۶۳.۱ (r19) — ریشهٔ اختلاف شمارش شناسنامه، هویت پایدار دستگاه، "
+    "ادغام تکراری‌ها بر اساس سریال، و دکمهٔ ریست"
 )
 
 DESCRIPTION = (
@@ -387,7 +387,7 @@ def main() -> None:
     payload["VERSION"] = (RELEASE_VERSION + "\n").encode("utf-8")
 
     manifest = {
-        "name": "smb-extract-r17",
+        "name": "asset-identity-reset-r19",
         "version": RELEASE_VERSION,
         "date": RELEASE_DATE,
         "title": TITLE,
