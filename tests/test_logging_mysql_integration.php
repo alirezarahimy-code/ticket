@@ -21,6 +21,7 @@ $pdo->exec("CREATE TABLE system_logs (
     id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY, event_id CHAR(36) NULL UNIQUE, request_id CHAR(36) NULL, trace_id CHAR(36) NULL, operation_id CHAR(36) NULL, parent_event_id CHAR(36) NULL,
     code VARCHAR(40) NULL, category VARCHAR(24) NOT NULL DEFAULT 'system', fingerprint CHAR(64) NULL,
     level VARCHAR(20) NOT NULL DEFAULT 'error', context VARCHAR(120) NULL, message TEXT NULL, meta_json JSON NULL,
+    escalation_count INT UNSIGNED NOT NULL DEFAULT 0, escalation_label VARCHAR(64) NULL,
     user_id INT UNSIGNED NULL, request_uri VARCHAR(255) NULL, created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
 $pdo->exec("CREATE TABLE activity_logs (id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY, event_id CHAR(36) NULL UNIQUE, request_id CHAR(36) NULL, trace_id CHAR(36) NULL, operation_id CHAR(36) NULL, parent_event_id CHAR(36) NULL, result VARCHAR(16) NOT NULL DEFAULT 'unknown', code VARCHAR(40) NULL, category VARCHAR(24) NOT NULL DEFAULT 'audit', user_id INT UNSIGNED NULL, username VARCHAR(190) NULL, full_name VARCHAR(190) NULL, role VARCHAR(40) NULL, action_code VARCHAR(120) NOT NULL DEFAULT 'test', action_label VARCHAR(190) NULL, module VARCHAR(80) NULL, target_type VARCHAR(40) NULL, target_id BIGINT UNSIGNED NULL, target_label VARCHAR(255) NULL, meta_json JSON NULL, ip_address VARCHAR(64) NULL, computer_name VARCHAR(190) NULL, hostname VARCHAR(190) NULL, user_agent VARCHAR(255) NULL, created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
@@ -152,6 +153,7 @@ $event['event_id'] = logging_uuid();
 $checks['new occurrence reopens resolved issue'] = logging_store_system($event)
     && (string) $pdo->query('SELECT status FROM log_issues')->fetchColumn() === 'open';
 $dedupeRow = $pdo->query('SELECT event_id, request_id, code, category, level, context, message, created_at FROM system_logs ORDER BY id DESC LIMIT 1')->fetch(PDO::FETCH_ASSOC);
+if (!is_array($dedupeRow)) throw new RuntimeException('System log fixture did not persist an event for issue-idempotency verification.');
 $beforeDedupeCount = (int) $pdo->query('SELECT occurrences FROM log_issues')->fetchColumn();
 $dedupeOk = logging_issue_upsert($dedupeRow, false);
 $afterDedupeCount = (int) $pdo->query('SELECT occurrences FROM log_issues')->fetchColumn();

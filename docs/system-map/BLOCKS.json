@@ -75250,16 +75250,16 @@
             "id": "TEST-119",
             "path": "tests\/test_logging_mysql_integration.php",
             "area": "TEST",
-            "lines": 256,
-            "file_fingerprint": "8aafcecb6f9a",
+            "lines": 258,
+            "file_fingerprint": "8ae96b835708",
             "blocks": [
                 {
                     "kind": "region",
-                    "anchor": "بلوک رویه‌ای 1-34",
+                    "anchor": "بلوک رویه‌ای 1-35",
                     "line_start": 1,
-                    "line_end": 34,
-                    "lines": 34,
-                    "fingerprint": "758602c84774",
+                    "line_end": 35,
+                    "lines": 35,
+                    "fingerprint": "949f56ce96b6",
                     "risk": {
                         "score": 5,
                         "flags": {
@@ -75272,8 +75272,8 @@
                 {
                     "kind": "function",
                     "anchor": "db",
-                    "line_start": 35,
-                    "line_end": 35,
+                    "line_start": 36,
+                    "line_end": 36,
                     "lines": 1,
                     "fingerprint": "9203c004bcb7",
                     "risk": {
@@ -75285,8 +75285,8 @@
                 {
                     "kind": "function",
                     "anchor": "execute_migration_statement",
-                    "line_start": 36,
-                    "line_end": 45,
+                    "line_start": 37,
+                    "line_end": 46,
                     "lines": 10,
                     "fingerprint": "0824cdd551dd",
                     "risk": {
@@ -75298,8 +75298,8 @@
                 {
                     "kind": "function",
                     "anchor": "split_sql_statements",
-                    "line_start": 46,
-                    "line_end": 116,
+                    "line_start": 47,
+                    "line_end": 117,
                     "lines": 71,
                     "fingerprint": "36c31084f5cb",
                     "risk": {
@@ -75310,9 +75310,9 @@
                 },
                 {
                     "kind": "region",
-                    "anchor": "بلوک رویه‌ای 117-134",
-                    "line_start": 117,
-                    "line_end": 134,
+                    "anchor": "بلوک رویه‌ای 118-135",
+                    "line_start": 118,
+                    "line_end": 135,
                     "lines": 18,
                     "fingerprint": "13dc3d8a7d36",
                     "risk": {
@@ -75324,10 +75324,10 @@
                 {
                     "kind": "region",
                     "anchor": "Migration 025 must remain safe when the updater retries a mi",
-                    "line_start": 135,
-                    "line_end": 213,
-                    "lines": 79,
-                    "fingerprint": "235560593eaf",
+                    "line_start": 136,
+                    "line_end": 215,
+                    "lines": 80,
+                    "fingerprint": "4a5f5b2d394a",
                     "risk": {
                         "score": 12,
                         "flags": {
@@ -75341,8 +75341,8 @@
                 {
                     "kind": "region",
                     "anchor": "The replay worker atomically renames the source file and pub",
-                    "line_start": 214,
-                    "line_end": 226,
+                    "line_start": 216,
+                    "line_end": 228,
                     "lines": 13,
                     "fingerprint": "f477ec77e7b9",
                     "risk": {
@@ -75356,8 +75356,8 @@
                 {
                     "kind": "region",
                     "anchor": "Verify migration 025 changes the live notification schema an",
-                    "line_start": 227,
-                    "line_end": 256,
+                    "line_start": 229,
+                    "line_end": 258,
                     "lines": 30,
                     "fingerprint": "448106ae2109",
                     "risk": {

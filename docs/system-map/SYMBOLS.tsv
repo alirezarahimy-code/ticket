@@ -3402,10 +3402,10 @@ __construct	function	tests/test_logging_issue_aggregator.php	29	tests
 execute	function	tests/test_logging_issue_aggregator.php	30	tests
 rowCount	function	tests/test_logging_issue_aggregator.php	35	tests
 db	function	tests/test_logging_issue_aggregator.php	39	tests
-APP_ROOT	const	tests/test_logging_mysql_integration.php	32	tests
-db	function	tests/test_logging_mysql_integration.php	35	tests
-execute_migration_statement	function	tests/test_logging_mysql_integration.php	36	tests
-split_sql_statements	function	tests/test_logging_mysql_integration.php	46	tests
+APP_ROOT	const	tests/test_logging_mysql_integration.php	33	tests
+db	function	tests/test_logging_mysql_integration.php	36	tests
+execute_migration_statement	function	tests/test_logging_mysql_integration.php	37	tests
+split_sql_statements	function	tests/test_logging_mysql_integration.php	47	tests
 test_diagnostics_engine_is_loaded_after_logging_core	def	tests/test_logging_phase56_static.py	3	tests
 test_diagnostic_engine_has_stable_rules_and_confidence	def	tests/test_logging_phase56_static.py	6	tests
 test_agent_bundle_is_cli_only_and_redacted	def	tests/test_logging_phase56_static.py	11	tests
