@@ -81529,8 +81529,8 @@
             "id": "TEST-180",
             "path": "tests\/test_release_1_63_2_r21_package.py",
             "area": "TEST",
-            "lines": 92,
-            "file_fingerprint": "74912e2da7ff",
+            "lines": 111,
+            "file_fingerprint": "8dbfda32b3e9",
             "blocks": [
                 {
                     "kind": "block",
@@ -81551,9 +81551,9 @@
                     "kind": "block",
                     "anchor": "test_1632_r21_is_a_valid_cumulative_installable_package",
                     "line_start": 37,
-                    "line_end": 92,
-                    "lines": 56,
-                    "fingerprint": "8afd1b74a3d3",
+                    "line_end": 111,
+                    "lines": 75,
+                    "fingerprint": "a818f2a9dfaf",
                     "risk": {
                         "score": 0,
                         "flags": []
@@ -94052,8 +94052,8 @@
             "id": "TOOL-025",
             "path": "tools\/build_1_63_2_update_r21.py",
             "area": "TOOL",
-            "lines": 288,
-            "file_fingerprint": "6458f2d016b1",
+            "lines": 278,
+            "file_fingerprint": "6e00d74a97d2",
             "blocks": [
                 {
                     "kind": "block",
@@ -94143,9 +94143,9 @@
                     "kind": "block",
                     "anchor": "add",
                     "line_start": 232,
-                    "line_end": 288,
-                    "lines": 57,
-                    "fingerprint": "809707a4bc56",
+                    "line_end": 278,
+                    "lines": 47,
+                    "fingerprint": "bc7b1b80a849",
                     "risk": {
                         "score": 0,
                         "flags": []
