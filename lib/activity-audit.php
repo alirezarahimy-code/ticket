@@ -279,6 +279,7 @@ function activity_action_label(string $code): string
         'domain_scan_start' => 'شروع اسکن دامنه',
         'domain_scan_batch' => 'ادامهٔ اسکن دامنه',
         'save_settings' => 'ذخیرهٔ تنظیمات سامانه',
+        'assets_reset' => 'ریست شناسنامه‌ها',
         'save_role_permissions' => 'ذخیرهٔ دسترسی‌های نقش',
         'reset_role_permissions' => 'بازگرداندن همهٔ نقش‌ها به پیش‌فرض',
         'reset_role_defaults' => 'بازگرداندن دسترسی یک نقش به پیش‌فرض کد',

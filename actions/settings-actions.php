@@ -188,9 +188,31 @@ if (!defined('APP_ROOT')) {
                 throw new RuntimeException('نام سامانه نمی‌تواند خالی باشد.');
             }
             save_setting('app_name', $appName);
+            if (post_value('settings_section') === 'general' && array_key_exists('security_cookie_both_protocols', $_POST)) {
+                // ۱.۶۳.۱-r16 — «کار با هر دو پروتکل http و https».
+                // روشن‌کردنش پرچم Secure را از کوکی نشست برمی‌دارد تا مرورگر
+                // آن را روی http هم بفرستد. هزینه‌اش صادقانه در UI نوشته شده:
+                // روی http کوکی رمزنگاری نمی‌شود. فقط برای شبکهٔ داخلی.
+                // فیلد مخفی «0» همیشه فرستاده می‌شود و چک‌باکس «1» وقتی تیک
+                // است. PHP برای نام‌های تکراری آخرین مقدار را می‌گیرد، پس
+                // post_value همان «1» تیک‌خورده است. ولی اگر فرم بدون چک‌باکس
+                // ارسال شود، فقط «0» می‌آید. این طور می‌شود خاموشش کرد —
+                // بدون آن، یک بار روشن‌کردن همیشگی بود.
+                $rawBoth = $_POST['security_cookie_both_protocols'] ?? '0';
+                if (is_array($rawBoth)) {
+                    $rawBoth = (string) end($rawBoth);
+                }
+                $both = in_array(strtolower(trim((string) $rawBoth)), ['1', 'true', 'on', 'yes'], true) ? '1' : '0';
+                save_setting('security_cookie_both_protocols', $both);
+                save_audit_required((int) $settingsUser['id'], 'security_cookie_protocol_mode_updated', null, ['both_protocols' => $both === '1']);
+                flash('success', $both === '1'
+                    ? 'حالت «هر دو پروتکل» روشن شد. از این پس ورود با http و https هر دو کار می‌کند.'
+                    : 'حالت «هر دو پروتکل» خاموش شد. کوکی نشست فقط روی https فرستاده می‌شود.');
+                redirect('index.php?page=settings#general');
+            }
             if (post_value('settings_section') === 'general' && array_key_exists('asset_hostname_style', $_POST)) {
                 // ۱.۳۷.۵ — حالت نمایش نام کامپیوترها: adminit2 (پیش‌فرض) | ADMINIT2 | ADMINIT2.DOMAIN.LOCAL
-                save_setting('asset_hostname_style', valid_choice(post_value('asset_hostname_style'), ['short_lower', 'short', 'full'], 'short_lower'));
+                save_setting('asset_hostname_style', valid_choice(post_value('asset_hostname_style'), ['short_lower', 'short', 'full'], 'short'));
             }
             if (post_value('settings_section') === 'ticket') {
                 $autoCloseDays = array_key_exists('ticket_auto_close_days', $_POST) ? max(0, min(30, (int) post_value('ticket_auto_close_days'))) : 3;
@@ -223,6 +245,11 @@ if (!defined('APP_ROOT')) {
                 save_setting('domain_scan_password', '');
                 // ترتیب پروتکل اتصال برای استخراج از راه دور (۱.۳۷): برای شبکه‌هایی که DCOM بسته است.
                 save_setting('domain_scan_protocols', valid_choice(post_value('domain_scan_protocols'), ['', 'Dcom,Wsman', 'Wsman,Dcom', 'Dcom', 'Wsman'], ''));
+                // ۱.۶۳.۱-r17 — مسیر دوم SMB. پیش‌فرض روشن است: مقصدی که
+                // DCOM/WinRM ردش کند، بار دوم با کپی عامل روی C$ و اجرای SYSTEM
+                // آزموده می‌شود. این تنها کاری است که حالت «Access is denied» را
+                // بدون تغییر سیاست‌های دامنه حل می‌کند.
+                save_setting('domain_scan_smb_fallback', post_value('domain_scan_smb_fallback') === '0' ? '0' : '1');
             }
             if (post_value('settings_section') === 'login_branding') {
                 foreach (['login_title' => 120, 'login_intro' => 500, 'login_art_title' => 100, 'login_art_text' => 300, 'login_note_title' => 100, 'login_note_text' => 300] as $loginKey => $maxLength) {
@@ -272,3 +299,71 @@ if (!defined('APP_ROOT')) {
             flash('success', 'تنظیمات سامانه ذخیره شد.');
             redirect('index.php?page=settings');
         }
+
+        // ─────────────────────────────────────────────────────────────────────
+        // ۱.۶۳.۱-r19 — «ریست شناسنامه‌ها»
+        //
+        // درخواست کاربر: دکمه‌ای برای شرایط اضطراری که همهٔ شناسنامه‌ها را
+        // صفر کند تا ثبت از نو شروع شود.
+        //
+        // چهار محافظ، به ترتیب:
+        //   ۱) فقط مدیر اصلی (require_primary_admin)
+        //   ۲) کلمهٔ تأیید باید دقیقاً تایپ شود (پیش‌فرض: ریست)
+        //   ۳) بکاپ کامل قبل از حذف گرفته می‌شود؛ اگر بکاپ شکست بخورد، حذفی
+        //      انجام نمی‌شود (ابزار asset_reset.php همین را تضمین می‌کند)
+        //   ۴) همه‌چیز در یک تراکنش؛ خطا ⇒ برگشت کامل
+        //
+        // عمداً از CLI ابزار را صدا نمی‌زنیم؛ همان منطق را اینجا اجرا می‌کنیم تا
+        // روی ویندوز/XAMPP به مسیر php.exe وابسته نباشد.
+        // ─────────────────────────────────────────────────────────────────────
+        if ($action === 'reset_assets') {
+            $resetAdmin = require_primary_admin();
+            if (post_value('reset_confirm') !== 'ریست') {
+                throw new RuntimeException('برای ریست، عبارت «ریست» را دقیقاً در کادر تأیید بنویسید.');
+            }
+            $pdo = db();
+            $totalBefore = (int) $pdo->query('SELECT COUNT(*) FROM assets')->fetchColumn();
+            if ($totalBefore === 0) {
+                flash('success', 'شناسنامه‌ها از قبل خالی بودند؛ چیزی برای ریست نبود.');
+                redirect('index.php?page=settings#asset-reset');
+            }
+            // بکاپ در همان پوشهٔ ابزار CLI
+            $backupDir = APP_ROOT . '/storage/asset-reset';
+            if (!is_dir($backupDir) && !@mkdir($backupDir, 0750, true) && !is_dir($backupDir)) {
+                throw new RuntimeException('ساخت پوشهٔ بکاپ ممکن نشد: storage/asset-reset. دسترسی نوشتن را بررسی کنید.');
+            }
+            $backupFile = $backupDir . '/assets-panel-' . date('Ymd-His') . '.json';
+            $rows = $pdo->query('SELECT * FROM assets ORDER BY id')->fetchAll(PDO::FETCH_ASSOC);
+            $json = json_encode(
+                ['created_at' => date('c'), 'source' => 'panel-reset', 'admin_id' => (int) $resetAdmin['id'], 'count' => count($rows), 'rows' => $rows],
+                JSON_UNESCAPED_UNICODE | JSON_INVALID_UTF8_SUBSTITUTE
+            );
+            if ($json === false || @file_put_contents($backupFile, $json) === false) {
+                throw new RuntimeException('نوشتن بکاپ ناموفق بود؛ هیچ رکوردی حذف نشد. مسیر: ' . $backupFile);
+            }
+            $deleted = 0;
+            $pdo->beginTransaction();
+            try {
+                // جداول فرزند بدون CASCADE
+                foreach ([
+                    'asset_inventory_history', 'asset_memory_modules', 'asset_storage_devices',
+                    'asset_graphics_adapters', 'asset_graphics_cards', 'asset_peripherals',
+                    'asset_history_events', 'asset_history', 'asset_events', 'asset_software',
+                    'asset_relations', 'asset_profiles',
+                ] as $childTable) {
+                    try { $pdo->exec('DELETE FROM `' . $childTable . '`'); } catch (Throwable $ignored) { /* جدول در این نسخه نیست */ }
+                }
+                $deleted = (int) $pdo->exec('DELETE FROM assets');
+                $pdo->commit();
+            } catch (Throwable $resetError) {
+                if ($pdo->inTransaction()) { $pdo->rollBack(); }
+                throw new RuntimeException('ریست ناموفق بود و همه‌چیز برگشت. بکاپ سالم است: ' . basename($backupFile) . ' — ' . $resetError->getMessage());
+            }
+            save_audit_required((int) $resetAdmin['id'], 'assets_reset', null, [
+                'deleted' => $deleted,
+                'backup' => basename($backupFile),
+            ]);
+            flash('success', sprintf('ریست انجام شد: %d شناسنامه حذف شد. بکاپ کامل: %s', $deleted, basename($backupFile)));
+            redirect('index.php?page=settings#asset-reset');
+        }
+

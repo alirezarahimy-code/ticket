@@ -92,8 +92,8 @@ env.state.reportTab = 'aggregate';
 env.state.aggregate = {
   counts: { total_orders: 120, lunch_orders: 112, dinner_orders: 8, guest_printed: 8, printed_final: 102, absent: 10, expected_absent: 10, has_mismatch: false, difference: 0 },
   diagnostics: { active_orders_all_meals: 120, active_lunch_orders: 112, active_dinner_orders: 8, reportable_lunch_rows: 112, unique_lunch_identities: 112, matched_printed_lunch_identities: 102, absent_count: 10, difference: 0 },
-  printed_people: [{ pc: '1001', name: 'علی رضایی', food: 'چلوکباب', kind: 'پرسنل', date: '2026-10-27', time: '12:01:00' }],
-  absent_people: [{ pc: '1002', name: 'مریم احمدی', food: 'قورمهسبزی', status: 'غایب', date: '2026-10-27', declared: true }],
+  printed_people: [{ pc: '1001', first_name: 'علی', last_name: 'رضایی', name: 'علی رضایی', food: 'چلوکباب', kind: 'پرسنل', date: '2026-10-27', time: '12:01:00' }],
+  absent_people: [{ pc: '1002', first_name: 'مریم', last_name: 'احمدی', name: 'مریم احمدی', food: 'قورمهسبزی', status: 'غایب', date: '2026-10-27', declared: true }],
   source_notes: [],
 };
 out = m.reportAggregateView();
@@ -104,11 +104,11 @@ assert(out.includes('۱۲۰') && out.includes('۱۰۲') && out.includes('۱۰'),
 assert(out.includes('ندارد'), 'وضعیت «مغایرت ندارد» نشان داده نشد');
 assert(out.includes('مبنای تطبیق') && out.includes('خارج از تطبیق ناهار: ۸'), 'تفکیک ناهار/شام برای بررسی مغایرت نشان داده نشد');
 assert(out.includes('عیب‌یابی و تفکیک منبع آمار'), 'جزئیات عیب‌یابی در پنل وجود ندارد');
-assert(out.includes('علی رضایی') && out.includes('مریم احمدی'), 'اسامی چاپشدهها/غایبین نشان داده نشد');
+assert(out.includes('علی') && out.includes('رضایی') && out.includes('مریم') && out.includes('احمدی'), 'اسامی چاپشدهها/غایبین نشان داده نشد');
 assert(out.includes('غیبت اعلامشده'), 'برچسب غیبت اعلامشده نشان داده نشد');
 assert(out.includes('aggregate-export') && out.includes('aggregate-print'), 'دکمههای استخراج/چاپ وجود ندارند');
 assert(out.includes('id="aggregate-filter"'), 'فرم انتخاب روز وجود ندارد');
-assert(out.includes('data-agg-field="name"'), 'انتخاب فیلد وجود ندارد');
+assert(out.includes('data-agg-field="first_name"') && out.includes('data-agg-field="last_name"'), 'انتخاب فیلدهای نام و نام خانوادگی وجود ندارد');
 
 // ۴) حالت مغایرtdارد
 env.state.aggregate.counts = { total_orders: 120, lunch_orders: 112, dinner_orders: 8, guest_printed: 8, printed_final: 100, absent: 10, expected_absent: 12, has_mismatch: true, difference: 2 };
@@ -120,28 +120,29 @@ assert(out.includes('agg-mismatch'), 'استایل هشدار مغایرت اع�
 // ۵) انتخاب فیلدها — فقط ستونهای انتخابشده بیایند
 storage.clear();
 assert.deepStrictEqual(m.aggFields(), m.AGG_DEFAULT_FIELDS, 'فیلدهای پیشفرض نادرستاند');
-m.aggSaveFields(['pc', 'name']);
-assert.deepStrictEqual(m.aggFields(), ['pc', 'name'], 'ذخیره/بازیابی فیلدها کار نمیکند');
-assert.strictEqual(m.aggSelectedCols().length, 2, 'تعداد ستونهای انتخابشده نادرست است');
-out = m.aggTable([{ pc: '1', name: 'الف' }], 'خالی');
-assert(out.includes('data-agg-sort="pc"') && out.includes('data-agg-sort="name"'), 'سرستونها ناقصاند');
+m.aggSaveFields(['pc', 'first_name', 'last_name']);
+assert.deepStrictEqual(m.aggFields(), ['pc', 'first_name', 'last_name'], 'ذخیره/بازیابی فیلدها کار نمیکند');
+assert.strictEqual(m.aggSelectedCols().length, 3, 'تعداد ستونهای انتخابشده نادرست است');
+out = m.aggTable([{ pc: '1', first_name: 'الف', last_name: 'ب' }], 'خالی');
+assert(out.includes('data-agg-sort="pc"') && out.includes('data-agg-sort="first_name"') && out.includes('data-agg-sort="last_name"'), 'سرستونها ناقصاند');
 assert(!out.includes('data-agg-sort="food"'), 'فیلد انتخابنشده همچنان نمایش داده میشود');
 assert(out.includes('fm-order-block-start') && out.includes('data-no-sort') && out.includes('fm-order-report-table'), 'بلوکبندی مثل گزارش فیشهای چاپشده اعمال نشد');
 storage.clear();
 
 // ۵ب) سورت بر اساس نام خانوادگی
-m.aggSaveFields(['name']);
-const sorted = m.aggSorted([{name:'علی رضایی'},{name:'مهدی احمدی'},{name:'رضا باقری'}]);
-assert.deepStrictEqual(sorted.map(x=>x.name), ['مهدی احمدی','رضا باقری','علی رضایی'], 'سورت نام خانوادگی نادرست است');
+m.aggSaveFields(['last_name']);
+const sorted = m.aggSorted([{first_name:'علی',last_name:'رضایی'},{first_name:'مهدی',last_name:'احمدی'},{first_name:'رضا',last_name:'باقری'}]);
+assert.deepStrictEqual(sorted.map(x=>x.last_name), ['احمدی','باقری','رضایی'], 'سورت نام خانوادگی نادرست است');
+assert.strictEqual(m.aggLastName({name:'علی رضایی'}), 'رضایی', 'fallback جداسازی نام از متن ترکیبی كار نکرد');
 storage.clear();
 
 // ۵ج) سورت کلیکی سرستونها
 env.state.aggSort={key:'pc',dir:'asc'};
-assert.deepStrictEqual(m.aggSorted([{pc:'2',name:'الف ب'},{pc:'1',name:'ج د'}]).map(x=>x.pc),['1','2'],'سورت بر اساس کد پرسنلی کار نکرد');
-env.state.aggSort={key:'name',dir:'desc'};
-assert(m.aggSorted([{name:'علی احمدی'},{name:'رضا باقری'}]).map(x=>x.name).join()==='رضا باقری,علی احمدی','سورت نزولی نام خانوادگی کار نکرد');
-out=m.aggTable([{name:'علی احمدی'},{name:'رضا باقری'}],'خالی');
-assert(out.includes('data-agg-sort="name"') && out.includes('fm-sort-btn'),'سرستون قابل کلیک نیست');
+assert.deepStrictEqual(m.aggSorted([{pc:'2',first_name:'الف',last_name:'ب'},{pc:'1',first_name:'ج',last_name:'د'}]).map(x=>x.pc),['1','2'],'سورت بر اساس کد پرسنلی کار نکرد');
+env.state.aggSort={key:'last_name',dir:'desc'};
+assert(m.aggSorted([{first_name:'علی',last_name:'احمدی'},{first_name:'رضا',last_name:'باقری'}]).map(x=>x.last_name).join()==='باقری,احمدی','سورت نزولی نام خانوادگی کار نکرد');
+out=m.aggTable([{first_name:'علی',last_name:'احمدی'},{first_name:'رضا',last_name:'باقری'}],'خالی');
+assert(out.includes('data-agg-sort="last_name"') && out.includes('fm-sort-btn'),'سرستون قابل کلیک نیست');
 delete env.state.aggSort;
 
 // ۶) کلیک تب → تغییر state و رندر

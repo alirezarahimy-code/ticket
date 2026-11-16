@@ -69,10 +69,11 @@ def test_index_require_order_keeps_backup_group_position():
         "actions/cd-dvd-actions.php",
         "actions/backup-actions.php",
         "actions/notification-actions.php",
-        "actions/supervisor-actions.php",
+        "modules/request-center/Actions/dispatch.php",
     ]
     positions = [src.index(f"require __DIR__ . '/{rel}';") for rel in order]
-    assert positions == sorted(positions), "ترتیب require گروه پشتیبان‌گیری عوض شده است"
+    assert positions == sorted(positions), "ترتیب گروه پشتیبان‌گیری و واگذاری اکشن‌های Request Center عوض شده است"
+    assert "require __DIR__ . '/supervisor-actions.php';" in read("modules/request-center/Actions/dispatch.php")
 
 
 def test_bootstrap_is_loader_and_lib_order_is_preserved():
@@ -144,7 +145,24 @@ def test_version_manifest_and_package():
     for need in LIB_FILES + ["VERSION", "index.php", "bootstrap.php", "actions/backup-actions.php",
                              "actions/org-actions.php", "actions/user-structure-actions.php"]:
         assert need in files, need
+    # ۱.۶۳: این دو فایل ریشه‌ای در تجمیع RC به modules/request-center/Pages/ منتقل شدند؛ بسته‌های ریلیز تغییرناپذیر می‌مانند.
+    MOVED_IN_1_63_RC_MIGRATION = {
+        "governance.php": "modules/request-center/Pages/governance.php",
+        "ola.php": "modules/request-center/Pages/ola.php",
+    }
+    # ۱.۶۳: لایهٔ MVC مرده کاملاً حذف شد (هیچ‌کس require نمی‌کرد).
+    DEAD_MVC_DELETED_IN_1_63 = {
+        "app/Views/layout/header.php",
+        "app/Views/layout/footer.php",
+    }
     for f in files:
+        if f in MOVED_IN_1_63_RC_MIGRATION:
+            assert not (ROOT / f).exists(), f
+            assert (ROOT / MOVED_IN_1_63_RC_MIGRATION[f]).is_file(), f
+            continue
+        if f in DEAD_MVC_DELETED_IN_1_63:
+            assert not (ROOT / f).exists(), f
+            continue
         assert (ROOT / f).is_file(), f
 
     package = ROOT / "downloads" / PACKAGE_NAME

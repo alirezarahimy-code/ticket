@@ -9,9 +9,45 @@ const zipDownloads = {
       '/ticket-update-1.62.2-food-dashboard-bulk-theme-fixes-20261025.zip',
       '/ticket-update-1.62.3-food-staff-report-theme-20261025.zip',
       '/food-update-1.62.3-download.zip',
+      '/ticket-update-1.62.93-to-1.62.94-food-guest-org-holiday-20261110.zip',
+      '/ticket-update-1.62.90-to-1.63-request-center-rc-candidate-20261111.zip',
     ]);
     server.middlewares.use((req, res, next) => {
       const pathname = (req.url || '').split('?')[0];
+      if (pathname === '/download-rc-request-center-1.63-r2' || pathname === '/download-rc-request-center-1.63-r2.sha256') {
+        res.statusCode = 410;
+        res.setHeader('Content-Type', 'text/plain; charset=utf-8');
+        res.end('این لینک بازنشسته شد (کاندید قدیمی با اسکریپت‌های بدون nonce). از /download-rc-request-center-1.63-r3 استفاده کنید');
+        return;
+      }
+      if (pathname === '/download-rc-request-center-1.63-r3' || pathname === '/download-rc-request-center-1.63-r3.sha256') {
+        res.statusCode = 410;
+        res.setHeader('Content-Type', 'text/plain; charset=utf-8');
+        res.end('این لینک بازنشسته شد (کاندید قبل از بازطراحی تقویم). از /download-rc-request-center-1.63-r4 استفاده کنید');
+        return;
+      }
+      if (pathname === '/download-rc-request-center-1.63-r4' || pathname === '/download-rc-request-center-1.63-r4.sha256') {
+        res.statusCode = 410;
+        res.setHeader('Content-Type', 'text/plain; charset=utf-8');
+        res.end('این لینک بازنشسته شد (کاندید قبل از اصلاح z-index پاپ‌آپ). از /download-rc-request-center-1.63-r5 استفاده کنید');
+        return;
+      }
+      if (pathname === '/download-rc-request-center-1.63-r5' || pathname === '/download-rc-request-center-1.63-r5.sha256') {
+        const isSha = pathname.endsWith('.sha256');
+        const filename = isSha
+          ? 'ticket-update-1.62.90-to-1.63-request-center-rc-candidate-20261111.zip.sha256'
+          : 'ticket-update-1.62.90-to-1.63-request-center-rc-candidate-20261111.zip';
+        const body = readFileSync(resolve(server.config.root, 'dist', filename));
+        res.statusCode = 200;
+        res.setHeader('Content-Type', isSha ? 'text/plain; charset=utf-8' : 'application/zip');
+        res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+        res.setHeader('Content-Length', String(body.length));
+        res.setHeader('Cache-Control', 'no-store, max-age=0');
+        res.setHeader('X-Content-Type-Options', 'nosniff');
+        if (req.method === 'HEAD') res.end();
+        else res.end(body);
+        return;
+      }
       if (pathname === '/download-food-update-1.62.3' || pathname === '/download-1.62.3-v2') {
         const filename = pathname === '/download-1.62.3-v2'
           ? 'food-update-1.62.3-download.zip'

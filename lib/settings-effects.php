@@ -358,6 +358,9 @@ function key_role_setting_map(): array
         'supervisor' => 'role_supervisor_ids',
         'inspection' => 'role_inspection_ids',
         'it_expert' => 'role_it_expert_ids',
+        // کارشناس پشتیبانی — همتای «کارشناس IT» برای حوزهٔ پشتیبانی.
+        // تصمیم مالک (۲۰۲۶-۱۱-۱۶): مسئول تیکت‌های پشتیبانی فقط از این فهرست خوانده می‌شود.
+        'support_expert' => 'role_support_expert_ids',
     ];
 }
 

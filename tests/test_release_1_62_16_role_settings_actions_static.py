@@ -30,11 +30,13 @@ SETTINGS_ACTIONS = [
     "save_settings",
     # ۱.۶۲.۵۲ (چند شرکت): نام‌های نمایشی شرکت‌ها ذخیره می‌شود.
     "save_org_company_names",
+    # ۱.۶۳.۱-r19 source addition; it is not part of the immutable 1.62.16 ZIP.
+    "reset_assets",
 ]
 
 # اکشن‌هایی که در بستهٔ منتشرشدهٔ جاری هم توضیح سرآیند ندارند؛ افزودن توضیح، فایل
 # را از نسخهٔ روی سرور جدا می‌کرد، پس فقط ثبت شده است.
-UNDOCUMENTED_HEADER_ACTIONS = {"save_org_company_names"}
+UNDOCUMENTED_HEADER_ACTIONS = {"save_org_company_names", "reset_assets"}
 
 
 def read(rel):
@@ -83,7 +85,24 @@ def test_version_manifest_and_package():
                  "actions/org-actions.php", "actions/ticket-actions.php", "actions/asset-actions.php",
                  "actions/service-actions.php", "food-ticket-web/assets/food-capitalio-dashboard-r42.js"):
         assert need in files, need
+    # ۱.۶۳: این دو فایل ریشه‌ای در تجمیع RC به modules/request-center/Pages/ منتقل شدند؛ بسته‌های ریلیز تغییرناپذیر می‌مانند.
+    MOVED_IN_1_63_RC_MIGRATION = {
+        "governance.php": "modules/request-center/Pages/governance.php",
+        "ola.php": "modules/request-center/Pages/ola.php",
+    }
+    # ۱.۶۳: لایهٔ MVC مرده کاملاً حذف شد (هیچ‌کس require نمی‌کرد).
+    DEAD_MVC_DELETED_IN_1_63 = {
+        "app/Views/layout/header.php",
+        "app/Views/layout/footer.php",
+    }
     for f in files:
+        if f in MOVED_IN_1_63_RC_MIGRATION:
+            assert not (ROOT / f).exists(), f
+            assert (ROOT / MOVED_IN_1_63_RC_MIGRATION[f]).is_file(), f
+            continue
+        if f in DEAD_MVC_DELETED_IN_1_63:
+            assert not (ROOT / f).exists(), f
+            continue
         assert (ROOT / f).is_file(), f
 
     package = ROOT / "downloads" / PACKAGE_NAME

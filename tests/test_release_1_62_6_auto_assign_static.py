@@ -5,14 +5,17 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 INDEX = (ROOT / "index.php").read_text(encoding="utf-8")
-# از ۱.۶۲.۱۲ اکشن‌های سازمان (از جمله فرم‌های ترمیم نقش) در فایل جدا هستند.
+# اکشن‌های سازمان در compatibility path می‌مانند؛ توابع مسیریابی خودکار اکنون
+# متعلق به کتابخانهٔ ماژول Request Center هستند.
 INDEX += "\n" + (ROOT / "actions/org-actions.php").read_text(encoding="utf-8")
+INDEX += "\n" + (ROOT / "modules/request-center/lib/functions.php").read_text(encoding="utf-8")
 
 
 def test_org_managers_are_deprioritized_in_auto_assignment():
     assert "function ticket_org_manager_rank_sql()" in INDEX
-    # هر دو کوئری (مالک حوزه و جایگزین) باید رتبهٔ مدیر سازمانی را در ORDER BY داشته باشند.
-    assert INDEX.count("ORDER BY ' . $orgManagerRank . 'COUNT(t.id), u.id") == 2
+    # Queries for designated experts and fallback role candidates all apply the
+    # organization-manager rank before load and id tie-breakers.
+    assert INDEX.count("ORDER BY ' . $orgManagerRank . 'COUNT(t.id), u.id") == 3
     # روی نصب‌های بدون جدول چارت، رتبه خالی می‌شود و ثبت تیکت خطا نمی‌گیرد.
     assert "$ready = false;" in INDEX
 

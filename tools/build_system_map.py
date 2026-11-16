@@ -77,7 +77,7 @@ FEATURES: list[tuple[str, str, str, str, str]] = [
      "صف کاری و عملیات گروهی", "index.php;actions/bulk-actions.php;actions/ticket-actions.php",
      "tickets", "فیلتر بدون مسئول / خارج از SLA / مسئول من"),
     ("SLA|OLA|مهلت|تعطیلات|تقویم|زمانبندی|هشدار",
-     "SLA/OLA و تقویم", "lib/tickets-sla.php;ola.php;actions/holiday-actions.php;cron/sla_maintenance.php;assets/jalali-calendar.js",
+     "SLA/OLA و تقویم", "lib/tickets-sla.php;modules/request-center/Pages/ola.php;actions/holiday-actions.php;cron/sla_maintenance.php;assets/jalali-calendar.js",
      "ticket_sla_alerts;ticket_ola_alerts;ola_policies;holidays;change_records",
      "پنجشنبه/جمعه مصرف SLA نمیکنند"),
     ("تأیید نهایی|سوپروایزر|بازگشایی|supervisor",
@@ -105,7 +105,7 @@ FEATURES: list[tuple[str, str, str, str, str]] = [
      "org_units;org_unit_managers;departments;handling_units",
      "واحد مستقل (نمایندگی) جایگاه چپ/راست دارد؛ migration 010"),
     ("تغییر|مشکل|change|problem|CAB|governance|حاکمیت",
-     "مدیریت تغییر و مشکل", "governance.php;index.php",
+     "مدیریت تغییر و مشکل", "modules/request-center/Pages/governance.php;index.php",
      "change_records;change_approvals;change_ticket_links;problem_records;problem_ticket_links",
      "صفحهای مستقل که require مستقیم bootstrap دارد"),
     ("تردد|ترافیک|traffic|ملاقات|مقصد|تأییدکننده",
@@ -159,7 +159,7 @@ FEATURES: list[tuple[str, str, str, str, str]] = [
      "سلامت، لاگ و حسابرسی", "system-health.php;lib/activity-audit.php;lib/logging-csrf.php;cron/prune_activity_logs.php;index.php",
      "system_logs;activity_logs;system_incidents", "خروجی امن و خوانا؛ لاگها بدون تأیید حذف نمیشوند"),
     ("نصب|install|config|پیکربندی|دیتابیس خالی",
-     "نصب و پیکربندی", "install.php;schema.sql;install-empty-db.sql;config.sample.php;.env.example;rebuild-final.sql",
+     "نصب و پیکربندی", "install.php;schema.sql;install-empty-db.sql;config.sample.php;.env.example;docs/architecture/rebuild-final.sql",
      "settings", "install.php?force=1 خطرناک است؛ قبل از اجرا تأیید بگیر"),
     ("مهاجرت|migration|upgrade|ارتقا|schema_updates|ستون جدید",
      "مهاجرتهای پایگاهداده", "migrations/;schema.sql;install-empty-db.sql;upgrade-1.1-departments.sql",
@@ -180,8 +180,8 @@ FEATURES: list[tuple[str, str, str, str, str]] = [
      "قواعد ثابت کاربر", "docs/HANDOFF-FA.md;AGENTS.md;docs/ARCHITECTURE-FA.md",
      "—", "حتماً بند ۱ HANDOFF خوانده شود؛ پاسخ فارسی، XLSX، عدم حذف داده"),
     ("MVC|app/|router|controller|مدل قدیمی|کد مرده",
-     "لایهٔ MVC بلااستفاده", "app/;routes/web.php",
-     "—", "هیچ فایلی اینها را require نمیکند؛ روتر واقعی index.php است"),
+     "لایهٔ MVC حذف‌شده", "—",
+     "—", "با ۱.۶۳ کاملاً حذف شد؛ هیچ فایلی require نمیکرد؛ روتر واقعی index.php و request-center.php است"),
 ]
 
 
@@ -290,7 +290,6 @@ def extract_symbols(rel: Path, text: str) -> list[tuple[str, str, int, str]]:
 # --- استخراج روتها ----------------------------------------------------------
 PAGE_RE = re.compile(r"\$page\s*===\s*'([a-z0-9-]+)'|\bpage=([a-z0-9-]+)")
 ACTION_RE = re.compile(r"['\"]action['\"]\s*=>\s*['\"]([a-z0-9_-]+)['\"]|\$action\s*===\s*['\"]([a-z0-9_-]+)['\"]|case\s+'([a-z0-9_-]+)'\s*:")
-ROUTE_ADD_RE = re.compile(r"\$router->add\(\s*'([^']*)'")
 API_ROUTE_RE = re.compile(r"\$route\s*===\s*'([a-z0-9_/-]+)'|\$apiRoute\s*===\s*'([a-z0-9_/-]+)'")
 
 
@@ -307,8 +306,8 @@ def extract_routes(rel: Path, text: str) -> list[tuple[str, str, int, str]]:
         seen.add(key)
         out.append((kind, name, text.count("\n", 0, pos) + 1, str_rel))
 
-    if str_rel == "index.php" or str_rel.startswith("actions/") or str_rel in {
-        "food-ticket.php", "food-order.php", "traffic-control.php", "governance.php", "ola.php"
+    if str_rel == "index.php" or str_rel.startswith("actions/") or str_rel.startswith("modules/request-center/Actions/") or str_rel in {
+        "food-ticket.php", "food-order.php", "traffic-control.php", "modules/request-center/Pages/governance.php", "modules/request-center/Pages/ola.php"
     }:
         for m in PAGE_RE.finditer(text):
             add("page", m.group(1) or m.group(2), m.start())
@@ -316,9 +315,6 @@ def extract_routes(rel: Path, text: str) -> list[tuple[str, str, int, str]]:
             add("action", next((g for g in m.groups() if g), ""), m.start())
         for m in API_ROUTE_RE.finditer(text):
             add("api", next((g for g in m.groups() if g), ""), m.start())
-    if str_rel == "routes/web.php":
-        for m in ROUTE_ADD_RE.finditer(text):
-            add("mvc-route", m.group(1), m.start())
     return out
 
 
@@ -383,7 +379,7 @@ def build() -> dict[str, str]:
         if rel.suffix.lower() in {".php", ".js", ".py", ".ps1"}:
             for kind, name, line, scat in extract_symbols(rel, text):
                 symbol_rows.append([name, kind, str(rel), line, scat])
-        if rel.suffix.lower() in {".php"} or str(rel) == "routes/web.php":
+        if rel.suffix.lower() == ".php":
             for kind, name, line, rfile in extract_routes(rel, text):
                 route_rows.append([kind, name, rfile, line])
         if rel.suffix.lower() == ".sql":

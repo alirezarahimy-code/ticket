@@ -1,5 +1,19 @@
+# ============================================================================
+#  ۱.۶۳.۱-r18 — پارامتر OutFile
+#
+#  چرا: پیش‌تر collect_via_smb.ps1 این اسکریپت را با ریدایرکت عملگر «>»
+#  اجرا می‌کرد تا خروجی را در فایل بنویسد. در PowerShell 5.1 آن عملگر
+#  خروجی را UTF-16LE همراه BOM می‌نویسد، نه UTF-8. PHP فایل را می‌خواند،
+#  JSON نامعتبر می‌شد و استخراج با پیام «دادهٔ سخت‌افزاری قابل‌استفاده
+#  دریافت نشد» شکست می‌خورد — در حالی که جمع‌آوری روی مقصد کامل و درست
+#  انجام شده بود.
+#
+#  حالا خودِ اسکریپت فایل را با UTF8NoBOM می‌نویسد. اگر OutFile خالی
+#  بماند، رفتار قبلی (نوشتن روی stdout) حفظ می‌شود.
+# ============================================================================
 param(
-    [string] $ComputerName = ''
+    [string] $ComputerName = '',
+    [string] $OutFile = ''
 )
 
 $ErrorActionPreference = 'Stop'
@@ -241,7 +255,15 @@ try {
         monitor_ids = @($monitorIds)
         software = @($software)
     }
-    $result | ConvertTo-Json -Depth 8 -Compress
+    $json = $result | ConvertTo-Json -Depth 8 -Compress
+    if (-not [string]::IsNullOrWhiteSpace($OutFile)) {
+        # UTF8NoBOM صریح: بدون آن، PowerShell 5.1 BOM می‌گذارد و
+        # json_decode در PHP با BOM شکست می‌خورد.
+        $utf8NoBom = New-Object System.Text.UTF8Encoding -ArgumentList $false
+        [System.IO.File]::WriteAllText($OutFile, $json, $utf8NoBom)
+        # stdout هم چاپ می‌شود تا اجرای دستی هم خروجی داشته باشد.
+    }
+    $json
 } catch {
     [Console]::Error.WriteLine($_.Exception.Message)
     exit 1

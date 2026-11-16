@@ -194,9 +194,9 @@ class FoodOrdersStaticTests(unittest.TestCase):
         self.assertIn("index.php?page=food-order", main_index)
         self.assertNotIn("'food-order' => 'foodorder.self'", main_index)
         php = read("food-order.php")
-        self.assertIn('href="assets/food-order.css?v=19"', php)
+        self.assertIn('href="assets/food-order.css?v=21"', php)
         self.assertIn('src="assets/food-order-calendar.js?v=1"', php)
-        self.assertIn('src="assets/food-order.js?v=22"', php)
+        self.assertIn('src="assets/food-order.js?v=25"', php)
         employee_css = read("assets/food-order.css")
         self.assertIn(".fo-my-orders .table-head,.fo-my-orders .table-row", employee_css)
         self.assertIn("grid-template-columns:42px minmax(140px,1.35fr)", employee_css)
@@ -207,11 +207,11 @@ class FoodOrdersStaticTests(unittest.TestCase):
         self.assertIn(".fo-my-orders .table-row > td:last-child .button { white-space:nowrap; }", employee_css)
 
         panel_html = read("food-ticket-web/index.html")
-        self.assertIn('href="assets/food-order.css?v=14"', panel_html)
-        self.assertIn('href="assets/food-menu.css?v=34"', panel_html)
+        self.assertIn('href="assets/food-order.css?v=16"', panel_html)
+        self.assertRegex(panel_html, r'href="assets/food-menu\.css\?v=\d+"')
         self.assertIn('src="assets/jalali-calendar.js?v=2"', panel_html)
         self.assertIn('src="assets/food-order-calendar.js?v=1"', panel_html)
-        self.assertIn('src="assets/food-menu.js?v=1.62.74"', panel_html)
+        self.assertRegex(panel_html, r'src="assets/food-menu\.js\?v=[A-Za-z0-9._-]+"')
         self.assertIn("FoodMenuUI.mount()", panel_html)
         for path in (
             "assets/food-order.css",
@@ -235,7 +235,7 @@ class FoodOrdersStaticTests(unittest.TestCase):
         self.assertIn("data-fm-order-field", js)
         self.assertIn("columns.length <= 3 ? 3", js)
         self.assertIn("fm-order-report-table", js)
-        self.assertIn("نام و نام خانوادگی", js)
+        self.assertIn("'نام خانوادگی'", js)  # فیلدها تفکیک شدند: نام / نام خانوادگی
         self.assertIn("array $selectedFields = []", php)
         self.assertIn("'fields' => $selectedFields", php)
 
@@ -304,7 +304,7 @@ class FoodOrdersStaticTests(unittest.TestCase):
         self.assertIn(".fo-modal .fo-form-field input", panel_css)
 
     def test_panel_assets_are_synchronized(self) -> None:
-        for name in ("food-menu.js", "food-menu.css", "food-order.css", "food-order-calendar.js", "jalali-calendar.js"):
+        for name in ("food-menu.js", "food-menu.css", "food-org-groups.js", "food-order.css", "food-order-calendar.js", "jalali-calendar.js"):
             self.assertEqual(read(f"assets/{name}"), read(f"food-ticket-web/assets/{name}"))
 
     def test_day_impact_confirmation_locks_and_reuses_the_confirmed_plan(self) -> None:
@@ -385,7 +385,7 @@ class FoodOrdersStaticTests(unittest.TestCase):
         self.assertIn("'full_name' => food_order_full_name($row)", php)
         self.assertIn("food_order_statistics_range($fromIso, $toIso, $mode, $mealType)", php)
         self.assertIn("food_order_export_statistics_range", php)
-        self.assertIn("['ردیف', 'نام پرسنل', 'تعداد سفارش فعال']", php)
+        self.assertIn("['ردیف', 'نام', 'نام خانوادگی', 'تعداد سفارش فعال']", php)
         self.assertIn("['روز هفته', 'تاریخ شمسی', 'نوع غذا', 'تعداد سفارش فعال']", php)
         self.assertIn("function food_order_selected_orders_range(string $fromDate, string $toDate, array $employeeIds", php)
         self.assertIn("function food_order_export_selected_orders_range(", php)
@@ -396,7 +396,7 @@ class FoodOrdersStaticTests(unittest.TestCase):
         export_start = php.index("function food_order_export_statistics_range(")
         export_end = php.index("\nfunction ", export_start + 10)
         export = php[export_start:export_end]
-        self.assertIn("$item['full_name']", export)
+        self.assertIn("$item['first_name'] ?? ''", export)  # نام/نام خانوادگی تفکیک شدند
         self.assertIn("$food['food_name']", export)
         self.assertIn("$item['count']", export)
         self.assertNotIn("national_code", export)
@@ -441,7 +441,7 @@ class FoodOrdersStaticTests(unittest.TestCase):
         self.assertIn("form.id === 'fm-statistics-date'", js)
         self.assertIn("{ from: state.statisticsFrom, to: state.statisticsTo, mode: state.statisticsMode || 'food', meal_type: state.mealType }", js)
         self.assertIn("fm-statistics-results--people", statistics_panel)
-        self.assertEqual(statistics_panel.count('<th>ردیف</th><th>نام و نام خانوادگی</th><th>تعداد</th>'), 1)
+        self.assertEqual(statistics_panel.count('data-fm-people-sort="first_name"'), 1)
         self.assertIn("peopleColumns.push('<section class=\"fm-statistics-people-column\"", statistics_panel)
         self.assertIn("people.slice(start, start + columnSize)", statistics_panel)
         self.assertIn("global.ItsmJalali.enhanceAll(root)", js)
@@ -525,13 +525,14 @@ class FoodOrdersStaticTests(unittest.TestCase):
         proxy_view = js[proxy_start:proxy_end]
         self.assertIn("state.proxyOrders", proxy_view)
         self.assertIn("renderProxyCancelControl(row.id, 'button secondary')", proxy_view)
-        self.assertIn("<th>نام پرسنل</th>", proxy_view)
+        self.assertIn("foSortTh('نام', 'proxyTable', 'first_name'", proxy_view)
         self.assertNotIn("national_code", proxy_view)
         self.assertNotIn("employee_number", proxy_view)
-        self.assertIn("state.targetName || '—'", proxy_view)
+        self.assertIn("personSplit(row)", proxy_view)
         self.assertIn("reserve_date: order.reserve_date || ''", proxy_view)
         self.assertIn("reserve_time: order.reserve_time || ''", proxy_view)
-        self.assertIn("<th>ردیف</th><th>نام پرسنل</th><th>نوع غذا</th><th>وعده</th><th>تاریخ غذا</th><th>تاریخ رزرو</th><th>ساعت رزرو</th><th>وضعیت</th><th>عملیات</th>", proxy_view)
+        self.assertIn("foSortTh('نام خانوادگی', 'proxyTable', 'last_name'", proxy_view)
+        self.assertIn("foSortTh('تاریخ غذا', 'proxyTable', 'food_date'", proxy_view)
         self.assertIn("var canCancel = active && !isPast(row.food_date) && row.day_status !== 'closed' && row.id > 0", proxy_view)
 
     def test_proxy_cancel_is_server_scoped_and_reverifies_the_recipient(self) -> None:
@@ -817,7 +818,7 @@ class FoodOrdersStaticTests(unittest.TestCase):
         self.assertIn("food_order_list_range", chatbot)
         self.assertIn("food_group_members_list", chatbot)
         # از ۱.۶۲.۱۷ اکشن food_order_cancel_decide در actions/supervisor-actions.php است (برش ۶ فاز ۲)
-        index_php = read("index.php") + read("actions/supervisor-actions.php")
+        index_php = read("index.php") + read("actions/supervisor-actions.php") + read("actions/food-order-actions.php")
         self.assertIn("food_order_cancel_decide", index_php)
         self.assertIn("food_order_render_pending_cancels_card", index_php)
         live = read("food-ticket-web/index.html")

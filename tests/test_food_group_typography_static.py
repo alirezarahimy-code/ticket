@@ -12,7 +12,8 @@ class FoodGroupTypographyStaticTests(unittest.TestCase):
         model = source[model_start:model_end]
         self.assertIn("$groupMenuStyle", model)
         self.assertIn("$groupMemberStyle", model)
-        self.assertIn("($groupLine['kind'] ?? '') === 'menu' ? $menuStyle : $memberStyle", model)
+        self.assertIn("$kind = (string) ($groupLine['kind'] ?? 'member')", model)
+        self.assertIn("$kind === 'menu' ? $menuStyle : $memberStyle", model)
         self.assertIn("'type' => 'rect'", model)
         self.assertIn("} elseif ($type === 'rect') {", source)
         self.assertIn("elseif ($t -eq 'rect') {", source)

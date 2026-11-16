@@ -164,8 +164,8 @@ def test_bootstrap_still_runs_migration_outside_any_transaction() -> None:
     # تراکنش‌ها در فایل‌های actions/ باز می‌شوند و index.php آن‌ها را require می‌کند؛
     # پس «بیرون از تراکنش بودن» یعنی این فراخوانی پیش از آن requireها انجام شود.
     first_action_require = min(
-        index.index(f"require __DIR__ . '/actions/{name}'")
-        for name in ("ticket-actions.php", "holiday-actions.php")
+        index.index("require __DIR__ . '/modules/request-center/Actions/dispatch.php'"),
+        index.index("require __DIR__ . '/actions/holiday-actions.php'"),
     )
     assert call < first_action_require, (
         "فراخوانی بوت‌استرپ مهاجرت بعد از بارگذاری فایل‌های اکشن افتاده است؛ "

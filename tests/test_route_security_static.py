@@ -1,3 +1,5 @@
+import re
+
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -14,16 +16,24 @@ def section(source: str, start: str, end: str) -> str:
 
 
 def test_new_ticket_page_requires_ticket_create_permission():
-    index = read("index.php")
-    page = section(index, "if ($page === 'new-ticket') {", "\nif ($page === 'ticket') {")
-    assert "$user = require_permission('ticket.create');" in page
+    page = read("modules/request-center/Pages/create.php")
+    route = section(page, "if ($page === 'new-ticket') {", "    $cdDvdRequestRecord = null;")
+    assert "$user = require_login();" in route
+    assert "user_can($user, 'ticket.create')" in route
+    assert "request_center_error_page(403" in route
 
 
 def test_post_action_dispatch_enforces_csrf_before_handlers():
-    index = read("index.php")
-    dispatch = section(index, "if ($_SERVER['REQUEST_METHOD'] === 'POST') {", "\nif ($page === 'chatbot-api')")
-    assert "require_csrf();" in dispatch
-    assert dispatch.index("require_csrf();") < dispatch.index("$action = (string) ($_POST['action'] ?? '');")
+    post_protocol = read("lib/http-post.php")
+    begin = section(post_protocol, "function post_context_begin()", "\n/**")
+    assert begin.index("require_csrf();") < begin.index("$action = (string) ($_POST['action'] ?? '');")
+
+    legacy = read("index.php")
+    legacy_dispatch = section(legacy, "if ($_SERVER['REQUEST_METHOD'] === 'POST') {", "\nif ($page === 'chatbot-api')")
+    assert legacy_dispatch.index("post_context_begin();") < legacy_dispatch.index("require __DIR__ . '/modules/request-center/Actions/dispatch.php';")
+
+    independent = read("modules/request-center/post-handler.php")
+    assert independent.index("post_context_begin();") < independent.index("require __DIR__ . '/Actions/dispatch.php';")
 
 
 def test_food_ticket_api_requires_login_and_csrf_for_post():
@@ -58,8 +68,20 @@ def test_action_handlers_refuse_direct_http_access():
     for path in action_files:
         source = path.read_text(encoding="utf-8")
         head = source[:2500]
-        if "defined('APP_ROOT')" not in head and 'defined("APP_ROOT")' not in head:
-            unguarded.append(path.relative_to(ROOT).as_posix())
+        if "defined('APP_ROOT')" in head or 'defined("APP_ROOT")' in head:
+            continue
+
+        # Request Center legacy files are compatibility bridges. Their target handler,
+        # not the bridge stub, owns the APP_ROOT direct-access guard.
+        match = re.search(r"modules/request-center/Actions/([A-Za-z0-9_-]+\.php)", source)
+        if match:
+            target = ROOT / "modules" / "request-center" / "Actions" / match.group(1)
+            target_source = target.read_text(encoding="utf-8") if target.is_file() else ""
+            target_head = target_source[:2500]
+            if "defined('APP_ROOT')" in target_head or 'defined("APP_ROOT")' in target_head:
+                continue
+
+        unguarded.append(path.relative_to(ROOT).as_posix())
     assert not unguarded, "Action handlers missing front-controller guard: " + ", ".join(unguarded)
 
 
@@ -94,7 +116,7 @@ def test_internal_modules_refuse_direct_http_access():
 
 
 def test_it_ticket_asset_reference_obeys_asset_own_unit_scope():
-    source = read("actions/ticket-actions.php")
+    source = read("modules/request-center/Actions/ticket-actions.php")
     handler = section(source, "$assetId = (int) ($_POST['asset_id']", "$supportLocation = post_value")
     assert "user_service_group($user) === 'it'" in handler
     assert "asset_scope($user, 'a')" in handler

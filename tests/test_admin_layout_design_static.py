@@ -20,7 +20,8 @@ class AdminLayoutDesignStaticTests(unittest.TestCase):
         index = (ROOT / "index.php").read_text(encoding="utf-8")
         food_ticket = (ROOT / "food-ticket.php").read_text(encoding="utf-8")
         javascript = (ROOT / "assets/admin-layout-design.js").read_text(encoding="utf-8")
-        self.assertIn("data-layout-design-launch", index)
+        shared_render = (ROOT / "lib/render.php").read_text(encoding="utf-8")
+        self.assertIn("data-layout-design-launch", shared_render)
         self.assertIn("admin_layout_design_api_handle($user)", index)
         self.assertIn("data-layout-page=\"food-ticket\"", food_ticket)
         self.assertIn("assets/admin-layout-design.js?v=10", food_ticket)
@@ -78,14 +79,14 @@ class AdminLayoutDesignStaticTests(unittest.TestCase):
     def test_pixel_offsets_are_not_capped_at_five_hundred(self) -> None:
         javascript = (ROOT / "assets/admin-layout-design.js").read_text(encoding="utf-8")
         module = (ROOT / "admin-layout-design.php").read_text(encoding="utf-8")
-        index = (ROOT / "index.php").read_text(encoding="utf-8")
+        shared_render = (ROOT / "lib/render.php").read_text(encoding="utf-8")
         food_ticket = (ROOT / "food-ticket.php").read_text(encoding="utf-8")
         self.assertNotIn('min="-500" max="500"', javascript)
         self.assertNotIn("Math.max(-500", javascript)
         self.assertIn("Number.isSafeInteger(roundedX)", javascript)
         self.assertIn("if ($offset !== false)", module)
         self.assertNotIn("$offset >= -500", module)
-        self.assertIn("assets/admin-layout-design.js?v=10", index)
+        self.assertIn("assets/admin-layout-design.js?v=10", shared_render)
         self.assertIn("assets/admin-layout-design.js?v=10", food_ticket)
 
     def test_order_table_has_ninth_action_track_and_keeps_cancel_button_inline(self) -> None:

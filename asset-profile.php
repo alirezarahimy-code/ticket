@@ -101,7 +101,7 @@ function asset_profile_sections(): array
             'fields' => [
                 ['key' => 'unit_name', 'label' => 'نام واحد', 'type' => 'text'],
                 ['key' => 'computer_type', 'label' => 'نوع رایانه', 'type' => 'text', 'auto' => true],
-                ['key' => 'user_login', 'label' => 'نام کاربری', 'type' => 'text'],
+                ['key' => 'user_login', 'label' => 'نام کاربری', 'type' => 'text', 'auto' => true],
                 ['key' => 'owner_full_name', 'label' => 'نام و نام خانوادگی', 'type' => 'text'],
                 ['key' => 'education', 'label' => 'رشته تحصیلی', 'type' => 'text'],
                 ['key' => 'phone', 'label' => 'شماره تماس', 'type' => 'text'],
@@ -120,6 +120,10 @@ function asset_profile_sections(): array
             'fields' => [
                 ['key' => 'os_name', 'label' => 'سیستم‌عامل', 'type' => 'text', 'auto' => true],
                 ['key' => 'hostname', 'label' => 'نام کامپیوتر', 'type' => 'text', 'auto' => true],
+                // ۱.۶۳.۴ — سریال و مدل خودِ دستگاه. قبلاً فقط سریال مادربرد/هارد/ویندوز
+                // در شناسنامه بود، پس سریالی که استخراج می‌خواند هیچ‌جا دیده نمی‌شد.
+                ['key' => 'machine_serial', 'label' => 'سریال دستگاه (BIOS)', 'type' => 'text', 'auto' => true],
+                ['key' => 'machine_model', 'label' => 'مدل دستگاه', 'type' => 'text', 'auto' => true],
                 ['key' => 'windows_serial', 'label' => 'شناسه ویندوز (SerialNumber؛ نه کلید محصول)', 'type' => 'text', 'auto' => true],
                 ['key' => 'os_version', 'label' => 'نسخه', 'type' => 'text', 'auto' => true],
                 ['key' => 'os_install_path', 'label' => 'محل نصب', 'type' => 'text', 'auto' => true],
@@ -164,7 +168,7 @@ function asset_profile_sections(): array
                 ['key' => 'netcard', 'label' => 'کارت شبکه', 'type' => 'text', 'auto' => true],
                 ['key' => 'net_node', 'label' => 'شماره نود شبکه', 'type' => 'text'],
                 ['key' => 'connected_internet', 'label' => 'متصل به اینترنت', 'type' => 'bool'],
-                ['key' => 'connected_network', 'label' => 'متصل به شبکه', 'type' => 'bool'],
+                ['key' => 'connected_network', 'label' => 'متصل به شبکه', 'type' => 'bool', 'auto' => true],
                 ['key' => 'lock_usb', 'label' => 'قفل شده USB', 'type' => 'bool'],
                 ['key' => 'lock_case', 'label' => 'پلمپ شده کیس', 'type' => 'bool'],
                 ['key' => 'lock_cd_dvd', 'label' => 'قفل CD-DVD R/W', 'type' => 'bool'],
@@ -189,8 +193,10 @@ function asset_profile_sections(): array
             'icon' => '🛡',
             'fields' => [
                 ['key' => 'antivirus', 'label' => 'آنتی‌ویروس', 'type' => 'text', 'auto' => true],
+                // ۱.۶۳.۴ — مدل کیس از Win32_SystemEnclosure خوانده می‌شود.
+                // «مدل پاور» را WMI استاندارد نمی‌دهد، پس دستی می‌ماند.
                 ['key' => 'power_model', 'label' => 'مدل پاور', 'type' => 'text'],
-                ['key' => 'case_model', 'label' => 'مدل کیس', 'type' => 'text'],
+                ['key' => 'case_model', 'label' => 'مدل کیس', 'type' => 'text', 'auto' => true],
             ],
         ],
         'h_ad' => [
@@ -198,13 +204,13 @@ function asset_profile_sections(): array
             'hint' => 'با اسکن دامنه به‌صورت خودکار پر می‌شود',
             'icon' => '🏢',
             'fields' => [
-                ['key' => 'ad_dn', 'label' => 'مسیر در دامنه (DN / OU)', 'type' => 'text', 'full' => true],
+                ['key' => 'ad_dn', 'label' => 'مسیر در دامنه (DN / OU)', 'type' => 'text', 'full' => true, 'auto' => true],
                 ['key' => 'ad_os', 'label' => 'سیستم‌عامل طبق دامنه', 'type' => 'text', 'auto' => true],
                 ['key' => 'ad_os_version', 'label' => 'نسخه طبق دامنه', 'type' => 'text', 'auto' => true],
                 ['key' => 'ad_last_logon', 'label' => 'آخرین ورود در دامنه', 'type' => 'date', 'auto' => true],
                 ['key' => 'ad_last_seen', 'label' => 'آخرین مشاهدهٔ آنلاین', 'type' => 'date', 'auto' => true],
                 ['key' => 'ad_scanned_at', 'label' => 'آخرین بررسی شبکه', 'type' => 'date', 'auto' => true],
-                ['key' => 'ad_online', 'label' => 'در شبکه آنلاین است', 'type' => 'bool'],
+                ['key' => 'ad_online', 'label' => 'در شبکه آنلاین است', 'type' => 'bool', 'auto' => true],
                 ['key' => 'ad_description', 'label' => 'توضیحات دامنه', 'type' => 'text', 'full' => true, 'auto' => true],
             ],
         ],
@@ -292,6 +298,9 @@ function asset_profile_fill_from_asset(array $profile, array $asset): array
     $peripherals = is_array($peripherals) ? $peripherals : [];
     $derived = asset_profile_auto_values([
         'hostname' => $asset['hostname'] ?? '',
+        'serial_number' => $asset['serial_number'] ?? '',
+        'manufacturer' => $asset['manufacturer'] ?? '',
+        'model' => $asset['model'] ?? '',
         'computer_type' => $asset['computer_type'] ?? '',
         'operating_system' => $asset['operating_system'] ?? '',
         'os_serial' => $asset['os_serial'] ?? '',
@@ -318,6 +327,12 @@ function asset_profile_fill_from_asset(array $profile, array $asset): array
         'plaque_number' => $asset['plaque_number'] ?? null,
         'os_name' => $asset['operating_system'] ?? null,
         'hostname' => $asset['hostname'] ?? null,
+        // ۱.۶۳.۴ — اگر استخراج هنوز مقدار را در asset_profiles ننشانده باشد،
+        // همان مقداری که در جدول assets ذخیره شده در شناسنامه دیده می‌شود.
+        'machine_serial' => trim((string) ($asset['serial_number'] ?? '')) !== '' ? $asset['serial_number'] : null,
+        'machine_model' => trim(trim((string) ($asset['manufacturer'] ?? '')) . ' ' . trim((string) ($asset['model'] ?? ''))) !== ''
+            ? trim(trim((string) ($asset['manufacturer'] ?? '')) . ' ' . trim((string) ($asset['model'] ?? '')))
+            : null,
         'windows_serial' => $asset['os_serial'] ?? null,
         'os_install_date' => $asset['os_install_date'] ?? null,
         'user_count' => $asset['registered_users'] ?? null,
@@ -623,12 +638,47 @@ function asset_profile_real_printers(mixed $printers): array
     return $rows;
 }
 
+/**
+ * ۱.۶۳.۴ — نوع رایانه را از دادهٔ سیستم مقصد استنتاج می‌کند: اگر سیستم‌عامل
+ * ویندوز باشد، کلاینت یا سرور؛ در غیر این صورت نام سیستم‌عامل.
+ * اگر داده‌ای نبود، همان مقدار ورودی حفظ می‌شود.
+ */
+function asset_profile_computer_type(array $inventory): string
+{
+    $os = trim((string) ($inventory['operating_system'] ?? ''));
+    $given = trim((string) ($inventory['computer_type'] ?? ''));
+    if ($os === '') {
+        return $given;
+    }
+    $lower = mb_strtolower($os);
+    if (str_contains($lower, 'windows')) {
+        // «Windows Server» فقط وقتی که خودِ سیستم‌عامل سرور باشد.
+        return str_contains($lower, 'server') ? 'Windows Server' : 'Windows client';
+    }
+    return $given !== '' && !preg_match('/(linux|darwin|freebsd) server/i', $given) ? $given : $os;
+}
+
 function asset_profile_auto_values(array $inventory): array
 {
     $hardware = is_array($inventory['hardware'] ?? null) ? $inventory['hardware'] : [];
     $os = is_array($hardware['operating_system'] ?? null) ? $hardware['operating_system'] : [];
     $processor = is_array($hardware['processor'] ?? null) ? $hardware['processor'] : [];
     $motherboard = is_array($hardware['motherboard'] ?? null) ? $hardware['motherboard'] : [];
+    // ۱.۶۳.۴ — قاب/کیس: PowerShell آن را در hardware.system_enclosure می‌گذارد.
+    $enclosure = [];
+    foreach ([
+        $hardware['system_enclosure'] ?? null,
+        $hardware['enclosure'] ?? null,
+        $hardware['extended_inventory']['enclosure'] ?? null,
+    ] as $enclosureCandidate) {
+        if (is_array($enclosureCandidate) && $enclosureCandidate !== []) {
+            $enclosureRows = inventory_rows($enclosureCandidate);
+            $enclosure = $enclosureRows[0] ?? $enclosureCandidate;
+            if ($enclosure !== []) {
+                break;
+            }
+        }
+    }
     $peripherals = is_array($inventory['peripherals'] ?? null) ? $inventory['peripherals'] : [];
     $disks = array_values(array_filter(inventory_rows($hardware['physical_disks'] ?? []), 'is_array'));
     usort($disks, static function (array $a, array $b): int {
@@ -682,7 +732,14 @@ function asset_profile_auto_values(array $inventory): array
     };
     $osInstallDate = null;
     $rawInstall = (string) inventory_value($os, ['InstallDate', 'install_date'], '');
-    if (preg_match('/^(\d{4})(\d{2})(\d{2})/', $rawInstall, $matches)) {
+    // Win32_OperatingSystem.InstallDate در CIM خام «20230211000000.000000+000» است، اما
+    // Get-CimInstance با PowerShell 7 آن را DateTime می‌کند و ConvertTo-Json به ISO 8601
+    // («2023-02-11T00:00:00Z») تبدیل می‌شود. هر دو فرمت باید پذیرفته شوند؛ وگرنه تاریخ نصب
+    // سیستم‌عامل هرگز در شناسنامه پر نمی‌شد.
+    if (preg_match('/^(\d{4})-?(\d{2})-?(\d{2})/', $rawInstall, $matches)
+        && (int) $matches[2] >= 1 && (int) $matches[2] <= 12
+        && (int) $matches[3] >= 1 && (int) $matches[3] <= 31
+        && (int) $matches[1] >= 1990) {
         $osInstallDate = $matches[1] . '-' . $matches[2] . '-' . $matches[3] . ' 00:00:00';
     }
     $localUsers = inventory_rows($inventory['os_users'] ?? []);
@@ -813,9 +870,15 @@ function asset_profile_auto_values(array $inventory): array
         }
     }
     $values = [
-        'computer_type' => (string) ($inventory['computer_type'] ?? ''),
+        // ۱.۶۳.۴ — نوع رایانه از دادهٔ خودِ سیستم مقصد، نه از سیستم‌عامل سرور پنل.
+        // قبلاً inventory_base_inventory() مقدار میزبان PHP («Linux Server») را
+        // می‌گذاشت و برای یک کلاینت ویندوزی هم همان می‌ماند.
+        'computer_type' => asset_profile_computer_type($inventory),
         'hostname' => (string) ($inventory['hostname'] ?? ''),
         'os_name' => (string) ($inventory['operating_system'] ?? ''),
+        // ۱.۶۳.۴ — سریال و مدل خودِ ماشین از BIOS/Computer خوانده می‌شود.
+        'machine_serial' => (string) ($inventory['serial_number'] ?? ''),
+        'machine_model' => trim((string) ($inventory['manufacturer'] ?? '') . ' ' . (string) ($inventory['model'] ?? '')),
         'windows_serial' => (string) inventory_value($os, ['SerialNumber', 'serial_number'], ($inventory['os_serial'] ?? '')),
         // نام فعلی از Win32_ComputerSystem.UserName می‌آید؛ RegisteredUser و فهرست پروفایل‌ها هویت فعلی نیستند.
         'user_login' => (function () use ($inventory, $hardware): string {
@@ -842,6 +905,12 @@ function asset_profile_auto_values(array $inventory): array
         'disk2_capacity' => $diskCapacity(1),
         'disk2_serial' => $diskAt(1, ['SerialNumber', 'serial_number']),
         'motherboard_model' => (string) inventory_value($motherboard, ['Manufacturer', 'manufacturer'], ''),
+        // کیس/قاب از Win32_SystemEnclosure؛ اگر Manufacturer و Model هر دو باشند
+        // کنار هم می‌آیند تا «HP – 103C_53307F G-D」 خوانا باشد.
+        'case_model' => trim(implode(' ', array_filter([
+            trim((string) inventory_value($enclosure, ['Manufacturer', 'manufacturer'], '')),
+            trim((string) inventory_value($enclosure, ['Model', 'model'], $inventory['model'] ?? '')),
+        ], static fn (string $part): bool => $part !== ''))),
         'motherboard_product' => (string) inventory_value($motherboard, ['Product', 'model'], ''),
         'motherboard_serial' => (string) inventory_value($motherboard, ['SerialNumber', 'serial_number'], ''),
         'cpu_model' => (string) ($inventory['cpu'] ?? ''),

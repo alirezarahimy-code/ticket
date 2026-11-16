@@ -307,13 +307,14 @@ CREATE TABLE IF NOT EXISTS tickets (
     support_location VARCHAR(255) NULL,
     support_equipment TEXT NULL,
     priority ENUM('normal','urgent','critical') NOT NULL DEFAULT 'normal',
-    status ENUM('new','manager_review','assigned','in_progress','waiting_user','pending','resolved','closed','cancelled') NOT NULL DEFAULT 'manager_review',
+    status ENUM('new','manager_review','assigned','in_progress','waiting_user','pending','resolved','closed','cancelled','rejected') NOT NULL DEFAULT 'manager_review',
     requester_id INT UNSIGNED NOT NULL,
     assigned_to INT UNSIGNED NULL,
     assigned_at DATETIME NULL,
     first_response_at DATETIME NULL,
     resolved_at DATETIME NULL,
     closed_at DATETIME NULL,
+    rejected_at DATETIME NULL,
     cancel_requested_at DATETIME NULL,
     cancel_requested_by INT UNSIGNED NULL,
     cancel_request_reason TEXT NULL,
@@ -1113,6 +1114,7 @@ CREATE TABLE IF NOT EXISTS system_logs (
     context VARCHAR(120) NULL,
     message TEXT NULL,
     meta_json JSON NULL,
+    -- هم‌تراز با migrations/034 (تشدید و برچسب شدت)
     escalation_count INT UNSIGNED NOT NULL DEFAULT 0,
     escalation_label VARCHAR(64) NULL,
     user_id INT UNSIGNED NULL,
@@ -1120,6 +1122,7 @@ CREATE TABLE IF NOT EXISTS system_logs (
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     INDEX idx_system_logs_created (created_at),
     INDEX idx_system_logs_level (level),
+    -- هم‌تراز با migrations/034 (کوئری خلاصهٔ هوشمند: سطح + زمان)
     INDEX idx_system_logs_level_time (level, created_at),
     UNIQUE KEY uq_system_event_id (event_id),
     KEY idx_system_logs_request (request_id),
@@ -1582,44 +1585,68 @@ CREATE TABLE IF NOT EXISTS schema_updates (
     UNIQUE KEY uq_schema_update (version, migration)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+-- برنامهٔ نوبت‌های رسیدگی کارشناسان (مرکز درخواست‌ها — فاز ۴)
+-- همتای افزایشی migrations/035-request-center-appointments.sql؛ هر دو idempotent هستند تا نصب تازه و ارتقاء به یک نتیجه برسند.
+CREATE TABLE IF NOT EXISTS request_center_appointments (
+    id               INT UNSIGNED      NOT NULL AUTO_INCREMENT,
+    ticket_id        INT UNSIGNED      NOT NULL,
+    assignee_id      INT UNSIGNED      NOT NULL,
+    starts_at        DATETIME          NOT NULL,
+    ends_at          DATETIME          NOT NULL,
+    kind             VARCHAR(24)       NOT NULL DEFAULT 'work',
+    status           VARCHAR(16)       NOT NULL DEFAULT 'planned',
+    note             VARCHAR(500)      NULL,
+    created_by       INT UNSIGNED      NOT NULL,
+    created_at       DATETIME          NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at       DATETIME          NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    PRIMARY KEY (id),
+    KEY idx_rc_appt_assignee_time (assignee_id, starts_at, ends_at),
+    KEY idx_rc_appt_ticket (ticket_id),
+    KEY idx_rc_appt_status_time (status, starts_at)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- نصب تازه از اسکیما‌ی تجمیعی ساخته می‌شود؛ مهاجرت‌های تاریخی در همین اسکیما اعمال شده‌اند.
 -- ثبت baseline مانع گزارش کاذب «مهاجرت اجرا نشده» روی نصب تازه می‌شود.
 INSERT IGNORE INTO schema_updates (version, migration) VALUES
-    ('1.62.95', '001-local-accounts.sql'),
-    ('1.62.95', '002-traffic-notices.sql'),
-    ('1.62.95', '003-sync-schema-151.sql'),
-    ('1.62.95', '004-ticket-cancellation.sql'),
-    ('1.62.95', '005-normalize-pending-status.sql'),
-    ('1.62.95', '006-food-meal-type.sql'),
-    ('1.62.95', '007-traffic-visit-history.sql'),
-    ('1.62.95', '008-traffic-destination-approver.sql'),
-    ('1.62.95', '009-traffic-destination-multi-approver.sql'),
-    ('1.62.95', '010-org-liaison-units.sql'),
-    ('1.62.95', '011-manual-attendance-delivery.sql'),
-    ('1.62.95', '012-manual-attendance-clears-absences.sql'),
-    ('1.62.95', '013-manual-attendance-record-backfill.sql'),
-    ('1.62.95', '014-asset-identity-dedupe.sql'),
-    ('1.62.95', '015-asset-identity-hotfix.sql'),
-    ('1.62.95', '016-auto-asset-finish.sql'),
-    ('1.62.95', '017-org-tree-order.sql'),
-    ('1.62.95', '018-org-company-separation.sql'),
-    ('1.62.95', '019-traffic-destination-link.sql'),
-    ('1.62.95', '020-traffic-destination-upgrade.sql'),
-    ('1.62.95', '021-food-auto-receipts.sql'),
-    ('1.62.95', '022-food-meal-reconciliation-invoices.sql'),
-    ('1.62.95', '023-user-access-groups.sql'),
-    ('1.62.95', '024-central-logging.sql'),
-    ('1.62.95', '025-logging-issues-alerts.sql'),
-    ('1.62.95', '026-logging-legacy-result-unknown.sql'),
-    ('1.62.95', '027-logging-correlation-ids.sql'),
-    ('1.62.95', '028-logging-fingerprint-v2.sql'),
-    ('1.62.95', '029-activity-result-default-unknown.sql'),
-    ('1.62.95', '030-logging-notification-idempotency-and-ticket-history.sql'),
-    ('1.62.95', '031-food-worker-window.sql'),
-    ('1.62.95', '032-schema-updates-baseline.sql'),
-    ('1.62.95', '034-logging-escalation.sql'),
+    ('1.62.88', '001-local-accounts.sql'),
+    ('1.62.88', '002-traffic-notices.sql'),
+    ('1.62.88', '003-sync-schema-151.sql'),
+    ('1.62.88', '004-ticket-cancellation.sql'),
+    ('1.62.88', '005-normalize-pending-status.sql'),
+    ('1.62.88', '006-food-meal-type.sql'),
+    ('1.62.88', '007-traffic-visit-history.sql'),
+    ('1.62.88', '008-traffic-destination-approver.sql'),
+    ('1.62.88', '009-traffic-destination-multi-approver.sql'),
+    ('1.62.88', '010-org-liaison-units.sql'),
+    ('1.62.88', '011-manual-attendance-delivery.sql'),
+    ('1.62.88', '012-manual-attendance-clears-absences.sql'),
+    ('1.62.88', '013-manual-attendance-record-backfill.sql'),
+    ('1.62.88', '014-asset-identity-dedupe.sql'),
+    ('1.62.88', '015-asset-identity-hotfix.sql'),
+    ('1.62.88', '016-auto-asset-finish.sql'),
+    ('1.62.88', '017-org-tree-order.sql'),
+    ('1.62.88', '018-org-company-separation.sql'),
+    ('1.62.88', '019-traffic-destination-link.sql'),
+    ('1.62.88', '020-traffic-destination-upgrade.sql'),
+    ('1.62.88', '021-food-auto-receipts.sql'),
+    ('1.62.88', '022-food-meal-reconciliation-invoices.sql'),
+    ('1.62.88', '023-user-access-groups.sql'),
+    ('1.62.88', '024-central-logging.sql'),
+    ('1.62.88', '025-logging-issues-alerts.sql'),
+    ('1.62.88', '026-logging-legacy-result-unknown.sql'),
+    ('1.62.88', '027-logging-correlation-ids.sql'),
+    ('1.62.88', '028-logging-fingerprint-v2.sql'),
+    ('1.62.88', '029-activity-result-default-unknown.sql'),
+    ('1.62.88', '030-logging-notification-idempotency-and-ticket-history.sql'),
+    ('1.62.88', '031-food-worker-window.sql'),
+    ('1.62.88', '032-schema-updates-baseline.sql'),
+    -- ۰۳۳ فقط داده‌های قدیمی را اصلاح می‌کند؛ عمداً در خط مبنا ثبت نمی‌شود تا
+    -- به‌عنوان مهاجرت داده‌ایِ امن و قابل‌اجرای مجدد جداگانه انجام شود.
+    ('1.62.88', '034-logging-escalation.sql'),
+    -- ۰۳۶ و ۰۳۷ هم در اسکیما اعمال شده‌اند (ستون‌های leftover_* و backfill تحویل).
     ('1.62.95', '036-food-meal-leftover-disposition.sql'),
-    ('1.62.95', '037-food-auto-receipts-delivered.sql')
-;
+    ('1.62.95', '037-food-auto-receipts-delivered.sql'),
+    -- ۰۳۵: جدولش را همین فایل در بالا می‌سازد (request_center_appointments)؛
+    -- بدون این ردیف، نصب تازه از install-empty-db هشدار کاذب «۰۳۵ اجرا نشده» می‌داد.
+    ('1.63', '035-request-center-appointments.sql');
 

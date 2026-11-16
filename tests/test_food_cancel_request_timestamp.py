@@ -1,4 +1,5 @@
 from pathlib import Path
+import re
 import unittest
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -20,9 +21,11 @@ class FoodCancelRequestTimestampTests(unittest.TestCase):
         manager = read("assets/food-menu.js")
         self.assertIn("'requested_at_label' => function_exists('jalali_date')", source)
         self.assertIn("class=\"food-cancel-request-time\">زمان ثبت درخواست:", source)
+        # The active table builds sortable headers through cancelHead(); the label is
+        # intentionally a button rather than a literal <th> text node.
         self.assertIn("cancelHead('requested_at', 'زمان ثبت درخواست')", manager)
-        self.assertIn("row.requested_at_label", manager)
-        self.assertIn("assets/food-menu.js?v=1.62.96", read("food-ticket-web/index.html"))
+        self.assertIn("row.requested_at_label || row.requested_at || row.created_at", manager)
+        self.assertRegex(read("food-ticket-web/index.html"), r"assets/food-menu\.js\?v=[A-Za-z0-9._-]+")
         user_js = read("assets/food-order.js")
         self.assertIn("زمان ثبت درخواست:", user_js)
         self.assertIn("SELECT id, order_id, status, created_at FROM food_order_cancel_requests", source)

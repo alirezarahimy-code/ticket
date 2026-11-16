@@ -60,7 +60,11 @@ def test_runtime_reconciliation_updates_stored_rows_when_absences_are_read():
     assert "function food_ticket_manual_attendance_reconcile_range(string $fromDate, string $toDate): array" in source
     assert "function food_ticket_manual_attendance_reconcile_date(string $date): array" in source
     assert "food_ticket_manual_attendance_reconcile_date($date);" in source
-    assert "DELETE a FROM food_ticket_daily_absence AS a" in source
+    # Reconciliation intentionally avoids MySQL-only DELETE ... JOIN so its
+    # read-then-delete flow also runs in the offline SQLite integration test.
+    assert "SELECT a.id FROM food_ticket_daily_absence a, food_ticket_events e" in source
+    assert "DELETE FROM food_ticket_daily_absence WHERE id IN (" in source
+    assert "DELETE a FROM food_ticket_daily_absence AS a" not in source
     assert "UPDATE food_ticket_events SET" in source
     assert "delivery_status = \"delivered\"" in source
     assert '((source_uid = "manual-attendance" AND event_type = "printed")' in source

@@ -62,13 +62,19 @@ KNOWN_DUPLICATE_MIGRATION_NUMBERS = {"017"}
 
 # حداقل تعداد نشانگر هر قابلیت که از نسخه‌های ۱.۶۲.۷۴/۷۵ به ارث رسیده و
 # هیچ بستهٔ لاگینگی حق حذفش را ندارد.
+# «برش فاز ۲» (d492f1fc، استخراج کروم مشترک از index.php به lib/render.php) و «استقلال کامل
+# مرکز درخواست‌ها» (2066cb00) کد مربوط به این نشانگرها را بدون حذف قابلیت، به ماژول/فایل‌های
+# جدید منتقل کردند. پین‌ها به موقعیت‌های جدید اشاره می‌کنند؛ کف‌ها بدون تضعیف حفظ شده‌اند:
+# مجموع occurrences در مسیر جدید حداقل همان نسخهٔ قبلی است.
 FEATURE_FLOOR = [
-    ("index.php", "access_group", 15),
+    ("actions/access-group-actions.php", "access_group", 15),
     ("index.php", "user_access_group", 7),
     ("index.php", "user-access-groups.php", 1),
     ("index.php", "notification_ticket_visibility", 2),
-    ("index.php", "$requesterId", 2),
-    ("index.php", "choose_handling_agent", 3),
+    ("modules/request-center/RequestCenterRepository.php", "$requesterId", 2),
+    ("modules/request-center/Actions/ticket-actions.php", "choose_handling_agent", 1),
+    ("modules/request-center/lib/functions.php", "choose_handling_agent", 1),
+    ("lib/auth-scope.php", "choose_handling_agent", 1),
     ("lib/activity-audit.php", "access_group_created", 1),
     ("lib/activity-audit.php", "access_group_updated", 1),
     ("lib/activity-audit.php", "access_group_deleted", 1),
@@ -221,8 +227,11 @@ def test_logging_update_must_not_delete_1_62_75_features() -> None:
 
 
 def test_logging_dashboard_is_reachable_from_the_reports_menu() -> None:
+    # «برش فاز ۲»: لینک منوی «گزارش‌ها» از index.php به کروم مشترک (lib/render.php) منتقل شد.
+    # مسیر صفحه همچنان در index.php است؛ قرارداد را در موقعیت جدید بررسی می‌کنیم.
+    render = read("lib/render.php")
     index = read("index.php")
-    assert "index.php?page=logging-dashboard" in index, "لینک داشبورد لاگ از منو حذف شده است"
+    assert "index.php?page=logging-dashboard" in render, "لینک داشبورد لاگ از منوی گزارش‌ها (lib/render.php) حذف شده است"
     assert "$page === 'logging-dashboard'" in index, "مسیر صفحهٔ داشبورد لاگ از index.php حذف شده است"
     assert "function logging_dashboard_render" in read("logging-dashboard.php")
 

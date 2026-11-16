@@ -1,0 +1,2 @@
+# صفحات این پوشه فقط بهصورت require از طریق نقاط ورود معتبر (index.php هسته یا request-center.php) بارگذاری می شوند؛ دسترسی مستقیم وب ممنوع است.
+Require all denied

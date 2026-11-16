@@ -11,7 +11,8 @@ def test_dashboard_is_permission_gated_and_routed():
     assert "user_can($user, 'system.health')" in page
     assert "security_log_access_denied" in page
     assert "if ($page === 'logging-dashboard')" in index
-    assert "index.php?page=logging-dashboard" in index
+    render = (ROOT / "lib/render.php").read_text(encoding="utf-8")
+    assert "index.php?page=logging-dashboard" in render
 
 
 def test_dashboard_uses_real_logging_sources_and_local_runtime():

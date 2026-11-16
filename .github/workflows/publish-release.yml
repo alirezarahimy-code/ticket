@@ -1,0 +1,224 @@
+name: Publish release assets
+
+# هدف: ساخت Release واقعی با فایل‌های پیوست، از داخل زیرساخت گیت‌هاب.
+# چرا: آپلود مستقیم از محیط توسعه به uploads.github.com مسدود است،
+# ولی runner خودِ گیت‌هاب به آن دسترسی دارد.
+#
+# چرا trigger با tag و نه workflow_dispatch؟
+#   workflow_dispatch فقط روی شاخهٔ پیش‌فرض (main) در دسترس است و اجرا نمی‌شود
+#   اگر فایل workflow روی main نباشد. برای رویداد push، گیت‌هاب فایل
+#   workflow را از همان refی می‌خواند که push شده — پس با زدن یک tag روی
+#   شاخهٔ کاری، این workflow بدون نیاز به main اجرا می‌شود.
+#
+# اجرا:
+#   git tag publish-1.62.97 <sha>
+#   git push origin publish-1.62.97
+#
+#   متغیرهای اختیاری از طریق commit message یا پیش‌فرض‌ها تعیین می‌شوند.
+
+on:
+  push:
+    tags:
+      - 'publish-*'
+  workflow_dispatch:
+    inputs:
+      release_tag:
+        description: 'برچسب نسخه (مثلاً v1.62.97)'
+        required: true
+        default: 'v1.62.97'
+        type: string
+
+permissions:
+  contents: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: تعیین برچسب Release
+        id: cfg
+        run: |
+          set -euo pipefail
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            RELEASE_TAG="${{ inputs.release_tag }}"
+          else
+            # publish-1.62.97  →  v1.62.97
+            PUSHED="${GITHUB_REF_NAME}"
+            RELEASE_TAG="v${PUSHED#publish-}"
+          fi
+          echo "release_tag=$RELEASE_TAG" >> "$GITHUB_OUTPUT"
+          # نسخهٔ واقعی از VERSION خوانده می‌شود — همان چیزی که در بسته است.
+          VERSION_LINE=$(head -1 VERSION | tr -d '\r\n')
+          echo "version=$VERSION_LINE" >> "$GITHUB_OUTPUT"
+          echo "برچسب Release: $RELEASE_TAG (نسخه: $VERSION_LINE)"
+
+      - name: فهرست فایل‌های پیوست
+        run: |
+          echo "── فایل‌های موجود ──"
+          ls -la downloads/*.zip
+          echo "── checksum ها ──"
+          cat downloads/*.sha256
+
+      - name: بررسی سالم بودن فایل‌های این نسخه
+        env:
+          RELEASE_VERSION: ${{ steps.cfg.outputs.version }}
+        run: |
+          set -euo pipefail
+          # فایل‌های این نسخه از VERSION مشتق می‌شوند، نه هارد‌کد.
+          # چرا: فهرست ثابت یعنی هر انتشار بعدی یا رد می‌شود یا نسخهٔ قبلی را
+          # دوباره بررسی می‌کند — دقیقاً همان‌طور که برای ۱.۶۲.۹۸ اتفاق افتاد.
+          # قاعده: هر zip/sha256 که نامش نسخهٔ جاری را دارد + بستهٔ دلتای همان نسخه.
+          fail=0
+          shopt -s nullglob
+          TARGETS=()
+          # اگر فهرست صریح این نسخه هست، همان مرجع است.
+          # چرا لازم شد: بستهٔ ۱.۶۳ نامش «…-1_62_96-to-1_63-…» است (زیرخط، نه نقطه)
+          # و با هیچ الگوی نسخه‌ای پیدا نمی‌شود.
+          MANIFEST="downloads/RELEASE-ASSETS-$RELEASE_VERSION.txt"
+          if [ -f "$MANIFEST" ]; then
+            echo "── فهرست صریح: $MANIFEST ──"
+            while IFS= read -r line; do
+              line="$(echo "$line" | tr -d '\r' | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')"
+              [ -z "$line" ] && continue
+              case "$line" in \#*) continue;; esac
+              TARGETS+=("$line")
+            done < "$MANIFEST"
+          else
+            # تطبیق دقیق نسخه: بعد از شماره باید . یا - بیاید، وگرنه 1.63
+            # فایل‌های 1.63.1 را هم می‌گیرد (و برعکس RCهای قدیمی را).
+            for f in downloads/*.zip; do
+              case "$(basename "$f")" in
+                *-"$RELEASE_VERSION".zip|*"$RELEASE_VERSION"-*.zip) TARGETS+=("$(basename "$f")");;
+              esac
+            done
+          fi
+          if [ ${#TARGETS[@]} -eq 0 ]; then
+            echo "::error::هیچ بسته‌ای برای نسخهٔ $RELEASE_VERSION پیدا نشد"
+            exit 1
+          fi
+          echo "── فایل‌های نسخهٔ $RELEASE_VERSION ──"
+          printf '  %s\n' "${TARGETS[@]}"
+          for pair in "${TARGETS[@]}"
+          do
+            path="downloads/$pair"
+            sc="$path.sha256"
+            if [ ! -f "$path" ]; then
+              echo "::error::فایل نیست: $path"
+              fail=1
+              continue
+            fi
+            if [ ! -f "$sc" ]; then
+              echo "::error::checksum نیست: $sc"
+              fail=1
+              continue
+            fi
+            expected=$(awk '{print $1}' "$sc")
+            actual=$(sha256sum "$path" | awk '{print $1}')
+            size=$(stat -c%s "$path")
+            if [ "$actual" != "$expected" ]; then
+              echo "::error::SHA-256 نمی‌خواند: $pair"
+              echo "  انتظار: $expected"
+              echo "  واقعی : $actual"
+              fail=1
+            else
+              echo "✓ $pair  ($size بایت)"
+              echo "  $actual"
+            fi
+          done
+          exit $fail
+
+      - name: ساخت Release و پیوست فایل‌ها
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          RELEASE_TAG: ${{ steps.cfg.outputs.release_tag }}
+          RELEASE_VERSION: ${{ steps.cfg.outputs.version }}
+          TARGET_SHA: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+          shopt -s nullglob
+
+          # فقط بسته‌های همین نسخه پیوست می‌شوند.
+          # پیش از این `downloads/*.zip` آپلود می‌شد — یعنی هر Release همهٔ
+          # بسته‌های تاریخی را دوباره سوار می‌کرد و لینک‌های نسخهٔ قبل هم
+          # زیر Release تازه ظاهر می‌شدند.
+          ATTACH=()
+          MANIFEST="downloads/RELEASE-ASSETS-$RELEASE_VERSION.txt"
+          if [ -f "$MANIFEST" ]; then
+            while IFS= read -r line; do
+              line="$(echo "$line" | tr -d '\r' | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')"
+              [ -z "$line" ] && continue
+              case "$line" in \#*) continue;; esac
+              ATTACH+=("downloads/$line")
+            done < "$MANIFEST"
+          else
+            for f in downloads/*.zip; do
+              case "$(basename "$f")" in
+                *-"$RELEASE_VERSION".zip|*"$RELEASE_VERSION"-*.zip) ATTACH+=("$f");;
+              esac
+            done
+          fi
+          if [ ${#ATTACH[@]} -eq 0 ]; then
+            echo "::error::هیچ فایلی برای پیوست نسخهٔ $RELEASE_VERSION نیست"
+            exit 1
+          fi
+          echo "── پیوست‌ها (${#ATTACH[@]}) ──"
+          printf '  %s\n' "${ATTACH[@]}"
+
+          # یادداشت مخصوص نسخه اگر بود، وگرنه یادداشت عمومی.
+          NOTES="downloads/RELEASE-NOTES-$RELEASE_VERSION.md"
+          [ -f "$NOTES" ] || NOTES="downloads/RELEASE-NOTES.md"
+          if [ ! -f "$NOTES" ]; then
+            echo "یادداشت نسخه نیست؛ از متن پیش‌فرض استفاده می‌شود."
+            printf 'بستهٔ %s\n' "$RELEASE_TAG" > /tmp/notes.md
+            NOTES=/tmp/notes.md
+          fi
+
+          if gh release view "$RELEASE_TAG" >/dev/null 2>&1; then
+            echo "Release «$RELEASE_TAG» از قبل هست — فایل‌ها به‌روزرسانی می‌شوند."
+            gh release upload "$RELEASE_TAG" "${ATTACH[@]}" --clobber
+          else
+            # عنوان از VERSION خوانده می‌شود، نه هارد‌کد. وگرنه Release نسخهٔ
+            # جدید با عنوان نسخهٔ قبلی منتشر می‌شود (یک بار همین اتفاق افتاد).
+            VERSION_LINE=$(head -1 VERSION 2>/dev/null | tr -d '\r\n')
+            TITLE="نسخهٔ ${VERSION_LINE}"
+            # پاراگراف اول یادداشت‌ها به عنوان اضافه می‌شود، اگر بود.
+            if [ -s "$NOTES" ]; then
+              FIRST_TITLE=$(grep -m1 '^# ' "$NOTES" | sed 's/^# //')
+              [ -n "$FIRST_TITLE" ] && TITLE="$FIRST_TITLE"
+            fi
+            echo "عنوان: $TITLE"
+            echo "ساخت Release «$RELEASE_TAG»…"
+            gh release create "$RELEASE_TAG" \
+              --title "$TITLE" \
+              --notes-file "$NOTES" \
+              --target "$TARGET_SHA" \
+              --latest \
+              "${ATTACH[@]}"
+          fi
+
+      - name: گزارش لینک‌های مستقیم
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          RELEASE_TAG: ${{ steps.cfg.outputs.release_tag }}
+        run: |
+          set -euo pipefail
+          shopt -s nullglob
+          REPO="${GITHUB_REPOSITORY}"
+          {
+            echo "## لینک‌های دانلود مستقیم"
+            echo ""
+            for f in downloads/*.zip; do
+              name=$(basename "$f")
+              url="https://github.com/${REPO}/releases/download/${RELEASE_TAG}/${name}"
+              echo "- \`$name\`"
+              echo ""
+              echo "  <$url>"
+              echo ""
+            done
+            echo "صفحهٔ Release: https://github.com/${REPO}/releases/tag/${RELEASE_TAG}"
+          } >> "$GITHUB_STEP_SUMMARY"
+          cat "$GITHUB_STEP_SUMMARY"

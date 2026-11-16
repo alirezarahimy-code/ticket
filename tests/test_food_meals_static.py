@@ -47,7 +47,9 @@ class FoodMealSeparationTests(unittest.TestCase):
 
     def test_receipt_order_sources_are_explicitly_lunch_only(self):
         source = read('food-ticket-order-source.php')
-        self.assertGreaterEqual(source.count("meal_type = 'lunch'"), 2)
+        # There is one canonical internal-order query, and it explicitly excludes dinner.
+        self.assertIn("WHERE o.food_date BETWEEN ? AND ? AND o.meal_type = 'lunch' AND o.status = 'active'", source)
+        self.assertEqual(source.count("meal_type = 'lunch'"), 1)
 
 
 if __name__ == '__main__':

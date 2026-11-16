@@ -992,6 +992,74 @@ function food_order_statistics_range(string $fromDate, string $toDate, string $m
 }
 
 /** گزارش ردیفی فیش‌های چاپ‌شده و وضعیت تحویل، به‌علاوهٔ فیش‌های چاپ‌شدهٔ مهمان. */
+/**
+ * ۱.۶۳.۴ — نگاشت سازمانی برای «نمایش بر اساس معاونت».
+ *
+ * گزارش‌های غذا افراد را با کد ملی/کد پرسنلی می‌شناسند، نه با شناسهٔ کاربر؛ و
+ * برای گروه‌بندی بر اساس معاونت باید هر فرد به سرشاخهٔ چارت سازمانی خودش وصل
+ * شود. این تابع یک نگاشت سبک برمی‌گرداند و در مرورگر کش می‌شود تا هر گزارش
+ * فقط یک‌بار آن را بگیرد، نه یک‌بار برای هر ردیف.
+ *
+ * کلیدها: کد ملی (nat:<code>)، کد پرسنلی (pc:<code>) و شناسهٔ کاربر (uid:<id>).
+ */
+function food_order_org_map(): array
+{
+    if (!function_exists('org_group_meta_for_users')) {
+        require_once __DIR__ . '/lib/org-grouping.php';
+    }
+    $groups = [];
+    $index = function_exists('org_group_unit_index') ? org_group_unit_index() : [];
+    foreach ($index as $unit) {
+        $type = (string) ($unit['unit_type'] ?? '');
+        if (in_array($type, ['deputy', 'management', 'liaison'], true)) {
+            $groups['unit-' . (int) $unit['id']] = [
+                'key'   => 'unit-' . (int) $unit['id'],
+                'label' => (string) ($unit['name'] ?? ''),
+                'type'  => $type,
+            ];
+        }
+    }
+    foreach (function_exists('org_group_company_roots') ? org_group_company_roots() : [] as $root) {
+        $groups[(string) $root['key']] = ['key' => (string) $root['key'], 'label' => (string) $root['label'], 'type' => 'company'];
+    }
+    $groups['none'] = ['key' => 'none', 'label' => 'بدون معاونت سازمانی', 'type' => 'none'];
+
+    // فهرست همهٔ کاربران فعال با کد ملی/پرسنلی — یک کوئری، بدون N+1.
+    $people = [];
+    try {
+        $rows = db()->query("SELECT id, national_code, employee_number, org_unit_id, company_id FROM users WHERE is_active = 1")->fetchAll(PDO::FETCH_ASSOC);
+    } catch (Throwable $e) {
+        return ['groups' => $groups, 'people' => []];
+    }
+    $meta = org_group_meta_for_users(array_map(static fn (array $r): int => (int) $r['id'], $rows));
+    foreach ($rows as $row) {
+        $uid = (int) ($row['id'] ?? 0);
+        if ($uid <= 0 || !isset($meta[$uid])) {
+            continue;
+        }
+        $group = $meta[$uid];
+        $entry = [
+            'group' => (string) $group['key'],
+            'label' => (string) $group['label'],
+            'type'  => (string) $group['type'],
+            'path'  => (string) ($group['path'] ?? ''),
+        ];
+        if (!isset($groups[$entry['group']])) {
+            $groups[$entry['group']] = ['key' => $entry['group'], 'label' => $entry['label'], 'type' => $entry['type']];
+        }
+        $nat = function_exists('food_ticket_digits') ? food_ticket_digits((string) ($row['national_code'] ?? '')) : (string) ($row['national_code'] ?? '');
+        $pc = trim((string) ($row['employee_number'] ?? ''));
+        if ($nat !== '') {
+            $people['nat:' . $nat] = $entry;
+        }
+        if ($pc !== '') {
+            $people['pc:' . $pc] = $entry;
+        }
+        $people['uid:' . $uid] = $entry;
+    }
+    return ['groups' => $groups, 'people' => $people];
+}
+
 function food_order_printed_delivery_report(string $fromDate, string $toDate): array
 {
     food_order_schema_ensure();
@@ -3684,6 +3752,10 @@ function food_order_menu_api_handle(string $route, array $user): never
             $fieldsRaw = trim((string) ($_GET['fields'] ?? ''));
             $fields = $fieldsRaw === '' ? [] : explode(',', $fieldsRaw);
             food_order_export_manager_orders($date, $user, food_order_meal_type($_GET['meal_type'] ?? 'lunch'), $fields);
+        }
+        if ($method === 'GET' && $route === 'food-menu/org-map') {
+            food_order_require_permission($user, 'food.reports');
+            food_order_send_json(food_order_org_map());
         }
         if ($method === 'GET' && $route === 'food-menu/printed-delivery') {
             food_order_require_permission($user, 'food.reports');

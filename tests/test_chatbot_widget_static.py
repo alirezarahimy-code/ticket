@@ -2,7 +2,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 chatbot = (ROOT / "chatbot.php").read_text(encoding="utf-8")
-index = (ROOT / "index.php").read_text(encoding="utf-8")
+index = (ROOT / "index.php").read_text(encoding="utf-8") + (ROOT / "lib" / "render.php").read_text(encoding="utf-8")
 guide = (ROOT / "help-guide.php").read_text(encoding="utf-8")
 
 

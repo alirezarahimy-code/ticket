@@ -2,6 +2,35 @@
 declare(strict_types=1);
 
 require __DIR__ . '/bootstrap.php';
+
+// Keep legacy attachment URLs, but execute the read through the RC-owned
+// endpoint before loading unrelated legacy modules or schema setup.
+if (strtoupper((string) ($_SERVER['REQUEST_METHOD'] ?? 'GET')) === 'GET'
+    && (string) ($_GET['action'] ?? '') === 'download_attachment') {
+    $query = $_GET;
+    header('Location: request-center.php?action=download_attachment&id=' . max(0, (int) ($query['id'] ?? 0)), true, 302);
+    exit;
+}
+
+if (strtoupper((string) ($_SERVER['REQUEST_METHOD'] ?? 'GET')) === 'GET'
+    && (string) ($_GET['action'] ?? '') === 'export_report') {
+    $query = $_GET;
+    unset($query['action']);
+    header('Location: request-center.php?action=export_report&' . http_build_query($query), true, 302);
+    exit;
+}
+
+// Early compatibility bridge: serve Request Center lifecycle GETs from its
+// independent entry before loading legacy modules or running their schema setup.
+$legacyRequestCenterPage = is_string($_GET['page'] ?? null) ? (string) $_GET['page'] : '';
+if (strtoupper((string) ($_SERVER['REQUEST_METHOD'] ?? 'GET')) === 'GET'
+    && empty($_GET['action'])
+    && in_array($legacyRequestCenterPage, ['new-ticket', 'ticket', 'queue', 'supervisor', 'services', 'reports', 'analytics', 'knowledge', 'governance', 'ola'], true)) {
+    $requestCenterQuery = $_GET;
+    header('Location: request-center.php?' . http_build_query($requestCenterQuery), true, 302);
+    exit;
+}
+require_once __DIR__ . '/modules/request-center/WorkflowService.php';
 require_once __DIR__ . '/user-access-groups.php';
 require_once __DIR__ . '/xlsx-writer.php';
 if (is_file(__DIR__ . '/admin-layout-design.php')) {
@@ -33,11 +62,6 @@ role_permissions_seed();
 
 if (isset($_GET['installed'])) {
     flash('success', 'سامانه با موفقیت نصب شد.');
-}
-
-function post_value(string $key, string $default = ''): string
-{
-    return trim((string) ($_POST[$key] ?? $default));
 }
 
 function csv_cell(mixed $value): string
@@ -105,18 +129,14 @@ function excel_download(string $filename, string $title, array $headers, array $
         // همهٔ مقادیر رشته‌ای می‌شوند تا صفرهای ابتدای کدها (مثل کد ملی) حفظ شود
         $sheetRows[] = array_map(static fn ($value): array => ['v' => is_scalar($value) ? (string) $value : '', 's' => 'body'], array_values((array) $row));
     }
+    // عرض ستون‌ها خودکار از بلندترین متن هر ستون محاسبه می‌شود (چون همهٔ سلول‌ها
+    // تک‌خطی‌اند، عرض ثابت باعث بریده‌شدن متن‌های بلند مثل مدل CPU یا نام نرم‌افزار می‌شد).
     $bytes = xlsx_build([[
         'name' => 'گزارش',
         'rows' => $sheetRows,
         'merges' => ['A1:' . xlsx_col_name($columnCount - 1) . '1'],
-        'widths' => array_fill(0, $columnCount, 20),
     ]]);
     xlsx_send($filename, $bytes);
-}
-
-function valid_choice(string $value, array $allowed, string $fallback): string
-{
-    return in_array($value, $allowed, true) ? $value : $fallback;
 }
 
 /** مرتب‌سازی سمت سرور لاگ‌ها: فقط کلیدهای مجاز از فهرست سفید می‌شوند. */
@@ -354,60 +374,7 @@ function parse_calendar_import(array $file): array
     return $events;
 }
 
-function store_attachment(int $messageId, array $file): void
-{
-    if (($file['error'] ?? UPLOAD_ERR_NO_FILE) === UPLOAD_ERR_NO_FILE) {
-        return;
-    }
-    if (($file['error'] ?? 1) !== UPLOAD_ERR_OK) {
-        throw new RuntimeException('بارگذاری فایل انجام نشد.');
-    }
-    $max = (int) cfg('security.max_upload_mb', 8) * 1024 * 1024;
-    $extension = strtolower(pathinfo((string) $file['name'], PATHINFO_EXTENSION));
-    if ((int) $file['size'] > $max || !in_array($extension, (array) cfg('security.allowed_uploads', []), true)) {
-        throw new RuntimeException('نوع یا حجم فایل مجاز نیست.');
-    }
-    $mime = 'application/octet-stream';
-    $mimeChecked = false;
-    if (function_exists('finfo_open')) {
-        $finfo = finfo_open(FILEINFO_MIME_TYPE);
-        if ($finfo) {
-            $mime = (string) (finfo_file($finfo, (string) $file['tmp_name']) ?: $mime);
-            $mimeChecked = true;
-            finfo_close($finfo);
-        }
-    }
-    $allowedMimes = [
-        'pdf' => ['application/pdf'],
-        'png' => ['image/png'],
-        'jpg' => ['image/jpeg'],
-        'jpeg' => ['image/jpeg'],
-        'doc' => ['application/msword', 'application/octet-stream'],
-        'docx' => ['application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'application/zip'],
-        'xls' => ['application/vnd.ms-excel', 'application/octet-stream'],
-        'xlsx' => ['application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', 'application/zip'],
-        'txt' => ['text/plain', 'text/csv', 'application/octet-stream'],
-        'zip' => ['application/zip', 'application/x-zip-compressed'],
-    ];
-    if ($mimeChecked && isset($allowedMimes[$extension]) && !in_array($mime, $allowedMimes[$extension], true)) {
-        throw new RuntimeException('محتوای فایل با پسوند آن مطابقت ندارد.');
-    }
-    $directory = APP_ROOT . '/storage/uploads';
-    if (!is_dir($directory) && !mkdir($directory, 0750, true) && !is_dir($directory)) {
-        throw new RuntimeException('پوشه ذخیره فایل قابل ایجاد نیست.');
-    }
-    $stored = bin2hex(random_bytes(18)) . '.' . $extension;
-    if (!move_uploaded_file((string) $file['tmp_name'], $directory . '/' . $stored)) {
-        throw new RuntimeException('ذخیره فایل انجام نشد.');
-    }
-    try {
-        $query = db()->prepare('INSERT INTO ticket_attachments (message_id, original_name, stored_name, mime, size_bytes) VALUES (?, ?, ?, ?, ?)');
-        $query->execute([$messageId, basename((string) $file['name']), $stored, $mime, (int) $file['size']]);
-    } catch (Throwable $exception) {
-        @unlink($directory . '/' . $stored);
-        throw $exception;
-    }
-}
+require_once __DIR__ . '/modules/request-center/lib/functions.php'; // برش استقلال فاز ۲: توابع دامنهٔ درخواست به ماژول منتقل شدند
 
 function store_profile_photo(array $file): string
 {
@@ -448,410 +415,8 @@ function valid_iranian_national_code(string $value): bool
     return $check === ($remainder < 2 ? $remainder : 11 - $remainder);
 }
 
-function fetch_ticket(int $id): ?array
-{
-    $query = db()->prepare('SELECT t.*, c.name AS category_name, sc.name AS service_name, sc.code AS service_code, d.name AS department_name, ou.name AS requesting_unit_name, r.full_name AS requester_name, r.username AS requester_username, a.full_name AS assignee_name, ass.asset_tag, ass.hostname, tr.score AS rating_score, tr.comment AS rating_comment, tr.created_at AS rating_at FROM tickets t LEFT JOIN categories c ON c.id = t.category_id LEFT JOIN service_catalog sc ON sc.id = t.service_id LEFT JOIN departments d ON d.id = t.department_id LEFT JOIN org_units ou ON ou.id = t.requesting_unit_id JOIN users r ON r.id = t.requester_id LEFT JOIN users a ON a.id = t.assigned_to LEFT JOIN assets ass ON ass.id = t.asset_id LEFT JOIN ticket_ratings tr ON tr.ticket_id = t.id WHERE t.id = ? LIMIT 1');
-    $query->execute([$id]);
-    return $query->fetch() ?: null;
-}
+require_once __DIR__ . '/lib/render.php'; // برش استقلال فاز ۲: لایهٔ chrome مشترک (هدر/فوتر/پیشنهاد غذا)
 
-function can_view_ticket(array $ticket, array $user): bool
-{
-    return ticket_user_can_view($ticket, $user);
-}
-
-/**
- * ۱.۶۲.۶ — آیا زیرساخت چارت سازمانی برای تشخیص «مدیر سازمانی» در دسترس است؟
- * نتیجه کش می‌شود تا ثبت درخواست روی نصب‌های قدیمیِ بدون این جدول‌ها خطا نگیرد.
- */
-function ticket_org_manager_rank_sql(): string
-{
-    static $ready = null;
-    if ($ready === null) {
-        try {
-            db()->query('SELECT 1 FROM org_units LIMIT 1');
-            db()->query('SELECT 1 FROM org_unit_managers LIMIT 1');
-            $ready = true;
-        } catch (Throwable) {
-            $ready = false;
-        }
-    }
-    return $ready
-        ? 'CASE WHEN EXISTS (SELECT 1 FROM org_units ou WHERE ou.is_active = 1 AND (ou.manager_user_id = u.id OR EXISTS (SELECT 1 FROM org_unit_managers oum WHERE oum.unit_id = ou.id AND oum.user_id = u.id))) THEN 1 ELSE 0 END, '
-        : '';
-}
-
-function choose_handling_agent(string $serviceGroup, ?int $departmentId = null, int $requesterId = 0): ?int
-{
-    $serviceGroup = in_array($serviceGroup, ['it', 'support'], true) ? $serviceGroup : 'it';
-    $departmentId = (int) ($departmentId ?? 0);
-    $loadJoin = ' LEFT JOIN tickets t ON t.assigned_to = u.id AND t.status NOT IN ("resolved", "closed", "cancelled")';
-    // ۱.۶۲.۶ — مدیران چارت سازمانی (معاون/مدیر اداره) آخرِ صف ارجاع خودکار می‌روند تا اگر
-    // نقش/پرچم اشتباهی (مثل «ادمین اصلی» شدن ناخواسته) داشته باشند، تا وقتی کاندیدای
-    // واقعی فعال هست انتخاب نشوند. برای اصلاح ریشه‌ای، نقش‌ها از صفحهٔ سازمان ترمیم شوند.
-    $orgManagerRank = ticket_org_manager_rank_sql();
-
-    // مالک اصلی هر حوزه اولویت دارد: IT ← ادمین اصلی؛ پشتیبانی ← مدیر پشتیبانی.
-    // اگر برای یک حوزه چند مالک فعال تعریف شده باشد، کمترین بارِ باز ملاک می‌شود.
-    $ownerCondition = $serviceGroup === 'it'
-        ? '(u.role = "primary_admin" OR (u.role = "admin" AND u.is_primary_admin = 1))'
-        : 'u.role = "support_manager"';
-    $candidateFields = 'u.id, u.role, u.is_active, u.is_primary_admin, u.department_id, u.is_it_agent, hu.code AS handling_unit_code';
-    $routingTicket = ['requester_id' => $requesterId, 'service_group' => $serviceGroup, 'department_id' => $departmentId];
-    $ownerQuery = db()->query('SELECT ' . $candidateFields . ' FROM users u LEFT JOIN handling_units hu ON hu.id = u.handling_unit_id' . $loadJoin . ' WHERE u.is_active = 1 AND ' . $ownerCondition . ' GROUP BY u.id, u.role, u.is_active, u.is_primary_admin, u.department_id, u.is_it_agent, hu.code ORDER BY ' . $orgManagerRank . 'COUNT(t.id), u.id');
-    foreach ($ownerQuery->fetchAll() as $candidate) {
-        if (ticket_assignee_is_eligible($routingTicket, $candidate, 'ticket_notification_user_can')) {
-            return (int) $candidate['id'];
-        }
-    }
-
-    // اگر مسئول اصلی غیرفعال/تعریف‌نشده باشد، فقط کارشناس همان حوزه جایگزین می‌شود.
-    // عمداً دیگر به کارشناس حوزهٔ دیگر ارجاع نمی‌دهیم؛ در نبود جایگزین، درخواست در manager_review می‌ماند.
-    $fallback = db()->prepare(
-        'SELECT ' . $candidateFields . ' FROM users u '
-        . 'LEFT JOIN handling_units hu ON hu.id = u.handling_unit_id'
-        . $loadJoin
-        . ' WHERE u.is_active = 1 AND u.role IN ("agent", "manager") AND hu.code = ?'
-        // مدیر عادی فقط مسئول همان معاونت/واحدِ ثبت‌شده روی درخواست است؛ از معاونت دیگری انتخاب نشود.
-        . ' AND (u.role <> "manager" OR (? > 0 AND u.department_id = ?))'
-        . ' GROUP BY u.id, u.role, u.is_active, u.is_primary_admin, u.department_id, u.is_it_agent, hu.code ORDER BY ' . $orgManagerRank . 'COUNT(t.id), u.id'
-    );
-    $fallback->execute([$serviceGroup, $departmentId, $departmentId]);
-    foreach ($fallback->fetchAll() as $candidate) {
-        if (ticket_assignee_is_eligible($routingTicket, $candidate, 'ticket_notification_user_can')) {
-            return (int) $candidate['id'];
-        }
-    }
-    return null;
-}
-
-/**
- * مسیر مجاز تغییر وضعیت توسط کارکنان (مدل رسمی گردش درخواست).
- * new/manager_review -> assigned -> in_progress <-> waiting_user -> resolved -> (امتیاز کاربر) -> closed توسط سوپروایزر
- */
-function ticket_allowed_transitions(string $from): array
-{
-    $map = [
-        'new' => ['manager_review', 'assigned', 'in_progress'],
-        'manager_review' => ['assigned', 'in_progress'],
-        'assigned' => ['in_progress', 'waiting_user', 'resolved', 'manager_review'],
-        'in_progress' => ['waiting_user', 'resolved', 'assigned', 'manager_review'],
-        'waiting_user' => ['in_progress', 'resolved', 'assigned', 'manager_review'],
-        // pending یک وضعیت «میراثی» از نسخه‌های قدیمی است: عمداً هیچ وضعیتی آن را
-        // به‌عنوان مقصد ندارد، پس هیچ درخواست تازه‌ای به آن نمی‌رسد. ولی سطر زیر
-        // حذف نمی‌شود، چون اگر در دیتابیسی ردیفی با همین وضعیت مانده باشد بدون
-        // مسیر خروج برای همیشه قفل می‌شود. قاعده: ورود ممنوع، خروج همیشه باز.
-        'pending' => ['in_progress', 'waiting_user', 'resolved', 'assigned', 'manager_review'],
-        'resolved' => ['in_progress', 'assigned'],
-        'closed' => [],
-        'cancelled' => [],
-    ];
-    return $map[$from] ?? [];
-}
-
-function ticket_requester_cancelable_statuses(): array
-{
-    // درخواست حل‌شده هم تا پیش از بسته‌شدن نهایی، با تأیید مسئول قابل لغو است.
-    return ['new', 'manager_review', 'assigned', 'in_progress', 'waiting_user', 'pending', 'resolved'];
-}
-
-function ticket_requester_can_cancel_directly(array $ticket): bool
-{
-    return in_array((string) ($ticket['status'] ?? ''), ['new', 'manager_review'], true)
-        && empty($ticket['assigned_to'])
-        && empty($ticket['first_response_at'])
-        && empty($ticket['resolved_at']);
-}
-
-function ticket_requester_can_cancel(array $ticket, array $user): bool
-{
-    return user_can($user, 'ticket.create')
-        && (int) ($ticket['requester_id'] ?? 0) === (int) ($user['id'] ?? 0)
-        && in_array((string) ($ticket['status'] ?? ''), ticket_requester_cancelable_statuses(), true)
-        && empty($ticket['cancel_requested_at']);
-}
-
-/** اعلان «حل شد» به کاربر (برای ثبت امتیاز یا بازگشایی) و به مسئولان (برای پیگیری تأیید نهایی). */
-function notify_ticket_resolved(int $ticketId, int $actorId): void
-{
-    $resolvedTicket = fetch_ticket($ticketId);
-    if (!$resolvedTicket) {
-        return;
-    }
-    notify_user((int) $resolvedTicket['requester_id'], 'ticket_resolved', 'درخواست شما انجام شد', 'درخواست ' . ticket_number($ticketId) . ' حل شد. لطفاً نتیجه را بررسی و امتیاز رضایت خود را ثبت کنید؛ اگر مشکل برطرف نشده است درخواست را بازگشایی کنید.', $ticketId);
-    notify_ticket_staff($ticketId, 'ticket_resolved', 'درخواست حل شد و منتظر امتیاز کاربر است', 'درخواست ' . ticket_number($ticketId) . ' حل‌شده است و پس از ثبت امتیاز کاربر قابل تأیید نهایی است.', $actorId);
-}
-function report_query_filters(array $user): array
-{
-    [$scope, $params] = ticket_scope($user);
-    $conditions = $scope !== '' ? [substr($scope, 6)] : [];
-    $ticketColumns = db_table_columns('tickets');
-    $status = valid_choice((string) ($_GET['status'] ?? ''), ['new', 'manager_review', 'assigned', 'in_progress', 'waiting_user', 'pending', 'resolved', 'closed', 'cancelled', 'active', 'all'], '');
-    if ($status === 'active') {
-        // «در حال پیگیری» = همهٔ وضعیت‌های باز (کارت داشبورد)
-        $conditions[] = 't.status IN ("new", "manager_review", "assigned", "in_progress", "waiting_user", "pending")';
-    } elseif ($status === 'resolved') {
-        // «حل‌شده» در داشبورد شامل درخواست‌های بسته‌شده هم می‌شود
-        $conditions[] = 't.status IN ("resolved", "closed")';
-    } elseif ($status !== '' && $status !== 'all') {
-        $conditions[] = 't.status = ?';
-        $params[] = $status;
-    }
-    $priority = valid_choice((string) ($_GET['priority'] ?? ''), ['normal', 'urgent', 'critical'], '');
-    if ($priority !== '') {
-        $conditions[] = 't.priority = ?';
-        $params[] = $priority;
-    }
-    $ticketType = valid_choice((string) ($_GET['ticket_type'] ?? ''), ['incident', 'request', 'problem', 'change'], '');
-    if ($ticketType !== '' && isset($ticketColumns['ticket_type'])) {
-        $conditions[] = 't.ticket_type = ?';
-        $params[] = $ticketType;
-    }
-    $serviceGroup = valid_choice((string) ($_GET['service_group'] ?? ''), ['it', 'support'], '');
-    if ($serviceGroup !== '' && isset($ticketColumns['service_group'])) {
-        $conditions[] = 't.service_group = ?';
-        $params[] = $serviceGroup;
-    }
-    foreach (['from' => '>=', 'to' => '<='] as $key => $operator) {
-        $value = (string) ($_GET[$key] ?? '');
-        $converted = jalali_input_to_gregorian($value, $key === 'to');
-        if ($converted !== null) {
-            $conditions[] = 't.created_at ' . $operator . ' ?';
-            $params[] = $converted;
-        }
-    }
-    foreach (['department_id', 'assigned_to'] as $key) {
-        $value = (int) ($_GET[$key] ?? 0);
-        if ($value > 0) {
-            $conditions[] = 't.' . $key . ' = ?';
-            $params[] = $value;
-        }
-    }
-    $search = trim((string) ($_GET['q'] ?? ''));
-    if ($search !== '') {
-        $conditions[] = '(t.subject LIKE ? OR t.description LIKE ? OR r.full_name LIKE ?)';
-        $params[] = '%' . $search . '%';
-        $params[] = '%' . $search . '%';
-        $params[] = '%' . $search . '%';
-    }
-    return [$conditions ? 'WHERE ' . implode(' AND ', $conditions) : '', $params];
-}
-
-function render_header(string $title, ?array $user = null): void
-{
-    global $page;
-    $appName = setting('app_name', (string) cfg('app.name', 'سامانه درخواست پشتیبانی'));
-    $logo = setting('app_logo', (string) cfg('app.logo', ''));
-    $flashes = take_flash();
-    $theme = $user ? valid_choice((string) setting('theme_user_' . (int) $user['id'], 'current'), ['current', 'ruby', 'indigo', 'copper'], 'current') : 'current';
-    $notificationSummary = $user ? notification_header_summary((int) $user['id'], $user) : ['unread' => 0, 'latest' => 0];
-    $notificationCount = $notificationSummary['unread'];
-    $layoutPage = 'dashboard';
-    $layoutAdmin = false;
-    $layoutCss = '';
-    try {
-        if (function_exists('admin_layout_design_page_key')
-            && function_exists('admin_layout_design_is_admin')
-            && function_exists('admin_layout_design_css_for_page')) {
-            $layoutPage = admin_layout_design_page_key($page ?? ($_GET['page'] ?? 'dashboard'));
-            $layoutAdmin = $user !== null && admin_layout_design_is_admin($user);
-            $layoutCss = admin_layout_design_css_for_page($layoutPage);
-        }
-    } catch (Throwable $exception) {
-        app_error_log('page layout enhancement skipped: ' . $exception->getMessage());
-        $layoutPage = 'dashboard';
-        $layoutAdmin = false;
-        $layoutCss = '';
-    }
-    $bodyPageClass = ($page ?? '') === 'organization' ? 'page-organization' : '';
-    $themeMode = app_theme_mode();
-    echo '<!doctype html><html lang="fa" dir="rtl" data-theme="' . e($theme) . '" data-theme-mode="' . e($themeMode) . '"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="' . ($themeMode === 'dark' ? '#101915' : '#174f43') . '"><title>' . e($title . ' | ' . $appName) . '</title><link rel="stylesheet" href="assets/style.css?v=3.4.61">' . ($layoutAdmin ? '<link rel="stylesheet" href="assets/admin-layout-design.css?v=9">' : '') . ($layoutCss !== '' ? '<style id="admin-page-layout-rules">' . $layoutCss . '</style>' : '') . '<link rel="stylesheet" href="assets/theme-mode.css?v=3">' . (($page ?? '') === 'logging-dashboard' ? '<link rel="stylesheet" href="assets/logging-dashboard.css?v=1">' : '') . '</head><body class="' . e($bodyPageClass) . '" data-theme-mode="' . e($themeMode) . '" data-layout-page="' . e($layoutPage) . '" data-layout-design-admin="' . ($layoutAdmin ? '1' : '0') . '" data-weekend-days="' . e(implode(',', sla_business_hours()['weekend'])) . '"><div class="app-shell"><header class="topbar"><div class="topbar-inner"><a class="brand" href="index.php"><span class="brand-mark">' . ($logo ? '<img src="' . e($logo) . '" alt="' . e($appName) . '">' : '<span class="brand-glyph">پ</span>') . '</span><span><strong>' . e($appName) . '</strong><small>مرکز خدمات و پشتیبانی</small></span></a>' . (!$user ? app_theme_toggle_markup() : '');
-    if ($user) {
-        $menuIcons = [
-            'home' => '<path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>',
-            'ticket' => '<path d="M3 9a3 3 0 0 0 0 6v3a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-3a3 3 0 0 1 0-6V6a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2z"/>',
-            'disc' => '<circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/>',
-            'traffic' => '<path d="M3 21h18"/><path d="M5 21V7l8-4v18"/><path d="M19 21V11l-6-4"/>',
-            'food' => '<path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2"/><path d="M7 2v20"/><path d="M21 15V2a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3zm0 0v7"/>',
-            'support' => '<path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94z"/>',
-            'reports' => '<line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/>',
-            'settings' => '<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>',
-            'bell' => '<path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/>',
-            'logout' => '<path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/>',
-        ];
-        $menuIcon = static function (string $name) use ($menuIcons): string {
-            return '<svg class="icon-svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false">' . ($menuIcons[$name] ?? '') . '</svg>';
-        };
-        $menuLink = static function (string $href, string $label, string $icon) use ($menuIcon): string {
-            return '<a href="' . e($href) . '">' . $menuIcon($icon) . '<span>' . e($label) . '</span></a>';
-        };
-        $submenuLink = static function (string $href, string $label): string {
-            return '<li><a href="' . e($href) . '">' . e($label) . '</a></li>';
-        };
-        $submenu = static function (string $id, string $label, string $icon, array $links) use ($menuIcon): string {
-            if (!$links) {
-                return '';
-            }
-            return '<li class="has-submenu"><details class="nav-dropdown"><summary aria-controls="' . e($id) . '">' . $menuIcon($icon) . '<span>' . e($label) . '</span><span class="arrow" aria-hidden="true"></span></summary><ul class="submenu" id="' . e($id) . '">' . implode('', $links) . '</ul></details></li>';
-        };
-        $supportLinks = [
-            $submenuLink('index.php?page=services', 'خدمات'),
-            $submenuLink('index.php?page=knowledge', 'دانش‌نامه'),
-        ];
-        if (user_can($user, 'queue.view')) {
-            $supportLinks[] = $submenuLink('index.php?page=queue', 'صف کاری');
-        }
-        if (user_can($user, 'assets.view')) {
-            $supportLinks[] = $submenuLink('index.php?page=assets', 'شناسنامه‌های فنی');
-        }
-        // ۱.۳۷.۷ — «تغییر و مشکل» فقط برای کارمندان: پیش‌تر این آیتم در منوی کاربران عادی هم
-        // دیده می‌شد، ولی خود صفحه با require_staff() رد می‌کرد.
-        if (user_can($user, 'governance.view') && is_staff_role((string) $user['role'])) {
-            $supportLinks[] = $submenuLink('governance.php', 'تغییر و مشکل');
-        }
-        if (user_can($user, 'supervisor.panel')) {
-            $supportLinks[] = $submenuLink('index.php?page=supervisor', 'پنل سوپروایزر');
-        }
-        if (user_can($user, 'ola.view')) {
-            $supportLinks[] = $submenuLink('ola.php', 'OLA');
-        }
-        $reportLinks = [];
-        if (user_can($user, 'reports.view')) {
-            $reportLinks[] = $submenuLink('index.php?page=reports', 'گزارش درخواست‌ها');
-        }
-        if (user_can($user, 'analytics.view')) {
-            $reportLinks[] = $submenuLink('index.php?page=analytics', 'چارت‌ها');
-        }
-        if (user_can_any($user, ['logs.activity', 'audit.view', 'logs.view'])) {
-            $reportLinks[] = $submenuLink('index.php?page=activity-log', 'لاگ سامانه');
-        }
-        if (user_can($user, 'system.health')) {
-            $reportLinks[] = $submenuLink('index.php?page=logging-dashboard', 'داشبورد مانیتورینگ لاگینگ');
-            $reportLinks[] = $submenuLink('index.php?page=system-health', 'سلامت سامانه');
-        }
-        $adminLinks = [];
-        if (user_can($user, 'org.view')) {
-            $adminLinks[] = $submenuLink('index.php?page=organization', 'سازمان');
-        }
-        if (user_can_any($user, ['settings.general', 'settings.domain', 'settings.users'])) {
-            $adminLinks[] = $submenuLink('index.php?page=settings', 'تنظیمات');
-        }
-        if (user_can($user, 'backup.view')) {
-            $adminLinks[] = $submenuLink('index.php?page=backup', 'به‌روزرسانی و پشتیبان‌گیری');
-        }
-        if (user_can($user, 'chatbot.manage')) {
-            $adminLinks[] = $submenuLink('index.php?page=chatbot-admin', 'مدیریت بات سخنگو');
-        }
-        $menuItems = [
-            '<li>' . $menuLink('index.php', 'داشبورد', 'home') . '</li>',
-        ];
-        if (user_can($user, 'ticket.create')) {
-            $menuItems[] = '<li>' . $menuLink('index.php?page=new-ticket', 'درخواست', 'ticket') . '</li>';
-        }
-        if (user_can($user, 'cddvd.view')) {
-            $menuItems[] = '<li>' . $menuLink('index.php?page=cd-dvd', 'کنترل CD/DVD', 'disc') . '</li>';
-        }
-        if (user_can($user, 'traffic.view')) {
-            $menuItems[] = '<li>' . $menuLink('index.php?page=traffic-control', 'کنترل تردد', 'traffic') . '</li>';
-        }
-        if (user_can($user, 'foodorder.self')) {
-            $menuItems[] = '<li>' . $menuLink('index.php?page=food-order', 'سفارش غذا', 'food') . '</li>';
-        }
-        if (food_ticket_is_allowed($user)) {
-            $menuItems[] = '<li>' . $menuLink('index.php?page=food-ticket', 'سامانه مدیریت غذا', 'food') . '</li>';
-        }
-        $menuItems[] = $submenu('menu-support', 'پشتیبانی', 'support', $supportLinks);
-        $menuItems[] = $submenu('menu-reports', 'گزارش‌ها', 'reports', $reportLinks);
-        $menuItems[] = $submenu('menu-management', 'مدیریت', 'settings', $adminLinks);
-        $menuItems[] = '<li>' . $menuLink('index.php?page=help', 'راهنما', 'support') . '</li>';
-        if (user_can($user, 'notif.view')) {
-    $menuItems[] = '<li class="notification-item"><a class="notification-link" href="index.php?page=notifications">' . $menuIcon('bell') . '<span>اعلان‌ها</span>' . ($notificationCount > 0 ? '<b>' . (int) $notificationCount . '</b>' : '') . '</a></li>';
-        }
-        $menuItems[] = '<li class="logout"><form method="post" class="logout-form">' . csrf_field() . '<input type="hidden" name="action" value="logout"><button class="logout-link" type="submit">' . $menuIcon('logout') . '<span>خروج</span></button></form></li>';
-        echo '<div class="header-tools"><form class="global-search header-search" method="get"><input type="hidden" name="page" value="search"><input name="q" placeholder="جست‌وجو در صفحه‌ها، درخواست، دارایی یا دانش‌نامه"></form>' . app_theme_toggle_markup() . ($layoutAdmin ? '<button class="layout-design-launch" type="button" data-layout-design-launch data-layout-page-title="' . e(admin_layout_design_page_label($layoutPage)) . '" aria-pressed="false">🎨 طراحی همین صفحه</button>' : '') . '<a class="profile-shortcut" href="index.php?page=profile#appearance">🎨 انتخاب تم</a><a class="profile-shortcut" href="index.php?page=profile">پروفایل: ' . e((string) $user['username']) . '</a></div>';
-        echo '<nav class="navbar" aria-label="ناوبری اصلی"><ul class="menu">' . implode('', $menuItems) . '</ul></nav>';
-    }
-      echo '</div></header><div class="content-wrap">';
-      echo '<div class="ambient-orbits" aria-hidden="true"><span class="orbit orbit-reusable orbit-reusable--top orbit-reusable--lg"></span><span class="orbit orbit-reusable orbit-reusable--ring orbit-reusable--md"></span><span class="orbit orbit-reusable orbit-reusable--bottom orbit-reusable--xl"></span><span class="orbit orbit-reusable orbit-reusable--side orbit-reusable--sm"></span><span class="orbit orbit-reusable orbit-reusable--corner orbit-reusable--md"></span></div>';
-     if ($user) {
-         echo '<div id="notification-toasts" class="notification-toasts" data-cursor="' . (int) $notificationSummary['latest'] . '" aria-live="polite"></div>';
-     }
-     foreach ($flashes as $flash) {
-         echo '<div class="alert ' . e($flash['type']) . '">' . e($flash['message']) . '</div>';
-     }
-     // توکن CSRF را پیش از بستن session بساز تا فرم‌های همین صفحه معتبر بمانند.
-     csrf_token();
-     // آزادسازی قفل فایل session پس از رندر هدر تا درخواست‌های موازی (پولینگ اعلان‌ها و
-     // بارگذاری تصاویر/فونت) پشت سر هم بلاک نشوند. فقط خواندن session بعد از این ممکن است.
-     if (function_exists('session_write_close') && session_status() === PHP_SESSION_ACTIVE) {
-         @session_write_close();
-     }
- }
-
-/**
- * صفحه‌هایی که لیست‌شان در سمت سرور محدود یا صفحه‌بندی شده است، مرتب‌ساز موقت را ندارند
- * تا فقط بخشی از داده مرتب نشود. پس از اضافه‌شدن «کل نتایج فیلتر» این فهرست خالی می‌شود.
- */
-function list_sort_page_off(): bool
-{
-    return in_array((string) ($_GET['page'] ?? ''), ['logs', 'activity-log', 'traffic-control', 'domain-scan'], true);
-}
-
-function inspection_food_reminder_markup(?array $user): string
-{
-    if (!$user || setting('inspection_food_absence_alarm_enabled', '1') === '0') {
-        return '';
-    }
-    $role = (string) ($user['role'] ?? '');
-    $isInspectionUser = in_array($role, ['inspector', 'guard'], true)
-        || (function_exists('user_is_key_role') && user_is_key_role($user, 'inspection'));
-    if (!$isInspectionUser) {
-        return '';
-    }
-
-    $now = new DateTimeImmutable('now', new DateTimeZone(date_default_timezone_get()));
-    $todayReminder = $now->setTime(11, 0, 0);
-    $dueNow = $now >= $todayReminder;
-    $nextReminder = $dueNow ? $todayReminder->modify('+1 day') : $todayReminder;
-    $name = trim((string) ($user['full_name'] ?? ''));
-    if ($name === '') {
-        $name = (string) ($user['username'] ?? '');
-    }
-    return '<div class="inspection-food-reminder" id="inspection-food-reminder" hidden aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="inspection-food-reminder-title" data-user-id="' . (int) ($user['id'] ?? 0) . '" data-timezone="' . e(date_default_timezone_get()) . '" data-server-now="' . $now->getTimestamp() . '" data-today-reminder-at="' . $todayReminder->getTimestamp() . '" data-next-reminder-at="' . $nextReminder->getTimestamp() . '" data-due-now="' . ($dueNow ? '1' : '0') . '"><section class="inspection-food-reminder-card"><div class="inspection-food-reminder-icon" aria-hidden="true">!</div><p class="inspection-food-reminder-heading">توجه</p><h2 id="inspection-food-reminder-title">آقای «' . e($name) . '» لطفا استعلام غایبین گروه های غذایی رو انجام بدید برای ثبت در گروه غذایی.</h2><button type="button" class="button inspection-food-reminder-dismiss">متوجه شدم</button></section></div>';
-}
-
-function render_footer(): void
-{
-    $appName = setting('app_name', (string) cfg('app.name', 'سامانه درخواست پشتیبانی'));
-    echo '<script nonce="' . e(csp_nonce()) . '">window.ITSM_LIST_SORT_OFF = ' . (list_sort_page_off() ? 'true' : 'false') . '; window.ITSM_CSRF = "' . e(csrf_token()) . '";</script><script defer src="assets/list-sort.js?v=2"></script><script defer src="assets/server-sort.js?v=1"></script>';
-    $layoutUser = current_user();
-    if ($layoutUser && function_exists('admin_layout_design_is_admin') && admin_layout_design_is_admin($layoutUser)) {
-        echo '<script defer src="assets/admin-layout-design.js?v=10"></script>';
-    }
-    echo '</div><footer class="footer">' . e($appName) . ' • نسخه سازمانی فارسی • سازنده سامانه: Ali.r.Rahimi • نسخهٔ سامانه ' . e(app_version()) . '</footer></div><script nonce="' . e(csp_nonce()) . '">window.ITSM_HOLIDAYS = ';
-    try {
-        $__h = db()->query("SELECT holiday_date, title FROM holidays WHERE is_active = 1")->fetchAll();
-        $__out = [];
-        foreach ($__h as $__row) {
-            $g = (string) $__row["holiday_date"];
-            $parts = explode("-", substr($g, 0, 10));
-            if (count($parts) === 3) {
-                [$gy, $gm, $gd] = [(int) $parts[0], (int) $parts[1], (int) $parts[2]];
-                [$jy, $jm, $jd] = gregorian_to_jalali($gy, $gm, $gd);
-                $__out[] = ["date" => $g, "jalali" => sprintf("%04d/%02d/%02d", $jy, $jm, $jd), "title" => (string) $__row["title"]];
-            }
-        }
-        echo json_encode($__out, JSON_UNESCAPED_UNICODE);
-    } catch (Throwable) {
-        echo "[]";
-    }
-    $inspectionReminder = inspection_food_reminder_markup($layoutUser);
-    echo ';</script><script src="assets/jalali-calendar.js?v=3.4.7"></script><script src="assets/app.js?v=3.4.28&theme-mode=2"></script>' . particle_effect_script_tag() . triangle_effect_script_tag() . chatbot_render_widget($layoutUser) . $inspectionReminder;
-    if ($inspectionReminder !== '') {
-        echo '<script defer src="assets/inspection-food-reminder.js?v=1"></script>';
-    }
-    echo '</body></html>';
-}
 
 if (($_GET['action'] ?? '') === 'logout') {
     redirect('index.php');
@@ -1062,27 +627,9 @@ if (($_GET['action'] ?? '') === 'export_activity_logs') {
     excel_download('activity-log-' . date('Y-m-d') . '.xlsx', 'گزارش فعالیت کاربران', ['زمان', 'کاربر', 'نام کاربری', 'نقش', 'عملیات', 'کد عملیات', 'صفحه', 'هدف', 'آی‌پی', 'نام کامپیوتر', 'جزئیات'], $rows, ['from' => $excelFrom !== null ? substr($excelFrom, 0, 10) : '', 'to' => $excelTo !== null ? substr($excelTo, 0, 10) : '']);
 }
 
+require_once __DIR__ . '/modules/request-center/lib/endpoints.php'; // برش استقلال فاز ۲
 if (($_GET['action'] ?? '') === 'export_report') {
-    $reportUser = require_permission('reports.view');
-    $reportMissingColumns = db_missing_columns('tickets', ['subject', 'description', 'status', 'priority', 'requester_id', 'department_id', 'service_group', 'created_at', 'updated_at', 'assigned_to', 'ticket_type', 'assigned_at', 'first_response_at', 'resolved_at', 'closed_at', 'due_at', 'sla_minutes']);
-    if ($reportMissingColumns) {
-        http_response_code(503);
-        exit('ساختار پایگاه‌داده کامل نیست. ابتدا upgrade-1.2-itsm.sql و upgrade-1.8-routing.sql را اجرا کنید. ستون‌های ناقص: ' . e(implode(', ', $reportMissingColumns)));
-    }
-    [$where, $params] = report_query_filters($reportUser);
-    $query = db()->prepare('SELECT t.id, t.subject, t.ticket_type, t.status, t.priority, t.created_at, t.updated_at, t.assigned_at, t.first_response_at, t.resolved_at, t.closed_at, t.due_at, t.sla_minutes, d.name AS department_name, r.full_name AS requester_name, a.full_name AS assignee_name FROM tickets t LEFT JOIN departments d ON d.id = t.department_id JOIN users r ON r.id = t.requester_id LEFT JOIN users a ON a.id = t.assigned_to ' . $where . ' ORDER BY t.created_at DESC LIMIT 5001');
-    $query->execute($params);
-    $rows = [];
-    while ($row = $query->fetch()) {
-        $rows[] = [ticket_number((int) $row['id']), $row['subject'], ticket_type_label($row['ticket_type']), $row['department_name'], $row['requester_name'], $row['assignee_name'], status_label($row['status']), priority_label($row['priority']), persian_date($row['created_at']), persian_date($row['updated_at']), $row['assigned_at'] ? persian_date($row['assigned_at']) : '', $row['first_response_at'] ? persian_date($row['first_response_at']) : '', $row['resolved_at'] ? persian_date($row['resolved_at']) : '', $row['closed_at'] ? persian_date($row['closed_at']) : '', $row['due_at'] ? persian_date($row['due_at']) : '', $row['sla_minutes']];
-    }
-    $exportTruncated = count($rows) > 5000;
-    if ($exportTruncated) {
-        $rows = array_slice($rows, 0, 5000);
-    }
-    $excelFrom = jalali_input_to_gregorian((string) ($_GET['from'] ?? ''));
-    $excelTo = jalali_input_to_gregorian((string) ($_GET['to'] ?? ''), true);
-    excel_download('ticket-report-' . date('Y-m-d') . '.xlsx', $exportTruncated ? 'گزارش درخواست‌ها (۵۰۰۰ ردیف اول؛ فیلتر را محدودتر کنید)' : 'گزارش کامل درخواست‌ها', ['شماره', 'عنوان', 'نوع', 'واحد', 'ثبت‌کننده', 'کارشناس', 'وضعیت', 'اولویت', 'ثبت', 'آخرین تغییر', 'ارجاع', 'اولین پاسخ', 'حل', 'بسته‌شدن', 'مهلت SLA', 'دقیقه SLA'], $rows, ['from' => $excelFrom !== null ? substr($excelFrom, 0, 10) : '', 'to' => $excelTo !== null ? substr($excelTo, 0, 10) : '']);
+    request_center_export_report(require_permission('reports.view'));
 }
 
 // خروجی XLSX از نمای مرتب‌شدهٔ لیست در مرورگر (فقط داده‌های همان صفحه؛ ترتیب از کاربر می‌آید)
@@ -1148,7 +695,7 @@ if (($_GET['action'] ?? '') === 'export_assets') {
         $sourceLabel = $sourceLabels[(string) $row['source']] ?? (string) $row['source'];
         $exportRow = [
             asset_tag_label((string) $row['asset_tag'], (string) $row['hostname']),
-            asset_display_name((string) $row['hostname']),
+            asset_name_or((string) $row['hostname']),
             (string) $row['serial_number'],
             (string) $row['computer_type'],
             (string) ($row['department_name'] ?? ''),
@@ -1175,29 +722,7 @@ if (($_GET['action'] ?? '') === 'export_traffic_report') {
 }
 
 if (($_GET['action'] ?? '') === 'download_attachment') {
-    $downloadUser = require_login();
-    $attachmentId = (int) ($_GET['id'] ?? 0);
-    $attachmentQuery = db()->prepare('SELECT a.*, m.ticket_id, m.is_internal FROM ticket_attachments a JOIN ticket_messages m ON m.id = a.message_id WHERE a.id = ? LIMIT 1');
-    $attachmentQuery->execute([$attachmentId]);
-    $attachment = $attachmentQuery->fetch();
-    $attachmentTicket = $attachment ? fetch_ticket((int) $attachment['ticket_id']) : null;
-    // پیوست داخلی را بر پایهٔ نسبت کاربر با همین درخواست می‌سنجیم، نه نقش سراسری:
-    // کارمندی که خودش ثبت‌کنندهٔ درخواست است نباید پیوست داخلی آن را بگیرد.
-    $canDownloadInternal = $attachmentTicket ? ticket_can_see_internal($attachmentTicket, $downloadUser) : false;
-    if (!$attachment || !$attachmentTicket || !can_view_ticket($attachmentTicket, $downloadUser) || ((int) $attachment['is_internal'] === 1 && !$canDownloadInternal)) {
-        http_response_code(404);
-        exit('فایل پیدا نشد.');
-    }
-    $filePath = APP_ROOT . '/storage/uploads/' . basename((string) $attachment['stored_name']);
-    if (!is_file($filePath)) {
-        http_response_code(404);
-        exit('فایل روی سرور موجود نیست.');
-    }
-    header('Content-Type: ' . ((string) $attachment['mime'] ?: 'application/octet-stream'));
-    header('Content-Length: ' . (string) filesize($filePath));
-    header("Content-Disposition: attachment; filename*=UTF-8''" . rawurlencode((string) $attachment['original_name']));
-    readfile($filePath);
-    exit;
+    request_center_download_attachment(require_login());
 }
 
 if ($page === 'food-personnel-link') {
@@ -1208,31 +733,9 @@ if ($page === 'food-personnel-link') {
 
 // ═══ ناحیهٔ ۴: پردازش همهٔ اکشن‌های POST (74 اکشن، گروه‌بندی با بانر) ═══
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    require_csrf();
+    require_once __DIR__ . '/lib/http-post.php';
+    post_context_begin();
     $action = (string) ($_POST['action'] ?? '');
-    if (function_exists('logging_begin_operation')) logging_begin_operation('post:' . $action);
-    $GLOBALS['activity_post'] = ['action' => $action, 'page' => (string) ($_GET['page'] ?? ''), 'failed' => false];
-    register_shutdown_function(static function (): void {
-        $pending = $GLOBALS['activity_post'] ?? null;
-        if (!$pending || $pending['action'] === '' || $pending['failed'] || !function_exists('activity_log')) {
-            return;
-        }
-        if (!empty($GLOBALS['activity_audited'])) {
-            return;
-        }
-        $isAjax = strtolower((string) ($_SERVER['HTTP_X_REQUESTED_WITH'] ?? '')) === 'xmlhttprequest';
-        if ($isAjax || str_starts_with((string) ($pending['page'] ?? ''), 'api')) {
-            return;
-        }
-        static $skip = ['login', 'logout'];
-        if (in_array($pending['action'], $skip, true)) {
-            return;
-        }
-        activity_log([
-            'action_code' => $pending['action'],
-            'module' => $pending['page'] !== '' ? $pending['page'] : 'action',
-        ]);
-    });
     try {
 
         // ───── گروه اکشن: احراز هویت، پروفایل و تم — ۳ اکشن از ۱.۶۲.۱۸ در فایل جدا (شرح فارسی در سرآیند همان فایل) ─────
@@ -1252,8 +755,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         // ───── گروه اکشن: اعلان‌ها — ۲ اکشن از ۱.۶۲.۱۸ در فایل جدا (شرح فارسی در سرآیند همان فایل) ─────
         require __DIR__ . '/actions/notification-actions.php';
 
-        // ───── گروه اکشن: تصمیم‌های سرپرست و امتیازدهی — ۴ اکشن از ۱.۶۲.۱۷ در فایل جدا (شرح فارسی در سرآیند همان فایل) ─────
-        require __DIR__ . '/actions/supervisor-actions.php';
+        // ───── گروه اکشن: تصمیم لغو سفارش غذا — خارج از دامنهٔ Request Center ─────
+        require __DIR__ . '/actions/food-order-actions.php';
+
+        // ───── گروه اکشن: تصمیم‌های سرپرست و امتیازدهی — ۴ اکشن درخواست‌ها ─────
+        // Request Center owns its POST action registry; this include is the legacy-context adapter.
+        require __DIR__ . '/modules/request-center/Actions/dispatch.php';
 
 
         // ───── گروه اکشن: اموال، دارایی‌ها و اسکن دامین — ۱۰ اکشن از ۱.۶۲.۱۳ در فایل جدا (شرح فارسی در سرآیند همان فایل) ─────
@@ -1261,11 +768,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 
         // ───── گروه اکشن: چرخهٔ کامل درخواست‌ها — ۷ اکشن از ۱.۶۲.۱۳ در فایل جدا (شرح فارسی در سرآیند همان فایل) ─────
-        require __DIR__ . '/actions/ticket-actions.php';
+
 
 
         // ───── گروه اکشن: خدمات، دسته‌ها و پایگاه دانش — ۷ اکشن از ۱.۶۲.۱۴ در فایل جدا (شرح فارسی در سرآیند همان فایل) ─────
-        require __DIR__ . '/actions/service-actions.php';
+
 
         
 
@@ -1274,7 +781,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 
         // ───── گروه اکشن: ارتباط دارایی و عملیات گروهی درخواست‌ها — ۲ اکشن از ۱.۶۲.۱۹ در فایل جدا (شرح فارسی در سرآیند همان فایل) ─────
-        require __DIR__ . '/actions/bulk-actions.php';
+
 
 
         // ───── گروه اکشن: ساختارهای پایه و کاربران — ۶ اکشن از ۱.۶۲.۱۹ در فایل جدا (شرح فارسی در سرآیند همان فایل) ─────
@@ -1296,39 +803,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         // ───── گروه اکشن: نگهداری لاگ‌ها/LDAP و تنظیمات عمومی — ۵ اکشن از ۱.۶۲.۱۶ در فایل جدا (شرح فارسی در سرآیند همان فایل) ─────
         require __DIR__ . '/actions/settings-actions.php';
     } catch (Throwable $exception) {
-        if (isset($GLOBALS['activity_post'])) {
-            $GLOBALS['activity_post']['failed'] = true;
-        }
-        if (db()->inTransaction()) {
-            db_rollback('index.php');
-        }
-        if (function_exists('activity_log')) {
-            try {
-                activity_log([
-                    'action_code' => 'post_action_failed',
-                    'action_label' => 'عملیات POST ناموفق بود',
-                    'module' => (string) ($_GET['page'] ?? 'action'),
-                    'result' => 'failure',
-                    'meta' => [
-                        'action' => (string) ($GLOBALS['activity_post']['action'] ?? 'unknown'),
-                        'page' => (string) ($_GET['page'] ?? ''),
-                        'error_type' => get_class($exception),
-                    ],
-                ]);
-            } catch (Throwable) {}
-        }
-        // app_error_log خودش یک رخداد فنی ساخت‌یافته ثبت می‌کند؛ system_log دوم باعث دوباره‌شماری همین خطا می‌شد.
-        app_error_log('ITSM request failed: ' . $exception->getMessage() . ' | ' . ($_SERVER['REQUEST_URI'] ?? 'unknown'));
-        flash('danger', $exception instanceof RuntimeException ? $exception->getMessage() : 'عملیات انجام نشد. گزارش خطا در لاگ سامانه ثبت شد.');
-        $errorRedirect = 'index.php?page=' . urlencode($page);
-        if ($page === 'settings' && in_array((string) ($action ?? ''), ['create_access_group', 'save_access_group', 'delete_access_group'], true)) {
-            $failedGroupId = max(0, (int) ($_POST['group_id'] ?? 0));
-            if ($failedGroupId > 0) {
-                $errorRedirect .= '&access_group_id=' . $failedGroupId;
-            }
-            $errorRedirect .= '#access-groups';
-        }
-        redirect($errorRedirect);
+        post_context_on_error($exception, $page);
     }
 }
 
@@ -1438,7 +913,7 @@ if ($page === 'profile') {
 }
 
 if ($page === 'governance') {
-    redirect('governance.php');
+    redirect('request-center.php?page=governance');
 }
 
 if ($page === 'food-ticket') {
@@ -1473,218 +948,31 @@ if ($page === 'traffic-control-print') {
     traffic_render_print($user, (int) ($_GET['id'] ?? 0));
 }
 
-if ($page === 'services') {
-    $serviceUser = require_login();
-    $isServiceAdmin = is_admin_role((string) $serviceUser['role']) || (int) ($serviceUser['is_primary_admin'] ?? 0) === 1;
-    $serviceGroupFilter = valid_choice((string) ($_GET['group'] ?? ''), ['', 'it', 'support'], '');
-    $listSql = 'SELECT s.*, d.name AS department_name, c.name AS category_name, hu.name AS handling_unit_name, COUNT(f.id) AS field_count FROM service_catalog s LEFT JOIN departments d ON d.id = s.department_id LEFT JOIN categories c ON c.id = s.category_id LEFT JOIN handling_units hu ON hu.id = s.handling_unit_id LEFT JOIN service_catalog_fields f ON f.service_id = s.id WHERE s.is_active = 1';
-    $listParams = [];
-    if ($serviceGroupFilter !== '') {
-        $listSql .= ' AND s.service_group = ?';
-        $listParams[] = $serviceGroupFilter;
-    }
-    $listSql .= ' GROUP BY s.id, d.name, c.name, hu.name ORDER BY s.service_group, s.name';
-    $listQuery = db()->prepare($listSql);
-    $listQuery->execute($listParams);
-    $services = $listQuery->fetchAll();
-    $serviceFieldsById = [];
-    if ($services) {
-        $serviceIds = array_map(static fn (array $service): int => (int) $service['id'], $services);
-        $fieldQuery = db()->prepare('SELECT * FROM service_catalog_fields WHERE service_id IN (' . implode(',', array_fill(0, count($serviceIds), '?')) . ') ORDER BY service_id, sort_order, id');
-        $fieldQuery->execute($serviceIds);
-        foreach ($fieldQuery->fetchAll() as $field) {
-            $serviceFieldsById[(int) $field['service_id']][] = $field;
-        }
-    }
-    $categories = db()->query('SELECT * FROM categories ORDER BY is_active DESC, service_group, name')->fetchAll();
-    $handlingUnits = db()->query('SELECT id, code, name FROM handling_units WHERE is_active = 1 ORDER BY code')->fetchAll();
-    $serviceDepartments = db()->query('SELECT id, name FROM departments WHERE is_active = 1 ORDER BY name')->fetchAll();
-    $categoryOptions = static function (int $selected) use ($categories): string {
-        $html = '<option value="">بدون دسته</option>';
-        foreach ($categories as $category) {
-            if ((int) $category['is_active'] !== 1) {
-                continue;
-            }
-            $html .= '<option value="' . (int) $category['id'] . '" ' . ($selected === (int) $category['id'] ? 'selected' : '') . '>' . e($category['name']) . '</option>';
-        }
-        return $html;
-    };
-    $handlingOptions = static function (int $selected) use ($handlingUnits): string {
-        $html = '';
-        foreach ($handlingUnits as $unit) {
-            $html .= '<option value="' . (int) $unit['id'] . '" ' . ($selected === (int) $unit['id'] ? 'selected' : '') . '>' . e($unit['name']) . '</option>';
-        }
-        return $html;
-    };
-    $departmentOptions = static function (int $selected) use ($serviceDepartments): string {
-        $html = '<option value="">سراسری</option>';
-        foreach ($serviceDepartments as $department) {
-            $html .= '<option value="' . (int) $department['id'] . '" ' . ($selected === (int) $department['id'] ? 'selected' : '') . '>' . e($department['name']) . '</option>';
-        }
-        return $html;
-    };
-    $ticketTypeOptions = static function (string $selected): string {
-        $types = ['incident' => 'رخداد', 'request' => 'درخواست خدمت', 'problem' => 'مشکل ریشه‌ای', 'change' => 'تغییر'];
-        $html = '';
-        foreach ($types as $value => $label) {
-            $html .= '<option value="' . $value . '" ' . ($selected === $value ? 'selected' : '') . '>' . $label . '</option>';
-        }
-        return $html;
-    };
-    $priorityOptions = static function (string $selected): string {
-        $items = ['normal' => 'عادی', 'urgent' => 'فوری', 'critical' => 'حیاتی'];
-        $html = '';
-        foreach ($items as $value => $label) {
-            $html .= '<option value="' . $value . '" ' . ($selected === $value ? 'selected' : '') . '>' . $label . '</option>';
-        }
-        return $html;
-    };
-    // فرم مشترک ساخت/ویرایش خدمت (بدون تگ form، تا در مودال و فرم ایجاد استفاده شود)
-    $serviceFormFields = static function (array $service) use ($categoryOptions, $handlingOptions, $departmentOptions, $ticketTypeOptions, $priorityOptions): string {
-        $group = (string) ($service['service_group'] ?? 'it');
-        return '<div class="form-grid">'
-            . '<label>نام خدمت<input name="service_name" required value="' . e((string) ($service['name'] ?? '')) . '" placeholder="مثلاً دسترسی به سامانه داخلی"></label>'
-            . '<label>کد خدمت انگلیسی<input name="service_code" required value="' . e((string) ($service['code'] ?? '')) . '" placeholder="IT-ACCESS"></label>'
-            . '<label>حوزه خدمت<select name="service_group"><option value="it" ' . ($group === 'it' ? 'selected' : '') . '>IT</option><option value="support" ' . ($group === 'support' ? 'selected' : '') . '>پشتیبانی</option></select></label>'
-            . '<label>دسته‌بندی<select name="category_id">' . $categoryOptions((int) ($service['category_id'] ?? 0)) . '</select></label>'
-            . '<label>واحد رسیدگی<select name="handling_unit_id">' . $handlingOptions((int) ($service['handling_unit_id'] ?? 0)) . '</select></label>'
-            . '<label>معاونت مالک<select name="department_id">' . $departmentOptions((int) ($service['department_id'] ?? 0)) . '</select></label>'
-            . '<label>نوع پیش‌فرض<select name="default_ticket_type">' . $ticketTypeOptions((string) ($service['default_ticket_type'] ?? 'incident')) . '</select></label>'
-            . '<label>اولویت پیش‌فرض<select name="default_priority">' . $priorityOptions((string) ($service['default_priority'] ?? 'normal')) . '</select></label>'
-            . '<label class="full">توضیح خدمت<textarea name="service_description" rows="3">' . e((string) ($service['description'] ?? '')) . '</textarea></label>'
-            . '<p class="field-help full">برای همهٔ خدمات حوزهٔ IT، انتخاب سیستم از شناسنامهٔ فنی الزامی است؛ این شرط برای خدمات پشتیبانی اعمال نمی‌شود.</p>'
-            . '<label class="check-label"><input type="checkbox" name="is_active" value="1" ' . ((int) ($service['is_active'] ?? 1) === 1 ? 'checked' : '') . '> فعال</label>'
-            . '</div>';
-    };
-    render_header('کاتالوگ خدمات', $serviceUser);
-    echo '<section class="page-heading"><div><span class="eyebrow">Service Catalog</span><h1>کاتالوگ خدمات سازمان</h1><p>هر خدمت فرم تکمیلی، اولویت پیش‌فرض و مسیر رسیدگی مستقل دارد. با سربرگ‌ها بین بخش‌ها جابه‌جا شوید.</p></div><a class="button" href="index.php?page=new-ticket">ثبت درخواست</a></section>';
-
-    // --- سربرگ‌ها (تب‌ها) ---
-    echo '<div class="settings-tabs service-tabs" data-service-tabs>';
-    echo '<a href="#tab-create" data-service-tab="tab-create">تعریف خدمت</a>';
-    echo '<a href="#tab-list" data-service-tab="tab-list">لیست خدمات</a>';
-    if ($isServiceAdmin) {
-        echo '<a href="#tab-categories" data-service-tab="tab-categories">دسته‌بندی‌ها</a>';
-    }
-    echo '</div>';
-
-    // --- تب ۱: تعریف خدمت (فقط فرم ایجاد خدمت) ---
-    echo '<div class="service-tab-panels">';
-    echo '<section class="card form-card service-tab-panel" id="tab-create">';
-    if ($isServiceAdmin) {
-        echo '<h2>تعریف خدمت جدید</h2><p class="muted">حوزه، دسته‌بندی، واحد رسیدگی و الزام شناسنامه فنی را از همین‌جا تعیین کنید. فیلدهای تکمیلی هر خدمت را بعد از ساخت، از دکمهٔ «فیلدها» در فهرست خدمات مدیریت کنید.</p><form method="post"><input type="hidden" name="action" value="add_service">' . csrf_field() . $serviceFormFields([]) . '<div class="actions"><button class="button" type="submit">ایجاد خدمت</button></div></form>';
-    } else {
-        echo '<h2>تعریف خدمت</h2><p class="muted">فقط ادمین‌ها می‌توانند خدمت جدید تعریف کنند.</p>';
-    }
-    echo '</section>';
-
-    // --- تب ۲: لیست خدمات + فیلتر ---
-    echo '<section class="card form-card service-tab-panel" id="tab-list" hidden>';
-    echo '<h2>لیست خدمات</h2><p class="muted">با انتخاب حوزه، فهرست سرویس‌ها فیلتر می‌شود.</p>';
-     echo '<form method="get" class="service-filter-bar"><input type="hidden" name="page" value="services"><input type="hidden" name="tab" value="tab-list"><label>فیلتر حوزه خدمت<select name="group" data-service-filter><option value="" ' . ($serviceGroupFilter === '' ? 'selected' : '') . '>همه حوزه‌ها</option><option value="it" ' . ($serviceGroupFilter === 'it' ? 'selected' : '') . '>خدمات IT</option><option value="support" ' . ($serviceGroupFilter === 'support' ? 'selected' : '') . '>خدمات پشتیبانی</option></select></label><button class="button secondary service-filter-submit" type="submit">اعمال فیلتر</button></form>';
-    echo '<div class="service-list"><div class="service-row service-row-head"><span>خدمت</span><span>حوزه</span><span>دسته</span><span>واحد رسیدگی</span><span>اولویت</span>' . ($isServiceAdmin ? '<span data-no-sort>عملیات</span>' : '') . '</div>';
-    foreach ($services as $service) {
-        $sid = (int) $service['id'];
-        echo '<div class="service-row"><span class="service-name"><strong>' . e($service['name']) . '</strong><small>' . e($service['code']) . ' • ' . (int) $service['field_count'] . ' فیلد' . ((int) $service['requires_asset'] === 1 ? ' • نیازمند شناسنامه' : '') . '</small></span>';
-        echo '<span>' . ($service['service_group'] === 'it' ? 'IT' : 'پشتیبانی') . '</span>';
-        echo '<span>' . e($service['category_name'] ?: '—') . '</span>';
-        echo '<span>' . e($service['handling_unit_name'] ?: 'تعیین‌نشده') . '</span>';
-        echo '<span><i class="priority-dot ' . e($service['default_priority']) . '"></i>' . e(priority_label($service['default_priority'])) . '</span>';
-        if ($isServiceAdmin) {
-            echo '<span class="service-actions"><button type="button" class="mini-button" data-modal-open="service-fields-' . $sid . '">فیلدها</button>';
-            echo '<button type="button" class="mini-button" data-modal-open="service-edit-' . $sid . '">ویرایش</button>';
-            echo '<form method="post" class="service-delete" data-confirm="خدمت از فهرست فعال خارج شود؟"><input type="hidden" name="action" value="delete_service"><input type="hidden" name="service_id" value="' . $sid . '">' . csrf_field() . '<button class="mini-button danger" type="submit">حذف</button></form></span>';
-        }
-        echo '</div>';
-    }
-    if (!$services) {
-        echo '<div class="service-row"><span class="muted">با این فیلتر خدمتی پیدا نشد.</span></div>';
-    }
-    echo '</div></section>';
-
-    // --- تب ۳: دسته‌بندی‌ها ---
-    if ($isServiceAdmin) {
-        echo '<section class="card form-card service-tab-panel" id="tab-categories" hidden>';
-        echo '<h2>دسته‌بندی خدمات</h2><p class="muted">دسته‌بندی لایهٔ میانی بین حوزه و خدمت است؛ هر خدمت به یک دسته وصل می‌شود.</p>';
-        echo '<form method="post" class="inline-form"><input type="hidden" name="action" value="save_service_category">' . csrf_field() . '<label>نام دسته<input name="category_name" required placeholder="مثلاً شبکه و اینترنت"></label><label>کد<input name="category_code" placeholder="IT-CAT-NET"></label><label>حوزه<select name="category_group"><option value="it">IT</option><option value="support">پشتیبانی</option></select></label><button class="button" type="submit">افزودن دسته</button></form>';
-        echo '<div class="category-list">';
-        foreach ($categories as $category) {
-            $cid = (int) $category['id'];
-            echo '<div><span><strong>' . e($category['name']) . '</strong><small>' . e($category['code'] ?: 'بدون کد') . ' • ' . ($category['service_group'] === 'it' ? 'IT' : 'پشتیبانی') . ' • ' . ((int) $category['is_active'] === 1 ? 'فعال' : 'غیرفعال') . '</small></span><span class="service-actions"><button type="button" class="mini-button" data-modal-open="category-edit-' . $cid . '">ویرایش</button><form method="post" class="service-delete" data-confirm="دسته غیرفعال شود؟ خدمت‌های وابسته حذف نمی‌شوند."><input type="hidden" name="action" value="delete_service_category"><input type="hidden" name="category_id" value="' . $cid . '">' . csrf_field() . '<button class="mini-button danger" type="submit">حذف</button></form></span></div>';
-        }
-        echo '</div></section>';
-    }
-    echo '</div>';
-
-    // --- پنجره‌های ویرایش/فیلد (rendered outside the tab panels, fixed overlay) ---
-    $serviceModals = '';
-    if ($isServiceAdmin) {
-        foreach ($services as $service) {
-            $sid = (int) $service['id'];
-            $serviceFields = $serviceFieldsById[$sid] ?? [];
-            $serviceModals .= '<div class="service-modal" role="dialog" aria-modal="true" aria-labelledby="service-edit-title-' . $sid . '" data-modal="service-edit-' . $sid . '" hidden><div class="service-modal-card"><div class="service-modal-head"><h3 id="service-edit-title-' . $sid . '">ویرایش خدمت</h3><p class="muted">' . e($service['name']) . ' • ' . e($service['code']) . '</p><button type="button" class="service-modal-close" aria-label="بستن" data-modal-close>&times;</button></div><div class="service-modal-body"><form method="post" id="service-edit-form-' . $sid . '" class="service-edit-form"><input type="hidden" name="action" value="edit_service"><input type="hidden" name="service_id" value="' . $sid . '">' . csrf_field() . $serviceFormFields($service) . '</form></div><div class="service-modal-foot"><button type="button" class="button secondary" data-modal-close>انصراف</button><button type="submit" class="button" form="service-edit-form-' . $sid . '">ذخیره</button></div></div></div>';
-            $serviceModals .= '<div class="service-modal" role="dialog" aria-modal="true" aria-labelledby="service-fields-title-' . $sid . '" data-modal="service-fields-' . $sid . '" hidden><div class="service-modal-card"><div class="service-modal-head"><h3 id="service-fields-title-' . $sid . '">فیلدهای تکمیلی خدمت</h3><p class="muted">خدمت: ' . e($service['name']) . '</p><button type="button" class="service-modal-close" aria-label="بستن" data-modal-close>&times;</button></div><div class="service-modal-body"><p class="muted">فیلد پویا یعنی پرسش اضافی که هنگام ثبت درخواست برای همین خدمت از درخواست‌کننده پرسیده می‌شود؛ در فرم ثبت خدمت نمایش داده نمی‌شود.</p><div class="category-list service-field-list">';
-            foreach ($serviceFields as $field) {
-                $serviceModals .= '<div><span><strong>' . e($field['label']) . '</strong><small>' . e($field['field_key']) . ' • ' . e($field['field_type']) . '</small></span><span>' . ((int) $field['is_required'] === 1 ? 'اجباری' : 'اختیاری') . '</span></div>';
-            }
-            if (!$serviceFields) {
-                $serviceModals .= '<div><span class="muted">هنوز فیلد تکمیلی برای این خدمت تعریف نشده است.</span></div>';
-            }
-            $serviceModals .= '</div><form method="post" id="service-fields-form-' . $sid . '" class="service-field-form">' . csrf_field() . '<input type="hidden" name="action" value="add_service_field"><input type="hidden" name="service_id" value="' . $sid . '"><h4>افزودن فیلد برای فرم ثبت درخواست</h4><div class="form-grid"><label>کلید انگلیسی<input name="field_key" pattern="[a-z][a-z0-9_]{1,79}" required placeholder="device_model"></label><label>عنوان نمایشی<input name="field_label" required placeholder="مثلاً مدل دستگاه"></label><label>نوع فیلد<select name="field_type"><option value="text">متن</option><option value="textarea">متن چندخطی</option><option value="number">عدد</option><option value="select">انتخابی</option><option value="date">تاریخ</option></select></label><label>ترتیب نمایش<input type="number" name="sort_order" value="0"></label><label class="full">گزینه‌های فیلد انتخابی<small>هر گزینه در یک خط یا با ویرگول جدا شود</small><textarea name="field_options" rows="3"></textarea></label><label class="check-label"><input type="checkbox" name="field_required" value="1"> اجباری</label></div></form></div><div class="service-modal-foot"><button type="button" class="button secondary" data-modal-close>بستن</button><button type="submit" class="button" form="service-fields-form-' . $sid . '">افزودن فیلد</button></div></div></div>';
-        }
-        foreach ($categories as $category) {
-            $cid = (int) $category['id'];
-            $serviceModals .= '<div class="service-modal" role="dialog" aria-modal="true" aria-labelledby="category-edit-title-' . $cid . '" data-modal="category-edit-' . $cid . '" hidden><div class="service-modal-card"><div class="service-modal-head"><h3 id="category-edit-title-' . $cid . '">ویرایش دسته‌بندی</h3><p class="muted">' . e($category['name']) . '</p><button type="button" class="service-modal-close" aria-label="بستن" data-modal-close>&times;</button></div><div class="service-modal-body"><form method="post" id="category-edit-form-' . $cid . '" class="service-edit-form"><input type="hidden" name="action" value="save_service_category"><input type="hidden" name="category_id" value="' . $cid . '">' . csrf_field() . '<div class="form-grid"><label>نام<input name="category_name" required value="' . e($category['name']) . '"></label><label>کد<input name="category_code" value="' . e($category['code'] ?? '') . '"></label><label>حوزه<select name="category_group"><option value="it" ' . ($category['service_group'] === 'it' ? 'selected' : '') . '>IT</option><option value="support" ' . ($category['service_group'] === 'support' ? 'selected' : '') . '>پشتیبانی</option></select></label></div><label class="check-label"><input type="checkbox" name="category_active" value="1" ' . ((int) $category['is_active'] === 1 ? 'checked' : '') . '> فعال</label></form></div><div class="service-modal-foot"><button type="button" class="button secondary" data-modal-close>انصراف</button><button type="submit" class="button" form="category-edit-form-' . $cid . '">ذخیره</button></div></div></div>';
-        }
-    }
-    if ($serviceModals !== '') {
-        echo '<div class="service-modal-layer" data-service-modal-layer hidden>' . $serviceModals . '</div>';
-    }
-    render_footer();
-    exit;
-}
-
 if ($page === 'help') {
     $helpUser = require_login();
+    // تب‌های راهنما (تصمیم مالک ۲۰۲۶-۱۱-۱۶): «راهنمای کامل» و «تغییرات نسخه‌ها».
+    // تغییرات نسخه‌ها اینجا دائمی است — پاپ‌آپ داشبورد فقط دو بار باز می‌شود.
+    $helpTab = (string) ($_GET['tab'] ?? '');
+    if ($helpTab === 'releases') {
+        render_header('تغییرات نسخه‌ها', $helpUser);
+        echo help_tabs_nav_html('releases');
+        echo release_notes_history_html();
+        render_footer();
+        exit;
+    }
     render_header('راهنمای سامانه', $helpUser);
+    echo help_tabs_nav_html('guide');
     require __DIR__ . '/help-guide.php';
     render_footer();
     exit;
 }
 
-if ($page === 'knowledge') {
-    $knowledgeUser = require_login();
-    $articleId = (int) ($_GET['id'] ?? 0);
-    $article = null;
-    if ($articleId > 0) {
-        $articleQuery = db()->prepare('SELECT k.*, u.full_name AS author_name FROM knowledge_articles k LEFT JOIN users u ON u.id = k.created_by WHERE k.id = ? AND (k.is_published = 1 OR ? = 1) LIMIT 1');
-        $articleQuery->execute([$articleId, is_staff_role($knowledgeUser['role']) ? 1 : 0]);
-        $article = $articleQuery->fetch();
-    }
-    $knowledgeSearch = trim((string) ($_GET['q'] ?? ''));
-    $knowledgeSql = 'SELECT id, title, category, updated_at FROM knowledge_articles WHERE ' . (is_staff_role($knowledgeUser['role']) ? '1 = 1' : 'is_published = 1');
-    $knowledgeParams = [];
-    if ($knowledgeSearch !== '') {
-        $knowledgeSql .= ' AND (title LIKE ? OR body LIKE ? OR category LIKE ?)';
-        $knowledgeParams = array_fill(0, 3, '%' . $knowledgeSearch . '%');
-    }
-    $knowledgeSql .= ' ORDER BY updated_at DESC LIMIT 100';
-    $knowledgeQuery = db()->prepare($knowledgeSql);
-    $knowledgeQuery->execute($knowledgeParams);
-    $articles = $knowledgeQuery->fetchAll();
-    render_header('دانش‌نامه', $knowledgeUser);
-    echo '<section class="page-heading"><div><span class="eyebrow">Knowledge Base</span><h1>دانش‌نامه و راهنمای حل مشکل</h1><p>قبل از ثبت درخواست، راه‌حل‌های تاییدشده سازمان را جست‌وجو کنید.</p></div><form class="inline-search" method="get"><input type="hidden" name="page" value="knowledge"><input name="q" value="' . e($knowledgeSearch) . '" placeholder="جست‌وجو در دانش‌نامه"><button class="button" type="submit">جست‌وجو</button></form></section>';
-    if ($article) {
-        echo '<article class="card knowledge-article"><span class="eyebrow">' . e($article['category'] ?: 'راهنما') . '</span><h2>' . e($article['title']) . '</h2><p class="muted">نویسنده: ' . e($article['author_name'] ?: 'سامانه') . ' • ' . e(jalali_date($article['updated_at'])) . '</p><div class="article-body">' . nl2br(e($article['body'])) . '</div><a class="button secondary" href="index.php?page=knowledge">بازگشت به دانش‌نامه</a></article>';
-    } else {
-        echo '<section class="knowledge-grid">';
-        foreach ($articles as $item) { echo '<a class="card knowledge-card" href="index.php?page=knowledge&id=' . (int) $item['id'] . '"><span class="eyebrow">' . e($item['category'] ?: 'راهنما') . '</span><h2>' . e($item['title']) . '</h2><small>به‌روزرسانی: ' . e(jalali_date($item['updated_at'], false)) . '</small></a>'; }
-        if (!$articles) { echo '<div class="card empty-state"><h2>مقاله‌ای پیدا نشد.</h2><p>عبارت دیگری جست‌وجو کنید یا از کارشناس انفورماتیک کمک بگیرید.</p></div>'; }
-        echo '</section>';
-    }
-    if (is_staff_role($knowledgeUser['role'])) {
-        echo '<section class="card form-card"><h2>افزودن مقاله دانش‌نامه</h2><form method="post">' . csrf_field() . '<input type="hidden" name="action" value="add_knowledge"><div class="form-grid"><label>عنوان مقاله<input name="article_title" required></label><label>دسته‌بندی<input name="article_category" placeholder="شبکه، پرینتر، نرم‌افزار"></label><label class="full">متن راهنما<textarea name="article_body" rows="7" required></textarea></label><label class="check-label"><input type="checkbox" name="is_published" value="1" checked> منتشر شود</label></div><button class="button" type="submit">ذخیره مقاله</button></form></section>';
-    }
+if ($page === 'release-notes') {
+    // «تغییرات سامانه» — صفحهٔ عمومی برای هر کاربر واردشده (تصمیم مالک ۲۰۲۶-۱۱-۱۴):
+    // بدون هیچ مجوز اضافه؛ محتوا از lib/release-notes.php (source of truth نسخه) می‌خواند.
+    $releaseNotesUser = require_login();
+    render_header('تغییرات سامانه', $releaseNotesUser);
+    echo release_notes_page_html();
     render_footer();
     exit;
 }
@@ -1955,14 +1243,19 @@ if ($page === 'search') {
         }
     );
     render_header('جست‌وجوی سراسری', $searchUser);
-    echo '<section class="page-heading"><div><span class="eyebrow">جست‌وجوی سراسری</span><h1>نتایج جست‌وجو</h1><p>در صفحه‌ها، درخواست‌ها، شناسنامه‌ها، تردد، رسانه‌ها و دانش‌نامه جست‌وجو کنید.</p></div></section><form class="card filter-card global-search-page" method="get"><input type="hidden" name="page" value="search"><input name="q" required value="' . e($searchTerm) . '" placeholder="مثلاً تردد، فیش غذا، پشتیبان‌گیری ..."><button class="button" type="submit">جست‌وجو</button></form>';
+    echo '<section class="page-heading"><div><span class="eyebrow">جست‌وجوی سراسری</span><h1>نتایج جست‌وجو</h1><p>در صفحه‌ها، درخواست‌ها، شناسنامه‌ها، تردد، رسانه‌ها و دانش‌نامه جست‌وجو کنید.</p></div></section><form class="card filter-card global-search-page" method="get"><input type="hidden" name="page" value="search"><input name="q" required value="' . e($searchTerm) . '" placeholder="مثلاً درخواست، تردد، فیش غذا، پشتیبان‌گیری ..."><button class="button" type="submit">جست‌وجو</button></form>';
     if ($searchTerm !== '') {
         $needles = array_values(array_unique(array_filter([$searchTerm, global_search_normalize($searchTerm)], static fn(string $v): bool => $v !== '')));
-        [$searchScope, $searchParams] = ticket_scope($searchUser);
-        $ticketGroups=[]; $ticketTerms=[];
-        foreach($needles as $needle){$like='%'.$needle.'%';$ticketGroups[]='(t.subject LIKE ? OR t.description LIKE ? OR r.full_name LIKE ?)';array_push($ticketTerms,$like,$like,$like);}
-        $ticketSql = 'SELECT t.id, t.subject, t.status, t.ticket_type, d.name AS department_name FROM tickets t LEFT JOIN departments d ON d.id = t.department_id JOIN users r ON r.id = t.requester_id ' . ($searchScope ?: 'WHERE 1 = 1') . ' AND (' . implode(' OR ', $ticketGroups) . ') ORDER BY t.updated_at DESC LIMIT 30';
-        $ticketQuery = db()->prepare($ticketSql); $ticketQuery->execute(array_merge($searchParams,$ticketTerms)); $ticketRows=$ticketQuery->fetchAll();
+        // نتایج مرکز درخواست‌ها دوباره در جست‌وجوی سراسری دیده می‌شوند (بازگردانی تصمیم مالک ۲۰۲۶-۱۱-۱۰)؛
+        // پیوندها به ماژول مستقل، نه به پل‌های سازگاری.
+        $ticketRows = [];
+        if (function_exists('request_center_global_search')) {
+            try {
+                $ticketRows = request_center_global_search($searchUser, $needles);
+            } catch (Throwable) {
+                $ticketRows = [];
+            }
+        }
         [$assetSearchScope, $assetSearchParams] = asset_scope($searchUser);
         $assetProfileColumns = db_table_columns('asset_profiles');
         $assetProfileJoin = $assetProfileColumns ? ' LEFT JOIN asset_profiles p ON p.asset_id = a.id ' : ' ';
@@ -2007,61 +1300,14 @@ if ($page === 'search') {
             // کارت «بخش‌ها و صفحه‌ها» اکنون فقط هنگام وجود نتیجه نمایش داده می‌شود.
             echo '<section class="search-results">';
             if($searchSections){echo '<div class="card"><h2>صفحه‌ها و بخش‌های مرتبط <span class="muted">('.count($searchSections).')</span></h2><div class="category-list">';foreach($searchSections as $result){echo '<a class="search-result" href="'.e((string)$result['url']).'"><strong>'.e((string)$result['title']).'</strong><small class="muted">باز کردن این بخش</small></a>'; }echo '</div></div>';}
-            if($ticketRows){echo '<div class="card"><h2>درخواست‌ها <span class="muted">('.count($ticketRows).')</span></h2><div class="category-list">';foreach($ticketRows as $result){echo '<a class="search-result" href="index.php?page=ticket&id='.(int)$result['id'].'"><strong>'.e(ticket_number((int)$result['id'])).' • '.e($result['subject']).'</strong><small>'.e($result['department_name']?:'بدون معاونت').' • '.e(ticket_type_label($result['ticket_type'])).' • '.e(status_label($result['status'])).'</small></a>'; }echo '</div></div>';}
-            if($assetRows){echo '<div class="card"><h2>شناسنامه‌ها و دارایی‌ها <span class="muted">('.count($assetRows).')</span></h2><div class="category-list">';foreach($assetRows as $result){echo '<a class="search-result" href="index.php?page=inventory&id='.(int)$result['id'].'"><strong>'.asset_tag_label($result['asset_tag'],$result['hostname']).' • '.e(asset_display_name($result['hostname'])).'</strong><small>'.e($result['profile_record']?:$result['serial_number']?:'شناسه ثبت نشده').' • '.e($result['profile_owner']?:$result['department_name']?:'بدون مالک ثبت‌شده').'</small></a>'; }echo '</div></div>';}
+            if($ticketRows){echo '<div class="card"><h2>درخواست‌ها <span class="muted">('.count($ticketRows).')</span></h2><div class="category-list">';foreach($ticketRows as $result){echo '<a class="search-result" href="request-center.php?page=ticket&id='.(int)$result['id'].'"><strong>'.e(ticket_number((int)$result['id'])).' • '.e($result['subject']).'</strong><small>'.e($result['department_name']?:'بدون معاونت').' • '.e(ticket_type_label($result['ticket_type'])).' • '.e(status_label($result['status'])).'</small></a>'; }echo '</div></div>';}
+            if($assetRows){echo '<div class="card"><h2>شناسنامه‌ها و دارایی‌ها <span class="muted">('.count($assetRows).')</span></h2><div class="category-list">';foreach($assetRows as $result){echo '<a class="search-result" href="index.php?page=inventory&id='.(int)$result['id'].'"><strong>'.asset_tag_label($result['asset_tag'],$result['hostname']).' • '.e(asset_name_or($result['hostname'])).'</strong><small>'.e($result['profile_record']?:$result['serial_number']?:'شناسه ثبت نشده').' • '.e($result['profile_owner']?:$result['department_name']?:'بدون مالک ثبت‌شده').'</small></a>'; }echo '</div></div>';}
             if($articleRows){echo '<div class="card"><h2>دانش‌نامه <span class="muted">('.count($articleRows).')</span></h2><div class="category-list">';foreach($articleRows as $result){echo '<a class="search-result" href="index.php?page=knowledge&id='.(int)$result['id'].'"><strong>'.e($result['title']).'</strong><small>'.e($result['category']?:'راهنما').' • '.e(jalali_date($result['updated_at'],false)).'</small></a>'; }echo '</div></div>';}
             if($trafficRows){echo '<div class="card"><h2>سوابق تردد <span class="muted">('.count($trafficRows).')</span></h2><div class="category-list">';foreach($trafficRows as $result){echo '<a class="search-result" href="index.php?page=traffic-control&tab=history&search='.rawurlencode($searchTerm).'"><strong>'.e($result['full_name']).' • '.e($result['serial_no']).'</strong><small>'.e($result['visit_date']).' • '.e($result['company']?:'بدون شرکت').' • '.e($result['meeting_with']?:'بدون مقصد').'</small></a>'; }echo '</div></div>';}
             if($mediaRows){echo '<div class="card"><h2>سوابق CD/DVD <span class="muted">('.count($mediaRows).')</span></h2><div class="category-list">';foreach($mediaRows as $result){echo '<a class="search-result" href="index.php?page=cd-dvd&tab=history&search='.rawurlencode($searchTerm).'"><strong>'.e($result['media']).' • '.e($result['serial']).' • '.e($result['info_type']).'</strong><small>'.e($result['date_str']).' • '.e($result['direction']==='IN'?'ورود':'خروج').' • '.e($result['receiver']?:$result['brought_by']?:'').'</small></a>'; }echo '</div></div>';}
             echo '</section>';
         }
     }
-    render_footer();
-    exit;
-}
-
-if ($page === 'queue') {
-    $queueUser = require_permission('queue.view');
-    $queueName = valid_choice((string) ($_GET['queue'] ?? 'all'), ['all', 'unassigned', 'overdue', 'mine', 'waiting_user', 'resolved', 'cancellation_requested', 'cancelled'], 'all');
-    [$queueScope, $queueParams] = ticket_scope($queueUser);
-    $queueConditions = $queueScope !== '' ? [substr($queueScope, 6)] : [];
-    if ($queueName === 'unassigned') { $queueConditions[] = 't.assigned_to IS NULL'; }
-    if ($queueName === 'overdue') { $queueConditions[] = 't.sla_paused_at IS NULL AND t.status NOT IN ("resolved", "closed", "cancelled") AND ((t.due_at IS NOT NULL AND t.due_at < NOW()) OR (t.first_response_at IS NULL AND t.ola_response_due_at IS NOT NULL AND t.ola_response_due_at < NOW()) OR (t.ola_due_at IS NOT NULL AND t.ola_due_at < NOW()) OR (t.ola_escalation_1_at IS NOT NULL AND t.ola_escalation_1_at < NOW()) OR (t.ola_escalation_2_at IS NOT NULL AND t.ola_escalation_2_at < NOW()))'; }
-    if ($queueName === 'mine') { $queueConditions[] = 't.assigned_to = ?'; $queueParams[] = (int) $queueUser['id']; }
-    if ($queueName === 'waiting_user') { $queueConditions[] = 't.status IN ("waiting_user", "pending")'; }
-    if ($queueName === 'resolved') { $queueConditions[] = 't.status = "resolved"'; }
-    if ($queueName === 'cancellation_requested') { $queueConditions[] = 't.cancel_requested_at IS NOT NULL'; }
-    if ($queueName === 'cancelled') { $queueConditions[] = 't.status = "cancelled"'; }
-    else { $queueConditions[] = 't.status <> "cancelled"'; }
-    $queueWhere = $queueConditions ? 'WHERE ' . implode(' AND ', $queueConditions) : '';
-    $queuePerPage = 100;
-    $queuePage = max(1, (int) ($_GET['p'] ?? 1));
-    $queueCountQuery = db()->prepare('SELECT COUNT(*) FROM tickets t ' . $queueWhere);
-    $queueCountQuery->execute($queueParams);
-    $queueTotal = (int) $queueCountQuery->fetchColumn();
-    $queuePages = max(1, (int) ceil($queueTotal / $queuePerPage));
-    $queuePage = min($queuePage, $queuePages);
-    $queueOffset = ($queuePage - 1) * $queuePerPage;
-        $queueQuery = db()->prepare('SELECT t.*, d.name AS department_name, r.full_name AS requester_name, a.full_name AS assignee_name FROM tickets t LEFT JOIN departments d ON d.id = t.department_id JOIN users r ON r.id = t.requester_id LEFT JOIN users a ON a.id = t.assigned_to ' . $queueWhere . ' ORDER BY CASE WHEN t.cancel_requested_at IS NOT NULL THEN 0 WHEN (t.status NOT IN ("resolved", "closed", "cancelled") AND t.sla_paused_at IS NULL AND ((t.due_at IS NOT NULL AND t.due_at < NOW()) OR (t.first_response_at IS NULL AND t.ola_response_due_at IS NOT NULL AND t.ola_response_due_at < NOW()) OR (t.ola_due_at IS NOT NULL AND t.ola_due_at < NOW()) OR (t.ola_escalation_1_at IS NOT NULL AND t.ola_escalation_1_at < NOW()) OR (t.ola_escalation_2_at IS NOT NULL AND t.ola_escalation_2_at < NOW()))) THEN 1 ELSE 2 END, FIELD(t.priority, "critical", "urgent", "normal"), t.created_at ASC LIMIT ' . $queuePerPage . ' OFFSET ' . $queueOffset);
-    $queueQuery->execute($queueParams);
-    $queueRows = $queueQuery->fetchAll();
-    // ستون ticket_no با همین SELECT آمده است؛ بدون این خط هر ticket_number() داخل حلقه
-    // یک کوئری جدا می‌زد (۱۰۰ کوئری اضافه در هر بار باز کردن صف).
-    ticket_number_cache_prime($queueRows);
-    render_header('صف کاری', $queueUser);
-     echo '<section class="page-heading"><div><span class="eyebrow">صف مرکزی خدمات</span><h1>صف کار واحد رسیدگی</h1><p>درخواست‌های هر حوزه جدا هستند؛ موارد خارج از SLA/OLA و اولویت‌های حیاتی بالاتر قرار می‌گیرند. نمایش ' . ($queueRows ? number_format($queueOffset + 1) . ' تا ' . number_format($queueOffset + count($queueRows)) . ' از ' . number_format($queueTotal) : '۰ از ' . number_format($queueTotal)) . ' درخواست.</p></div><a class="button secondary" href="index.php?page=reports">گزارش کامل</a></section><div class="queue-tabs"><a class="' . ($queueName === 'all' ? 'active' : '') . '" href="index.php?page=queue&queue=all">همه</a><a class="' . ($queueName === 'unassigned' ? 'active' : '') . '" href="index.php?page=queue&queue=unassigned">بدون مسئول</a><a class="' . ($queueName === 'overdue' ? 'active' : '') . '" href="index.php?page=queue&queue=overdue">خارج از SLA/OLA</a><a class="' . ($queueName === 'mine' ? 'active' : '') . '" href="index.php?page=queue&queue=mine">مسئول من</a><a class="' . ($queueName === 'waiting_user' ? 'active' : '') . '" href="index.php?page=queue&queue=waiting_user">انتظار کاربر</a><a class="' . ($queueName === 'resolved' ? 'active' : '') . '" href="index.php?page=queue&queue=resolved">حل‌شده</a><a class="' . ($queueName === 'cancellation_requested' ? 'active' : '') . '" href="index.php?page=queue&queue=cancellation_requested">درخواست لغو</a><a class="' . ($queueName === 'cancelled' ? 'active' : '') . '" href="index.php?page=queue&queue=cancelled">لغوشده</a></div><form method="post"><section class="card ticket-table queue-table"><div class="table-head"><span>انتخاب / درخواست</span><span>معاونت</span><span>ثبت‌کننده</span><span>مسئول</span><span>وضعیت</span></div>';
-    foreach ($queueRows as $queueTicket) {
-        echo '<label class="table-row queue-row"><span class="ticket-title"><input type="checkbox" name="ticket_ids[]" value="' . (int) $queueTicket['id'] . '"><b>' . e(ticket_number((int) $queueTicket['id'])) . '</b><a href="index.php?page=ticket&id=' . (int) $queueTicket['id'] . '"><strong>' . e($queueTicket['subject']) . '</strong></a><small>' . e(ticket_type_label($queueTicket['ticket_type'])) . ' • ' . e(priority_label($queueTicket['priority'])) . (!empty($queueTicket['cancel_requested_at']) ? ' • درخواست لغو در انتظار بررسی' : '') . '</small></span><span>' . e($queueTicket['department_name'] ?: 'بدون معاونت') . '</span><span>' . e($queueTicket['requester_name']) . '</span><span>' . e($queueTicket['assignee_name'] ?: 'بدون مسئول') . '</span><span><em class="status ' . e($queueTicket['status']) . '">' . e(status_label($queueTicket['status'])) . '</em></span></label>';
-        }
-    echo '</section><div class="bulk-actions"><input type="hidden" name="action" value="bulk_update_tickets">' . csrf_field() . '<select name="bulk_status"><option value="in_progress">در حال انجام</option><option value="waiting_user">در انتظار پاسخ کاربر</option><option value="resolved">حل‌شده</option></select><label class="bulk-note">پیام مشترک (برای انتظار/حل‌شده الزامی)<textarea name="bulk_note" rows="2" maxlength="5000" placeholder="این پیام در همهٔ درخواست‌های انتخاب‌شده ثبت می‌شود"></textarea></label><button class="button" type="submit">اعمال روی انتخاب‌ها</button></div></form>';
-    if ($queuePages > 1) {
-        echo '<nav class="pagination" aria-label="صفحه‌بندی صف">';
-        for ($queueNav = max(1, $queuePage - 3); $queueNav <= min($queuePages, $queuePage + 3); $queueNav++) {
-            echo '<a class="' . ($queueNav === $queuePage ? 'active' : '') . '" href="index.php?page=queue&queue=' . e($queueName) . '&p=' . $queueNav . '">' . number_format($queueNav) . '</a>';
-        }
-        echo '</nav>';
-    }
-    // اسکریپت درون‌صفحه: تضمین کارکرد سربرگ‌ها و مودال‌ها مستقل از کش app.js
-
     render_footer();
     exit;
 }
@@ -2180,537 +1426,6 @@ if ($page === 'holidays') {
     exit;
 }
 
-if ($page === 'new-ticket' && $user && !user_can($user, 'ticket.create')) {
-    security_log_access_denied($user, 'ticket.create', 'new-ticket');
-    http_response_code(403);
-    render_header('عدم دسترسی', $user);
-    echo '<section class="page-heading"><div><span class="eyebrow">عدم دسترسی</span><h1>دسترسی به این بخش مجاز نیست</h1><p>برای دریافت دسترسی با ادمین اصلی سامانه تماس بگیرید.</p></div></section>';
-    render_footer();
-    exit;
-}
-if ($page === 'new-ticket') {
-    $user = require_permission('ticket.create');
-    $cdDvdRequestRecord = null;
-    $subjectDefault = '';
-    $descriptionDefault = '';
-    if (($_GET['request'] ?? '') === 'cd_dvd_edit') {
-        $candidate = cd_dvd_fetch_record((int) ($_GET['record_id'] ?? 0));
-        if ($candidate && !cd_dvd_can_edit_records($user) && cd_dvd_can_view_record($candidate, $user)) {
-            $cdDvdRequestRecord = $candidate;
-            $subjectDefault = 'درخواست اصلاح رکورد CD/DVD ' . $candidate['media'] . ' ' . $candidate['serial'];
-            $descriptionDefault = "لطفاً رکورد CD/DVD زیر را بررسی و در صورت تأیید اصلاح کنید.\n\n"
-                . 'شناسه رکورد: ' . $candidate['id'] . "\n"
-                . 'رسانه: ' . $candidate['media'] . "\n"
-                . 'شماره: ' . $candidate['serial'] . "\n"
-                . 'جهت: ' . ($candidate['direction'] === 'IN' ? 'ورود' : 'خروج') . "\n"
-                . 'تاریخ: ' . $candidate['date_str'] . "\n"
-                . 'شرح فعلی: ' . $candidate['info_desc'] . "\n\n"
-                . 'شرح اصلاح موردنیاز: ';
-        }
-    }
-    if ($cdDvdRequestRecord === null) {
-        // پیش‌پرکردن متن از آریا؛ خدمت و سایر فیلدها را کاربر خودش در همین فرم انتخاب می‌کند.
-        $subjectDefault = mb_substr(trim((string) ($_GET['subject'] ?? '')), 0, 255, 'UTF-8');
-        $descriptionDefault = mb_substr(trim((string) ($_GET['description'] ?? '')), 0, 5000, 'UTF-8');
-    }
-    ticket_service_ensure_schema();
-    $categories = db()->query('SELECT * FROM categories WHERE is_active = 1 ORDER BY service_group, name')->fetchAll();
-    $clientIp = inventory_client_ip();
-    $limitedAssetScope = !is_staff_role((string) $user['role']) && !is_it_agent($user);
-    if ($limitedAssetScope) {
-        // برای کاربر عادی فقط سیستم‌های متعلق به خودش یا همین کلاینت را حتی در HTML هم بارگذاری کن.
-        $assetQuery = db()->prepare('SELECT id, asset_tag, hostname, owner_user_id, ip_address FROM assets WHERE owner_user_id = ? OR (? <> "" AND ip_address = ?) ORDER BY hostname');
-        $assetQuery->execute([(int) $user['id'], $clientIp, $clientIp]);
-        $allAssets = $assetQuery->fetchAll();
-    } else {
-        [$assetWhere, $assetParams] = asset_scope($user, 'a');
-        $assetQuery = db()->prepare('SELECT a.id, a.asset_tag, a.hostname, a.owner_user_id, a.ip_address FROM assets a ' . ($assetWhere !== '' ? $assetWhere : '') . ' ORDER BY a.hostname');
-        $assetQuery->execute($assetParams);
-        $allAssets = $assetQuery->fetchAll();
-    }
-    $clientAssetId = 0;
-    $ownAssets = [];
-    $otherAssets = [];
-    foreach ($allAssets as $assetRow) {
-        $isOwner = (int) $assetRow['owner_user_id'] === (int) $user['id'];
-        $isHere = $clientIp !== '' && trim((string) $assetRow['ip_address']) === $clientIp;
-        if ($isHere && !$clientAssetId) { $clientAssetId = (int) $assetRow['id']; }
-        if ($isOwner || $isHere) { $ownAssets[] = $assetRow; } else { $otherAssets[] = $assetRow; }
-    }
-    $userAssets = array_merge($ownAssets, $otherAssets);
-    $autoAssetId = $clientAssetId ?: (count($userAssets) === 1 ? (int) $userAssets[0]['id'] : 0);
-    $departments = [];
-    // معاونت‌های سازمانی از چارت سازمانی (org_units) خوانده می‌شوند و برای همهٔ نقش‌ها
-    // نمایش داده می‌شوند تا درخواست به معاونت انتخاب‌شده مسیردهی شود.
-    org_ensure_schema();
-    org_ticket_schema_ensure();
-    $departments = org_deputy_units();
-    ticket_service_ensure_schema();
-    $services = db()->query('SELECT id, name, code, service_group, requires_asset, default_priority, default_ticket_type, category_id FROM service_catalog WHERE is_active = 1 ORDER BY service_group, name')->fetchAll();
-    $cdDvdServiceId = 0;
-    if ($cdDvdRequestRecord) {
-        $cdDvdServiceQuery = db()->prepare("SELECT id FROM service_catalog WHERE code = 'SUP-CDDVD' AND is_active = 1 LIMIT 1");
-        $cdDvdServiceQuery->execute();
-        $cdDvdServiceId = (int) ($cdDvdServiceQuery->fetchColumn() ?: 0);
-    }
-    $serviceFields = [];
-    if ($services) {
-        $serviceFieldQuery = db()->prepare('SELECT * FROM service_catalog_fields WHERE service_id = ? ORDER BY sort_order, id');
-        foreach ($services as $service) {
-            $serviceFieldQuery->execute([(int) $service['id']]);
-            $serviceFields[(int) $service['id']] = $serviceFieldQuery->fetchAll();
-        }
-    }
-    // ۱.۳۷.۲ (درخواست کاربر): فرم ثبت درخواست همیشه با حوزهٔ «خدمات کامپیوتری و IT» باز می‌شود.
-    // تنها مسیر CD/DVD (که رسیدگی‌اش در پشتیبانی است) روی «پشتیبانی» می‌ماند.
-    $ticketDefaultGroup = $cdDvdRequestRecord ? 'support' : 'it';
-    render_header('ثبت درخواست', $user);
-    echo '<section class="page-heading"><div><span class="eyebrow">درخواست جدید</span><h1>ثبت درخواست</h1><p>ابتدا حوزه خدمت را انتخاب کنید تا فرم و مسیر رسیدگی درست نمایش داده شود.</p></div><a class="button secondary" href="index.php">بازگشت به داشبورد</a></section><section class="card form-card"><form method="post" enctype="multipart/form-data">' . csrf_field() . '<input type="hidden" name="action" value="create_ticket">' . ($cdDvdRequestRecord ? '<input type="hidden" name="cd_dvd_record_id" value="' . (int) $cdDvdRequestRecord['id'] . '">' : '');
-    echo '<div class="ticket-number-box" data-next-it="' . e(ticket_number_peek('IT')) . '" data-next-support="' . e(ticket_number_peek('SUP')) . '"><span>شماره درخواست:</span><strong id="ticket-number-preview">' . e($ticketDefaultGroup === 'support' ? ticket_number_peek('SUP') : ticket_number_peek('IT')) . '</strong></div>';
-    echo '<div class="form-grid"><label class="full">موضوع درخواست<input name="subject" required maxlength="255" value="' . e($subjectDefault) . '" placeholder="مثلاً: اختلال در اتصال به پرینتر واحد مالی"></label><label>حوزه خدمت<div class="group-combo"><label class="group-option"><input type="radio" name="service_group" value="it"' . ($ticketDefaultGroup === 'it' ? ' checked' : '') . '><span>خدمات کامپیوتری و IT</span></label><label class="group-option"><input type="radio" name="service_group" value="support"' . ($ticketDefaultGroup === 'support' ? ' checked' : '') . '><span>خدمات پشتیبانی</span></label></div></label><input type="hidden" name="category_id" id="category-selector" value=""><label>خدمت از کاتالوگ<select name="service_id" id="service-selector" required><option value="">انتخاب کنید…</option>';
-    foreach ($services as $service) {
-        $selected = ($cdDvdServiceId > 0 && (int) $service['id'] === $cdDvdServiceId) ? ' selected' : '';
-        echo '<option value="' . (int) $service['id'] . '" data-service-group="' . e($service['service_group']) . '" data-category-id="' . (int) ($service['category_id'] ?? 0) . '" data-requires-asset="' . (int) $service['requires_asset'] . '"' . $selected . '>' . e($service['name']) . '</option>';
-    }
-    echo '</select><small class="field-help">ابتدا حوزه و سپس خدمت را انتخاب کنید؛ دسته‌بندی، اولویت و مسیر رسیدگی خودکار تنظیم می‌شود.</small></label>';
-    if ($departments) {
-        $myUnitId = function_exists('user_org_unit_id') ? user_org_unit_id($user) : 0;
-        $myUnitIsDeputy = false;
-        foreach ($departments as $department) {
-            if ((int) $department['id'] === $myUnitId) {
-                $myUnitIsDeputy = true;
-                break;
-            }
-        }
-        echo '<label>معاونت سازمانی درخواست‌کننده<select name="requesting_unit_id" required><option value="">انتخاب کنید…</option>';
-        foreach ($departments as $department) {
-            echo '<option value="' . (int) $department['id'] . '" ' . ((int) $department['id'] === $myUnitId ? 'selected' : '') . '>' . e($department['name']) . '</option>';
-        }
-        echo '</select><small class="field-help">' . ($myUnitIsDeputy ? 'معاونت شما به‌صورت پیش‌فرض انتخاب شده است؛ ' : '') . 'درخواست به معاونت انتخاب‌شده ارجاع داده می‌شود.</small></label>';
-    } else {
-        echo '<label>معاونت سازمانی درخواست‌کننده<input value="هیچ معاونتی در چارت سازمانی تعریف نشده است" readonly></label>';
-    }
-     echo '<label>اولویت<select name="priority"><option value="">پیش‌فرض خدمت</option><option value="normal">عادی</option><option value="urgent">فوری</option><option value="critical">حیاتی</option></select></label><label class="ticket-asset-field" data-asset-combo data-asset-required-group="it">سیستم مرتبط <span class="auto-label" data-asset-label>پس از انتخاب خدمت مشخص می‌شود</span><input type="text" id="asset-search" class="asset-search" placeholder="جستجوی سیستم (نام رایانه، شماره اموال یا پلاک)" autocomplete="off" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="asset-results" aria-required="false"><select name="asset_id" id="asset-selector" class="asset-native" tabindex="-1" aria-hidden="true"><option value="">بدون سیستم خاص / انتخاب نشده</option>';
-     foreach ($userAssets as $asset) {
-          $isCurrent = (int) $asset['id'] === $clientAssetId;
-          $tagText = asset_tag_label($asset['asset_tag'], $asset['hostname']);
-          if (asset_is_auto_domain_tag($asset['asset_tag'])) { $tagText = ''; }
-          echo '<option value="' . (int) $asset['id'] . '" ' . ((int) $asset['id'] === $autoAssetId ? 'selected' : '') . '>' . e(asset_display_name($asset['hostname']) . ($tagText !== '' ? ' - ' . $tagText : '') . ($isCurrent ? ' (سیستم فعلی)' : '')) . '</option>';
-     }
-       echo '</select><div class="asset-results" id="asset-results" role="listbox" hidden></div><small class="field-help">برای همهٔ خدمات IT، انتخاب سیستم مرتبط از شناسنامهٔ فنی الزامی است. نام رایانه، شمارهٔ اموال یا پلاک را جست‌وجو و از فهرست انتخاب کنید.</small><small class="field-error" data-asset-error hidden></small></label><label class="support-field">محل خدمت / اتاق<span class="auto-label">برای پشتیبانی الزامی</span><input name="support_location" placeholder="ساختمان، طبقه، اتاق یا محل دقیق"></label><label class="support-field">تجهیز یا مورد درخواست<textarea name="support_equipment" rows="2" placeholder="مثلاً صندلی، میز، پرینتر عمومی یا تجهیزات اتاق"></textarea></label>' . ((is_staff_role($user['role']) || is_it_agent($user)) ? '<label>ارجاع به درخواست قبلی (اختیاری، کارشناسان)<input type="number" name="parent_ticket_id" placeholder="شناسه داخلی درخواست"></label>' : '') . '<label class="full">شرح کامل مشکل<textarea name="description" required rows="8" placeholder="چه اتفاقی افتاده؟ از چه زمانی؟ چه پیامی می‌بینید؟">' . e($descriptionDefault) . '</textarea></label>';
-      foreach ($serviceFields as $serviceId => $fields) {
-          if (!$fields) { continue; }
-          echo '<fieldset class="service-fields" data-service-fields="' . $serviceId . '"><legend>اطلاعات تکمیلی خدمت</legend><div class="form-grid">';
-          foreach ($fields as $field) {
-              $required = (int) $field['is_required'] === 1 ? ' required' : '';
-              $name = 'custom[' . e($field['field_key']) . ']';
-              $options = json_decode((string) $field['options_json'], true) ?: [];
-              if ($field['field_type'] === 'textarea') {
-                  echo '<label class="full">' . e($field['label']) . '<textarea name="' . $name . '" rows="3"' . $required . '></textarea></label>';
-              } elseif ($field['field_type'] === 'select') {
-                  echo '<label>' . e($field['label']) . '<select name="' . $name . '"' . $required . '><option value="">انتخاب کنید</option>';
-                  foreach ($options as $option) { echo '<option value="' . e($option) . '">' . e($option) . '</option>'; }
-                  echo '</select></label>';
-              } else {
-                   $inputType = $field['field_type'] === 'number' ? 'number' : 'text';
-                   $placeholder = $field['field_type'] === 'date' ? '۱۴۰۵/۰۱/۰۱' : '';
-                   echo '<label>' . e($field['label']) . '<input type="' . $inputType . '" name="' . $name . '" placeholder="' . $placeholder . '"' . $required . '></label>';
-              }
-          }
-          echo '</div></fieldset>';
-      }
-      echo '<label class="full file-input">پیوست اختیاری<input type="file" name="attachment"><small>حداکثر ۸ مگابایت؛ PDF، تصویر، Word، Excel، TXT و ZIP</small></label></div><div class="actions"><button class="button" type="submit">ثبت درخواست</button></div></form></section>';
-    render_footer();
-    exit;
-}
-
-if ($page === 'ticket') {
-    $ticket = fetch_ticket((int) ($_GET['id'] ?? 0));
-    if (!$ticket || !can_view_ticket($ticket, $user)) {
-        http_response_code(404);
-        render_header('درخواست پیدا نشد', $user);
-        echo '<section class="empty-state"><div class="empty-icon">؟</div><h2>درخواست پیدا نشد</h2><a class="button" href="index.php">بازگشت</a></section>';
-        render_footer();
-        exit;
-    }
-    $messagesQuery = db()->prepare('SELECT m.*, u.full_name, u.role FROM ticket_messages m JOIN users u ON u.id = m.user_id WHERE m.ticket_id = ? ORDER BY m.created_at');
-    $messagesQuery->execute([$ticket['id']]);
-    $messages = $messagesQuery->fetchAll();
-    $attachments = [];
-    if ($messages) {
-        $ids = array_column($messages, 'id');
-        $marks = implode(',', array_fill(0, count($ids), '?'));
-        $attachmentQuery = db()->prepare('SELECT * FROM ticket_attachments WHERE message_id IN (' . $marks . ') ORDER BY id');
-        $attachmentQuery->execute($ids);
-        foreach ($attachmentQuery->fetchAll() as $attachment) {
-            $attachments[(int) $attachment['message_id']][] = $attachment;
-        }
-    }
-    $staff = is_staff_role($user['role']) || user_is_primary_admin($user);
-    $canManageTicket = $staff && user_can($user, 'ticket.edit');
-    $isRequester = ticket_user_is_requester($ticket, $user);
-    $requesterView = $isRequester;
-    $canCancelOwnTicket = ticket_requester_can_cancel($ticket, $user);
-    $handlerLevel = ticket_handler_level($ticket, $user);
-    // نمای فعال: 'requester' | 'assignee' | 'supervisor'. تنها منبع حقیقتِ «چه چیزی
-    // نشان داده شود»، تا نما و اختیار از هم جدا نیفتند.
-    $viewMode = ticket_view_mode($ticket, $user);
-    $canSeeInternal = ticket_can_see_internal($ticket, $user);
-    $cancelHasRequest = !empty($ticket['cancel_requested_at']);
-    $cancelDecidable = $cancelHasRequest
-        && in_array((string) $ticket['status'], ticket_requester_cancelable_statuses(), true);
-    $cancelStaleClosed = $cancelHasRequest
-        && in_array((string) $ticket['status'], ['closed', 'cancelled'], true);
-    $cancelRequestPending = $cancelDecidable || $cancelStaleClosed;
-    $canDecideCancellation = $cancelRequestPending
-        && $handlerLevel !== ''
-        && (int) ($ticket['cancel_requested_by'] ?? 0) !== (int) $user['id'];
-    $canAssignTicket = $handlerLevel === 'manager';
-    $requiresRating = $isRequester && in_array($ticket['status'], ['resolved', 'closed'], true) && !ticket_rating_is_current($ticket);
-    render_header('جزئیات ' . ticket_number((int) $ticket['id']), $user);
-     echo '<section class="page-heading"><div><a class="back-link" href="index.php">← بازگشت به فهرست</a><h1>' . e($ticket['subject']) . '</h1><div class="ticket-meta"><span>' . ticket_number((int) $ticket['id']) . '</span><span>' . persian_date($ticket['created_at']) . '</span><span class="tag">' . e(ticket_type_label((string) $ticket['ticket_type'])) . '</span>' . ($ticket['service_name'] ? '<span class="tag">' . e($ticket['service_name']) . '</span>' : '') . '<span class="status ' . e($ticket['status']) . '">' . e(status_label($ticket['status'])) . '</span><span class="priority ' . e($ticket['priority']) . '">' . e(priority_label($ticket['priority'])) . '</span></div></div></section><div class="ticket-layout" data-view-mode="' . e($viewMode) . '"><section class="conversation">';
-    foreach ($messages as $message) {
-        if ((int) $message['is_internal'] === 1 && !$canSeeInternal) {
-            continue;
-        }
-         $messageRole = ((int) $message['is_internal'] === 1) ? 'internal' : (is_staff_role($message['role']) ? 'agent' : ($message['role'] === 'supervisor' ? 'supervisor' : 'user'));
-         echo '<article class="message ' . $messageRole . ' ' . ((int) $message['user_id'] === (int) $user['id'] ? 'mine' : '') . '"><div class="message-head"><strong>' . e($message['full_name']) . '</strong><span>' . persian_date($message['created_at']) . '</span></div><div class="message-body">' . nl2br(e($message['body'])) . '</div>';
-        if (!empty($attachments[(int) $message['id']])) {
-            echo '<div class="attachments">';
-            foreach ($attachments[(int) $message['id']] as $attachment) {
-                 echo '<a class="attachment" href="index.php?action=download_attachment&id=' . (int) $attachment['id'] . '">📎 ' . e($attachment['original_name']) . '</a>';
-            }
-            echo '</div>';
-        }
-        echo '</article>';
-    }
-     if ($cancelRequestPending) {
-        $pendingNote = $cancelStaleClosed
-            ? 'این درخواست مربوط به پیش از بسته‌شدن است و باید پاک‌سازی شود.'
-            : 'تا تصمیم مسئول، گفت‌وگو ادامه دارد اما تغییر وضعیت و ارجاع متوقف است.';
-        echo '<div class="card cancellation-pending"><h3>درخواست لغو در انتظار بررسی مسئول است</h3><p><strong>دلیل ثبت‌شده:</strong> ' . nl2br(e((string) ($ticket['cancel_request_reason'] ?? ''))) . '</p><small class="muted">درخواست در ' . e(persian_date((string) $ticket['cancel_requested_at'])) . ' ثبت شده است. ' . $pendingNote . '</small></div>';
-    } elseif ($canCancelOwnTicket) {
-        $cancelNeedsApproval = !ticket_requester_can_cancel_directly($ticket);
-        $cancelButton = $cancelNeedsApproval ? 'ثبت درخواست لغو' : 'لغو درخواست پیش از ارجاع';
-        $cancelConfirm = $cancelNeedsApproval
-            ? 'درخواست لغو ثبت می‌شود؛ تا تصمیم مسئول، گفت‌وگو ادامه دارد اما تغییر وضعیت متوقف است. ادامه می‌دهید؟'
-            : 'درخواست پیش از ارجاع به کارشناس فوراً لغو می‌شود؛ سابقه حفظ خواهد شد. ادامه می‌دهید؟';
-        $cancelHelp = $cancelNeedsApproval
-            ? 'چون درخواست ارجاع شده یا رسیدگی آغاز شده است، ابتدا درخواست شما ثبت می‌شود و مسئول همان حوزه باید آن را تأیید کند؛ تا آن زمان گفت‌وگو ادامه دارد اما تغییر وضعیت و ارجاع متوقف است.'
-            : 'چون هنوز به کارشناس ارجاع نشده است، لغو فوراً انجام می‌شود؛ حذف فیزیکی نمی‌شود و تاریخچه می‌ماند.';
-        echo '<form class="card cancel-ticket-card" method="post" data-confirm="' . e($cancelConfirm) . '">' . csrf_field() . '<input type="hidden" name="action" value="cancel_ticket"><input type="hidden" name="ticket_id" value="' . (int) $ticket['id'] . '"><h3>دیگر به این درخواست نیاز ندارید؟</h3><label>دلیل لغو<textarea name="cancel_reason" required maxlength="1000" rows="2" placeholder="مثلاً درخواست اشتباهی ثبت شده است…"></textarea></label><button class="button danger-button" type="submit">' . e($cancelButton) . '</button><small class="muted">' . e($cancelHelp) . '</small></form>';
-    }
-    if ($canDecideCancellation) {
-        if ($cancelStaleClosed) {
-            echo '<form class="card cancellation-decision" method="post">' . csrf_field() . '<input type="hidden" name="action" value="decide_ticket_cancellation"><input type="hidden" name="ticket_id" value="' . (int) $ticket['id'] . '"><h3>پاک‌سازی درخواست لغو قدیمی</h3><p class="muted">درخواست قبلاً ' . e(status_label((string) $ticket['status'])) . ' شده است؛ این درخواست قدیمی باید با ذکر دلیل پاک‌سازی شود.</p><label>یادداشت پاک‌سازی (الزامی)<textarea name="decision_note" required maxlength="1000" rows="2" placeholder="مثلاً: درخواست پیش از بسته‌شدن ثبت شده بود؛ بایگانی شد."></textarea></label><div class="actions"><button class="button secondary" type="submit" name="decision" value="reject">پاک‌سازی درخواست قدیمی</button></div></form>';
-        } else {
-            echo '<form class="card cancellation-decision" method="post">' . csrf_field() . '<input type="hidden" name="action" value="decide_ticket_cancellation"><input type="hidden" name="ticket_id" value="' . (int) $ticket['id'] . '"><h3>تصمیم مسئول رسیدگی دربارهٔ لغو</h3><label>یادداشت تصمیم (برای رد، نوشتن دلیل الزامی است)<textarea name="decision_note" maxlength="1000" rows="2" placeholder="در صورت رد، توضیح دهید رسیدگی چگونه ادامه می‌یابد."></textarea></label><div class="actions"><button class="button danger-button" type="submit" name="decision" value="approve" data-confirm="درخواست لغو را تأیید کنید؟ با این کار درخواست از صف فعال خارج می‌شود و سابقه حفظ می‌ماند.">تأیید لغو</button><button class="button secondary" type="submit" name="decision" value="reject">رد و ادامهٔ رسیدگی</button></div></form>';
-        }
-    }
-    if ($requiresRating && !user_can($user, 'ticket.rate')) {
-        echo '<div class="card"><p>دسترسی ثبت امتیاز برای حساب شما فعال نیست؛ برای بررسی دسترسی با مدیر سامانه تماس بگیرید.</p></div>';
-    } elseif ($requiresRating) {
-         echo '<form class="card rating-card required-rating" method="post">' . csrf_field() . '<input type="hidden" name="action" value="rate_ticket"><input type="hidden" name="ticket_id" value="' . (int) $ticket['id'] . '"><h3>ثبت امتیاز رضایت الزامی است</h3><p class="muted">برای نهایی‌شدن این درخواست، میزان رضایت خود از واحد رسیدگی را ثبت کنید.</p><div class="rating-options">';
-         for ($score = 1; $score <= 5; $score++) {
-             echo '<label><input type="radio" name="score" value="' . $score . '" required><span>' . $score . '★</span></label>';
-         }
-         echo '</div><label>نظر اختیاری<textarea name="rating_comment" rows="3" placeholder="اگر توضیحی دارید بنویسید..."></textarea></label><button class="button" type="submit">ثبت امتیاز</button></form>';
-     }
-     if ($ticket['status'] === 'cancelled') {
-         echo '<div class="card"><p class="muted">این درخواست به درخواست ثبت‌کننده لغو شده است. سابقه برای پیگیری حفظ می‌شود؛ برای نیاز جدید، درخواست تازه ثبت کنید.</p></div>';
-     } elseif ($requesterView && $ticket['status'] === 'resolved') {
-         if (!$requiresRating) {
-             echo '<div class="card"><p class="muted">امتیاز شما ثبت شد. درخواست در انتظار تأیید نهایی سوپروایزر است.</p></div>';
-         }
-         if ($cancelHasRequest) {
-             echo '<div class="card"><p class="muted">لغو این درخواست در انتظار تصمیم مسئول است؛ بازگشایی پس از تصمیم او امکان‌پذیر می‌شود.</p></div>';
-         } elseif (user_can($user, 'ticket.reply')) {
-             echo '<form class="card reply-box" method="post">' . csrf_field() . '<input type="hidden" name="action" value="reopen_ticket"><input type="hidden" name="ticket_id" value="' . (int) $ticket['id'] . '"><h3>مشکل برطرف نشده است؟</h3><label>توضیح دهید چه چیزی هنوز برطرف نشده<textarea name="reopen_reason" required rows="3" placeholder="مثلاً: همچنان خطا می‌دهد..."></textarea></label><button class="button secondary" type="submit">مشکل حل نشده، بازگشایی درخواست</button></form>';
-         }
-     } elseif ($ticket['status'] === 'closed') {
-         if (!$requiresRating) {
-             echo '<div class="card"><p class="muted">این درخواست بسته شده است. برای ادامه، درخواست جدید ثبت کنید.</p></div>';
-         }
-     } elseif (!$requiresRating && user_can($user, 'ticket.reply')) {
-         $afterOptions = (!$isRequester && user_can($user, 'ticket.edit') && $handlerLevel !== '' && !empty($ticket['assigned_to']) && !$cancelHasRequest) ? array_values(array_intersect(['waiting_user', 'resolved'], ticket_allowed_transitions((string) $ticket['status']))) : [];
-         $afterSelect = '';
-         if ($afterOptions) {
-             $afterSelect = '<label>پس از ارسال<select name="after_status"><option value="">بدون تغییر وضعیت</option>';
-             foreach ($afterOptions as $afterOption) {
-                 $afterSelect .= '<option value="' . $afterOption . '">' . ($afterOption === 'resolved' ? 'حل شد (منتظر امتیاز کاربر)' : e(status_label($afterOption))) . '</option>';
-             }
-             $afterSelect .= '</select></label>';
-         } elseif ($cancelHasRequest && $handlerLevel !== '') {
-             $afterSelect = '<small class="muted">تا تصمیم لغو، تغییر وضعیت از مسیر پاسخ متوقف است؛ پیام شما به‌عنوان گفت‌وگو ثبت می‌شود.</small>';
-         }
-         echo '<form class="card reply-box" method="post" enctype="multipart/form-data">' . csrf_field() . '<input type="hidden" name="action" value="reply"><input type="hidden" name="ticket_id" value="' . (int) $ticket['id'] . '"><label>پاسخ شما<textarea name="body" required rows="5" placeholder="پیام خود را بنویسید..."></textarea></label><div class="reply-actions"><label class="file-input compact">پیوست<input type="file" name="attachment"></label>' . ($staff && !$isRequester ? '<label class="check-label"><input type="checkbox" name="is_internal" value="1"> یادداشت داخلی</label>' : '') . $afterSelect . '<button class="button" type="submit">ارسال پاسخ</button></div></form>';
-     }
-     echo '</section>';
-        echo '<aside class="ticket-sidebar"><div class="card detail-card"><h3>اطلاعات درخواست</h3><dl><dt>ثبت‌کننده</dt><dd>' . e($ticket['requester_name']) . '</dd><dt>حوزه</dt><dd>' . (($ticket['service_group'] ?? 'it') === 'support' ? 'پشتیبانی' : 'IT') . '</dd><dt>نوع</dt><dd>' . e(ticket_type_label((string) $ticket['ticket_type'])) . '</dd><dt>خدمت</dt><dd>' . e($ticket['service_name'] ?: 'بدون خدمت') . '</dd><dt>واحد رسیدگی</dt><dd>' . e(($ticket['service_group'] ?? 'it') === 'support' ? 'واحد پشتیبانی' : 'واحد فناوری اطلاعات') . '</dd><dt>معاونت سازمانی</dt><dd>' . e($ticket['requesting_unit_name'] ?: ($ticket['department_name'] ?: 'بدون معاونت')) . '</dd><dt>دسته‌بندی</dt><dd>' . e($ticket['category_name'] ?: 'بدون دسته‌بندی') . '</dd><dt>کارشناس</dt><dd>' . e($ticket['assignee_name'] ?: 'تخصیص داده نشده') . '</dd>' . (($ticket['service_group'] ?? 'it') === 'support' ? '<dt>محل خدمت</dt><dd>' . e($ticket['support_location'] ?: 'ثبت نشده') . '</dd><dt>تجهیز / مورد</dt><dd>' . e($ticket['support_equipment'] ?: 'ثبت نشده') . '</dd>' : '<dt>سیستم</dt><dd>' . e($ticket['hostname'] ? asset_display_name($ticket['hostname']) . (asset_is_auto_domain_tag($ticket['asset_tag']) ? '' : ' (' . $ticket['asset_tag'] . ')') : 'بدون سیستم مرتبط') . '</dd>') . '<dt>مهلت SLA</dt><dd>' . e($ticket['due_at'] ? persian_date($ticket['due_at']) : 'ثبت نشده') . '</dd><dt>مهلت پاسخ OLA</dt><dd>' . e($ticket['ola_response_due_at'] ? persian_date($ticket['ola_response_due_at']) : 'ثبت نشده') . '</dd><dt>مهلت حل OLA</dt><dd>' . e($ticket['ola_due_at'] ? persian_date($ticket['ola_due_at']) : 'ثبت نشده') . '</dd>' . (ticket_rating_is_current($ticket) ? '<dt>رضایت کاربر</dt><dd>' . e((string) $ticket['rating_score']) . ' از ۵</dd>' : '') . '</dl></div>';
-    if ($staff && empty($ticket['assigned_to']) && in_array($ticket['status'], ['new', 'manager_review'], true) && ticket_assignee_is_eligible($ticket, $user, 'ticket_notification_user_can') && !$cancelHasRequest) {
-        echo '<div class="card detail-card"><h3>برداشتن درخواست</h3><p class="muted">این درخواست هنوز کارشناس مسئول ندارد.</p><form method="post">' . csrf_field() . '<input type="hidden" name="action" value="claim_ticket"><input type="hidden" name="ticket_id" value="' . (int) $ticket['id'] . '"><button class="button wide" type="submit">برداشتن و شروع رسیدگی</button></form></div>';
-    }
-    if ($canManageTicket && $handlerLevel !== '' && $cancelHasRequest && !in_array((string) $ticket['status'], ['closed', 'cancelled'], true)) {
-        echo '<div class="card detail-card"><h3>مدیریت درخواست</h3><p class="muted">تا تصمیم دربارهٔ درخواست لغو، تغییر وضعیت، اولویت و ارجاع متوقف است. گفت‌وگو از ستون مکالمه ادامه دارد.</p></div>';
-    }
-    if ($canManageTicket && $handlerLevel !== '' && !$cancelHasRequest && !in_array((string) $ticket['status'], ['closed', 'cancelled'], true)) {
-         if ($canAssignTicket) {
-              $ticketGroupForList = (string) ($ticket['service_group'] ?? 'it');
-              $agentSql = 'SELECT u.id, u.full_name, u.username, u.role, u.is_active, u.is_primary_admin, u.department_id, u.is_it_agent, hu.code AS handling_unit_code FROM users u LEFT JOIN handling_units hu ON hu.id = u.handling_unit_id WHERE u.is_active = 1 AND (((u.role = "primary_admin" OR (u.role = "admin" AND u.is_primary_admin = 1)) AND ? = "it") OR (u.role = "support_manager" AND ? = "support") OR (u.role IN ("agent", "manager") AND hu.code = ?)) AND (u.role <> "manager" OR (? > 0 AND u.department_id = ?))';
-              $ticketDepartmentForList = (int) ($ticket['department_id'] ?? 0);
-              $agentParams = [$ticketGroupForList, $ticketGroupForList, $ticketGroupForList, $ticketDepartmentForList, $ticketDepartmentForList];
-              if (($user['role'] ?? '') === 'manager' && $ticketGroupForList === 'support' && (int) ($user['department_id'] ?? 0) > 0) {
-                  $agentSql .= ' AND u.department_id = ?';
-                  $agentParams[] = (int) $user['department_id'];
-              }
-              $agentSql .= ' ORDER BY u.full_name';
-              $agentQuery = db()->prepare($agentSql);
-              $agentQuery->execute($agentParams);
-              $agents = array_values(array_filter($agentQuery->fetchAll(), static fn ($candidate) => ticket_assignee_is_eligible($ticket, $candidate, 'ticket_notification_user_can')));
-        }
-        echo '<div class="card detail-card"><h3>مدیریت درخواست</h3><form method="post">' . csrf_field() . '<input type="hidden" name="action" value="update_ticket"><input type="hidden" name="ticket_id" value="' . (int) $ticket['id'] . '"><label>وضعیت<select name="status">';
-        $statusChoices = array_values(array_unique(array_merge([(string) $ticket['status']], array_filter(ticket_allowed_transitions((string) $ticket['status']), fn ($allowedStatus) => $canAssignTicket || in_array($allowedStatus, ['in_progress', 'waiting_user', 'resolved'], true)))));
-        foreach ($statusChoices as $status) {
-            echo '<option value="' . $status . '" ' . ($ticket['status'] === $status ? 'selected' : '') . '>' . status_label($status) . '</option>';
-        }
-        echo '</select></label>';
-        if ($canAssignTicket) {
-            echo '<label>اولویت<select name="priority">';
-            foreach (['normal','urgent','critical'] as $priority) {
-                echo '<option value="' . $priority . '" ' . ($ticket['priority'] === $priority ? 'selected' : '') . '>' . priority_label($priority) . '</option>';
-            }
-            echo '</select></label>';
-        } else {
-            echo '<input type="hidden" name="priority" value="' . e((string) $ticket['priority']) . '">';
-        }
-        if ($canAssignTicket) {
-            echo '<label>ارجاع به<select name="assigned_to"><option value="">بدون تخصیص</option>';
-            if (!empty($ticket['assigned_to']) && !in_array((int) $ticket['assigned_to'], array_map('intval', array_column($agents, 'id')), true)) {
-                echo '<option value="' . (int) $ticket['assigned_to'] . '" selected>' . e((string) ($ticket['assignee_name'] ?? '')) . '</option>';
-            }
-            foreach ($agents as $agent) {
-                echo '<option value="' . (int) $agent['id'] . '" ' . ((int) $ticket['assigned_to'] === (int) $agent['id'] ? 'selected' : '') . '>' . e($agent['full_name']) . '</option>';
-            }
-            echo '</select></label>';
-        } else {
-            echo '<input type="hidden" name="assigned_to" value="' . (int) $ticket['assigned_to'] . '"><p class="muted">ارجاع درخواست فقط توسط مدیر واحد انجام می‌شود.</p>';
-        }
-        echo '<label>پیام همراه تغییر (برای «در انتظار پاسخ کاربر» و «حل‌شده» الزامی)<textarea name="update_note" rows="3" maxlength="5000" placeholder="برای انتظار: سؤال روشن؛ برای حل‌شده: شرح راه‌حل"></textarea><small class="field-help">این پیام برای ثبت‌کننده قابل مشاهده است و در مکالمه ذخیره می‌شود.</small></label>';
-        echo '<button class="button wide" type="submit">ذخیره تغییرات</button></form></div>';
-    }
-    echo '</aside></div>';
-    $eventSearch = trim((string) ($_GET['event_q'] ?? ''));
-    $eventConditions = ['e.ticket_id = ?'];
-    $eventParams = [(int) $ticket['id']];
-    if ($eventSearch !== '') {
-        $needle = '%' . logging_utf8_substr($eventSearch, 0, 100) . '%';
-        $searchParts = ['e.event_type LIKE ?', 'e.from_status LIKE ?', 'e.to_status LIKE ?', 'u.full_name LIKE ?'];
-        array_push($eventParams, $needle, $needle, $needle, $needle);
-        if ($staff) {
-            $searchParts[] = 'CAST(e.details AS CHAR) LIKE ?';
-            $eventParams[] = $needle;
-        } else {
-            // Requesters may search only the same safe detail keys that are rendered to them.
-            foreach (['reason','score','from','to','mode','department_id','sla_minutes','ticket_type','service_id','from_status','to_status','status','priority'] as $safeSearchKey) {
-                $searchParts[] = "JSON_UNQUOTE(JSON_EXTRACT(e.details, '$." . $safeSearchKey . "')) LIKE ?";
-                $eventParams[] = $needle;
-            }
-        }
-        $eventConditions[] = '(' . implode(' OR ', $searchParts) . ')';
-    }
-    $eventCountQuery = db()->prepare('SELECT COUNT(*) FROM ticket_events e LEFT JOIN users u ON u.id = e.user_id WHERE ' . implode(' AND ', $eventConditions));
-    $eventCountQuery->execute($eventParams);
-    $eventTotal = (int) $eventCountQuery->fetchColumn();
-    $eventPageSize = 100;
-    $eventPages = max(1, (int) ceil($eventTotal / $eventPageSize));
-    $eventPage = min(max(1, (int) ($_GET['event_page'] ?? 1)), $eventPages);
-    $eventOffset = ($eventPage - 1) * $eventPageSize;
-    $eventsQuery = db()->prepare('SELECT e.*, u.full_name FROM ticket_events e LEFT JOIN users u ON u.id = e.user_id WHERE ' . implode(' AND ', $eventConditions) . ' ORDER BY e.created_at DESC, e.id DESC LIMIT ' . $eventPageSize . ' OFFSET ' . $eventOffset);
-    $eventsQuery->execute($eventParams);
-    $ticketEvents = $eventsQuery->fetchAll();
-    echo '<section class="card event-log"><div class="section-title"><div><h3>ردگیری و سوابق انجام کار</h3><p class="muted">' . number_format($eventTotal) . ' رخداد مطابق فیلتر؛ صفحه ' . number_format($eventPage) . ' از ' . number_format($eventPages) . '. جزئیات قابل‌مشاهده بر اساس سطح دسترسی پالایش می‌شود.</p></div></div>';
-    echo '<form method="get" class="inline-form"><input type="hidden" name="page" value="ticket"><input type="hidden" name="id" value="' . (int) $ticket['id'] . '"><label>جست‌وجوی رویداد<input type="search" name="event_q" maxlength="100" value="' . e($eventSearch) . '" placeholder="نوع رویداد، وضعیت، توضیحات یا عامل"></label><button class="button secondary" type="submit">جست‌وجو</button>' . ($eventSearch !== '' ? '<a class="button secondary" href="index.php?page=ticket&amp;id=' . (int) $ticket['id'] . '">پاک‌کردن</a>' : '') . '</form><div class="event-list">';
-    foreach ($ticketEvents as $event) {
-        $eventText = ['created' => 'درخواست ثبت شد', 'assigned' => 'درخواست به کارشناس ارجاع شد', 'status_changed' => 'وضعیت درخواست تغییر کرد', 'reply' => 'پاسخ ثبت شد', 'internal_note' => 'یادداشت داخلی ثبت شد', 'claimed' => 'درخواست توسط کارشناس برداشته شد', 'rated' => 'امتیاز رضایت کاربر ثبت شد', 'reopened_by_user' => 'کاربر اعلام کرد مشکل حل نشده است', 'supervisor_approved' => 'تأیید نهایی و بسته‌شدن', 'supervisor_rework' => 'برگشت برای اصلاح توسط سوپروایزر', 'supervisor_reopened' => 'بازگشایی رسمی توسط سوپروایزر', 'cancelled_by_requester' => 'لغو مستقیم توسط ثبت‌کننده پیش از ارجاع', 'cancellation_requested' => 'درخواست لغو در انتظار تصمیم مسئول', 'cancellation_approved' => 'تأیید لغو توسط مسئول رسیدگی', 'cancellation_rejected' => 'رد درخواست لغو و ادامهٔ رسیدگی', 'auto_assigned' => 'ارجاع خودکار به مسئول حوزه', 'auto_closed' => 'بسته‌شدن خودکار (بدون امتیاز کاربر)', 'bulk_status_changed' => 'تغییر وضعیت گروهی', 'priority_changed' => 'اولویت تغییر کرد'][$event['event_type']] ?? $event['event_type'];
-        $eventDetails = json_decode((string) ($event['details'] ?? ''), true);
-        $eventDetails = is_array($eventDetails) ? $eventDetails : [];
-        $visibleDetails = [];
-        $safeKeys = ['reason','score','from','to','mode','department_id','sla_minutes','ticket_type','service_id','from_status','to_status','status','priority'];
-        if ($staff) $safeKeys = array_merge($safeKeys, ['note','assigned_to','requested_at','actor_id']);
-        foreach ($eventDetails as $detailKey => $detailValue) {
-            if (in_array((string) $detailKey, $safeKeys, true)) $visibleDetails[$detailKey] = $detailValue;
-        }
-        $detailLines = $visibleDetails ? activity_log_meta_lines(json_encode($visibleDetails, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES)) : [];
-        $detailHtml = $detailLines ? '<details class="log-details"><summary>جزئیات (' . count($detailLines) . ')</summary><dl>' . implode('', array_map(static fn (array $line): string => '<div><dt>' . e((string) $line[0]) . '</dt><dd>' . e((string) $line[1]) . '</dd></div>', $detailLines)) . '</dl></details>' : '';
-        $fromStatus = trim((string) ($event['from_status'] ?? ''));
-        $toStatus = trim((string) ($event['to_status'] ?? ''));
-        $transition = ($fromStatus !== '' || $toStatus !== '') ? '<small class="muted">' . e($fromStatus !== '' ? status_label($fromStatus) : '—') . ' ← ' . e($toStatus !== '' ? status_label($toStatus) : '—') . '</small>' : '';
-        $correlationHtml = $staff && !empty($event['request_id'])
-            ? '<small class="muted" dir="ltr">Request: ' . e((string) $event['request_id']) . (!empty($event['trace_id']) ? ' · Trace: ' . e((string) $event['trace_id']) : '') . '</small>'
-            : '';
-        echo '<div class="event-item"><span class="event-dot"></span><div><strong>' . e($eventText) . '</strong><small>' . e($event['full_name'] ?: 'سامانه') . ' • ' . persian_date($event['created_at']) . '</small>' . $transition . $detailHtml . $correlationHtml . '</div><em>' . e($toStatus !== '' ? status_label($toStatus) : '—') . '</em></div>';
-    }
-    if (!$ticketEvents) echo '<p class="muted">رخدادی با این عبارت پیدا نشد.</p>';
-    if ($eventPages > 1) {
-        $eventBase = 'index.php?page=ticket&amp;id=' . (int) $ticket['id'] . ($eventSearch !== '' ? '&amp;event_q=' . rawurlencode($eventSearch) : '') . '&amp;event_page=';
-        echo '<div class="actions">' . ($eventPage > 1 ? '<a class="button secondary" href="' . $eventBase . ($eventPage - 1) . '">رخدادهای قدیمی‌تر</a>' : '') . ($eventPage < $eventPages ? '<a class="button secondary" href="' . $eventBase . ($eventPage + 1) . '">رخدادهای جدیدتر</a>' : '') . '</div>';
-    }
-    echo '</div></section>';
-    render_footer();
-    exit;
-}
-
-if ($page === 'analytics') {
-    $analyticsUser = require_permission('analytics.view');
-    [$analyticsScope, $analyticsParams] = ticket_scope($analyticsUser);
-    $statusQuery = db()->prepare('SELECT t.status, COUNT(*) AS total FROM tickets t ' . $analyticsScope . ' GROUP BY t.status ORDER BY total DESC');
-    $statusQuery->execute($analyticsParams);
-    $statusRows = $statusQuery->fetchAll();
-    $priorityQuery = db()->prepare('SELECT t.priority, COUNT(*) AS total FROM tickets t ' . $analyticsScope . ' GROUP BY t.priority ORDER BY total DESC');
-    $priorityQuery->execute($analyticsParams);
-    $priorityRows = $priorityQuery->fetchAll();
-    $departmentQuery = db()->prepare('SELECT COALESCE(d.name, "بدون معاونت") AS label, COUNT(*) AS total FROM tickets t LEFT JOIN departments d ON d.id = t.department_id ' . $analyticsScope . ' GROUP BY t.department_id, d.name ORDER BY total DESC LIMIT 10');
-    $departmentQuery->execute($analyticsParams);
-    $departmentRows = $departmentQuery->fetchAll();
-    $ratingConditions = ['(u.is_it_agent = 1 OR u.role = "agent")', 'u.is_active = 1'];
-    $ratingParams = [];
-    if (!is_global_ticket_role($analyticsUser['role'])) {
-        $ratingConditions[] = 'hu.code = ?';
-        $ratingParams[] = ($analyticsUser['role'] ?? '') === 'support_manager' ? 'support' : user_service_group($analyticsUser);
-        if (is_department_scoped_role($analyticsUser['role']) && (int) ($analyticsUser['department_id'] ?? 0) > 0) {
-            $ratingConditions[] = 'rt.department_id = ?';
-            $ratingParams[] = (int) $analyticsUser['department_id'];
-        }
-    }
-    $agentQuery = db()->prepare('SELECT u.full_name AS label, COUNT(tr.id) AS ratings, COALESCE(AVG(tr.score), 0) AS average FROM users u LEFT JOIN handling_units hu ON hu.id = u.handling_unit_id LEFT JOIN ticket_ratings tr ON tr.agent_id = u.id LEFT JOIN tickets rt ON rt.id = tr.ticket_id WHERE ' . implode(' AND ', $ratingConditions) . ' GROUP BY u.id ORDER BY average DESC, ratings DESC LIMIT 10');
-    $agentQuery->execute($ratingParams);
-    $agentRows = $agentQuery->fetchAll();
-    $chart = static function (string $title, array $rows, callable $label, callable $value, string $suffix = ''): string {
-        $max = 1;
-        foreach ($rows as $row) { $max = max($max, (float) $value($row)); }
-        $html = '<section class="card chart-card"><div class="chart-title"><h2>' . e($title) . '</h2><span>نمای تحلیلی</span></div>';
-        if (!$rows) { return $html . '<p class="muted">داده‌ای برای نمایش وجود ندارد.</p></section>'; }
-        foreach ($rows as $row) { $amount = (float) $value($row); $width = max(3, (int) round(($amount / $max) * 100)); $html .= '<div class="chart-row"><div class="chart-label"><span>' . e((string) $label($row)) . '</span><b>' . e(rtrim(rtrim(number_format($amount, 1, '.', ''), '0'), '.') . $suffix) . '</b></div><div class="chart-track"><i style="width:' . $width . '%"></i></div></div>'; }
-        return $html . '</section>';
-    };
-    render_header('تحلیل و چارت‌ها', $analyticsUser);
-     echo '<section class="page-heading"><div><span class="eyebrow">نمای تحلیلی مدیریتی</span><h1>تحلیل عملکرد سامانه</h1><p>توزیع وضعیت، اولویت، معاونت و رضایت از کارشناسان هر واحد.</p></div><a class="button secondary" href="index.php?page=reports">گزارش فیلترپذیر</a></section><section class="charts-grid">';
-    echo $chart('توزیع وضعیت درخواست‌ها', $statusRows, static fn (array $row): string => status_label((string) $row['status']), static fn (array $row): float => (float) $row['total']);
-    echo $chart('توزیع اولویت‌ها', $priorityRows, static fn (array $row): string => priority_label((string) $row['priority']), static fn (array $row): float => (float) $row['total']);
-    echo $chart('درخواست بر اساس معاونت', $departmentRows, static fn (array $row): string => (string) $row['label'], static fn (array $row): float => (float) $row['total']);
-    echo $chart('میانگین رضایت کارشناسان', $agentRows, static fn (array $row): string => (string) $row['label'] . ' (' . (int) $row['ratings'] . ' نظر)', static fn (array $row): float => (float) $row['average'], ' از ۵');
-    echo '</section><section class="card analytics-note"><strong>راهنمای تحلیل</strong><span>امتیاز رضایت فقط پس از حل درخواست و توسط ثبت‌کننده ثبت می‌شود. گزارش‌های این صفحه بر اساس سطح دسترسی شما (حوزه و معاونت) فیلتر می‌شوند.</span></section>';
-    render_footer();
-    exit;
-}
-
-if ($page === 'reports') {
-    $reportUser = require_permission('reports.view');
-    $reportMissingColumns = db_missing_columns('tickets', ['subject', 'description', 'status', 'priority', 'requester_id', 'department_id', 'service_group', 'created_at', 'updated_at', 'assigned_to', 'ticket_type', 'assigned_at', 'first_response_at', 'resolved_at', 'closed_at', 'due_at', 'sla_minutes']);
-    if ($reportMissingColumns) {
-        render_header('گزارش‌ها', $reportUser);
-        echo '<section class="card empty-state"><h2>ساختار گزارش‌ها کامل نیست.</h2><p>این نسخه به ستون‌های جدید درخواست نیاز دارد. فایل‌های Migration را به‌ترتیب روی همان دیتابیس اجرا کنید، سپس صفحه را تازه‌سازی کنید.</p><p><code>upgrade-1.2-itsm.sql</code> و در صورت نیاز <code>upgrade-1.8-routing.sql</code></p><p class="muted">ستون‌های ناقص: ' . e(implode(', ', $reportMissingColumns)) . '</p><a class="button" href="index.php">بازگشت به داشبورد</a></section>';
-        render_footer();
-        exit;
-    }
-    [$where, $params] = report_query_filters($reportUser);
-    $summaryQuery = db()->prepare('SELECT COUNT(*) AS total, COALESCE(SUM(t.status IN ("new", "manager_review", "assigned", "in_progress", "waiting_user", "pending")), 0) AS active, COALESCE(SUM(t.status = "resolved"), 0) AS resolved, COALESCE(SUM(t.status = "closed"), 0) AS closed, COALESCE(SUM(t.status = "cancelled"), 0) AS cancelled, COALESCE(SUM(t.status NOT IN ("resolved", "closed", "cancelled") AND t.sla_paused_at IS NULL AND t.due_at IS NOT NULL AND t.due_at < NOW()), 0) AS overdue, AVG(CASE WHEN t.resolved_at IS NOT NULL THEN TIMESTAMPDIFF(MINUTE, t.created_at, t.resolved_at) END) AS avg_resolution FROM tickets t LEFT JOIN users r ON r.id = t.requester_id ' . $where);
-    $summaryQuery->execute($params);
-    $summary = $summaryQuery->fetch() ?: ['total' => 0, 'active' => 0, 'resolved' => 0, 'closed' => 0, 'cancelled' => 0, 'overdue' => 0, 'avg_resolution' => 0];
-    $reportPerPage = 100;
-    $reportPage = max(1, (int) ($_GET['p'] ?? 1));
-    $reportPages = max(1, (int) ceil(((int) $summary['total']) / $reportPerPage));
-    $reportPage = min($reportPage, $reportPages);
-    $reportOffset = ($reportPage - 1) * $reportPerPage;
-     $rowsQuery = db()->prepare('SELECT t.*, d.name AS department_name, r.full_name AS requester_name, a.full_name AS assignee_name FROM tickets t LEFT JOIN departments d ON d.id = t.department_id JOIN users r ON r.id = t.requester_id LEFT JOIN users a ON a.id = t.assigned_to ' . $where . ' ORDER BY t.created_at DESC LIMIT ' . $reportPerPage . ' OFFSET ' . $reportOffset);
-    $rowsQuery->execute($params);
-    $reportRows = $rowsQuery->fetchAll();
-    ticket_number_cache_prime($reportRows); // ticket_no از همین SELECT آمده؛ جلوگیری از N+1
-    $departments = is_global_ticket_role($reportUser['role']) ? db()->query('SELECT id, name FROM departments WHERE is_active = 1 ORDER BY name')->fetchAll() : [];
-    $queryString = http_build_query(array_filter($_GET, static fn ($value, $key): bool => $key !== 'page' && $key !== 'action' && $value !== '', ARRAY_FILTER_USE_BOTH));
-    render_header('گزارش‌ها', $reportUser);
-     echo '<section class="page-heading"><div><span class="eyebrow">کنترل عملکرد پشتیبانی</span><h1>گزارش و پیگیری</h1><p>گزارش‌ها را فیلتر کنید و خروجی قابل استفاده در Excel بگیرید.</p></div><a class="button secondary" href="index.php?action=export_report' . ($queryString ? '&' . e($queryString) : '') . '">خروجی Excel</a></section><section class="card filter-card"><form method="get"><input type="hidden" name="page" value="reports"><div class="filter-grid"><label>از تاریخ جلالی<input type="text" name="from" placeholder="۱۴۰۵/۰۱/۰۱" value="' . e($_GET['from'] ?? '') . '"></label><label>تا تاریخ جلالی<input type="text" name="to" placeholder="۱۴۰۵/۰۱/۳۱" value="' . e($_GET['to'] ?? '') . '"></label><label>وضعیت<select name="status"><option value="">همه وضعیت‌ها</option>';
-    // گزینه‌های گروهی هم اضافه شدند تا کارت‌های داشبورد (?status=active/resolved/all) در فرم دیده شوند
-    foreach (['all' => 'همهٔ درخواست‌ها', 'active' => 'باز و در حال پیگیری', 'new' => 'جدید', 'manager_review' => null, 'assigned' => null, 'in_progress' => null, 'waiting_user' => null, 'pending' => null, 'resolved' => null, 'closed' => null, 'cancelled' => null] as $status => $customLabel) {
-        echo '<option value="' . $status . '" ' . ((string) ($_GET['status'] ?? '') === $status ? 'selected' : '') . '>' . e($customLabel ?? status_label($status)) . '</option>';
-    }
-    echo '</select></label>';
-    if ($departments) {
-        echo '<label>واحد<select name="department_id"><option value="">همه واحدها</option>';
-        foreach ($departments as $department) {
-            echo '<option value="' . (int) $department['id'] . '" ' . ((int) ($_GET['department_id'] ?? 0) === (int) $department['id'] ? 'selected' : '') . '>' . e($department['name']) . '</option>';
-        }
-        echo '</select></label>';
-    }
-    echo '<label>اولویت<select name="priority"><option value="">همه اولویت‌ها</option>';
-     foreach (['normal','urgent','critical'] as $priority) {
-        echo '<option value="' . $priority . '" ' . ((string) ($_GET['priority'] ?? '') === $priority ? 'selected' : '') . '>' . priority_label($priority) . '</option>';
-    }
-     echo '</select></label><label>حوزه خدمت<select name="service_group"><option value="">همه حوزه‌ها</option><option value="it" ' . ((string) ($_GET['service_group'] ?? '') === 'it' ? 'selected' : '') . '>IT</option><option value="support" ' . ((string) ($_GET['service_group'] ?? '') === 'support' ? 'selected' : '') . '>پشتیبانی</option></select></label><label>نوع درخواست<select name="ticket_type"><option value="">همه انواع</option>';
-     foreach (['incident','request','problem','change'] as $ticketType) { echo '<option value="' . $ticketType . '" ' . ((string) ($_GET['ticket_type'] ?? '') === $ticketType ? 'selected' : '') . '>' . ticket_type_label($ticketType) . '</option>'; }
-     echo '</select></label><label class="filter-search">جست‌وجو<input name="q" value="' . e($_GET['q'] ?? '') . '" placeholder="عنوان، شرح یا ثبت‌کننده"></label><button class="button" type="submit">اعمال فیلتر</button></div></form></section><section class="stat-grid report-stats"><div class="stat-card accent"><span class="stat-icon">▣</span><div><strong>' . (int) $summary['total'] . '</strong><small>کل درخواست‌ها</small></div></div><div class="stat-card"><span class="stat-icon blue">◈</span><div><strong>' . (int) $summary['active'] . '</strong><small>باز و در حال انجام</small></div></div><div class="stat-card"><span class="stat-icon green">✓</span><div><strong>' . ((int) $summary['resolved'] + (int) $summary['closed']) . '</strong><small>حل‌شده یا بسته</small></div></div><div class="stat-card"><span class="stat-icon gray">×</span><div><strong>' . (int) $summary['cancelled'] . '</strong><small>لغوشده</small></div></div><div class="stat-card"><span class="stat-icon gray">◷</span><div><strong>' . ($summary['avg_resolution'] ? round((float) $summary['avg_resolution'] / 60, 1) . ' ساعت' : '-') . '</strong><small>میانگین زمان حل</small></div></div><div class="stat-card"><span class="stat-icon" style="background:#fef3f2;color:#b42318">!</span><div><strong>' . (int) $summary['overdue'] . '</strong><small>عبور از SLA</small></div></div></section><section class="card ticket-table report-table"><div class="table-head"><span>درخواست</span><span>واحد</span><span>ثبت‌کننده</span><span>وضعیت</span><span>زمان ثبت</span></div>';
-    foreach ($reportRows as $row) {
-         echo '<a class="table-row" href="index.php?page=ticket&id=' . (int) $row['id'] . '"><span class="ticket-title"><b>' . e(ticket_number((int) $row['id'])) . '</b><strong>' . e($row['subject']) . '</strong><small>' . e(ticket_type_label($row['ticket_type'])) . ' • ' . e($row['assignee_name'] ?: 'بدون کارشناس') . '</small></span><span>' . e($row['department_name'] ?: 'بدون واحد') . '</span><span>' . e($row['requester_name']) . '</span><span><em class="status ' . e($row['status']) . '">' . e(status_label($row['status'])) . '</em></span><span class="date-cell">' . persian_date($row['created_at']) . '</span></a>';
-    }
-    echo '</section>';
-    if ($reportPages > 1) {
-        $reportBaseArgs = array_filter($_GET, static fn ($value, $key): bool => $key !== 'p' && $key !== 'page' && $value !== '', ARRAY_FILTER_USE_BOTH);
-        echo '<nav class="pagination" aria-label="صفحه‌بندی گزارش">';
-        for ($reportNav = max(1, $reportPage - 3); $reportNav <= min($reportPages, $reportPage + 3); $reportNav++) {
-            $reportArgs = array_merge(['page' => 'reports'], $reportBaseArgs, ['p' => $reportNav]);
-            echo '<a class="' . ($reportNav === $reportPage ? 'active' : '') . '" href="index.php?' . e(http_build_query($reportArgs)) . '">' . number_format($reportNav) . '</a>';
-        }
-        echo '</nav>';
-    }
-    render_footer();
-    exit;
-}
-
-if ($page === 'supervisor') {
-    $supervisor = require_permission('supervisor.panel');
-    [$where, $params] = ticket_scope($supervisor);
-    $summaryQuery = db()->prepare('SELECT COUNT(*) AS total, SUM(status IN ("new", "manager_review", "assigned", "in_progress", "waiting_user", "pending")) AS active, SUM(status = "resolved") AS awaiting_approval, SUM(status = "closed") AS closed, SUM(status = "cancelled") AS cancelled FROM tickets t ' . $where);
-    $summaryQuery->execute($params);
-    $summary = $summaryQuery->fetch() ?: ['total' => 0, 'active' => 0, 'awaiting_approval' => 0, 'closed' => 0, 'cancelled' => 0];
-    $supervisorPerPage = 100;
-    $supervisorPage = max(1, (int) ($_GET['p'] ?? 1));
-    $supervisorPages = max(1, (int) ceil(((int) $summary['total']) / $supervisorPerPage));
-    $supervisorPage = min($supervisorPage, $supervisorPages);
-    $supervisorOffset = ($supervisorPage - 1) * $supervisorPerPage;
-     $ticketsQuery = db()->prepare('SELECT t.*, d.name AS department_name, r.full_name AS requester_name, a.full_name AS assignee_name, tr.score AS rating_score, tr.created_at AS rating_at FROM tickets t LEFT JOIN departments d ON d.id = t.department_id JOIN users r ON r.id = t.requester_id LEFT JOIN users a ON a.id = t.assigned_to LEFT JOIN ticket_ratings tr ON tr.ticket_id = t.id ' . $where . ' ORDER BY CASE WHEN t.status = "resolved" THEN 0 WHEN t.status IN ("new", "manager_review", "assigned", "in_progress", "waiting_user", "pending") THEN 1 ELSE 2 END, t.updated_at DESC LIMIT ' . $supervisorPerPage . ' OFFSET ' . $supervisorOffset);
-    $ticketsQuery->execute($params);
-    $supervisorRows = $ticketsQuery->fetchAll();
-    ticket_number_cache_prime($supervisorRows); // ticket_no از همین SELECT آمده؛ جلوگیری از N+1
-    render_header('پنل سوپروایزر', $supervisor);
-    echo '<section class="page-heading"><div><span class="eyebrow">نظارت سراسری</span><h1>پنل سوپروایزر</h1><p>تمام مراحل از ثبت تا انجام و تأیید نهایی را کنترل کنید.</p></div><a class="button secondary" href="index.php?page=reports">گزارش کامل</a></section><section class="stat-grid"><div class="stat-card accent"><span class="stat-icon">▣</span><div><strong>' . (int) $summary['total'] . '</strong><small>کل درخواست‌ها</small></div></div><div class="stat-card"><span class="stat-icon blue">◈</span><div><strong>' . (int) $summary['active'] . '</strong><small>در گردش</small></div></div><div class="stat-card"><span class="stat-icon" style="background:#fff8e7;color:#9a6700">✓</span><div><strong>' . (int) $summary['awaiting_approval'] . '</strong><small>منتظر تأیید شما</small></div></div><div class="stat-card"><span class="stat-icon green">✓</span><div><strong>' . (int) $summary['closed'] . '</strong><small>بسته‌شده</small></div></div><div class="stat-card"><span class="stat-icon gray">×</span><div><strong>' . (int) $summary['cancelled'] . '</strong><small>لغوشده</small></div></div></section><section class="card supervisor-list"><div class="table-head"><span>درخواست</span><span>واحد</span><span>کارشناس</span><span>وضعیت</span><span>عملیات</span></div>';
-    foreach ($supervisorRows as $ticket) {
-        echo '<div class="table-row supervisor-row"><span class="ticket-title"><b>' . e(ticket_number((int) $ticket['id'])) . '</b><a href="index.php?page=ticket&id=' . (int) $ticket['id'] . '"><strong>' . e($ticket['subject']) . '</strong></a><small>' . e($ticket['requester_name']) . '</small>' . (!empty($ticket['cancel_requested_at']) ? '<small class="warning-text">درخواست لغو در انتظار بررسی</small>' : '') . '</span><span>' . e($ticket['department_name'] ?: 'بدون واحد') . '</span><span>' . e($ticket['assignee_name'] ?: 'بدون کارشناس') . '</span><span><em class="status ' . e($ticket['status']) . '">' . e(status_label($ticket['status'])) . '</em></span><span class="supervisor-actions">';
-        if ($ticket['status'] === 'resolved') {
-            if (ticket_rating_is_current($ticket)) {
-                echo '<form method="post">' . csrf_field() . '<input type="hidden" name="action" value="supervisor_decision"><input type="hidden" name="ticket_id" value="' . (int) $ticket['id'] . '"><input type="hidden" name="decision" value="approve"><button class="button" type="submit">تأیید و بستن</button></form>';
-            } else {
-                echo '<small class="muted">در انتظار امتیاز کاربر</small>';
-            }
-            echo '<form method="post">' . csrf_field() . '<input type="hidden" name="action" value="supervisor_decision"><input type="hidden" name="ticket_id" value="' . (int) $ticket['id'] . '"><input type="hidden" name="decision" value="rework"><input type="text" name="supervisor_note" required maxlength="500" placeholder="دلیل برگشت برای اصلاح"><button class="button secondary" type="submit">برگشت برای اصلاح</button></form>';
-         } elseif ($ticket['status'] === 'closed') {
-             echo '<a class="button secondary" href="index.php?page=ticket&id=' . (int) $ticket['id'] . '">مشاهده</a><form method="post">' . csrf_field() . '<input type="hidden" name="action" value="supervisor_reopen"><input type="hidden" name="ticket_id" value="' . (int) $ticket['id'] . '"><input type="hidden" name="supervisor_note" value="بازگشایی رسمی برای ادامه رسیدگی"><button class="button secondary" type="submit">بازگشایی رسمی</button></form>';
-         } else {
-             echo '<a class="button secondary" href="index.php?page=ticket&id=' . (int) $ticket['id'] . '">مشاهده</a>';
-        }
-        echo '</span></div>';
-    }
-    echo '</section>';
-    if ($supervisorPages > 1) {
-        echo '<nav class="pagination" aria-label="صفحه‌بندی سوپروایزر">';
-        for ($supervisorNav = max(1, $supervisorPage - 3); $supervisorNav <= min($supervisorPages, $supervisorPage + 3); $supervisorNav++) {
-            echo '<a class="' . ($supervisorNav === $supervisorPage ? 'active' : '') . '" href="index.php?page=supervisor&p=' . $supervisorNav . '">' . number_format($supervisorNav) . '</a>';
-        }
-        echo '</nav>';
-    }
-    render_footer();
-    exit;
-}
-
 if ($page === 'inventory') {
     $inventoryUser = require_permission('inventory.view');
     if (!is_global_ticket_role($inventoryUser['role']) && user_service_group($inventoryUser) !== 'it') {
@@ -2739,7 +1454,7 @@ if ($page === 'inventory') {
              } else {
                  $netBadge = '<small class="net-badge unknown">پینگ نشده</small>';
              }
-             echo '<a class="table-row" href="index.php?page=inventory&id=' . (int) $asset['id'] . '"><span class="ticket-title">' . (asset_is_auto_domain_tag($asset['asset_tag']) ? '' : '<b>' . e($asset['asset_tag']) . '</b>') . '<strong' . asset_name_attr($asset['hostname'], $asset['asset_tag']) . '>' . e(asset_display_name($asset['hostname'])) . '</strong>' . (asset_is_auto_domain_tag($asset['asset_tag']) ? '<small class="asset-tag-chip">دامنه</small>' : '') . $netBadge . '</span><span>' . e($asset['department_name'] ?: 'بدون معاونت') . '</span><span>' . e($asset['operating_system']) . '</span><span>' . e($asset['last_inventory_at'] ? persian_date($asset['last_inventory_at']) : 'ثبت نشده') . '</span></a>';
+             echo '<a class="table-row" href="index.php?page=inventory&id=' . (int) $asset['id'] . '"><span class="ticket-title">' . '<strong' . asset_name_attr($asset['hostname']) . '>' . e(asset_name_or($asset['hostname'])) . '</strong>' . $netBadge . '</span><span>' . e($asset['department_name'] ?: 'بدون معاونت') . '</span><span>' . e($asset['operating_system']) . '</span><span>' . e($asset['last_inventory_at'] ? persian_date($asset['last_inventory_at']) : 'ثبت نشده') . '</span></a>';
          }
         echo '</section>';
         render_footer();
@@ -2786,18 +1501,14 @@ if ($page === 'inventory') {
     render_header('شناسنامه سیستم', $inventoryUser);
     $canExtractThisAsset = user_can($inventoryUser, 'domain.scan');
     $extractPreflight = $canExtractThisAsset ? domain_scan_preflight() : null;
-    $canExtractLocalThisAsset = PHP_OS_FAMILY === 'Windows' && user_can($inventoryUser, 'asset.extract') && (is_global_ticket_role($inventoryUser['role']) || user_service_group($inventoryUser) === 'it') && inventory_asset_is_local($asset);
     $assetActions = '';
-    if ($canExtractLocalThisAsset) {
-        $assetActions .= '<form method="post" class="inline-action inventory-local-extract-form">' . csrf_field() . '<input type="hidden" name="action" value="collect_inventory"><button class="button" type="submit">استخراج محلی همین سیستم</button><label class="muted"><input type="checkbox" name="overwrite" value="1"> بازنویسی فیلدهای خودکارِ پُر</label></form>';
-    }
     if ($canExtractThisAsset && $extractPreflight === null) {
         $assetActions .= '<a class="button secondary" href="#extract-inventory">استخراج شبکه‌ای</a>';
         if (user_can($inventoryUser, 'settings.domain')) {
             $assetActions .= '<a class="button secondary" href="index.php?page=settings#domain-scan">تنظیمات اسکن شبکه</a>';
         }
     }
-    echo '<section class="page-heading asset-heading"><div><a class="back-link" href="index.php?page=inventory">← بازگشت به سیستم‌ها</a><h1>شناسنامه رایانه ' . e(asset_display_name($asset['hostname'])) . '</h1><p>' . e(asset_name_title($asset['hostname'], $asset['asset_tag']) ?: $asset['asset_tag']) . ' • مالک: ' . e($asset['owner_name'] ?: 'بدون مالک') . '</p><p class="muted">آخرین برداشت سخت‌افزاری: ' . e($lastInventoryLabel) . '</p><small class="muted">ثبت این زمان کامل‌بودن همهٔ فیلدها را تضمین نمی‌کند؛ در برداشت ناقص ممکن است مقدار پیشین باقی بماند. استخراج محلی برای جایگزینی فیلدهای خودکارِ پُر به تأیید «بازنویسی» نیاز دارد.</small>' . $collectionStatusHtml . '</div><div class="actions">' . $assetActions . '<a class="button secondary" href="index.php?page=asset-history&id=' . $inventoryId . '">تاریخچه</a></div></section>';
+    echo '<section class="page-heading asset-heading"><div><a class="back-link" href="index.php?page=inventory">← بازگشت به سیستم‌ها</a><h1' . asset_name_attr($asset['hostname']) . '>شناسنامه رایانه ' . e(asset_name_or($asset['hostname'])) . '</h1><p>مالک: ' . e($asset['owner_name'] ?: 'بدون مالک') . '</p><p class="muted">آخرین برداشت سخت‌افزاری: ' . e($lastInventoryLabel) . '</p><small class="muted">ثبت این زمان کامل‌بودن همهٔ فیلدها را تضمین نمی‌کند؛ در برداشت ناقص ممکن است مقدار پیشین باقی بماند. برداشت شبکه‌ایِ موفق فیلدهای ماشینی را تازه می‌کند؛ اطلاعات اداری و دستی جداگانه حفظ می‌شوند.</small>' . $collectionStatusHtml . '</div><div class="actions">' . $assetActions . '<a class="button secondary" href="index.php?page=asset-history&id=' . $inventoryId . '">تاریخچه</a></div></section>';
     if ($canExtractThisAsset) {
         if ($extractPreflight !== null) {
             echo '<section id="extract-inventory" class="card form-card inventory-extract-card"><h2>استخراج شبکه‌ای</h2><p class="alert danger">' . e((string) $extractPreflight) . '</p></section>';
@@ -2855,7 +1566,7 @@ if ($page === 'asset-history') {
     $historyQuery = db()->prepare('SELECT h.*, u.full_name, t.subject, t.id AS ticket_id FROM asset_history_events h LEFT JOIN users u ON u.id = h.user_id LEFT JOIN tickets t ON t.id = h.ticket_id WHERE h.asset_id = ? ORDER BY h.created_at DESC');
     $historyQuery->execute([$historyId]);
     render_header('تاریخچه سیستم', $historyUser);
-    echo '<section class="page-heading"><div><a class="back-link" href="index.php?page=inventory&id=' . $historyId . '">← بازگشت به شناسنامه</a><h1>تاریخچه کامل ' . e(asset_display_name($asset['hostname'])) . '</h1><p>' . e(asset_name_title($asset['hostname'], $asset['asset_tag']) ?: $asset['asset_tag']) . ' • ' . e($asset['owner_name'] ?: 'بدون مالک') . '</p></div></section><section class="card event-log system-history"><h3>تمام تغییرات، برداشت‌ها و حل مشکلات</h3><div class="event-list">';
+    echo '<section class="page-heading"><div><a class="back-link" href="index.php?page=inventory&id=' . $historyId . '">← بازگشت به شناسنامه</a><h1>تاریخچه کامل ' . e(asset_name_or($asset['hostname'])) . '</h1><p>مالک: ' . e($asset['owner_name'] ?: 'بدون مالک') . '</p></div></section><section class="card event-log system-history"><h3>تمام تغییرات، برداشت‌ها و حل مشکلات</h3><div class="event-list">';
     foreach ($historyQuery->fetchAll() as $event) { echo '<div class="event-item"><span class="event-dot"></span><div><strong>' . e($event['title']) . '</strong><small>' . e($event['full_name'] ?: 'سامانه') . ' • ' . e(persian_date($event['created_at'])) . ($event['subject'] ? ' • درخواست: ' . e(ticket_number((int) $event['ticket_id'])) : '') . '</small><p>' . e($event['details'] ?: '') . '</p></div></div>'; }
     echo '</div></section>';
     render_footer();
@@ -2907,6 +1618,47 @@ if ($page === 'domain-scan') {
                     echo '<p class="alert danger">' . e((string) $retryPreflight) . '</p>';
                 }
             }
+            // آماده‌سازی راه‌دور مقصدها (فعال‌سازی WinRM و قواعد فایروال WMI با اعتبارنامهٔ همین نوبت،
+            // بدون Group Policy) — فقط برای سیستم‌های خطادارِ آنلاین و فقط با مجوز asset.remote_prepare.
+            $prepareHosts = [];
+            foreach ($scanRows as $scanRowForPrepare) {
+                if ((string) ($scanRowForPrepare['status'] ?? '') === 'error' && (int) ($scanRowForPrepare['online'] ?? 0) === 1) {
+                    $prepareHosts[] = (string) $scanRowForPrepare['hostname'];
+                }
+            }
+            $prepareHosts = array_values(array_unique(array_filter($prepareHosts, static fn (string $host): bool => $host !== '' && (bool) preg_match('/^[A-Za-z0-9._-]+$/', $host))));
+            if ($prepareHosts !== [] && user_can($scanPageUser, 'asset.remote_prepare')) {
+                $preparePreflight = domain_scan_prepare_preflight();
+                if ($preparePreflight === null) {
+                    echo '<form id="prepare-form" method="post" class="form-grid" style="margin:0 0 14px">' . csrf_field() . '<input type="hidden" name="action" value="domain_scan_prepare"><label>حساب مجاز ویندوز (DOMAIN\\user)<input name="scan_username" required autocomplete="off" placeholder="COMPANY\\inventory-scan"></label><label>رمز همان حساب<input type="password" name="scan_password" required autocomplete="new-password"></label><div class="full"><button class="button" id="prepare-btn" type="submit">آماده‌سازی سیستم‌های مقصد (فعال‌سازی WinRM) — ' . count($prepareHosts) . ' سیستم</button><small>با همان حساب، WinRM و قواعد فایروال WMI روی مقصدها فعال می‌شود؛ بدون دست‌کاری Group Policy. هر سیستم حدود ۱۵ تا ۳۰ ثانیه طول می‌کشد و نتیجهٔ هر سیستم همین‌جا نمایش داده می‌شود.</small></div></form><div id="prepare-results"></div>';
+                    echo '<script nonce="' . e(csp_nonce()) . '">window.__prepareHosts=' . json_encode($prepareHosts, JSON_UNESCAPED_UNICODE) . ';</script>';
+                    echo '<script nonce="' . e(csp_nonce()) . '">(function(){var f=document.getElementById("prepare-form");if(!f){return;}var hosts=window.__prepareHosts||[];var out=document.getElementById("prepare-results");var btn=document.getElementById("prepare-btn");f.addEventListener("submit",function(ev){ev.preventDefault();if(!hosts.length){return;}btn.disabled=true;out.innerHTML="";var i=0;function add(cls,txt){var p=document.createElement("p");p.className=cls;p.textContent=txt;out.appendChild(p);}function chunk(){if(i>=hosts.length){btn.disabled=false;add("alert success","آماده‌سازی کامل شد؛ حالا «تلاش دوباره برای ناموفق‌ها» را بزنید تا استخراج انجام شود.");return;}var part=hosts.slice(i,i+3);i+=3;var d=new FormData(f);d.set("ajax","1");part.forEach(function(h){d.append("hostnames[]",h);});fetch("index.php",{method:"POST",body:d,credentials:"same-origin"}).then(function(r){return r.json();}).then(function(j){if(!j||!j.ok){add("alert danger",(j&&j.error)?j.error:"خطا در آماده‌سازی.");}else{(j.results||[]).forEach(function(x){add(x.success?"alert success":"alert danger",(x.success?"✓ ":"✗ ")+(x.name||x.hostname)+" — "+x.message);});}chunk();}).catch(function(){add("alert danger","خطای ارتباط با سرور.");chunk();});}chunk();});})();</script>';
+                } else {
+                    echo '<p class="alert danger">' . e((string) $preparePreflight) . '</p>';
+                }
+            }
+            // روش دوم: انتشار خودکار GPO در دامنه از داخل همین پنل (بدون GPMC و بدون کار دستی).
+            // برای سیستم‌هایی که حتی SMB هم روی آن‌ها بسته است کار می‌کند و کل دامنه را پوشش می‌دهد.
+            $gpoHosts = [];
+            foreach ($scanRows as $scanRowForGpo) {
+                if ((string) ($scanRowForGpo['status'] ?? '') === 'error') {
+                    $gpoHosts[] = (string) $scanRowForGpo['hostname'];
+                }
+            }
+            $gpoHosts = array_values(array_unique(array_filter($gpoHosts, static fn (string $host): bool => $host !== '' && (bool) preg_match('/^[A-Za-z0-9._-]+$/', $host))));
+            if ($gpoHosts !== [] && user_can($scanPageUser, 'asset.remote_prepare')) {
+                $gpoPreflight = domain_scan_prepare_preflight();
+                if ($gpoPreflight === null && is_file(domain_scan_prepare_gpo_script_path())) {
+                    echo '<form id="gpo-form" method="post" class="form-grid" style="margin:0 0 14px;border:1px dashed var(--border,#ccc);padding:10px;border-radius:8px">' . csrf_field() . '<input type="hidden" name="action" value="domain_scan_prepare_gpo">';
+                    foreach ($gpoHosts as $gpoHost) {
+                        echo '<input type="hidden" name="hostnames[]" value="' . e($gpoHost) . '">';
+                    }
+                    echo '<label>حساب ادمین دامنه (DOMAIN\\admin)<input name="scan_username" required autocomplete="off" placeholder="COMPANY\\domain-admin"></label><label>رمز همان حساب<input type="password" name="scan_password" required autocomplete="new-password"></label><div class="full"><button class="button" id="gpo-btn" type="submit">روش دوم: ساخت و اعمال خودکار Group Policy در کل دامنه</button><small>پنل خودش روی کنترلر دامنه یک GPO می‌سازد (فعال‌سازی WinRM + قواعد فایروال WMI/RPC/WinRM)، به دامنه لینک می‌کند و همین حالا با gpupdate روی مقصدها اعمال می‌کند. لازم نیست شما در Group Policy Management کاری بکنید. اگر سرور پنل عضو دامنه نباشد، این روش خطای روشن می‌دهد و روش اول (SMB) جایگزین است.</small><label style="display:flex;gap:8px;align-items:center;font-weight:400"><input type="checkbox" name="gpo_unlink" value="1"> لغو لینک GPO از دامنه (سیاست از مقصدها برداشته می‌شود؛ خودِ GPO حذف نمی‌شود)</label></div></form><div id="gpo-results"></div>';
+                    echo '<script nonce="' . e(csp_nonce()) . '">(function(){var f=document.getElementById("gpo-form");if(!f){return;}var out=document.getElementById("gpo-results");var btn=document.getElementById("gpo-btn");f.addEventListener("submit",function(ev){ev.preventDefault();btn.disabled=true;out.innerHTML="";var d=new FormData(f);d.set("ajax","1");var unlink=d.get("gpo_unlink")==="1";if(unlink){d.set("action","domain_scan_prepare_gpo_unlink");}fetch("index.php",{method:"POST",body:d,credentials:"same-origin"}).then(function(r){return r.json();}).then(function(j){var p=document.createElement("p");p.className=(j&&j.ok)?"alert success":"alert danger";if(j&&j.ok){p.textContent="✓ "+j.message;if(j.details&&j.details.actions&&j.details.actions.length){p.textContent+=" | "+j.details.actions.join(" • ");}}else{p.textContent="✗ "+((j&&j.error)?j.error:"خطا در انتشار Group Policy.");}out.appendChild(p);btn.disabled=false;}).catch(function(){var p=document.createElement("p");p.className="alert danger";p.textContent="خطای ارتباط با سرور.";out.appendChild(p);btn.disabled=false;});});})();</script>';
+                } elseif ($gpoPreflight !== null) {
+                    echo '<p class="alert warning">روش Group Policy در این سرور در دسترس نیست: ' . e((string) $gpoPreflight) . ' روش اول (SMB) را استفاده کنید یا پنل را روی سرور عضو دامنه اجرا کنید.</p>';
+                }
+            }
             echo '<p class="muted">بعد از انجام هر اصلاح روی سرور یا کلاینت‌ها، دکمهٔ «تلاش دوباره» فقط سیستم‌های خطادار را در نوبت تازه‌ای صف می‌کند؛ سیستم‌های موفق دوباره استخراج نمی‌شوند.</p><div class="scan-failure-grid">';
             foreach ($scanFailureGroups as $scanGroup) {
                 echo '<article class="scan-failure"><h3>' . e((string) $scanGroup['title']) . ' <span class="scan-failure-count">' . (int) $scanGroup['count'] . ' سیستم</span></h3>';
@@ -2928,7 +1680,7 @@ if ($page === 'domain-scan') {
             echo '<section class="card ticket-table" id="scan-rows">' . log_sort_header_row([['name', 'کامپیوتر'], ['status', 'وضعیت'], ['online', 'آنلاین'], ['message', 'پیام']], 'sort_d', 'dir_d', $_GET, (string) ($_GET['sort_d'] ?? ''), (string) ($_GET['dir_d'] ?? '')) . '';
             foreach ($scanRows as $scanRow) {
                 $statusLabel = ['pending' => 'در انتظار', 'running' => 'در حال اجرا', 'done' => 'انجام شد', 'offline' => 'آفلاین', 'error' => 'خطا'][(string) $scanRow['status']] ?? (string) $scanRow['status'];
-                echo '<div class="table-row"><span class="ticket-title"><b' . asset_name_attr((string) $scanRow['hostname']) . '>' . e(asset_display_name((string) $scanRow['hostname'])) . '</b></span><span>' . e($statusLabel) . '</span><span>' . ((int) $scanRow['online'] === 1 ? 'بله' : 'خیر') . '</span><span style="font-size:11px">' . e((string) ($scanRow['message'] ?? '')) . '</span></div>';
+                echo '<div class="table-row"><span class="ticket-title"><b' . asset_name_attr((string) $scanRow['hostname']) . '>' . e(asset_name_or((string) $scanRow['hostname'])) . '</b></span><span>' . e($statusLabel) . '</span><span>' . ((int) $scanRow['online'] === 1 ? 'بله' : 'خیر') . '</span><span style="font-size:11px">' . e((string) ($scanRow['message'] ?? '')) . '</span></div>';
             }
             echo '</section>';
         }
@@ -2969,7 +1721,6 @@ if ($page === 'assets') {
     $canImportAssets = user_can($assetUser, 'domain.import');
     $canPingAssets = user_can($assetUser, 'asset.ping') && (is_global_ticket_role($assetUser['role']) || user_service_group($assetUser) === 'it');
     $canExtractAssets = user_can($assetUser, 'domain.scan');
-    $canExtractLocalServer = PHP_OS_FAMILY === 'Windows' && user_can($assetUser, 'asset.extract') && (is_global_ticket_role($assetUser['role']) || user_service_group($assetUser) === 'it');
     $canConfigureNetworkScan = user_can($assetUser, 'settings.domain');
     $networkScanEnabled = domain_scan_preflight() === null;
     $canSelectAssets = $canPingAssets || $canExtractAssets;
@@ -2980,7 +1731,7 @@ if ($page === 'assets') {
         $collectedCount += !empty($assetRow['last_inventory_at']) ? 1 : 0;
     }
     render_header('دارایی‌ها', $assetUser);
-    inventory_render_assets_content($assetRows, $assetSearch, $networkFilter, $canImportAssets, $canPingAssets, $canExtractAssets, $canExtractLocalServer, $canConfigureNetworkScan, $networkScanEnabled, $canSelectAssets, $onlineCount, $collectedCount);
+    inventory_render_assets_content($assetRows, $assetSearch, $networkFilter, $canImportAssets, $canPingAssets, $canExtractAssets, $canConfigureNetworkScan, $networkScanEnabled, $canSelectAssets, $onlineCount, $collectedCount);
     render_footer();
     exit;
 }
@@ -3006,15 +1757,8 @@ if ($page === 'asset') {
     $peripherals = json_decode((string) $asset['peripherals_json'], true) ?: [];
     render_header('شناسنامه دارایی', $assetUser);
     $manualPeripherals = is_array($peripherals['manual_entries'] ?? null) ? $peripherals['manual_entries'] : [];
-    $canExtractLocalAsset = PHP_OS_FAMILY === 'Windows' && user_can($assetUser, 'asset.extract') && (is_global_ticket_role($assetUser['role']) || user_service_group($assetUser) === 'it') && inventory_asset_is_local($asset);
-    $localExtractButton = $canExtractLocalAsset
-        ? '<form method="post" class="inline-action">' . csrf_field() . '<input type="hidden" name="action" value="collect_inventory"><button class="button" type="submit">استخراج محلی همین سیستم</button></form>'
-        : '';
-     echo '<section class="page-heading"><div><a class="back-link" href="index.php?page=assets">← بازگشت به دارایی‌ها</a><h1>' . e(asset_display_name($asset['hostname'])) . '</h1><p>' . e(asset_name_title($asset['hostname'], $asset['asset_tag']) ?: $asset['asset_tag']) . ' • آخرین جمع‌آوری: ' . e($asset['last_inventory_at'] ? persian_date($asset['last_inventory_at']) : 'ثبت نشده') . '</p></div><div class="actions">' . $localExtractButton . '<a class="button secondary" href="index.php?page=inventory&id=' . $assetId . '">ویرایش شناسنامه</a><a class="button secondary" href="index.php?page=asset-history&id=' . $assetId . '">تاریخچه سیستم</a></div></section>';
-    if ($canExtractLocalAsset) {
-        echo '<p class="muted">این استخراج روی میزبانی اجرا می‌شود که PHP سامانه روی آن نصب است؛ اگر سامانه را روی همین کامپیوتر اجرا کرده‌اید، همین دستگاه خوانده می‌شود.</p>';
-    }
-    echo '<section class="asset-facts"><div class="card detail-card"><h3>مشخصات اصلی</h3><dl><dt>شناسه</dt><dd>' . e($asset['asset_tag']) . '</dd><dt>نام کامپیوتر</dt><dd>' . e($asset['hostname']) . '</dd><dt>سریال</dt><dd>' . e($asset['serial_number']) . '</dd><dt>واحد</dt><dd>' . e($asset['department_name'] ?: 'بدون واحد') . '</dd><dt>کاربر دامنه</dt><dd>' . e($asset['domain_username']) . '</dd><dt>سیستم‌عامل</dt><dd>' . e($asset['operating_system']) . '</dd><dt>آنتی‌ویروس</dt><dd>' . e($asset['antivirus']) . '</dd><dt>IP</dt><dd>' . e($asset['ip_address']) . '</dd><dt>MAC</dt><dd>' . e($asset['mac_address']) . '</dd><dt>پردازنده</dt><dd>' . e($asset['cpu']) . '</dd><dt>حافظه</dt><dd>' . e((string) $asset['memory_mb']) . ' MB</dd></dl></div><div class="card detail-card"><h3>سخت‌افزار تکمیلی</h3><pre class="json-view">' . e(json_encode(array_merge($hardware, ['disks' => $disks]), JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES)) . '</pre></div><div class="card detail-card"><h3>تجهیزات و اقلام دستی</h3><pre class="json-view">' . e(json_encode(array_merge($peripherals, ['printer_scanner_monitor_case' => $peripherals['case'] ?? ($manualPeripherals['case'] ?? [])]), JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES)) . '</pre></div><div class="card detail-card"><h3>نرم‌افزارهای نصب‌شده</h3><pre class="json-view">' . e(json_encode($software, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES)) . '</pre></div></section>';
+    echo '<section class="page-heading"><div><a class="back-link" href="index.php?page=assets">← بازگشت به دارایی‌ها</a><h1' . asset_name_attr($asset['hostname']) . '>' . e(asset_name_or($asset['hostname'])) . '</h1><p>آخرین جمع‌آوری: ' . e($asset['last_inventory_at'] ? persian_date((string) $asset['last_inventory_at']) : 'ثبت نشده') . '</p></div><div class="actions"><a class="button secondary" href="index.php?page=inventory&id=' . $assetId . '">ویرایش شناسنامه</a><a class="button secondary" href="index.php?page=asset-history&id=' . $assetId . '">تاریخچه سیستم</a></div></section>';
+    echo '<section class="asset-facts"><div class="card detail-card"><h3>مشخصات اصلی</h3><dl><dt>شناسه</dt><dd>' . e($asset['asset_tag']) . '</dd><dt>نام کامپیوتر</dt><dd' . asset_name_attr($asset['hostname'], $asset['asset_tag']) . '>' . e(asset_name_or($asset['hostname'])) . '</dd><dt>سریال</dt><dd>' . e($asset['serial_number']) . '</dd><dt>واحد</dt><dd>' . e($asset['department_name'] ?: 'بدون واحد') . '</dd><dt>کاربر دامنه</dt><dd>' . e($asset['domain_username']) . '</dd><dt>سیستم‌عامل</dt><dd>' . e($asset['operating_system']) . '</dd><dt>آنتی‌ویروس</dt><dd>' . e($asset['antivirus']) . '</dd><dt>IP</dt><dd>' . e($asset['ip_address']) . '</dd><dt>MAC</dt><dd>' . e($asset['mac_address']) . '</dd><dt>پردازنده</dt><dd>' . e($asset['cpu']) . '</dd><dt>حافظه</dt><dd>' . e((string) $asset['memory_mb']) . ' MB</dd></dl></div><div class="card detail-card"><h3>سخت‌افزار تکمیلی</h3><pre class="json-view">' . e(json_encode(array_merge($hardware, ['disks' => $disks]), JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES)) . '</pre></div><div class="card detail-card"><h3>تجهیزات و اقلام دستی</h3><pre class="json-view">' . e(json_encode(array_merge($peripherals, ['printer_scanner_monitor_case' => $peripherals['case'] ?? ($manualPeripherals['case'] ?? [])]), JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES)) . '</pre></div><div class="card detail-card"><h3>نرم‌افزارهای نصب‌شده</h3><pre class="json-view">' . e(json_encode($software, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES)) . '</pre></div></section>';
     render_footer();
     exit;
 }
@@ -3238,7 +1982,10 @@ if ($page === 'settings') {
     foreach ([
         'supervisor' => ['label' => 'سوپروایز', 'note' => 'دسترسی سوپروایزر: مشاهده و مدیریت درخواست‌ها، تأیید و بستن.'],
         'inspection' => ['label' => 'بازرسی', 'note' => 'مجوز ثبت ورود رسانه در کنترل CD/DVD.'],
-        'it_expert' => ['label' => 'کارشناس IT', 'note' => 'دسترسی ادمین اصلی سامانه.'],
+        'it_expert' => ['label' => 'کارشناس آی تی', 'note' => 'مسئول رسیدگی به درخواست‌های فناوری اطلاعات. فقط از همین فهرست انتخاب می‌شود.'],
+        // تصمیم مالک (۲۰۲۶-۱۱-۱۶): همتای «کارشناس آی تی» برای حوزهٔ پشتیبانی.
+        // مسئول تیکت‌های پشتیبانی فقط از این فهرست خوانده می‌شود.
+        'support_expert' => ['label' => 'کارشناس پشتیبانی', 'note' => 'مسئول رسیدگی به درخواست‌های پشتیبانی. فقط از همین فهرست انتخاب می‌شود.'],
     ] as $roleKey => $roleMeta) {
         $roleIds = key_role_user_ids($roleKey);
         $roleCards .= '<div class="key-role-block"><h3>' . e($roleMeta['label']) . '</h3><p class="muted">' . e($roleMeta['note']) . '</p><div class="form-grid">';
@@ -3290,7 +2037,7 @@ if ($page === 'settings') {
         $inspectionAlarmEnabled = setting('inspection_food_absence_alarm_enabled', '1') !== '0';
         echo '<div class="card form-card inspection-alarm-settings" id="inspection-alarm-settings"><h2>یادآور روزانهٔ بازرسی</h2><p class="muted">هر روز ساعت ۱۱، پیام یادآوری غایبین گروه‌های غذایی فقط برای کاربران بازرسی نمایش داده می‌شود. تغییر این گزینه برای همهٔ کاربران بازرسی اعمال می‌شود.</p><p>وضعیت فعلی: <strong class="' . ($inspectionAlarmEnabled ? 'inspection-alarm-status-on' : 'inspection-alarm-status-off') . '">' . ($inspectionAlarmEnabled ? 'فعال' : 'غیرفعال') . '</strong></p><form method="post">' . csrf_field() . '<input type="hidden" name="action" value="save_settings"><input type="hidden" name="settings_section" value="inspection_alarm"><input type="hidden" name="inspection_food_absence_alarm_enabled" value="' . ($inspectionAlarmEnabled ? '0' : '1') . '"><button class="button ' . ($inspectionAlarmEnabled ? 'danger' : '') . '" type="submit">' . ($inspectionAlarmEnabled ? 'غیرفعال کردن یادآور' : 'فعال کردن یادآور') . '</button></form></div>';
     }
-    echo '<div class="card form-card"><h2>اطلاعات سامانه</h2><form method="post" enctype="multipart/form-data">' . csrf_field() . '<input type="hidden" name="action" value="save_settings"><input type="hidden" name="settings_section" value="general"><label>نام سامانه<input name="app_name" required value="' . e($appName) . '"></label><label>لوگو<input type="file" name="logo" accept="image/png,image/jpeg,image/svg+xml"><small>لوگوی جدید اختیاری است؛ PNG، JPG یا SVG تا ۲ مگابایت.</small></label><label>ظاهر نام کامپیوترها<select name="asset_hostname_style"><option value="short_lower"' . (setting('asset_hostname_style', 'short_lower') === 'short_lower' ? ' selected' : '') . '>فقط نام، با حروف کوچک (adminit2) — پیش‌فرض</option><option value="short"' . (setting('asset_hostname_style', 'short_lower') === 'short' ? ' selected' : '') . '>فقط نام، با حروف اصلی (ADMINIT2)</option><option value="full"' . (setting('asset_hostname_style', 'short_lower') === 'full' ? ' selected' : '') . '>نام کامل دامنه (ADMINIT2.DOMAIN.LOCAL)</option></select><small>روی فهرست شناسنامه‌ها، فهرست اسکن دامنه، فهرست سیستم‌ها و کمبوی «سیستم مرتبط» اثر دارد. نام کامل همیشه به‌صورت راهنما (tooltip) روی نام می‌ماند.</small></label>' . ($logo ? '<div class="current-logo"><img src="' . e($logo) . '" alt="لوگوی فعلی"><span>لوگوی فعلی</span></div>' : '') . '<button class="button" type="submit">ذخیره اطلاعات عمومی</button></form></div>';
+    echo '<div class="card form-card"><h2>اطلاعات سامانه</h2><form method="post" enctype="multipart/form-data">' . csrf_field() . '<input type="hidden" name="action" value="save_settings"><input type="hidden" name="settings_section" value="general"><label>نام سامانه<input name="app_name" required value="' . e($appName) . '"></label><label>لوگو<input type="file" name="logo" accept="image/png,image/jpeg,image/svg+xml"><small>لوگوی جدید اختیاری است؛ PNG، JPG یا SVG تا ۲ مگابایت.</small></label><label>ظاهر نام کامپیوترها<select name="asset_hostname_style"><option value="short"' . (setting('asset_hostname_style', 'short') === 'short' ? ' selected' : '') . '>فقط نام، دقیقاً با همان حروف ثبت‌شده (MBA4-01) — پیش‌فرض</option><option value="short_lower"' . (setting('asset_hostname_style', 'short') === 'short_lower' ? ' selected' : '') . '>فقط نام، با حروف کوچک (mba4-01)</option><option value="full"' . (setting('asset_hostname_style', 'short') === 'full' ? ' selected' : '') . '>نام کامل دامنه (MBA4-01.CORP.LOCAL)</option></select><small>روی فهرست شناسنامه‌ها، فهرست اسکن دامنه، فهرست سیستم‌ها و کمبوی «سیستم مرتبط» اثر دارد. نام کامل همیشه به‌صورت راهنما (tooltip) روی نام می‌ماند.<br><b>نام دقیقاً همان چیزی است که در سیستم‌عامل/AD ثبت شده</b> — نه حرف اضافه، نه کم؛ ارقام نام هم فارسی نمی‌شوند (MBA4-01 همان MBA4-01 می‌ماند، نه MBA4-۰۱).<br><b>آدرس IP هرگز در نام نمایش داده نمی‌شود</b> — اگر نام ثبت‌شده چیزی مثل «clint 192.168.1.65» باشد، فقط «clint» دیده می‌شود. برای پاک‌کردن دائمی نام‌های موجود: <code dir="ltr">php tools/normalize_asset_hostnames.php --apply</code></small></label>' . ($logo ? '<div class="current-logo"><img src="' . e($logo) . '" alt="لوگوی فعلی"><span>لوگوی فعلی</span></div>' : '') . '<label style="display:flex;gap:8px;align-items:flex-start"><input type="hidden" name="security_cookie_both_protocols" value="0"><input type="checkbox" name="security_cookie_both_protocols" value="1"' . (in_array(strtolower(trim((string) setting('security_cookie_both_protocols', '0'))), ['1', 'true', 'on', 'yes'], true) ? ' checked' : '') . '><span>کار با هر دو پروتکل <b>http</b> و <b>https</b> با همان ورود<small style="display:block;margin-top:4px">اگر لازم است هم با <code dir="ltr">http://</code> داخلی و هم با <code dir="ltr">https://</code> وارد شوید، این را روشن کنید. مرورگر کوکی نشست را روی هر دو می‌فرستد و دیگر لازم نیست دوباره وارد شوید.<br><b style="color:#a16207">هشدار:</b> روی http، کوکی نشست رمزنگاری نمی‌شود و در شبکه قابل شنود است. این گزینه برای شبکهٔ داخلی مطمئن است، نه دسترسی از اینترنت.</small></span></label><button class="button" type="submit">ذخیره اطلاعات عمومی</button></form></div>';
     echo '<div class="card form-card login-branding-settings" id="login-branding"><h2>مدیریت صفحه ورود</h2><p class="muted">عنوان‌ها، پیام متحرک و لوگوی مخصوص صفحه ورود را تنظیم کنید. لوگو PNG یا JPG و حداکثر ۲ مگابایت باشد.</p><form method="post" enctype="multipart/form-data">' . csrf_field() . '<input type="hidden" name="action" value="save_settings"><input type="hidden" name="settings_section" value="login_branding"><input type="hidden" name="app_name" value="' . e($appName) . '"><label>عنوان اصلی<input name="login_title" maxlength="120" value="' . e(setting('login_title', 'به سامانه درخواست پشتیبانی خوش آمدید')) . '"></label><label>متن معرفی<textarea name="login_intro" rows="2" maxlength="500">' . e(setting('login_intro', 'برای ثبت و پیگیری درخواست‌های خود وارد شوید.')) . '</textarea></label><label>پیام‌های متحرک ابتدای صفحه (اختیاری؛ هر پیام در یک خط، حداکثر ۵ پیام)<textarea name="login_announcements" rows="3" maxlength="1300" placeholder="مثلاً: اطلاعیه نگهداری سامانه در روز ...">' . e(setting('login_announcements', '') !== '' ? setting('login_announcements', '') : setting('login_announcement', '')) . '</textarea><small class="field-help">پیام‌ها به‌ترتیب و پشت سر هم نمایش داده می‌شوند؛ هر پیام حداکثر ۲۴۰ نویسه. اگر خالی باشد، نوار پیام نمایش داده نمی‌شود.</small></label><div class="form-grid"><label>سرعت حرکت پیام (ثانیه برای هر دور؛ کمتر = سریع‌تر)<input type="number" name="login_announcement_speed" min="5" max="60" value="' . (int) setting('login_announcement_speed', '18') . '"></label><label>اندازه قلم پیام (پیکسل)<input type="number" name="login_announcement_font_size" min="11" max="22" value="' . (int) setting('login_announcement_font_size', '12') . '"></label></div><div class="form-grid"><label>عنوان کارت معرفی<input name="login_art_title" maxlength="100" value="' . e(setting('login_art_title', 'پشتیبانی، ساده و شفاف')) . '"></label><label>متن کارت معرفی<input name="login_art_text" maxlength="300" value="' . e(setting('login_art_text', 'هر درخواست یک شماره پیگیری دارد و مسیر رسیدگی آن برای شما روشن است.')) . '"></label><label>عنوان راهنمای ورود<input name="login_note_title" maxlength="100" value="' . e(setting('login_note_title', 'ورود یکپارچه سازمانی')) . '"></label><label>متن راهنمای ورود<input name="login_note_text" maxlength="300" value="' . e(setting('login_note_text', 'کاربران شبکه با حساب Active Directory خود وارد می‌شوند.')) . '"></label></div><label>لوگوی صفحه ورود<input type="file" name="login_logo" accept="image/png,image/jpeg"></label>' . (setting('app_login_logo', '') ? '<div class="current-logo"><img src="' . e((string) setting('app_login_logo', '')) . '" alt="لوگوی صفحه ورود"><span>لوگوی اختصاصی صفحه ورود</span></div>' : '') . '<button class="button" type="submit">ذخیره تنظیمات صفحه ورود</button></form></div>';
     echo '<div class="card form-card food-ticket-brand-settings" id="food-ticket-brand"><h2>هویت پنل سامانه مدیریت غذا</h2><p class="muted">این نام و لوگو هنگام ورود از سامانه اصلی به پنل چاپ فیش منتقل می‌شود و با تغییرات بعدی نیز همگام خواهد ماند.</p><form method="post" enctype="multipart/form-data">' . csrf_field() . '<input type="hidden" name="action" value="save_food_ticket_brand"><label>نام سامانه چاپ فیش<input name="food_ticket_brand_name" required value="' . e($foodBrandName) . '"></label><label>لوگوی پنل چاپ فیش<input type="file" name="food_ticket_logo" accept="image/png,image/jpeg"><small>PNG یا JPG، حداکثر ۲ مگابایت.</small></label>' . ($foodBrandLogo ? '<div class="current-logo"><img src="' . e($foodBrandLogo) . '" alt="لوگوی پنل چاپ فیش"><span>لوگوی فعلی پنل فیش</span></div>' : '') . '<button class="button" type="submit">ذخیره هویت پنل چاپ فیش</button></form></div>';
     if (user_is_primary_admin($user)) {
@@ -3366,10 +2113,37 @@ if ($page === 'settings') {
     if ($canSettingsDomain) {
     echo '<div class="settings-panel settings-panel-grid" id="domain"' . ($canSettingsDomainEdit ? '' : ' inert') . '>';
     echo '<div class="card form-card settings-panel-tall"><h2>اتصال Active Directory</h2><p class="muted">رمز حساب سرویس در صورت خالی‌گذاشتن تغییر نمی‌کند. ' . (ldap_secret_key() === null ? '<b>توجه:</b> کلید <code>app.key</code> در config.php تنظیم نشده، پس این رمز به‌صورت متن ساده ذخیره می‌شود.' : 'این رمز رمزشده ذخیره می‌شود؛ با عوض‌کردن <code>app.key</code> باید دوباره وارد شود.') . '</p><form method="post">' . csrf_field() . '<input type="hidden" name="action" value="save_settings"><input type="hidden" name="settings_section" value="ldap"><input type="hidden" name="app_name" value="' . e($appName) . '"><label class="switch-row"><input type="checkbox" name="ldap_enabled" value="1" ' . (setting('ldap_enabled', cfg('ldap.enabled') ? '1' : '0') === '1' ? 'checked' : '') . '> ورود کاربران شبکه فعال باشد</label><div class="form-grid"><label>آدرس کنترلر<input name="ldap_host" value="' . e(setting('ldap_host', (string) cfg('ldap.host', ''))) . '"></label><label>پورت<input type="number" name="ldap_port" value="' . e(setting('ldap_port', (string) cfg('ldap.port', '389'))) . '"></label><label class="full">Base DN<input name="ldap_base_dn" value="' . e(setting('ldap_base_dn', (string) cfg('ldap.base_dn', ''))) . '"></label><label class="full">حساب سرویس<input name="ldap_bind_dn" value="' . e(setting('ldap_bind_dn', (string) cfg('ldap.bind_dn', ''))) . '"></label><label class="full">رمز حساب سرویس<input type="password" name="ldap_bind_password" placeholder="بدون تغییر"></label><label>Domain suffix<input name="ldap_domain_suffix" value="' . e(setting('ldap_domain_suffix', (string) cfg('ldap.domain_suffix', ''))) . '"></label></div><label class="switch-row"><input type="checkbox" name="ldap_ssl" value="1" ' . (setting('ldap_ssl', cfg('ldap.ssl') ? '1' : '0') === '1' ? 'checked' : '') . '> استفاده از LDAPS</label><button class="button" type="submit">ذخیره تنظیمات دامین</button></form></div>';
-    echo '<div class="card form-card" id="domain-scan"' . (user_can($user, 'asset.remote_extract') ? '' : ' inert') . '><h2>اسکن دامنه و استخراج از شبکه</h2><p class="muted">همهٔ کامپیوترهای دامنه از Active Directory خوانده می‌شوند، سپس در صورت آنلاین بودن، اطلاعات سخت‌افزاری آن‌ها از راه دور دریافت و در شناسنامه ثبت می‌شود. برای دریافت سخت‌افزار، حساب وارد‌شده باید روی کلاینت‌ها دسترسی ادمین محلی داشته باشد.</p><form method="post">' . csrf_field() . '<input type="hidden" name="action" value="save_settings"><input type="hidden" name="settings_section" value="domain_scan"><input type="hidden" name="app_name" value="' . e($appName) . '"><p class="muted">نام کاربری و رمز ادمین در فرم استخراج هر نوبت وارد می‌شوند؛ رمز در تنظیمات پایگاه‌داده ذخیره نمی‌شود و برای ارسال آن HTTPS لازم است. حساب باید روی کلاینت‌ها عضو Administrators محلی باشد.</p><div class="form-grid"><label>دامنه (NetBIOS)<input name="domain_scan_domain" value="' . e(setting('domain_scan_domain', '')) . '" placeholder="COMPANY"></label><label>زمان انتظار پینگ (میلی‌ثانیه)<input type="number" name="domain_scan_timeout" min="500" max="30000" value="' . e(setting('domain_scan_timeout', '2500')) . '"></label><label>ترتیب پروتکل اتصال (۱.۳۷)<select name="domain_scan_protocols"><option value=""' . (setting('domain_scan_protocols', '') === '' ? ' selected' : '') . '>خودکار (اول DCOM، بعد WinRM)</option><option value="Wsman,Dcom"' . (setting('domain_scan_protocols', '') === 'Wsman,Dcom' ? ' selected' : '') . '>اول WinRM، بعد DCOM (اگر WinRM روی مقصدها فعال است)</option><option value="Dcom"' . (setting('domain_scan_protocols', '') === 'Dcom' ? ' selected' : '') . '>فقط DCOM</option><option value="Wsman"' . (setting('domain_scan_protocols', '') === 'Wsman' ? ' selected' : '') . '>فقط WinRM (نیازمند فعال‌بودن WinRM روی مقصدها)</option></select></label></div><p class="muted">خطاهای رایج استخراج («RPC/WMI در دسترس نیست» و «دسترسی رد شد») در صفحهٔ «اسکن دامنه» با راه‌حل گام‌به‌گام نمایش داده می‌شوند؛ پس از هر اصلاح، از همان صفحه «تلاش دوباره برای ناموفق‌ها» را بزنید.</p><button class="button" type="submit">ذخیره تنظیمات اسکن دامنه</button></form></div>';
+    echo '<div class="card form-card" id="domain-scan"' . (user_can($user, 'asset.remote_extract') ? '' : ' inert') . '><h2>اسکن دامنه و استخراج از شبکه</h2><p class="muted">همهٔ کامپیوترهای دامنه از Active Directory خوانده می‌شوند، سپس در صورت آنلاین بودن، اطلاعات سخت‌افزاری آن‌ها از راه دور دریافت و در شناسنامه ثبت می‌شود. برای دریافت سخت‌افزار، حساب وارد‌شده باید روی کلاینت‌ها دسترسی ادمین محلی داشته باشد.</p><form method="post">' . csrf_field() . '<input type="hidden" name="action" value="save_settings"><input type="hidden" name="settings_section" value="domain_scan"><input type="hidden" name="app_name" value="' . e($appName) . '"><p class="muted">نام کاربری و رمز ادمین در فرم استخراج هر نوبت وارد می‌شوند؛ رمز در تنظیمات پایگاه‌داده ذخیره نمی‌شود و برای ارسال آن HTTPS لازم است. حساب باید روی کلاینت‌ها عضو Administrators محلی باشد.</p><div class="form-grid"><label>دامنه (NetBIOS)<input name="domain_scan_domain" value="' . e(setting('domain_scan_domain', '')) . '" placeholder="COMPANY"></label><label>زمان انتظار پینگ (میلی‌ثانیه)<input type="number" name="domain_scan_timeout" min="500" max="30000" value="' . e(setting('domain_scan_timeout', '2500')) . '"></label><label>ترتیب پروتکل اتصال (۱.۳۷)<select name="domain_scan_protocols"><option value=""' . (setting('domain_scan_protocols', '') === '' ? ' selected' : '') . '>خودکار (اول DCOM، بعد WinRM)</option><option value="Wsman,Dcom"' . (setting('domain_scan_protocols', '') === 'Wsman,Dcom' ? ' selected' : '') . '>اول WinRM، بعد DCOM (اگر WinRM روی مقصدها فعال است)</option><option value="Dcom"' . (setting('domain_scan_protocols', '') === 'Dcom' ? ' selected' : '') . '>فقط DCOM</option><option value="Wsman"' . (setting('domain_scan_protocols', '') === 'Wsman' ? ' selected' : '') . '>فقط WinRM (نیازمند فعال‌بودن WinRM روی مقصدها)</option></select></label><label class="muted" style="display:flex;gap:.5rem;align-items:flex-start"><input type="hidden" name="domain_scan_smb_fallback" value="0"><input type="checkbox" name="domain_scan_smb_fallback" value="1"' . (setting('domain_scan_smb_fallback', '1') === '0' ? '' : ' checked') . '><span>روش دوم خودکار (SMB): مقصدی که DCOM/WinRM ردش کند، بار دوم با کپی عامل روی C$ و اجرای آن به‌عنوان SYSTEM خوانده شود — همان روش TNI و Administrator Yar. شرطش فقط ادمین محلی بودن حساب روی مقصد و باز بودن TCP 445 است.</span></label></div><p class="muted">خطاهای رایج استخراج («RPC/WMI در دسترس نیست» و «دسترسی رد شد») در صفحهٔ «اسکن دامنه» با راه‌حل گام‌به‌گام نمایش داده می‌شوند؛ پس از هر اصلاح، از همان صفحه «تلاش دوباره برای ناموفق‌ها» را بزنید.</p><button class="button" type="submit">ذخیره تنظیمات اسکن دامنه</button></form></div>';
     echo '<div class="card form-card" id="ldap-sync"><h2>معرفی کاربران دامین</h2><p class="muted">همه کاربران قابل مشاهده در Base DN را بدون نیاز به اولین ورود به سامانه معرفی می‌کند. حساب‌هایی که دیگر در دامین پیدا نشوند یا غیرفعال باشند، غیرفعال می‌شوند.</p><div class="actions" style="margin-top:0"><form method="post">' . csrf_field() . '<input type="hidden" name="action" value="sync_ldap_users"><button class="button" type="submit">همگام‌سازی همه کاربران دامین</button></form><form method="post">' . csrf_field() . '<input type="hidden" name="action" value="diagnose_ldap"><button class="button secondary" type="submit">تشخیص اتصال دامنه</button></form></div></div>';
     echo '<div class="card form-card settings-panel-full" id="ldap-role-map"><h2>نقش‌دهی گروه‌های AD</h2><p class="muted">هر خط یک JSON معتبر برای نقش باشد؛ مثال: {"agent":["CN=IT-Helpdesk,OU=Groups,DC=example,DC=local"]}. کاربران جدید دامینی بر اساس عضویت گروه نقش می‌گیرند و نقش کاربران فعلی دستی حفظ می‌شود.</p><form method="post">' . csrf_field() . '<input type="hidden" name="action" value="save_settings"><input type="hidden" name="settings_section" value="ldap"><input type="hidden" name="app_name" value="' . e($appName) . '"><label>تنظیم JSON نگاشت گروه به نقش<textarea name="ldap_group_map" rows="2" class="compact-textarea" placeholder="{&quot;agent&quot;:[&quot;CN=IT-Helpdesk,...&quot;]}">' . e(setting('ldap_group_map', '{}')) . '</textarea></label><button class="button secondary" type="submit">ذخیره نگاشت گروه‌ها</button></form></div>';
     echo '</div>';
+    }
+    // ۱.۶۳.۱-r19 — کارت «ریست شناسنامه‌ها» (درخواست کاربر).
+    //
+    // فقط مدیر اصلی می‌بیند. کلمهٔ تأیید «ریست» باید عیناً تایپ شود تا یک
+    // کلیک اشتباهی کل شناسنامه‌ها را پاک نکند. متن صریح می‌گوید چه چیزی پاک
+    // می‌شود و چه چیزی می‌ماند، و مسیر بازگردانی را هم نشان می‌دهد.
+    if (user_is_primary_admin($user)) {
+        $assetCountNow = 0;
+        try { $assetCountNow = (int) db()->query('SELECT COUNT(*) FROM assets')->fetchColumn(); } catch (Throwable $ignored) {}
+        $resetBackups = @glob(APP_ROOT . '/storage/asset-reset/*.json') ?: [];
+        usort($resetBackups, static fn(string $a, string $b): int => filemtime($b) <=> filemtime($a));
+        echo '<div class="card form-card asset-reset-card" id="asset-reset"><h2>ریست شناسنامه‌ها</h2>';
+        echo '<p class="muted">این ابزار برای شرایط اضطراری است: همهٔ شناسنامه‌ها را پاک می‌کند تا ثبت از نو شروع شود. مثلاً وقتی شمارِ شناسنامه با تعداد واقعی سیستم‌های شبکه نمی‌خواند.</p>';
+        echo '<p>شناسنامه‌های فعلی: <strong>' . (int) $assetCountNow . '</strong> رکورد</p>';
+        echo '<div class="alert warning" style="margin:12px 0"><strong>چه چیزی پاک می‌شود:</strong> شناسنامه‌ها، پروفایل‌ها، تاریخچهٔ استخراج، ماژول‌های حافظه، دیسک‌ها، کارت گرافیک، لوازم جانبی و نرم‌افزارهای ثبت‌شده.<br><strong>چه چیزی می‌ماند:</strong> کاربران، درخواست‌ها، گروه‌های غذایی، تنظیمات سامانه و بکاپ‌ها.</div>';
+        echo '<div class="alert info" style="margin:12px 0">پیش از حذف، یک بکاپ کامل JSON در <code dir="ltr">storage/asset-reset/</code> ساخته می‌شود. اگر بکاپ نوشته نشود، هیچ رکوردی حذف نمی‌شود.</div>';
+        if ($resetBackups) {
+            echo '<p class="muted">آخرین بکاپ‌ها:</p><ul class="compact-list">';
+            foreach (array_slice($resetBackups, 0, 3) as $bk) {
+                echo '<li><code dir="ltr">' . e(basename($bk)) . '</code> — ' . number_format((int) filesize($bk) / 1024, 1) . ' کیلوبایت</li>';
+            }
+            echo '</ul><p class="muted">بازگردانی از خط فرمان: <code dir="ltr">php tools/asset_reset_restore.php &lt;نام-فایل&gt; --apply</code></p>';
+        }
+        echo '<form method="post" onsubmit="return confirm(\'همهٔ شناسنامه‌ها پاک می‌شوند. بکاپ گرفته می‌شود ولی این کار برگشت‌ناپذیر است. مطمئنید؟\');">' . csrf_field();
+        echo '<input type="hidden" name="action" value="reset_assets">';
+        echo '<label>برای تأیید، عبارت <b>ریست</b> را بنویسید<input name="reset_confirm" required autocomplete="off" placeholder="ریست" dir="auto"></label>';
+        echo '<button class="button danger" type="submit">پاک‌کردن همهٔ شناسنامه‌ها</button></form></div>';
     }
 
     if ($canSettingsUsers) {
@@ -3404,7 +2178,7 @@ if ($page === 'settings') {
         echo '</div>';
     }
     echo '</div>';
-    echo '<div id="key-roles" class="settings-subform"' . ($canSettingsKeyRolesEdit ? '' : ' inert') . '><h3>نقش‌های کلیدی</h3><p class="muted">برای هر نقش حداکثر دو کاربر انتخاب کنید. «کارشناس IT» دسترسی ادمین اصلی می‌گیرد، «سوپروایز» نقش سوپروایزر را می‌گیرد و «بازرسی» مجوز ثبت ورود رسانه در CD/DVD را دارد.</p><form method="post">' . csrf_field() . '<input type="hidden" name="action" value="save_key_roles">' . $roleCards . (user_is_primary_admin($user) ? '' : '<p class="muted">تعیین یا حذف کارشناس IT فقط توسط ادمین اصلی انجام می‌شود.</p>') . '<button class="button" type="submit">ذخیره نقش‌های کلیدی</button></form></div>';
+    echo '<div id="key-roles" class="settings-subform"' . ($canSettingsKeyRolesEdit ? '' : ' inert') . '><h3>نقش‌های کلیدی</h3><p class="muted">برای هر نقش حداکثر دو کاربر انتخاب کنید. هیچ‌کدام از این نقش‌ها <strong>نقش اصلی کاربر را عوض نمی‌کند</strong>؛ فقط دسترسی اضافه می‌کند. «کارشناس آی تی» و «کارشناس پشتیبانی» مسئول رسیدگی به درخواست‌های همان حوزه هستند (فقط از همین فهرست خوانده می‌شوند)، «سوپروایز» فضای سوپروایزر و صف تصمیم‌ها را می‌دهد، و «بازرسی» مجوز ثبت ورود رسانه در CD/DVD را.</p><form method="post">' . csrf_field() . '<input type="hidden" name="action" value="save_key_roles">' . $roleCards . (user_is_primary_admin($user) ? '' : '<p class="muted">تعیین یا حذف کارشناس IT فقط توسط ادمین اصلی انجام می‌شود.</p>') . '<button class="button" type="submit">ذخیره نقش‌های کلیدی</button></form></div>';
     echo '</div>';
     }
 
@@ -3710,21 +2484,35 @@ if ($page !== 'dashboard') {
 }
 
     $isStaff = is_staff_role($user['role']);
-[$ticketWhere, $ticketParams] = ticket_scope($user);
-$countQuery = db()->prepare('SELECT status, COUNT(*) AS total FROM tickets t ' . $ticketWhere . ' GROUP BY status');
-$countQuery->execute($ticketParams);
-$counts = ['new' => 0, 'manager_review' => 0, 'assigned' => 0, 'in_progress' => 0, 'waiting_user' => 0, 'open' => 0, 'pending' => 0, 'resolved' => 0, 'closed' => 0, 'cancelled' => 0];
-foreach ($countQuery->fetchAll() as $count) {
-    $counts[$count['status']] = (int) $count['total'];
+// بازگردانی کارت‌ها و فهرست درخواست‌ها در داشبورد (تصمیم مالک ۲۰۲۶-۱۱-۱۰):
+// موج استقلال (2066cb0) این بلوک را حذف کرده بود؛ بازگردانده شد. پیوندها به ماژول مستقل می‌روند.
+$rcCanSee = function_exists('request_center_dashboard_rows')
+    && (user_can_any($user, ['ticket.create', 'ticket.view_own', 'ticket.edit', 'queue.view', 'ticket.view_unit', 'ticket.view_all', 'supervisor.panel']) || user_is_primary_admin($user));
+$rcCounts = null;
+$rcTickets = null;
+if ($rcCanSee) {
+    try {
+        [$rcCounts, $rcTickets] = request_center_dashboard_rows($user);
+    } catch (Throwable $rcDashError) {
+        error_log('[dashboard] rc rows: ' . $rcDashError->getMessage());
+    }
 }
-$listQuery = db()->prepare('SELECT t.*, c.name AS category_name, d.name AS department_name, r.full_name AS requester_name, a.full_name AS assignee_name FROM tickets t LEFT JOIN categories c ON c.id = t.category_id LEFT JOIN departments d ON d.id = t.department_id JOIN users r ON r.id = t.requester_id LEFT JOIN users a ON a.id = t.assigned_to ' . $ticketWhere . ' ORDER BY t.updated_at DESC LIMIT 50');
-$listQuery->execute($ticketParams);
-$tickets = $listQuery->fetchAll();
-ticket_number_cache_prime($tickets); // ticket_no از همین SELECT آمده؛ جلوگیری از N+1
+$activeCount = 0;
+if (is_array($rcCounts)) {
+    $activeCount = (int) ($rcCounts['new'] ?? 0) + (int) ($rcCounts['manager_review'] ?? 0) + (int) ($rcCounts['assigned'] ?? 0)
+        + (int) ($rcCounts['in_progress'] ?? 0) + (int) ($rcCounts['waiting_user'] ?? 0) + (int) ($rcCounts['pending'] ?? 0);
+}
 render_header('داشبورد', $user);
-$activeCount = $counts['new'] + $counts['manager_review'] + $counts['assigned'] + $counts['in_progress'] + $counts['waiting_user'] + $counts['pending'];
 $cdDvdReady = cd_dvd_available();
-echo '<section class="dashboard-hero"><div><span class="eyebrow">' . ($isStaff ? 'مرکز کنترل پشتیبانی' : 'فضای درخواست‌های شما') . '</span><h1>سلام ' . e($user['full_name']) . '،<br><strong>چه کمکی از ما می‌خواهید؟</strong></h1><p>درخواست جدید ثبت کنید یا وضعیت درخواست‌های قبلی را دنبال کنید.</p></div><a class="button hero-button" href="index.php?page=new-ticket"><span>＋</span> ثبت درخواست جدید</a></section><section class="stat-grid"><a class="stat-card accent" href="index.php?page=reports&amp;status=active" title="نمایش درخواست‌های در حال پیگیری"><span class="stat-icon">◈</span><div><strong>' . $activeCount . '</strong><small>در حال پیگیری</small></div></a><a class="stat-card" href="index.php?page=reports&amp;status=waiting_user" title="نمایش درخواست‌های در انتظار پاسخ کاربر"><span class="stat-icon blue">◌</span><div><strong>' . $counts['waiting_user'] . '</strong><small>در انتظار پاسخ کاربر</small></div></a><a class="stat-card" href="index.php?page=reports&amp;status=resolved" title="نمایش درخواست‌های حل‌شده و بسته‌شده"><span class="stat-icon green">✓</span><div><strong>' . ($counts['resolved'] + $counts['closed']) . '</strong><small>حل‌شده</small></div></a><a class="stat-card" href="index.php?page=reports&amp;status=cancelled" title="نمایش درخواست‌های لغوشده"><span class="stat-icon" style="background:#fef3f2;color:#b42318">×</span><div><strong>' . $counts['cancelled'] . '</strong><small>لغوشده</small></div></a><a class="stat-card" href="index.php?page=reports&amp;status=all" title="نمایش همهٔ درخواست‌های من در گزارش‌ها"><span class="stat-icon gray">▣</span><div><strong>' . count($tickets) . '</strong><small>نمایش داده‌شده</small></div></a></section>';
+echo release_notes_dashboard_card();
+echo '<section class="dashboard-hero"><div><span class="eyebrow">' . ($isStaff ? 'مرکز کنترل پشتیبانی' : 'فضای درخواست‌های شما') . '</span><h1>سلام ' . e($user['full_name']) . '،<br><strong>چه کمکی از ما می‌خواهید؟</strong></h1><p>درخواست جدید ثبت کنید یا وضعیت درخواست‌های قبلی را دنبال کنید؛ بقیهٔ بخش‌ها در «دسترسی سریع» پایین صفحه است.</p></div><a class="button hero-button" href="request-center.php?page=new-ticket"><span>＋</span> ثبت درخواست جدید</a></section>';
+if (is_array($rcCounts)) {
+    $waiting = (int) ($rcCounts['waiting_user'] ?? 0) + (int) ($rcCounts['pending'] ?? 0);
+    $resolved = (int) ($rcCounts['resolved'] ?? 0) + (int) ($rcCounts['closed'] ?? 0);
+    $cancelled = (int) ($rcCounts['cancelled'] ?? 0);
+    $shown = is_array($rcTickets) ? count($rcTickets) : 0;
+    echo '<section class="stat-grid"><a class="stat-card accent" href="request-center.php?page=reports&amp;status=active" title="نمایش درخواست‌های در حال پیگیری"><span class="stat-icon">◈</span><div><strong>' . (int) $activeCount . '</strong><small>در حال پیگیری</small></div></a><a class="stat-card" href="request-center.php?page=reports&amp;status=waiting_user" title="نمایش درخواست‌های در انتظار پاسخ کاربر"><span class="stat-icon blue">◌</span><div><strong>' . $waiting . '</strong><small>در انتظار پاسخ کاربر</small></div></a><a class="stat-card" href="request-center.php?page=reports&amp;status=resolved" title="نمایش درخواست‌های حل‌شده و بسته‌شده"><span class="stat-icon green">✓</span><div><strong>' . $resolved . '</strong><small>حل‌شده</small></div></a><a class="stat-card" href="request-center.php?page=reports&amp;status=cancelled" title="نمایش درخواست‌های لغوشده"><span class="stat-icon" style="background:#fef3f2;color:#b42318">×</span><div><strong>' . $cancelled . '</strong><small>لغوشده</small></div></a><a class="stat-card" href="request-center.php?page=reports&amp;status=all" title="نمایش همهٔ درخواست‌ها در گزارش‌ها"><span class="stat-icon gray">▣</span><div><strong>' . $shown . '</strong><small>نمایش داده‌شده</small></div></a></section>';
+}
 if ($cdDvdReady) {
     echo cd_dvd_render_surface($user, 'index.php');
      echo '<script src="assets/cd-dvd.js?v=3.4.9"></script>';
@@ -3732,15 +2520,40 @@ if ($cdDvdReady) {
 if (function_exists('food_order_render_pending_cancels_card')) {
     echo food_order_render_pending_cancels_card($user);
 }
-echo '<section class="list-section"><div class="section-title"><div><h2>' . ($isStaff ? 'آخرین درخواست‌ها' : 'درخواست‌های من') . '</h2><p>آخرین تغییرات در ابتدا نمایش داده می‌شود.</p></div><a href="index.php?page=new-ticket">ثبت درخواست ←</a></div>';
-if (!$tickets) {
-    echo '<div class="card empty-state"><div class="empty-icon">✦</div><h3>هنوز درخواستی ثبت نشده است</h3><p>برای شروع، اولین درخواست خود را ثبت کنید.</p><a class="button" href="index.php?page=new-ticket">ثبت اولین درخواست</a></div>';
-} else {
-    echo '<div class="card ticket-table"><div class="table-head"><span>عنوان درخواست</span><span>ثبت‌کننده</span><span>اولویت</span><span>وضعیت</span><span>آخرین تغییر</span></div>';
-    foreach ($tickets as $ticket) {
-        echo '<a class="table-row" href="index.php?page=ticket&id=' . (int) $ticket['id'] . '"><span class="ticket-title"><b>' . e(ticket_number((int) $ticket['id'])) . '</b><strong>' . e($ticket['subject']) . '</strong><small>' . e($ticket['category_name'] ?: 'بدون دسته‌بندی') . '</small></span><span>' . e($isStaff ? $ticket['requester_name'] : ($ticket['assignee_name'] ?: 'در انتظار تخصیص')) . '</span><span><i class="priority-dot ' . e($ticket['priority']) . '"></i>' . e(priority_label($ticket['priority'])) . '</span><span><em class="status ' . e($ticket['status']) . '">' . e(status_label($ticket['status'])) . '</em></span><span class="date-cell">' . persian_date($ticket['updated_at']) . ' ←</span></a>';
+if (is_array($rcTickets)) {
+    echo '<section class="list-section"><div class="section-title"><div><h2>' . ($isStaff ? 'آخرین درخواست‌ها' : 'درخواست‌های من') . '</h2><p>آخرین تغییرات در ابتدا نمایش داده می‌شود.</p></div><a href="request-center.php?page=new-ticket">ثبت درخواست ←</a></div>';
+    if ($rcTickets === []) {
+        echo '<div class="card empty-state"><div class="empty-icon">✦</div><h3>هنوز درخواستی ثبت نشده است</h3><p>برای شروع، اولین درخواست خود را ثبت کنید.</p><a class="button" href="request-center.php?page=new-ticket">ثبت اولین درخواست</a></div>';
+    } else {
+        echo '<div class="card ticket-table"><div class="table-head"><span>عنوان درخواست</span><span>ثبت‌کننده</span><span>اولویت</span><span>وضعیت</span><span>آخرین تغییر</span></div>';
+        foreach ($rcTickets as $ticket) {
+            echo '<a class="table-row" href="request-center.php?page=ticket&id=' . (int) $ticket['id'] . '"><span class="ticket-title"><b>' . e(ticket_number((int) $ticket['id'])) . '</b><strong>' . e($ticket['subject']) . '</strong><small>' . e($ticket['category_name'] ?: 'بدون دسته‌بندی') . '</small></span><span>' . e($isStaff ? $ticket['requester_name'] : ($ticket['assignee_name'] ?: 'در انتظار تخصیص')) . '</span><span><i class="priority-dot ' . e($ticket['priority']) . '"></i>' . e(priority_label($ticket['priority'])) . '</span><span><em class="status ' . e($ticket['status']) . '">' . e(status_label($ticket['status'])) . '</em></span><span class="date-cell">' . e(persian_date($ticket['updated_at'])) . ' ←</span></a>';
+        }
+        echo '</div>';
     }
-    echo '</div>';
+    echo '</section>';
 }
-echo '</section>';
+$quickLinks = [];
+if (user_can($user, 'foodorder.self')) {
+    $quickLinks[] = ['index.php?page=food-order', 'سفارش غذا', 'تقویم شمسی برنامهٔ غذایی و ثبت سفارش'];
+}
+if (user_can($user, 'assets.view')) {
+    $quickLinks[] = ['index.php?page=assets', 'شناسنامه‌های فنی', 'شناسنامه و مشخصات فنی سیستم‌ها'];
+}
+if (user_can($user, 'traffic.view')) {
+    $quickLinks[] = ['index.php?page=traffic-control', 'کنترل تردد', 'ثبت و گزارش تردد مهمانان ساختمان'];
+}
+if (user_can($user, 'cddvd.view')) {
+    $quickLinks[] = ['index.php?page=cd-dvd', 'کنترل CD/DVD', 'ثبت و پیگیری جابجایی رسانه‌ها'];
+}
+$quickLinks[] = ['request-center.php?page=knowledge', 'دانش‌نامه', 'مقالات و راهنماهای حل مشکل'];
+if ($isStaff) {
+    $quickLinks[] = ['request-center.php?page=governance', 'مدیریت تغییر و مشکل', 'ثبت و پیگیری تغییر و Problem'];
+}
+$quickLinks[] = ['index.php?page=help', 'راهنمای سامانه', 'آموزش کار با بخش‌های سامانه'];
+echo '<section class="list-section"><div class="section-title"><div><h2>دسترسی سریع</h2><p>بخش‌های اصلی سامانه در یک نگاه.</p></div></div><div class="card category-list">';
+foreach ($quickLinks as [$quickUrl, $quickTitle, $quickDesc]) {
+    echo '<a class="search-result" href="' . e($quickUrl) . '"><strong>' . e($quickTitle) . '</strong><small>' . e($quickDesc) . '</small></a>';
+}
+echo '</div></section>';
 render_footer();

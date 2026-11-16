@@ -113,6 +113,7 @@ function permission_catalog(): array
                 ['code' => 'asset.edit', 'label' => 'ویرایش'],
                 ['code' => 'asset.extract', 'label' => 'استخراج سخت‌افزار (همین سرور)'],
                 ['code' => 'asset.remote_extract', 'label' => 'ویرایش'],
+                ['code' => 'asset.remote_prepare', 'label' => 'آماده‌سازی سیستم‌های مقصد (فعال‌سازی WinRM)'],
                 ['code' => 'asset.history', 'label' => 'تاریخچهٔ دارایی'],
                 ['code' => 'asset.ping', 'label' => 'پینگ سیستم‌های انتخابی'],
                 ['code' => 'inventory.view', 'label' => 'فهرست موجودی'],
@@ -355,7 +356,7 @@ function permission_defaults_raw(): array
         'primary_admin' => permission_all_codes(),
         // ۱.۳۷.۷ — پیش‌فرض نقش قدیمی «admin» (قابل ویرایش از تنظیمات ← نقش‌ها).
         'supervisor' => array_values(array_unique(array_merge($common, ['ticket.view_all', 'ticket.edit', 'supervisor.panel', 'supervisor.decide', 'supervisor.reopen', 'analytics.view', 'asset.edit', 'asset.extract', 'asset.ping', 'domain.import', 'domain.scan', 'knowledge.manage', 'cddvd.edit', 'cddvd.view_all', 'traffic.destinations', 'logs.activity', 'food.dashboard', 'food.monitor', 'food.orders', 'food.reports', 'food.employees', 'food.guest', 'food.groups', 'food.groups_override']))),
-        'support_manager' => array_values(array_unique(array_merge($common, ['ticket.edit', 'ticket.assign', 'ticket.bulk', 'ticket.attach_asset', 'services.manage', 'service_cat.manage', 'service_field.manage', 'knowledge.manage', 'cddvd.view_all', 'traffic.destinations', 'analytics.view', 'asset.edit', 'asset.extract', 'asset.ping', 'asset.remote_extract', 'inventory.diagnostics', 'domain.import', 'domain.scan', 'audit.view', 'logs.view', 'logs.activity', 'logs.activity_export', 'food.dashboard', 'food.monitor', 'food.orders', 'food.reports', 'food.employees', 'food.guest', 'food.groups', 'food.groups_override', 'food.menu', 'food.menu_edit', 'settings.general', 'settings.domain', 'holidays.manage']))),
+        'support_manager' => array_values(array_unique(array_merge($common, ['ticket.edit', 'ticket.assign', 'ticket.bulk', 'ticket.attach_asset', 'services.manage', 'service_cat.manage', 'service_field.manage', 'knowledge.manage', 'cddvd.view_all', 'traffic.destinations', 'analytics.view', 'asset.edit', 'asset.extract', 'asset.ping', 'asset.remote_extract', 'asset.remote_prepare', 'inventory.diagnostics', 'domain.import', 'domain.scan', 'audit.view', 'logs.view', 'logs.activity', 'logs.activity_export', 'food.dashboard', 'food.monitor', 'food.orders', 'food.reports', 'food.employees', 'food.guest', 'food.groups', 'food.groups_override', 'food.menu', 'food.menu_edit', 'settings.general', 'settings.domain', 'holidays.manage']))),
         'inspector' => array_values(array_unique(array_merge($all, ['ticket.view_unit', 'ticket.view_all', 'ticket.edit', 'queue.view', 'assets.view', 'asset.view', 'asset.history', 'asset.ping', 'reports.view', 'analytics.view', 'audit.view', 'inventory.view', 'cddvd.submit_in', 'cddvd.edit', 'cddvd.view_all', 'cddvd.history', 'cddvd.export', 'traffic.manage']))),
         'manager' => array_values(array_unique(array_merge($common, ['ticket.edit', 'ticket.assign', 'ticket.bulk', 'ticket.attach_asset', 'knowledge.manage', 'asset.edit', 'asset.extract', 'asset.ping', 'analytics.view']))),
         'agent' => array_values(array_unique(array_merge($common, ['ticket.attach_asset', 'knowledge.manage', 'asset.edit', 'asset.extract', 'asset.ping']))),
@@ -564,6 +565,16 @@ function role_permissions_migrate_once(): void
             db()->exec("DELETE FROM role_permissions WHERE permission = 'cddvd.edit' AND role NOT IN ('primary_admin', 'supervisor', 'inspector', 'guard')");
             db()->exec("DELETE FROM role_permissions WHERE permission = 'foodorder.proxy'");
             save_setting('perm_edit_v4', '1');
+            role_permissions_flush_cache();
+        } catch (Throwable $exception) {
+            // Retry this additive permission reconciliation on the next request.
+        }
+    }
+    if (setting('perm_edit_v5') !== '1') {
+        try {
+            // آماده‌سازی راه‌دور مقصدها (فعال‌سازی WinRM) همان جمعیتی را می‌گیرد که استخراج از راه دور دارد.
+            db()->exec("INSERT IGNORE INTO role_permissions (role, permission) SELECT DISTINCT role, 'asset.remote_prepare' FROM role_permissions WHERE permission = 'asset.remote_extract'");
+            save_setting('perm_edit_v5', '1');
             role_permissions_flush_cache();
         } catch (Throwable $exception) {
             // Retry this additive permission reconciliation on the next request.
@@ -794,8 +805,66 @@ function user_can(array $user, string $permission): bool
     if (user_is_primary_admin($user)) {
         return true;
     }
+    // تصمیم مالک (۲۰۲۶-۱۱-۱۶): «سوپروایز» در تنظیمات ← کاربران یک نقش **اعطایی**
+    // است، نه تبدیل نقش. کاربر با هر نقش اصلی (agent، manager، inspector، user…)
+    // می‌تواند در فهرست سوپروایزرها باشد و دسترسی‌های سرپرستی را بگیرد، بدون
+    // اینکه نقشش عوض شود.
+    //
+    // چرا اینجا؟ user_can() تنها نقطهٔ مشترک همهٔ بررسی‌های دسترسی است، پس
+    // سوپروایزر بودن یک‌جا و بی‌پراکندگی اعمال می‌شود.
+    if (function_exists('user_is_key_role')) {
+        if (in_array($permission, user_can_supervisor_grants(), true)
+            && user_is_key_role($user, 'supervisor')) {
+            return true;
+        }
+        // تصمیم مالک (۲۰۲۶-۱۱-۱۶): کاربری که در تنظیمات ← کاربران «کارشناس آی تی»
+        // یا «کارشناس پشتیبانی» تعیین شده باید واقعاً بتواند تیکت‌های حوزه‌اش را
+        // **رسیدگی** کند — نه فقط مسئولِ اسمی باشد. پیش از این فقط نقش سیستمی
+        // (agent/manager) `ticket.edit` داشت، پس کارشناسِ تعیین‌شده از فهرست
+        // هیچ تیکتی نمی‌توانست باز کند یا پاسخ دهد.
+        //
+        // مرز: فقط کدهای «رسیدگی به تیکت»، نه هیچ دسترسی مدیریتی یا سراسری.
+        if (in_array($permission, user_can_expert_grants(), true)
+            && (user_is_key_role($user, 'it_expert') || user_is_key_role($user, 'support_expert'))) {
+            return true;
+        }
+    }
     return isset(role_permission_set(user_role_code($user))[$permission])
         || isset(user_access_group_permission_set($user)[$permission]);
+}
+
+/**
+ * دسترسی‌هایی که «بودن در فهرست سوپروایزرها» مستقلاً می‌دهد.
+ *
+ * تصمیم مالک (۲۰۲۶-۱۱-۱۶): **«دسترسی‌های اضافی سوپروایزر هم گرفته شود.»**
+ * پس این فهرست به کارهای پایهٔ سرپرستی محدود شد.
+ *
+ * کدام حذف شد و چرا:
+ *   • supervisor.decide (ویرایش/تصمیم) — وظیفهٔ تصمیم‌گیری، نه دیدن پنل
+ *   • supervisor.reopen (بازگشایی)     — وظیفهٔ جداگانه
+ *   • queue.view (صف)                  — کارشناسانه است، نه سرپرستانه
+ *
+ * هر سه همچنان از **نقش** می‌آیند اگر نقش داشته باشد (مثلاً نقش supervisor
+ * قدیمی دست‌نخورده است). کسی که فقط در فهرست است، پنل را می‌بیند و تمام.
+ */
+function user_can_supervisor_grants(): array
+{
+    return ['supervisor.panel'];
+}
+
+/**
+ * دسترسی‌هایی که «بودن در فهرست کارشناسان» مستقلاً می‌دهد.
+ *
+ * حداقلی و دقیقاً هم‌اندازهٔ کاری که یک کارشناس رسیدگی‌کننده لازم دارد:
+ * دیدن صف حوزهٔ خودش، باز کردن تیکت، پاسخ دادن، و برداشتنِ کار.
+ *
+ * عمداً `ticket.view_all` این‌جا **نیست**: کارشناس فقط حوزهٔ خدمت خودش را
+ * می‌بیند (`ticket_scope()` مرز را اعمال می‌کند). و `ticket.assign` هم نیست —
+ * تخصیص کارِ سرپرست/مدیر است.
+ */
+function user_can_expert_grants(): array
+{
+    return ['ticket.edit', 'ticket.view_unit', 'ticket.reply', 'ticket.view_own', 'queue.view'];
 }
 
 function user_can_any(array $user, array $permissions): bool

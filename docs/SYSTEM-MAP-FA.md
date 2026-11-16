@@ -145,7 +145,7 @@ python3 tools/find-in-system.py --stats
 
 ## ۳. جریان یک درخواست وب (از ورود تا خروج)
 
-`index.php` (۳۴۵۴ خط) روتر تکفایلهای است — **MVC استفاده نمیشود**.
+`index.php` روتر تکفایلهای است — **MVC استفاده نمیشود؛ لایهٔ MVC مرده در ۱.۶۳ حذف شد**.
 
 ```
 مرورگر → index.php
@@ -185,7 +185,7 @@ python3 tools/find-in-system.py --stats
 | `tests/` | ۹۱ | تستهای ایستا (Python) + تستهای PHP |
 | `tools/` | ۸۰ | ابزارهای CLI، عیبیابی، بنچمارک، نصب Worker |
 | `docs/` | ۱۳ | مستندات فارسی |
-| `app/` + `routes/` | ۲۷ | ⚠️ **لایهٔ MVC بلااستفاده** — هیچ فایلی requireشان نمیکند |
+| `app/` + `routes/` | — | ✅ **لایهٔ MVC در ۱.۶۳ حذف شد** — هیچ فایلی requireشان نمیکرد |
 | `updates/` | ۳۱۰ فایل | تاریخچهٔ ۱۱۰ بستهٔ انتشار |
 | `downloads/` | ۲۰۵ فایل | ZIPها و SHA256ها |
 | `benchmark-results/` | ۱۳ | نتایج بنچمارک |
@@ -481,7 +481,7 @@ migration `013` فیشهای دستی قدیمی (`source_uid=manual-attendance`
 | `schema.sql` vs `install-empty-db.sql` | ✅ **رفع شد** → هر دو ۷۰ جدول؛ ۴ جدول `chatbot_faq`, `chatbot_logs`, `system_incidents`, `food_guest_requests` فقط با `CREATE TABLE IF NOT EXISTS` اضافه شدند (بدون حذف داده) |
 | تستهای پینشده (۷ تست / ۱۳ پین) | ✅ **رفع شد** → ۷۳ تست استاتیک، همگی PASS. پینهای `?v=` و نسخهٔ پنل (`1.37.27`) و رشتههای بازآراییشده بهروز شدند. بستههای ZIP آرشیو عمداً دستنخورده ماندند |
 | اسناد `ARCHITECTURE.md` / `ARCHITECTURE-FA.md` | ⚠️ همچنان قدیمی و ناهماهنگ (اعدادشان مربوط به قبل از تفکیک `bootstrap.php` است). **از این سند استفاده کنید** |
-| `app/` + `routes/web.php` | ⚠️ لایهٔ MVC بلااستفاده؛ گیجکننده (تصمیم حذف با کاربر) |
+| `app/` + `routes/web.php` | ✅ **حذف شد** (۲۰۲۶-۱۱-۱۴، نسخهٔ ۱.۶۳): لایهٔ MVC مرده که هیچ‌کس require نمی‌کرد |
 | `SecurityTest.php` | ⚠️ شکست قدیمی مربوط به پوشش `rebuild-final.sql` — نیاز به **تصمیم کاربر** (طبق `HANDOFF-FA.md` بند ۴) |
 | `food-ticket-env.php` | ⚠️ رمز پیشفرض Access بهصورت Base64 (ریسک امنیتی) |
 | runtime `ALTER TABLE` | ⚠️ اسکیمای واقعی فقط با اجرای کد ساخته میشود |

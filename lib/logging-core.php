@@ -191,6 +191,7 @@ function logging_action_event_definition(string $action): array
         'reset_role_defaults' => ['AUD-ACL-001', 'audit'],
         'update_setting' => ['AUD-SET-001', 'audit'],
         'save_settings' => ['AUD-SET-001', 'audit'],
+        'assets_reset' => ['AUD-AST-001', 'audit'],
         'update_system_settings' => ['AUD-SET-001', 'audit'],
         'config_changed' => ['AUD-SET-001', 'audit'],
         'http_403' => ['SEC-ACL-001', 'security'],

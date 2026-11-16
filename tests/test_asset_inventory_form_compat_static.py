@@ -27,13 +27,13 @@ def test_renderer_normalizes_legacy_and_current_argument_orders():
     assert "$collectedCount = $legacyCollected" in signature
 
 
-def test_current_index_call_uses_the_12_argument_layout():
+def test_current_index_call_uses_the_11_argument_layout_without_local_extract_flag():
     calls = [line.strip() for line in INDEX.splitlines() if "inventory_render_assets_content(" in line]
     assert len(calls) == 1
     call = calls[0]
-    # از ۱.۶۲.۳۷ آرگومان canExtractLocalServer صریح پاس داده می‌شود؛ امضای تابع هم
-    # سازگاری نسخهٔ قدیمی را با پارامتر اختیاری حفظ کرده است.
-    assert "$canExtractLocalServer" in call
+    # caller جاری دیگر پرچم استخراج محلی را نمی‌فرستد؛ پارامتر اختیاری در رندر
+    # فقط برای سازگاری با نسخه‌های قدیمی باقی مانده است.
+    assert "$canExtractLocalServer" not in call
     assert "$canConfigureNetworkScan" in call and "$collectedCount" in call
 
 

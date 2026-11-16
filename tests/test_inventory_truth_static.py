@@ -44,22 +44,32 @@ class InventoryTruthStaticTests(unittest.TestCase):
         self.assertIn("دسترسی رد شد (حساب اسکن ادمین محلی مقصد نیست)", scan)
         self.assertIn("عضو Administrators محلی هر کلاینت باشد", scan)
 
-    def test_local_extraction_button_uses_php_host_and_only_targets_its_own_asset(self) -> None:
-        # اکشن‌های اموال/اسکن از ۱.۶۲.۱۳ در فایل جدا هستند (برش ۳ فاز ۲).
+    def test_legacy_local_collection_backend_remains_but_its_ui_is_removed(self) -> None:
+        # اکشن برای سازگاری/عیب‌یابی داخلی می‌ماند؛ سرور از مسیر معمول انتخاب سیستم اسکن می‌شود.
         index = read("index.php") + "\n" + read("actions/asset-actions.php")
         self.assertIn("$action === 'collect_inventory'", index)
         self.assertIn("inventory_collect_server_reliable()", index)
         self.assertIn("inventory_upsert_server_asset($serverInventory", index)
-        self.assertIn("inventory_asset_is_local($asset)", index)
-        self.assertIn("function inventory_asset_is_local(array $asset)", read("inventory.php"))
-        self.assertIn("استخراج محلی همین سیستم", index)
-        self.assertIn("میزبانی اجرا می‌شود که PHP سامانه روی آن نصب است", index)
-        page = read("asset-inventory-page.php")
-        self.assertIn("bool $canExtractAssets", page)
-        self.assertIn("canExtractLocalServer", page)  # لایهٔ سازگاری با index.php قدیمی
-        self.assertIn("name=\"action\" value=\"collect_inventory\"", page)
         action = index[index.index("if ($action === 'collect_inventory')"):index.index("if ($action === 'asset_profile_selftest')")]
         self.assertLess(action.index("if ($hardwareScore === 0)"), action.index("inventory_upsert_server_asset($serverInventory"))
+
+        index_ui = read("index.php")
+        page = read("asset-inventory-page.php")
+        self.assertNotIn("استخراج محلی سرور سامانه", index_ui)
+        self.assertNotIn("استخراج محلی سرور سامانه", page)
+        self.assertNotIn("$canExtractLocalServer", index_ui)
+        self.assertNotIn("$canExtractLocalThisAsset", index_ui)
+        self.assertNotIn("$canExtractLocalAsset", index_ui)
+        self.assertNotIn('name="action" value="collect_inventory"', page)
+        self.assertIn('value="domain_scan_test_selected"', page)
+        self.assertIn('value="domain_scan_selected"', page)
+
+        scan = read("domain-scan.php")
+        remote = scan[scan.index("function domain_scan_remote_inventory_many"):scan.index("function domain_scan_remote_inventory(")]
+        self.assertIn("$localNames = domain_scan_local_names();", remote)
+        self.assertIn("$isLocal = in_array(strtolower($host), $localNames, true);", remote)
+        self.assertIn("if (!$isLocal)", remote)
+        self.assertIn("'env' => $isLocal ? [] : $env", remote)
 
     def test_winrm_only_targets_are_detected_when_icmp_is_blocked(self) -> None:
         scan = read("domain-scan.php")

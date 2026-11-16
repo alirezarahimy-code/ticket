@@ -67,7 +67,9 @@ def test_a_requester_who_is_also_the_assigned_agent_can_still_work():
     code = strip_php_comments(
         php_function("lib/auth-scope.php", "function ticket_handler_level(array $ticket, array $user): string")
     )
-    block = code[code.index("ticket_user_is_requester($ticket, $user)"):]
+    # روی بلوکِ «اگر ثبت‌کننده است» لنگر بزن، نه اولینِ هر جای تابع:
+    # فراخوان Manager-Tree (isManagerRequester) زودتر از آنجا می‌آید و پنجرهٔ ۶۰۰ نویسه‌ای را منحرف می‌کرد.
+    block = code[code.index("if (ticket_user_is_requester($ticket, $user)) {"):]
     assert "'assignee'" in block[:600], (
         "ثبت‌کننده‌ای که کارشناس مسئول همین درخواست است باید نمای کارشناس بگیرد"
     )
@@ -99,7 +101,7 @@ def test_a_single_function_answers_which_view_to_render():
 
 
 def test_the_ticket_page_uses_the_single_view_function():
-    source = read("index.php")
+    source = read("modules/request-center/Pages/detail.php")
     assert "ticket_view_mode($ticket, $user)" in source, (
         "صفحهٔ درخواست باید نما را از تابع مرجع بگیرد"
     )
@@ -125,10 +127,11 @@ def test_internal_notes_are_hidden_from_the_requester_even_if_they_are_staff():
 
 def test_message_list_no_longer_decides_by_global_role():
     source = read("index.php")
+    combined = source + "\n" + read("modules/request-center/Pages/detail.php") + "\n" + read("modules/request-center/lib/endpoints.php")
     assert "if ((int) $message['is_internal'] === 1 && !$staff) {" not in source, (
         "فیلتر یادداشت داخلی هنوز از نقش سراسری تصمیم می‌گیرد"
     )
-    assert "ticket_can_see_internal(" in source
+    assert "ticket_can_see_internal(" in combined
 
 
 def test_internal_attachment_download_uses_the_same_rule():
@@ -136,7 +139,8 @@ def test_internal_attachment_download_uses_the_same_rule():
     assert "$canDownloadInternal = is_staff_role($downloadUser['role']) || user_is_primary_admin($downloadUser);" not in source, (
         "دانلود پیوست داخلی هنوز از نقش سراسری تصمیم می‌گیرد"
     )
-    download_block = source[source.index("'download_attachment'"):]
+    endpoints = read("modules/request-center/lib/endpoints.php")
+    download_block = endpoints[endpoints.index("request_center_download_attachment"):]
     assert "ticket_can_see_internal($attachmentTicket, $downloadUser)" in download_block[:1400], (
         "دانلود پیوست داخلی باید همان قاعدهٔ رابطه‌محور را به کار ببرد"
     )

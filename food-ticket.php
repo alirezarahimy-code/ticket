@@ -38,6 +38,14 @@ if (is_file(__DIR__ . '/food-ticket-order-source.php')) {
 if (is_file(__DIR__ . '/food-ticket-web-host.php')) {
     require_once __DIR__ . '/food-ticket-web-host.php';
 }
+// آزمون جامع worker/چاپ/مدیریت — همان منطقی که ابزار CLI استفاده می‌کند.
+if (is_file(__DIR__ . '/food-ticket-selftest.php')) {
+    require_once __DIR__ . '/food-ticket-selftest.php';
+}
+// «تغییرات این به‌روزرسانی» داخل خود پنل (مستقل از index.php/۱.۶۳).
+if (is_file(__DIR__ . '/food-ticket-release-notes.php')) {
+    require_once __DIR__ . '/food-ticket-release-notes.php';
+}
 if (is_file(__DIR__ . '/food-ticket-templates.php')) {
     require_once __DIR__ . '/food-ticket-templates.php';
 }
@@ -113,6 +121,10 @@ function food_ticket_route_edit_permission(string $route): ?string
     if (in_array($route, ['reprint-errors', 'delivery'], true)) {
         return $route === 'delivery' ? 'food.manual_attendance_edit' : 'food.printer_edit';
     }
+    // لغو فیش همان مجوز ثبت دستی را می‌خواهد (همان کسی که می‌تواند ثبت کند).
+    if ($route === 'cancel-ticket') {
+        return 'food.manual_attendance_edit';
+    }
     return null;
 }
 
@@ -149,12 +161,18 @@ function food_ticket_route_allowed(array $user, string $route): bool
             'food-menu/printed-delivery', 'food-menu/printed-delivery-export', 'food-menu/employee-search',
             'food-menu/group-orders', 'food-menu/groups', 'food-menu/reconciliation',
             'food-menu/invoice-file', 'food-menu/reconciliation-export',
+            // ۱.۶۳.۴ — نگاشت سازمانی برای «نمایش بر اساس معاونت» در گزارش‌های غذا.
+            'food-menu/org-map',
         ];
         if ($route === 'food-menu/emergency-window-state') {
             return $method === 'GET' && user_can($user, 'food.emergency_window');
         }
         if ($route === 'food-menu/emergency-window') {
             return $method === 'POST' && user_can($user, 'food.emergency_window_edit');
+        }
+        // ثبت خودکار فیش برای روزهای گذشته — نوشتن است، پس مجوز ویرایش منو.
+        if ($route === 'backfill-auto-receipts') {
+            return $method === 'POST' && user_can($user, 'food.menu_edit');
         }
         if ($route === 'food-menu/emergency/lookup') {
             return $method === 'POST' && user_can($user, 'food.menu');
@@ -242,6 +260,8 @@ function food_ticket_route_allowed(array $user, string $route): bool
         'templates/group-design' => 'food.design',
         'health' => 'food.health',
         'self-test' => 'food.health',
+        // آزمون جامع worker/چاپ/مدیریت، در انتهای صفحهٔ «اتصال پایگاه‌ها» — فقط‌خواندنی.
+        'worker-selftest' => 'food.db',
         'process' => 'food.manual_attendance',
         'reprint-errors' => 'food.printer',
         // غیبت روزانه بخشی از گروه‌های غذاست؛ خواندن با food.groups و هر ویرایش با food.groups_edit.
@@ -249,6 +269,11 @@ function food_ticket_route_allowed(array $user, string $route): bool
         'absence-save' => 'food.groups',
         'absence-clear' => 'food.groups',
         'delivery' => 'food.manual_attendance',
+        // لغو فیش: بدون این سطر، $routePermission برای مسیر null می‌ماند و
+        // food_ticket_route_allowed همیشه false برمی‌گرداند — یعنی حتی برای
+        // مدیر پشتیبانی که «ثبت دستی» و «ثبت غیبت» را دارد، دکمهٔ لغو بی‌صدا
+        // ۴۰۳ می‌گرفت و هیچ فیشی لغو نمی‌شد. (گزارش کاربر: «لغو عمل نمی‌کند»)
+        'cancel-ticket' => 'food.manual_attendance',
         'diag-source_row-delete' => 'food.db',
         // سازگاری: لینک قدیمی «آزمون اتصال منبع تردد»
         (function_exists('food_ticket_legacy_key') ? food_ticket_legacy_key('route_test') : 'test-source') => 'food.db',
@@ -1817,8 +1842,38 @@ function food_ticket_source_delete_where(array $item): ?string
         }
         $text = (string) $value;
         if ($isTemporal) {
-            // مسیر PowerShell نوع ستون را برنمی‌گرداند؛ ستون تاریخ/زمان با قالب Access (#...#) نوشته می‌شود.
-            // در Jet، مقایسهٔ ستون تاریخ با رشتهٔ ساده تطبیق نمی‌دهد و دلیل «۰ تطبیق» همین بود.
+            /*
+             * ۱.۶۳.۱-r18 — اصلاح «ردیف از جدول تردد حذف نمی‌شود».
+             *
+             * پیش‌تر همهٔ ستون‌های ردیف در شرط می‌آمدند. جدول تردد ستون
+             * تاریخ/ساعت دارد و مقدار آن از ODBC به‌صورت «YYYY-MM-DD HH:MM:SS»
+             * برمی‌گردد، در حالی که Access آن را با کسری از ثانیه ذخیره
+             * می‌کند. نتیجه: `C_Time = #...12:34:56#` هیچ ردیفی تطبیق
+             * نمی‌داد و هر سه استراتژی حذف شکست می‌خوردند — ردیف می‌ماند،
+             * درست همان چیزی که کاربر دید.
+             *
+             * حالا ستون زمان با بازهٔ یک‌ثانیه‌ای مقایسه می‌شود، نه برابری
+             * دقیق. ستون تاریخ (اگر Date خالص باشد) همان برابری می‌ماند.
+             */
+            $kind = food_ticket_source_column_kind((string) $key);
+            if ($kind === 'time' || $kind === 'datetime') {
+                $seconds = food_ticket_source_seconds_of_day($text);
+                if ($seconds !== null) {
+                    /*
+                     * تاریخِ همراه هم لازم است، حتی برای ستون «زمان»:
+                     * Access مقدار ساعت‌تنها را به‌صورت #1899-12-30 HH:MM:SS#
+                     * ذخیره می‌کند. اگر آن تاریخ را دور بریزیم و فقط
+                     * #HH:MM:SS# بنویسیم، Jet ممکن است این را «امروز»
+                     * تفسیر کند و ردیف دیگری تطبیق بخورد.
+                     *
+                     * پس هر تاریخی که در مقدار اصلی هست حفظ می‌شود؛ اگر
+                     * نیست، فقط ساعت مقایسه می‌شود (ستون Short Text).
+                     */
+                    $day = (preg_match('/(\d{4}-\d{2}-\d{2})/', $text, $dm) === 1) ? $dm[1] : null;
+                    $parts[] = food_ticket_source_time_where($identifier, $seconds, $day);
+                    continue;
+                }
+            }
             $parts[] = $identifier . ' = ' . food_ticket_source_sql_literal($text);
             continue;
         }
@@ -1916,6 +1971,135 @@ function food_ticket_source_is_temporal(string $columnKey, string $type): bool
         'c_date', 'c_time', 'c_datetime', 'c_timestamp', 'punchdate', 'punchtime', 'punch_date', 'punch_time',
         'date', 'time', 'datetime', 'created_at', 'updated_at', 'insert_date', 'insert_time',
     ], true);
+}
+
+/**
+ * نوع یک ستون تاریخ‌مانند را از نامش تشخیص می‌دهد: time / date / datetime / null.
+ *
+ * چرا لازم شد: در جدول تردد ستون‌های C_Date و C_Time جدا هستند و Access
+ * مقدار را با کسری از ثانیه ذخیره می‌کند. برابری دقیق روی زمان هیچ ردیفی
+ * تطبیق نمی‌داد و ردیف تردد برای همیشه در جدول می‌ماند.
+ */
+function food_ticket_source_column_kind(string $key): ?string
+{
+    $k = strtolower(trim($key));
+    if ($k === '') {
+        return null;
+    }
+    // زمان خالص: c_time، punchtime، punch_time، time، insert_time
+    if (preg_match('/(^|_)(c_)?time$|(^|_)time$|punchtime/', $k) === 1 && !preg_match('/datetime|timestamp/', $k)) {
+        return 'time';
+    }
+    // تاریخ+زمان در یک ستون
+    if (preg_match('/datetime|timestamp|created_at|updated_at/', $k) === 1) {
+        return 'datetime';
+    }
+    // تاریخ خالص: c_date، punch_date، date
+    if (preg_match('/(^|_)(c_)?date$|(^|_)date$|punchdate/', $k) === 1) {
+        return 'date';
+    }
+    return null;
+}
+
+/**
+ * «HH:MM:SS» (یا هر قالبی که ساعت را دارد) را به ثانیهٔ روز تبدیل می‌کند.
+ * null = زمان قابل تشخیص نیست، پس باید مسیر برابری دقیق طی شود.
+ */
+function food_ticket_source_seconds_of_day(string $value): ?int
+{
+    $text = trim(food_ticket_normalize_digits($value));
+    if ($text === '') {
+        return null;
+    }
+    // YYYY-MM-DD HH:MM:SS  یا  YYYY-MM-DDTHH:MM:SS
+    if (preg_match('/(\d{1,2}):(\d{2}):(\d{2})/', $text, $m) === 1) {
+        $h = (int) $m[1];
+        $i = (int) $m[2];
+        $s = (int) $m[3];
+        if ($h > 23 || $i > 59 || $s > 59) {
+            return null;
+        }
+        return $h * 3600 + $i * 60 + $s;
+    }
+    // فقط HH:MM بدون ثانیه
+    if (preg_match('/^(\d{1,2}):(\d{2})$/', $text, $m) === 1) {
+        return (int) $m[1] * 3600 + (int) $m[2] * 60;
+    }
+    return null;
+}
+
+/**
+ * برای یک ثانیهٔ روز، یک عبارت مقایسه‌ای می‌سازد که همان ثانیه را بگیرد
+ * حتی وقتی Access کسری از ثانیه ذخیره کرده است.
+ *
+ * روش: میانهٔ همان ثانیه (s + 0.5) با بازهٔ یک‌ثانیه‌ای. در Jet/Access
+ * می‌توان از #HH:MM:SS# استفاده کرد و بازه را با TimeValue ساخت، ولی
+ * ساده‌ترین شکل قابل‌حمل: مقایسه با ستون زمانِ عددیِ روز از طریق
+ * توابع تاریخ. اینجا از الگوی زیر استفاده می‌کنیم که در Jet پشتیبانی
+ * می‌شود و به کسر ثانیه حساس نیست:
+ *
+ *     C_Time >= #HH:MM:SS# AND C_Time < #HH:MM:(SS+1)#
+ *
+ * و چون این تابع فقط «کران پایین» برمی‌گرداند، فراخواننده هر دو طرف را
+ * با food_ticket_source_time_literal_range می‌سازد.
+ */
+function food_ticket_source_time_literal_sod(int $seconds): string
+{
+    $seconds = max(0, min(86399, $seconds));
+    $h = intdiv($seconds, 3600);
+    $i = intdiv($seconds % 3600, 60);
+    $s = $seconds % 60;
+    return sprintf('#%02d:%02d:%02d#', $h, $i, $s);
+}
+
+/**
+ * بازهٔ «همان ثانیه» برای ستون زمان: s <= Time < s+1
+ *
+ * چرا بازه و نه برابری: Access مقدار زمان را با کسری از ثانیه ذخیره
+ * می‌کند و ODBC همان کسر را برنمی‌گرداند. `Time = #12:34:56#` هیچ ردیفی
+ * نمی‌گیرد، ولی `>= 12:34:56 AND < 12:34:57` همان ردیف را می‌گیرد —
+ * بدون این‌که ردیف مجاور را قربانی کند.
+ *
+ * @return array{0:string,1:string} [کران پایین, کران بالا]
+ */
+function food_ticket_source_time_between(int $seconds): array
+{
+    $seconds = max(0, min(86399, $seconds));
+    $end = min(86399, $seconds + 1);
+    // ثانیهٔ ۸۶۳۹۹ (۲۳:۵۹:۵۹): کران بالا نمی‌تواند ۲۴:۰۰:۰۰ باشد؛
+    // از = استفاده می‌کنیم که همان یک ثانیه را بگیرد.
+    return [$seconds, $end];
+}
+
+/**
+ * عبارت SQL بازهٔ زمانی برای ستون تاریخ/زمانِ Access.
+ * $column نام ستون، $seconds ثانیهٔ روز، $withDate تاریخ YYYY-MM-DD یا null.
+ */
+function food_ticket_source_time_where(string $column, int $seconds, ?string $date = null): string
+{
+    [$from, $to] = food_ticket_source_time_between($seconds);
+    $datePrefix = '';
+    $validDate = null;
+    if ($date !== null && preg_match('/^(\d{4})-(\d{2})-(\d{2})$/', $date, $dm) === 1) {
+        if (!checkdate((int) $dm[2], (int) $dm[3], (int) $dm[1])) {
+            // تاریخ نامعتبر نباید شرط را به «فقط ساعت» تنزل دهد و رکورد دیگری را حذف کند.
+            return '(1 = 0)';
+        }
+        $validDate = $date;
+        $datePrefix = $date . ' ';
+    }
+    $lo = $datePrefix . trim(food_ticket_source_time_literal_sod($from), '#');
+    if ($to <= $from) {
+        // ۲۳:۵۹:۵۹ — اگر تاریخ کامل داریم، کران بالا نیمه‌شب روز بعد است؛
+        // در ستونِ صرفاً زمان، خودِ کران پایین آخرین ثانیهٔ ممکن را می‌گیرد.
+        if ($validDate !== null) {
+            $nextDate = (new DateTimeImmutable($validDate))->modify('+1 day')->format('Y-m-d');
+            return '(' . $column . ' >= #' . $lo . '# AND ' . $column . ' < #' . $nextDate . ' 00:00:00#)';
+        }
+        return '(' . $column . ' >= #' . $lo . '#)';
+    }
+    $hi = $datePrefix . trim(food_ticket_source_time_literal_sod($to), '#');
+    return '(' . $column . ' >= #' . $lo . '# AND ' . $column . ' < #' . $hi . '#)';
 }
 
 /** یک کلید تاریخ/زمان را به شکل «#YYYY-MM-DD HH:MM:SS#» برای Jet/Access می‌نویسد (کوتاه‌ترین شکل ممکن). */
@@ -2055,8 +2239,21 @@ function food_ticket_source_minimal_where(array $item): ?string
     }
     if ($timeKey !== null) {
         $timeType = (string) ($types[$timeKey] ?? '');
-        $timeLiteral = food_ticket_source_column_sql_literal((string) $time, $timeKey, $timeType);
-        $parts[] = food_ticket_ident((string) ($columns[$timeKey] ?? $timeKey)) . ' = ' . $timeLiteral;
+        $timeColumn = food_ticket_ident((string) ($columns[$timeKey] ?? $timeKey));
+        $timeText = (string) $time;
+        $timeKind = food_ticket_source_column_kind((string) $timeKey);
+        $seconds = food_ticket_source_is_temporal((string) $timeKey, $timeType)
+            && ($timeKind === 'time' || $timeKind === 'datetime')
+            ? food_ticket_source_seconds_of_day($timeText)
+            : null;
+        if ($seconds !== null) {
+            // مسیر fallback هم باید کسری ثانیهٔ Access را تحمل کند؛ برابری دقیق دوباره همان ردیف را جا می‌گذارد.
+            $day = preg_match('/(\d{4}-\d{2}-\d{2})/', $timeText, $dm) === 1 ? $dm[1] : null;
+            $parts[] = food_ticket_source_time_where($timeColumn, $seconds, $day);
+        } else {
+            $timeLiteral = food_ticket_source_column_sql_literal($timeText, $timeKey, $timeType);
+            $parts[] = $timeColumn . ' = ' . $timeLiteral;
+        }
     }
     return $parts ? implode(' AND ', $parts) : null;
 }
@@ -3116,6 +3313,10 @@ function food_ticket_api_config(array $user = []): array
         : ['token' => '', 'fresh' => true, 'existing' => false, 'counts' => []];
     $payload = [
         'db' => $dbState,
+        // «تغییرات این به‌روزرسانی» — پنل این را در نوار بالای صفحه نشان می‌دهد.
+        'releaseNotes' => function_exists('food_ticket_release_notes_current')
+            ? food_ticket_release_notes_current()
+            : null,
         'attendancePath' => (string) ($config['attendance_path'] ?? ''),
         'attendanceTable' => food_ticket_source_table(),
         // مقادیر legacy برای سازگاری API؛ در رابط کاربری نمایش داده نمی‌شوند.
@@ -3157,6 +3358,10 @@ function food_ticket_api_config(array $user = []): array
         'brandName' => (string) ($brand['brand_name'] ?? 'سامانه مدیریت غذا'),
         'brandLogo' => (string) ($brand['brand_logo'] ?? ''),
         'panelVersion' => FOOD_TICKET_PANEL_VERSION,
+        // «تغییرات این به‌روزرسانی» — بنر بالای پنل (مستقل از index.php/۱.۶۳).
+        'releaseNotes' => function_exists('food_ticket_release_notes_current')
+            ? food_ticket_release_notes_current()
+            : null,
         'printer' => [
             'mode' => (food_ticket_normalize_printer_mode($config['printer_mode'] ?? 'tcp_raw') === 'tcp_raw' ? 'socket' : 'windows-spooler'),
             'mode_db' => food_ticket_normalize_printer_mode($config['printer_mode'] ?? 'tcp_raw'),
@@ -5279,6 +5484,29 @@ function food_ticket_api_handle(string $route, array $user): never
             }
             food_ticket_api_json(food_ticket_api_delivery((int) ($body['id'] ?? $body['event_id'] ?? 0), $action, trim((string) ($body['reason'] ?? '')), $user));
         }
+        if ($_SERVER['REQUEST_METHOD'] === 'POST' && $route === 'cancel-ticket') {
+            // لغو فیش یک روز و برگرداندن شخص به «تردد این روز ثبت نشده».
+            // با mark_absent (پیش‌فرض ۱) شخص غایب ثبت می‌شود و خودکار در
+            // فهرست غایبان می‌آید.
+            $body = food_ticket_api_body();
+            $cancelUserId = (int) ($body['user_id'] ?? $body['id'] ?? 0);
+            $cancelDate = food_ticket_iso_date_input($body['date'] ?? '') ?? '';
+            if ($cancelDate === '') {
+                food_ticket_api_json(['error' => 'تاریخ معتبر نیست.'], 400);
+            }
+            // پیش‌فرض: هم فیش لغو شود (ردیف «غذا سفارش داده ولی فیش چاپ نشده»
+            // تا قابل صدور مجدد باشد) و هم شخص در فهرست غایبان بیاید.
+            // کاربر انتظار دارد بعد از لغو، از «غذا گرفته» خارج و در «غایبین» دیده شود.
+            $cancelMarkAbsent = !array_key_exists('mark_absent', $body)
+                || (bool) filter_var($body['mark_absent'], FILTER_VALIDATE_BOOLEAN);
+            food_ticket_api_json(food_ticket_cancel_ticket_for_user(
+                $cancelUserId,
+                $cancelDate,
+                $user,
+                trim((string) ($body['reason'] ?? '')),
+                $cancelMarkAbsent
+            ));
+        }
         if ($_SERVER['REQUEST_METHOD'] === 'POST' && $route === 'cleanup-source_row') {
             // پاک‌سازی ردیف‌های باقی‌مانده در SOURCE_TABLE برای فیش‌های ثبت‌شده (dry_run=1 فقط تشخیص).
             $body = food_ticket_api_body();
@@ -5494,6 +5722,114 @@ function food_ticket_api_handle(string $route, array $user): never
 
         if ($_SERVER['REQUEST_METHOD'] === 'POST' && $route === 'self-test') {
             food_ticket_api_json(food_ticket_api_self_test());
+        }
+
+        // ── ثبت خودکار فیش برای روزهای گذشته ────────────────────────────
+        // چرا این مسیر لازم شد: گذر پایان‌روزِ Worker فقط «دیروز» و «امروز» را
+        // پر می‌کند. روزهایی که Worker نبود/خاموش بود/این کد را نداشت، برای
+        // همیشه سوراخ می‌مانند. این مسیر همان تابع واقعی سامانه را روی بازهٔ
+        // دلخواه اجرا می‌کند — نه یک بازنویسی موازی.
+        // idempotent است (کلید یکتای sha256)، پس اجرای دوباره بی‌خطر است.
+        if ($_SERVER['REQUEST_METHOD'] === 'POST' && $route === 'backfill-auto-receipts') {
+            $raw = (string) file_get_contents('php://input');
+            $body = json_decode($raw, true);
+            if (!is_array($body)) {
+                $body = $_POST;
+            }
+            $from = trim((string) ($body['from'] ?? ''));
+            $to   = trim((string) ($body['to'] ?? ''));
+            $apply = !empty($body['apply']);
+
+            $ok = static fn (string $d): bool => (bool) preg_match('/^\d{4}-\d{2}-\d{2}$/', $d)
+                && checkdate((int) substr($d, 5, 2), (int) substr($d, 8, 2), (int) substr($d, 0, 4));
+            if (!$ok($from) || !$ok($to)) {
+                food_ticket_api_json(['error' => 'بازهٔ تاریخ معتبر نیست (YYYY-MM-DD).'], 400);
+            }
+            if ($from > $to) {
+                food_ticket_api_json(['error' => 'تاریخ شروع بعد از پایان است.'], 400);
+            }
+            // سقف ۴۰۰ روز: جلوی اشتباه تایپی مثل ۱۴۰۰-۰۱-۰۱ را می‌گیرد.
+            $span = (new DateTimeImmutable($from))->diff(new DateTimeImmutable($to))->days;
+            if ($span > 400) {
+                food_ticket_api_json(['error' => 'بازه بیش از ۴۰۰ روز است.'], 400);
+            }
+            if (!function_exists('food_ticket_auto_receipts_run')) {
+                food_ticket_api_json(['error' => 'کتابخانهٔ ثبت خودکار فیش بارگذاری نشد.'], 500);
+            }
+            if (!food_ticket_auto_receipt_schema_ready()) {
+                food_ticket_api_json(['error' => 'ساختار ثبت خودکار آماده نیست (مهاجرت ۰۲۱).'], 400);
+            }
+
+            $days = [];
+            $sum = ['staff' => 0, 'guest' => 0, 'already' => 0, 'absence' => 0, 'real_event' => 0, 'locked' => 0];
+            $cursor = new DateTimeImmutable($from);
+            $end = new DateTimeImmutable($to);
+            while ($cursor <= $end) {
+                $d = $cursor->format('Y-m-d');
+                $cursor = $cursor->modify('+1 day');
+                if (!$apply) {
+                    // گزارش: فقط تعداد کاندید، بدون نوشتن.
+                    $q = db()->prepare("SELECT SUM(meal_type='dinner') AS d, SUM(meal_type='lunch') AS l
+                                        FROM food_orders WHERE food_date = ? AND status='active' AND meal_type IN ('lunch','dinner')");
+                    $q->execute([$d]);
+                    $c = $q->fetch() ?: [];
+                    $dn = (int) ($c['d'] ?? 0);
+                    $ln = (int) ($c['l'] ?? 0);
+                    if ($dn === 0 && $ln === 0) {
+                        continue;
+                    }
+                    $h = food_ticket_auto_receipt_holiday($d);
+                    $days[] = ['date' => $d, 'holiday' => (bool) $h['holiday'], 'dinner' => $dn,
+                               'lunch' => $h['holiday'] ? $ln : 0, 'lunch_skipped' => $h['holiday'] ? 0 : $ln];
+                    continue;
+                }
+                try {
+                    $r = food_ticket_auto_receipts_run($d);
+                } catch (Throwable $e) {
+                    $days[] = ['date' => $d, 'error' => $e->getMessage()];
+                    continue;
+                }
+                if (!empty($r['locked'])) {
+                    $sum['locked']++;
+                    $days[] = ['date' => $d, 'locked' => true];
+                    continue;
+                }
+                $sum['staff'] += (int) $r['staff_created'];
+                $sum['guest'] += (int) $r['guest_created'];
+                $sum['already'] += (int) $r['already_registered'];
+                $sum['absence'] += (int) $r['skipped_absence'];
+                $sum['real_event'] += (int) $r['skipped_real_event'];
+                $days[] = [
+                    'date' => $d,
+                    'holiday' => (bool) $r['holiday'],
+                    'created' => (int) $r['staff_created'] + (int) $r['guest_created'],
+                    'staff' => (int) $r['staff_created'],
+                    'guest' => (int) $r['guest_created'],
+                    'already' => (int) $r['already_registered'],
+                    'absence' => (int) $r['skipped_absence'],
+                    'real_event' => (int) $r['skipped_real_event'],
+                ];
+            }
+            food_ticket_api_json([
+                'from' => $from, 'to' => $to, 'apply' => $apply,
+                'days' => $days, 'totals' => $sum,
+                'created' => $sum['staff'] + $sum['guest'],
+            ]);
+        }
+        // آزمون جامع Worker/چاپ/مدیریت — همان کتابخانه‌ای که CLI استفاده می‌کند.
+        // فقط‌خواندنی: هیچ فیشی چاپ نمی‌شود و هیچ تنظیمی تغییر نمی‌کند.
+        if (in_array($_SERVER['REQUEST_METHOD'] ?? 'GET', ['GET', 'POST'], true) && $route === 'worker-selftest') {
+            if (!function_exists('food_ticket_selftest_run')) {
+                food_ticket_api_json(['error' => 'کتابخانهٔ آزمون (food-ticket-selftest.php) بارگذاری نشد.'], 500);
+            }
+            $payload = food_ticket_selftest_run([
+                'config' => food_ticket_config(true),
+                'source' => 'panel',
+                'dry_print' => true,
+            ]);
+            $payload['text'] = food_ticket_selftest_text($payload);
+            $payload['ok'] = (int) ($payload['verdict']['counts']['fail'] ?? 0) === 0;
+            food_ticket_api_json($payload);
         }
 
         food_ticket_api_json(['error' => 'مسیر API چاپ فیش پیدا نشد.'], 404);

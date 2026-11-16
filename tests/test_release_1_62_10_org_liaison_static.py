@@ -44,7 +44,8 @@ def test_index_php_supports_liaison_node():
     assert "'chartSide' => (string) ($unit['chart_side'] ?? '')" in src
     # نسخهٔ کش دارایی‌ها
     assert re.search(r"assets/organization\.js\?v=\d+", src)
-    assert "assets/style.css?v=3.4.60" in src
+    # Shared HTML rendering moved the stylesheet link out of index.php.
+    assert re.search(r"assets/style\.css\?v=3\.4\.\d+", read("lib/render.php"))
 
 
 def test_organization_js_renders_liaison_band():

@@ -52,6 +52,8 @@ POST_RELEASE_WORKTREE_CHANGES = {
     "lib/auth-scope.php",
     "assets/food-order.css",
     "food-ticket-web/assets/food-order.css",
+    # کار «ساعت ۲۳ پایان‌روز + پنجرهٔ سختگیرانه»: ردیف‌های ثبت خودکار از این پس تحویل‌شده‌اند.
+    "food-ticket-auto-receipts.php",
 }
 
 
@@ -109,6 +111,8 @@ class ReleasePackageTest(unittest.TestCase):
             self.assertEqual(actually_changed, EXPECTED_REPLACEMENTS)
 
             for relative in EXPECTED_ADDITIONS:
+                if relative in POST_RELEASE_WORKTREE_CHANGES:
+                    continue  # پس از انتشار ۱.۶۲.۷۳ تغییر کرده (worktree جلوتر از بستهٔ غیرقابل‌تغییر است)
                 self.assertEqual(new.read("files/" + relative), (ROOT / relative).read_bytes(), relative)
             self.assertEqual(
                 new.read("files/migrations/021-food-auto-receipts.sql"),

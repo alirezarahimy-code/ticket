@@ -17,9 +17,11 @@ def test_current_profile_module_has_complete_form_and_additive_schema():
     section_block = PROFILE[PROFILE.index("function asset_profile_sections"):PROFILE.index("function asset_profile_all_columns")]
     field_keys = set(re.findall(r"\['key' => '([^']+)'", section_block))
     section_count = len(re.findall(r"'title' => '", section_block))
-    assert len(field_keys) == 74
+    # دو فیلد BIOS/model به شناسنامهٔ جاری افزوده شده‌اند؛ بستهٔ r18 پایین‌تر
+    # در همین فایل تاریخی می‌ماند و نباید تعداد فیلدهای runtime را محدود کند.
+    assert len(field_keys) == 76
     assert section_count == 9
-    for key in ["record_number", "plaque_monitor", "owner_full_name", "os_name", "cpu_model", "ram_total", "ip_address", "monitor_model", "antivirus", "ad_online"]:
+    for key in ["record_number", "plaque_monitor", "owner_full_name", "os_name", "machine_serial", "machine_model", "cpu_model", "ram_total", "ip_address", "monitor_model", "antivirus", "ad_online"]:
         assert key in field_keys
     assert "function asset_profile_render_sections" in PROFILE
     assert "function asset_profile_fill_from_asset" in PROFILE

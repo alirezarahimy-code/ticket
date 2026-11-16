@@ -164,6 +164,11 @@ function inventory_collection_status_keys(string $path): array
         'hardware.computer' => ['root/cimv2|Win32_ComputerSystem'],
         'hardware.processor' => ['root/cimv2|Win32_Processor'],
         'hardware.operating_system' => ['root/cimv2|Win32_OperatingSystem'],
+        // ۱.۶۳.۴ — قاب/کیس و محصول سیستم: قبلاً PowerShell این‌ها را می‌خواند
+        // (Win32_SystemEnclosure و Win32_ComputerSystemProduct) ولی هیچ نگاشتی
+        // به فیلد شناسنامه نداشتند، پس «مدل کیس» همیشه خالی می‌ماند.
+        'hardware.system_enclosure' => ['root/cimv2|Win32_SystemEnclosure'],
+        'hardware.system_product' => ['root/cimv2|Win32_ComputerSystemProduct'],
         'hardware.motherboard' => ['root/cimv2|Win32_BaseBoard'],
         'hardware.memory_modules' => ['root/cimv2|Win32_PhysicalMemory'],
         'hardware.physical_disks' => ['root/cimv2|Win32_DiskDrive'],
@@ -255,6 +260,26 @@ function inventory_merge_missing_values(array $fresh, array $previous, ?array $s
         }
     }
     return $fresh;
+}
+
+/**
+ * Bind asset INSERT values in the canonical schema order.
+ *
+ * Both the local collector and the inventory API build their remaining values
+ * with hostname at index 0. The SQL column prefix is always
+ * (asset_tag, hostname, hostname_key); the values after that prefix therefore
+ * start at index 1. Keeping the slice here prevents a repeated hostname from
+ * silently shifting every later bind and causing PDO parameter-count errors.
+ */
+function inventory_asset_insert_params(string $assetTag, array $values): array
+{
+    $values = array_values($values);
+    if (!array_key_exists(0, $values)) {
+        throw new InvalidArgumentException('Inventory asset INSERT requires hostname at values[0].');
+    }
+    $hostname = (string) $values[0];
+    $hostnameKey = function_exists('asset_identity_key') ? asset_identity_key($hostname) : '';
+    return [$assetTag, $hostname, $hostnameKey, ...array_slice($values, 1)];
 }
 
 function inventory_saved_asset_snapshot(array $asset): array
@@ -503,6 +528,14 @@ function inventory_base_inventory(): array
 
 function inventory_apply_powershell_data(array $inventory, array $data): array
 {
+    // شناسه‌های سرویس‌دهندهٔ پنل (php_version/php_sapi/server_software/os_release) مربوط به
+    // همان سروری‌اند که PowerShell را اجرا می‌کند، نه لزوماً سیستمی که شناسنامه‌اش ساخته
+    // می‌شود. اگر باقی بمانند، هنگام استخراج از راه دور داخل hardware_json سیستم مقصد
+    // ذخیره می‌شوند (نشت اطلاعات سرور پنل و دادهٔ گمراه‌کننده در شناسنامهٔ مقصد).
+    // هیچ‌جای برنامه این چهار کلید را نمی‌خواند، پس حذفشان بی‌اثر است.
+    foreach (['php_version', 'php_sapi', 'server_software', 'os_release'] as $panelOnlyKey) {
+        unset($inventory['hardware'][$panelOnlyKey]);
+    }
     $rows = static fn (string $key): array => inventory_rows($data[$key] ?? []);
     $collectionStatus = is_array($data['collection_status'] ?? null) ? $data['collection_status'] : [];
     $inventory['collection_status'] = $collectionStatus;
@@ -531,6 +564,17 @@ function inventory_apply_powershell_data(array $inventory, array $data): array
     $inventory['serial_number'] = (string) ($bios['SerialNumber'] ?? '');
     $inventory['manufacturer'] = (string) ($computer['Manufacturer'] ?? '');
     $inventory['model'] = (string) ($computer['Model'] ?? '');
+    // ۱.۶۳.۱-r15 — نام واقعی کامپیوتر از خودِ ویندوز.
+    //
+    // قبلاً نام میزبان فقط از AD (`dnshostname`) می‌آمد. برای کلاینت‌هایی که
+    // رکورد DNS معتبر ندارند، آن مقدار چیزی مثل «client 192.168.1.25» است یا
+    // کلاً خالی می‌ماند — یعنی اسم واقعی ماشین هیچ‌وقت خوانده نمی‌شد، در حالی
+    // که Win32_ComputerSystem.Name همین را می‌دهد. حالا آن را جدا نگه می‌داریم و
+    // مسیر ذخیره، جای نام جعلی با آن را پر می‌کند.
+    $reportedName = trim((string) inventory_value($computer, ['Name', 'name', 'csname']));
+    if ($reportedName !== '' && preg_match('/^[A-Za-z0-9][A-Za-z0-9._-]{0,62}$/', $reportedName) === 1) {
+        $inventory['reported_hostname'] = $reportedName;
+    }
     $inventory['cpu'] = (string) ($processor['Name'] ?? '') !== '' ? (string) $processor['Name'] : $inventory['cpu'];
     $inventory['memory_mb'] = (int) round(((int) ($computer['TotalPhysicalMemory'] ?? 0)) / 1048576);
     $inventory['domain_username'] = (string) ($computer['UserName'] ?? $inventory['domain_username']);
@@ -638,26 +682,47 @@ function inventory_upsert_server_asset(array $inventory, int $userId): int
     $host = trim((string) ($inventory['hostname'] ?? ''));
     $serial = trim((string) ($inventory['serial_number'] ?? ''));
     $assetTag = inventory_server_asset_tag();
-    $conditions = ['asset_tag = ?'];
-    $params = [$assetTag];
-    if ($host !== '') {
-        $conditions[] = 'hostname = ?';
-        $params[] = $host;
+    /* ۱.۶۳.۱-r19 — جست‌وجوی پله‌ای به‌جای OR.
+     *
+     * نسخهٔ قبلی سه شرط را با OR می‌چسباند:
+     *     WHERE (asset_tag = ? OR hostname = ? OR serial_number = ?)
+     * خطرش این بود که تطابق روی **هر یک** از این سه، رکورد را برمی‌گرداند؛
+     * پس اگر asset_tag ثابت با رکورد بیربطی جور می‌شد، شناسنامهٔ یک سیستم
+     * دیگر به‌روزرسانی می‌شد و سیستم واقعی رکورد تازه می‌ساخت — یکی از
+     * سرچشمه‌های اختلاف ۱۲۵ با ۸۹.
+     *
+     * حالا اولویت صریح است و هر پله جدا پرسیده می‌شود:
+     *   ۱) سریال سخت‌افزار (پایدارترین شناسه؛ تعویض نام/IP عوضش نمی‌کند)
+     *   ۲) MAC آداپتور اصلی
+     *   ۳) نام کامپیوتر
+     *   ۴) asset_tag — آخرین راه، برای رکوردهای قدیمیِ بی‌سریال.
+     */
+    $existingAsset = false;
+    $assetId = 0;
+    if (function_exists('asset_resolve_by_machine')) {
+        $resolved = asset_resolve_by_machine(
+            $inventory['hostname'] ?? null,
+            $inventory['serial_number'] ?? null,
+            $inventory['mac_address'] ?? null
+        );
+        $assetId = (int) ($resolved['id'] ?? 0);
     }
-    if ($serial !== '') {
-        $conditions[] = 'serial_number = ?';
-        $params[] = $serial;
+    if ($assetId <= 0 && $assetTag !== '') {
+        $tagQuery = db()->prepare('SELECT * FROM assets WHERE asset_tag = ? ORDER BY id ASC LIMIT 1');
+        $tagQuery->execute([$assetTag]);
+        $existingAsset = $tagQuery->fetch();
+        $assetId = (int) ($existingAsset['id'] ?? 0);
     }
-    $assetQuery = db()->prepare('SELECT * FROM assets WHERE (' . implode(' OR ', $conditions) . ') ORDER BY id ASC LIMIT 1');
-    $assetQuery->execute($params);
-    $existingAsset = $assetQuery->fetch();
-    $assetId = (int) ($existingAsset['id'] ?? 0);
-    if ($assetId <= 0) { $assetId = asset_resolve_id($inventory['hostname'] ?? null, null, $inventory['serial_number'] ?? null); }
+    if ($assetId <= 0) {
+        $assetId = asset_resolve_id($inventory['hostname'] ?? null, null, $inventory['serial_number'] ?? null);
+    }
     if ($assetId > 0 && !$existingAsset) {
-        $refetch = db()->prepare('SELECT * FROM assets WHERE id = ? LIMIT 1');
-        $refetch->execute([$assetId]);
-        $existingAsset = $refetch->fetch();
+        $refetchEarly = db()->prepare('SELECT * FROM assets WHERE id = ? LIMIT 1');
+        $refetchEarly->execute([$assetId]);
+        $existingAsset = $refetchEarly->fetch();
+        $assetId = (int) ($existingAsset['id'] ?? 0);
     }
+    unset($host, $serial, $params, $conditions);
     $receivedInventory = $inventory;
     $previousStatus = [];
     if ($existingAsset) {
@@ -673,8 +738,9 @@ function inventory_upsert_server_asset(array $inventory, int $userId): int
     $values = [$inventory['hostname'], $inventory['serial_number'], $inventory['manufacturer'], $inventory['model'], $inventory['operating_system'], $inventory['os_architecture'], $inventory['os_serial'], $inventory['ip_address'], $inventory['mac_address'], $inventory['cpu'], $inventory['memory_mb'], json_encode($inventory['disks'], JSON_UNESCAPED_UNICODE), json_encode($inventory['software'], JSON_UNESCAPED_UNICODE), json_encode($inventory['hardware'], JSON_UNESCAPED_UNICODE), json_encode($inventory['peripherals'], JSON_UNESCAPED_UNICODE), $inventory['domain_username'], $inventory['antivirus']];
     if ($assetId > 0) {
         db()->prepare('UPDATE assets SET hostname = ?, serial_number = ?, manufacturer = ?, model = ?, operating_system = ?, os_architecture = ?, os_serial = ?, ip_address = ?, mac_address = ?, cpu = ?, memory_mb = ?, disks_json = ?, software_json = ?, hardware_json = ?, peripherals_json = ?, domain_username = ?, antivirus = ?, source = "server_inventory", last_inventory_at = NOW() WHERE id = ?')->execute([...$values, $assetId]);
+                if (function_exists('asset_sync_identity_key')) { asset_sync_identity_key($assetId); }
     } else {
-        db()->prepare('INSERT INTO assets (asset_tag, hostname, serial_number, manufacturer, model, operating_system, os_architecture, os_serial, ip_address, mac_address, cpu, memory_mb, disks_json, software_json, hardware_json, peripherals_json, domain_username, antivirus, source, last_inventory_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, "server_inventory", NOW())')->execute([$assetTag, ...$values]);
+        db()->prepare('INSERT INTO assets (asset_tag, hostname, hostname_key, serial_number, manufacturer, model, operating_system, os_architecture, os_serial, ip_address, mac_address, cpu, memory_mb, disks_json, software_json, hardware_json, peripherals_json, domain_username, antivirus, source, last_inventory_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, "server_inventory", NOW())')->execute(inventory_asset_insert_params($assetTag, $values));
         $assetId = (int) db()->lastInsertId();
     }
     if (function_exists('asset_sync_identity_key')) { asset_sync_identity_key($assetId); }
@@ -797,11 +863,14 @@ function inventory_collect_client_asset(array $user): ?int
                     $hostname = substr($storedHostname, 0, 190);
                 }
                 db()->prepare('UPDATE assets SET hostname = ?, owner_user_id = ?, department_id = COALESCE(?, department_id), ip_address = ?, domain_username = ? WHERE id = ?')->execute([$hostname, (int) ($user['id'] ?? 0), $departmentId, $clientIp, $username, $assetId]);
+                if (function_exists('asset_sync_identity_key')) { asset_sync_identity_key($assetId); }
             } elseif ($isLoginIdentity) {
                 // اصلاح رکوردهای قدیمی که ورود کاربر را اشتباهاً Inventory موفق علامت زده بودند.
                 db()->prepare('UPDATE assets SET hostname = ?, owner_user_id = ?, department_id = COALESCE(?, department_id), ip_address = ?, domain_username = ?, hardware_json = ?, last_inventory_at = NULL WHERE id = ?')->execute([$hostname, (int) ($user['id'] ?? 0), $departmentId, $clientIp, $username, $hardware, $assetId]);
+                if (function_exists('asset_sync_identity_key')) { asset_sync_identity_key($assetId); }
             } else {
                 db()->prepare('UPDATE assets SET hostname = ?, owner_user_id = ?, department_id = COALESCE(?, department_id), ip_address = ?, domain_username = ?, hardware_json = ? WHERE id = ?')->execute([$hostname, (int) ($user['id'] ?? 0), $departmentId, $clientIp, $username, $hardware, $assetId]);
+                if (function_exists('asset_sync_identity_key')) { asset_sync_identity_key($assetId); }
             }
         } else {
             // ثبت هویت ورود، Inventory سخت‌افزاری نیست؛ تاریخ جمع‌آوری عمداً خالی می‌ماند.

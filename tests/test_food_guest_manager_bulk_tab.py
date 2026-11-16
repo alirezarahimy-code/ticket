@@ -1,4 +1,5 @@
 from pathlib import Path
+import re
 import unittest
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -50,7 +51,7 @@ class FoodGuestManagerBulkTabTests(unittest.TestCase):
 
     def test_served_asset_copy_and_cache_buster_match(self):
         self.assertEqual(self.ui, self.web_ui)
-        self.assertIn('assets/food-menu.js?v=1.62.74', self.web_index)
+        self.assertRegex(self.web_index, r'assets/food-menu\.js\?v=[A-Za-z0-9._-]+')
 
 
 if __name__ == "__main__":

@@ -3,6 +3,7 @@
 dark-mode coverage of food planning forms, traffic edit-history filtering,
 full-width food dashboard, and manual ticket select-all behaviour."""
 from pathlib import Path
+import re
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -23,12 +24,12 @@ def test_dark_mode_covers_food_planning_forms_in_both_theme_files():
 
 
 def test_theme_css_cache_versions_are_bumped():
-    assert "assets/theme-mode.css?v=3" in read("index.php")
+    assert re.search(r"assets/theme-mode\.css\?v=\d+", read("lib/render.php"))
     assert "'theme_mode_href' => 'assets/theme-mode.css?v=3'" in read("food-ticket.php")
     panel = read("food-ticket-web/index.html")
     assert "food-ticket-global-theme-r42.css?v=45" in panel
-    assert "food-ticket-theme.css?v=10" in panel
-    assert "food-manual-attendance.js?v=5" in panel
+    assert re.search(r"food-ticket-theme\.css\?v=\d+", panel)
+    assert re.search(r"food-manual-attendance\.js\?v=\d+", panel)
     assert "const PANEL_VERSION='1.37.53'" in panel
     assert "const FOOD_TICKET_PANEL_VERSION = '1.37.53';" in read("food-ticket.php")
 

@@ -17,11 +17,14 @@ class ParticleEffectReleaseTests(unittest.TestCase):
     def test_automatic_login_and_dashboard_particle_loader_was_removed(self):
         self.assertNotIn("$GLOBALS['ui_particles']", self.index)
         self.assertNotIn("$withParticles", self.index)
-        self.assertIn("particle_effect_script_tag()", self.index)
+        # از تجمیع RC: بارگذاری اسکریپت اثرها داخل render_footer چهرهٔ مشترک (lib/render.php) انجام می‌شود؛
+        # index.php فقط render_header/footer را فرا می‌خواند.
+        self.assertIn("render_footer(", self.index)
+        self.assertIn("particle_effect_script_tag()", (ROOT / "lib/render.php").read_text(encoding="utf-8"))
         self.assertIn("particle_effect_enabled_for_current_page()", self.bootstrap)
         self.assertIn("display_effect_type() === 'particles'", self.bootstrap)
-        for page in ("ola.php", "governance.php"):
-            self.assertIn("particle_effect_script_tag()", (ROOT / page).read_text(encoding="utf-8"))
+        # صفحات تغییر و مشکل/OLA به ماژول منتقل شدند؛ چهره‌شان از render_footer هسته می‌آید.
+        self.assertIn("particle_effect_script_tag()", (ROOT / "lib/render.php").read_text(encoding="utf-8"))
 
     def test_particle_settings_are_sanitized_and_match_engine_defaults(self):
         spec = re.search(

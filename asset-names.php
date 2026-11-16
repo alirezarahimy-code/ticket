@@ -19,18 +19,112 @@ declare(strict_types=1);
  *     در «شناسنامه رایانه» هم قابل دیدن است.
  *
  * حالت نمایش با تنظیم «ظاهر نام کامپیوترها» در تنظیمات ← اطلاعات سامانه قابل تغییر است:
- *   short_lower (پیش‌فرض) = adminit2   |   short = ADMINIT2   |   full = ADMINIT2.DOMAIN.LOCAL
+ *   short (پیش‌فرض، حروف اصلی) = ADMINIT2   |   short_lower = adminit2   |   full = ADMINIT2.DOMAIN.LOCAL
+ *
+ * ۱.۶۳.۳: پیش‌فرض از short_lower به short عوض شد تا نام دقیقاً همان چیزی
+ * باشد که روی کیس/سیستم‌عامل نوشته شده. کوچک‌کردن انتخابی مانده است. ارقام
+ * نام هم دیگر فارسی نمی‌شوند (نگاه کنید به lib/fa-digits.php).
  */
 
 /** حالت نمایش نام کامپیوتر: short_lower | short | full */
 function asset_hostname_style(): string
 {
-    $style = (string) setting('asset_hostname_style', 'short_lower');
-    return in_array($style, ['short_lower', 'short', 'full'], true) ? $style : 'short_lower';
+    // ⚠️ ۱.۶۳.۳ — پیش‌فرض از short_lower به short عوض شد.
+    //
+    // کاربر نام کامپیوترها را با الگوی «MBA4-01» تا «MBA4-150» روی کیس
+    // برچسب زده است و می‌خواهد در شناسنامه **دقیقاً همان چیزی** را ببیند که
+    // در سیستم‌عامل/Active Directory هست، نه نسخهٔ کوچک‌شده. کوچک‌کردن
+    // حروف، شناسایی چشمی و کپی‌کردن نام را سخت می‌کرد (MBA4-01 ≠ mba4-01
+    // برای کسی که برچسب را می‌خواند).
+    //
+    // کوچک‌کردن همچنان به‌صورت انتخاب در تنظیمات هست؛ فقط پیش‌فرضِ تازه
+    // «حفظ حروف اصلی» است. نصب‌هایی که قبلاً short_lower را صریح ذخیره
+    // کرده‌اند، همان را حفظ می‌کنند.
+    $style = (string) setting('asset_hostname_style', 'short');
+    return in_array($style, ['short_lower', 'short', 'full'], true) ? $style : 'short';
 }
 
 /**
- * هستهٔ نام: حذف بخش دامنه، پیشوند خودکار «DOMAIN-» و پسوند «$» حساب کامپیوتر.
+ * الگوی IPv4 برای تشخیص «IP چسبیده به نام».
+ * نکته: بخش آخر را عمداً محدود نمی‌کنیم (۲۵۹/۲۵۵/…) چون هدف «تشخیص»
+ * است نه اعتبارسنجی؛ اگر چهار بخش عددیِ نقطه‌دار دیدیم، IP است.
+ */
+const ASSET_IPV4_PATTERN = '((?:\d{1,3}\.){3}\d{1,3})';
+
+/**
+ * الگوی MAC آدرس — ۱.۶۳.۱-r17.
+ *
+ * مسئلهٔ کاربر: در ستون «نام»، «192.168.1.65 00-1A-2B-3C-4D-5E» دیده می‌شد.
+ * علت: قاعدهٔ «IP را از نام بردار» فقط IPv4 را می‌شناخت و MAC را نه؛ بعد از
+ * حذف IP، MAC تنها بازمانده بود و به‌عنوان «نام کامپیوتر» چاپ می‌شد.
+ * ریشهٔ داده هم reverse DNS معیوب شبکه است که نام را «نام IP MAC» برمی‌گرداند.
+ *
+ * سه شکل رایج پشتیبانی می‌شود: خط‌تیره (00-1A-2B-…)، دونقطه (00:1A:2B:…)
+ * و بدون جداکننده (001A2B3C4D5E). مرز کلمه لازم است تا نامی مثل
+ * «PC-12AB34CD» قربانی نشود.
+ */
+const ASSET_MAC_PATTERN = '(?<![0-9A-Za-z])(?:[0-9A-Fa-f]{2}[:-]){5}[0-9A-Fa-f]{2}(?![0-9A-Za-z])';
+
+/** آیا این رشته یک آدرس MAC است؟ (تنها MAC، بدون چیز دیگر) */
+function asset_is_mac(string $value): bool
+{
+    return preg_match('/^' . ASSET_MAC_PATTERN . '$/', trim($value)) === 1;
+}
+
+/** حذف هر MAC از داخل رشته — مثل asset_strip_ip ولی برای MAC. */
+function asset_strip_mac(string $value): string
+{
+    $stripped = preg_replace('/[\s_-]*' . ASSET_MAC_PATTERN . '/', '', $value);
+    if (!is_string($stripped)) {
+        return $value;
+    }
+    // MAC بدون جداکننده (001A2B3C4D5E) فقط وقتی حذف می‌شود که کلمهٔ مستقل باشد؛
+    // وگرنه ممکن است بخشی از یک نام واقعی باشد.
+    $stripped = preg_replace('/(?<![0-9A-Za-z])[0-9A-Fa-f]{12}(?![0-9A-Za-z])/', '', $stripped);
+    if (!is_string($stripped)) {
+        return $value;
+    }
+    return trim(trim($stripped, " \t\n\r\0\x0B-_.:"));
+}
+
+/** آیا این رشته یک آدرس IP خالص است؟ */
+function asset_is_ip(string $value): bool
+{
+    return filter_var($value, FILTER_VALIDATE_IP) !== false;
+}
+
+/** آیا این رشته یک نام کامل دامنه است (نه IP)؟ */
+function asset_is_domain_name(string $value): bool
+{
+    return $value !== '' && !asset_is_ip($value) && str_contains($value, '.');
+}
+
+/**
+ * حذف IP از هر جای رشته، بدون آسیب به بقیهٔ نام.
+ *
+ * چرا: روی شبکهٔ کاربر، reverse DNS برای کلاینت‌ها نامی مثل
+ * «clint 192.168.1.65» برمی‌گرداند — یعنی اسم و IP در یک فیلد. پیش‌تر
+ * قاعدهٔ «هرچه بعد از اولین نقطه است حذف شود» این را به «clint 192»
+ * تبدیل می‌کرد که نه اسم است نه IP: بدتر از خودِ مقدار خام.
+ * حالا اول IP برداشته می‌شود و بعد قاعدهٔ دامنه اعمال می‌شود.
+ */
+function asset_strip_ip(string $value): string
+{
+    // «ip.corp.local» — IP که یک نام دامنه دنبالش آمده: کل بخش دامنه هم می‌رود
+    $stripped = preg_replace('/[\s_-]*' . ASSET_IPV4_PATTERN . '(?:\.\S*)?/', '', $value);
+    if (is_string($stripped)) {
+        $value2 = $stripped === '' ? '' : $stripped;
+    }
+    // IP ساده با جداکنندهٔ فاصله/خط‌تیره/زیرخط یا در ابتدا/انتها
+    $stripped = preg_replace('/[\s_-]*' . ASSET_IPV4_PATTERN . '(?![\d.])/', '', $value2 ?? '');
+    $stripped = is_string($stripped) ? $stripped : $value;
+    // جداکننده‌های آویزان در ابتدا/انتها (مثل «pc1-» یا «-pc1»)
+    $stripped = trim($stripped, " \t\n\r\0\x0B-_.");
+    return trim($stripped);
+}
+
+/**
+ * هستهٔ نام: حذف IP چسبیده، بخش دامنه، پیشوند خودکار «DOMAIN-» و پسوند «$».
  * هیچ حرفی از نام اصلی حذف نمی‌شود جز این‌ها.
  */
 function asset_name_core(string $hostname): string
@@ -40,24 +134,73 @@ function asset_name_core(string $hostname): string
     if ($name === '') {
         return '';
     }
-    // آدرس IP یک نام است، نه «نام کامل دامنه» ⇒ دست‌نخورده برمی‌گردد
-    if (filter_var($name, FILTER_VALIDATE_IP) !== false || preg_match('/^\d{1,3}(\.\d{1,3}){3}$/', $name) === 1) {
+    // آدرس IP خالص یک نام است، نه «نام کامل دامنه» ⇒ دست‌نخورده برمی‌گردد
+    // (تنها جایی که IP نگه داشته می‌شود: وقتی چیز دیگری برای نشان‌دادن نباشد)
+    if (asset_is_ip($name)) {
         return $name;
+    }
+    // ۱.۶۳.۱-r17 — MAC خالص هم نام کامپیوتر نیست؛ ولی asset_name_core کلید
+    // هویت را می‌سازد و باید مقداری برگرداند. رشتهٔ خالی می‌دهیم تا فراخوان
+    // («نام ثبت نشده») جایش را بگیرد، نه اینکه MAC به‌عنوان نام چاپ شود.
+    if (asset_is_mac($name)) {
+        return '';
+    }
+    // IP چسبیده به نام (clint 192.168.1.65 ⇒ clint) — پیش از قاعدهٔ دامنه
+    $name = asset_strip_ip($name);
+    // ۱.۶۳.۱-r17 — MAC چسبیده به نام هم بخشی از نام نیست.
+    // ترتیب مهم است: اول IP، بعد MAC. اگر برعکس بود، در رشتهٔ
+    // «pc 192.168.1.65 00-1A-2B-3C-4D-5E» حذف IP جداکننده‌ها را جا می‌گذاشت
+    // و MAC با فاصلهٔ اضافه باقی می‌ماند.
+    $name = asset_strip_mac($name);
+    if ($name === '') {
+        // فقط نشانی بود و چیزی از نام نماند. کلید هویت نمی‌تواند خالی بماند،
+        // پس IP را برمی‌گردانیم — ولی نمایش، خودش IP را نشان نمی‌دهد
+        // (asset_display_name آن را به «نام ثبت نشده» تبدیل می‌کند).
+        if (preg_match('/' . ASSET_IPV4_PATTERN . '/', $hostname, $addressMatch) === 1) {
+            return $addressMatch[1];
+        }
+        return '';
     }
     // نام کامل دامنه: هرچه بعد از اولین نقطه است حذف می‌شود (ADMINIT2.DOMAIN.LOCAL ⇒ ADMINIT2)
     $dot = strpos($name, '.');
     if ($dot !== false && $dot > 0) {
         $name = substr($name, 0, $dot);
     }
-    // پیشوند خودکارِ رکوردهای اسکن دامنه (چند بار، برای اطمینان)
+    // پیشوند خودکارِ رکوردهای اسکن دامنه و کلاینت‌ها (چند بار، برای اطمینان)
     for ($i = 0; $i < 3; $i++) {
         if (stripos($name, 'DOMAIN-') === 0) {
             $name = substr($name, 7);
         }
+        if (stripos($name, 'CLIENT-') === 0) {
+            $name = substr($name, 7);
+        }
     }
+    // پسوند دامنه بدون نقطه: reverse DNS معمولاً «نام» و «دامنه» را با فاصله
+    // می‌دهد (pc1 192.168.1.5 CORP). پس از حذف IP، کلمهٔ آخر اگر کاملاً
+    // حرفی و کوتاه باشد و نام بلندتری قبلش باشد، باقی‌ماندهٔ دامنه است.
+    $words = preg_split('/\s+/u', $name) ?: [];
+    while (count($words) > 1) {
+        $last = (string) end($words);
+        if (preg_match('/^[A-Za-z]{2,24}$/', $last) === 1) {
+            array_pop($words);
+            continue;
+        }
+        break;
+    }
+    $name = implode(' ', $words);
     // پسوند $ حساب کامپیوتر در Active Directory (مثل PC1$)
     $name = rtrim($name, '$');
-    $name = trim($name);
+    $name = trim($name, " \t\n\r\0\x0B-_");
+    // باقی‌ماندهٔ «آی‌پی خط‌تیره‌ای» (192-168-1-65): نام کامپیوتر نیست.
+    //
+    // این شکل از خودِ سامانه هم می‌آید: هنگام ورود کاربر که نام واقعی را
+    // نمی‌دانیم، `CLIENT-192-168-1-25` ساخته می‌شود. قبلاً این تابع آن را به
+    // «192.168.1.25» تبدیل و برمی‌گرداند و همان IP در ستون «نام» می‌نشست —
+    // یعنی همان چیزی که کاربر می‌دید. حالا رشتهٔ خالی برمی‌گردد تا فراخوان
+    // بفهمد «نام واقعی نداریم» و از مسیر Win32_ComputerSystem.Name پر شود.
+    if (preg_match('/^(\d{1,3})-\d{1,3}-\d{1,3}-\d{1,3}$/', $name) === 1) {
+        return '';
+    }
     return $name;
 }
 
@@ -68,13 +211,51 @@ function asset_display_name(?string $hostname): string
     if ($raw === '') {
         return '';
     }
-    $style = asset_hostname_style();
-    if ($style === 'full') {
-        return $raw;
+    // IP خالص «نام کامپیوتر» نیست؛ شناسه است. طبق قرارداد، آدرس فقط در
+    // tooltip می‌آید و در ستون «نام» مقداری جز نام ماشین نمی‌نشیند.
+    // (تابع asset_name_core دست‌نخورده می‌ماند، چون کلید هویت از آن ساخته
+    //  می‌شود و خالی‌کردنش رکوردهای IP-محور را به هم می‌ریخت.)
+    if (asset_is_ip($raw)) {
+        return '';
     }
     $core = asset_name_core($raw);
+    $style = asset_hostname_style();
+    if ($style === 'full') {
+        // «نام کامل دامنه» یعنی نام میزبان + دامنه — **نه** رشتهٔ خام.
+        // قبلاً همین‌جا `return $raw` بود و نتیجه این بود که هر مقدار آلوده
+        // (مثل «client 192.168.1.25» که reverse DNS چپانده) دست‌نخورده به
+        // کاربر نشان داده می‌شد و IP هم داخل نام می‌ماند. قاعدهٔ «IP هرگز در
+        // نام دیده نمی‌شود» نباید به حالت نمایش وابسته باشد.
+        if ($core === '' || asset_is_ip($core)) {
+            return $core !== '' ? $core : '';
+        }
+        // دامنه را از مقدار خام برمی‌داریم (اگر واقعاً دامنه‌ای بوده)، ولی
+        // هستهٔ نام را همان هستهٔ تمیزشده می‌گذاریم.
+        $domain = '';
+        if (preg_match('/^[^\s]+\.[A-Za-z][A-Za-z0-9.-]*$/', $raw) === 1) {
+            $dot = strpos($raw, '.');
+            if ($dot !== false) {
+                $domain = substr($raw, $dot);
+            }
+        }
+        return $core . $domain;
+    }
     if ($core === '') {
-        return $raw;
+        // نام واقعی قابل استخراج نیست (مثلاً CLIENT-192-168-1-25 که خودمان
+        // ساختیم، یا IP خالص). «نمایش» نباید همان IP را برگرداند، چون کاربر
+        // آن را به‌عنوان نام کامپیوتر می‌خواند. رشتهٔ خالی می‌دهیم تا فراخوان
+        // جایگزین مناسب بگذارد (asset_name_title / «نام ثبت نشده»).
+        return '';
+    }
+    // ۱.۶۳.۱-r17 — هسته هم نباید IP باشد.
+    //
+    // asset_name_core برای ساختن کلید هویت ناچار است مقداری برگرداند، پس در
+    // حالت «فقط نشانی» (مثل «192.168.1.65 00-1A-2B-3C-4D-5E») همان IP را
+    // می‌دهد. اگر اینجا جلویش گرفته نشود، همان IP به‌عنوان «نام» چاپ می‌شود و
+    // قاعدهٔ «IP هرگز نام نیست» نقض می‌شود. شاخهٔ full از قبل همین بررسی را
+    // داشت؛ شاخهٔ short نداشت.
+    if (asset_is_ip($core) || asset_is_mac($core)) {
+        return '';
     }
     return $style === 'short_lower' ? (function_exists('mb_strtolower') ? mb_strtolower($core, 'UTF-8') : strtolower($core)) : $core;
 }
@@ -92,13 +273,36 @@ function asset_is_auto_domain_tag(?string $tag, ?string $hostname = null): bool
     return true;
 }
 
+/**
+ * نامی که همیشه چیزی برای نشان‌دادن دارد.
+ *
+ * `asset_display_name()` وقتی نام واقعی قابل استخراج نیست رشتهٔ خالی می‌دهد
+ * (مثلاً رکوردی که فقط `CLIENT-192-168-1-25` دارد). هر جای رابط کاربری که
+ * این مقدار را مستقیم چاپ می‌کرد، یک سلول خالی می‌شد. این تابع همان حالت را
+ * به یک برچسب صادقانه تبدیل می‌کند — بدون IP و بدون ادعای دروغ.
+ *
+ * @param string $fallback برچسبی که وقتی نام واقعی نیست نشان داده می‌شود.
+ */
+function asset_name_or(?string $hostname, string $fallback = 'نام ثبت نشده'): string
+{
+    $shown = asset_display_name($hostname);
+    return $shown !== '' ? $shown : $fallback;
+}
+
 /** متن tooltip: نام کامل (اگر با نام نمایشی یکی نباشد). */
 function asset_name_title(?string $hostname, ?string $tag = null): string
 {
     $raw = trim((string) $hostname);
     $parts = [];
-    if ($raw !== '' && $raw !== asset_display_name($raw)) {
-        $parts[] = $raw;
+    $shown = asset_display_name($raw);
+    if ($raw !== '' && $raw !== $shown) {
+        // نام خام فقط وقتی در tooltip می‌آید که خودش IP نباشد؛ وگرنه همان
+        // قاعدهٔ «IP هیچ‌جا به‌عنوان نام دیده نمی‌شود» نقض می‌شد.
+        if (asset_is_ip($raw)) {
+            $parts[] = 'آدرس: ' . $raw;
+        } elseif (preg_match('/\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}/', $raw) !== 1) {
+            $parts[] = $raw;
+        }
     }
     $tag = trim((string) $tag);
     if ($tag !== '' && !asset_is_auto_domain_tag($tag)) {
@@ -140,6 +344,26 @@ function asset_identity_key(?string $hostname, ?string $tag = null): string
 {
     $raw = trim((string) ($hostname !== null && $hostname !== '' ? $hostname : $tag));
     if ($raw === '') { return ''; }
+    /*
+     * ۱.۶۳.۱-r19 — باگ هویت تکراری برای آدرس IP.
+     *
+     * پیش‌تر asset_name_core() روی «CLIENT-192.168.1.50» اول پیشوند
+     * CLIENT- را برمی‌داشت و بعد نقطه را جداکنندهٔ نام دامنه می‌دید، پس
+     * هر سه آدرس 192.168.1.10 و .11 و .200 به هویت «192» می‌رسیدند.
+     * نتیجه: یا روی یک رکورد به‌غلط ادغام می‌شدند، یا رکوردهای پشت‌سرهم
+     * ساخته می‌شد و شمارش از تعداد واقعی بالا می‌زد (۱۲۵ در برابر ۸۹).
+     *
+     * حالا IP قبل از هر نرمال‌سازی‌ای تشخیص داده می‌شود و بدون دست‌کاری
+     * برمی‌گردد. پیشوند CLIENT-/DOMAIN- هم فقط وقتی حذف می‌شود که بقیه
+     * واقعاً یک نام باشد، نه یک IP.
+     */
+    if (preg_match('/^\d{1,3}(\.\d{1,3}){3}$/', $raw) === 1) {
+        return $raw;
+    }
+    // CLIENT-192.168.1.50 / CLIENT 192.168.1.50
+    if (preg_match('/^(?:CLIENT|DOMAIN)[-\s]+(\d{1,3}(?:\.\d{1,3}){3})$/i', $raw, $ipMatch) === 1) {
+        return $ipMatch[1];
+    }
     $core = asset_name_core($raw);
     // پیشوند خودکار رکوردهای ویندوز کلاینت (CLIENT-*) هم بخشی از هویت نیست.
     for ($i = 0; $i < 3; $i++) {
@@ -185,6 +409,112 @@ function asset_resolve_id(?string $hostname, ?string $tag = null, ?string $seria
 }
 
 /** بهروزرسانی کلید هویت بعد از تغییر hostname یا ساخت رکورد جدید. */
+/**
+ * هویت پایدار دستگاه — مستقل از نام و IP.
+ *
+ * پاسخ به این سؤال عملی: «اگر یک سیستم در شبکه عوض شود، سامانه آن را
+ * سیستم جدید می‌بیند یا همان را به‌روز می‌کند؟»
+ *
+ * قانون پیاده‌شده:
+ *   ۱) سریال سخت‌افزار — پایدارترین شناسه. با تعویض نام، تعویض IP و حتی
+ *      نصب مجدد ویندوز تغییر نمی‌کند.
+ *   ۲) MAC آداپتور اصلی — اگر سریال خالی/بی‌معنی باشد (ماشین مجازی،
+ *      برخی برندها).
+ *   ۳) نام کامپیوتر — اگر هیچ‌کدام نبود.
+ *
+ * IP **هرگز** بخشی از هویت نیست. آدرس IP با DHCP عوض می‌شود و اگر هویت
+ * بر آن سوار شود، همان سیستم با IP تازه رکورد دوم می‌سازد — دقیقاً همان
+ * چیزی که شمارش ۱۲۵ در برابر ۸۹ را می‌سازد.
+ *
+ * @return array{key:string,match:string,value:string}
+ */
+function asset_identity_serial_value(?string $serial): string
+{
+    $serial = strtoupper(trim((string) $serial));
+    $junkSerials = [
+        '', 'TO BE FILLED BY O.E.M.', 'DEFAULT STRING', 'SYSTEM SERIAL NUMBER',
+        'NONE', 'N/A', '0', '00000000', 'NOT SPECIFIED', 'CHASSIS SERIAL NUMBER',
+        '0123456789', 'SERIAL', 'UNKNOWN',
+    ];
+    return $serial !== '' && !in_array($serial, $junkSerials, true) && strlen($serial) >= 4 ? $serial : '';
+}
+
+function asset_identity_mac_value(?string $mac): string
+{
+    $raw = trim((string) $mac);
+    // Remove only ordinary MAC separators. Arbitrary text must not become a
+    // plausible address merely because its non-hex characters were discarded.
+    $compact = preg_replace('/[:.\- ]/', '', $raw);
+    if (!is_string($compact) || preg_match('/^[0-9A-Fa-f]{12}$/', $compact) !== 1) {
+        return '';
+    }
+    $mac = strtoupper($compact);
+    $junkMacs = ['', '000000000000', 'FFFFFFFFFFFF', '020000000000'];
+    if (in_array($mac, $junkMacs, true) || (hexdec(substr($mac, 0, 2)) & 1) !== 0) {
+        return '';
+    }
+    return $mac;
+}
+
+function asset_stable_identity(?string $hostname, ?string $serial = null, ?string $mac = null): array
+{
+    $serialValue = asset_identity_serial_value($serial);
+    if ($serialValue !== '') {
+        return ['key' => 'sn:' . $serialValue, 'match' => 'serial', 'value' => $serialValue];
+    }
+    $macValue = asset_identity_mac_value($mac);
+    if ($macValue !== '') {
+        return ['key' => 'mac:' . $macValue, 'match' => 'mac', 'value' => $macValue];
+    }
+    $nameKey = asset_identity_key($hostname);
+    if ($nameKey !== '') {
+        return ['key' => $nameKey, 'match' => 'hostname', 'value' => $nameKey];
+    }
+    return ['key' => '', 'match' => '', 'value' => ''];
+}
+
+/**
+ * پیدا کردن رکورد موجود با اولویت هویت پایدار، نه نام.
+ *
+ * ترتیبِ بررسی، سریال → MAC → نام است. نکتهٔ مهم: اگر یک سریال معتبر
+ * در جدول پیدا نشد، MAC هم امتحان می‌شود؛ این حالت هنگام تعویض مادربرد
+ * پیش می‌آید (سریال BIOS عوض می‌شود، اما کارت شبکه/نام همان است).
+ *
+ * @return array{id:int,matched_by:string} id=0 یعنی هیچ تطبیقی نبود
+ */
+function asset_resolve_by_machine(?string $hostname, ?string $serial = null, ?string $mac = null): array
+{
+    $serialValue = asset_identity_serial_value($serial);
+    if ($serialValue !== '') {
+        $q = db()->prepare('SELECT id FROM assets WHERE UPPER(TRIM(serial_number)) = ? ORDER BY id ASC LIMIT 1');
+        $q->execute([$serialValue]);
+        $id = (int) ($q->fetchColumn() ?: 0);
+        if ($id > 0) {
+            return ['id' => $id, 'matched_by' => 'serial'];
+        }
+    }
+
+    $macValue = asset_identity_mac_value($mac);
+    if ($macValue !== '') {
+        $q = db()->prepare(
+            "SELECT id FROM assets
+             WHERE REPLACE(REPLACE(REPLACE(REPLACE(UPPER(COALESCE(mac_address,'')),':',''),'-',''),'.',''),' ','') = ?
+             ORDER BY id ASC LIMIT 1"
+        );
+        $q->execute([$macValue]);
+        $id = (int) ($q->fetchColumn() ?: 0);
+        if ($id > 0) {
+            return ['id' => $id, 'matched_by' => 'mac'];
+        }
+    }
+
+    $byName = asset_resolve_id($hostname);
+    if ($byName > 0) {
+        return ['id' => $byName, 'matched_by' => 'hostname'];
+    }
+    return ['id' => 0, 'matched_by' => ''];
+}
+
 function asset_sync_identity_key(int $assetId): void
 {
     if ($assetId <= 0) { return; }
@@ -193,6 +523,15 @@ function asset_sync_identity_key(int $assetId): void
     $asset = $row->fetch();
     if (!$asset) { return; }
     $key = asset_identity_key($asset['hostname'] ?? null, $asset['asset_tag'] ?? null);
-    db()->prepare('UPDATE assets SET hostname_key = ? WHERE id = ?')->execute([$key !== '' ? $key : null, $assetId]);
+    try {
+        db()->prepare('UPDATE assets SET hostname_key = ? WHERE id = ?')->execute([$key !== '' ? $key : null, $assetId]);
+    } catch (PDOException $keyError) {
+        // ۱.۶۳.۴ — کلید یکتای نام: اگر همین نام قبلاً روی رکورد دیگری ثبت شده باشد،
+        // ثبت کلید شکست می‌خورد. این وضعیت نباید کل ذخیرهٔ شناسنامه را از بین ببرد؛
+        // رکورد بدون به‌روزرسانی کلید می‌ماند و رخداد برای بررسی ثبت می‌شود.
+        if (function_exists('app_error_log')) {
+            app_error_log('[asset-names] hostname_key collision for asset ' . $assetId . ' (' . $key . '): ' . $keyError->getMessage());
+        }
+    }
 }
 }

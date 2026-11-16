@@ -1,17 +1,17 @@
 <?php
 declare(strict_types=1);
 
-require dirname(__DIR__) . '/bootstrap.php';
-if (function_exists('ticket_hot_schema_ensure')) {
-    ticket_hot_schema_ensure();
-}
-
 if (PHP_SAPI !== 'cli') {
     http_response_code(404);
     exit("Not found\n");
 }
 
-$query = db()->query('SELECT t.id, t.subject, t.due_at FROM tickets t WHERE t.due_at IS NOT NULL AND t.status NOT IN ("resolved", "closed", "cancelled") AND t.sla_paused_at IS NULL AND t.due_at <= DATE_ADD(NOW(), INTERVAL 60 MINUTE) AND NOT EXISTS (SELECT 1 FROM ticket_sla_alerts a WHERE a.ticket_id = t.id AND (a.alert_type = "overdue" OR (a.alert_type = "due_soon" AND t.due_at > NOW()))) ORDER BY t.due_at LIMIT 1000');
+require dirname(__DIR__) . '/bootstrap.php';
+if (function_exists('ticket_hot_schema_ensure')) {
+    ticket_hot_schema_ensure();
+}
+
+$query = db()->query('SELECT t.id, t.subject, t.due_at FROM tickets t WHERE t.due_at IS NOT NULL AND t.status NOT IN ("resolved", "closed", "cancelled", "rejected") AND t.sla_paused_at IS NULL AND t.due_at <= DATE_ADD(NOW(), INTERVAL 60 MINUTE) AND NOT EXISTS (SELECT 1 FROM ticket_sla_alerts a WHERE a.ticket_id = t.id AND a.due_at = t.due_at AND (a.alert_type = "overdue" OR (a.alert_type = "due_soon" AND t.due_at > NOW()))) ORDER BY t.due_at LIMIT 1000');
 $claim = db()->prepare('INSERT IGNORE INTO ticket_sla_alerts (ticket_id, alert_type, due_at) VALUES (?, ?, ?)');
 $alerts = 0;
 $now = new DateTimeImmutable('now');
@@ -21,6 +21,18 @@ foreach ($query->fetchAll() as $ticket) {
     $type = $dueAt <= $now ? 'overdue' : 'due_soon';
     db()->beginTransaction();
     try {
+        // Candidate discovery is intentionally outside the transaction. Re-read
+        // the ticket under its lifecycle row lock so a concurrent close, pause,
+        // reassignment of the deadline, or status change cannot emit a stale alert.
+        $currentQuery = db()->prepare('SELECT id, subject, due_at, CASE WHEN due_at <= NOW() THEN "overdue" ELSE "due_soon" END AS current_alert_type FROM tickets WHERE id = ? AND status NOT IN ("resolved", "closed", "cancelled", "rejected") AND sla_paused_at IS NULL AND due_at IS NOT NULL AND due_at = ? AND due_at <= DATE_ADD(NOW(), INTERVAL 60 MINUTE) FOR UPDATE');
+        $currentQuery->execute([(int) $ticket['id'], $ticket['due_at']]);
+        $currentTicket = $currentQuery->fetch();
+        if (!$currentTicket) {
+            db()->rollBack();
+            continue;
+        }
+        $type = (string) $currentTicket['current_alert_type'];
+        $ticket = $currentTicket;
         $claim->execute([(int) $ticket['id'], $type, $ticket['due_at']]);
         if ($claim->rowCount() === 1) {
             $title = $type === 'overdue' ? 'درخواست از SLA عبور کرد' : 'مهلت SLA درخواست نزدیک است';
@@ -28,6 +40,23 @@ foreach ($query->fetchAll() as $ticket) {
                 ? 'درخواست ' . ticket_number((int) $ticket['id']) . ' از مهلت SLA عبور کرده است.'
                 : 'مهلت درخواست ' . ticket_number((int) $ticket['id']) . ' در کمتر از یک ساعت آینده است.';
             notify_ticket_staff((int) $ticket['id'], 'sla_' . $type, $title, $body);
+            log_ticket_event((int) $ticket['id'], null, 'sla_alert', null, null, [
+                'alert_type' => $type,
+                'due_at' => $ticket['due_at'],
+                'actor_type' => 'system',
+            ]);
+            $auditSaved = activity_log([
+                'user_id' => null,
+                'action_code' => 'ticket_sla_alert',
+                'module' => 'tickets',
+                'target_type' => 'ticket',
+                'target_id' => (int) $ticket['id'],
+                'meta' => ['alert_type' => $type, 'due_at' => $ticket['due_at'], 'actor_type' => 'system'],
+                'result' => 'success',
+            ]);
+            if (!$auditSaved) {
+                throw new RuntimeException('Required audit persistence failed for SLA alert.');
+            }
             $alerts++;
         }
         db()->commit();
@@ -59,16 +88,48 @@ try {
     $olaClaim = db()->prepare('INSERT IGNORE INTO ticket_ola_alerts (ticket_id, alert_type, due_at) VALUES (?, ?, ?)');
     foreach ($olaTypes as $type => $spec) {
         $column = $spec['column'];
-        $olaQuery = db()->query('SELECT t.id, t.' . $column . ' AS due_text FROM tickets t WHERE t.status NOT IN ("resolved", "closed", "cancelled") AND t.sla_paused_at IS NULL AND t.' . $column . ' IS NOT NULL AND t.' . $column . ' <= NOW() ' . $spec['extra'] . ' AND NOT EXISTS (SELECT 1 FROM ticket_ola_alerts a WHERE a.ticket_id = t.id AND a.alert_type = "' . $type . '") ORDER BY t.' . $column . ' LIMIT 500');
+        $olaQuery = db()->query('SELECT t.id, t.' . $column . ' AS due_text FROM tickets t WHERE t.status NOT IN ("resolved", "closed", "cancelled", "rejected") AND t.sla_paused_at IS NULL AND t.' . $column . ' IS NOT NULL AND t.' . $column . ' <= NOW() ' . $spec['extra'] . ' AND NOT EXISTS (SELECT 1 FROM ticket_ola_alerts a WHERE a.ticket_id = t.id AND a.alert_type = "' . $type . '" AND a.due_at = t.' . $column . ') ORDER BY t.' . $column . ' LIMIT 500');
         foreach ($olaQuery->fetchAll() as $ticket) {
             $dueAtText = (string) $ticket['due_text'];
             db()->beginTransaction();
             try {
+                // Lock and validate the exact OLA deadline again. The ticket may
+                // have been resolved, paused, or had its policy recalculated since
+                // the discovery query ran.
+                $currentOlaQuery = db()->prepare('SELECT t.id, t.' . $column . ' AS due_text, t.first_response_at FROM tickets t WHERE t.id = ? AND t.status NOT IN ("resolved", "closed", "cancelled", "rejected") AND t.sla_paused_at IS NULL AND t.' . $column . ' IS NOT NULL AND t.' . $column . ' = ? AND t.' . $column . ' <= NOW() ' . $spec['extra'] . ' FOR UPDATE');
+                $currentOlaQuery->execute([(int) $ticket['id'], $dueAtText]);
+                $currentOla = $currentOlaQuery->fetch();
+                if (!$currentOla) {
+                    db()->rollBack();
+                    continue;
+                }
+                $dueAtText = (string) $currentOla['due_text'];
                 $olaClaim->execute([(int) $ticket['id'], $type, $dueAtText]);
                 if ($olaClaim->rowCount() === 1) {
                     $number = ticket_number((int) $ticket['id']);
                     $labels = [$olaLabels[$type][0], sprintf($olaLabels[$type][1], $number)];
                     notify_ticket_staff((int) $ticket['id'], 'ola_' . $type, $labels[0], $labels[1]);
+                    log_ticket_event((int) $ticket['id'], null, 'ola_alert', null, null, [
+                        'alert_type' => $type,
+                        'due_at' => $dueAtText,
+                        'actor_type' => 'system',
+                    ]);
+                    $auditSaved = activity_log([
+                        'user_id' => null,
+                        'action_code' => 'ticket_ola_alert',
+                        'module' => 'tickets',
+                        'target_type' => 'ticket',
+                        'target_id' => (int) $ticket['id'],
+                        'meta' => [
+                            'alert_type' => $type,
+                            'due_at' => $dueAtText,
+                            'actor_type' => 'system',
+                        ],
+                        'result' => 'success',
+                    ]);
+                    if (!$auditSaved) {
+                        throw new RuntimeException('Required audit persistence failed for OLA alert.');
+                    }
                     if ($type === 'escalation_2') {
                         $admins = db()->query('SELECT id FROM users WHERE role = "primary_admin" AND is_active = 1')->fetchAll(PDO::FETCH_COLUMN);
                         foreach ($admins as $adminId) {

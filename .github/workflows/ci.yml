@@ -54,8 +54,9 @@ jobs:
     - name: Guard — skill manifest
       run: python tests/test_skill_manifest_static.py
 
-    - name: Guard — system map freshness
-      run: python tests/test_system_map_static.py
+    # تازگی نقشه در workflow مستقل Refresh Request Center system map
+    # پس از بازتولید و پیش از commit خروجی‌ها کنترل می‌شود؛ اجرای موازی این guard
+    # در CI عمومی باعث race با commit تولیدشده توسط همان workflow می‌شد.
 
     - name: Guard — session boot
       run: python tests/test_session_boot_static.py

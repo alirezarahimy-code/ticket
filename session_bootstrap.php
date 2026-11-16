@@ -31,7 +31,53 @@ function app_session_start(): void
     ini_set('session.cookie_lifetime', (string) $lifetime);
     ini_set('session.use_strict_mode', '1');
 
-    $secure = !empty($_SERVER['HTTPS']) && strtolower((string) $_SERVER['HTTPS']) !== 'off';
+    $isHttps = !empty($_SERVER['HTTPS']) && strtolower((string) $_SERVER['HTTPS']) !== 'off';
+    // ── حالت «کار با هر دو پروتکل» ────────────────────────────────────────
+    //
+    // پیش‌فرض امن: روی HTTPS کوکی با پرچم Secure صادر می‌شود. مشکل این است
+    // که مرورگر کوکی Secure را روی http:// **نمی‌فرستد**، پس کاربری که باید
+    // هم با http داخلی و هم با https کار کند، هر بار نشستش می‌شکند.
+    //
+    // setting `security.cookie_both_protocols` = true این را حل می‌کند:
+    // همان کوکی روی هر دو پروتکل فرستاده می‌شود. **هزینه‌اش صادقانه:** اگر
+    // کسی با http وارد شود، کوکی نشست روی سیم رمزنگاری نمی‌شود و در شبکه
+    // قابل شنود است. پس این گزینه فقط برای شبکهٔ داخلی/مطمئن است، نه اینترنت.
+    //
+    // چرا setting و نه hardcode: چون این یک معاوضهٔ امنیتی است و باید آگاهانه
+    // روشن شود، نه پیش‌فرض همه.
+    $bothProtocols = false;
+    if (function_exists('setting')) {
+        try {
+            $bothProtocols = in_array(
+                strtolower(trim((string) setting('security_cookie_both_protocols', '0'))),
+                ['1', 'true', 'on', 'yes'],
+                true
+            );
+        } catch (Throwable) {
+            $bothProtocols = false;
+        }
+    }
+    $secure = $isHttps && !$bothProtocols;
+    // ── تلهٔ «کوکی Secure روی HTTP» ────────────────────────────────────────
+    // اگر کاربر یک بار با HTTPS وارد شود، مرورگر کوکی نشست را با پرچم Secure
+    // ذخیره می‌کند. بعداً که همان سامانه با http:// باز شود، مرورگر آن کوکی
+    // را **نمی‌فرستد** — پس PHP نشست تازه می‌سازد، شناسهٔ تازه هم با پرچم
+    // Secure ذخیره می‌شود، و کاربر در هر درخواست یک نشست ناشناس جدید می‌گیرد.
+    // نتیجه: هر فرم «درخواست نامعتبر است» می‌دهد و ورود انجام نمی‌شود.
+    //
+    // وقتی اتصال فعلی HTTPS نیست ولی کوکی قدیمی Secure در مرورگر هست، از
+    // فرزندِ آن کوکی استفاده می‌کنیم تا همان نشست قبلی آزاد شود؛ و اگر خود
+    // نشست هم دیگر وجود نداشت، دست‌کم بن‌بست نمی‌شود چون require_csrf()
+    // حالا کاربر را به فرم برمی‌گرداند، نه به بن‌بست.
+    if (!$secure) {
+        $cookieName = session_name();
+        $sentId = (string) ($_COOKIE[$cookieName] ?? '');
+        if ($sentId !== '' && preg_match('/^[A-Za-z0-9,-]{22,256}$/', $sentId) === 1) {
+            // همان شناسه‌ای که مرورگر فرستاده معتبر است؛ فقط پرچم Secure را
+            // برمی‌داریم تا این بار کوکی روی HTTP هم پذیرفته شود.
+            session_id($sentId);
+        }
+    }
     $sessionCookieParams = [
         'lifetime' => $lifetime,
         'path' => '/',
@@ -46,6 +92,10 @@ function app_session_start(): void
         'httponly' => true,
         'samesite' => 'Lax',
     ];
+    // اگر برعکس بود — یعنی قبلاً روی HTTPS/privacy-mode کوکی Secure داشتیم و
+    // حالا حالت «هر دو پروتکل» روشن شده — نام کوکی را عوض نمی‌کنیم (تا نشست
+    // فعلی حفظ شود) ولی پرچم را با setcookie پایین‌تر بازنویسی می‌کنیم: مرورگر
+    // با دیدن همان نام و پرچم آزاد، نسخهٔ قدیمی را جایگزین می‌کند.
     session_set_cookie_params($sessionCookieParams);
     session_start();
 

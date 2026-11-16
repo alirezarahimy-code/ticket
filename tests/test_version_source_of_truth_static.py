@@ -10,11 +10,12 @@
 
 این تست سه چیز را ماشینی بررسی می‌کند:
 
-1. `VERSION` مخزن باید برابر **بیشترین نسخهٔ manifest** در `downloads/` باشد
-   (یا از آن جدیدتر؛ عقب‌ماندن ممنوع است).
-2. محتوای فایل‌های برنامه در **تازه‌ترین بستهٔ همان نسخه** باید بایت‌به‌بایت با
-   مخزن یکی باشد؛ اگر بسته جدیدتر از مخزن باشد، یعنی نسخه‌ای منتشر شده که کدش
-   در Git نیست.
+1. `VERSION` مخزن نباید از بیشترین نسخهٔ manifest در ZIPهایی که `downloads/index.html`
+   واقعاً منتشر می‌کند عقب‌تر باشد. آرشیوهای قدیمی و نامزدهای لینک‌نشده در `downloads/`
+   انتشار محسوب نمی‌شوند و به‌تنهایی مجوز ارتقای `VERSION` نیستند.
+2. اگر برای همان `VERSION` بسته‌ای در صفحهٔ عمومی منتشر شده باشد، تازه‌ترین بستهٔ آن
+   نسخه باید با فایل‌های مخزن بایت‌به‌بایت برابر باشد؛ اگر نه، آزمون برای بررسی/تأیید
+   انتشار متوقف می‌شود.
 3. اگر `files/VERSION` داخل بسته با نسخهٔ manifest آن یکی نباشد (باگ بستهٔ
    منتشرشده)، تست فقط وقتی سبز می‌ماند که این ناهم‌خوانی در فهرست
    `KNOWN_PACKAGE_VERSION_DRIFT` ثبت شده باشد؛ ناهم‌خوانی تازه = شکست.
@@ -31,6 +32,8 @@ import re
 import unittest
 import zipfile
 from pathlib import Path
+
+from download_page_helpers import published_packages
 
 ROOT = Path(__file__).resolve().parent.parent
 DOWNLOADS = ROOT / "downloads"
@@ -96,6 +99,17 @@ def scan_packages() -> list[dict]:
     return packages
 
 
+def scan_published_packages() -> list[dict]:
+    """Return only updater ZIPs explicitly linked from the public download page.
+
+    `downloads/` also contains historical archives and unannounced candidates;
+    those must not be mistaken for packages already shipped to users.
+    """
+    available = {package["path"].name: package for package in scan_packages()}
+    linked = published_packages()
+    return [available[item["name"]] for item in linked]
+
+
 def resolve_repo_path(relative: str, downloads: Path = DOWNLOADS) -> Path | None:
     """مسیر معادل فایل داخل بسته را در مخزن پیدا می‌کند.
 
@@ -118,8 +132,8 @@ def newest_package_for(version: str, packages: list[dict]) -> dict:
 
 class VersionSourceOfTruthTests(unittest.TestCase):
     def test_repo_version_is_not_behind_the_newest_published_package(self) -> None:
-        packages = scan_packages()
-        self.assertTrue(packages, "هیچ بستهٔ به‌روزرسانی با manifest در downloads/ پیدا نشد")
+        packages = scan_published_packages()
+        self.assertTrue(packages, "صفحهٔ دانلود هیچ بستهٔ منتشرشدهٔ معتبری را لینک نکرده است")
         newest_shipped = max(packages, key=lambda p: version_tuple(p["version"]))["version"]
         current = repo_version()
         self.assertGreaterEqual(
@@ -134,7 +148,7 @@ class VersionSourceOfTruthTests(unittest.TestCase):
 
     def test_repo_matches_the_newest_package_of_the_current_version(self) -> None:
         current = repo_version()
-        packages = scan_packages()
+        packages = scan_published_packages()
         candidates = [p for p in packages if p["version"] == current]
         if not candidates:
             self.skipTest(f"برای نسخهٔ {current} بسته‌ای در downloads/ نیست")

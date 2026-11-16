@@ -19,6 +19,7 @@ if (PHP_SAPI === 'cli' && !is_file($root . '/config.php')) {
 if (is_file($root . '/config.php')) { require_once $root . '/config.php'; }
 if (!function_exists('db')) { fwrite(STDERR, "تابع db() در دسترس نیست.\n"); exit(1); }
 require_once $root . '/asset-names.php';
+require_once $root . '/lib/asset-dedupe.php';
 
 $apply    = in_array('--apply', $argv, true);
 $enforce  = in_array('--enforce', $argv, true);
@@ -65,25 +66,95 @@ try {
     }
     $out(sprintf('۱) کلید هویت: %d رکورد نیازمند نرمالسازی دوباره (%s).', $synced, $apply ? 'انجام شد' : 'فقط گزارش'));
 
-    // ── ۲) پیدا کردن گروههای تکراری
-    $groups = $pdo->query(<<<'SQL'
-        SELECT hostname_key, COUNT(*) AS cnt,
-               GROUP_CONCAT(id ORDER BY id SEPARATOR ',') AS ids,
-               MIN(id) AS keeper
+    // ── ۲) پیدا کردن گروه‌های تکراری
+    //
+    // سه منبع مستقل و قابل‌گزارش:
+    //   الف) hostname_key — نام کامپیوتر
+    //   ب) serial_number  — سریال سخت‌افزار
+    //   ج) mac_address    — MAC معتبر؛ برای رکوردهای قدیمی که سریال ندارند
+    //
+    // MACهای خالی/نامعتبر/صفر/همه-F کنار گذاشته می‌شوند. در خروجی گزارش،
+    // تعداد هر منبع جداست تا پیش از --apply قابل بررسی باشد.
+    $nameRows = $pdo->query(<<<'SQL'
+        SELECT hostname_key AS k, GROUP_CONCAT(id ORDER BY id SEPARATOR ',') AS ids
           FROM assets
          WHERE hostname_key IS NOT NULL AND hostname_key <> ''
          GROUP BY hostname_key
         HAVING COUNT(*) > 1
-         ORDER BY cnt DESC, hostname_key
     SQL)->fetchAll(PDO::FETCH_ASSOC);
+    $keyGroups = count($nameRows);
+
+    $junkSerials = "'', 'TO BE FILLED BY O.E.M.', 'DEFAULT STRING', 'SYSTEM SERIAL NUMBER', 'NONE', 'N/A', '0', '00000000', 'NOT SPECIFIED', 'CHASSIS SERIAL NUMBER', '0123456789', 'SERIAL', 'UNKNOWN'";
+    $serialRows = $pdo->query(<<<SQL
+        SELECT UPPER(TRIM(serial_number)) AS k, GROUP_CONCAT(id ORDER BY id SEPARATOR ',') AS ids
+          FROM assets
+         WHERE serial_number IS NOT NULL
+           AND UPPER(TRIM(serial_number)) NOT IN ({$junkSerials})
+           AND CHAR_LENGTH(TRIM(serial_number)) >= 4
+         GROUP BY UPPER(TRIM(serial_number))
+        HAVING COUNT(*) > 1
+    SQL)->fetchAll(PDO::FETCH_ASSOC);
+    $serialGroups = count($serialRows);
+
+    $normalizedMac = "REPLACE(REPLACE(REPLACE(REPLACE(UPPER(TRIM(COALESCE(mac_address,''))),':',''),'-',''),'.',''),' ','')";
+    $macRowsAll = $pdo->query(<<<SQL
+        SELECT {$normalizedMac} AS k,
+               GROUP_CONCAT(id ORDER BY id SEPARATOR ',') AS ids,
+               COUNT(DISTINCT CASE
+                   WHEN serial_number IS NOT NULL
+                    AND UPPER(TRIM(serial_number)) NOT IN ({$junkSerials})
+                    AND CHAR_LENGTH(TRIM(serial_number)) >= 4
+                   THEN UPPER(TRIM(serial_number)) ELSE NULL END) AS serial_variants
+          FROM assets
+         WHERE mac_address IS NOT NULL
+           AND {$normalizedMac} REGEXP '^[0-9A-F]{12}$'
+           AND SUBSTRING({$normalizedMac}, 2, 1) REGEXP '^[02468ACE]$'
+           AND {$normalizedMac} NOT IN ('000000000000', 'FFFFFFFFFFFF', '020000000000')
+         GROUP BY {$normalizedMac}
+        HAVING COUNT(*) > 1
+    SQL)->fetchAll(PDO::FETCH_ASSOC);
+    // Never auto-merge a shared MAC when records have conflicting valid
+    // hardware serials; report the conflict for human review instead.
+    $macFilter = asset_dedupe_filter_mac_groups($macRowsAll);
+    $macRows = $macFilter['rows'];
+    $macConflictRows = $macFilter['conflict_rows'];
+    $macConflictGroups = $macFilter['conflicts'];
+    $macGroups = count($macRows);
+
+    // The same function is exercised by tools/test_asset_dedupe_offline.php;
+    // test and production cannot drift into different union-find implementations.
+    $groups = asset_dedupe_group_rows($nameRows, $serialRows, $macRows);
 
     $totalDupes = 0;
     foreach ($groups as $g) { $totalDupes += (int) $g['cnt'] - 1; }
-    $out(sprintf('۲) گروههای تکراری: %d گروه، %d رکورد اضافه.', count($groups), $totalDupes));
+    $out(sprintf('۲) گروه‌های تکراری: %d گروه، %d رکورد اضافه.', count($groups), $totalDupes));
+    $out(sprintf('   • از روی نام: %d گروه   • سریال: %d گروه   • MAC بدون تعارض سریال: %d گروه   • MAC با سریال‌های متعارض (فقط گزارش): %d', $keyGroups, $serialGroups, $macGroups, $macConflictGroups));
     foreach (array_slice($groups, 0, 30) as $g) {
-        $out(sprintf('   • %-30s → %s (نگه: %s)', $g['hostname_key'], $g['ids'], $g['keeper']));
+        $labels = [];
+        try {
+            $q = $pdo->query('SELECT id, hostname FROM assets WHERE id IN (' . $g['ids'] . ') ORDER BY id');
+            foreach ($q->fetchAll(PDO::FETCH_ASSOC) as $r) {
+                $labels[] = '#' . $r['id'] . '=' . (((string) ($r['hostname'] ?? '')) !== '' ? (string) $r['hostname'] : '(بی‌نام)');
+            }
+        } catch (Throwable $e) {
+        }
+        $out(sprintf('   • نگه: #%s  ←  %s', $g['keeper'], implode(' | ', $labels)));
     }
     if (count($groups) > 30) { $out('   … و ' . (count($groups) - 30) . ' گروه دیگر.'); }
+    foreach (array_slice($macConflictRows, 0, 20) as $row) {
+        $ids = array_values(array_filter(array_map('intval', explode(',', (string) ($row['ids'] ?? ''))), static fn (int $id): bool => $id > 0));
+        if (count($ids) < 2) { continue; }
+        try {
+            $q = $pdo->query('SELECT id, hostname FROM assets WHERE id IN (' . implode(',', $ids) . ') ORDER BY id');
+            $labels = [];
+            foreach ($q->fetchAll(PDO::FETCH_ASSOC) as $assetRow) {
+                $labels[] = '#' . $assetRow['id'] . '=' . (((string) ($assetRow['hostname'] ?? '')) !== '' ? (string) $assetRow['hostname'] : '(بی‌نام)');
+            }
+            $out('   • MAC مشترک با سریال‌های متعارض؛ ادغام نمی‌شود: ' . implode(' | ', $labels));
+        } catch (Throwable $e) {
+        }
+    }
+    if (count($macConflictRows) > 20) { $out('   … و ' . (count($macConflictRows) - 20) . ' گروه متعارض دیگر.'); }
 
     if (!$apply || $totalDupes === 0) {
         $out('');
@@ -162,7 +233,7 @@ try {
                 // بکاپ رکورد تکراری
                 $row = $pdo->query('SELECT * FROM assets WHERE id = ' . $dupId)->fetch(PDO::FETCH_ASSOC);
                 $pdo->prepare("INSERT INTO `{$backupTable}` (asset_id, hostname_key, payload, merged_into) VALUES (?, ?, ?, ?)")
-                    ->execute([$dupId, $g['hostname_key'], json_encode($row, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES), $keeper]);
+                    ->execute([$dupId, (string) ($row['hostname_key'] ?? ''), json_encode($row, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES), $keeper]);
 
                 // پر کردن فیلدهای خالی رکورد اصلی از روی تکراری
                 $keeperRow = $pdo->query('SELECT * FROM assets WHERE id = ' . $keeper)->fetch(PDO::FETCH_ASSOC);

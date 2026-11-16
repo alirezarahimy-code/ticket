@@ -274,7 +274,9 @@ fieldset.service-fields[hidden] { display: none; }
 .cd-dvd-user-picker { position: relative; }
 .cd-dvd-user-picker > input[type="text"] { width: 100%; }
 .cd-dvd-user-options { position: absolute; z-index: 20; top: calc(100% + 5px); right: 0; left: 0; max-height: 250px; overflow-y: auto; padding: 5px; border: 1px solid var(--line); border-radius: 10px; background: var(--white); box-shadow: var(--shadow); }
-.cd-dvd-user-options[hidden], .cd-dvd-user-option[hidden] { display: none; }
+.cd-dvd-user-options[hidden], .cd-dvd-user-option[hidden], .cd-dvd-user-empty[hidden] { display: none; }
+/* ۱.۶۳.۴: پیام «پیدا نشد» و برجسته‌سازی عبارت جست‌وجو در فهرست کاربران */
+.cd-dvd-user-empty { padding: 10px 12px; color: var(--muted, #6b7280); font-size: 12px; line-height: 1.7; text-align: center; }
 .cd-dvd-user-option { display: block; width: 100%; border: 0; border-bottom: 1px solid #f1eee6; background: transparent; color: var(--ink); cursor: pointer; padding: 9px 10px; text-align: right; font-family: inherit; font-size: 12px; }
 .cd-dvd-user-option:last-child { border-bottom: 0; }
 .cd-dvd-user-option:hover { background: var(--teal-light); color: var(--navy); }
@@ -1863,3 +1865,4 @@ body.org-image-print-page img { display: block; width: min(100vw, 100%); height:
   .access-group-member-toolbar { flex-wrap: wrap; }
   .access-group-member-toolbar input { flex-basis: 100%; }
 }
+

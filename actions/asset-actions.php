@@ -13,6 +13,9 @@ declare(strict_types=1);
  *   domain_scan_batch         پردازش دستهٔ بعدیِ اسکن در جریان
  *   ping_assets               پینگ گروهی دارایی‌ها (پاسخ AJAX)
  *   domain_scan_retry         تلاش دوباره برای دستگاه‌های خطادار
+ *   domain_scan_prepare       آماده‌سازی راه‌دور مقصدها (فعال‌سازی WinRM، بدون GPO) — AJAX دسته‌ای
+ *   domain_scan_prepare_gpo   انتشار/لینک خودکار GPO دامنه از داخل پنل (WinRM + فایروال WMI)
+ *   domain_scan_prepare_gpo_unlink  برداشتن لینک همان GPO از دامنه
  *   domain_scan_test_selected آزمایش اتصال/اعتبار روی موارد انتخاب‌شده (بدون ذخیره)
  *   domain_scan_selected      اسکن کامل موارد انتخاب‌شده
  *   save_inventory_form       ذخیرهٔ فرم شناسنامه/اموال دستگاه
@@ -90,6 +93,10 @@ if (!defined('APP_ROOT')) {
                 $report['rows'][] = [$key, (string) count(inventory_rows($inventory['hardware'][$key] ?? $inventory[$key] ?? []))];
             }
             foreach ($values as $key => $value) {
+                if (strncmp((string) $key, '_', 1) === 0 || is_array($value)) {
+                    // کلیدهای داخلی (_clear_fields، _field_provenance) جزو فیلدهای شناسنامه نیستند.
+                    continue;
+                }
                 $text = trim((string) $value);
                 if ($text === '') {
                     $report['empty']++;
@@ -111,6 +118,9 @@ if (!defined('APP_ROOT')) {
                         'overwrite' => $overwrite,
                     ]);
                 }
+            }
+            if (session_status() !== PHP_SESSION_ACTIVE) {
+                session_start();
             }
             $_SESSION['asset_selftest'] = $report;
             system_log('info', 'inventory', 'اجرای تست استخراج شناسنامه', ['filled' => $report['filled'], 'score' => $report['hardware_score'], 'asset_id' => $report['asset_id']]);
@@ -177,7 +187,7 @@ if (!defined('APP_ROOT')) {
             foreach (domain_scan_queue_rows($runId, 1000) as $queueRow) {
                 $batchRows[] = [
                     'hostname' => (string) $queueRow['hostname'],
-                    'name' => asset_display_name((string) $queueRow['hostname']),
+                    'name' => asset_name_or((string) $queueRow['hostname']),
                     'status' => (string) $queueRow['status'],
                     'online' => (int) $queueRow['online'],
                     'message' => (string) ($queueRow['message'] ?? ''),
@@ -280,6 +290,147 @@ if (!defined('APP_ROOT')) {
             save_audit_required((int) $retryUser['id'], 'domain_inventory_retry', null, ['from_run' => $retryRunId, 'run_id' => $retry['run_id'], 'total' => $retry['total']]);
             flash('success', $retry['total'] . ' سیستم ناموفق در نوبت تازه #' . $retry['run_id'] . ' دوباره در صف استخراج قرار گرفت.');
             redirect('index.php?page=domain-scan&run=' . $retry['run_id']);
+        }
+
+        if ($action === 'domain_scan_prepare') {
+            // آماده‌سازی راه‌دور سیستم‌های مقصد (فعال‌سازی WinRM و قواعد فایروال WMI با اعتبارنامهٔ
+            // همین نوبت، بدون Group Policy). AJAX و دسته‌ای (حداکثر ۳ سیستم در هر درخواست) است؛
+            // رابط کاربری دسته‌ها را پشت‌سرهم می‌فرستد. این عملیات حساس است و حتماً ممیزی می‌شود.
+            $prepareUser = require_permission('asset.remote_prepare');
+            $prepareAjax = post_value('ajax') === '1';
+            $prepareFail = static function (string $message) use ($prepareAjax): void {
+                if ($prepareAjax) {
+                    header('Content-Type: application/json; charset=utf-8');
+                    http_response_code(400);
+                    echo json_encode(['ok' => false, 'error' => $message], JSON_UNESCAPED_UNICODE);
+                    exit;
+                }
+                flash('danger', $message);
+                redirect('index.php?page=domain-scan');
+            };
+            $scanUsername = trim((string) ($_POST['scan_username'] ?? ''));
+            $scanPassword = (string) ($_POST['scan_password'] ?? '');
+            try {
+                domain_scan_validate_credentials($scanUsername, $scanPassword);
+            } catch (Throwable $prepareCredException) {
+                $prepareFail($prepareCredException->getMessage());
+            }
+            $prepareProblem = domain_scan_prepare_preflight();
+            if ($prepareProblem !== null) {
+                $prepareFail($prepareProblem);
+            }
+            $prepareHosts = array_values(array_unique(array_filter(
+                array_map('trim', (array) ($_POST['hostnames'] ?? [])),
+                static fn (string $host): bool => $host !== '' && (bool) preg_match('/^[A-Za-z0-9._-]+$/', $host)
+            )));
+            if ($prepareHosts === []) {
+                $prepareFail('هیچ سیستمی برای آماده‌سازی انتخاب نشد.');
+            }
+            if (count($prepareHosts) > 3) {
+                $prepareFail('در هر نوبت حداکثر ۳ سیستم را آماده کنید.');
+            }
+            if (function_exists('set_time_limit')) {
+                @set_time_limit(300);
+            }
+            if (function_exists('session_write_close')) {
+                @session_write_close();
+            }
+            $prepareCredentials = ['username' => $scanUsername, 'password' => $scanPassword];
+            unset($scanPassword, $_POST['scan_password']);
+            $prepareResults = domain_scan_prepare_targets($prepareHosts, $prepareCredentials);
+            unset($prepareCredentials, $scanUsername);
+            if (session_status() !== PHP_SESSION_ACTIVE) {
+                session_start();
+            }
+            $prepareOk = 0;
+            $prepareRows = [];
+            foreach ($prepareHosts as $prepareHost) {
+                $prepareResult = $prepareResults[$prepareHost] ?? ['success' => false, 'code' => 'unknown', 'message' => 'نتیجه‌ای دریافت نشد.'];
+                if (!empty($prepareResult['success'])) {
+                    $prepareOk++;
+                }
+                $prepareRows[] = [
+                    'hostname' => $prepareHost,
+                    'name' => asset_name_or($prepareHost),
+                    'success' => (bool) $prepareResult['success'],
+                    'code' => (string) $prepareResult['code'],
+                    'message' => (string) $prepareResult['message'],
+                ];
+            }
+            system_log('info', 'domain_scan', 'آماده‌سازی سیستم‌های مقصد (فعال‌سازی WinRM)', ['hosts' => $prepareHosts, 'prepared' => $prepareOk]);
+            save_audit_required((int) $prepareUser['id'], 'domain_targets_prepared', null, ['hosts' => $prepareHosts, 'prepared' => $prepareOk, 'results' => $prepareRows]);
+            if ($prepareAjax) {
+                header('Content-Type: application/json; charset=utf-8');
+                echo json_encode(['ok' => true, 'prepared' => $prepareOk, 'total' => count($prepareHosts), 'results' => $prepareRows], JSON_UNESCAPED_UNICODE | JSON_INVALID_UTF8_SUBSTITUTE);
+                exit;
+            }
+            flash($prepareOk > 0 ? 'success' : 'danger', 'آماده‌سازی انجام شد: ' . $prepareOk . ' از ' . count($prepareHosts) . ' سیستم آماده شد.');
+            redirect('index.php?page=domain-scan');
+        }
+
+        if ($action === 'domain_scan_prepare_gpo' || $action === 'domain_scan_prepare_gpo_unlink') {
+            // آماده‌سازی خودکار کل دامنه با Group Policy — از داخل پنل؛ کاربر لازم نیست در GPMC
+            // کاری کند. پنل روی DC یک GPO می‌سازد/لینک می‌کند و با Invoke-GPUpdate همان لحظه
+            // اعمال می‌کند. لغو (Unlink) هم از همین‌جاست.
+            $gpoUser = require_permission('asset.remote_prepare');
+            $gpoAjax = post_value('ajax') === '1';
+            $gpoMode = $action === 'domain_scan_prepare_gpo_unlink' ? 'unlink' : 'link';
+            $gpoFail = static function (string $message) use ($gpoAjax): void {
+                if ($gpoAjax) {
+                    header('Content-Type: application/json; charset=utf-8');
+                    http_response_code(400);
+                    echo json_encode(['ok' => false, 'error' => $message], JSON_UNESCAPED_UNICODE);
+                    exit;
+                }
+                flash('danger', $message);
+                redirect('index.php?page=domain-scan');
+            };
+            $gpoUsername = trim((string) ($_POST['scan_username'] ?? ''));
+            $gpoPassword = (string) ($_POST['scan_password'] ?? '');
+            try {
+                domain_scan_validate_credentials($gpoUsername, $gpoPassword);
+            } catch (Throwable $gpoCredException) {
+                $gpoFail($gpoCredException->getMessage());
+            }
+            $gpoProblem = domain_scan_prepare_preflight();
+            if ($gpoProblem !== null) {
+                $gpoFail($gpoProblem);
+            }
+            if (function_exists('set_time_limit')) {
+                @set_time_limit(360);
+            }
+            if (function_exists('session_write_close')) {
+                @session_write_close();
+            }
+            $gpoHosts = array_values(array_unique(array_filter(
+                array_map('trim', (array) ($_POST['hostnames'] ?? [])),
+                static fn (string $host): bool => $host !== '' && (bool) preg_match('/^[A-Za-z0-9._-]+$/', $host)
+            )));
+            if (count($gpoHosts) > 50) {
+                $gpoHosts = array_slice($gpoHosts, 0, 50);
+            }
+            $gpoCredentials = ['username' => $gpoUsername, 'password' => $gpoPassword];
+            unset($gpoPassword, $_POST['scan_password']);
+            $gpoResult = domain_scan_prepare_domain_gpo($gpoHosts, $gpoCredentials, $gpoMode);
+            unset($gpoCredentials, $gpoUsername);
+            if (session_status() !== PHP_SESSION_ACTIVE) {
+                session_start();
+            }
+            $gpoMessage = (string) $gpoResult['message'];
+            system_log($gpoResult['success'] ? 'info' : 'warning', 'domain_scan', $gpoMode === 'unlink' ? 'برداشتن لینک GPO استخراج' : 'انتشار GPO استخراج (WinRM + فایروال WMI)', ['success' => $gpoResult['success'], 'message' => $gpoMessage, 'hosts' => $gpoHosts]);
+            save_audit_required((int) $gpoUser['id'], $gpoMode === 'unlink' ? 'domain_gpo_unlinked' : 'domain_gpo_published', null, ['success' => $gpoResult['success'], 'message' => $gpoMessage, 'hosts' => $gpoHosts, 'details' => $gpoResult['details'] ?? []]);
+            if ($gpoAjax) {
+                header('Content-Type: application/json; charset=utf-8');
+                if ($gpoResult['success']) {
+                    echo json_encode(['ok' => true, 'message' => $gpoMessage, 'details' => $gpoResult['details'] ?? []], JSON_UNESCAPED_UNICODE | JSON_INVALID_UTF8_SUBSTITUTE);
+                } else {
+                    http_response_code(400);
+                    echo json_encode(['ok' => false, 'error' => $gpoMessage], JSON_UNESCAPED_UNICODE | JSON_INVALID_UTF8_SUBSTITUTE);
+                }
+                exit;
+            }
+            flash($gpoResult['success'] ? 'success' : 'danger', $gpoMessage);
+            redirect('index.php?page=domain-scan');
         }
 
         if ($action === 'domain_scan_test_selected') {
@@ -414,6 +565,11 @@ if (!defined('APP_ROOT')) {
             $set = implode(', ', array_map(static fn (string $key): string => $key . ' = ?', array_keys($fields)));
             try {
                 db()->prepare('UPDATE assets SET ' . $set . ', updated_at = NOW() WHERE id = ?')->execute([...array_values($fields), $assetId]);
+                // نام عوض شد ⇒ کلید هویت هم باید عوض شود، وگرنه رکورد بعدی با
+                // همین نام به‌عنوان «سیستم تازه» ثبت می‌شود و تکراری می‌سازد.
+                if (function_exists('asset_sync_identity_key')) {
+                    asset_sync_identity_key($assetId);
+                }
                 asset_profile_save($assetId, $_POST, (int) $inventoryUser['id']);
                 record_asset_history($assetId, 'inventory_manual_update', 'ویرایش شناسنامه سیستم', (int) $inventoryUser['id'], null, 'فرم شناسنامه سیستم ذخیره شد.', $asset, $fields);
                 save_audit_required((int) $inventoryUser['id'], 'asset_inventory_updated', null, ['asset_id' => $assetId, 'fields' => array_keys($fields)]);

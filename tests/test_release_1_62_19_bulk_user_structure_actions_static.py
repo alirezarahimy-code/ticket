@@ -10,6 +10,7 @@ import re
 import zipfile
 from pathlib import Path
 from download_page_helpers import check_download_page_lists_only_latest_package
+from request_center_action_helpers import action_source
 
 ROOT = Path(__file__).resolve().parents[1]
 PACKAGE_NAME = "ticket-update-1.62.19-bulk-user-structure-actions-split-20261025.zip"
@@ -31,13 +32,18 @@ def read(rel):
 
 def test_index_requires_both_files_in_original_order():
     src = read("index.php")
-    b = "require __DIR__ . '/actions/bulk-actions.php';"
-    u = "require __DIR__ . '/actions/user-structure-actions.php';"
-    assert src.count(b) == 1 and src.count(u) == 1
-    # ترتیب اجرای قبلی حفظ شده: تعطیلات < ارتباط دارایی/گروهی < ساختار پایه/کاربران < سازمان
+    dispatch_line = "require __DIR__ . '/modules/request-center/Actions/dispatch.php';"
+    user_structure_line = "require __DIR__ . '/actions/user-structure-actions.php';"
+    assert dispatch_line in src and user_structure_line in src
+    # Request Center owns bulk actions through its registry. User-structure
+    # actions remain in the legacy POST path after holidays and before org actions.
     hol = src.index("require __DIR__ . '/actions/holiday-actions.php';")
     org = src.index("require __DIR__ . '/actions/org-actions.php';")
-    assert hol < src.index(b) < src.index(u) < org
+    assert src.index(dispatch_line) < src.index(user_structure_line)
+    assert hol < src.index(user_structure_line) < org
+    dispatch = read("modules/request-center/Actions/dispatch.php")
+    assert "require __DIR__ . '/bulk-actions.php';" in dispatch
+    assert "require dirname(__DIR__) . '/modules/request-center/Actions/bulk-actions.php';" in read("actions/bulk-actions.php")
     for actions in FILES_AND_ACTIONS.values():
         for action in actions:
             assert f"if ($action === '{action}')" not in src, action
@@ -45,7 +51,7 @@ def test_index_requires_both_files_in_original_order():
 
 def test_action_files_structure_and_persian_descriptions():
     for rel, actions in FILES_AND_ACTIONS.items():
-        src = read(rel)
+        src, _ = action_source(rel)
         assert src.startswith("<?php\n\ndeclare(strict_types=1);\n"), rel
         assert "if (!defined('APP_ROOT')) {" in src and GUARD_END in src, rel
         for action in actions:
@@ -70,7 +76,24 @@ def test_version_manifest_and_package():
                                            "actions/account-actions.php", "actions/org-actions.php",
                                            "food-ticket-web/assets/food-capitalio-dashboard-r42.js"]:
         assert need in files, need
+    # ۱.۶۳: این دو فایل ریشه‌ای در تجمیع RC به modules/request-center/Pages/ منتقل شدند؛ بسته‌های ریلیز تغییرناپذیر می‌مانند.
+    MOVED_IN_1_63_RC_MIGRATION = {
+        "governance.php": "modules/request-center/Pages/governance.php",
+        "ola.php": "modules/request-center/Pages/ola.php",
+    }
+    # ۱.۶۳: لایهٔ MVC مرده کاملاً حذف شد (هیچ‌کس require نمی‌کرد).
+    DEAD_MVC_DELETED_IN_1_63 = {
+        "app/Views/layout/header.php",
+        "app/Views/layout/footer.php",
+    }
     for f in files:
+        if f in MOVED_IN_1_63_RC_MIGRATION:
+            assert not (ROOT / f).exists(), f
+            assert (ROOT / MOVED_IN_1_63_RC_MIGRATION[f]).is_file(), f
+            continue
+        if f in DEAD_MVC_DELETED_IN_1_63:
+            assert not (ROOT / f).exists(), f
+            continue
         assert (ROOT / f).is_file(), f
 
     package = ROOT / "downloads" / PACKAGE_NAME

@@ -131,6 +131,34 @@ function ticket_manager_scope_unit_ids(array $user): array
     }
 }
 
+/**
+ * آیا کاربر «مدیر واحدِ صرف» است؟
+ * رئیسِ فعالِ دست‌کم یک واحدِ چارت سازمانی است و هیچ نشانۀ کارشناسی/پشتیبانی/سراسری ندارد:
+ * نه نقش agent/support_manager، نه is_it_agent، نه handling_unit_code، نه نقش سراسری و نه مدیر اصلی.
+ * مالکِ این تعریف همین تابع است؛ هر مرزِ دسترسیِ «مدیر واحد» باید از آن تغذیه شود.
+ */
+function ticket_sole_unit_head(array $user): bool
+{
+    if (function_exists('user_is_primary_admin') && user_is_primary_admin($user)) {
+        return false;
+    }
+    // اولویت با خودِ نقش است؛ دسترسی‌های موردیِ گرنت‌شده از گروه‌ها، نقش را تغییر نمی‌دهند.
+    if (is_global_ticket_role((string) ($user['role'] ?? ''))) {
+        return false;
+    }
+    $role = (string) ($user['role'] ?? '');
+    if (in_array($role, ['agent', 'support_manager'], true)) {
+        return false;
+    }
+    if (function_exists('is_it_agent') && is_it_agent($user)) {
+        return false;
+    }
+    if (trim((string) ($user['handling_unit_code'] ?? '')) !== '') {
+        return false;
+    }
+    return ticket_manager_scope_unit_ids($user) !== [];
+}
+
 /** SQL predicate shared by list and single-ticket authorization. */
 function ticket_requester_tree_predicate(string $requesterExpr, array $unitIds): array
 {
@@ -142,8 +170,44 @@ function ticket_requester_tree_predicate(string $requesterExpr, array $unitIds):
         . ' OR EXISTS (SELECT 1 FROM org_unit_managers scope_members JOIN org_units scope_unit ON scope_unit.id = scope_members.unit_id AND scope_unit.is_active = 1 WHERE scope_members.user_id = scope_user.id AND scope_unit.id IN (' . $marks . '))))', array_merge($unitIds, $unitIds, $unitIds)];
 }
 
-function ticket_user_can_view(array $ticket, array $user, ?callable $permissionCheck = null): bool
+/**
+ * پهنهٔ «انتساب سازمانی درخواست» (requesting_unit_id): درخواستی که form، آن را
+ * به یکی از واحدهای این زیردرخت منتسب کرده باشد. مرزِ آن با پهنهٔ ثبت‌کننده
+ * یکی است (همان واحدهای مدیریت‌شده)؛ درخواست‌هایی که اصلاً منتسب‌نشده‌اند
+ * (NULL) هرگز از این مسیر دیده نمی‌شوند.
+ * مثال: ادمین درخواستی برای «معاونت مالی» ثبت می‌کند؛ مدیر آن معاونت باید آن
+ * درخواست را ببیند، حتی اگر ثبت‌کننده داخل چارت او نباشد.
+ */
+function ticket_attribution_predicate(string $unitExpr, array $unitIds): array
 {
+    if (!$unitIds) return ['1 = 0', []];
+    $unitExpr = trim($unitExpr);
+    if (!preg_match('/^[a-zA-Z_][a-zA-Z0-9_.]*$/', $unitExpr)) {
+        throw new InvalidArgumentException('Invalid attribution expression');
+    }
+    $marks = implode(',', array_fill(0, count($unitIds), '?'));
+    return ["{$unitExpr} IN ({$marks})", array_values($unitIds)];
+}
+
+/** آیا این درخواست (بر پایهٔ ستون requesting_unit_id) به این واحدها منتسب است؟ */
+function ticket_attribution_in_unit_ids(array $ticket, array $unitIds): bool
+{
+    $attributedId = (int) ($ticket['requesting_unit_id'] ?? 0);
+    return $attributedId > 0 && in_array($attributedId, array_map('intval', $unitIds), true);
+}
+
+function ticket_user_can_view(array $ticket, array $user, callable|string|null $permissionCheck = null): bool
+{
+    // تصمیم (۲۰۲۶-۱۱-۱۶): امضا callable|string است، نه فقط callable.
+    // فایل با declare(strict_types=1) اجرا می‌شود و همهٔ فراخوانی‌ها نام تابع را
+    // به‌صورت رشته می‌فرستند ('ticket_notification_user_can'، 'user_can'). با
+    // ?callable صرف، این فراخوانی‌ها TypeError می‌دادند و **ارجاع خودکار تیکت
+    // کاملاً می‌افتاد** — در نصب ۱.۶۲.۹۷ این یک خطای مرگبار در مسیر ثبت درخواست بود.
+    if (is_string($permissionCheck)) {
+        if (!is_callable($permissionCheck)) {
+            $permissionCheck = 'user_can';
+        }
+    }
     $permissionCheck = $permissionCheck ?? 'user_can';
     // جداسازی حوزه پیش از درخواست‌های خود و مجوزهای سفارشی؛ کارمند پشتیبانی فقط پشتیبانی.
     // این کنترل روی جزئیات، پیوست، پاسخ، ارجاع و عملیات گروهی هم اعمال می‌شود.
@@ -155,8 +219,23 @@ function ticket_user_can_view(array $ticket, array $user, ?callable $permissionC
     if ($role === 'support_manager' && $ticketGroup !== 'support') {
         return false;
     }
-    if (in_array($role, ['agent', 'manager'], true) && $ticketGroup !== user_service_group($user)) {
+    if ($role === 'agent' && $ticketGroup !== user_service_group($user)) {
         return false;
+    }
+    if ($role === 'manager' && empty(ticket_manager_scope_unit_ids($user))
+        && $ticketGroup !== user_service_group($user)) {
+        // مدیر بدون درخت سازمانی، همان رفتار قدیمی (فقط حوزهٔ خودش) را دارد.
+        return false;
+    }
+    // کارشناس برگزیده در تنظیمات ← نقش‌ها: درخواست حوزهٔ خودش را می‌بیند و
+    // ویرایش می‌کند، حتی با نقش سیستمی user. (پیش از این فقط agent/manager
+    // دیده می‌شدند، پس مسئولِ تعیین‌شده نمی‌توانست تیکت باز کند.)
+    // در هر دو فهرست بودن هم مجاز است — هر کدام حوزهٔ خودش را می‌دهد.
+    if (function_exists('user_is_key_role') && in_array($ticketGroup, ['it', 'support'], true)) {
+        $designatedRole = $ticketGroup === 'it' ? 'it_expert' : 'support_expert';
+        if (user_is_key_role($user, $designatedRole)) {
+            return $permissionCheck($user, 'ticket.view_unit') && $permissionCheck($user, 'ticket.edit');
+        }
     }
     // ۱.۳۷.۸ — دسترسی‌های مشاهدهٔ درخواست از سطوح دسترسی نقش‌ها خوانده می‌شود:
     // ticket.view_own (درخواست‌های خودم)، ticket.view_unit (واحد/زیرمجموعه)، ticket.view_all (همهٔ درخواست‌ها).
@@ -177,8 +256,29 @@ function ticket_user_can_view(array $ticket, array $user, ?callable $permissionC
         return (string) ($ticket['service_group'] ?? '') === user_service_group($user);
     }
     if ($user['role'] === 'manager') {
+        // فضای مدیر واحد: مرزِ اختیار او = چارت سازمانی (خودش + زیرمجموعه‌اش، هر دو حوزهٔ IT و پشتیبانی).
+        // مدیر واحدِ صرف حتی درخواستِ ارجاعی به خودش را از این مسیر نمی‌بیند؛ مرز او فقط چارت است.
+        if (!ticket_sole_unit_head($user)
+            && (int) ($ticket['assigned_to'] ?? 0) === (int) $user['id'] && $permissionCheck($user, 'ticket.view_unit')) {
+            // هر درخواستی که به خودِ مدیر ارجاع شده برای خودش قابل مشاهده است.
+            return true;
+        }
+        if (!ticket_sole_unit_head($user)
+            && (string) ($ticket['service_group'] ?? '') !== user_service_group($user)) {
+            // مدیر-کارشناس: بیرون از حوزهٔ خدمتِ خودش امتیازِ تفویض‌شده ندارد؛ چارت به‌تنهایی اختیاری برون‌حوزه‌ای نمی‌دهد.
+            // (هم‌راستا با ticket_scope که برای او فیلتر service_group را روی فهرست اعمال می‌کند.)
+            return false;
+        }
         $ids = ticket_manager_scope_unit_ids($user);
-        if (!$ids) return false;
+        if (!$ids) {
+            // بدون درخت مشخص، همان رفتار داخلیِ حوزهٔ خودش باقی می‌ماند.
+            return $permissionCheck($user, 'ticket.view_unit')
+                && (string) ($ticket['service_group'] ?? '') === user_service_group($user);
+        }
+        // هر دو مرز معتبر است: ثبت‌کننده داخل زیردرخت چارت، یا درخواست به همان زیردرخت منتسب شده باشد.
+        if (ticket_attribution_in_unit_ids($ticket, $ids)) {
+            return true;
+        }
         [$predicate, $params] = ticket_requester_tree_predicate('?', $ids);
         try {
             $query = db()->prepare('SELECT ' . $predicate);
@@ -206,12 +306,44 @@ function ticket_handler_level(array $ticket, array $user): string
     if (($user['role'] ?? '') === 'support_manager' && $ticketGroup !== 'support') {
         return '';
     }
-    if (in_array(($user['role'] ?? ''), ['agent', 'manager'], true) && $ticketGroup !== user_service_group($user)) {
+    if (($user['role'] ?? '') === 'agent' && $ticketGroup !== user_service_group($user)) {
         return '';
     }
-    if (($user['role'] ?? '') === 'manager' && (int) ($user['department_id'] ?? 0) > 0
-        && (int) ($user['department_id'] ?? 0) !== (int) ($ticket['department_id'] ?? 0)) {
+    if (($user['role'] ?? '') === 'manager'
+        && !(function_exists('ticket_sole_unit_head') && ticket_sole_unit_head($user))
+        && $ticketGroup !== user_service_group($user)) {
+        // مدیر-کارشناس یا مدیر بدون چارت: خارج از حوزهٔ خدمتِ خودش اختیاری ندارد.
         return '';
+    }
+    if (($user['role'] ?? '') === 'manager') {
+        $managerScopeIds = ticket_manager_scope_unit_ids($user);
+        $isManagerRequester = ticket_user_is_requester($ticket, $user);
+        if ($managerScopeIds) {
+            // سرپرستی درخواست‌های دیگران داخل درخت واحدهای مدیر برقرار است (هر دو حوزه)؛
+            // درخواستِ خودِ مدیر هرگز از درخت اختیارِ سرپرستی نمی‌گیرد (تفکیک وظایف).
+            if (!$isManagerRequester) {
+                // همان دو مرزِ دیدن: ثبت‌کننده داخل زیردرخت، یا منتسب به زیردرخت (نمونه: ادمین برای معاونت مالی ثبت کرده).
+                $inSubtree = ticket_attribution_in_unit_ids($ticket, $managerScopeIds);
+                if (!$inSubtree) {
+                    [$treePredicate, $treeParams] = ticket_requester_tree_predicate('?', $managerScopeIds);
+                    try {
+                        $treeQuery = db()->prepare('SELECT ' . $treePredicate);
+                        $treeQuery->execute(array_merge([(int) ($ticket['requester_id'] ?? 0)], $treeParams));
+                        $inSubtree = (bool) $treeQuery->fetchColumn();
+                    } catch (Throwable $error) {
+                        if (function_exists('app_error_log')) {
+                            app_error_log('[ticket-scope] ' . $error->getMessage());
+                        }
+                    }
+                }
+                if (!$inSubtree) {
+                    return '';
+                }
+            }
+        } elseif ((int) ($user['department_id'] ?? 0) > 0
+            && (int) ($user['department_id'] ?? 0) !== (int) ($ticket['department_id'] ?? 0)) {
+            return '';
+        }
     }
     // تفکیک وظایف: نما و اختیار تابع «نسبت این کاربر با همین درخواست» است، نه نقش
     // سراسری او. کارشناس یا مدیری که خودش درخواستی ثبت کرده، روی آن درخواست
@@ -222,6 +354,10 @@ function ticket_handler_level(array $ticket, array $user): string
     // ولی فقط در حد کارشناس. (ticket_reply_starts_work گارد جداگانهٔ خودش را دارد
     // تا پاسخِ چنین کاربری وضعیت را به‌طور ضمنی جلو نبرد.)
     if (ticket_user_is_requester($ticket, $user)) {
+        if (ticket_sole_unit_head($user)) {
+            // مدیر واحدِ صرف روی درخواست خودش هم اختیار رسیدگی ندارد.
+            return '';
+        }
         return ((int) ($ticket['assigned_to'] ?? 0) === (int) ($user['id'] ?? 0)
             && is_assignable_role((string) ($user['role'] ?? '')))
             ? 'assignee'
@@ -229,6 +365,10 @@ function ticket_handler_level(array $ticket, array $user): string
     }
     if ((is_assignable_role((string) ($user['role'] ?? '')) || user_is_primary_admin($user))
         && user_can($user, 'ticket.assign')) {
+        if (ticket_sole_unit_head($user)) {
+            // اختیار «ارجاع پیش از تخصیص» + اولویت/اصلاح — نه اختیار کامل کارشناسی.
+            return 'assigner';
+        }
         return 'manager';
     }
     if ((int) ($ticket['assigned_to'] ?? 0) === (int) $user['id'] && is_assignable_role((string) ($user['role'] ?? ''))) {
@@ -268,6 +408,10 @@ function ticket_view_mode(array $ticket, array $user): string
  */
 function ticket_can_see_internal(array $ticket, array $user): bool
 {
+    if (ticket_sole_unit_head($user)) {
+        // مدیر واحدِ صرف: فقط گفت‌وگوی عمومی را می‌بیند؛ یادداشت‌های تیم رسیدگی نه.
+        return false;
+    }
     if (ticket_user_is_requester($ticket, $user)
         && (int) ($ticket['assigned_to'] ?? 0) !== (int) ($user['id'] ?? 0)) {
         return false;
@@ -276,8 +420,18 @@ function ticket_can_see_internal(array $ticket, array $user): bool
 }
 
 /** A ticket assignee must be active, in the right scope and able to handle it. */
-function ticket_assignee_is_eligible(array $ticket, array $user, ?callable $permissionCheck = null): bool
+function ticket_assignee_is_eligible(array $ticket, array $user, callable|string|null $permissionCheck = null): bool
 {
+    // تصمیم (۲۰۲۶-۱۱-۱۶): امضا callable|string است، نه فقط callable.
+    // فایل با declare(strict_types=1) اجرا می‌شود و همهٔ فراخوانی‌ها نام تابع را
+    // به‌صورت رشته می‌فرستند ('ticket_notification_user_can'، 'user_can'). با
+    // ?callable صرف، این فراخوانی‌ها TypeError می‌دادند و **ارجاع خودکار تیکت
+    // کاملاً می‌افتاد** — در نصب ۱.۶۲.۹۷ این یک خطای مرگبار در مسیر ثبت درخواست بود.
+    if (is_string($permissionCheck)) {
+        if (!is_callable($permissionCheck)) {
+            $permissionCheck = 'user_can';
+        }
+    }
     $permissionCheck = $permissionCheck ?? 'user_can';
     $role = (string) ($user['role'] ?? '');
     $group = (string) ($ticket['service_group'] ?? '');
@@ -302,8 +456,35 @@ function ticket_assignee_is_eligible(array $ticket, array $user, ?callable $perm
     if (!$allowSelfAssignment && ticket_user_is_requester($ticket, $user)) {
         return false;
     }
+    // ── قانون لازم‌الاجرا (تصمیم مالک، ۲۰۲۶-۱۱-۱۶) ──────────────────────────
+    //
+    // «ادمین اصلی بودن» **به‌خودی‌خود** هیچ حقی برای مسئولیت تیکت نمی‌دهد.
+    // هیچ ادمین اصلی نباید پیش‌فرض مسئول انجام تیکت شود — فقط اگر در فهرست
+    // «کارشناس آی تی» یا «کارشناس پشتیبانی» تنظیمات ← کاربران معرفی شده باشد.
+    //
+    // این قانون **مرز خودکار و دستی را جدا نمی‌کند**: ارجاع خودکار و ارجاع
+    // دستی هر دو از همین تابع می‌گذرند، پس یک ادمینِ خارج از فهرست حتی با
+    // ارجاع دستی هم به‌عنوان مسئول پذیرفته نمی‌شود.
+    //
+    // اگر ادمین اصلی **در فهرست باشد** (مثل کاربر علی)، نقش ادمینش حفظ می‌شود
+    // و تیکت‌های همان حوزه هم به او ارجاع می‌شود — این دو با هم منافات ندارند.
+    $isDesignated = function_exists('user_is_key_role')
+        && in_array($group, ['it', 'support'], true)
+        && user_is_key_role($user, $group === 'it' ? 'it_expert' : 'support_expert');
+
     if (user_is_primary_admin($user)) {
-        return $group === 'it';
+        // بدون شرط حوزه! فهرست، حوزه را تعیین می‌کند نه نقش.
+        return $isDesignated
+            && ticket_user_can_view($ticket, $user, $permissionCheck)
+            && $permissionCheck($user, 'ticket.edit');
+    }
+    // تصمیم مالک (۲۰۲۶-۱۱-۱۶): کسی که در تنظیمات ← نقش‌ها به‌عنوان «کارشناس IT» یا
+    // «کارشناس پشتیبانی» برگزیده شده، مجاز به مسئولیت همان حوزه است — حتی اگر نقش
+    // سیستمی‌اش user/agent/inspector/supervisor باشد و handling_unit نداشته باشد.
+    // پیش از این فقط نقش‌های سیستمی پذیرفته می‌شدند و فهرست تنظیمات بی‌اثر بود.
+    if ($isDesignated) {
+        // کاربری که در هر دو فهرست است، مسئول هر دو حوزه می‌شود.
+        return ticket_user_can_view($ticket, $user, $permissionCheck) && $permissionCheck($user, 'ticket.edit');
     }
     if ($role === 'support_manager') {
         $inGroup = $group === 'support';
@@ -318,6 +499,47 @@ function ticket_assignee_is_eligible(array $ticket, array $user, ?callable $perm
         return false;
     }
     return ticket_user_can_view($ticket, $user, $permissionCheck) && $permissionCheck($user, 'ticket.edit');
+}
+
+/**
+ * آیا این کاربر به حوزهٔ خدمتِ این درخواست تعلق دارد؟
+ *
+ * قانون لازم‌الاجرا (تصمیم مالک، ۲۰۲۶-۱۱-۱۶): «ادمین اصلی بودن» به‌خودی‌خود
+ * هیچ حقی برای مسئولیت تیکت نمی‌دهد. حوزه را **فهرست تنظیمات** تعیین می‌کند
+ * (کارشناس آی تی / کارشناس پشتیبانی)، نه نقش سیستمی.
+ *
+ * پیش از این، هر سه مسیر ارجاع دستی شرط «ادمین اصلی ⇒ حوزهٔ IT» را جداگانه
+ * تکرار می‌کردند؛ نتیجه: ادمینِ خارج از فهرست هم پذیرفته می‌شد و ادمینِ
+ * داخل فهرست هم فقط برای IT. یک نقطهٔ حقیقت بهتر است.
+ */
+function ticket_assignee_group_ok(array $ticket, array $user): bool
+{
+    $group = (string) ($ticket['service_group'] ?? 'it');
+    if (!in_array($group, ['it', 'support'], true)) {
+        return false;
+    }
+    // ۱) کارشناس تعیین‌شده: حوزه را فهرست تعیین می‌کند — نه نقش.
+    if (function_exists('user_is_key_role')) {
+        if ($group === 'it' && user_is_key_role($user, 'it_expert')) {
+            return true;
+        }
+        if ($group === 'support' && user_is_key_role($user, 'support_expert')) {
+            return true;
+        }
+    }
+    // ۲) نقش‌های سیستمی همان حوزه.
+    $role = (string) ($user['role'] ?? '');
+    if ($role === 'support_manager') {
+        return $group === 'support';
+    }
+    if (in_array($role, ['agent', 'manager'], true)) {
+        // ادمین اصلی هرگز از این مسیر رد نمی‌شود، حتی اگر واحدش هم‌نام باشد.
+        if (function_exists('user_is_primary_admin') && user_is_primary_admin($user)) {
+            return false;
+        }
+        return (string) ($user['handling_unit_code'] ?? '') === $group;
+    }
+    return false;
 }
 
 /** Current rating belongs to the latest resolution, including same-second events. */
@@ -364,6 +586,7 @@ function ticket_reply_starts_work(array $ticket, array $user): bool
         && (string) ($ticket['status'] ?? '') === 'assigned'
         && empty($ticket['cancel_requested_at'])
         && user_can($user, 'ticket.edit')
+        && !ticket_sole_unit_head($user)
         && ticket_handler_level($ticket, $user) !== '';
 }
 
@@ -375,14 +598,51 @@ function ticket_scope(array $user, string $alias = 't'): array
     $own = user_can($user, 'ticket.view_own');
     $unit = user_can($user, 'ticket.view_unit');
     if (is_global_ticket_role($role) && user_can($user, 'ticket.view_all')) return ['', []];
+    // تصمیم مالک (۲۰۲۶-۱۱-۱۶): کارشناس برگزیده در تنظیمات ← نقش‌ها، صف همان حوزه را
+    // می‌بیند — حتی اگر نقش سیستمی‌اش agent/manager نباشد. بدون این، مسئولِ تعیین‌شده
+    // از فهرستش هیچ تیکتی نمی‌دید و ارجاع خودکار عملاً بی‌اثر می‌شد.
+    // مرز همچنان حوزهٔ خودش است (IT یا پشتیبانی) — نه دسترسی سراسری.
+    //
+    // تصمیم مالک (۲۰۲۶-۱۱-۱۶، تکمیل): کاربر می‌تواند **هم‌زمان** در هر دو فهرست باشد.
+    // پیش از این elseif بود، پس کسی که هم کارشناس IT و هم پشتیبانی بود فقط حوزهٔ اول
+    // را می‌دید. حالا هر دو حوزه با هم.
+    if (function_exists('key_role_user_ids') && $unit && !in_array($role, ['support_manager', 'agent', 'manager'], true)) {
+        $scopeGroups = [];
+        if (in_array((int) ($user['id'] ?? 0), key_role_user_ids('it_expert'), true)) {
+            $scopeGroups[] = 'it';
+        }
+        if (in_array((int) ($user['id'] ?? 0), key_role_user_ids('support_expert'), true)) {
+            $scopeGroups[] = 'support';
+        }
+        if (count($scopeGroups) === 1) {
+            return ["WHERE {$alias}.service_group = ?", [$scopeGroups[0]]];
+        }
+        if (count($scopeGroups) > 1) {
+            return ["WHERE {$alias}.service_group IN (?, ?)", $scopeGroups];
+        }
+    }
     if (in_array($role, ['support_manager', 'agent', 'manager'], true)) {
         $group = $role === 'support_manager' ? 'support' : user_service_group($user);
         if ($unit && $role !== 'manager') return ["WHERE {$alias}.service_group = ?", [$group]];
+        if ($role === 'manager' && ticket_sole_unit_head($user)) {
+            // مدیر واحدِ صرف: همان مرزِ «فضای مدیر واحد» — خودش + زیردرخت چارت + منتسب‌های همان زیردرخت؛ بدون فیلتر حوزهٔ خدمت.
+            $scopeIds = ticket_manager_scope_unit_ids($user);
+            [$tree, $treeParams] = ticket_requester_tree_predicate("{$alias}.requester_id", $scopeIds);
+            [$attrib, $attribParams] = ticket_attribution_predicate("{$alias}.requesting_unit_id", $scopeIds);
+            $parts = []; $params = [];
+            if ($own) { $parts[] = "{$alias}.requester_id = ?"; $params[] = (int) ($user['id'] ?? 0); }
+            $parts[] = $tree; $params = array_merge($params, $treeParams);
+            $parts[] = $attrib; $params = array_merge($params, $attribParams);
+            return ["WHERE (" . implode(' OR ', $parts) . ')', $params];
+        }
         $parts = []; $params = [$group];
         if ($own) { $parts[] = "{$alias}.requester_id = ?"; $params[] = (int) ($user['id'] ?? 0); }
         if ($unit && $role === 'manager') {
-            [$tree, $treeParams] = ticket_requester_tree_predicate("{$alias}.requester_id", ticket_manager_scope_unit_ids($user));
+            $scopeIds = ticket_manager_scope_unit_ids($user);
+            [$tree, $treeParams] = ticket_requester_tree_predicate("{$alias}.requester_id", $scopeIds);
+            [$attrib, $attribParams] = ticket_attribution_predicate("{$alias}.requesting_unit_id", $scopeIds);
             $parts[] = $tree; $params = array_merge($params, $treeParams);
+            $parts[] = $attrib; $params = array_merge($params, $attribParams);
         }
         return ["WHERE {$alias}.service_group = ? AND (" . ($parts ? implode(' OR ', $parts) : '1 = 0') . ')', $params];
     }

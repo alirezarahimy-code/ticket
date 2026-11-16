@@ -25,7 +25,10 @@ import re
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-TICKET_WRITE_PATHS = ("actions/ticket-actions.php", "actions/bulk-actions.php")
+TICKET_WRITE_PATHS = (
+    "modules/request-center/Actions/ticket-actions.php",
+    "modules/request-center/Actions/bulk-actions.php",
+)
 
 
 def read(relative_path: str) -> str:
@@ -140,7 +143,7 @@ def test_other_modules_keep_their_existing_commit_contract():
 # ───────────────── ۲) تاریخچهٔ راست ─────────────────
 
 def test_auto_assignment_does_not_invent_a_state_the_ticket_never_had():
-    source = read("actions/ticket-actions.php")
+    source = read("modules/request-center/Actions/ticket-actions.php")
     assert "'auto_assigned', 'manager_review', 'assigned'" not in source, (
         "درخواستی که مستقیم assigned ساخته شده هرگز در manager_review نبوده است"
     )
@@ -155,7 +158,7 @@ def test_auto_assignment_does_not_invent_a_state_the_ticket_never_had():
 
 
 def test_creation_event_records_the_real_initial_status():
-    source = read("actions/ticket-actions.php")
+    source = read("modules/request-center/Actions/ticket-actions.php")
     assert "log_ticket_event($ticketId, (int) $user['id'], 'created', null, $initialStatus" in source, (
         "رویداد ثبت باید همان وضعیت واقعی اولیه را بنویسد"
     )
