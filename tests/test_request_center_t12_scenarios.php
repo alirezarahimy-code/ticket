@@ -292,6 +292,24 @@ function t12s_compare(array $a, array $b, string $scenario = ''): array
             }));
         }
         if (count($a[$key]) !== count($featureRows)) { $diffs[] = "{$key} count differs: legacy=" . count($a[$key]) . ' feature=' . count($featureRows); continue; }
+        if ($scenario === '07b-priority-by-manager' && $key === 'notifications') {
+            // RC intentionally replaces the legacy primary-admin fallback with the designated IT handler.
+            // In this fixture, supervisor 105 remains notified and designated IT agent 106 replaces admin 100.
+            $legacyRecipients = array_map('intval', array_column($a[$key], 'user_id'));
+            $featureRecipients = array_map('intval', array_column($featureRows, 'user_id'));
+            $legacyTypes = array_map('strval', array_column($a[$key], 'notification_type'));
+            $featureTypes = array_map('strval', array_column($featureRows, 'notification_type'));
+            sort($legacyRecipients);
+            sort($featureRecipients);
+            sort($legacyTypes);
+            sort($featureTypes);
+            if ($legacyRecipients === [100, 105]
+                && $featureRecipients === [105, 106]
+                && $legacyTypes === $featureTypes) {
+                $tolerated[] = 'notifications: designated IT handler 106 replaces legacy primary-admin fallback 100; supervisor 105 remains';
+                continue;
+            }
+        }
         foreach ($a[$key] as $i => $ra) {
             $rb = $featureRows[$i];
             foreach ($cols as $c) {
