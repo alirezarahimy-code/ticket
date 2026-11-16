@@ -179,12 +179,12 @@ jobs:
                 echo "::error::Manifest entries must be safe ZIP basenames only: $line"
                 exit 1
               fi
-              ATTACH+=("downloads/$line")
+              ATTACH+=("downloads/$line" "downloads/$line.sha256")
             done < "$MANIFEST"
           else
             for f in downloads/*.zip; do
               case "$(basename "$f")" in
-                *-"$RELEASE_VERSION".zip|*"$RELEASE_VERSION"-*.zip) ATTACH+=("$f");;
+                *-"$RELEASE_VERSION".zip|*"$RELEASE_VERSION"-*.zip) ATTACH+=("$f" "$f.sha256");;
               esac
             done
           fi
@@ -228,15 +228,35 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           RELEASE_TAG: ${{ steps.cfg.outputs.release_tag }}
+          RELEASE_VERSION: ${{ steps.cfg.outputs.version }}
         run: |
           set -euo pipefail
           shopt -s nullglob
           REPO="${GITHUB_REPOSITORY}"
+          MANIFEST="downloads/RELEASE-ASSET-MANIFEST-$RELEASE_VERSION.txt"
+          RELEASE_ASSETS=()
+          if [ -f "$MANIFEST" ]; then
+            while IFS= read -r line; do
+              line="$(echo "$line" | tr -d '\r' | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')"
+              [ -z "$line" ] && continue
+              case "$line" in \#*) continue;; esac
+              RELEASE_ASSETS+=("$line" "$line.sha256")
+            done < "$MANIFEST"
+          else
+            for f in downloads/*.zip; do
+              case "$(basename "$f")" in
+                *-"$RELEASE_VERSION".zip|*"$RELEASE_VERSION"-*.zip)
+                  name=$(basename "$f")
+                  RELEASE_ASSETS+=("$name" "$name.sha256")
+                  ;;
+              esac
+            done
+          fi
           {
             echo "## لینک‌های دانلود مستقیم"
             echo ""
-            for f in downloads/*.zip; do
-              name=$(basename "$f")
+            for name in "${RELEASE_ASSETS[@]}"; do
+              [ -f "downloads/$name" ] || continue
               url="https://github.com/${REPO}/releases/download/${RELEASE_TAG}/${name}"
               echo "- \`$name\`"
               echo ""
