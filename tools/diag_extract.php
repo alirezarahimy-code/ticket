@@ -206,10 +206,63 @@ if (PHP_OS_FAMILY !== 'Windows') {
     fwrite(STDOUT, "\n");
 }
 
-// ۰.۶) حساب اجرای سرویس وب Web (IIS) — با چه هویتی احراز هویت می‌شود
-fwrite(STDOUT, "۰.۶) هویت سرویس وب\n");
+/*
+ * ۰.۶) با کدام هویت اجرا می‌شوم؟ — و تفاوت حیاتی IIS با XAMPP
+ *
+ * روی IIS، Apache/PHP زیر AppPoolIdentity اجرا می‌شود: حساب ماشین، بدون
+ * رمز، و بدون دسترسی شبکه‌ای به جای دیگر — حتی وقتی از داخل cmd با کاربر
+ * ادمین اجرایش کنید، هویت PHP همان است.
+ *
+ * روی XAMPP (که این سامانه برایش نوشته شده) Apache معمولاً به‌عنوان سرویس اجرا می‌شود و PHP
+ * را با همان حساب LocalSystem یا حساب ادمینی اجرا می‌کند که Apache با آن
+ * بالا آمده. این یعنی خودِ PHP ممکن است بتواند تکمیل کند — اما به شرطی که
+ * حساب سرویس Apache همان حسابی باشد که آزمون می‌دهید.
+ *
+ * مهم‌تر: اگر ابزار را از cmd اجرا کنید، «حساب اجرای PHP» در cmd همان
+ * کاربر cmd است. همان چیزی است که سامانه در زمان اجرا دارد فقط اگر Apache
+ * هم با همان حساب بالا آمده باشد. تفاوت این دو، منبع بیشتر سردرگمی‌هاست.
+ */
+fwrite(STDOUT, "۰.۶) هویت اجرای PHP (تفاوت XAMPP و IIS)\n");
 $phpUser = getenv('USERNAME') ?: (getenv('USER') ?: '');
-diag_line('حساب اجرای PHP', $phpUser !== '', $phpUser !== '' ? $phpUser : 'نامشخص');
+$isWindows = PHP_OS_FAMILY === 'Windows';
+diag_line('حساب کاربری', $phpUser !== '', $phpUser !== '' ? $phpUser : 'نامشخص');
+diag_line('SAPI', true, PHP_SAPI);
+
+// آیا Apache با LocalSystem بالا آمده؟ روی XAMPP پیش‌فرض همین است.
+if ($isWindows) {
+    $svcFile = sys_get_temp_dir() . '/itsm_svc_' . bin2hex(random_bytes(4)) . '.ps1';
+    @file_put_contents($svcFile, 'try { Get-CimInstance Win32_Service -Filter "Name=\'Apache2.4\'" -ErrorAction Stop | Select-Object -First 1 -Property Name,StartName,State | ConvertTo-Json -Compress } catch { "{}" }');
+    $svcPipes = [];
+    $svcProc = @proc_open([$ps, '-NoProfile', '-NonInteractive', '-ExecutionPolicy', 'Bypass', '-File', $svcFile], [0 => ['pipe', 'r'], 1 => ['pipe', 'w'], 2 => ['pipe', 'w']], $svcPipes);
+    $svcOut = '';
+    if (is_resource($svcProc)) {
+        fclose($svcPipes[0]);
+        $svcOut = trim((string) stream_get_contents($svcPipes[1]));
+        stream_get_contents($svcPipes[2]);
+        fclose($svcPipes[1]);
+        fclose($svcPipes[2]);
+        proc_close($svcProc);
+    }
+    @unlink($svcFile);
+    $svc = json_decode($svcOut, true);
+    if (is_array($svc) && !empty($svc['Name'])) {
+        $startName = trim((string) ($svc['StartName'] ?? ''));
+        $isLocalSystem = stripos($startName, 'LocalSystem') !== false;
+        diag_line('حساب سرویس Apache', true, $startName !== '' ? $startName : 'نامشخص');
+        if ($isLocalSystem) {
+            fwrite(STDOUT, "      ⚠ Apache با LocalSystem اجرا می‌شود (پیش‌فرض XAMPP).\n");
+            fwrite(STDOUT, "        این حساب روی شبکه به‌عنوان ماشین\$ شناخته می‌شود و به کلاینت‌ها دسترسی ادمین ندارد.\n");
+            fwrite(STDOUT, "        پس «استخراج از راه دور» از خودِ پنل کار نمی‌کند — حتی اگر شما با ادمین وارد شوید.\n");
+            fwrite(STDOUT, "        درست است: همان چیزی که در پیام خطا دیدید.\n");
+        } elseif (stripos($startName, 'NetworkService') !== false || stripos($startName, 'LocalService') !== false) {
+            fwrite(STDOUT, "      ⚠ Apache با NetworkService/LocalService اجرا می‌شود — بدون دسترسی شبکه‌ای به کلاینت‌ها.\n");
+        }
+    } elseif ($svcOut === '{}' || $svcOut === '') {
+        diag_line('حساب سرویس Apache', false, 'سرویس Apache2.4 پیدا نشد — شاید نام دیگری دارد');
+        fwrite(STDOUT, "      نام سرویس واقعی را ببینید:  sc query state= all | findstr /i apache\n");
+        fwrite(STDOUT, "      یا در XAMPP Control Panel → Config → Service and Port Settings\n");
+    }
+}
 fwrite(STDOUT, "\n");
 
 // ۱) نام و DNS
@@ -318,7 +371,12 @@ if ($user === '' || $pass === '') {
     @mkdir($sandbox, 0700, true);
     $resultFile = $sandbox . '/smb_result.json';
     $smbProbe = <<<'PWSH'
-param([string]$ComputerName,[string]$User,[string]$Pass,[string]$OutFile)
+param([string]$ComputerName,[string]$User,[string]$OutFile)
+# رمز از محیط فرآیند خوانده می‌شود، نه از خط فرمان. خط فرمان یک فرآیند در
+# Task Manager و WMI و Sysmon برای هر کاربری قابل خواندن است؛ محتوا‌ی محیط
+# فقط برای همان فرآیند و والدش.
+$Pass = $env:ITSM_DIAG_SMB_PASS
+Remove-Item Env:\ITSM_DIAG_SMB_PASS -ErrorAction SilentlyContinue
 $result = [ordered]@{ tcp445 = $false; cshare = $false; admin = $false; detail = '' }
 $tcp = New-Object System.Net.Sockets.TcpClient
 try {
@@ -340,16 +398,29 @@ if ($result.tcp445) {
     } catch {
         $result.detail = $_.Exception.Message
     } finally {
-        if ($drive) { try { Remove-Item -Path "$($drive.Name):\ITSM\diag.txt" -Force -ErrorAction SilentlyContinue } catch { }; try { Remove-PSDrive -Name $drive.Name -Force -ErrorAction SilentlyContinue } catch { } }
+        if ($drive) {
+            # پوشهٔ آزمون روی مقصد پاک می‌شود؛ این ابزار باید هیچ ردپایی نگذارد.
+            try { Remove-Item -Path "$($drive.Name):\ITSM" -Recurse -Force -ErrorAction SilentlyContinue } catch { }
+            try { Remove-PSDrive -Name $drive.Name -Force -ErrorAction SilentlyContinue } catch { }
+        }
     }
 }
 $result | ConvertTo-Json -Compress | Out-File -FilePath $OutFile -Encoding utf8
 PWSH;
     $probeFile = $sandbox . '/smb_probe.ps1';
     @file_put_contents($probeFile, $smbProbe);
-    $cmd = [$ps, '-NoProfile', '-NonInteractive', '-ExecutionPolicy', 'Bypass', '-File', $probeFile, '-ComputerName', $host, '-User', $user, '-Pass', $pass, '-OutFile', $resultFile];
+    $cmd = [$ps, '-NoProfile', '-NonInteractive', '-ExecutionPolicy', 'Bypass', '-File', $probeFile, '-ComputerName', $host, '-User', $user, '-OutFile', $resultFile];
+    // رمز از محیط فرزند می‌رود، نه از خط فرمان.
+    $childEnv = null;
+    if (function_exists('getenv')) {
+        $all = @getenv();
+        if (is_array($all)) {
+            $childEnv = $all;
+            $childEnv['ITSM_DIAG_SMB_PASS'] = $pass;
+        }
+    }
     $pipes = [];
-    $proc = @proc_open($cmd, [0 => ['pipe', 'r'], 1 => ['pipe', 'w'], 2 => ['pipe', 'w']], $pipes);
+    $proc = @proc_open($cmd, [0 => ['pipe', 'r'], 1 => ['pipe', 'w'], 2 => ['pipe', 'w']], $pipes, null, $childEnv);
     if (is_resource($proc)) {
         fclose($pipes[0]);
         stream_get_contents($pipes[1]);

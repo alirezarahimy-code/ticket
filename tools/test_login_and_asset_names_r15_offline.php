@@ -246,8 +246,30 @@ check('۲۰: اگر php پیدا نشد، راهنمای صریح می‌دهد'
 // سند دستور اجرا
 $cmdDoc = (string) file_get_contents($root . '/docs/DIAG-EXTRACT-COMMANDS-FA.md');
 check('۲۱: سند دستور اجرا موجود است', $cmdDoc !== '');
-check('۲۲: می‌گوید روی سرور اجرا شود، نه روی کلاینت', str_contains($cmdDoc, 'روی **همان سروری که سامانه روی آن نصب است**'));
-check('۲۳: مسیر جایگزین php.exe را نشان می‌دهد', str_contains($cmdDoc, 'where /r "C:\\Program Files" php.exe'));
+check('۲۲: می‌گوید روی سرور XAMPP اجرا شود، نه روی کلاینت', str_contains($cmdDoc, 'روی **همان سرور XAMPP**'));
+check('۲۳: مسیر جایگزین php.exe را نشان می‌دهد', str_contains($cmdDoc, 'C:\\xampp\\php\\php.exe'));
+
+echo "\n═══ ۳.۸) XAMPP — حساب سرویس Apache (r17-ج) ═══\n";
+// روی XAMPP، Apache با LocalSystem اجرا می‌شود و PHP همان هویت را دارد؛
+// پس استخراج از راه دور از پنل هیچ دسترسی شبکه‌ای ندارد. این باید در ابزار
+// تشخیص داده و صریح گفته شود، نه اینکه کاربر دنبال فایروال بگردد.
+check('۲۴: حساب سرویس Apache خوانده می‌شود', str_contains($diagSrc, 'حساب سرویس Apache'));
+check('۲۵: LocalSystem به‌عنوان ریشهٔ مشکل نام برده می‌شود', str_contains($diagSrc, 'LocalSystem'));
+check('۲۶: نام سرویس Apache2.4 جست‌وجو می‌شود', str_contains($diagSrc, 'Apache2.4'));
+// نشت رمز: خط فرمان فرآیند برای هر کاربری در Task Manager خوانا است.
+check('۲۷: رمز SMB از خط فرمان رد نمی‌شود', !str_contains($diagSrc, "'-Pass', \$pass"));
+check('۲۸: رمز از محیط فرآیند فرزند می‌رود', str_contains($diagSrc, 'ITSM_DIAG_SMB_PASS'));
+// اثر جانبی روی کلاینت: پوشهٔ آزمون باید پاک شود.
+check('۲۹: پوشهٔ آزمون روی مقصد پاک می‌شود', str_contains($diagSrc, 'Remove-Item -Path "$($drive.Name):\\ITSM" -Recurse'));
+// سند باید XAMPP را اول حساب کند، نه IIS
+check('۳۰: سند مسیر کامل C:\\xampp\\php\\php.exe را می‌دهد', str_contains($cmdDoc, 'C:\\xampp\\php\\php.exe'));
+check('۳۱: سند هشدار LocalSystem را توضیح می‌دهد', str_contains($cmdDoc, 'LocalSystem'));
+check('۳۲: سند مسیر client-agent را به‌عنوان جایگزین می‌دهد', str_contains($cmdDoc, 'Collect-Inventory.ps1'));
+// فایل batch باید xampp را قبل از بقیه بگردد
+$batPos = strpos($bat, 'C:\\xampp\\php\\php.exe');
+$progPos = strpos($bat, 'C:\\Program Files\\PHP\\php.exe');
+check('۳۳: batch اول xampp را می‌گردد', $batPos !== false && $progPos !== false && $batPos < $progPos);
+check('۳۴: batch درایو D را هم می‌گردد', str_contains($bat, 'D:\\xampp\\php\\php.exe'));
 
 echo "\n═══ ۴) ابزار تشخیص ═══\n";
 $diag = (string) file_get_contents($root . '/tools/diagnose_login_and_assets.php');
