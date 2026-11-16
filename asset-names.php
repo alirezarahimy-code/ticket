@@ -344,6 +344,26 @@ function asset_identity_key(?string $hostname, ?string $tag = null): string
 {
     $raw = trim((string) ($hostname !== null && $hostname !== '' ? $hostname : $tag));
     if ($raw === '') { return ''; }
+    /*
+     * ۱.۶۳.۱-r19 — باگ هویت تکراری برای آدرس IP.
+     *
+     * پیش‌تر asset_name_core() روی «CLIENT-192.168.1.50» اول پیشوند
+     * CLIENT- را برمی‌داشت و بعد نقطه را جداکنندهٔ نام دامنه می‌دید، پس
+     * هر سه آدرس 192.168.1.10 و .11 و .200 به هویت «192» می‌رسیدند.
+     * نتیجه: یا روی یک رکورد به‌غلط ادغام می‌شدند، یا رکوردهای پشت‌سرهم
+     * ساخته می‌شد و شمارش از تعداد واقعی بالا می‌زد (۱۲۵ در برابر ۸۹).
+     *
+     * حالا IP قبل از هر نرمال‌سازی‌ای تشخیص داده می‌شود و بدون دست‌کاری
+     * برمی‌گردد. پیشوند CLIENT-/DOMAIN- هم فقط وقتی حذف می‌شود که بقیه
+     * واقعاً یک نام باشد، نه یک IP.
+     */
+    if (preg_match('/^\d{1,3}(\.\d{1,3}){3}$/', $raw) === 1) {
+        return $raw;
+    }
+    // CLIENT-192.168.1.50 / CLIENT 192.168.1.50
+    if (preg_match('/^(?:CLIENT|DOMAIN)[-\s]+(\d{1,3}(?:\.\d{1,3}){3})$/i', $raw, $ipMatch) === 1) {
+        return $ipMatch[1];
+    }
     $core = asset_name_core($raw);
     // پیشوند خودکار رکوردهای ویندوز کلاینت (CLIENT-*) هم بخشی از هویت نیست.
     for ($i = 0; $i < 3; $i++) {
@@ -389,6 +409,93 @@ function asset_resolve_id(?string $hostname, ?string $tag = null, ?string $seria
 }
 
 /** بهروزرسانی کلید هویت بعد از تغییر hostname یا ساخت رکورد جدید. */
+/**
+ * هویت پایدار دستگاه — مستقل از نام و IP.
+ *
+ * پاسخ به این سؤال عملی: «اگر یک سیستم در شبکه عوض شود، سامانه آن را
+ * سیستم جدید می‌بیند یا همان را به‌روز می‌کند؟»
+ *
+ * قانون پیاده‌شده:
+ *   ۱) سریال سخت‌افزار — پایدارترین شناسه. با تعویض نام، تعویض IP و حتی
+ *      نصب مجدد ویندوز تغییر نمی‌کند.
+ *   ۲) MAC آداپتور اصلی — اگر سریال خالی/بی‌معنی باشد (ماشین مجازی،
+ *      برخی برندها).
+ *   ۳) نام کامپیوتر — اگر هیچ‌کدام نبود.
+ *
+ * IP **هرگز** بخشی از هویت نیست. آدرس IP با DHCP عوض می‌شود و اگر هویت
+ * بر آن سوار شود، همان سیستم با IP تازه رکورد دوم می‌سازد — دقیقاً همان
+ * چیزی که شمارش ۱۲۵ در برابر ۸۹ را می‌سازد.
+ *
+ * @return array{key:string,match:string,value:string}
+ */
+function asset_stable_identity(?string $hostname, ?string $serial = null, ?string $mac = null): array
+{
+    $serial = strtoupper(trim((string) $serial));
+    $junkSerials = [
+        '', 'TO BE FILLED BY O.E.M.', 'DEFAULT STRING', 'SYSTEM SERIAL NUMBER',
+        'NONE', 'N/A', '0', '00000000', 'NOT SPECIFIED', 'CHASSIS SERIAL NUMBER',
+        '0123456789', 'SERIAL', 'UNKNOWN',
+    ];
+    if ($serial !== '' && !in_array($serial, $junkSerials, true) && strlen($serial) >= 4) {
+        return ['key' => 'sn:' . $serial, 'match' => 'serial', 'value' => $serial];
+    }
+    $mac = strtoupper((string) preg_replace('/[^0-9A-Fa-f]/', '', trim((string) $mac)));
+    $junkMacs = ['', '000000000000', 'FFFFFFFFFFFF', '020000000000'];
+    if ($mac !== '' && preg_match('/^[0-9A-F]{12}$/', $mac) === 1 && !in_array($mac, $junkMacs, true)) {
+        return ['key' => 'mac:' . $mac, 'match' => 'mac', 'value' => $mac];
+    }
+    $nameKey = asset_identity_key($hostname);
+    if ($nameKey !== '') {
+        return ['key' => $nameKey, 'match' => 'hostname', 'value' => $nameKey];
+    }
+    return ['key' => '', 'match' => '', 'value' => ''];
+}
+
+/**
+ * پیدا کردن رکورد موجود با اولویت هویت پایدار، نه نام.
+ *
+ * مسیرهای استخراج باید این را به‌جای asset_resolve_id() صدا بزنند: با آن،
+ * تعویض IP یا تغییر نام کامپیوتر رکورد تازه نمی‌سازد و همان شناسنامه
+ * به‌روز می‌شود.
+ *
+ * @return array{id:int,matched_by:string} id=0 یعنی رکوردی نبود
+ */
+function asset_resolve_by_machine(?string $hostname, ?string $serial = null, ?string $mac = null): array
+{
+    $identity = asset_stable_identity($hostname, $serial, $mac);
+    if ($identity['key'] === '') {
+        return ['id' => 0, 'matched_by' => ''];
+    }
+
+    if ($identity['match'] === 'serial') {
+        $q = db()->prepare('SELECT id FROM assets WHERE UPPER(TRIM(serial_number)) = ? ORDER BY id ASC LIMIT 1');
+        $q->execute([$identity['value']]);
+        $id = (int) ($q->fetchColumn() ?: 0);
+        if ($id > 0) {
+            return ['id' => $id, 'matched_by' => 'serial'];
+        }
+    }
+
+    if ($identity['match'] === 'mac') {
+        $q = db()->prepare(
+            "SELECT id FROM assets
+             WHERE REPLACE(REPLACE(REPLACE(UPPER(COALESCE(mac_address,'')),':',''),'-',''),'.','') = ?
+             ORDER BY id ASC LIMIT 1"
+        );
+        $q->execute([$identity['value']]);
+        $id = (int) ($q->fetchColumn() ?: 0);
+        if ($id > 0) {
+            return ['id' => $id, 'matched_by' => 'mac'];
+        }
+    }
+
+    $byName = asset_resolve_id($hostname);
+    if ($byName > 0) {
+        return ['id' => $byName, 'matched_by' => 'hostname'];
+    }
+    return ['id' => 0, 'matched_by' => ''];
+}
+
 function asset_sync_identity_key(int $assetId): void
 {
     if ($assetId <= 0) { return; }

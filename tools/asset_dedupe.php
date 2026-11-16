@@ -65,23 +65,83 @@ try {
     }
     $out(sprintf('۱) کلید هویت: %d رکورد نیازمند نرمالسازی دوباره (%s).', $synced, $apply ? 'انجام شد' : 'فقط گزارش'));
 
-    // ── ۲) پیدا کردن گروههای تکراری
-    $groups = $pdo->query(<<<'SQL'
-        SELECT hostname_key, COUNT(*) AS cnt,
-               GROUP_CONCAT(id ORDER BY id SEPARATOR ',') AS ids,
-               MIN(id) AS keeper
+    // ── ۲) پیدا کردن گروه‌های تکراری
+    //
+    // ۱.۶۳.۱-r19 — دو کلید برای تشخیص، نه یکی:
+    //   الف) hostname_key — همان نام کامپیوتر؛ تکرارهای ناشی از درج بدون کلید.
+    //   ب) serial_number  — سریال سخت‌افزار؛ رکوردهایی که با نام‌های مختلف یا
+    //      IP خام برای **همان دستگاه** ساخته شده‌اند فقط با این کلید پیدا
+    //      می‌شوند — همان چیزی که ۱۲۵ را در برابر ۸۹ می‌گذارد.
+    //
+    // گروه‌ها با union-find ادغام می‌شوند تا رکوردی که هم‌نام و هم‌سریال است
+    // دو بار پردازش نشود و زنجیره‌ها (A~B با نام، B~C با سریال) یک گروه شوند.
+    $parent = [];
+    $findRoot = static function (int $x) use (&$parent): int {
+        while (($parent[$x] ?? $x) !== $x) { $x = $parent[$x]; }
+        return $x;
+    };
+    $linkIds = static function (array $ids) use (&$parent): void {
+        if (count($ids) < 2) { return; }
+        foreach ($ids as $id) { if (!isset($parent[$id])) { $parent[$id] = $id; } }
+        $first = $ids[0];
+        foreach ($ids as $id) {
+            $ra = $first; while (($parent[$ra] ?? $ra) !== $ra) { $ra = $parent[$ra]; }
+            $rb = $id;    while (($parent[$rb] ?? $rb) !== $rb) { $rb = $parent[$rb]; }
+            if ($ra !== $rb) { $parent[max($ra, $rb)] = min($ra, $rb); }
+        }
+    };
+
+    $nameRows = $pdo->query(<<<'SQL'
+        SELECT hostname_key AS k, GROUP_CONCAT(id ORDER BY id SEPARATOR ',') AS ids
           FROM assets
          WHERE hostname_key IS NOT NULL AND hostname_key <> ''
          GROUP BY hostname_key
         HAVING COUNT(*) > 1
-         ORDER BY cnt DESC, hostname_key
     SQL)->fetchAll(PDO::FETCH_ASSOC);
+    $keyGroups = count($nameRows);
+
+    $junkSerials = "'', 'TO BE FILLED BY O.E.M.', 'DEFAULT STRING', 'SYSTEM SERIAL NUMBER', 'NONE', 'N/A', '0', '00000000', 'NOT SPECIFIED', 'CHASSIS SERIAL NUMBER', '0123456789', 'SERIAL', 'UNKNOWN'";
+    $serialRows = $pdo->query(<<<SQL
+        SELECT UPPER(TRIM(serial_number)) AS k, GROUP_CONCAT(id ORDER BY id SEPARATOR ',') AS ids
+          FROM assets
+         WHERE serial_number IS NOT NULL
+           AND UPPER(TRIM(serial_number)) NOT IN ({$junkSerials})
+           AND CHAR_LENGTH(TRIM(serial_number)) >= 4
+         GROUP BY UPPER(TRIM(serial_number))
+        HAVING COUNT(*) > 1
+    SQL)->fetchAll(PDO::FETCH_ASSOC);
+    $serialGroups = count($serialRows);
+
+    foreach (array_merge($nameRows, $serialRows) as $row) {
+        $linkIds(array_map('intval', explode(',', (string) $row['ids'])));
+    }
+
+    $components = [];
+    foreach (array_keys($parent) as $id) {
+        $components[$findRoot((int) $id)][] = (int) $id;
+    }
+    $groups = [];
+    foreach ($components as $ids) {
+        if (count($ids) < 2) { continue; }
+        sort($ids);
+        $groups[] = ['cnt' => (string) count($ids), 'ids' => implode(',', $ids), 'keeper' => (string) $ids[0]];
+    }
+    usort($groups, static fn(array $a, array $b): int => (int) $b['cnt'] <=> (int) $a['cnt']);
 
     $totalDupes = 0;
     foreach ($groups as $g) { $totalDupes += (int) $g['cnt'] - 1; }
-    $out(sprintf('۲) گروههای تکراری: %d گروه، %d رکورد اضافه.', count($groups), $totalDupes));
+    $out(sprintf('۲) گروه‌های تکراری: %d گروه، %d رکورد اضافه.', count($groups), $totalDupes));
+    $out(sprintf('   • از روی نام: %d گروه   • از روی سریال سخت‌افزار: %d گروه', $keyGroups, $serialGroups));
     foreach (array_slice($groups, 0, 30) as $g) {
-        $out(sprintf('   • %-30s → %s (نگه: %s)', $g['hostname_key'], $g['ids'], $g['keeper']));
+        $labels = [];
+        try {
+            $q = $pdo->query('SELECT id, hostname FROM assets WHERE id IN (' . $g['ids'] . ') ORDER BY id');
+            foreach ($q->fetchAll(PDO::FETCH_ASSOC) as $r) {
+                $labels[] = '#' . $r['id'] . '=' . (((string) ($r['hostname'] ?? '')) !== '' ? (string) $r['hostname'] : '(بی‌نام)');
+            }
+        } catch (Throwable $e) {
+        }
+        $out(sprintf('   • نگه: #%s  ←  %s', $g['keeper'], implode(' | ', $labels)));
     }
     if (count($groups) > 30) { $out('   … و ' . (count($groups) - 30) . ' گروه دیگر.'); }
 
@@ -162,7 +222,7 @@ try {
                 // بکاپ رکورد تکراری
                 $row = $pdo->query('SELECT * FROM assets WHERE id = ' . $dupId)->fetch(PDO::FETCH_ASSOC);
                 $pdo->prepare("INSERT INTO `{$backupTable}` (asset_id, hostname_key, payload, merged_into) VALUES (?, ?, ?, ?)")
-                    ->execute([$dupId, $g['hostname_key'], json_encode($row, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES), $keeper]);
+                    ->execute([$dupId, (string) ($row['hostname_key'] ?? ''), json_encode($row, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES), $keeper]);
 
                 // پر کردن فیلدهای خالی رکورد اصلی از روی تکراری
                 $keeperRow = $pdo->query('SELECT * FROM assets WHERE id = ' . $keeper)->fetch(PDO::FETCH_ASSOC);

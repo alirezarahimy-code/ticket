@@ -34,7 +34,7 @@
 
 ### ۳) فایل را دانلود کنید
 
-**[⬇ دانلود بستهٔ میانی ۱.۶۳ ← ۱.۶۳.۱](https://github.com/alirezarahimy-code/ticket/raw/publish-1.63.1/downloads/ticket-update-1.63-to-1.63.1-r17-smb-extract-20261115.zip)**
+**[⬇ دانلود بستهٔ میانی ۱.۶۳ ← ۱.۶۳.۱](https://github.com/alirezarahimy-code/ticket/raw/publish-1.63.1/downloads/ticket-update-1.63-to-1.63.1-r19-asset-identity-reset-20261116.zip)**
 
 این راهنما **داخل خود بسته** هم منتشر می‌شود، پس حجم و هشِ دقیقِ همین زیپ
 را نمی‌تواند درست حمل کند (هر بار که راهنما تغییر کند، زیپ هم عوض می‌شود).

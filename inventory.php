@@ -662,26 +662,47 @@ function inventory_upsert_server_asset(array $inventory, int $userId): int
     $host = trim((string) ($inventory['hostname'] ?? ''));
     $serial = trim((string) ($inventory['serial_number'] ?? ''));
     $assetTag = inventory_server_asset_tag();
-    $conditions = ['asset_tag = ?'];
-    $params = [$assetTag];
-    if ($host !== '') {
-        $conditions[] = 'hostname = ?';
-        $params[] = $host;
+    /* ۱.۶۳.۱-r19 — جست‌وجوی پله‌ای به‌جای OR.
+     *
+     * نسخهٔ قبلی سه شرط را با OR می‌چسباند:
+     *     WHERE (asset_tag = ? OR hostname = ? OR serial_number = ?)
+     * خطرش این بود که تطابق روی **هر یک** از این سه، رکورد را برمی‌گرداند؛
+     * پس اگر asset_tag ثابت با رکورد بیربطی جور می‌شد، شناسنامهٔ یک سیستم
+     * دیگر به‌روزرسانی می‌شد و سیستم واقعی رکورد تازه می‌ساخت — یکی از
+     * سرچشمه‌های اختلاف ۱۲۵ با ۸۹.
+     *
+     * حالا اولویت صریح است و هر پله جدا پرسیده می‌شود:
+     *   ۱) سریال سخت‌افزار (پایدارترین شناسه؛ تعویض نام/IP عوضش نمی‌کند)
+     *   ۲) MAC آداپتور اصلی
+     *   ۳) نام کامپیوتر
+     *   ۴) asset_tag — آخرین راه، برای رکوردهای قدیمیِ بی‌سریال.
+     */
+    $existingAsset = false;
+    $assetId = 0;
+    if (function_exists('asset_resolve_by_machine')) {
+        $resolved = asset_resolve_by_machine(
+            $inventory['hostname'] ?? null,
+            $inventory['serial_number'] ?? null,
+            $inventory['mac_address'] ?? null
+        );
+        $assetId = (int) ($resolved['id'] ?? 0);
     }
-    if ($serial !== '') {
-        $conditions[] = 'serial_number = ?';
-        $params[] = $serial;
+    if ($assetId <= 0 && $assetTag !== '') {
+        $tagQuery = db()->prepare('SELECT * FROM assets WHERE asset_tag = ? ORDER BY id ASC LIMIT 1');
+        $tagQuery->execute([$assetTag]);
+        $existingAsset = $tagQuery->fetch();
+        $assetId = (int) ($existingAsset['id'] ?? 0);
     }
-    $assetQuery = db()->prepare('SELECT * FROM assets WHERE (' . implode(' OR ', $conditions) . ') ORDER BY id ASC LIMIT 1');
-    $assetQuery->execute($params);
-    $existingAsset = $assetQuery->fetch();
-    $assetId = (int) ($existingAsset['id'] ?? 0);
-    if ($assetId <= 0) { $assetId = asset_resolve_id($inventory['hostname'] ?? null, null, $inventory['serial_number'] ?? null); }
+    if ($assetId <= 0) {
+        $assetId = asset_resolve_id($inventory['hostname'] ?? null, null, $inventory['serial_number'] ?? null);
+    }
     if ($assetId > 0 && !$existingAsset) {
-        $refetch = db()->prepare('SELECT * FROM assets WHERE id = ? LIMIT 1');
-        $refetch->execute([$assetId]);
-        $existingAsset = $refetch->fetch();
+        $refetchEarly = db()->prepare('SELECT * FROM assets WHERE id = ? LIMIT 1');
+        $refetchEarly->execute([$assetId]);
+        $existingAsset = $refetchEarly->fetch();
+        $assetId = (int) ($existingAsset['id'] ?? 0);
     }
+    unset($host, $serial, $params, $conditions);
     $receivedInventory = $inventory;
     $previousStatus = [];
     if ($existingAsset) {
@@ -699,7 +720,7 @@ function inventory_upsert_server_asset(array $inventory, int $userId): int
         db()->prepare('UPDATE assets SET hostname = ?, serial_number = ?, manufacturer = ?, model = ?, operating_system = ?, os_architecture = ?, os_serial = ?, ip_address = ?, mac_address = ?, cpu = ?, memory_mb = ?, disks_json = ?, software_json = ?, hardware_json = ?, peripherals_json = ?, domain_username = ?, antivirus = ?, source = "server_inventory", last_inventory_at = NOW() WHERE id = ?')->execute([...$values, $assetId]);
                 if (function_exists('asset_sync_identity_key')) { asset_sync_identity_key($assetId); }
     } else {
-        db()->prepare('INSERT INTO assets (asset_tag, hostname, serial_number, manufacturer, model, operating_system, os_architecture, os_serial, ip_address, mac_address, cpu, memory_mb, disks_json, software_json, hardware_json, peripherals_json, domain_username, antivirus, source, last_inventory_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, "server_inventory", NOW())')->execute([$assetTag, ...$values]);
+        db()->prepare('INSERT INTO assets (asset_tag, hostname, hostname_key, serial_number, manufacturer, model, operating_system, os_architecture, os_serial, ip_address, mac_address, cpu, memory_mb, disks_json, software_json, hardware_json, peripherals_json, domain_username, antivirus, source, last_inventory_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, "server_inventory", NOW())')->execute([$assetTag, $values[0], (function_exists('asset_identity_key') ? asset_identity_key((string) $values[0]) : ''), ...$values]);
         $assetId = (int) db()->lastInsertId();
     }
     if (function_exists('asset_sync_identity_key')) { asset_sync_identity_key($assetId); }

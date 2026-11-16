@@ -91,9 +91,28 @@ if (inventory_hardware_score($payload) === 0) {
 
 $assetTag = inventory_api_asset_tag($payload);
 $receivedPayload = $payload;
-$assetQuery = db()->prepare('SELECT * FROM assets WHERE asset_tag = ? LIMIT 1');
-$assetQuery->execute([$assetTag]);
-$existing = $assetQuery->fetch();
+/* ۱.۶۳.۱-r19 — هویت دستگاه پیش از asset_tag پرسیده می‌شود.
+ *
+ * چرا: asset_tag برای همهٔ کلاینت‌های ویندوزی یکسان است (CLIENT-<ip> یا
+ * ثابت)، پس جست‌وجو با آن می‌توانست رکورد سیستم دیگری را برگرداند و
+ * دستگاه واقعی رکورد تازه بسازد. ترتیب تازه: سریال ← MAC ← نام ← تگ.
+ */
+$existing = false;
+$resolved = 0;
+if (function_exists('asset_resolve_by_machine')) {
+    $byMachine = asset_resolve_by_machine($hostname, $payload['serial_number'] ?? null, $payload['mac_address'] ?? null);
+    $resolved = (int) ($byMachine['id'] ?? 0);
+}
+if ($resolved > 0) {
+    $refetch = db()->prepare('SELECT * FROM assets WHERE id = ? LIMIT 1');
+    $refetch->execute([$resolved]);
+    $existing = $refetch->fetch();
+}
+if (!$existing) {
+    $assetQuery = db()->prepare('SELECT * FROM assets WHERE asset_tag = ? LIMIT 1');
+    $assetQuery->execute([$assetTag]);
+    $existing = $assetQuery->fetch();
+}
 if (!$existing) {
     $resolved = asset_resolve_id($hostname, null, $payload['serial_number'] ?? null);
     if ($resolved > 0) {
@@ -176,7 +195,7 @@ try {
         db()->prepare('UPDATE assets SET hostname = ?, serial_number = ?, computer_type = ?, manufacturer = ?, model = ?, owner_user_id = COALESCE(?, owner_user_id), department_id = COALESCE(?, department_id), operating_system = ?, os_architecture = ?, os_serial = ?, ip_address = ?, mac_address = ?, cpu = ?, memory_mb = ?, disks_json = ?, software_json = ?, hardware_json = ?, peripherals_json = ?, domain_username = ?, antivirus = ?, source = "agent", last_inventory_at = NOW() WHERE id = ?')->execute([...$values, $existingId]);
         $assetId = $existingId;
     } else {
-        db()->prepare('INSERT INTO assets (asset_tag, hostname, serial_number, computer_type, manufacturer, model, owner_user_id, department_id, operating_system, os_architecture, os_serial, ip_address, mac_address, cpu, memory_mb, disks_json, software_json, hardware_json, peripherals_json, domain_username, antivirus, source, last_inventory_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, "agent", NOW())')->execute([$assetTag, ...$values]);
+        db()->prepare('INSERT INTO assets (asset_tag, hostname, hostname_key, serial_number, computer_type, manufacturer, model, owner_user_id, department_id, operating_system, os_architecture, os_serial, ip_address, mac_address, cpu, memory_mb, disks_json, software_json, hardware_json, peripherals_json, domain_username, antivirus, source, last_inventory_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, "agent", NOW())')->execute([$assetTag, $values[0], (function_exists('asset_identity_key') ? asset_identity_key((string) $values[0]) : ''), ...$values]);
         $assetId = (int) db()->lastInsertId();
     }
     if (function_exists('asset_sync_identity_key')) { asset_sync_identity_key($assetId); }

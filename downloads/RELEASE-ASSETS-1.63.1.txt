@@ -1,19 +1,19 @@
-# نسخه ۱.۶۳.۱ — چرخهٔ فیش غذا: لغو، غایب، ری‌آیشو (r13)
+# نسخه ۱.۶۳.۱ — r19: هویت دستگاه، ریست شناسنامه، ادغام تکراری‌ها
 
 ## دانلود مستقیم
 
 **بستهٔ میانی (۱.۶۳ → ۱.۶۳.۱) — این را نصب کنید:**
-https://github.com/alirezarahimy-code/ticket/raw/publish-1.63.1/downloads/ticket-update-1.63-to-1.63.1-r13-cancel-fix-20261115.zip
+https://github.com/alirezarahimy-code/ticket/raw/publish-1.63.1/downloads/ticket-update-1.63-to-1.63.1-r19-asset-identity-reset-20261116.zip
 
 **بستهٔ کامل (نصب تازه):**
 https://github.com/alirezarahimy-code/ticket/raw/publish-1.63.1/downloads/ticket-full-1.63.1-r13-20261115.zip
 
 | بسته | حجم | SHA-256 |
 |---|---|---|
-| میانی | ۴۱۲٬۷۹۴ بایت (~۴۰۳ کیلوبایت) | `7b7539474db8fbecf4af89664a858b33169f920ab1126e680b137be9a1bb1e82` |
-| کامل | ۱۱٬۷۷۸٬۲۰۰ بایت (~۱۱٫۲ مگابایت) | `aa0a167bc30648276f9ec7fce37ca7419c55f5f2eafd36c8731deb388e8deaa8` |
+| میانی r19 | 945,171 بایت (~۸۹۰ کیلوبایت) | `8575a45fa4668033ce99ffb14930afdfa7c45edca86f617b004202ef53b7b9dc` |
+| کامل (r13، برای نصب تازه) | ۱۱٬۷۷۸٬۲۰۰ بایت (~۱۱٫۲ مگابایت) | `aa0a167bc30648276f9ec7fce37ca7419c55f5f2eafd36c8731deb388e8deaa8` |
 
-۳۲ فایل، بدون مهاجرت.
+۸۳ فایل، بدون مهاجرت. اگر ۱.۶۳ را نصب کرده‌اید، فقط بستهٔ میانی را لازم دارید.
 
 ---
 

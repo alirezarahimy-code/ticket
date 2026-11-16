@@ -2130,6 +2130,33 @@ if ($page === 'settings') {
     echo '<div class="card form-card settings-panel-full" id="ldap-role-map"><h2>نقش‌دهی گروه‌های AD</h2><p class="muted">هر خط یک JSON معتبر برای نقش باشد؛ مثال: {"agent":["CN=IT-Helpdesk,OU=Groups,DC=example,DC=local"]}. کاربران جدید دامینی بر اساس عضویت گروه نقش می‌گیرند و نقش کاربران فعلی دستی حفظ می‌شود.</p><form method="post">' . csrf_field() . '<input type="hidden" name="action" value="save_settings"><input type="hidden" name="settings_section" value="ldap"><input type="hidden" name="app_name" value="' . e($appName) . '"><label>تنظیم JSON نگاشت گروه به نقش<textarea name="ldap_group_map" rows="2" class="compact-textarea" placeholder="{&quot;agent&quot;:[&quot;CN=IT-Helpdesk,...&quot;]}">' . e(setting('ldap_group_map', '{}')) . '</textarea></label><button class="button secondary" type="submit">ذخیره نگاشت گروه‌ها</button></form></div>';
     echo '</div>';
     }
+    // ۱.۶۳.۱-r19 — کارت «ریست شناسنامه‌ها» (درخواست کاربر).
+    //
+    // فقط مدیر اصلی می‌بیند. کلمهٔ تأیید «ریست» باید عیناً تایپ شود تا یک
+    // کلیک اشتباهی کل شناسنامه‌ها را پاک نکند. متن صریح می‌گوید چه چیزی پاک
+    // می‌شود و چه چیزی می‌ماند، و مسیر بازگردانی را هم نشان می‌دهد.
+    if (user_is_primary_admin($user)) {
+        $assetCountNow = 0;
+        try { $assetCountNow = (int) db()->query('SELECT COUNT(*) FROM assets')->fetchColumn(); } catch (Throwable $ignored) {}
+        $resetBackups = @glob(APP_ROOT . '/storage/asset-reset/*.json') ?: [];
+        usort($resetBackups, static fn(string $a, string $b): int => filemtime($b) <=> filemtime($a));
+        echo '<div class="card form-card asset-reset-card" id="asset-reset"><h2>ریست شناسنامه‌ها</h2>';
+        echo '<p class="muted">این ابزار برای شرایط اضطراری است: همهٔ شناسنامه‌ها را پاک می‌کند تا ثبت از نو شروع شود. مثلاً وقتی شمارِ شناسنامه با تعداد واقعی سیستم‌های شبکه نمی‌خواند.</p>';
+        echo '<p>شناسنامه‌های فعلی: <strong>' . (int) $assetCountNow . '</strong> رکورد</p>';
+        echo '<div class="alert warning" style="margin:12px 0"><strong>چه چیزی پاک می‌شود:</strong> شناسنامه‌ها، پروفایل‌ها، تاریخچهٔ استخراج، ماژول‌های حافظه، دیسک‌ها، کارت گرافیک، لوازم جانبی و نرم‌افزارهای ثبت‌شده.<br><strong>چه چیزی می‌ماند:</strong> کاربران، درخواست‌ها، گروه‌های غذایی، تنظیمات سامانه و بکاپ‌ها.</div>';
+        echo '<div class="alert info" style="margin:12px 0">پیش از حذف، یک بکاپ کامل JSON در <code dir="ltr">storage/asset-reset/</code> ساخته می‌شود. اگر بکاپ نوشته نشود، هیچ رکوردی حذف نمی‌شود.</div>';
+        if ($resetBackups) {
+            echo '<p class="muted">آخرین بکاپ‌ها:</p><ul class="compact-list">';
+            foreach (array_slice($resetBackups, 0, 3) as $bk) {
+                echo '<li><code dir="ltr">' . e(basename($bk)) . '</code> — ' . number_format((int) filesize($bk) / 1024, 1) . ' کیلوبایت</li>';
+            }
+            echo '</ul><p class="muted">بازگردانی از خط فرمان: <code dir="ltr">php tools/asset_reset_restore.php &lt;نام-فایل&gt; --apply</code></p>';
+        }
+        echo '<form method="post" onsubmit="return confirm(\'همهٔ شناسنامه‌ها پاک می‌شوند. بکاپ گرفته می‌شود ولی این کار برگشت‌ناپذیر است. مطمئنید؟\');">' . csrf_field();
+        echo '<input type="hidden" name="action" value="reset_assets">';
+        echo '<label>برای تأیید، عبارت <b>ریست</b> را بنویسید<input name="reset_confirm" required autocomplete="off" placeholder="ریست" dir="auto"></label>';
+        echo '<button class="button danger" type="submit">پاک‌کردن همهٔ شناسنامه‌ها</button></form></div>';
+    }
 
     if ($canSettingsUsers) {
     echo '<div class="card form-card settings-panel" id="users"' . ($canSettingsUsersEdit ? '' : ' inert') . '><h2>کاربران</h2>' . (user_is_primary_admin($user) ? '<p><a class="button secondary" href="index.php?page=local-accounts">کاربران محلی (پرسنل غذا) و انتخاب بازرسی</a></p>' : '') . '<p class="muted">شرکت هر کاربر از جایگاه فعال او در درخت سازمانی به دست می‌آید؛ تا پیش از معرفی در یکی از درخت‌ها، وضعیت او «بدون شرکت» است. این تفکیک فقط برای نمایش فهرست کارکنان است و نقش‌ها را تغییر نمی‌دهد.</p>';

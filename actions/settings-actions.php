@@ -299,3 +299,71 @@ if (!defined('APP_ROOT')) {
             flash('success', 'تنظیمات سامانه ذخیره شد.');
             redirect('index.php?page=settings');
         }
+
+        // ─────────────────────────────────────────────────────────────────────
+        // ۱.۶۳.۱-r19 — «ریست شناسنامه‌ها»
+        //
+        // درخواست کاربر: دکمه‌ای برای شرایط اضطراری که همهٔ شناسنامه‌ها را
+        // صفر کند تا ثبت از نو شروع شود.
+        //
+        // چهار محافظ، به ترتیب:
+        //   ۱) فقط مدیر اصلی (require_primary_admin)
+        //   ۲) کلمهٔ تأیید باید دقیقاً تایپ شود (پیش‌فرض: ریست)
+        //   ۳) بکاپ کامل قبل از حذف گرفته می‌شود؛ اگر بکاپ شکست بخورد، حذفی
+        //      انجام نمی‌شود (ابزار asset_reset.php همین را تضمین می‌کند)
+        //   ۴) همه‌چیز در یک تراکنش؛ خطا ⇒ برگشت کامل
+        //
+        // عمداً از CLI ابزار را صدا نمی‌زنیم؛ همان منطق را اینجا اجرا می‌کنیم تا
+        // روی ویندوز/XAMPP به مسیر php.exe وابسته نباشد.
+        // ─────────────────────────────────────────────────────────────────────
+        if ($action === 'reset_assets') {
+            $resetAdmin = require_primary_admin();
+            if (post_value('reset_confirm') !== 'ریست') {
+                throw new RuntimeException('برای ریست، عبارت «ریست» را دقیقاً در کادر تأیید بنویسید.');
+            }
+            $pdo = db();
+            $totalBefore = (int) $pdo->query('SELECT COUNT(*) FROM assets')->fetchColumn();
+            if ($totalBefore === 0) {
+                flash('success', 'شناسنامه‌ها از قبل خالی بودند؛ چیزی برای ریست نبود.');
+                redirect('index.php?page=settings#asset-reset');
+            }
+            // بکاپ در همان پوشهٔ ابزار CLI
+            $backupDir = APP_ROOT . '/storage/asset-reset';
+            if (!is_dir($backupDir) && !@mkdir($backupDir, 0750, true) && !is_dir($backupDir)) {
+                throw new RuntimeException('ساخت پوشهٔ بکاپ ممکن نشد: storage/asset-reset. دسترسی نوشتن را بررسی کنید.');
+            }
+            $backupFile = $backupDir . '/assets-panel-' . date('Ymd-His') . '.json';
+            $rows = $pdo->query('SELECT * FROM assets ORDER BY id')->fetchAll(PDO::FETCH_ASSOC);
+            $json = json_encode(
+                ['created_at' => date('c'), 'source' => 'panel-reset', 'admin_id' => (int) $resetAdmin['id'], 'count' => count($rows), 'rows' => $rows],
+                JSON_UNESCAPED_UNICODE | JSON_INVALID_UTF8_SUBSTITUTE
+            );
+            if ($json === false || @file_put_contents($backupFile, $json) === false) {
+                throw new RuntimeException('نوشتن بکاپ ناموفق بود؛ هیچ رکوردی حذف نشد. مسیر: ' . $backupFile);
+            }
+            $deleted = 0;
+            $pdo->beginTransaction();
+            try {
+                // جداول فرزند بدون CASCADE
+                foreach ([
+                    'asset_inventory_history', 'asset_memory_modules', 'asset_storage_devices',
+                    'asset_graphics_adapters', 'asset_graphics_cards', 'asset_peripherals',
+                    'asset_history_events', 'asset_history', 'asset_events', 'asset_software',
+                    'asset_relations', 'asset_profiles',
+                ] as $childTable) {
+                    try { $pdo->exec('DELETE FROM `' . $childTable . '`'); } catch (Throwable $ignored) { /* جدول در این نسخه نیست */ }
+                }
+                $deleted = (int) $pdo->exec('DELETE FROM assets');
+                $pdo->commit();
+            } catch (Throwable $resetError) {
+                if ($pdo->inTransaction()) { $pdo->rollBack(); }
+                throw new RuntimeException('ریست ناموفق بود و همه‌چیز برگشت. بکاپ سالم است: ' . basename($backupFile) . ' — ' . $resetError->getMessage());
+            }
+            save_audit_required((int) $resetAdmin['id'], 'assets_reset', null, [
+                'deleted' => $deleted,
+                'backup' => basename($backupFile),
+            ]);
+            flash('success', sprintf('ریست انجام شد: %d شناسنامه حذف شد. بکاپ کامل: %s', $deleted, basename($backupFile)));
+            redirect('index.php?page=settings#asset-reset');
+        }
+
