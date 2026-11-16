@@ -1,6 +1,6 @@
 # نگهبان سامانهٔ لاگ‌گیری مرکزی.
-# این گردش‌کار سبک است و فقط قرارداد ایستای لاگ را بررسی می‌کند تا هیچ
-# به‌روزرسانی‌ای فایل‌ها، مهاجرت‌ها یا قابلیت‌های لاگ را حذف نکند.
+# قرارداد Logging روی همهٔ شاخه‌ها اجرا می‌شود؛ اعتبارسنجی بستهٔ کلاسیک
+# ۱٫۶۲٫۸۸ فقط روی همان نسخه انجام می‌شود، چون سازندهٔ آن VERSION را قفل می‌کند.
 name: Logging contract
 
 on:
@@ -26,10 +26,17 @@ jobs:
         run: python -m pip install --quiet pytest
       - name: Verify the central logging contract
         run: python -m pytest -q tests/test_logging_system_contract.py
-      # Rebuild the release archive from this checkout before comparing repository bytes.
+      - name: Verify Request Center routing and release asset contracts
+        run: python -m pytest -q tests/test_ticket_cancellation_static.py tests/test_release_asset_manifest.py
+      - name: Read application version
+        id: app-version
+        shell: bash
+        run: echo "value=$(tr -d '\r\n' < VERSION)" >> "$GITHUB_OUTPUT"
+      # This builder and its byte-for-byte guard belong only to the 1.62.88 release.
+      # Newer release trains validate their own pinned packages in their package-preview workflow.
       - name: Rebuild 1.62.88 package before source-of-truth guard
+        if: steps.app-version.outputs.value == '1.62.88'
         run: python tools/build_update_1_62_88.py
-      # Keeps the repository and the shipped update package byte-identical.
-      # Nothing else in CI runs this guard, so a package could silently drift.
       - name: Verify the repository matches the shipped package
+        if: steps.app-version.outputs.value == '1.62.88'
         run: python -m pytest -q tests/test_version_source_of_truth_static.py
