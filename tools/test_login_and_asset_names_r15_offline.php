@@ -271,6 +271,24 @@ $progPos = strpos($bat, 'C:\\Program Files\\PHP\\php.exe');
 check('۳۳: batch اول xampp را می‌گردد', $batPos !== false && $progPos !== false && $batPos < $progPos);
 check('۳۴: batch درایو D را هم می‌گردد', str_contains($bat, 'D:\\xampp\\php\\php.exe'));
 
+echo "\n═══ ۳.۹) اجرای مستقل و دریافت فایل (r17-د) ═══\n";
+// کاربر «diag_extract.php ندارم» گفت. فایل فقط داخل بستهٔ به‌روزرسانی است.
+// اما بدتر: ابزار bootstrap را اجباری require می‌کرد و وقتی MySQL خاموش
+// بود می‌مرد — یعنی دقیقاً وقتی که به تشخیص نیاز است.
+check('۳۵: bootstrap اجباری نیست', str_contains($diagSrc, '$bootOk = false;'));
+check('۳۶: خطای bootstrap گرفته می‌شود', str_contains($diagSrc, "catch (Throwable \$e)"));
+check('۳۷: setting() جانشین امن دارد', str_contains($diagSrc, "if (!function_exists('setting'))"));
+check('۳۸: وضعیت bootstrap صریح گزارش می‌شود', str_contains($diagSrc, 'bootstrap خوانده شد'));
+// هیچ وابستگی دیگری نباید باشد: یک فایل، اجرا در هر جایی
+preg_match_all('/^\s*require(?:_once)?\s+\$/m', $diagSrc, $m);
+check('۳۹: تنها یک require دارد (bootstrap)', count($m[0]) === 1);
+$getBat = (string) @file_get_contents($root . '/tools/GET-DIAG-EXTRACT.bat');
+check('۴۰: دریافت‌کنندهٔ batch منتشر شده است', $getBat !== '');
+check('۴۱: لینک دانلود مستقیم را چاپ می‌کند', str_contains($getBat, '/raw/publish-1.63.1/tools/diag_extract.php'));
+check('۴۲: ساختار بستهٔ به‌روزرسانی را می‌شناسد', str_contains($getBat, 'files\tools\diag_extract.php'));
+check('۴۳: اگر فایل از قبل هست، بازنویسی نمی‌کند', str_contains($getBat, 'به‌روزرسانی نمی‌شود'));
+check('۴۴: پوشهٔ درست را بررسی می‌کند (index.php)', str_contains($getBat, 'index.php'));
+
 echo "\n═══ ۴) ابزار تشخیص ═══\n";
 $diag = (string) file_get_contents($root . '/tools/diagnose_login_and_assets.php');
 check('ابزار تشخیص وجود دارد', $diag !== '');

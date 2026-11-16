@@ -155,6 +155,7 @@ FILES = [
     "docs/DIAG-EXTRACT-COMMANDS-FA.md",
     # اجراکنندهٔ .bat: php.exe را خودش پیدا می‌کند (روی IIS در PATH نیست).
     "tools/RUN-DIAG-EXTRACT.bat",
+    "tools/GET-DIAG-EXTRACT.bat",
 ]
 
 # استثنای مستند: اسکریپت‌هایی که در ۱.۶۳ نبودند ولی این بسته **می‌سازد**.
@@ -221,6 +222,7 @@ ALLOWED_NEW_FILES = {
     # همین بسته حمل می‌کند.
     "docs/DIAG-EXTRACT-COMMANDS-FA.md",
     "tools/RUN-DIAG-EXTRACT.bat",
+    "tools/GET-DIAG-EXTRACT.bat",
 }
 
 # این‌ها فقط برای آزمون‌اند و مسیر runtime ندارند؛ در بسته نمی‌آیند اما
