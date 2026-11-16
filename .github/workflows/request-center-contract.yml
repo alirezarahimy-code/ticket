@@ -7,10 +7,13 @@ on:
       - 'request-center.php'
       - 'modules/request-center/**'
       - 'migrations/035-request-center-appointments.sql'
+      - 'migrations/037-food-auto-receipts-delivered.sql'
       - 'tests/test_request_center_phase3_lifecycle_static.py'
       - 'tests/test_request_center_phase3_workspaces_static.py'
       - 'tests/test_request_center_workflow_service_sqlite.php'
       - 'tests/test_request_center_migration_037_mariadb.php'
+      - 'tests/test_request_center_migration_035_mariadb.php'
+      - 'tests/test_food_auto_receipts_migration.php'
       - 'tests/test_request_center_schema_preflight_mariadb.php'
       - 'tests/test_request_center_first_slice_static.py'
       - 'tests/test_request_center_access_matrix_static.py'
@@ -116,7 +119,8 @@ jobs:
           php -l modules/request-center/Actions/service-actions.php
           php -l modules/request-center/Actions/admin-actions.php
           php -l tests/test_request_center_workflow_service_sqlite.php
-          php -l tests/test_request_center_migration_037_mariadb.php
+          php -l tests/test_request_center_migration_035_mariadb.php
+          php -l tests/test_food_auto_receipts_migration.php
           php -l tests/test_request_center_schema_preflight_mariadb.php
           php -l modules/request-center/AppointmentRepository.php
           php -l modules/request-center/Actions/appointment-actions.php
@@ -185,7 +189,15 @@ jobs:
           mariadb --skip-ssl -h 127.0.0.1 -uroot -pci-ephemeral-root-password rc_migration_upgrade_ci < migrations/035-request-center-appointments.sql
           mariadb --skip-ssl -h 127.0.0.1 -uroot -pci-ephemeral-root-password rc_migration_upgrade_ci < migrations/035-request-center-appointments.sql
       - name: Verify migration 035 (merged) upgrade path
-        run: php tests/test_request_center_migration_037_mariadb.php
+        run: php tests/test_request_center_migration_035_mariadb.php
+        env:
+          CI_DB_HOST: 127.0.0.1
+          CI_DB_PORT: '3306'
+          CI_DB_NAME: rc_migration_upgrade_ci
+          CI_DB_USER: root
+          CI_DB_PASS: ci-ephemeral-root-password
+      - name: Verify food auto-receipts migration 037 scope and idempotency
+        run: php tests/test_food_auto_receipts_migration.php
         env:
           CI_DB_HOST: 127.0.0.1
           CI_DB_PORT: '3306'
