@@ -322,9 +322,9 @@
         "DB-007.269"
       ],
       "related": [
-        "TEST-198.36",
         "TEST-191.08",
         "TEST-119.08",
+        "TEST-198.35",
         "TOOL-012.02",
         "CRON-001.09",
         "PAGE-033.30",
@@ -985,14 +985,14 @@
         "PAGE-033.73",
         "TEST-191.08",
         "PAGE-054.03",
-        "TEST-198.35",
         "TOOL-012.02",
         "PAGE-075.26",
         "TEST-199.07",
         "PAGE-047.02",
-        "ACT-012.03"
+        "ACT-012.03",
+        "ACT-017.07"
       ],
-      "total": 107
+      "total": 106
     },
     {
       "id": "page:traffic-control-print",
@@ -3157,7 +3157,7 @@
         "TEST-119.06",
         "PAGE-033.30"
       ],
-      "total": 70
+      "total": 71
     },
     {
       "id": "table:api_rate_limits",
@@ -4493,9 +4493,9 @@
         "DB-007.265"
       ],
       "related": [
-        "TEST-198.36",
         "TEST-191.08",
         "TEST-119.08",
+        "TEST-198.35",
         "TOOL-012.02",
         "CRON-001.09",
         "PAGE-033.30"
@@ -5005,12 +5005,12 @@
       "related": [
         "TEST-198.36",
         "TEST-191.08",
-        "TEST-198.35",
         "PAGE-063.03",
         "CRON-013.01",
-        "TOOL-101.06"
+        "TOOL-101.06",
+        "PAGE-051.03"
       ],
-      "total": 22
+      "total": 21
     },
     {
       "id": "table:ticket_sla_alerts",

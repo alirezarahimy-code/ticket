@@ -250,6 +250,18 @@ function t12s_compare(array $a, array $b, string $scenario = ''): array
 {
     $diffs = [];
     $tolerated = [];
+    $featureTicket = $b['tickets'][0] ?? [];
+    $legacyTicket = $a['tickets'][0] ?? [];
+    $featureDeniedCrossGroupWrite = $scenario === '07b-priority-by-manager'
+        && ($featureTicket['service_group'] ?? '') === 'it'
+        && ($featureTicket['status'] ?? '') === 'in_progress'
+        && (int) ($featureTicket['assigned_to'] ?? 0) === 106
+        && ($featureTicket['priority'] ?? '') === 'normal';
+    $legacyAcceptedCrossGroupPriority = $featureDeniedCrossGroupWrite
+        && ($legacyTicket['priority'] ?? '') === 'urgent';
+    if ($legacyAcceptedCrossGroupPriority) {
+        $tolerated[] = '07b: feature denied the out-of-group priority write; the pinned legacy baseline accepted it';
+    }
     // tickets: same count, per row strict minus tol keys
     if (count($a['tickets']) !== count($b['tickets'])) {
         $diffs[] = 'tickets count differs: legacy=' . count($a['tickets']) . ' feature=' . count($b['tickets']);
@@ -257,10 +269,19 @@ function t12s_compare(array $a, array $b, string $scenario = ''): array
         foreach ($a['tickets'] as $i => $ta) {
             $tb = $b['tickets'][$i];
             foreach (['ticket_no', 'status', 'requester_id', 'assigned_to', 'priority', 'department_id', 'service_group', 'category_id', 'service_id', 'sla_minutes', 'sla_pause_minutes', 'ola_policy_id', 'cancel_requested_by'] as $k) {
-                if (($ta[$k] ?? null) !== ($tb[$k] ?? null)) { $diffs[] = "ticket[{$i}].{$k}: legacy=" . json_encode($ta[$k]) . ' feature=' . json_encode($tb[$k]); }
+                if (($ta[$k] ?? null) === ($tb[$k] ?? null)) {
+                    continue;
+                }
+                if ($legacyAcceptedCrossGroupPriority && in_array($k, ['priority', 'sla_minutes', 'ola_policy_id'], true)) {
+                    continue;
+                }
+                $diffs[] = "ticket[{$i}].{$k}: legacy=" . json_encode($ta[$k]) . ' feature=' . json_encode($tb[$k]);
             }
             foreach ($ta['ts'] as $j => $va) {
                 $vb = $tb['ts'][$j];
+                if ($legacyAcceptedCrossGroupPriority && in_array($j, [1, 6, 8, 9, 10, 11], true)) {
+                    continue;
+                }
                 $an = $va === null || $va === ''; $bn = $vb === null || $vb === '';
                 if ($an !== $bn) {
                     // RC starts first-response SLA on the first public status note;
@@ -279,7 +300,23 @@ function t12s_compare(array $a, array $b, string $scenario = ''): array
     foreach (['messages' => ['user_id', 'is_internal', 'body'], 'events' => ['event_type', 'from_status', 'to_status'],
               'notifications' => ['user_id', 'notification_type'], 'ratings' => ['requester_id', 'agent_id', 'score'],
               'activity_logs' => ['action_code']] as $key => $cols) {
+        $legacyRows = $a[$key];
         $featureRows = $b[$key];
+        if ($legacyAcceptedCrossGroupPriority && $key === 'events') {
+            $legacyRows = array_values(array_filter($legacyRows, static fn (array $row): bool => ($row['event_type'] ?? '') !== 'priority_changed'));
+            $removedPriorityEvents = count($a[$key]) - count($legacyRows);
+            if ($removedPriorityEvents > 1) {
+                $diffs[] = '07b: legacy emitted more than one priority_changed event for the single denied cross-group write';
+            } elseif ($removedPriorityEvents === 1) {
+                $tolerated[] = '07b: no priority-change event was emitted after the feature denied the cross-group write';
+            }
+        }
+        if ($legacyAcceptedCrossGroupPriority && $key === 'notifications') {
+            $legacyRows = array_values(array_filter($legacyRows, static fn (array $row): bool => ($row['notification_type'] ?? '') !== 'ticket_updated'));
+            if (count($legacyRows) < count($a[$key])) {
+                $tolerated[] = '07b: legacy ticket-update notification was not sent by the feature after denying the cross-group write';
+            }
+        }
         if ($key === 'activity_logs') {
             // Phase 3 adds a durable system-actor audit row for automatic closure;
             // the legacy implementation emitted the ticket event but no audit row.
@@ -291,8 +328,8 @@ function t12s_compare(array $a, array $b, string $scenario = ''): array
                 return true;
             }));
         }
-        if (count($a[$key]) !== count($featureRows)) { $diffs[] = "{$key} count differs: legacy=" . count($a[$key]) . ' feature=' . count($featureRows); continue; }
-        foreach ($a[$key] as $i => $ra) {
+        if (count($legacyRows) !== count($featureRows)) { $diffs[] = "{$key} count differs: legacy=" . count($legacyRows) . ' feature=' . count($featureRows); continue; }
+        foreach ($legacyRows as $i => $ra) {
             $rb = $featureRows[$i];
             foreach ($cols as $c) {
                 $legacyValue = (string) ($ra[$c] ?? '');
@@ -308,6 +345,15 @@ function t12s_compare(array $a, array $b, string $scenario = ''): array
                     && in_array($c, ['from_status', 'to_status'], true)
                     && $legacyValue === '' && $featureValue !== '') {
                     $tolerated[] = "{$key}[{$i}].{$c}: additive locked-state context for " . (string) $ra['event_type'];
+                    continue;
+                }
+
+                // A successful priority update is expected on the pinned legacy
+                // baseline, but the feature correctly denies this cross-group write.
+                if ($key === 'activity_logs' && $c === 'action_code'
+                    && $legacyAcceptedCrossGroupPriority
+                    && $legacyValue === 'ticket_updated' && $featureValue === 'post_action_failed') {
+                    $tolerated[] = '07b: legacy success audit is replaced by the feature denial audit';
                     continue;
                 }
 
@@ -439,14 +485,32 @@ function t12s_finish(string $name, callable $body, array &$apps, string $rootUse
         if (($featureTicket['service_group'] ?? '') !== 'it'
             || ($featureTicket['status'] ?? '') !== 'in_progress'
             || (int) ($featureTicket['assigned_to'] ?? 0) !== 106
-            || ($featureTicket['priority'] ?? '') !== 'normal') {
+            || ($featureTicket['priority'] ?? '') !== 'normal'
+            || (int) ($featureTicket['department_id'] ?? 0) !== 2
+            || (int) ($featureTicket['category_id'] ?? 0) !== 2
+            || (int) ($featureTicket['service_id'] ?? 0) !== 2) {
             $diffs[] = '07b: cross-group support-manager edit changed an IT ticket that must remain untouched';
         } else {
             $tolerated[] = '07b: out-of-group support manager could not change the IT ticket; status, assignee and priority remained unchanged';
         }
-        $featureActions = array_column($pair['snapshots']['feature']['activity_logs'], 'action_code');
+        $feature = $pair['snapshots']['feature'];
+        $featureActions = array_column($feature['activity_logs'], 'action_code');
         if (!in_array('post_action_failed', $featureActions, true)) {
             $diffs[] = '07b: denied cross-group write did not leave a failure audit record';
+        }
+        if (in_array('ticket_updated', $featureActions, true)) {
+            $diffs[] = '07b: denied cross-group write also left a success audit record';
+        }
+        $featureEvents = array_column($feature['events'], 'event_type');
+        if (in_array('priority_changed', $featureEvents, true)) {
+            $diffs[] = '07b: denied cross-group write emitted a priority_changed ticket event';
+        }
+        $featureNotifications = array_column($feature['notifications'], 'notification_type');
+        if (in_array('ticket_updated', $featureNotifications, true)) {
+            $diffs[] = '07b: denied cross-group write emitted a ticket-updated notification';
+        }
+        if (count($feature['messages']) !== 1) {
+            $diffs[] = '07b: denied cross-group write changed the single seeded ticket message';
         }
     }
     $evidence = [

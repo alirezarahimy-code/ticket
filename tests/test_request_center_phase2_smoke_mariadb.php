@@ -307,9 +307,10 @@ try {
     $download = smoke_http('http://' . $address . '/request-center.php?action=download_attachment&id=99999', ['Cookie: ' . $cookie]);
     smoke_check($download['status'] === 404, 'independent download_attachment with unknown id returns HTTP 404 (status ' . $download['status'] . ')');
 
-    // 5) Phase 3 — POST through the INDEPENDENT entry: no CSRF must yield 419 (legacy contract).
-    $noCsrf = smoke_http_post('http://' . $address . '/request-center.php', ['action' => 'create_ticket', 'subject' => 'should-be-rejected'], ['Cookie: ' . $cookie]);
-    smoke_check($noCsrf['status'] === 419, 'independent POST without CSRF is rejected with HTTP 419 (status ' . $noCsrf['status'] . ')');
+    // 5) Phase 3 — JSON/API callers get an explicit 419; browser form posts use the
+    // safe flash-and-redirect recovery path in require_csrf().
+    $noCsrf = smoke_http_post('http://' . $address . '/request-center.php', ['action' => 'create_ticket', 'subject' => 'should-be-rejected'], ['Cookie: ' . $cookie, 'Accept: application/json']);
+    smoke_check($noCsrf['status'] === 419, 'independent JSON POST without CSRF is rejected with HTTP 419 (status ' . $noCsrf['status'] . ')');
 
     // 6) Phase 3 — obtain the token from the actual independent creation form,
     // then exercise the complete create_ticket round trip through that entry.

@@ -57,7 +57,7 @@
 | **مدیریت بات** | `chatbot-admin` | `chatbot.manage` | `PAGE-033.64` <sub>index.php:1315</sub><br>`CORE-022.05` <sub>lib/settings-effects.php:57</sub> | 8 |
 | **مدیریت سازمان** | `organization` | `org.view` | `PAGE-074.39` <sub>organization.php:486</sub><br>`PAGE-033.72` <sub>index.php:1766</sub><br>`PAGE-033.27` <sub>index.php:467</sub><br>`PAGE-074.02` <sub>organization.php:4</sub> | 194 |
 | **پروفایل کاربری** | `profile` | `profile.edit` | `PAGE-033.43` <sub>index.php:897</sub><br>`PAGE-004.16` <sub>asset-profile.php:509</sub><br>`CORE-022.05` <sub>lib/settings-effects.php:57</sub> | 13 |
-| **پنل سوپروایزر** | `supervisor` | `supervisor.panel` | `PAGE-063.03` <sub>modules/request-center/Pages/supervisor.php:16</sub><br>`PAGE-045.03` <sub>modules/request-center/Actions/supervisor-actions.php:26</sub><br>`PAGE-077.15` <sub>request-center.php:188</sub><br>`PAGE-063.01` <sub>modules/request-center/Pages/supervisor.php:1</sub> | 107 |
+| **پنل سوپروایزر** | `supervisor` | `supervisor.panel` | `PAGE-063.03` <sub>modules/request-center/Pages/supervisor.php:16</sub><br>`PAGE-045.03` <sub>modules/request-center/Actions/supervisor-actions.php:26</sub><br>`PAGE-077.15` <sub>request-center.php:188</sub><br>`PAGE-063.01` <sub>modules/request-center/Pages/supervisor.php:1</sub> | 106 |
 | **چاپ کنترل تردد** | `traffic-control-print` | `traffic.view` | `PAGE-033.51` <sub>index.php:947</sub> | 7 |
 | **کاتالوگ خدمات** | `services` | `services.view` | `PAGE-061.03` <sub>modules/request-center/Pages/services.php:12</sub><br>`PAGE-077.16` <sub>request-center.php:192</sub><br>`PAGE-061.06` <sub>modules/request-center/Pages/services.php:147</sub><br>`PAGE-061.07` <sub>modules/request-center/Pages/services.php:171</sub> | 26 |
 | **کنترل CD/DVD** | `cd-dvd` | `cddvd.view` | `PAGE-033.48` <sub>index.php:936</sub><br>`PAGE-007.33` <sub>cd-dvd.php:406</sub><br>`PAGE-007.19` <sub>cd-dvd.php:153</sub><br>`PAGE-007.39` <sub>cd-dvd.php:555</sub> | 72 |
@@ -184,7 +184,7 @@
 
 | جدول | آدرس‌های اصلی | کل |
 |---|---|---|
-| `activity_logs` | `DB-004.28` <sub>install-empty-db.sql:397</sub><br>`DB-007.19` <sub>migrations/003-sync-schema-151.sql:298</sub><br>`DB-044.25` <sub>schema.sql:376</sub> | 70 |
+| `activity_logs` | `DB-004.28` <sub>install-empty-db.sql:397</sub><br>`DB-007.19` <sub>migrations/003-sync-schema-151.sql:298</sub><br>`DB-044.25` <sub>schema.sql:376</sub> | 71 |
 | `api_rate_limits` | `DB-004.67` <sub>install-empty-db.sql:1140</sub><br>`DB-007.58` <sub>migrations/003-sync-schema-151.sql:949</sub><br>`DB-044.67` <sub>schema.sql:1153</sub> | 8 |
 | `asset_dedupe_backup_016` | `DB-020.20` <sub>migrations/016-auto-asset-finish.sql:53</sub><br>`DB-020.22` <sub>migrations/016-auto-asset-finish.sql:57</sub><br>`DB-020.19` <sub>migrations/016-auto-asset-finish.sql:52</sub> | 4 |
 | `asset_graphics_adapters` | `DB-004.40` <sub>install-empty-db.sql:616</sub><br>`DB-007.30` <sub>migrations/003-sync-schema-151.sql:475</sub><br>`DB-044.37` <sub>schema.sql:595</sub> | 16 |
@@ -258,7 +258,7 @@
 | `ticket_messages` | `DB-004.25` <sub>install-empty-db.sql:360</sub><br>`DB-007.16` <sub>migrations/003-sync-schema-151.sql:264</sub><br>`DB-044.22` <sub>schema.sql:339</sub> | 28 |
 | `ticket_number_seq` | `DB-004.66` <sub>install-empty-db.sql:1134</sub><br>`DB-007.57` <sub>migrations/003-sync-schema-151.sql:945</sub><br>`DB-040.03` <sub>migrations/035-request-center-appointments.sql:36</sub> | 26 |
 | `ticket_ola_alerts` | `DB-004.47` <sub>install-empty-db.sql:789</sub><br>`DB-007.37` <sub>migrations/003-sync-schema-151.sql:641</sub><br>`DB-044.44` <sub>schema.sql:768</sub> | 14 |
-| `ticket_ratings` | `DB-004.26` <sub>install-empty-db.sql:372</sub><br>`DB-007.17` <sub>migrations/003-sync-schema-151.sql:275</sub><br>`DB-044.23` <sub>schema.sql:351</sub> | 22 |
+| `ticket_ratings` | `DB-004.26` <sub>install-empty-db.sql:372</sub><br>`DB-007.17` <sub>migrations/003-sync-schema-151.sql:275</sub><br>`DB-044.23` <sub>schema.sql:351</sub> | 21 |
 | `ticket_sla_alerts` | `DB-004.32` <sub>install-empty-db.sql:469</sub><br>`DB-007.23` <sub>migrations/003-sync-schema-151.sql:350</sub><br>`DB-044.29` <sub>schema.sql:448</sub> | 15 |
 | `tickets` | `DB-004.24` <sub>install-empty-db.sql:292</sub><br>`DB-007.15` <sub>migrations/003-sync-schema-151.sql:198</sub><br>`DB-044.21` <sub>schema.sql:271</sub> | 216 |
 | `tmp_asset_dedupe_map` | `DB-020.17` <sub>migrations/016-auto-asset-finish.sql:39</sub><br>`DB-020.18` <sub>migrations/016-auto-asset-finish.sql:45</sub><br>`DB-020.16` <sub>migrations/016-auto-asset-finish.sql:38</sub> | 8 |

@@ -37,7 +37,7 @@ path	category	lines	bytes
 .github/workflows/request-center-contract.yml	workflows	336	16758
 .github/workflows/request-center-package-preview.yml	workflows	226	10325
 .github/workflows/request-center-t12-characterization.yml	workflows	93	2897
-.github/workflows/request-center-t12-scenarios.yml	workflows	126	4218
+.github/workflows/request-center-t12-scenarios.yml	workflows	128	4422
 .gitignore	config	31	519
 .htaccess	config	24	788
 00-FULL-PACKAGE-1.62.73-FA.md	root-misc	27	3236
@@ -1309,7 +1309,7 @@ tests/test_logging_spool_capacity.php	tests	28	1787
 tests/test_logging_spool_concurrency.php	tests	47	1910
 tests/test_logging_system_contract.py	tests	283	14885
 tests/test_logging_ticket_event_replay.php	tests	71	3670
-tests/test_logging_trace_coverage.php	tests	49	3359
+tests/test_logging_trace_coverage.php	tests	49	3405
 tests/test_manual_no_print_food_ticket_static.py	tests	130	8517
 tests/test_mariadb_fresh_install.php	tests	133	6381
 tests/test_migration_registry_seed.py	tests	54	2298
@@ -1369,14 +1369,14 @@ tests/test_request_center_jalali_parity.mjs	tests	87	3728
 tests/test_request_center_mariadb_ddl_gates.php	tests	107	4352
 tests/test_request_center_metadata_lock_mariadb.php	tests	82	3468
 tests/test_request_center_migration_037_mariadb.php	tests	75	3503
-tests/test_request_center_phase2_smoke_mariadb.php	tests	938	65847
+tests/test_request_center_phase2_smoke_mariadb.php	tests	939	65931
 tests/test_request_center_phase3_lifecycle_static.py	tests	618	34735
 tests/test_request_center_phase3_workspaces_static.py	tests	66	3519
 tests/test_request_center_repository_sqlite.php	tests	117	7045
 tests/test_request_center_schema_preflight_mariadb.php	tests	196	9296
 tests/test_request_center_t07_migration_clone.php	tests	467	19639
 tests/test_request_center_t12_preflight.php	tests	321	13348
-tests/test_request_center_t12_scenarios.php	tests	1024	64394
+tests/test_request_center_t12_scenarios.php	tests	1088	68248
 tests/test_request_center_web_ddl_runtime.php	tests	261	12040
 tests/test_request_center_workflow_service_mariadb.php	tests	265	10657
 tests/test_request_center_workflow_service_sqlite.php	tests	410	17288

@@ -109,7 +109,9 @@ jobs:
           import sys
           path = Path(sys.argv[1])
           text = path.read_text(encoding="utf-8", errors="replace") if path.is_file() else "T12 console log was not created"
-          message = text[-4000:].replace("%", "%25").replace("\r", "%0D").replace("\n", "%0A")
+          details = [line for line in text.splitlines() if "DIFF:" in line or "T12 SUMMARY:" in line or "T12 RESULT:" in line]
+          message = "\n".join(details[-30:]) if details else text[-4000:]
+          message = message[-4000:].replace("%", "%25").replace("\r", "%0D").replace("\n", "%0A")
           print(f"::error title=T12 scenario diagnostic::{message}")
           PY
 

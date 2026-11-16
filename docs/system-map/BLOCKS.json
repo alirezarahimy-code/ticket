@@ -76435,7 +76435,7 @@
             "path": "tests\/test_logging_trace_coverage.php",
             "area": "TEST",
             "lines": 50,
-            "file_fingerprint": "ceeb88e0b8be",
+            "file_fingerprint": "82815c3e18ae",
             "blocks": [
                 {
                     "kind": "region",
@@ -76443,7 +76443,7 @@
                     "line_start": 1,
                     "line_end": 50,
                     "lines": 50,
-                    "fingerprint": "ceeb88e0b8be",
+                    "fingerprint": "82815c3e18ae",
                     "risk": {
                         "score": 2,
                         "flags": {
@@ -82729,8 +82729,8 @@
             "id": "TEST-191",
             "path": "tests\/test_request_center_phase2_smoke_mariadb.php",
             "area": "TEST",
-            "lines": 939,
-            "file_fingerprint": "f8a9671b50bd",
+            "lines": 940,
+            "file_fingerprint": "96dfde411121",
             "blocks": [
                 {
                     "kind": "region",
@@ -82836,11 +82836,11 @@
                 },
                 {
                     "kind": "region",
-                    "anchor": "بلوک رویه‌ای 153-939",
+                    "anchor": "بلوک رویه‌ای 153-940",
                     "line_start": 153,
-                    "line_end": 939,
-                    "lines": 787,
-                    "fingerprint": "e50978bf83fb",
+                    "line_end": 940,
+                    "lines": 788,
+                    "fingerprint": "c9761f4a0e4e",
                     "risk": {
                         "score": 16,
                         "flags": {
@@ -84121,8 +84121,8 @@
             "id": "TEST-198",
             "path": "tests\/test_request_center_t12_scenarios.php",
             "area": "TEST",
-            "lines": 1025,
-            "file_fingerprint": "22c408248caf",
+            "lines": 1089,
+            "file_fingerprint": "89ce8a965e09",
             "blocks": [
                 {
                     "kind": "region",
@@ -84420,13 +84420,15 @@
                     "kind": "function",
                     "anchor": "t12s_compare",
                     "line_start": 249,
-                    "line_end": 333,
-                    "lines": 85,
-                    "fingerprint": "6fd29878f99f",
+                    "line_end": 379,
+                    "lines": 131,
+                    "fingerprint": "613b3a7d488a",
                     "risk": {
-                        "score": 5,
+                        "score": 7,
                         "flags": {
-                            "sql_concat": 5
+                            "sql_concat": 5,
+                            "write_no_tx": 1,
+                            "long": 1
                         }
                     },
                     "id": "TEST-198.22"
@@ -84434,8 +84436,8 @@
                 {
                     "kind": "function",
                     "anchor": "t12s_rebuild_all",
-                    "line_start": 335,
-                    "line_end": 349,
+                    "line_start": 381,
+                    "line_end": 395,
                     "lines": 15,
                     "fingerprint": "ac60aadcc7d7",
                     "risk": {
@@ -84449,8 +84451,8 @@
                 {
                     "kind": "function",
                     "anchor": "t12s_sessions",
-                    "line_start": 351,
-                    "line_end": 362,
+                    "line_start": 397,
+                    "line_end": 408,
                     "lines": 12,
                     "fingerprint": "f65ff4254959",
                     "risk": {
@@ -84462,8 +84464,8 @@
                 {
                     "kind": "function",
                     "anchor": "t12s_clone_log_tail",
-                    "line_start": 364,
-                    "line_end": 364,
+                    "line_start": 410,
+                    "line_end": 410,
                     "lines": 1,
                     "fingerprint": "71bfba6796ba",
                     "risk": {
@@ -84477,8 +84479,8 @@
                 {
                     "kind": "function",
                     "anchor": "t12s_create_ticket",
-                    "line_start": 366,
-                    "line_end": 395,
+                    "line_start": 412,
+                    "line_end": 441,
                     "lines": 30,
                     "fingerprint": "3ab437f4bbe5",
                     "risk": {
@@ -84490,8 +84492,8 @@
                 {
                     "kind": "function",
                     "anchor": "t12s_pdo",
-                    "line_start": 397,
-                    "line_end": 400,
+                    "line_start": 443,
+                    "line_end": 446,
                     "lines": 4,
                     "fingerprint": "ae20771f9c8f",
                     "risk": {
@@ -84503,8 +84505,8 @@
                 {
                     "kind": "function",
                     "anchor": "t12s_expect_redirect",
-                    "line_start": 402,
-                    "line_end": 407,
+                    "line_start": 448,
+                    "line_end": 453,
                     "lines": 6,
                     "fingerprint": "689a21644491",
                     "risk": {
@@ -84516,8 +84518,8 @@
                 {
                     "kind": "function",
                     "anchor": "t12s_run_pair",
-                    "line_start": 409,
-                    "line_end": 429,
+                    "line_start": 455,
+                    "line_end": 475,
                     "lines": 21,
                     "fingerprint": "d73e6c822ecf",
                     "risk": {
@@ -84529,10 +84531,10 @@
                 {
                     "kind": "function",
                     "anchor": "t12s_finish",
-                    "line_start": 431,
-                    "line_end": 478,
-                    "lines": 48,
-                    "fingerprint": "65f4546c6e01",
+                    "line_start": 477,
+                    "line_end": 542,
+                    "lines": 66,
+                    "fingerprint": "c979816c9e57",
                     "risk": {
                         "score": 1,
                         "flags": {
@@ -84544,8 +84546,8 @@
                 {
                     "kind": "function",
                     "anchor": "t12s_finish_feature_only",
-                    "line_start": 481,
-                    "line_end": 556,
+                    "line_start": 545,
+                    "line_end": 620,
                     "lines": 76,
                     "fingerprint": "bf6e9b412141",
                     "risk": {
@@ -84558,9 +84560,9 @@
                 },
                 {
                     "kind": "region",
-                    "anchor": "بلوک رویه‌ای 557-574",
-                    "line_start": 557,
-                    "line_end": 574,
+                    "anchor": "بلوک رویه‌ای 621-638",
+                    "line_start": 621,
+                    "line_end": 638,
                     "lines": 18,
                     "fingerprint": "b24b42a5ba7f",
                     "risk": {
@@ -84574,8 +84576,8 @@
                 {
                     "kind": "region",
                     "anchor": "Both databases must exist BEFORE the web servers start: the ",
-                    "line_start": 575,
-                    "line_end": 575,
+                    "line_start": 639,
+                    "line_end": 639,
                     "lines": 1,
                     "fingerprint": "1a480a5df182",
                     "risk": {
@@ -84587,8 +84589,8 @@
                 {
                     "kind": "region",
                     "anchor": "bootstrap performs a schema check on EVERY request and retur",
-                    "line_start": 576,
-                    "line_end": 576,
+                    "line_start": 640,
+                    "line_end": 640,
                     "lines": 1,
                     "fingerprint": "b33578bd6c53",
                     "risk": {
@@ -84600,8 +84602,8 @@
                 {
                     "kind": "region",
                     "anchor": "while a clone database is absent.",
-                    "line_start": 577,
-                    "line_end": 718,
+                    "line_start": 641,
+                    "line_end": 782,
                     "lines": 142,
                     "fingerprint": "4d0626ffeebf",
                     "risk": {
@@ -84618,8 +84620,8 @@
                 {
                     "kind": "region",
                     "anchor": "مسیر: rated",
-                    "line_start": 719,
-                    "line_end": 1025,
+                    "line_start": 783,
+                    "line_end": 1089,
                     "lines": 307,
                     "fingerprint": "39b0525ce300",
                     "risk": {
