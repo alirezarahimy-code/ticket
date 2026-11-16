@@ -1,6 +1,8 @@
 name: Request Center QA Package Preview
 
 on:
+  pull_request:
+    branches: [ arena/22d4eba7-ticket ]
   push:
     branches: [ feature/request-center-module-1.62.88, arena/22d4eba7-ticket ]
   workflow_dispatch:
@@ -89,7 +91,7 @@ jobs:
 
       - name: Existing ticket workflow regression contracts
         run: |
-          python -m pytest -q tests/test_ticket_workflow_safety_static.py tests/test_ticket_cancellation_static.py tests/test_ticket_three_views_static.py tests/test_ticket_lifecycle_guide_static.py tests/test_ldap_secret_and_legacy_status_static.py
+          python -m pytest -q tests/test_ticket_workflow_safety_static.py tests/test_ticket_cancellation_static.py tests/test_ticket_three_views_static.py tests/test_ticket_lifecycle_guide_static.py tests/test_ldap_secret_and_legacy_status_static.py tests/test_release_asset_manifest.py
           php tests/test_ticket_routing_unit.php
 
       - name: Verify package baseline and required source files
