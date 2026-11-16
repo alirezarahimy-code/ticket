@@ -336,7 +336,7 @@ try {
     file_put_contents($uploadPath, $uploadContents);
     $create = smoke_http_multipart_post('http://' . $address . '/request-center.php', [
         'action' => 'create_ticket',
-        'subject' => 'RC phase-3 independent POST smoke',
+        'subject' => 'RC phase 3 independent POST smoke',
         'description' => 'Created via request-center.php POST path (same protocol as legacy)',
         'category_id' => $smokeCategoryId,
         'service_id' => $supportServiceId,
@@ -391,7 +391,7 @@ try {
             && str_contains($legacyLocation, 'page=' . $legacyLabel),
             'legacy ' . $legacyLabel . ' URL is bridged to the independent Request Center entry (status ' . $legacyResponse['status'] . ')');
     }
-    $ticketRow = $pdo->query("SELECT id, subject, ticket_type FROM tickets WHERE subject = 'RC phase-3 independent POST smoke' ORDER BY id DESC LIMIT 1")->fetch();
+    $ticketRow = $pdo->query("SELECT id, subject, ticket_type FROM tickets WHERE subject = 'RC phase 3 independent POST smoke' ORDER BY id DESC LIMIT 1")->fetch();
     smoke_check(is_array($ticketRow), 'independent create_ticket persisted the ticket row');
     smoke_check((string) ($ticketRow['ticket_type'] ?? '') === 'request', 'independent create_ticket stored the requested ticket type');
     $attachmentQuery = $pdo->prepare('SELECT a.id, a.stored_name FROM ticket_attachments a JOIN ticket_messages m ON m.id = a.message_id WHERE m.ticket_id = ? ORDER BY a.id DESC LIMIT 1');
@@ -454,8 +454,8 @@ try {
     // 7) Phase 3 — exercise all four independent workspaces and their operational pages.
     $createdTicketId = (int) ($ticketRow['id'] ?? 0);
     $detail = smoke_http('http://' . $address . '/request-center.php?id=' . $createdTicketId, ['Cookie: ' . $cookie]);
-    // عنوان تیکت «نمایشی» است؛ لایهٔ سراسریِ ارقام آن را «RC phase-۳ …» چاپ می‌کند. مقایسه با نرمال‌سازی ارقام:
-    smoke_check($detail['status'] === 200 && str_contains($detail['body'], smoke_persian_digits('RC phase-3 independent POST smoke')), 'independent ticket detail renders the created request (status ' . $detail['status'] . '; body=' . substr(trim(strip_tags($detail['body'])), 0, 700) . ')');
+    // عنوان درخواست «نمایشی» است؛ لایهٔ سراسری رقمِ جداشده با فاصله را فارسی می‌کند و توکن‌های خط‌تیره‌دار را ماشینی نگه می‌دارد.
+    smoke_check($detail['status'] === 200 && str_contains($detail['body'], smoke_persian_digits('RC phase 3 independent POST smoke')), 'independent ticket detail renders the created request (status ' . $detail['status'] . '; body=' . substr(trim(strip_tags($detail['body'])), 0, 700) . ')');
     smoke_check(str_contains($detail['body'], 'name="action" value="reply"'), 'independent ticket detail exposes the reply operation');
     $workspaceProbes = [
         ['requester', 'request-center.php?workspace=requester'],
