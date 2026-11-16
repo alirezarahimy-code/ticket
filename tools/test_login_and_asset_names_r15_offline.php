@@ -225,6 +225,30 @@ check('۹: کلید هویت پس از حذف MAC تکراری نمی‌سازد
 check('۱۰: الگوی MAC و توابعش در asset-names.php هست',
     str_contains($names, 'ASSET_MAC_PATTERN') && str_contains($names, 'function asset_strip_mac') && str_contains($names, 'function asset_is_mac'));
 
+echo "\n═══ ۳.۷) ابزار diag_extract — تله‌های ویندوز (r17-ب) ═══\n";
+
+$diagSrc = (string) file_get_contents($root . '/tools/diag_extract.php');
+// باگ واقعی: Read-Host داخل shell_exec هیچ کنسولی ندارد و رشتهٔ خالی
+// برمی‌گرداند — رمز خالی و پیام گمراه‌کنندهٔ «اعتبارنامه نادرست».
+check('۱۱: رمز با shell_exec خوانده نمی‌شود (باگ کنسول‌نداشتن)', !str_contains($diagSrc, 'shell_exec(\'powershell -NoProfile -Command "$s=Read-Host'));
+check('۱۲: رمز از تابع اختصاصی خوانده می‌شود', str_contains($diagSrc, 'function diag_read_password'));
+check('۱۳: گزینهٔ متغیر محیطی برای اجرای خودکار دارد', str_contains($diagSrc, 'ITSM_DIAG_PASS'));
+check('۱۴: اگر رمز خالی ماند، پیام صریح می‌دهد و گیر نمی‌کند', str_contains($diagSrc, 'رمز خالی بود'));
+// باگ واقعی: کدهای ANSI در cmd.exe قدیمی به‌صورت ←[31m چاپ می‌شدند
+check('۱۵: رنگ فقط در ترمینال واقعی', str_contains($diagSrc, 'diagColorEnabled'));
+check('۱۶: خروجی بدون رنگ هم خوانا است (علامت ✓/✗)', str_contains($diagSrc, "'✓'") || str_contains($diagSrc, "✓"));
+// دکمهٔ اجرا: php.exe روی IIS در PATH نیست
+$bat = (string) file_get_contents($root . '/tools/RUN-DIAG-EXTRACT.bat');
+check('۱۷: اجراکنندهٔ batch منتشر شده است', $bat !== '');
+check('۱۸: php را در PATH و مسیرهای رایج می‌گردد', str_contains($bat, 'where php') && str_contains($bat, 'Program Files\\PHP'));
+check('۱۹: مسیر خودش را امن می‌سازد (%~dp0)', str_contains($bat, '%~dp0diag_extract.php'));
+check('۲۰: اگر php پیدا نشد، راهنمای صریح می‌دهد', str_contains($bat, 'php.exe پیدا نشد'));
+// سند دستور اجرا
+$cmdDoc = (string) file_get_contents($root . '/docs/DIAG-EXTRACT-COMMANDS-FA.md');
+check('۲۱: سند دستور اجرا موجود است', $cmdDoc !== '');
+check('۲۲: می‌گوید روی سرور اجرا شود، نه روی کلاینت', str_contains($cmdDoc, 'روی **همان سروری که سامانه روی آن نصب است**'));
+check('۲۳: مسیر جایگزین php.exe را نشان می‌دهد', str_contains($cmdDoc, 'where /r "C:\\Program Files" php.exe'));
+
 echo "\n═══ ۴) ابزار تشخیص ═══\n";
 $diag = (string) file_get_contents($root . '/tools/diagnose_login_and_assets.php');
 check('ابزار تشخیص وجود دارد', $diag !== '');

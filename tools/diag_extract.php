@@ -42,18 +42,68 @@ if ($host === '' || !preg_match('/^[A-Za-z0-9._-]+$/', $host)) {
     exit(2);
 }
 
+/**
+ * خواندن رمز از کاربر بدون این‌که روی صفحه بماند.
+ *
+ * ⚠ باگی که همین‌جا بود و در r17-ب اصلاح شد: نسخهٔ اول از shell_exec برای
+ * Read-Host استفاده می‌کرد. shell_exec هیچ کنسولی به فرزند نمی‌دهد، پس
+ * Read-Host روی ویندوز بلافاصله رشتهٔ خالی برمی‌گرداند — یعنی رمز خالی می‌شد
+ * و ابزار به‌اشتباه می‌گفت «اعتبارنامه نادرست». حالا با proc_open و دادن
+ * کنسول واقعی (CON) به فرزند، ورودی پنهان درست کار می‌کند.
+ */
+function diag_read_password(string $prompt): string
+{
+    // ۱) متغیر محیطی — برای اجرای خودکار/آزمون. آگاهانه و مستند.
+    $envPass = getenv('ITSM_DIAG_PASS');
+    if (is_string($envPass) && $envPass !== '') {
+        fwrite(STDOUT, $prompt . "(از متغیر محیطی ITSM_DIAG_PASS خوانده شد)\n");
+        return $envPass;
+    }
+
+    fwrite(STDOUT, $prompt);
+
+    // ۲) ویندوز: PowerShell فرزند با کنسول واقعی تا Read-Host پنهان کار کند.
+    if (PHP_OS_FAMILY === 'Windows' && function_exists('proc_open')) {
+        $code = '$s = Read-Host -AsSecureString; '
+            . '[Runtime.InteropServices.Marshal]::PtrToStringAuto('
+            . '[Runtime.InteropServices.Marshal]::SecureStringToBSTR($s))';
+        $pipes = [];
+        $proc = @proc_open(
+            ['powershell', '-NoProfile', '-NonInteractive', '-Command', $code],
+            [0 => ['file', 'CON', 'r'], 1 => ['pipe', 'w'], 2 => ['pipe', 'w']],
+            $pipes
+        );
+        if (is_resource($proc)) {
+            $out = (string) stream_get_contents($pipes[1]);
+            stream_get_contents($pipes[2]);
+            fclose($pipes[1]);
+            fclose($pipes[2]);
+            proc_close($proc);
+            $out = str_replace(["\r", "\n"], '', $out);
+            if ($out !== '') {
+                fwrite(STDOUT, "\n");
+                return $out;
+            }
+        }
+    }
+
+    // ۳) هر جای دیگر: خواندن مستقیم از ورودی استاندارد.
+    $line = fgets(STDIN);
+    fwrite(STDOUT, "\n");
+    return is_string($line) ? trim($line) : '';
+}
+
 $user = trim((string) ($argv[2] ?? ''));
 $pass = '';
 if ($user !== '') {
-    fwrite(STDOUT, 'رمز حساب ' . $user . ': ');
-    if (function_exists('shell_exec') && stripos(PHP_OS_FAMILY, 'win') === 0) {
-        // ویندوز: خواندن رمز بدون نمایش
-        $pass = trim((string) shell_exec('powershell -NoProfile -Command "$s=Read-Host -AsSecureString; [Runtime.InteropServices.Marshal]::PtrToStringAuto([Runtime.InteropServices.Marshal]::SecureStringToBSTR($s))"'));
-    } else {
-        $pass = trim((string) fgets(STDIN));
+    $pass = diag_read_password('رمز حساب ' . $user . ': ');
+    if ($pass === '') {
+        fwrite(STDERR, "رمز خالی بود؛ آزمون بخش ۴ (SMB) ممکن نیست. اگر رمز ندارید، همین دستور را بدون نام کاربری اجرا کنید.\n");
     }
-    fwrite(STDOUT, "\n");
 }
+$GLOBALS['diagColorEnabled'] = $colorEnabled = (PHP_OS_FAMILY === 'Windows')
+    ? (getenv('ANSICON') !== false || getenv('WT_SESSION') !== false || getenv('TERM') !== false || getenv('TERM_PROGRAM') !== false)
+    : (function_exists('stream_isatty') ? @stream_isatty(STDOUT) : true);
 $domain = trim((string) setting('domain_scan_domain', ''));
 if ($user !== '' && strpos($user, '\\') === false && strpos($user, '@') === false && $domain !== '') {
     $user = $domain . '\\' . $user;
@@ -61,9 +111,19 @@ if ($user !== '' && strpos($user, '\\') === false && strpos($user, '@') === fals
 
 function diag_line(string $label, bool $ok, string $detail = ''): void
 {
+    // رنگ فقط وقتی که ترمینال واقعاً رنگ می‌فهمد. در cmd.exe قدیمی، کدهای
+    // ANSI به‌صورت «←[32m» روی صفحه می‌افتادند و خروجی برای کاربر ناخوانا
+    // می‌شد؛ برای همان کسی که قرار است این خروجی را برای ما بفرستد.
+    static $color = null;
+    if ($color === null) {
+        $color = (bool) ($GLOBALS['diagColorEnabled'] ?? false);
+    }
     $mark = $ok ? '✓' : '✗';
-    $color = $ok ? "\033[32m" : "\033[31m";
-    fwrite(STDOUT, sprintf("  %s%s\033[0m %-28s %s\n", $color, $mark, $label, $detail));
+    if ($color) {
+        $mark = $ok ? "\033[32m✓\033[0m" : "\033[31m✗\033[0m";
+    }
+    // عرض ستون را ثابت می‌گذاریم تا خروجی در cmd.exe هم تراز بماند.
+    fwrite(STDOUT, sprintf("  %s %-26s %s\n", $mark, $label, $detail));
 }
 
 function diag_tcp(string $host, int $port, int $timeoutSec = 4): array
