@@ -4444,12 +4444,12 @@
         "CORE-011.04"
       ],
       "related": [
-        "TEST-119.08",
         "CRON-001.09",
         "CRON-005.04",
         "CRON-015.01",
         "PAGE-079.19",
-        "CRON-001.08"
+        "CRON-001.08",
+        "TEST-119.07"
       ],
       "total": 14
     },
@@ -47860,14 +47860,14 @@
       "path": "tests/test_logging_mysql_integration.php",
       "area": "TEST",
       "line": 1,
-      "anchor": "بلوک رویه‌ای 1-34",
+      "anchor": "بلوک رویه‌ای 1-35",
       "risk": 5,
-      "lines": 34
+      "lines": 35
     },
     "TEST-119.02": {
       "path": "tests/test_logging_mysql_integration.php",
       "area": "TEST",
-      "line": 35,
+      "line": 36,
       "anchor": "db",
       "risk": 0,
       "lines": 1
@@ -47875,7 +47875,7 @@
     "TEST-119.03": {
       "path": "tests/test_logging_mysql_integration.php",
       "area": "TEST",
-      "line": 36,
+      "line": 37,
       "anchor": "execute_migration_statement",
       "risk": 0,
       "lines": 10
@@ -47883,7 +47883,7 @@
     "TEST-119.04": {
       "path": "tests/test_logging_mysql_integration.php",
       "area": "TEST",
-      "line": 46,
+      "line": 47,
       "anchor": "split_sql_statements",
       "risk": 0,
       "lines": 71
@@ -47891,23 +47891,23 @@
     "TEST-119.05": {
       "path": "tests/test_logging_mysql_integration.php",
       "area": "TEST",
-      "line": 117,
-      "anchor": "بلوک رویه‌ای 117-134",
+      "line": 118,
+      "anchor": "بلوک رویه‌ای 118-135",
       "risk": 0,
       "lines": 18
     },
     "TEST-119.06": {
       "path": "tests/test_logging_mysql_integration.php",
       "area": "TEST",
-      "line": 135,
+      "line": 136,
       "anchor": "Migration 025 must remain safe when the updater retries a mi",
       "risk": 12,
-      "lines": 79
+      "lines": 80
     },
     "TEST-119.07": {
       "path": "tests/test_logging_mysql_integration.php",
       "area": "TEST",
-      "line": 214,
+      "line": 216,
       "anchor": "The replay worker atomically renames the source file and pub",
       "risk": 1,
       "lines": 13
@@ -47915,7 +47915,7 @@
     "TEST-119.08": {
       "path": "tests/test_logging_mysql_integration.php",
       "area": "TEST",
-      "line": 227,
+      "line": 229,
       "anchor": "Verify migration 025 changes the live notification schema an",
       "risk": 13,
       "lines": 30

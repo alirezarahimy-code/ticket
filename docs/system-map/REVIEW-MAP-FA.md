@@ -9,7 +9,7 @@
 | سنجه | مقدار |
 |---|---|
 | فایل‌های کد تولیدی | 694 |
-| خطوط | 174,942 |
+| خطوط | 174,944 |
 | آدرس‌ها (بلوک) | 8,284 |
 | موضوع‌های قابل جست‌وجو | 41 صفحه + 102 مجوز + 85 جدول |
 | بازبینی‌شده | 0 آدرس (0.0%) — 0 خط (0.0%) |
@@ -288,7 +288,7 @@
 
 | ناحیه | معنی | فایل | بلوک | خط |
 |---|---|---|---|---|
-| `TEST` | TEST | 252 | 1,960 | 28,835 |
+| `TEST` | TEST | 252 | 1,960 | 28,837 |
 | `TOOL` | TOOL | 152 | 1,452 | 40,124 |
 | `DB` | DB | 86 | 1,385 | 8,274 |
 | `PAGE` | صفحات (ریشه) | 84 | 1,609 | 57,771 |
@@ -340,12 +340,12 @@
 | 19 | `PAGE-029.41` | `food-ticket.php:821` | food_ticket_access_rows_powershell | 13 | الحاق در SQL، سرکوب @، فراخوانی خطرناک، >۱۲۰ خط | ⬜ در نوبت |
 | 20 | `PAGE-029.43` | `food-ticket.php:1039` | food_ticket_access_delete_powershell_e | 13 | الحاق در SQL، سرکوب @، فراخوانی خطرناک، نوشتن بدون تراکنش | ⬜ در نوبت |
 | 21 | `PAGE-029.92` | `food-ticket.php:2781` | food_ticket_retry_failed | 13 | catch بی‌صدا، الحاق در SQL، سرکوب @، نوشتن بدون تراکنش | ⬜ در نوبت |
-| 22 | `TEST-119.08` | `tests/test_logging_mysql_integration.php:227` | Verify migration 025 changes the live  | 13 | الحاق در SQL، سرکوب @، فراخوانی خطرناک، نوشتن بدون تراکنش | ⬜ در نوبت |
+| 22 | `TEST-119.08` | `tests/test_logging_mysql_integration.php:229` | Verify migration 025 changes the live  | 13 | الحاق در SQL، سرکوب @، فراخوانی خطرناک، نوشتن بدون تراکنش | ⬜ در نوبت |
 | 23 | `TOOL-003.07` | `tools/asset_reset.php:169` | ۶) حذف | 13 | catch بی‌صدا، الحاق در SQL، فراخوانی خطرناک | ⬜ در نوبت |
 | 24 | `TOOL-044.10` | `tools/diag_extract.php:265` | اگر مسیر جایگزینی پیدا شد ولی در tools | 13 | الحاق در SQL، سرکوب @، فراخوانی خطرناک، >۱۲۰ خط | ⬜ در نوبت |
 | 25 | `PAGE-009.27` | `chatbot.php:694` | chatbot_api_handle | 12 | ورودی خام، چاپ بدون فرار، سرکوب @، فراخوانی خطرناک، نوشتن بدون تراکنش | ⬜ در نوبت |
 | 26 | `CRON-009.01` | `cron/rebuild_logging_issues.php:1` | بلوک رویه‌ای 1-53 | 12 | الحاق در SQL، سرکوب @، فراخوانی خطرناک | ⬜ در نوبت |
-| 27 | `TEST-119.06` | `tests/test_logging_mysql_integration.php:135` | Migration 025 must remain safe when th | 12 | الحاق در SQL، سرکوب @، فراخوانی خطرناک | ⬜ در نوبت |
+| 27 | `TEST-119.06` | `tests/test_logging_mysql_integration.php:136` | Migration 025 must remain safe when th | 12 | الحاق در SQL، سرکوب @، فراخوانی خطرناک | ⬜ در نوبت |
 | 28 | `TEST-197.11` | `tests/test_request_center_t12_preflight.php:210` | بلوک رویه‌ای 210-322 | 12 | catch بی‌صدا، سرکوب @، فراخوانی خطرناک، نوشتن بدون تراکنش | ⬜ در نوبت |
 | 29 | `TOOL-044.11` | `tools/diag_extract.php:406` | آیا Apache با LocalSystem بالا آمده؟ ر | 12 | الحاق در SQL، سرکوب @، فراخوانی خطرناک | ⬜ در نوبت |
 | 30 | `TOOL-050.01` | `tools/diag_source_row_delete.php:1` | بلوک رویه‌ای 1-128 | 12 | الحاق در SQL، ورودی خام، سرکوب @، نوشتن بدون تراکنش، >۱۲۰ خط | ⬜ در نوبت |
@@ -2136,18 +2136,18 @@
 </details>
 
 <details>
-<summary><b>TEST-119</b> — <code>tests/test_logging_mysql_integration.php</code> (256 خط، 8 آدرس، بازبینی‌شده 0/8)</summary>
+<summary><b>TEST-119</b> — <code>tests/test_logging_mysql_integration.php</code> (258 خط، 8 آدرس، بازبینی‌شده 0/8)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TEST-119.01` | 1–34 | ناحیه | `بلوک رویه‌ای 1-34` | 5 | ⬜ |
-| `TEST-119.02` | 35–35 | تابع | `db` | 0 | ⬜ |
-| `TEST-119.03` | 36–45 | تابع | `execute_migration_statement` | 0 | ⬜ |
-| `TEST-119.04` | 46–116 | تابع | `split_sql_statements` | 0 | ⬜ |
-| `TEST-119.05` | 117–134 | ناحیه | `بلوک رویه‌ای 117-134` | 0 | ⬜ |
-| `TEST-119.06` | 135–213 | ناحیه | `Migration 025 must remain safe when the updater re` | **12** | ⬜ |
-| `TEST-119.07` | 214–226 | ناحیه | `The replay worker atomically renames the source fi` | 1 | ⬜ |
-| `TEST-119.08` | 227–256 | ناحیه | `Verify migration 025 changes the live notification` | **13** | ⬜ |
+| `TEST-119.01` | 1–35 | ناحیه | `بلوک رویه‌ای 1-35` | 5 | ⬜ |
+| `TEST-119.02` | 36–36 | تابع | `db` | 0 | ⬜ |
+| `TEST-119.03` | 37–46 | تابع | `execute_migration_statement` | 0 | ⬜ |
+| `TEST-119.04` | 47–117 | تابع | `split_sql_statements` | 0 | ⬜ |
+| `TEST-119.05` | 118–135 | ناحیه | `بلوک رویه‌ای 118-135` | 0 | ⬜ |
+| `TEST-119.06` | 136–215 | ناحیه | `Migration 025 must remain safe when the updater re` | **12** | ⬜ |
+| `TEST-119.07` | 216–228 | ناحیه | `The replay worker atomically renames the source fi` | 1 | ⬜ |
+| `TEST-119.08` | 229–258 | ناحیه | `Verify migration 025 changes the live notification` | **13** | ⬜ |
 
 </details>
 

@@ -30,7 +30,7 @@ path	category	lines	bytes
 .github/workflows/ci.yml	workflows	219	10062
 .github/workflows/critical-system-stress.yml	workflows	54	1926
 .github/workflows/food-system-stress.yml	workflows	223	10114
-.github/workflows/logging-acceptance.yml	workflows	156	6005
+.github/workflows/logging-acceptance.yml	workflows	169	6563
 .github/workflows/logging-contract.yml	workflows	43	2180
 .github/workflows/publish-release.yml	workflows	224	9907
 .github/workflows/refresh-request-center-map.yml	workflows	89	3585
