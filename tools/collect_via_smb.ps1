@@ -109,23 +109,50 @@ try {
     $remoteResult = Join-Path $remoteDir $resultName
     Copy-Item -Path $collector -Destination $remoteCollector -Force
 
-    # ۳) تسک با /ru SYSTEM — همان کلید موفقیت. با حساب کاربری معمولی، WMI محلی
-    #    هم ممکن است ناقص بماند؛ SYSTEM روی خود مقصد کامل است و به رمز هم نیاز ندارد.
-    $taskCmd = 'powershell -NoProfile -NonInteractive -ExecutionPolicy Bypass -File C:\ITSM\collect_server_inventory.ps1 > C:\ITSM\' + $resultName
-    $createOut = & schtasks.exe /create /s $ComputerName /u $user /p $pass /tn $taskName /tr $taskCmd /sc once /st 00:00 /ru SYSTEM /rl HIGHEST /f 2>&1
-    if ($LASTEXITCODE -ne 0) {
-        Fail 'SMB_TASK_FAILED' "schtasks /create failed: $createOut"
-    }
-
-    # فایل نتیجهٔ کهنه نباید خوانده شود؛ نامش یکتاست ولی پاک‌سازی صریح ارزان است.
+    # ۳) تسک با هویت SYSTEM — همان کلید موفقیت. با حساب کاربری معمولی، WMI
+    #    محلی هم ممکن است ناقص بماند؛ SYSTEM روی خود مقصد کامل است.
+    /*
+     * ۱.۶۳.۱-r18 — رمز از خط فرمان schtasks حذف شد.
+     *
+     * پیش‌تر رمز با /p روی خط فرمان schtasks می‌رفت و خط فرمان هر فرآیند در
+     * Task Manager، WMI و Sysmon برای هر کاربری خواناست. بدتر: gflags
+     * از زمان XP تا کنون آن را در audit نگه می‌دارد.
+     *
+     * راه‌حل: تسک را با New-ScheduledTask در یک نشست CIM می‌سازیم که
+     * اعتبارنامه در آن امن است. اگر آن مسیر در دسترس نبود، عمداً شکست
+     * می‌خوریم و صریح می‌گوییم چرا — بهتر از لو رفتن رمز.
+     */
+    # نام فایل یکتاست، ولی پاک‌سازی صریح پیش از اجرا ارزان است و تضمین می‌کند
+    # نتیجهٔ اجرای قبلی (اگر مانده باشد) به‌اشتباه خوانده نشود.
     try { Remove-Item -Path $remoteResult -Force -ErrorAction SilentlyContinue } catch { }
 
-    $runOut = & schtasks.exe /run /s $ComputerName /u $user /p $pass /tn $taskName 2>&1
-    if ($LASTEXITCODE -ne 0) {
-        Fail 'SMB_TASK_FAILED' "schtasks /run failed (Task Scheduler may be blocked by firewall): $runOut"
+    $taskCreated = $false
+    try {
+        $taskSession = New-CimSession -ComputerName $ComputerName -Credential $cred -ErrorAction Stop
+        try {
+            $action = New-ScheduledTaskAction -Execute 'powershell.exe' `
+                -Argument ('-NoProfile -NonInteractive -ExecutionPolicy Bypass -File C:\ITSM\collect_server_inventory.ps1 -OutFile C:\ITSM\' + $resultName)
+            $principal = New-ScheduledTaskPrincipal -UserId 'SYSTEM' -LogonType ServiceAccount -RunLevel Highest
+            $settings = New-ScheduledTaskSettingsSet -AllowStartIfOnBatteries -DontStopIfGoingOnBatteries -ExecutionTimeLimit (New-TimeSpan -Minutes 10)
+            $definition = New-ScheduledTask -Action $action -Principal $principal -Settings $settings
+            Register-ScheduledTask -CimSession $taskSession -TaskName $taskName -InputObject $definition -Force -ErrorAction Stop | Out-Null
+            $taskCreated = $true
+            Start-ScheduledTask -CimSession $taskSession -TaskName $taskName -ErrorAction Stop
+        } finally {
+            if ($taskSession) { Remove-CimSession -CimSession $taskSession -ErrorAction SilentlyContinue }
+        }
+    } catch {
+        // CIM/موتور زمان‌بندی از راه دور در دسترس نیست → schtasks، ولی رمز
+        // دیگر در آرگومان نیست: آن را به‌صورت متغیر محیطی به schtasks نمی‌توان داد،
+        // پس صریح شکست می‌خوریم تا رمز هیچ‌جا لو نرود.
+        Fail 'SMB_TASK_FAILED' "building the remote task through CIM failed; the credential-passing fallback is disabled on purpose so the password never appears on a command line: $($_.Exception.Message)"
+    }
+    if (-not $taskCreated) {
+        Fail 'SMB_TASK_FAILED' 'remote scheduled task was not created'
     }
 
     # ۴) انتظار برای خروجی جمع‌آوری. اسکن کامل چند ده ثانیه طول می‌کشد.
+    #    (فایل نتیجه پیش از اجرای تسک پاک شده است — بالاتر.)
     $raw = $null
     $deadline = (Get-Date).AddSeconds($TimeoutSec)
     while ((Get-Date) -lt $deadline) {
@@ -165,7 +192,13 @@ try {
 } finally {
     # ۶) پاک‌سازی همیشه انجام می‌شود — حتی وقتی خطا رخ داده است. عامل نباید روی
     #    مقصد بماند: هم اثر امنیتی دارد، هم اجرای بعدی را آلوده می‌کند.
-    try { & schtasks.exe /delete /s $ComputerName /u $user /p $pass /tn $taskName /f 2>&1 | Out-Null } catch { }
+    try {
+        // حذف تسک هم از راه CIM، تا رمز روی خط فرمان نیاید.
+        $cleanSession = New-CimSession -ComputerName $ComputerName -Credential $cred -ErrorAction Stop
+        try { Unregister-ScheduledTask -CimSession $cleanSession -TaskName $taskName -Confirm:$false -ErrorAction SilentlyContinue } finally {
+            Remove-CimSession -CimSession $cleanSession -ErrorAction SilentlyContinue
+        }
+    } catch { }
     if ($drive) {
         foreach ($leftover in @($resultName, 'collect_server_inventory.ps1')) {
             try { Remove-Item -Path (Join-Path "$($drive.Name):\ITSM" $leftover) -Force -ErrorAction SilentlyContinue } catch { }

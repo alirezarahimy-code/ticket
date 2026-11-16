@@ -145,6 +145,10 @@ FILES = [
     "domain-scan.php",                          # مسیر SMB + خطاهای تفکیک‌شده + فالبک خودکار
     "asset-names.php",                          # حذف MAC از نام + IP هرگز نام نیست
     "actions/asset-actions.php",                # (بدون تغییر نهایی؛ برای هم‌ترازی نسخه)
+    # جمع‌آور — r18 پارامتر OutFile گرفت و خودش با UTF8NoBOM می‌نویسد.
+    # بدون این فایل، اصلاح کدگذاری هرگز به سرور نمی‌رسد و مسیر SMB باز هم
+    # «دادهٔ سخت‌افزاری دریافت نشد» می‌دهد.
+    "tools/collect_server_inventory.ps1",
     "tools/collect_via_smb.ps1",                # عامل: کپی روی C$ و اجرا با SYSTEM
     "tools/diag_extract.php",                   # سنجش لایه‌به‌لایهٔ مسیر استخراج
     # مستند اسکن شبکه: بررسی مستقیم TNI و ادمین‌یار از منبع فروشنده + نکتهٔ
@@ -158,7 +162,9 @@ FILES = [
     "tools/RUN-DIAG-EXTRACT.bat",
     "tools/GET-DIAG-EXTRACT.bat",
     "tools/test_source_time_delete_offline.php",
+    "tools/test_smb_collect_offline.php",
     "tools/repair_source_rows.php",
+    "docs/ASSET-SCAN-CLOSING-FA.md",
     "tools/INSTALL-UPDATE-FILES.bat",
 ]
 
@@ -190,6 +196,14 @@ TEST_FILES = [
 ]
 
 ALLOWED_NEW_FILES = {
+    # ── r18 — آزمون مسیر SMB ──────────────────────────────────────────────
+    # این مسیر هرگز روی ویندوز واقعی اجرا نشده بود و سه باگ کشنده داشت
+    # (کدگذاری UTF-16، نبود فایل، لو رفتن رمز). آزمون متن اسکریپت‌ها را
+    # می‌سنجد تا همان‌ها برنگردند. فقط خواندن فایل؛ هیچ وابستگی کدی ندارد.
+    "tools/test_smb_collect_offline.php",
+    # ── r18 — جمع‌بندی و بستن پروندهٔ شناسنامه ────────────────────────────
+    # فقط مستندات. هیچ وابستگی کدی ندارد.
+    "docs/ASSET-SCAN-CLOSING-FA.md",
     "cron/register_system_alarm_tasks.bat",
     # ابزار پرکردن روزهای گذشته. به هیچ فایل تازهٔ دیگری وابسته نیست:
     # food-ticket-auto-receipts.php از ۱.۶۳ روی نصب هست و همین را صدا می‌زند.
