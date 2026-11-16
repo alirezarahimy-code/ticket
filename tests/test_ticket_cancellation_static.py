@@ -1,4 +1,5 @@
 from pathlib import Path
+import re
 
 ROOT = Path(__file__).resolve().parents[1]
 index = "\n".join((ROOT / name).read_text(encoding="utf-8") for name in (
@@ -142,13 +143,20 @@ check("function ticket_is_waiting_status" in bootstrap
       and "SET `status` = 'waiting_user'" in migration_pending
       and "WHERE `status` = 'pending'" in migration_pending,
       "pending is treated as waiting_user for SLA/OLA and normalized by migration")
-index_user_text = "\n".join(line for line in index.splitlines() if not line.lstrip().startswith("//"))
+def strip_php_comments(source: str) -> str:
+    source = re.sub(r"/\\*.*?\\*/", "", source, flags=re.S)
+    return re.sub(r"(?m)^\\s*//.*$", "", source)
+
+
+index_user_text = strip_php_comments(index)
+bootstrap_user_text = strip_php_comments(bootstrap)
+permissions_user_text = strip_php_comments(permissions)
 check("تیکت" not in index_user_text
-      and "تیکت" not in bootstrap
-      and "تیکت" not in permissions
-      and "ثبت درخواست" in index
-      and "سامانه درخواست پشتیبانی" in index,
-      "user-facing texts use «درخواست» instead of «تیکت» (code identifiers stay Latin)")
+      and "تیکت" not in bootstrap_user_text
+      and "تیکت" not in permissions_user_text
+      and "ثبت درخواست" in index_user_text
+      and "سامانه درخواست پشتیبانی" in index_user_text,
+      "user-facing texts use «درخواست» instead of «تیکت» (PHP comments and identifiers are excluded)")
 check("CHATBOT_WORDS_TICKET = ['تیکت', 'درخواست'" in chatbot
       and "'تیکتها' => ['تیکت']" in chatbot
       and "درخواست بزنم" in chatbot,
