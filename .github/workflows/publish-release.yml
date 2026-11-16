@@ -54,6 +54,14 @@ jobs:
           # نسخهٔ واقعی از VERSION خوانده می‌شود — همان چیزی که در بسته است.
           VERSION_LINE=$(head -1 VERSION | tr -d '\r\n')
           echo "version=$VERSION_LINE" >> "$GITHUB_OUTPUT"
+          if [ "${{ github.event_name }}" = "push" ] && git ls-remote --exit-code --tags origin "refs/tags/$RELEASE_TAG" >/dev/null 2>&1; then
+            git fetch --no-tags origin "refs/tags/$RELEASE_TAG:refs/tags/$RELEASE_TAG"
+            release_commit=$(git rev-parse "$RELEASE_TAG^{commit}")
+            if [ "$release_commit" != "$GITHUB_SHA" ]; then
+              echo "::error::Release tag $RELEASE_TAG points to $release_commit, but publish source is $GITHUB_SHA. Refusing to mix assets from different source revisions."
+              exit 1
+            fi
+          fi
           echo "برچسب Release: $RELEASE_TAG (نسخه: $VERSION_LINE)"
 
       - name: فهرست فایل‌های پیوست
@@ -78,13 +86,18 @@ jobs:
           # اگر فهرست صریح این نسخه هست، همان مرجع است.
           # چرا لازم شد: بستهٔ ۱.۶۳ نامش «…-1_62_96-to-1_63-…» است (زیرخط، نه نقطه)
           # و با هیچ الگوی نسخه‌ای پیدا نمی‌شود.
-          MANIFEST="downloads/RELEASE-ASSETS-$RELEASE_VERSION.txt"
+          MANIFEST="downloads/RELEASE-ASSET-MANIFEST-$RELEASE_VERSION.txt"
           if [ -f "$MANIFEST" ]; then
             echo "── فهرست صریح: $MANIFEST ──"
             while IFS= read -r line; do
               line="$(echo "$line" | tr -d '\r' | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')"
               [ -z "$line" ] && continue
               case "$line" in \#*) continue;; esac
+              if [[ ! "$line" =~ ^[A-Za-z0-9._-]+\.zip$ || "$line" == *..* ]]; then
+                echo "::error::Manifest entries must be safe ZIP basenames only: $line"
+                fail=1
+                continue
+              fi
               TARGETS+=("$line")
             done < "$MANIFEST"
           else
@@ -146,12 +159,16 @@ jobs:
           # بسته‌های تاریخی را دوباره سوار می‌کرد و لینک‌های نسخهٔ قبل هم
           # زیر Release تازه ظاهر می‌شدند.
           ATTACH=()
-          MANIFEST="downloads/RELEASE-ASSETS-$RELEASE_VERSION.txt"
+          MANIFEST="downloads/RELEASE-ASSET-MANIFEST-$RELEASE_VERSION.txt"
           if [ -f "$MANIFEST" ]; then
             while IFS= read -r line; do
               line="$(echo "$line" | tr -d '\r' | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')"
               [ -z "$line" ] && continue
               case "$line" in \#*) continue;; esac
+              if [[ ! "$line" =~ ^[A-Za-z0-9._-]+\.zip$ || "$line" == *..* ]]; then
+                echo "::error::Manifest entries must be safe ZIP basenames only: $line"
+                exit 1
+              fi
               ATTACH+=("downloads/$line")
             done < "$MANIFEST"
           else
@@ -177,19 +194,17 @@ jobs:
             NOTES=/tmp/notes.md
           fi
 
+          VERSION_LINE=$(head -1 VERSION 2>/dev/null | tr -d '\r\n')
+          TITLE="نسخهٔ ${VERSION_LINE}"
+          if [ -s "$NOTES" ]; then
+            FIRST_TITLE=$(grep -m1 '^# ' "$NOTES" | sed 's/^# //')
+            [ -n "$FIRST_TITLE" ] && TITLE="$FIRST_TITLE"
+          fi
           if gh release view "$RELEASE_TAG" >/dev/null 2>&1; then
-            echo "Release «$RELEASE_TAG» از قبل هست — فایل‌ها به‌روزرسانی می‌شوند."
+            echo "Release «$RELEASE_TAG» از قبل هست — یادداشت و فایل‌ها هم‌زمان به‌روزرسانی می‌شوند."
+            gh release edit "$RELEASE_TAG" --title "$TITLE" --notes-file "$NOTES"
             gh release upload "$RELEASE_TAG" "${ATTACH[@]}" --clobber
           else
-            # عنوان از VERSION خوانده می‌شود، نه هارد‌کد. وگرنه Release نسخهٔ
-            # جدید با عنوان نسخهٔ قبلی منتشر می‌شود (یک بار همین اتفاق افتاد).
-            VERSION_LINE=$(head -1 VERSION 2>/dev/null | tr -d '\r\n')
-            TITLE="نسخهٔ ${VERSION_LINE}"
-            # پاراگراف اول یادداشت‌ها به عنوان اضافه می‌شود، اگر بود.
-            if [ -s "$NOTES" ]; then
-              FIRST_TITLE=$(grep -m1 '^# ' "$NOTES" | sed 's/^# //')
-              [ -n "$FIRST_TITLE" ] && TITLE="$FIRST_TITLE"
-            fi
             echo "عنوان: $TITLE"
             echo "ساخت Release «$RELEASE_TAG»…"
             gh release create "$RELEASE_TAG" \
