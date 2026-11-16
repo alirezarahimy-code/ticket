@@ -207,6 +207,7 @@ TEST_FILES = [
     "lib/log-catalog.php",                      # کد رخداد AUD-AST-001 برای ریست
     "lib/logging-core.php",                     # نگاشت assets_reset → AUD-AST-001
     "lib/activity-audit.php",                   # برچسب فارسی «ریست شناسنامه‌ها»
+    "docs/ASSET-IDENTITY-RESET-FA.md",           # سند بستن: ریشه، هویت، ریست
 ]
 
 ALLOWED_NEW_FILES = {
