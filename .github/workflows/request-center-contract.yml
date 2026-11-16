@@ -224,6 +224,18 @@ jobs:
           CI_DB_USER: root
           CI_DB_PASS: ci-ephemeral-root-password
 
+      - name: Surface Phase-2 smoke failure detail
+        if: failure() && steps.phase2_smoke.outcome == 'failure'
+        run: |
+          python3 - "$RUNNER_TEMP/phase2-smoke.log" <<'PY'
+          from pathlib import Path
+          import sys
+          path = Path(sys.argv[1])
+          text = path.read_text(encoding="utf-8", errors="replace") if path.is_file() else "Phase-2 smoke log was not created"
+          message = text[-2500:].replace("%", "%25").replace("\r", "%0D").replace("\n", "%0A")
+          print(f"::error title=Phase-2 smoke diagnostic::{message}")
+          PY
+
       - name: Upload Phase-2 smoke log on failure
         if: failure()
         uses: actions/upload-artifact@v4

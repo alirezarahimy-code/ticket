@@ -9,6 +9,10 @@ function app_error_log(string $message): bool { return true; }
 function cfg(string $key, mixed $default = null): mixed { return $default; }
 require APP_ROOT . '/system-update.php';
 
+// The fixture package version tracks the repository VERSION (see sibling version-agnostic tests);
+// a frozen literal goes stale the moment main moves forward and turns the valid-package assertions into a downgrade error.
+$repoVersion = trim((string) file_get_contents(APP_ROOT . '/VERSION'));
+
 if (!class_exists(ZipArchive::class)) {
     fwrite(STDERR, "FAIL: ext-zip is required for archive validation tests.\n");
     exit(1);
