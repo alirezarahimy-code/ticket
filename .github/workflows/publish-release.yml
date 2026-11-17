@@ -41,20 +41,39 @@ jobs:
 
       - name: تعیین برچسب Release
         id: cfg
+        env:
+          INPUT_RELEASE_TAG: ${{ inputs.release_tag }}
         run: |
           set -euo pipefail
-          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
-            RELEASE_TAG="${{ inputs.release_tag }}"
+          if [ "$GITHUB_EVENT_NAME" = "workflow_dispatch" ]; then
+            RELEASE_TAG="${INPUT_RELEASE_TAG:?release_tag input is required}"
           else
             # publish-1.62.97  →  v1.62.97
-            PUSHED="${GITHUB_REF_NAME}"
+            PUSHED="$GITHUB_REF_NAME"
             RELEASE_TAG="v${PUSHED#publish-}"
           fi
-          echo "release_tag=$RELEASE_TAG" >> "$GITHUB_OUTPUT"
-          # نسخهٔ واقعی از VERSION خوانده می‌شود — همان چیزی که در بسته است.
+          if [[ ! "$RELEASE_TAG" =~ ^v[0-9]+(\\.[0-9]+){1,2}$ ]]; then
+            echo "::error::Invalid release tag format: $RELEASE_TAG"
+            exit 1
+          fi
+          # The version stream is selected from the requested release tag.
           VERSION_LINE=$(head -1 VERSION | tr -d '\r\n')
-          echo "version=$VERSION_LINE" >> "$GITHUB_OUTPUT"
-          echo "برچسب Release: $RELEASE_TAG (نسخه: $VERSION_LINE)"
+          RELEASE_VERSION="${RELEASE_TAG#v}"
+          echo "release_tag=$RELEASE_TAG" >> "$GITHUB_OUTPUT"
+          echo "version=$RELEASE_VERSION" >> "$GITHUB_OUTPUT"
+          echo "source_version=$VERSION_LINE" >> "$GITHUB_OUTPUT"
+          # If the release tag already exists, its commit must be this exact source.
+          # This applies equally to push and workflow_dispatch; never mix assets from
+          # a different source revision into an existing Release.
+          if git ls-remote --exit-code --tags origin "refs/tags/$RELEASE_TAG" >/dev/null 2>&1; then
+            git fetch --no-tags origin "refs/tags/$RELEASE_TAG:refs/tags/$RELEASE_TAG"
+            release_commit=$(git rev-parse "$RELEASE_TAG^{commit}")
+            if [ "$release_commit" != "$GITHUB_SHA" ]; then
+              echo "::error::Release tag $RELEASE_TAG points to $release_commit, but publish source is $GITHUB_SHA. Refusing to mix assets from different source revisions."
+              exit 1
+            fi
+          fi
+          echo "برچسب Release: $RELEASE_TAG (نسخهٔ بسته: $RELEASE_VERSION، VERSION منبع: $VERSION_LINE)"
 
       - name: فهرست فایل‌های پیوست
         run: |
