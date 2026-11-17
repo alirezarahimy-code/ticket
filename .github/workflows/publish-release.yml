@@ -52,7 +52,7 @@ jobs:
             PUSHED="$GITHUB_REF_NAME"
             RELEASE_TAG="v${PUSHED#publish-}"
           fi
-          if [[ ! "$RELEASE_TAG" =~ ^v[0-9]+(\\.[0-9]+){1,2}$ ]]; then
+          if [[ ! "$RELEASE_TAG" =~ ^v[0-9]+(\.[0-9]+){1,2}$ ]]; then
             echo "::error::Invalid release tag format: $RELEASE_TAG"
             exit 1
           fi
