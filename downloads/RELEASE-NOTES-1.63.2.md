@@ -5,9 +5,9 @@
 ## فایل‌های r23
 
 - [دانلود بستهٔ r23 از پیش‌نمایش (ZIP)](ticket-update-1.63-to-1.63.2-r23-panel-render-notice-fix-20261106.zip)
-- [دانلود مستقیم بسته از GitHub](https://github.com/alirezarahimy-code/ticket/raw/refs/heads/arena/c417681f-ticket/downloads/ticket-update-1.63-to-1.63.2-r23-panel-render-notice-fix-20261106.zip)
-- [SHA-256](ticket-update-1.63-to-1.63.2-r23-panel-render-notice-fix-20261106.zip.sha256)
-- [گزارش ممیزی و آزمون‌ها](CHANGE-REPORT-FA-1.63.2-r23-panel-render-notice-fix.md)
+- [دانلود مستقیم از Release رسمی GitHub (ZIP)](https://github.com/alirezarahimy-code/ticket/releases/download/v1.63.2/ticket-update-1.63-to-1.63.2-r23-panel-render-notice-fix-20261106.zip)
+- [SHA-256 روی GitHub](https://github.com/alirezarahimy-code/ticket/releases/download/v1.63.2/ticket-update-1.63-to-1.63.2-r23-panel-render-notice-fix-20261106.zip.sha256)
+- [گزارش ممیزی و آزمون‌ها در GitHub](https://github.com/alirezarahimy-code/ticket/releases/download/v1.63.2/CHANGE-REPORT-FA-1.63.2-r23-panel-render-notice-fix.md)
 
 - حجم: **1,067,898 بایت**
 - فایل‌های نصب: **۱۰۳**
@@ -22,4 +22,4 @@
 
 `tests/test_selftest_panel_render.js` **۵۴ بررسی موفق**؛ آزمون ایستای مسیر GET `/api/config` نیز تأیید می‌کند که یادداشت جاری از `food_ticket_api_config()` به پاسخ API می‌رسد. آزمون چاپ/مرز اسکریپت، lint PHP-WASM و آزمون میزبان پنل نیز موفق‌اند. آزمون زندهٔ پایگاه داده و بازبینی Excel در Office انجام نشده‌اند.
 
-این لینک مستقیم از شاخهٔ GitHub است؛ Release رسمی `v1.63.2` هنوز پیوست r21 را دارد.
+Release رسمی `v1.63.2` اکنون بستهٔ r23 و checksum آن را دارد؛ فایل r21 برای سابقه در Release باقی می‌ماند. آزمون زندهٔ نصب روی سرور مقصد در این نوبت انجام نشده است.

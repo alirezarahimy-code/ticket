@@ -13,7 +13,7 @@
 
 ## بستهٔ جاری — ۱.۶۳.۲-r23 (رفع اختلال پنل و اعلان)
 
-**[⬇ دانلود بستهٔ به‌روزرسانی ۱.۶۳.۲-r23 از پیش‌نمایش](ticket-update-1.63-to-1.63.2-r23-panel-render-notice-fix-20261106.zip)** · [دانلود مستقیم از GitHub](https://github.com/alirezarahimy-code/ticket/raw/refs/heads/arena/c417681f-ticket/downloads/ticket-update-1.63-to-1.63.2-r23-panel-render-notice-fix-20261106.zip)
+**[⬇ دانلود بستهٔ به‌روزرسانی ۱.۶۳.۲-r23 از پیش‌نمایش](ticket-update-1.63-to-1.63.2-r23-panel-render-notice-fix-20261106.zip)** · [دانلود از Release رسمی GitHub](https://github.com/alirezarahimy-code/ticket/releases/download/v1.63.2/ticket-update-1.63-to-1.63.2-r23-panel-render-notice-fix-20261106.zip)
 
 | فایل | حجم | SHA-256 |
 |---|---:|---|
@@ -21,7 +21,7 @@
 
 **۱۰۳ فایل، بدون migration تازه و بدون تغییر جدول.** r23 بر پایهٔ r22 است: تگ script توکار از HTML چاپ حذف شده تا کد پنل به‌صورت متن رندر نشود؛ شناسهٔ اعلان r23 مستقل از اعلان‌های قبلی است و شمارنده با هر رندر تکرار نمی‌شود. نسخهٔ پنل به **1.37.56** افزایش یافته تا کش قدیمی تشخیص داده شود. پس از پشتیبان‌گیری، ZIP را در بخش «به‌روزرسانی و پشتیبان‌گیری» پنل مدیر اصلی بارگذاری کنید. پس از نصب، Ctrl+F5 بزنید. راهنمای نصب: [`GUIDE-FA-install-1.63.2.md`](../docs/GUIDE-FA-install-1.63.2.md) · گزارش تغییرات و آزمون‌ها: [`CHANGE-REPORT-FA-1.63.2-r23-panel-render-notice-fix.md`](CHANGE-REPORT-FA-1.63.2-r23-panel-render-notice-fix.md).
 
-آزمون‌های آفلاین/ایستا موفق‌اند؛ آزمون زندهٔ پایگاه داده و Office انجام نشده است. Release رسمی `v1.63.2` هنوز r21 را دارد؛ بستهٔ r23 از پیش‌نمایش و پیوند مستقیم شاخهٔ GitHub در دسترس است.
+بستهٔ r23 از پیش‌نمایش و Release رسمی GitHub در دسترس است. آزمون‌های آفلاین/ایستا موفق‌اند؛ آزمون زندهٔ پایگاه داده و Office انجام نشده است. فایل قدیمی r21 در Release برای سابقه باقی مانده است؛ برای نصب جدید فقط r23 را بگیرید.
 
 ---
 

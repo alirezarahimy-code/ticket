@@ -169,7 +169,7 @@ def render_download_page(package_size: int, digest: str, file_count: int) -> str
 <p>پس از پشتیبان‌گیری، ZIP را در بخش «به‌روزرسانی و پشتیبان‌گیری» پنل مدیر اصلی بارگذاری کنید. راهنمای نصب و گزارش تغییرات نیز در دسترس است.</p>
 <div class="actions">
 <a class="button primary" href="{PACKAGE_NAME}" download>دانلود بستهٔ ۱.۶۳.۲ (ZIP)</a>
-<a class="button secondary" href="https://github.com/alirezarahimy-code/ticket/raw/refs/heads/arena/c417681f-ticket/downloads/{PACKAGE_NAME}">دانلود مستقیم از GitHub</a>
+<a class="button secondary" href="https://github.com/alirezarahimy-code/ticket/releases/download/v1.63.2/{PACKAGE_NAME}">دانلود از Release رسمی GitHub</a>
 <a class="button secondary" href="{PACKAGE_NAME}.sha256" download>دریافت SHA-256</a>
 <a class="button secondary" href="{REPORT_NAME}">گزارش تغییرات و آزمون‌ها</a>
 <a class="button secondary" href="../{GUIDE_NAME}">راهنمای نصب</a></div>
