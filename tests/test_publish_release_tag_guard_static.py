@@ -17,7 +17,9 @@ def test_release_dispatch_input_is_not_interpolated_into_shell() -> None:
 
 def test_existing_release_tag_must_match_the_publish_source_commit() -> None:
     workflow = WORKFLOW.read_text(encoding="utf-8")
-    assert 'git ls-remote --exit-code --tags origin "refs/tags/$RELEASE_TAG"' in workflow
+    assert 'TAG_REF_OUTPUT=$(git ls-remote --tags origin "refs/tags/$RELEASE_TAG")' in workflow
+    assert 'git ls-remote --exit-code' not in workflow
+    assert 'if [ -n "$TAG_REF_OUTPUT" ]; then' in workflow
     assert 'git fetch --no-tags origin "refs/tags/$RELEASE_TAG:refs/tags/$RELEASE_TAG"' in workflow
     assert 'release_commit=$(git rev-parse "$RELEASE_TAG^{commit}")' in workflow
     assert 'if [ "$release_commit" != "$GITHUB_SHA" ]; then' in workflow
@@ -32,7 +34,7 @@ def _run_tag_probe(tmp_path: Path, mode: str, tag_commit: str = "abc123") -> sub
     probe = workflow[start:end]
 
     fake_bin = tmp_path / "bin"
-    fake_bin.mkdir()
+    fake_bin.mkdir(parents=True)
     fake_git = fake_bin / "git"
     fake_git.write_text(
         """#!/usr/bin/env python3
