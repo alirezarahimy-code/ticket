@@ -101,5 +101,7 @@ def test_release_upload_and_summary_follow_manifest_and_include_checksums() -> N
     assert 'ATTACH+=("$sidecar")' in upload
     assert 'ASSETS+=("$line" "$line.sha256")' in summary
     assert 'for name in "${ASSETS[@]}"' in summary
-    assert 'for f in downloads/*.zip' not in summary
+    assert 'if [ -f "$MANIFEST" ]; then' in summary
+    assert 'case "$(basename "$f")" in' in summary
+    assert '*-"$RELEASE_VERSION".zip|*"$RELEASE_VERSION"-*.zip' in summary
     assert 'if [ ! -f "$path" ]; then' in summary
