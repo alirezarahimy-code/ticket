@@ -217,3 +217,19 @@ jobs:
           downloads/ticket-update-1.62.94-to-1.62.95-food-auto-receipts-cddvd-20261111.zip
           downloads/ticket-update-1.62.94-to-1.62.95-food-auto-receipts-cddvd-20261111.zip.sha256
         if-no-files-found: error
+
+    # ۱.۶۲.۹۶/۹۷ خارج از زنجیرهٔ union ۹۰→۹۵ هستند؛ checksum، ساختار ZIP و
+    # تست‌های offline/anti-drift خود بسته باید در CI اصلی نیز اجرا شوند.
+    - name: Verify pinned 1.62.96/1.62.97 food self-test update archives
+      run: |
+        set -euo pipefail
+        cd downloads
+        sha256sum -c ticket-update-1.62.95-to-1.62.96-food-queue-head-of-line-20261114.zip.sha256
+        sha256sum -c ticket-update-1.62.96-to-1.62.97-food-worker-selftest-panel-20261115.zip.sha256
+        unzip -t ticket-update-1.62.95-to-1.62.96-food-queue-head-of-line-20261114.zip
+        unzip -t ticket-update-1.62.96-to-1.62.97-food-worker-selftest-panel-20261115.zip
+        cd ..
+        php tools/test_1_62_97_drift_offline.php
+        php tools/test_schema_baseline_offline.php
+        php tools/test_explain_alarms_offline.php
+        php tools/verify_1_62_97.php
