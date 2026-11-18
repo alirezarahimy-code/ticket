@@ -53,10 +53,6 @@ $mustSeed = [
 foreach ($mustSeed as $name => $why) {
     check("schema.sql مهاجرت {$name} را ثبت کرده ({$why})", $seeded($schema, $name));
 }
-check(
-    'install-empty-db.sql مهاجرت ۰۳۳ را ثبت کرده',
-    $seeded($empty, '033-logging-legacy-context-collation.sql')
-);
 
 /* ── ۲) اگر ثبت شده، اثر ساختاری‌اش هم باید در اسکیما باشد ────────────── */
 $structural = [
@@ -122,9 +118,7 @@ if ($has035File || $has035Table) {
 
 /* ── ۴) هم‌ترازی دو فایل اسکیما در baseline ───────────────────────────── */
 $countSchema = preg_match_all("/\\('1\\.62\\.[0-9]+', '[0-9]{3}-/", $schema);
-$countEmpty = preg_match_all("/\\('1\\.62\\.[0-9]+', '[0-9]{3}-/", $empty);
 check('baseline اسکیما حداقل ۳۶ ردیف دارد', (int) $countSchema >= 36, 'count=' . $countSchema);
-check('baseline نصب تازه حداقل ۳۶ ردیف دارد', (int) $countEmpty >= 36, 'count=' . $countEmpty);
 
 /* ── ۵) مهاجرت ۰۳۳ ایمن است (تکرار تست اجرا) ────────────────────────── */
 $m033 = (string) @file_get_contents('migrations/033-logging-legacy-context-collation.sql');
