@@ -61,7 +61,7 @@ assert(guide.includes('گزارش مستقل غایبین ناهار') && guide.
   'the Persian guide documents the standalone view and its grouping');
 assert(chatbot.includes("'food_absent_lunch_report'") && chatbot.includes("'رفتن به گزارش غایبین ناهار'"),
   'chatbot provides a dedicated answer/link for the standalone report');
-assert(panel.includes("PANEL_VERSION='1.37.56'") && php.includes("FOOD_TICKET_PANEL_VERSION = '1.37.56'"),
+assert(panel.includes("PANEL_VERSION='1.37.57'") && php.includes("FOOD_TICKET_PANEL_VERSION = '1.37.57'"),
   'panel cache/version markers agree');
 
 // Evaluate only the report functions against small, synthetic fixtures. No DOM,

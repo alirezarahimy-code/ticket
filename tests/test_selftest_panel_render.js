@@ -76,7 +76,7 @@ const extract = (name) => {
   throw new Error('پایان «' + name + '» پیدا نشد');
 };
 
-const parts = ['esc', 'ST_LABELS', 'ST_CLASS', 'selftestBox', '__ftRnState', 'releaseNotesBanner', 'loadReleaseNotes'].map(extract).join('\n;\n');
+const parts = ['esc', 'ST_LABELS', 'ST_CLASS', 'PANEL_VERSION', 'selftestBox', '__ftRnState', 'versionBanner', 'releaseNotesBanner', 'panelViewHtml', 'loadReleaseNotes'].map(extract).join('\n;\n');
 
 const sandbox = {
   console,
@@ -95,9 +95,10 @@ const sandbox = {
 };
 vm.createContext(sandbox);
 vm.runInContext(parts, sandbox);
-vm.runInContext('globalThis.__selftestBox = selftestBox; globalThis.__releaseNotesBanner = releaseNotesBanner;', sandbox);
+vm.runInContext('globalThis.__selftestBox = selftestBox; globalThis.__releaseNotesBanner = releaseNotesBanner; globalThis.__panelViewHtml = panelViewHtml;', sandbox);
 const selftestBox = sandbox.__selftestBox;
 const releaseNotesBanner = sandbox.__releaseNotesBanner;
+const panelViewHtml = sandbox.__panelViewHtml;
 
 /* ── ۱) حالت اولیه: دکمهٔ اجرا ─────────────────────────────────────────── */
 let out = selftestBox();
@@ -238,13 +239,23 @@ check('بنر تغییرات: شمارش بقیه را می‌گوید', banner.
 check('بنر تغییرات: پاورقی را نشان می‌دهد', banner.includes('هیچ تغییری در مسیر چاپ'));
 check('بنر تغییرات: دکمهٔ بستن دارد', banner.includes('data-action="dismiss-release-notes"'));
 check('بنر تغییرات: شناسهٔ نسخه برای localStorage دارد', banner.includes('data-version="1.62.97"'));
-check('یادداشت سمت سرور برای r23 شناسهٔ اعلان تازه دارد', releaseNotesPhp.includes("'notification_id' => '1.63.2-r23'"));
+check('یادداشت سمت سرور برای r24 شناسهٔ اعلان تازه دارد', releaseNotesPhp.includes("'notification_id' => '1.63.2-r24'"));
 check('GET /api/config شناسهٔ اعلان را از یادداشت جاری می‌فرستد', foodTicketPhp.includes("'releaseNotes' => function_exists('food_ticket_release_notes_current')") && foodTicketPhp.includes('food_ticket_api_json(food_ticket_api_config($user));'));
-sandbox.window.__ftReleaseNotes = { version: '1.63.2', notification_id: '1.63.2-r23', title: 'اعلان تازه', label: 'r23', items: [], footnote: '' };
-sandbox.window.__ftRnDismissed = new Set(['1.63.2']);
-sandbox.window.__ftRnSeen = { '1.63.2': 2 };
+sandbox.window.__ftReleaseNotes = { version: '1.63.2-r24', notification_id: '1.63.2-r24', title: 'اعلان سراسری تازه', label: 'r24', items: [], footnote: '' };
+sandbox.window.__ftRnDismissed = new Set();
+sandbox.window.__ftRnSeen = {};
 sandbox.window.__ftRnPageCounted = new Set();
-check('اعلان r23 با دیده/بسته‌شدن اعلان ۱.۶۳.۲ قبلی پنهان نمی‌شود', releaseNotesBanner().includes('data-version="1.63.2-r23"'));
+const dashboardPreview = panelViewHtml('<section id="dashboard-preview-marker">داشبورد</section>');
+check('اعلان تازه پیش از محتوای داشبورد رندر می‌شود', dashboardPreview.indexOf('id="ft-release-notes"') >= 0 && dashboardPreview.indexOf('id="ft-release-notes"') < dashboardPreview.indexOf('dashboard-preview-marker'));
+sandbox.window.__ftPanelExpected = '1.37.56';
+const dashboardVersionPreview = panelViewHtml('<section id="dashboard-version-marker">داشبورد</section>');
+check('هشدار نسخهٔ پنل نیز پیش از محتوای داشبورد رندر می‌شود', dashboardVersionPreview.indexOf('version-warning') >= 0 && dashboardVersionPreview.indexOf('version-warning') < dashboardVersionPreview.indexOf('dashboard-version-marker'));
+delete sandbox.window.__ftPanelExpected;
+sandbox.window.__ftReleaseNotes = { version: '1.63.2-r24', notification_id: '1.63.2-r24', title: 'اعلان تازه', label: 'r24', items: [], footnote: '' };
+sandbox.window.__ftRnDismissed = new Set(['1.63.2', '1.63.2-r23']);
+sandbox.window.__ftRnSeen = { '1.63.2': 2, '1.63.2-r23': 2 };
+sandbox.window.__ftRnPageCounted = new Set();
+check('اعلان r24 با دیده/بسته‌شدن اعلان‌های قبلی پنهان نمی‌شود', releaseNotesBanner().includes('data-version="1.63.2-r24"'));
 
 /* رگرسیون: باگ «بستن کار نمی‌کند» — بستن باید حافظهٔ درون‌برنامه‌ای هم داشته باشد،
    وگرنه وقتی localStorage مسدود است بنر در render() بعدی برمی‌گردد. */
@@ -278,8 +289,9 @@ check('بنر تغییرات: تگ img در عنوان escape شد', !bannerXss.
 check('بنر تغییرات: تگ script در آیتم escape شد', !bannerXss.includes('<script>bad()'));
 check('بنر تغییرات: تگ svg در پاورقی escape شد', !bannerXss.includes('<svg>'));
 
-/* سیم‌کشی در صفحه */
-check('بنر تغییرات در shell صدا زده می‌شود', html.includes('let content=releaseNotesBanner()+versionBanner()'));
+/* سیم‌کشی سراسری در صفحه */
+check('render بنر تغییرات را برای همهٔ نماها تزریق می‌کند', html.includes('screen.innerHTML=panelViewHtml((pages[view]||dashboardView)());'));
+check('فرم تنظیمات بنر را دوباره رندر نمی‌کند', html.includes("let content=pages[active]?pages[active]():'';") && !html.includes('let content=releaseNotesBanner()+versionBanner()'));
 check('بارگذاری یک‌باره در render هست', html.includes('loadReleaseNotes();'));
 check('اکشن بستن سیم‌کشی شده', html.includes("act==='dismiss-release-notes'"));
 

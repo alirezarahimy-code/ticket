@@ -5,12 +5,18 @@ import json
 from pathlib import Path
 from zipfile import ZipFile
 
-from download_page_helpers import check_download_page_lists_only_latest_package
-
 ROOT = Path(__file__).resolve().parents[1]
 DOWNLOADS = ROOT / "downloads"
 NAME = "ticket-update-1.63-to-1.63.2-r23-panel-render-notice-fix-20261106.zip"
 PACKAGE = DOWNLOADS / NAME
+# r24 refreshes these cumulative files; r23 remains an immutable historical asset.
+REFRESHED_AFTER_R23 = {
+    "food-ticket.php",
+    "food-ticket-release-notes.php",
+    "food-ticket-web/index.html",
+    "tests/test_selftest_panel_render.js",
+    "tests/js/food-absent-report.test.js",
+}
 REQUIRED_FILES = {
     "VERSION",
     "food-ticket.php",
@@ -56,7 +62,7 @@ def test_1632_r23_is_a_valid_reinstallable_hotfix_package():
         for relative in files:
             data = archive.read("files/" + relative)
             assert hashlib.sha256(data).hexdigest() == manifest["sha256"][relative]
-            if relative == "VERSION":
+            if relative == "VERSION" or relative in REFRESHED_AFTER_R23:
                 continue
             source = ROOT / relative
             if not source.is_file():
@@ -92,11 +98,4 @@ def test_1632_r23_is_a_valid_reinstallable_hotfix_package():
     sidecar = (DOWNLOADS / f"{NAME}.sha256").read_text(encoding="ascii")
     assert digest in sidecar
 
-    assets = (DOWNLOADS / "RELEASE-ASSETS-1.63.2.txt").read_text(encoding="ascii").splitlines()
-    assert assets == [NAME]
-    release_notes = (DOWNLOADS / "RELEASE-NOTES-1.63.2.md").read_text(encoding="utf-8")
-    assert NAME in release_notes and digest in release_notes
-    assert "1.63.2-r23" in release_notes
-    check_download_page_lists_only_latest_package()
-    page = (DOWNLOADS / "index.html").read_text(encoding="utf-8")
-    assert "۱.۶۳.۲-r23" in page and NAME in page and digest in page
+    # Release/index pointers are tested by the current r24 package test.
