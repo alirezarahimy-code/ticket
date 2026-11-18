@@ -58,7 +58,7 @@ if (is_file(__DIR__ . '/food-ticket-import.php')) {
 
 /** نسخهٔ پنل (food-ticket-web/index.html). پنل همان عدد را دارد و اگر مرورگر
  *  نسخهٔ کش‌شدهٔ قدیمی را نشان دهد، خودش هشدار می‌دهد. */
-const FOOD_TICKET_PANEL_VERSION = '1.37.53';
+const FOOD_TICKET_PANEL_VERSION = '1.37.56';
 
 function food_ticket_panel_version(): string
 {
@@ -3503,21 +3503,15 @@ function food_ticket_aggregate_sort_people(array &$people): void
         return $cmp !== 0 ? $cmp : strcmp((string) ($a['name'] ?? ''), (string) ($b['name'] ?? ''));
     });
 }
-function food_ticket_aggregate_diagnostics(string $fromDate, string $toDate, array $printedPeople, array $counts, array &$sourceNotes): array
+/** محاسبهٔ خالص تطبیق سفارش‌های قابل‌شناسایی با فیش‌های ناهار؛ بدون دسترسی به پایگاه‌داده. */
+function food_ticket_aggregate_identity_sets(array $orderRows, array $printedPeople): array
 {
-    $orderRows = [];
-    try {
-        // همان منبع و همان scope ناهار که گزارش غایبین استفاده می‌کند.
-        $orderRows = food_ticket_api_orders($fromDate, '', $toDate);
-    } catch (Throwable $e) {
-        $sourceNotes[] = 'عیب‌یابی سفارش‌ها: ' . $e->getMessage();
-    }
-
     $identities = [];
     $byNational = [];
     $byPersonnel = [];
     $withoutNational = [];
     $withoutNationalCount = 0;
+    $withoutIdentityCount = 0;
     foreach ($orderRows as $row) {
         $date = (string) ($row['foodDate'] ?? '');
         $national = food_ticket_digits($row['nat'] ?? '');
@@ -3527,29 +3521,23 @@ function food_ticket_aggregate_diagnostics(string $fromDate, string $toDate, arr
             if (count($withoutNational) < 100) {
                 $withoutNational[] = ['date' => $date, 'name' => trim((string) ($row['first'] ?? '') . ' ' . (string) ($row['last'] ?? '')), 'first_name' => trim((string) ($row['first'] ?? '')), 'last_name' => trim((string) ($row['last'] ?? '')), 'pc' => $personnel];
             }
+        }
+        $identity = $national !== '' ? 'nat:' . $national : ($personnel !== '' ? 'pc:' . $personnel : '');
+        if ($identity === '') {
+            $withoutIdentityCount++;
             continue;
         }
-        $key = $date . '|nat:' . $national;
+        $key = $date . '|' . $identity;
         if (!isset($identities[$key])) {
-            $identities[$key] = ['date' => $date, 'nat' => $national, 'pc' => $personnel, 'name' => trim((string) ($row['first'] ?? '') . ' ' . (string) ($row['last'] ?? '')), 'first_name' => trim((string) ($row['first'] ?? '')), 'last_name' => trim((string) ($row['last'] ?? '')), 'rows' => 0];
+            // Keep national codes only in the local lookup key; diagnostics returned to the browser must not expose them.
+            $identities[$key] = ['date' => $date, 'pc' => $personnel, 'name' => trim((string) ($row['first'] ?? '') . ' ' . (string) ($row['last'] ?? '')), 'first_name' => trim((string) ($row['first'] ?? '')), 'last_name' => trim((string) ($row['last'] ?? '')), 'rows' => 0];
         }
         $identities[$key]['rows']++;
-        $byNational[$date . '|' . $national] = $key;
+        if ($national !== '') {
+            $byNational[$date . '|' . $national] = $key;
+        }
         if ($personnel !== '') {
             $byPersonnel[$date . '|' . $personnel] = $key;
-        }
-    }
-
-    $duplicates = [];
-    $duplicateRows = 0;
-    $duplicateIdentityCount = 0;
-    foreach ($identities as $identity) {
-        if ((int) $identity['rows'] > 1) {
-            $duplicateIdentityCount++;
-            $duplicateRows += (int) $identity['rows'] - 1;
-            if (count($duplicates) < 100) {
-                $duplicates[] = $identity;
-            }
         }
     }
 
@@ -3557,8 +3545,11 @@ function food_ticket_aggregate_diagnostics(string $fromDate, string $toDate, arr
     $unmatchedPrintedEvents = [];
     $unmatchedPrintedCount = 0;
     $legacyPrintedEvents = [];
+    $legacyPrintedCount = 0;
     foreach ($printedPeople as $event) {
-        if (in_array((string) ($event['kind'] ?? ''), ['مهمان', 'چاپ خودکار مهمان'], true)
+        $eventType = (string) ($event['event_type'] ?? '');
+        if (in_array($eventType, ['guest', 'auto_guest'], true)
+            || in_array((string) ($event['kind'] ?? ''), ['مهمان', 'چاپ خودکار مهمان'], true)
             || (string) ($event['meal_type'] ?? 'lunch') !== 'lunch') {
             continue;
         }
@@ -3574,11 +3565,55 @@ function food_ticket_aggregate_diagnostics(string $fromDate, string $toDate, arr
         } else {
             $unmatchedPrintedCount++;
             if (count($unmatchedPrintedEvents) < 100) {
-                $unmatchedPrintedEvents[] = ['event_id' => (int) ($event['event_id'] ?? 0), 'date' => $date, 'name' => (string) ($event['name'] ?? ''), 'first_name' => (string) ($event['first_name'] ?? ''), 'last_name' => (string) ($event['last_name'] ?? ''), 'pc' => $personnel, 'legacy_printed' => !empty($event['legacy_printed'])];
+                $unmatchedPrintedEvents[] = ['event_id' => (int) ($event['event_id'] ?? 0), 'date' => $date, 'name' => (string) ($event['name'] ?? ''), 'first_name' => (string) ($event['first_name'] ?? ''), 'last_name' => (string) ($event['last_name'] ?? ''), 'pc' => $personnel, 'legacy_printed' => $eventType === 'print' || !empty($event['legacy_printed'])];
             }
         }
-        if (!empty($event['legacy_printed']) && count($legacyPrintedEvents) < 100) {
-            $legacyPrintedEvents[] = ['event_id' => (int) ($event['event_id'] ?? 0), 'date' => $date, 'name' => (string) ($event['name'] ?? ''), 'first_name' => (string) ($event['first_name'] ?? ''), 'last_name' => (string) ($event['last_name'] ?? ''), 'pc' => $personnel];
+        if ($eventType === 'print' || !empty($event['legacy_printed'])) {
+            $legacyPrintedCount++;
+            if (count($legacyPrintedEvents) < 100) {
+                $legacyPrintedEvents[] = ['event_id' => (int) ($event['event_id'] ?? 0), 'date' => $date, 'name' => (string) ($event['name'] ?? ''), 'first_name' => (string) ($event['first_name'] ?? ''), 'last_name' => (string) ($event['last_name'] ?? ''), 'pc' => $personnel];
+            }
+        }
+    }
+
+    return [
+        'identities' => $identities,
+        'matched' => $matched,
+        'unique_lunch_identities' => count($identities),
+        'matched_printed_lunch_identities' => count($matched),
+        'expected_absent_count' => max(0, count($identities) - count($matched)),
+        'orders_without_national_code' => $withoutNational,
+        'orders_without_national_code_count' => $withoutNationalCount,
+        'orders_without_identity_count' => $withoutIdentityCount,
+        'unmatched_printed_events' => $unmatchedPrintedEvents,
+        'unmatched_printed_event_count' => $unmatchedPrintedCount,
+        'legacy_printed_events' => $legacyPrintedEvents,
+        'legacy_printed_event_count' => $legacyPrintedCount,
+    ];
+}
+
+function food_ticket_aggregate_diagnostics(string $fromDate, string $toDate, array $printedPeople, array $counts, array &$sourceNotes): array
+{
+    $orderRows = [];
+    try {
+        // همان منبع و همان scope ناهار که گزارش غایبین استفاده می‌کند.
+        $orderRows = food_ticket_api_orders($fromDate, '', $toDate);
+    } catch (Throwable $e) {
+        $sourceNotes[] = 'عیب‌یابی سفارش‌ها: ' . $e->getMessage();
+    }
+
+    $identityData = food_ticket_aggregate_identity_sets($orderRows, $printedPeople);
+    $identities = $identityData['identities'];
+    $duplicates = [];
+    $duplicateRows = 0;
+    $duplicateIdentityCount = 0;
+    foreach ($identities as $identity) {
+        if ((int) $identity['rows'] > 1) {
+            $duplicateIdentityCount++;
+            $duplicateRows += (int) $identity['rows'] - 1;
+            if (count($duplicates) < 100) {
+                $duplicates[] = $identity;
+            }
         }
     }
 
@@ -3639,19 +3674,21 @@ function food_ticket_aggregate_diagnostics(string $fromDate, string $toDate, arr
         'active_dinner_orders' => (int) ($counts['dinner_orders'] ?? 0),
         'active_other_meal_orders' => (int) ($counts['other_meal_orders'] ?? 0),
         'reportable_lunch_rows' => count($orderRows),
-        'unique_lunch_identities' => count($identities),
-        'matched_printed_lunch_identities' => count($matched),
-        'orders_without_national_code' => $withoutNational,
-        'orders_without_national_code_count' => $withoutNationalCount,
+        'unique_lunch_identities' => $identityData['unique_lunch_identities'],
+        'matched_printed_lunch_identities' => $identityData['matched_printed_lunch_identities'],
+        'expected_absent_count' => $identityData['expected_absent_count'],
+        'orders_without_national_code' => $identityData['orders_without_national_code'],
+        'orders_without_national_code_count' => $identityData['orders_without_national_code_count'],
+        'orders_without_identity_count' => $identityData['orders_without_identity_count'],
         'duplicate_order_identities' => $duplicates,
         'duplicate_order_identity_count' => $duplicateIdentityCount,
         'duplicate_order_rows' => $duplicateRows,
         'unprintable_lunch_order_count' => $unprintableCount,
         'unprintable_lunch_orders' => $unprintableOrders,
-        'unmatched_printed_events' => $unmatchedPrintedEvents,
-        'unmatched_printed_event_count' => $unmatchedPrintedCount,
-        'legacy_printed_events' => $legacyPrintedEvents,
-        'legacy_printed_event_count' => (int) ($counts['legacy_printed'] ?? 0),
+        'unmatched_printed_events' => $identityData['unmatched_printed_events'],
+        'unmatched_printed_event_count' => $identityData['unmatched_printed_event_count'],
+        'legacy_printed_events' => $identityData['legacy_printed_events'],
+        'legacy_printed_event_count' => $identityData['legacy_printed_event_count'],
         'event_type_status_counts' => $eventTypeStatusCounts,
         'absent_count' => (int) ($counts['absent'] ?? 0),
         'difference' => (int) ($counts['difference'] ?? 0),
@@ -3768,6 +3805,7 @@ function food_ticket_api_aggregate_report(string $fromDate, string $toDate): arr
                 'nat' => food_ticket_digits($row['national_code'] ?? ''),
                 'name' => (string) ($row['full_name'] ?? ''),
                 'food' => (string) ($row['food_type'] ?? ''),
+                'event_type' => $eventType,
                 'kind' => $kind,
                 'auto_label' => $autoLabel,
                 'meal_type' => $mealType,
@@ -3811,15 +3849,16 @@ function food_ticket_api_aggregate_report(string $fromDate, string $toDate): arr
     }
 
     $counts['absent'] = count($absentPeople);
-    // فیش و غیبت شام جدا گزارش می‌شوند و در تفریق غایبین ناهار وارد نمی‌شوند.
-    $expected = $counts['lunch_orders'] - $counts['printed_final'];
-    $counts['expected_absent'] = $expected;
-    $counts['has_mismatch'] = ($expected !== $counts['absent']);
-    $counts['difference'] = $expected - $counts['absent'];
-
+    // مبنای تطبیق، هویت‌های یکتای قابل‌تطبیق است؛ شمار خام رویدادهای چاپی می‌تواند شامل فیش بی‌سفارش یا تکراری باشد.
     food_ticket_aggregate_sort_people($printedPeople);
     food_ticket_aggregate_sort_people($absentPeople);
     $diagnostics = food_ticket_aggregate_diagnostics($from, $to, $printedPeople, $counts, $sourceNotes);
+    $expected = (int) ($diagnostics['expected_absent_count'] ?? 0);
+    $counts['expected_absent'] = $expected;
+    $counts['has_mismatch'] = ($expected !== $counts['absent']);
+    $counts['difference'] = $expected - $counts['absent'];
+    $diagnostics['absent_count'] = $counts['absent'];
+    $diagnostics['difference'] = $counts['difference'];
     $publicPrintedPeople = $printedPeople;
     foreach ($publicPrintedPeople as &$person) {
         // شناسه و کد ملی فقط برای تطبیق سمت سرور است و به مرورگر گزارش نمی‌شود.
@@ -3869,6 +3908,7 @@ function food_ticket_aggregate_export(string $fromDate, string $toDate, string $
         ? food_order_jalali_label($report['from'])
         : food_order_jalali_label($report['from']) . ' تا ' . food_order_jalali_label($report['to']);
     $c = $report['counts'];
+    $d = $report['diagnostics'];
     $rows = [];
     $rows[] = ['گزارش تجمیعی غذا — بازه: ' . $rangeLabel];
     $rows[] = ['سفارش فعال ناهار', $c['lunch_orders'], 'سفارش لغوشدهٔ ناهار', $c['cancelled_orders']];
@@ -3881,7 +3921,8 @@ function food_ticket_aggregate_export(string $fromDate, string $toDate, string $
     $rows[] = ['فیش مهمان ثبت‌شدهٔ ناهار', $c['guest_printed_lunch'], 'فیش مهمان ثبت‌شدهٔ شام', $c['guest_printed_dinner']];
     $rows[] = ['چاپ فیزیکی مهمان ناهار', $c['physical_guest_printed_lunch'], 'چاپ فیزیکی مهمان شام', $c['physical_guest_printed_dinner']];
     $rows[] = ['فیش خودکار مهمان ناهار', $c['auto_guest_printed_lunch'], 'فیش خودکار مهمان شام', $c['auto_guest_printed_dinner']];
-    $rows[] = ['تعداد غایبین', $c['absent'], 'تفریق تخمینی، نه تطبیق فردی', $c['expected_absent'] ?? 0];
+    $rows[] = ['هویت یکتای سفارش‌دارِ قابل‌تطبیق ناهار', $d['unique_lunch_identities'] ?? 0, 'هویت دارای فیش ناهار', $d['matched_printed_lunch_identities'] ?? 0];
+    $rows[] = ['غایب موردانتظار', $c['expected_absent'] ?? 0, 'غایب ثبت‌شده', $c['absent']];
     $rows[] = ['فیش چاپی به‌تنهایی تأیید مستقل تحویل فیزیکی غذا نیست.'];
     $rows[] = ['فیش‌های قدیمی نوع print', $c['legacy_printed'], 'باقیماندهٔ مغایرت', $c['difference'] ?? 0];
     $rows[] = ['مغایرت ناهار', $c['has_mismatch'] ? 'دارد' : 'ندارد', 'اختلاف', $c['difference'] ?? 0];
@@ -3953,13 +3994,15 @@ function food_ticket_api_absent(string $fromDate, ?string $toDate = null): array
         $items = food_ticket_api_orders($fromDate, '', $toDate);
         foreach ($items as $it) {
             $nat = food_ticket_digits((string) ($it['nat'] ?? ''));
-            if ($nat === '') {
-                continue;
+            $pc = trim((string) ($it['pc'] ?? ''));
+            if ($nat === '' && $pc === '') {
+                continue; // بدون کد ملی و پرسنلی هیچ تطبیق امنی ممکن نیست.
             }
             $day = (string) ($it['foodDate'] ?? $fromDate);
-            $orders[$day][$nat] = [
+            $identityKey = $nat !== '' ? 'nat:' . $nat : 'pc:' . $pc;
+            $orders[$day][$identityKey] = [
                 'nat' => $nat,
-                'pc' => (string) ($it['pc'] ?? ''),
+                'pc' => $pc,
                 'first' => (string) ($it['first'] ?? ''),
                 'last' => (string) ($it['last'] ?? ''),
                 'food' => (string) ($it['food'] ?? ''),
@@ -4013,16 +4056,20 @@ function food_ticket_api_absent(string $fromDate, ?string $toDate = null): array
         }
     }
     $userIdsByNational = [];
+    $userIdsByPersonnel = [];
     $absent = [];
     foreach ($orders as $day => $dayOrders) {
-        foreach ($dayOrders as $nat => $row) {
+        foreach ($dayOrders as $row) {
+            $nat = food_ticket_digits((string) ($row['nat'] ?? ''));
             $pc = trim((string) ($row['pc'] ?? ''));
-            if (!empty($printed[$day]['nat:' . $nat]) || ($pc !== '' && !empty($printed[$day]['pc:' . $pc]))) {
+            if (($nat !== '' && !empty($printed[$day]['nat:' . $nat]))
+                || ($pc !== '' && !empty($printed[$day]['pc:' . $pc]))) {
                 continue;
             }
             $row['full_name'] = trim(($row['first'] ?? '') . ' ' . ($row['last'] ?? ''));
             $declared = false;
             try {
+                $uid = 0;
                 if ($nat !== '') {
                     if (!isset($userIdsByNational[$nat])) {
                         $uq = db()->prepare('SELECT id FROM users WHERE national_code = ? OR national_code = ? LIMIT 1');
@@ -4030,8 +4077,15 @@ function food_ticket_api_absent(string $fromDate, ?string $toDate = null): array
                         $userIdsByNational[$nat] = (int) ($uq->fetchColumn() ?: 0);
                     }
                     $uid = (int) $userIdsByNational[$nat];
-                    $declared = $uid > 0 && !empty($declaredByDay[(string) $day][$uid]);
+                } elseif ($pc !== '') {
+                    if (!isset($userIdsByPersonnel[$pc])) {
+                        $uq = db()->prepare('SELECT id FROM users WHERE employee_number = ? LIMIT 1');
+                        $uq->execute([$pc]);
+                        $userIdsByPersonnel[$pc] = (int) ($uq->fetchColumn() ?: 0);
+                    }
+                    $uid = (int) $userIdsByPersonnel[$pc];
                 }
+                $declared = $uid > 0 && !empty($declaredByDay[(string) $day][$uid]);
             } catch (Throwable $e) {
                 app_error_log('[absent] user lookup: ' . $e->getMessage());
             }
@@ -5894,6 +5948,7 @@ function food_ticket_render_page(array $user): void
         'dashboard' => $fpCan('food.dashboard'),
         'live' => $fpCan('food.monitor'),
         'employees' => $fpCan('food.employees'),
+        'absent-report' => $fpCan('food.reports'),
         'food-menu' => $fpCan('food.menu') || $fpCan('food.menu_edit'),
         'food-groups' => $fpCan('food.groups'),
         'reports' => $fpCan('food.reports'),

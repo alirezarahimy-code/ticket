@@ -187,7 +187,7 @@ calendar-template.csv	root-misc	4	119
 calendar-template.ics	root-misc	14	297
 cd-dvd.php	core	897	72941
 chatbot-tts-lexicon.php	core	14	472
-chatbot.php	core	3403	180145
+chatbot.php	core	3416	181648
 client-agent/Collect-Inventory.ps1	client-agent	147	7378
 config.sample.php	config	56	2332
 cron/.htaccess	cron	1	19
@@ -232,7 +232,7 @@ docs/DOWNLOAD-PUBLISHING-POLICY-FA.md	docs	16	2814
 docs/EXECUTION-STATUS-1.62.76-FA.md	docs	17	1494
 docs/FOOD-MANUAL-GUEST-FA.md	docs	261	10593
 docs/GUIDE-FA-install-1.63.1.md	docs	304	12135
-docs/GUIDE-FA-install-1.63.2.md	docs	56	3923
+docs/GUIDE-FA-install-1.63.2.md	docs	60	4660
 docs/HANDOFF-FA.md	docs	407	63893
 docs/HEALTH-PROCESS-FA.md	docs	215	12834
 docs/INSTALL-R20-ASSET-TENTER-FA.md	docs	55	4211
@@ -332,7 +332,7 @@ downloads/CHANGE-REPORT-FA-1.63.1-r16.md	history-downloads	914	52678
 downloads/CHANGE-REPORT-FA-1.63.1-r17.md	history-downloads	994	59193
 downloads/CHANGE-REPORT-FA-1.63.1-r20-assets-tenter.md	history-downloads	35	2549
 downloads/CHANGE-REPORT-FA-1.63.1.md	history-downloads	509	29402
-downloads/CHANGE-REPORT-FA-1.63.2-r21-assets-tenter.md	history-downloads	36	4308
+downloads/CHANGE-REPORT-FA-1.63.2-r21-assets-tenter.md	history-downloads	42	5662
 downloads/CHANGE-REPORT-FA-1.63.md	history-downloads	455	126338
 downloads/CHANGE-REPORT-FA-asset-names.md	history-downloads	117	4741
 downloads/CHANGE-REPORT-FA-cd-org.md	history-downloads	235	11798
@@ -363,7 +363,7 @@ downloads/RELEASE-ASSETS-1.63.2.txt	history-downloads	1	60
 downloads/RELEASE-ASSETS-1.63.txt	history-downloads	1	75
 downloads/RELEASE-DOWNLOAD-POLICY-fa.md	history-downloads	11	1557
 downloads/RELEASE-NOTES-1.63.1.md	history-downloads	167	9084
-downloads/RELEASE-NOTES-1.63.2.md	history-downloads	34	3447
+downloads/RELEASE-NOTES-1.63.2.md	history-downloads	38	4192
 downloads/RELEASE-NOTES-1.63.md	history-downloads	44	2461
 downloads/RELEASE-NOTES.md	history-downloads	66	3326
 downloads/REQUEST-CENTER-TEST-BUILD-1.62.92-FA.md	history-downloads	58	7324
@@ -378,7 +378,7 @@ downloads/TICKET-HARDENING-1.62.87-UPDATE-NOTE-fa.txt	history-downloads	113	7178
 downloads/TICKET-NUMBER-REPAIR-1.62.83-CHANGE-REPORT-fa.md	history-downloads	172	10838
 downloads/TICKET-NUMBER-REPAIR-1.62.83-UPDATE-NOTE-fa.txt	history-downloads	91	7839
 downloads/URGENT-FIX-1.62.38-FA.md	history-downloads	51	3340
-downloads/index.html	history-downloads	27	4282
+downloads/index.html	history-downloads	27	4452
 downloads/repair-1.62.36.html	history-downloads	54	6825
 downloads/ticket-repair-1.62.36-full-source-restore-20261027.html	history-downloads	21	5176
 food-order-import.php	core	476	26389
@@ -428,15 +428,15 @@ food-ticket-web/assets/food-ticket-persistence.js	food-web	23	1137
 food-ticket-web/assets/food-ticket-theme.css	food-web	434	20820
 food-ticket-web/assets/jalali-calendar.js	food-web	346	13976
 food-ticket-web/assets/list-sort.js	food-web	322	15241
-food-ticket-web/index.html	food-web	1064	261581
+food-ticket-web/index.html	food-web	1082	276417
 food-ticket-web/integration-contract-fa.md	food-web	24	1961
 food-ticket-web/samples/employees-sample.csv	food-web	1	61
 food-ticket-web/template-bridge.js	food-web	26	1069
 food-ticket-window.php	core	335	15488
 food-ticket-worker-install-fa.html	root-misc	176	23682
-food-ticket.php	core	6040	301124
+food-ticket.php	core	6041	301175
 global-search.php	core	122	12781
-help-guide.php	core	722	135775
+help-guide.php	core	723	137263
 holiday-board.php	core	75	8205
 index.php	core	2559	258161
 install-empty-db.sql	sql-root	1652	84912
@@ -463,7 +463,7 @@ lib/logging-integrity.php	lib	237	15084
 lib/logging-replay.php	lib	260	18905
 lib/notify-users.php	lib	524	26237
 lib/org-grouping.php	lib	297	14028
-lib/release-notes.php	lib	369	33368
+lib/release-notes.php	lib	370	33835
 lib/render.php	lib	279	22430
 lib/settings-effects.php	lib	388	14577
 lib/system-alarms.php	lib	630	31397
@@ -553,6 +553,7 @@ modules/request-center/post-handler.php	other	192	10984
 organization.php	core	796	40555
 permissions.php	core	980	51930
 persian-ticketing-full-install-fa.html	root-misc	150	19115
+preview/absent-report-prototype.html	preview	573	40046
 preview/domain-scan-sim/index.html	preview	420	30494
 preview/food-release-download/index.html	preview	41	8141
 preview/food-release-download/package-lock.json	preview	798	25013
@@ -589,6 +590,7 @@ tests/fixtures/request-center-ddl-probe.php	tests	11	372
 tests/fixtures/request-center-session-seed.php	tests	20	486
 tests/fixtures/request-center-t12-session-seed.php	tests	29	864
 tests/food-engine-checklist.md	tests	59	4865
+tests/js/food-absent-report.test.js	tests	227	14429
 tests/js/food-aggregate-report.test.js	tests	189	13094
 tests/js/food-bulk-past-window.test.js	tests	32	1683
 tests/js/food-calendar-order-count.test.js	tests	94	5887
@@ -625,6 +627,7 @@ tests/test_chatbot_tts_static.py	tests	144	9034
 tests/test_chatbot_widget_static.py	tests	76	4067
 tests/test_duty_split_and_work_hours_static.py	tests	246	13020
 tests/test_fa_digits_output.py	tests	120	4196
+tests/test_food_absent_report_static.py	tests	16	484
 tests/test_food_aggregate_report_static.py	tests	148	7669
 tests/test_food_auto_receipts_scope_static.py	tests	70	3851
 tests/test_food_bulk_operations_static.py	tests	104	5801
@@ -760,7 +763,7 @@ tests/test_release_1_62_8_traffic_autofill_multi_approver_static.py	tests	127	67
 tests/test_release_1_62_93_food_reconciliation_leftover_static.py	tests	266	12812
 tests/test_release_1_62_94_static.py	tests	233	12430
 tests/test_release_1_62_9_manual_ticket_date_guest_static.py	tests	170	8680
-tests/test_release_1_63_2_r21_package.py	tests	110	4628
+tests/test_release_1_63_2_r21_package.py	tests	120	5206
 tests/test_release_notes_popup.js	tests	189	8992
 tests/test_repair_16236_full_source_restore.py	tests	162	7687
 tests/test_request_center_access_matrix_static.py	tests	214	10391
@@ -869,7 +872,7 @@ tools/build_1_63_1_update_r16.py	tools	1340	77541
 tools/build_1_63_1_update_r17.py	tools	1470	87993
 tools/build_1_63_1_update_r19.py	tools	1485	89455
 tools/build_1_63_1_update_r20.py	tools	218	10382
-tools/build_1_63_2_update_r21.py	tools	277	17408
+tools/build_1_63_2_update_r21.py	tools	285	19019
 tools/build_asset_names_package.py	tools	299	12220
 tools/build_cd_report_org_package.py	tools	414	19963
 tools/build_cumulative_update.py	tools	278	14883

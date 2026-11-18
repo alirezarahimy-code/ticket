@@ -24,6 +24,7 @@ RELEASE_DATE = "2026-11-06"
 ZIP_DATE = (2026, 11, 6, 14, 0, 0)
 
 # Files whose current source must travel with the cumulative r20 payload.
+# The food reconciliation API and both mirrors of its UI asset changed in r21.
 REFRESH_FILES = [
     "api/inventory.php",
     "asset-inventory-page.php",
@@ -35,6 +36,11 @@ REFRESH_FILES = [
     "tools/test_asset_dedupe_offline.php",
     "tools/test_asset_names_offline.php",
     "food-ticket.php",
+    "food-ticket-release-notes.php",
+    "food-reconciliation.php",
+    "assets/food-menu.js",
+    "help-guide.php",
+    "chatbot.php",
     "tools/test_source_time_delete_offline.php",
     "docs/ASSET-SCAN-CLOSING-FA.md",
     "docs/NETWORK-INVENTORY-SETUP-FA.md",
@@ -52,6 +58,8 @@ ADD_OR_REPLACE_FILES = [
     "docs/ASSET-IDENTITY-AND-LIVE-TEST-FA.md",
     "docs/ASSET-NAME-EXACT-FA.md",
     "tests/test_asset_inventory_flow_sqlite.php",
+    "tools/test_food_reconciliation_disposition_offline.php",
+    "tools/test_food_aggregate_report_offline.php",
     "tools/test_source_delete_offline.php",
     GUIDE_NAME,
 ]
@@ -66,6 +74,12 @@ REQUIRED_INSTALL_FILES = [
     "VERSION",
     "lib/release-notes.php",
     "food-ticket.php",
+    "food-ticket-release-notes.php",
+    "food-reconciliation.php",
+    "assets/food-menu.js",
+    "food-ticket-web/assets/food-menu.js",
+    "tools/test_food_reconciliation_disposition_offline.php",
+    "tools/test_food_aggregate_report_offline.php",
     "tools/repair_source_rows.php",
     "tools/test_source_delete_offline.php",
     "tools/test_source_time_delete_offline.php",
@@ -95,14 +109,14 @@ def read_source(relative: str) -> bytes:
 
 
 def report_text(file_count: int) -> str:
-    return f"""# گزارش بستهٔ به‌روزرسانی ۱.۶۳.۲-r21 — شناسنامه و TENTER
+    return f"""# گزارش بستهٔ به‌روزرسانی ۱.۶۳.۲-r21 — شناسنامه، TENTER و گزارش غذا
 
 - نسخهٔ مقصد: **{RELEASE_VERSION}**
 - پیش‌نیاز: **{REQUIRES_VERSION} به بعد** (روی ۱.۶۳ و ۱.۶۳.۱ نصب می‌شود)
 - تاریخ ساخت: **{RELEASE_DATE}**
 - فایل‌های نصب: **{file_count}**
 - مهاجرت دیتابیس: **ندارد**
-- پایه: بستهٔ تجمعی r20 با اصلاحات شناسنامه و TENTER، به‌همراه یادداشت و راهنمای نسخهٔ ۱.۶۳.۲
+- پایه: بستهٔ تجمعی r20 با اصلاحات شناسنامه و TENTER؛ r21 همچنین رفع اشکال گزارش غایبین و تعیین تکلیف دقیق ماندهٔ غذا را دارد.
 
 ## اصلاح TENTER
 
@@ -117,6 +131,12 @@ def report_text(file_count: int) -> str:
 - نام نمایشی از IP، MAC و برچسب خودکار جداست؛ جست‌وجو و tooltip همچنان جزئیات شبکه را نگه می‌دارند. انتخاب سیستم در فرم درخواست فقط نام نمایشی را نشان می‌دهد.
 - وابستگی `lib/asset-dedupe.php`، ابزارهای استخراج SMB/شبکه، تشخیص و آزمون‌های آفلاین همراه بسته‌اند. ادغام شناسنامه‌ها خودکار اجرا نمی‌شود.
 
+## گزارش غایبین و تعیین تکلیف ماندهٔ غذا
+
+گزارش تجمیعی، غایبین موردانتظار را از هویت‌های یکتای سفارش ناهار بر پایهٔ کد ملی (و در نبود آن، کد پرسنلی) در برابر فیش‌های ناهار محاسبه می‌کند؛ فیش تکراری، فیش بی‌سفارش، مهمان و وعدهٔ شام تعداد غایبین را به‌اشتباه تغییر نمی‌دهند. تشخیص ردیف‌های بدون کد، فیش‌های قدیمی و موارد بی‌تطبیق در بخش عیب‌یابی باقی است. نمای مستقل «غایبین ناهار» نیز بازهٔ شمسی، گروه‌بندی معاونتی، شمار پرس/افراد یکتا، XLSX و چاپ فهرست را دارد.
+
+هنگام بستن روزِ غذا، مجموع گزینه‌های تعیین تکلیف برای ماندهٔ مثبت باید دقیقاً با ماندهٔ تازه‌محاسبه‌شدهٔ سرور برابر باشد؛ کمتر/بیشتر رد می‌شود و اگر نمای کاربر کهنه باشد، ثبت متوقف و تازه‌سازی خواسته می‌شود. برای ماندهٔ صفر یا منفی فقط مجموع صفر پذیرفته است. تغییرات API/پایگاه‌داده یا مهاجرت جدیدی اضافه نشده‌اند.
+
 ## سایر فایل‌های هم‌تراز‌شده
 
 چهار فایل رابط گزارش گروه‌بندی غذا که از قبل در بستهٔ تجمعی بودند، با نسخهٔ جاری مخزن هم‌تراز شده‌اند؛ گزارش گروهی می‌تواند شمار هر غذای سفارش‌شده را نشان دهد.
@@ -127,8 +147,10 @@ def report_text(file_count: int) -> str:
 - شناسنامه: `tools/test_asset_dedupe_offline.php` **۳۵/۳۵**، `tools/test_asset_names_offline.php` **۵۰/۵۰**، استخراج آفلاین **۱۴/۱۴** و آزمون SMB **۲۹/۲۹**.
 - جریان موجودی در SQLite درون‌حافظه‌ای: `tests/test_asset_inventory_flow_sqlite.php` **۲۵/۲۵**.
 - یادداشت انتشار در درخت کامل برنامه: `tools/test_release_notes_offline.php` **۴۱/۴۱**.
-- PHP lint برای ۱۱ فایل PHP بسته: **بدون خطای نحوی**؛ آزمون‌های Python مخزن: **۷۹۳ موفق، ۱۵ ردشده به‌صورت skip، ۲۵ زیرآزمون موفق**.
-- اعتبارسنجی ZIP: آزمون‌های `system-update.php` موفق؛ بستهٔ r21 نیز با خود updater خوانده، استخراج و hash-verification شد (**۹۲ فایل، صفر migration**).
+- تعیین تکلیف مانده: `tools/test_food_reconciliation_disposition_offline.php` **۸/۸** با PHP-WASM؛ مجموع کمتر/بیشتر، ماندهٔ صفر و گزارش کهنه پوشش داده شده‌اند.
+- گزارش غایبین: `tools/test_food_aggregate_report_offline.php` **۹/۹** با PHP-WASM؛ یکتایی روزانه، کد ملی، fallback کد پرسنلی، رویداد تکراری/legacy، مهمان و وعدهٔ شام بررسی شده‌اند.
+- پنل گزارش: `tests/js/food-aggregate-report.test.js` و `tests/js/food-absent-report.test.js` **موفق**؛ `tests/test_food_aggregate_report_static.py` **۵۹ چک موفق**.
+- بستهٔ r21 با manifest، فهرست فایل‌ها، SHA-256 داخلی و تطبیق فایل‌های منبع بررسی می‌شود؛ هیچ migration تازه‌ای ندارد. PHP lint فقط برای فایل‌های تغییریافتهٔ مرتبط ثبت می‌شود؛ آزمون زندهٔ MySQL/Access در این محیط ادعا نمی‌شود.
 
 نتایج آفلاین/ایستا جایگزین آزمون روی فایل Access واقعی یا شبکهٔ مقصد نیستند؛ اتصال زندهٔ Access/TENTER، SMB و WinRM در این محیط تأیید نشده است. آزمون استخراج بدون `config.php` بخش‌های وابسته به دادهٔ نصب واقعی را رد می‌کند. برای هیچ‌یک از ردیف‌های TENTER یا شناسنامه‌های تکراری پاک‌سازی خودکار انجام نمی‌شود.
 """
@@ -145,7 +167,7 @@ def render_download_page(package_size: int, digest: str, file_count: int) -> str
 </style></head>
 <body><main><span class="eyebrow">صفحهٔ دانلود — آخرین نسخه</span>
 <h1>بستهٔ به‌روزرسانی نسخهٔ ۱.۶۳.۲</h1>
-<p>این بستهٔ تجمعی، اصلاحات هویت شناسنامهٔ رایانه و پاک‌سازی دقیق ردیف‌های TENTER را دارد و فایل‌های لازم استخراج شبکه/تشخیص را همراه می‌آورد. ردیف‌های قدیمی TENTER یا شناسنامه‌های تکراری خودکار حذف نمی‌شوند.</p>
+<p>این بستهٔ تجمعی، اصلاحات هویت شناسنامهٔ رایانه و پاک‌سازی دقیق ردیف‌های TENTER را دارد و فایل‌های لازم استخراج شبکه/تشخیص را همراه می‌آورد. گزارش مستقل «غایبین ناهار» نیز با مجوز گزارش‌های غذا، خروجی XLSX و چاپ فهرست در پنل قرار دارد. ردیف‌های قدیمی TENTER یا شناسنامه‌های تکراری خودکار حذف نمی‌شوند.</p>
 
 <div class="ok"><b>پیش‌نیاز:</b> نسخهٔ <code>1.63</code> یا جدیدتر (از جمله <code>1.63.1</code>). بسته {file_count} فایل نصب دارد و هیچ مهاجرت دیتابیسی اجرا نمی‌کند.</div>
 
@@ -195,6 +217,12 @@ def main() -> None:
         raise SystemExit("یادداشت انتشار ۱.۶۳.۲ در lib/release-notes.php نیست.")
     if "food_ticket_source_minimal_where" not in payload["food-ticket.php"].decode("utf-8", "replace"):
         raise SystemExit("مسیر fallback اصلاح‌شدهٔ TENTER در payload نیست.")
+    if "food_reconciliation_expected_remaining_assert" not in payload["food-reconciliation.php"].decode("utf-8", "replace"):
+        raise SystemExit("بررسی ماندهٔ کهنه و تعیین تکلیف دقیق در payload نیست.")
+    if "food_ticket_aggregate_identity_sets" not in payload["food-ticket.php"].decode("utf-8", "replace"):
+        raise SystemExit("تطبیق هویت‌محور غایبین در payload نیست.")
+    if "leftover_expected_remaining: m.remaining" not in payload["food-ticket-web/assets/food-menu.js"].decode("utf-8", "replace"):
+        raise SystemExit("نمایش/ارسال ماندهٔ کاربر در payload نیست.")
     if "tools/test_source_delete_offline.php" not in payload:
         raise SystemExit("آزمون TENTER در payload نیست.")
     missing = [relative for relative in REQUIRED_INSTALL_FILES if relative not in payload]
@@ -213,14 +241,14 @@ def main() -> None:
         "name": "asset-tenter-install-r21",
         "version": RELEASE_VERSION,
         "date": RELEASE_DATE,
-        "title": "۱.۶۳.۲-r21 — شناسنامهٔ پایدار و اصلاح TENTER",
+        "title": "۱.۶۳.۲-r21 — شناسنامه، TENTER و رفع اشکال گزارش غذا",
         "requires_version": REQUIRES_VERSION,
         "migrations": [],
         "files": files,
         "sha256": {path: sha256(payload[path]) for path in files},
         "release_status": "INSTALLABLE_OFFLINE_VERIFIED",
         "description": (
-            "بستهٔ تجمعی بر پایهٔ ۱.۶۳ با هویت پایدار شناسنامه، اصلاح تطبیق زمان TENTER و ابزار گزارش/ترمیم اختیاری. "
+            "بستهٔ تجمعی بر پایهٔ ۱.۶۳ با هویت پایدار شناسنامه، اصلاح تطبیق زمان TENTER، محاسبهٔ هویت‌محور غایبین و تعیین تکلیف دقیق ماندهٔ غذا. "
             "مهاجرت ندارد؛ اتصال زندهٔ Access/TENTER یا SMB/WinRM در محیط ساخت ادعا نمی‌شود."
         ),
     }

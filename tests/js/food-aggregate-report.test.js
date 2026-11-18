@@ -1,189 +1,232 @@
-// تست رفتاری «گزارش تجمیعی» — بلوک UI را از index.html جدا کرده و با mock اجرا میکند.
-// اجرا: node tests/js/food-aggregate-report.test.js
+// Regression coverage for the current aggregate-report UI and reconciliation formula.
+// Run: node tests/js/food-aggregate-report.test.js
+'use strict';
 const fs = require('fs');
-const assert = require('assert');
 const path = require('path');
+const assert = require('assert');
 
 const root = path.resolve(__dirname, '../..');
 const html = fs.readFileSync(path.join(root, 'food-ticket-web/index.html'), 'utf8');
 const start = html.indexOf('const AGG_FIELDS_KEY=');
-const fnEnd = html.indexOf('function reportClassicView(){', start);
-assert(start > 0 && fnEnd > start, 'بلوک توابع گزارش تجمیعی در index.html پیدا نشد');
-const hStart = html.indexOf("document.addEventListener('click',e=>{\n const sortBtn=", fnEnd);
-const hEndMarker = "document.addEventListener('click',e=>{const a=e.target.closest('[data-action]');if(a?.dataset.action==='today-orders'){e.preventDefault();";
-const hEnd = html.indexOf(hEndMarker, hStart);
-assert(hStart > 0 && hEnd > hStart, 'بلوک هندلرهای گزارش تجمیعی پیدا نشد');
-const block = html.slice(start, fnEnd) + '\n' + html.slice(hStart, hEnd);
+const end = html.indexOf('function reportClassicView(){', start);
+assert(start >= 0 && end > start, 'the aggregate-report module is present');
+const block = html.slice(start, end);
+const handlerStart = html.indexOf("document.addEventListener('click',e=>{\n const sortBtn=", end);
+const handlerEnd = html.indexOf("document.addEventListener('click',e=>{const a=e.target.closest('[data-action]');if(a?.dataset.action==='today-orders')", handlerStart);
+assert(handlerStart > end && handlerEnd > handlerStart, 'aggregate click/change/submit handlers are present');
+const interactionBlock = html.slice(handlerStart, handlerEnd);
 
-// ── mock محیط ────────────────────────────────────────────────────────────────
 const storage = new Map();
-const listeners = { click: [], change: [], submit: [] };
+const listeners = { click: [], change: [], input: [], submit: [], focusout: [] };
 const created = [];
-const toastCalls = [];
 const apiCalls = [];
+const toasts = [];
 let renderCount = 0;
 
 const env = {
   localStorage: {
-    getItem: (k) => (storage.has(k) ? storage.get(k) : null),
-    setItem: (k, v) => storage.set(k, String(v)),
+    getItem(key) { return storage.has(key) ? storage.get(key) : null; },
+    setItem(key, value) { storage.set(key, String(value)); },
   },
   document: {
-    addEventListener: (type, fn) => { if (listeners[type]) listeners[type].push(fn); },
-    querySelectorAll: () => [],
-    createElement: () => ({ className: '', innerHTML: '', href: '', download: '', click() {}, remove() {}, style: {} }),
-    body: { appendChild: (x) => created.push(x), classList: { add() {}, remove() {} } },
+    addEventListener(type, handler) { if (listeners[type]) listeners[type].push(handler); },
+    querySelector() { return null; },
+    querySelectorAll() { return []; },
+    createElement() {
+      const element = { className: '', innerHTML: '', href: '', download: '', style: {}, isConnected: true,
+        click() {}, remove() { this.isConnected = false; } };
+      created.push(element);
+      return element;
+    },
+    body: { appendChild(element) { if (!created.includes(element)) created.push(element); }, classList: { add() {}, remove() {} } },
   },
-  state: { report: { from: '۱۴۰۵/۰۸/۰۵', to: '۱۴۰۵/۰۸/۰۵' }, reportTab: 'aggregate' },
+  window: { FoodOrgGroups: null },
+  state: {
+    report: { from: '۱۴۰۵/۰۸/۰۵', to: '۱۴۰۵/۰۸/۰۵' },
+    reportTab: 'aggregate',
+    aggSort: { key: 'last_name', dir: 'asc' },
+  },
   view: 'reports',
   serviceMode: true,
   apiBase: '',
-  esc: (x) => String(x ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;'),
-  faDate: (x) => String(x ?? ''),
-  toFaDigits: (v) => String(v).replace(/\d/g, (d) => '۰۱۲۳۴۵۶۷۸۹'[d]),
-  isoDateFor: (x) => {
-    const s = String(x ?? '').replace(/[۰-۹]/g, (d) => '۰۱۲۳۴۵۶۷۸۹'.indexOf(d));
-    if (/^\d{4}-\d{2}-\d{2}$/.test(s)) return s;
-    const m = s.match(/^(\d{4})\/(\d{1,2})\/(\d{1,2})$/);
-    if (m) return '2026-' + m[2].padStart(2, '0') + '-' + m[3].padStart(2, '0');
-    return '2026-10-27';
+  absentFilterDirty: false,
+  absentRenderPending: false,
+  esc(value) {
+    return String(value ?? '').replace(/[&<>"']/g, char => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[char]));
+  },
+  faDate(value) { return String(value ?? ''); },
+  toFaDigits(value) { return String(value ?? '').replace(/\d/g, digit => '۰۱۲۳۴۵۶۷۸۹'[Number(digit)]); },
+  isoDateFor(value) {
+    const text = String(value ?? '').replace(/[۰-۹]/g, digit => '۰۱۲۳۴۵۶۷۸۹'.indexOf(digit));
+    return /^\d{4}-\d{2}-\d{2}$/.test(text) ? text : null;
   },
   todayIso: () => '2026-10-27',
   todayJalali: () => '۱۴۰۵/۰۸/۰۵',
-  formObject: (f) => f._values || {},
-  heading: (title, sub, actions = '') => `<div class="heading"><h2>${title}</h2><p>${sub}</p>${actions}</div>`,
-  api: (url) => { apiCalls.push(url); return Promise.resolve({ ok: true, counts: {}, printed_people: [], absent_people: [], columns: [] }); },
-  persist: () => {},
-  render: () => { renderCount++; },
-  toast: (m) => toastCalls.push(String(m)),
-  loadReportMonitoring: () => {},
-  loadAggregate: () => Promise.resolve(),
-  reportClassicView: () => '<div id="classic-report">گزارشگیری قدیمی</div>',
+  formObject(form) { return form.values || {}; },
+  heading(title, subtitle, actions = '') { return `<header><h2>${title}</h2><p>${subtitle}</p>${actions}</header>`; },
+  api(url) { apiCalls.push(url); return Promise.resolve({ ok: true, counts: {}, printed_people: [], absent_people: [], columns: [] }); },
+  loadAggregate(force) { apiCalls.push({ aggregate: !!force }); return Promise.resolve(); },
+  persist() {},
+  render() { renderCount++; },
+  toast(message) { toasts.push(String(message)); },
+  loadOrgMap: () => Promise.resolve(null),
+  loadReportMonitoring() {},
+  reportClassicView: () => '<div>گزارش کلاسیک</div>',
   Promise, JSON, Array, String, Number, Math, Object, Set, URLSearchParams,
 };
 
 const names = Object.keys(env);
-const fn = new Function(...names, `${block}; return {
+const create = new Function(...names, `${block}; return {
   reportView, reportAggregateView, aggFields, aggSaveFields, aggRange, aggDateLabel,
-  aggCell, aggTable, aggSelectedCols, aggSorted, aggLastName, aggSortValue, loadAggregate, aggDownloadUrl, showAggregatePreview,
-  AGG_ALL_FIELDS, AGG_DEFAULT_FIELDS
+  aggCell, aggTable, aggSelectedCols, aggSorted, aggDownloadUrl, showAggregatePreview,
+  aggregateDiagTable, AGG_ALL_FIELDS, AGG_DEFAULT_FIELDS
 };`);
-const m = fn(...names.map((n) => env[n]));
+const reportModule = create(...names.map(name => env[name]));
+const handlerEnv = {
+  ...env,
+  REPORT_TABS: [['classic', 'گزارشگیری'], ['aggregate', 'گزارش تجمیعی']],
+  FOOD_REPORT_TABS: {},
+  aggDownloadUrl: reportModule.aggDownloadUrl,
+  showAggregatePreview: reportModule.showAggregatePreview,
+  aggSaveFields: reportModule.aggSaveFields,
+};
+new Function(...Object.keys(handlerEnv), interactionBlock)(...Object.values(handlerEnv));
 
 function fire(type, target, extra = {}) {
-  const e = { target, preventDefault() {}, stopImmediatePropagation() {}, ...extra };
-  for (const h of listeners[type]) h(e);
+  const event = { target, preventDefault() { this.defaultPrevented = true; }, stopImmediatePropagation() {}, ...extra };
+  for (const handler of listeners[type] || []) handler(event);
+}
+function clickTarget({ action = null, tab = null, sort = null } = {}) {
+  return { closest(selector) {
+    if (selector === '[data-agg-sort]' && sort) return { dataset: { aggSort: sort } };
+    if (selector === '[data-report-tab]' && tab) return { dataset: { reportTab: tab } };
+    if (selector === '[data-action]' && action) return { dataset: { action } };
+    return null;
+  } };
 }
 
-// ── تستها ───────────────────────────────────────────────────────────────────
-// ۱) reportView باید دوتا تب بسازد
-let out = m.reportView();
-assert(out.includes('data-report-tab="classic"'), 'تب گزارشگیری وجود ندارد');
-assert(out.includes('data-report-tab="aggregate"'), 'تب گزارش تجمیعی وجود ندارد');
-assert(out.includes('گزارشگیری') && out.includes('گزارش تجمیعی'), 'عنوان تبها ناقص است');
-
-// ۲) تب کلاسیک، محتوای قدیمی را نشان دهد (عقبگرد نکرده باشد)
+let viewHtml = reportModule.reportView();
+assert(viewHtml.includes('data-report-tab="classic"') && viewHtml.includes('data-report-tab="aggregate"'),
+  'classic and aggregate tabs are rendered');
 env.state.reportTab = 'classic';
-out = m.reportView();
-assert(out.includes('id="classic-report"'), 'تب گزارشگیری محتوای قدیمی را نشان نمیدهد');
+assert(reportModule.reportView().includes('گزارش کلاسیک'), 'classic tab retains its original report view');
 env.state.reportTab = 'aggregate';
+viewHtml = reportModule.reportView();
+assert(viewHtml.includes('id="aggregate-filter"'), 'aggregate tab renders its date filter');
 
-// ۳) پنج شمارنده + مغایرت
+// Active orders are row counts; the absent reconciliation uses unique, matchable people.
 env.state.aggregate = {
-  counts: { total_orders: 120, lunch_orders: 112, dinner_orders: 8, guest_printed: 8, printed_final: 102, absent: 10, expected_absent: 10, has_mismatch: false, difference: 0 },
-  diagnostics: { active_orders_all_meals: 120, active_lunch_orders: 112, active_dinner_orders: 8, reportable_lunch_rows: 112, unique_lunch_identities: 112, matched_printed_lunch_identities: 102, absent_count: 10, difference: 0 },
-  printed_people: [{ pc: '1001', first_name: 'علی', last_name: 'رضایی', name: 'علی رضایی', food: 'چلوکباب', kind: 'پرسنل', date: '2026-10-27', time: '12:01:00' }],
-  absent_people: [{ pc: '1002', first_name: 'مریم', last_name: 'احمدی', name: 'مریم احمدی', food: 'قورمهسبزی', status: 'غایب', date: '2026-10-27', declared: true }],
+  counts: {
+    total_orders: 120, lunch_orders: 112, cancelled_orders: 3, order_rows: 115,
+    dinner_orders: 8, dinner_cancelled_orders: 1, dinner_order_rows: 9,
+    printed_final: 102, printed_dinner: 7, physical_printed_lunch: 98,
+    physical_printed_dinner: 7, auto_printed_lunch: 4, auto_printed_dinner: 0,
+    guest_printed_lunch: 2, guest_printed_dinner: 1,
+    physical_guest_printed_lunch: 1, physical_guest_printed_dinner: 1,
+    auto_guest_printed_lunch: 1, auto_guest_printed_dinner: 0,
+    absent: 9, expected_absent: 9, has_mismatch: false, difference: 0,
+  },
+  diagnostics: {
+    active_lunch_orders: 112, active_dinner_orders: 8, active_other_meal_orders: 0,
+    reportable_lunch_rows: 110, unique_lunch_identities: 108,
+    matched_printed_lunch_identities: 99, absent_count: 9, difference: 0,
+    orders_without_national_code_count: 2, orders_without_identity_count: 1,
+    legacy_printed_event_count: 1,
+    legacy_printed_events: [{ date: '2026-10-27', first_name: 'علی', last_name: 'رضایی', pc: '101', event_id: 7 }],
+    event_type_status_counts: [{ event_type: 'print', meal_type: 'lunch', print_status: 'printed', total: 1 }],
+  },
+  printed_people: [
+    { pc: '101', first_name: 'علی', last_name: 'رضایی', name: 'علی رضایی', food: 'چلوکباب', kind: 'پرسنل', date: '2026-10-27', time: '12:01:00', meal_type: 'lunch' },
+    { pc: '102', first_name: 'مریم', last_name: 'احمدی', name: 'مریم احمدی', food: 'خورش', kind: 'پرسنل', date: '2026-10-27', time: '12:03:00', meal_type: 'dinner' },
+  ],
+  absent_people: [
+    { pc: '202', first_name: 'سارا', last_name: 'محمدی', name: 'سارا محمدی', food: 'قورمه‌سبزی', status: 'غایب', date: '2026-10-27', declared: true, meal_type: 'lunch' },
+  ],
   source_notes: [],
 };
-out = m.reportAggregateView();
-for (const label of ['تعداد کل سفارشها', 'فیش مهمان چاپ شده', 'فیش چاپشده قطعی', 'تعداد غایبین', 'مغایرت']) {
-  assert(out.includes(label), `شمارنده «${label}» در خروجی نیست`);
+env.state.aggregateUpdatedAt = '2026-10-27T09:30:00.000Z';
+
+let out = reportModule.reportAggregateView();
+for (const label of ['سفارش‌ها', 'فیش خودکار پرسنل', 'فیش خودکار مهمان', 'فهرست چاپ‌شده', 'فهرست غایبین']) {
+  assert(out.includes(label), `current summary row appears: ${label}`);
 }
-assert(out.includes('۱۲۰') && out.includes('۱۰۲') && out.includes('۱۰'), 'اعداد فارسی نشان داده نشدند');
-assert(out.includes('ندارد'), 'وضعیت «مغایرت ندارد» نشان داده نشد');
-assert(out.includes('مبنای تطبیق') && out.includes('خارج از تطبیق ناهار: ۸'), 'تفکیک ناهار/شام برای بررسی مغایرت نشان داده نشد');
-assert(out.includes('عیب‌یابی و تفکیک منبع آمار'), 'جزئیات عیب‌یابی در پنل وجود ندارد');
-assert(out.includes('علی') && out.includes('رضایی') && out.includes('مریم') && out.includes('احمدی'), 'اسامی چاپشدهها/غایبین نشان داده نشد');
-assert(out.includes('غیبت اعلامشده'), 'برچسب غیبت اعلامشده نشان داده نشد');
-assert(out.includes('aggregate-export') && out.includes('aggregate-print'), 'دکمههای استخراج/چاپ وجود ندارند');
-assert(out.includes('id="aggregate-filter"'), 'فرم انتخاب روز وجود ندارد');
-assert(out.includes('data-agg-field="first_name"') && out.includes('data-agg-field="last_name"'), 'انتخاب فیلدهای نام و نام خانوادگی وجود ندارد');
+assert(out.includes('۱۰۸ هویت یکتای سفارش‌دارِ قابل‌تطبیق − ۹۹ هویت دارای فیش ناهار'),
+  'summary calculates expected absences from unique identities and matched staff receipts');
+assert(out.includes('۹ غایبِ موردانتظار') && out.includes('غایب ثبت‌شده ۹'), 'expected and listed absences are visible');
+assert(!out.includes('۱۱۲ سفارش فعال ناهار − ۱۰۲ ثبت فیش ناهار'), 'raw row/event subtraction is not presented as person reconciliation');
+assert(out.includes('با همان کد هم انجام می‌شود'), 'missing national codes can fall back to personnel-code matching');
+assert(out.includes('نه کد ملی دارد و نه کد پرسنلی'), 'unmatchable rows have a distinct warning');
+assert(out.includes('هویت‌های یکتای قابل‌تطبیق') && !out.includes('هویت‌های یکتای دارای کد ملی'),
+  'diagnostics describe both national-code and personnel-code fallback identities accurately');
+assert(out.includes('عیب‌یابی و تفکیک منبع آمار') && out.includes('رویداد چاپ با نوع قدیمی print'), 'diagnostic details and legacy events remain visible');
+assert(out.includes('data-action="aggregate-export"') && out.includes('data-action="aggregate-print"'), 'XLSX and print actions remain present');
+assert(out.includes('id="aggregate-filter"'), 'date-range filter remains present');
 
-// ۴) حالت مغایرtdارد
-env.state.aggregate.counts = { total_orders: 120, lunch_orders: 112, dinner_orders: 8, guest_printed: 8, printed_final: 100, absent: 10, expected_absent: 12, has_mismatch: true, difference: 2 };
-env.state.aggregate.diagnostics.difference = 2;
-out = m.reportAggregateView();
-assert(out.includes('>دارد</b>') && out.includes('agg-mismatch-text'), 'وضعیت «مغایرت دارد» نشان داده نشد');
-assert(out.includes('agg-mismatch'), 'استایل هشدار مغایرت اعمال نشد');
+// Mismatch status must use the set-based count, not raw printed event totals.
+env.state.aggregate.counts.has_mismatch = true;
+env.state.aggregate.counts.expected_absent = 10;
+env.state.aggregate.counts.absent = 9;
+env.state.aggregate.counts.difference = 1;
+env.state.aggregate.diagnostics.matched_printed_lunch_identities = 98;
+env.state.aggregate.diagnostics.difference = 1;
+out = reportModule.reportAggregateView();
+assert(out.includes('notice warn') && out.includes('مغایرت نشان می‌دهد'), 'mismatch warning/message is rendered');
 
-// ۵) انتخاب فیلدها — فقط ستونهای انتخابشده بیایند
+// Column selection, escaping, and sorting use the real panel helpers.
 storage.clear();
-assert.deepStrictEqual(m.aggFields(), m.AGG_DEFAULT_FIELDS, 'فیلدهای پیشفرض نادرستاند');
-m.aggSaveFields(['pc', 'first_name', 'last_name']);
-assert.deepStrictEqual(m.aggFields(), ['pc', 'first_name', 'last_name'], 'ذخیره/بازیابی فیلدها کار نمیکند');
-assert.strictEqual(m.aggSelectedCols().length, 3, 'تعداد ستونهای انتخابشده نادرست است');
-out = m.aggTable([{ pc: '1', first_name: 'الف', last_name: 'ب' }], 'خالی');
-assert(out.includes('data-agg-sort="pc"') && out.includes('data-agg-sort="first_name"') && out.includes('data-agg-sort="last_name"'), 'سرستونها ناقصاند');
-assert(!out.includes('data-agg-sort="food"'), 'فیلد انتخابنشده همچنان نمایش داده میشود');
-assert(out.includes('fm-order-block-start') && out.includes('data-no-sort') && out.includes('fm-order-report-table'), 'بلوکبندی مثل گزارش فیشهای چاپشده اعمال نشد');
-storage.clear();
+assert.deepStrictEqual(reportModule.aggFields(), reportModule.AGG_DEFAULT_FIELDS, 'default selected columns are restored');
+reportModule.aggSaveFields(['pc', 'first_name', 'last_name']);
+assert.deepStrictEqual(reportModule.aggFields(), ['pc', 'first_name', 'last_name'], 'selected columns persist');
+assert.strictEqual(reportModule.aggSelectedCols().length, 3, 'only selected columns are returned');
+const table = reportModule.aggTable([{ pc: '1', first_name: 'علی', last_name: '<رضایی>' }], 'خالی');
+assert(table.includes('data-agg-sort="pc"') && table.includes('data-agg-sort="last_name"'), 'selected headers remain sortable');
+assert(table.includes('&lt;رضایی&gt;'), 'table cells are escaped');
+assert(!table.includes('data-agg-sort="food"'), 'unselected fields are omitted');
+const sorted = reportModule.aggSorted([
+  { first_name: 'علی', last_name: 'رضایی' },
+  { first_name: 'مهدی', last_name: 'احمدی' },
+]);
+assert.deepStrictEqual(sorted.map(person => person.last_name), ['احمدی', 'رضایی'], 'family-name ordering works');
 
-// ۵ب) سورت بر اساس نام خانوادگی
-m.aggSaveFields(['last_name']);
-const sorted = m.aggSorted([{first_name:'علی',last_name:'رضایی'},{first_name:'مهدی',last_name:'احمدی'},{first_name:'رضا',last_name:'باقری'}]);
-assert.deepStrictEqual(sorted.map(x=>x.last_name), ['احمدی','باقری','رضایی'], 'سورت نام خانوادگی نادرست است');
-assert.strictEqual(m.aggLastName({name:'علی رضایی'}), 'رضایی', 'fallback جداسازی نام از متن ترکیبی كار نکرد');
-storage.clear();
+const url = reportModule.aggDownloadUrl();
+assert(url.includes('/api/aggregate-report-export?') && url.includes('from=') && url.includes('to=') && url.includes('fields='),
+  'XLSX download URL has the range and selected fields');
+reportModule.showAggregatePreview();
+const preview = created[created.length - 1];
+assert(preview.innerHTML.includes('۱۰۸ هویت یکتای سفارش‌دارِ قابل‌تطبیق'), 'print preview uses the corrected set-based formula');
+assert(preview.innerHTML.includes('<h3>غایبین ناهار</h3>'), 'print preview includes absent list');
 
-// ۵ج) سورت کلیکی سرستونها
-env.state.aggSort={key:'pc',dir:'asc'};
-assert.deepStrictEqual(m.aggSorted([{pc:'2',first_name:'الف',last_name:'ب'},{pc:'1',first_name:'ج',last_name:'د'}]).map(x=>x.pc),['1','2'],'سورت بر اساس کد پرسنلی کار نکرد');
-env.state.aggSort={key:'last_name',dir:'desc'};
-assert(m.aggSorted([{first_name:'علی',last_name:'احمدی'},{first_name:'رضا',last_name:'باقری'}]).map(x=>x.last_name).join()==='باقری,احمدی','سورت نزولی نام خانوادگی کار نکرد');
-out=m.aggTable([{first_name:'علی',last_name:'احمدی'},{first_name:'رضا',last_name:'باقری'}],'خالی');
-assert(out.includes('data-agg-sort="last_name"') && out.includes('fm-sort-btn'),'سرستون قابل کلیک نیست');
-delete env.state.aggSort;
+// Delegated navigation, sorting, and action buttons use the production click handler.
+let before = renderCount;
+fire('click', clickTarget({ sort: 'pc' }));
+assert(env.state.aggSort.key === 'pc' && renderCount > before, 'clicking a column header sorts and re-renders');
+before = renderCount;
+fire('click', clickTarget({ tab: 'classic' }));
+assert(env.state.reportTab === 'classic' && renderCount > before, 'classic tab click changes view and renders');
+fire('click', clickTarget({ tab: 'aggregate' }));
+assert(env.state.reportTab === 'aggregate', 'aggregate tab click restores the summary');
+assert(apiCalls.some(call => call && call.aggregate === false), 'opening aggregate tab requests its report');
 
-// ۶) کلیک تب → تغییر state و رندر
-const before = renderCount;
-fire('click', { closest: (sel) => (sel === '[data-report-tab]' ? { dataset: { reportTab: 'classic' } } : null) });
-assert.strictEqual(env.state.reportTab, 'classic', 'کلیک تب، state را عوض نکرد');
-assert(renderCount > before, 'کلیک تب، رندر نکرد');
-fire('click', { closest: (sel) => (sel === '[data-report-tab]' ? { dataset: { reportTab: 'aggregate' } } : null) });
-assert.strictEqual(env.state.reportTab, 'aggregate', 'برگشت به تب تجمیعی کار نکرد');
+// XLSX and print actions remain wired to the selected range and current report.
+fire('click', clickTarget({ action: 'aggregate-export' }));
+const downloadLink = created[created.length - 1];
+assert(downloadLink.download.endsWith('.xlsx') && downloadLink.href.includes('aggregate-report-export'),
+  'export action creates an XLSX download link');
+fire('click', clickTarget({ action: 'aggregate-print' }));
+const clickedPreview = created[created.length - 1];
+assert(clickedPreview.innerHTML.includes('پیش‌نمایش گزارش تجمیعی'), 'print action opens the real preview layer');
 
-// ۷) استخراج → لینک دانلود XLSX
-const beforeLinks = created.length;
-fire('click', {
-  closest: (sel) => (sel === '[data-report-tab]' ? null : (sel === '[data-action]' ? { dataset: { action: 'aggregate-export' } } : null)),
-});
-const link = created[created.length - 1];
-assert(link && link.href && link.href.includes('aggregate-report-export'), 'لینک استخراج ساخته نشد');
-assert(link.href.includes('from=') && link.href.includes('to=') && link.href.includes('fields='), 'پارامترهای استخراج ناقصاند');
-assert(link.download.endsWith('.xlsx'), 'خروجی XLSX نیست');
+// The production filter rejects invalid ranges without persisting them, then refreshes valid input.
+const previousRange = { ...env.state.report };
+fire('submit', { id: 'aggregate-filter', values: { from: '2026-10-29', to: '2026-10-27' }, matches() { return true; } });
+assert(toasts.some(message => message.includes('معتبر نیست')), 'an inverted date range is rejected');
+assert.deepStrictEqual(env.state.report, previousRange, 'invalid dates do not overwrite the current range');
+before = renderCount;
+fire('submit', { id: 'aggregate-filter', values: { from: '2026-10-27', to: '2026-10-28' }, matches() { return true; } });
+assert(renderCount > before, 'valid range submission renders a new report');
+assert(env.state.report.from === '2026-10-27' && env.state.report.to === '2026-10-28', 'submitted range becomes current');
+assert(apiCalls.some(call => call && call.aggregate === true), 'valid range triggers a refreshed aggregate request');
+fire('click', clickTarget({ action: 'aggregate-today' }));
+assert(env.state.report.from === '۱۴۰۵/۰۸/۰۵' && env.state.report.to === '۱۴۰۵/۰۸/۰۵', 'today action resets both range endpoints');
 
-// ۸) چاپ → لایه پیشنمایش
-const beforeLayers = created.length;
-fire('click', {
-  closest: (sel) => (sel === '[data-report-tab]' ? null : (sel === '[data-action]' ? { dataset: { action: 'aggregate-print' } } : null)),
-});
-assert(created.length > beforeLayers, 'لایه پیشنمایش چاپ ساخته نشد');
-assert(created[created.length - 1].innerHTML.includes('پیشنمایش گزارش تجمیعی'), 'محتوای پیشنمایش ناقص است');
-assert(created[created.length - 1].innerHTML.includes('مبنای تطبیق'), 'تفکیک ناهار و مغایرت در نسخهٔ قابل چاپ نیست');
-
-// ۹) فرم تاریخ نامعتبر → خطا، بدون رندر
-toastCalls.length = 0;
-fire('submit', {
-  id: 'aggregate-filter',
-  _values: { from: '۱۴۰۵/۰۸/۱۰', to: '۱۴۰۵/۰۸/۰۱' },
-});
-assert(toastCalls.some((x) => x.includes('معتبر نیست')), 'بازه نامعتبر گرفته نشد');
-
-// ۱۰) دکمه «امروز»
-fire('click', {
-  closest: (sel) => (sel === '[data-report-tab]' ? null : (sel === '[data-action]' ? { dataset: { action: 'aggregate-today' } } : null)),
-});
-assert.strictEqual(env.state.report.from, '۱۴۰۵/۰۸/۰۵', 'دکمه امروز تاریخ را تنظیم نکرد');
-
-console.log('✅ تست رفتاری گزارش تجمیعی: PASS (۱۰ گروه تست)');
+console.log('PASS: aggregate-report UI regression checks');

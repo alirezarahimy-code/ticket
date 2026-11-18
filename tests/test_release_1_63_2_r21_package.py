@@ -5,15 +5,33 @@ import json
 from pathlib import Path
 from zipfile import ZipFile
 
-from download_page_helpers import check_download_page_lists_only_latest_package
-
 ROOT = Path(__file__).resolve().parents[1]
 DOWNLOADS = ROOT / "downloads"
 NAME = "ticket-update-1.63-to-1.63.2-r21-assets-tenter-20261106.zip"
 PACKAGE = DOWNLOADS / NAME
+# The original r21 archive is immutable; these files were refreshed by r22.
+REFRESHED_AFTER_R21 = {
+    # Files refreshed while advancing the cumulative package through r22/r23.
+    "food-reconciliation.php",
+    "assets/food-menu.js",
+    "food-ticket-web/assets/food-menu.js",
+    "tools/test_food_reconciliation_disposition_offline.php",
+    "food-ticket.php",
+    "food-ticket-release-notes.php",
+    "food-ticket-web/index.html",
+}
 REQUIRED_FILES = {
     "VERSION",
     "food-ticket.php",
+    "food-ticket-release-notes.php",
+    "food-reconciliation.php",
+    "assets/food-menu.js",
+    "food-ticket-web/assets/food-menu.js",
+    "tools/test_food_reconciliation_disposition_offline.php",
+    "tools/test_food_aggregate_report_offline.php",
+    "food-ticket-web/index.html",
+    "help-guide.php",
+    "chatbot.php",
     "lib/release-notes.php",
     "lib/asset-dedupe.php",
     "tools/asset_dedupe.php",
@@ -60,7 +78,7 @@ def test_1632_r21_is_a_valid_cumulative_installable_package():
         for relative in files:
             data = archive.read("files/" + relative)
             assert hashlib.sha256(data).hexdigest() == manifest["sha256"][relative]
-            if relative == "VERSION":
+            if relative == "VERSION" or relative in REFRESHED_AFTER_R21:
                 continue
             source = ROOT / relative
             if not source.is_file():
@@ -71,8 +89,26 @@ def test_1632_r21_is_a_valid_cumulative_installable_package():
         source_delete = archive.read("files/tools/test_source_delete_offline.php").decode("utf-8")
         source_time = archive.read("files/tools/test_source_time_delete_offline.php").decode("utf-8")
         food = archive.read("files/food-ticket.php").decode("utf-8")
+        reconciliation = archive.read("files/food-reconciliation.php").decode("utf-8")
+        food_release_notes = archive.read("files/food-ticket-release-notes.php").decode("utf-8")
+        panel = archive.read("files/food-ticket-web/index.html").decode("utf-8")
+        menu_js = archive.read("files/food-ticket-web/assets/food-menu.js").decode("utf-8")
+        guide = archive.read("files/help-guide.php").decode("utf-8")
+        chatbot = archive.read("files/chatbot.php").decode("utf-8")
         asset_names = archive.read("files/asset-names.php").decode("utf-8")
         assert "food_ticket_source_minimal_where" in food
+        assert "'absent-report' => $fpCan('food.reports')" in food
+        assert "PANEL_VERSION='1.37.55'" in panel and "function absentReportView()" in panel
+        assert "food_reconciliation_expected_remaining_assert" in reconciliation
+        assert "if ($sum !== $remaining)" in reconciliation
+        assert "leftover_expected_remaining: m.remaining" in menu_js and "sum !== remaining" in menu_js
+        assert "'1.63.2' =>" in food_release_notes and "گزارش تجمیعی غایبین" in food_release_notes
+        assert "food_ticket_aggregate_identity_sets" in food
+        assert "$identities[$key] = ['date' => $date, 'pc' => $personnel" in food
+        assert "$identities[$key] = ['date' => $date, 'nat' => $national" not in food
+        assert "$expected = (int) ($diagnostics['expected_absent_count'] ?? 0);" in food
+        assert "گزارش مستقل غایبین ناهار" in guide
+        assert "food_absent_lunch_report" in chatbot
         assert "food_ticket_source_time_where" in food
         assert "fallback ساعت بازهٔ یک‌ثانیه‌ای" in source_delete
         assert "ثانیهٔ آخر تا نیمه‌شب روز بعد" in source_time
@@ -86,25 +122,8 @@ def test_1632_r21_is_a_valid_cumulative_installable_package():
     sidecar = (DOWNLOADS / f"{NAME}.sha256").read_text(encoding="ascii")
     assert digest in sidecar
 
-    asset_manifest = (DOWNLOADS / "RELEASE-ASSETS-1.63.2.txt").read_text(encoding="ascii")
-    asset_names = [
-        line.strip()
-        for line in asset_manifest.splitlines()
-        if line.strip() and not line.lstrip().startswith("#")
-    ]
-    assert asset_names == [NAME]
-    assert (DOWNLOADS / asset_names[0]).is_file()
-
-    release_notes = DOWNLOADS / "RELEASE-NOTES-1.63.2.md"
-    assert release_notes.is_file()
-    release_note_text = release_notes.read_text(encoding="utf-8")
-    assert release_note_text.startswith("# نسخهٔ ۱.۶۳.۲")
-    assert NAME in release_note_text
-    assert digest in release_note_text
-    assert "۱.۶۲.۸۸" in release_note_text
-    assert "مستقیماً" in release_note_text
-
-    check_download_page_lists_only_latest_package()
-    page = (DOWNLOADS / "index.html").read_text(encoding="utf-8")
-    assert "نسخهٔ ۱.۶۳.۲" in page
-    assert NAME in page
+    # r21 remains a verifiable historical artifact, but r22 is now the current download.
+    with ZipFile(PACKAGE) as archive:
+        archived_report = archive.read("files/CHANGE-REPORT-FA-1.63.2-r21-assets-tenter.md").decode("utf-8")
+    assert "۱.۶۳.۲-r21" in archived_report
+    assert "مهاجرت دیتابیس: **ندارد**" in archived_report

@@ -8,6 +8,7 @@ const fm2=R('assets/food-menu.js');
 const css=R('assets/food-menu.css');
 const css2=R('food-ticket-web/assets/food-menu.css');
 const php=R('food-ticket.php');
+const manual=R('food-ticket-web/assets/food-manual-attendance.js');
 
 // ۱) عرض ستون ردیف
 for(const c of [css,css2]){
@@ -21,8 +22,8 @@ assert(fm.includes('data-delivery-view='),'دکمه view از attribute اختص
 // و هندلر پنل یه محافظ داشته باشه
 assert(panel.includes("b.hasAttribute('data-fm-action')"),'هندلر پنل محافظ ماژول ندارد');
 // ۳) دسترسی ثبت دستی فیش
-assert(php.includes("'manual-attendance' => $fpCan('food.manual_ticket')"),'نمایش منو به مجوز food.manual_ticket وصل نیست');
-assert(panel.includes('FOOD_TICKET_CAN_MANUAL_TICKET'),'پنل مجوز سرور را چک نمیکند');
+assert(php.includes("'manual-attendance' => $fpCan('food.manual_attendance')"),'نمایش منو به مجوز food.manual_attendance وصل نیست');
+assert(manual.includes('FOOD_TICKET_CAN_MANUAL_TICKET'),'ماژول ثبت دستی مجوز سرور را چک نمیکند');
 // هردو کپی یکسان
 assert.strictEqual(fm,fm2,'دوتا کپی food-menu.js فرق دارند');
 assert.strictEqual(css,css2,'دوتا کپی food-menu.css فرق دارند');

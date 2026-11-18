@@ -1,0 +1,573 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <title>پیش‌نمایش گزارش غایبین</title>
+  <style>
+    :root {
+      --ink: #173042;
+      --muted: #6c7f8c;
+      --line: #e1e9ed;
+      --soft: #f5f8f9;
+      --paper: #ffffff;
+      --canvas: #f2f6f7;
+      --teal: #087f78;
+      --teal-dark: #066a65;
+      --teal-soft: #e7f6f3;
+      --blue-soft: #edf5fb;
+      --amber: #c17c16;
+      --amber-soft: #fff5df;
+      --shadow: 0 14px 36px rgba(20, 53, 68, .07);
+      --radius: 17px;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-width: 360px;
+      background: var(--canvas);
+      color: var(--ink);
+      font-family: Tahoma, "Segoe UI", Arial, sans-serif;
+      line-height: 1.7;
+    }
+    button, input { font: inherit; }
+    button { cursor: pointer; }
+    .shell { max-width: 1480px; margin: 0 auto; padding: 18px 24px 56px; }
+    .topbar {
+      display: flex; align-items: center; justify-content: space-between; gap: 18px;
+      padding: 13px 18px; background: var(--paper); border: 1px solid var(--line);
+      border-radius: 16px; box-shadow: 0 4px 18px rgba(20, 53, 68, .035);
+    }
+    .brand { display: flex; align-items: center; gap: 12px; }
+    .brand-mark {
+      width: 43px; height: 43px; display: grid; place-items: center;
+      border-radius: 14px; background: linear-gradient(145deg, #0b968c, #08716c);
+      color: #fff; font-size: 15px; font-weight: 800; letter-spacing: -.5px;
+      box-shadow: 0 6px 14px #087f782b;
+    }
+    .brand-title { display: block; font-weight: 800; font-size: 14px; }
+    .brand-subtitle { display: block; color: var(--muted); font-size: 11px; margin-top: 1px; }
+    .top-meta { display: flex; align-items: center; gap: 10px; color: var(--muted); font-size: 12px; }
+    .demo-pill, .user-pill { display: inline-flex; align-items: center; gap: 6px; border-radius: 99px; padding: 6px 11px; }
+    .demo-pill { color: #8a5d13; background: var(--amber-soft); font-weight: 700; }
+    .user-pill { background: var(--soft); color: #536977; }
+    .main-nav { display: flex; gap: 6px; align-items: center; overflow-x: auto; margin: 16px 0 22px; padding: 5px; background: #e9eff1; border-radius: 13px; }
+    .nav-item { flex: 0 0 auto; display: inline-flex; align-items: center; gap: 7px; border: 0; border-radius: 10px; background: transparent; color: #637784; padding: 10px 15px; font-size: 13px; font-weight: 700; }
+    .nav-item.active { background: #fff; color: var(--teal-dark); box-shadow: 0 2px 8px #17304210; }
+    .nav-item .nav-mark { width: 7px; height: 7px; border-radius: 50%; background: #a6b8c0; }
+    .nav-item.active .nav-mark { background: var(--teal); box-shadow: 0 0 0 4px var(--teal-soft); }
+    .page-heading { display: flex; justify-content: space-between; align-items: flex-end; gap: 20px; margin: 0 2px 18px; }
+    .eyebrow { color: var(--teal); font-size: 12px; font-weight: 800; margin-bottom: 4px; }
+    h1 { margin: 0; font-size: clamp(22px, 3vw, 29px); letter-spacing: -.4px; }
+    .page-heading p { margin: 6px 0 0; color: var(--muted); font-size: 13px; }
+    .heading-status { display: inline-flex; align-items: center; gap: 7px; flex: 0 0 auto; color: #526b79; background: #fff; border: 1px solid var(--line); border-radius: 99px; padding: 7px 12px; font-size: 11px; }
+    .heading-status i { display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: #16a085; }
+    .card { background: var(--paper); border: 1px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow); }
+    .common-card { padding: 19px 21px 17px; }
+    .section-title { display: flex; align-items: center; gap: 9px; margin: 0 0 15px; font-size: 14px; font-weight: 800; }
+    .section-icon { width: 27px; height: 27px; display: grid; place-items: center; border-radius: 9px; color: var(--teal); background: var(--teal-soft); }
+    .common-grid { display: grid; grid-template-columns: minmax(155px, 1fr) minmax(155px, 1fr) auto 1fr; align-items: end; gap: 12px; }
+    .field { display: flex; flex-direction: column; gap: 5px; color: #586d79; font-size: 12px; font-weight: 700; }
+    .field input {
+      width: 100%; min-height: 42px; border: 1px solid #d5e0e5; border-radius: 10px;
+      background: #fff; color: var(--ink); padding: 8px 12px; outline: none;
+      direction: ltr; text-align: right; transition: border-color .15s, box-shadow .15s;
+    }
+    .field input:focus { border-color: #48a79f; box-shadow: 0 0 0 3px #087f7815; }
+    .toolbar-actions { display: flex; align-items: center; justify-content: flex-start; gap: 8px; flex-wrap: wrap; }
+    .btn { min-height: 41px; display: inline-flex; align-items: center; justify-content: center; gap: 7px; border: 1px solid transparent; border-radius: 10px; padding: 8px 13px; font-size: 12px; font-weight: 800; white-space: nowrap; transition: transform .12s, background .12s, border-color .12s; }
+    .btn:hover { transform: translateY(-1px); }
+    .btn svg { width: 16px; height: 16px; flex: 0 0 auto; }
+    .btn-primary { background: var(--teal); color: #fff; box-shadow: 0 5px 12px #087f7825; }
+    .btn-primary:hover { background: var(--teal-dark); }
+    .btn-light { background: #fff; color: #425c6a; border-color: #d7e2e6; }
+    .btn-light:hover { background: #f7fafb; border-color: #b8cbd2; }
+    .fields-box { border-top: 1px solid #edf1f3; margin-top: 17px; padding-top: 14px; display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+    .fields-label { color: #5f737f; font-size: 12px; font-weight: 800; white-space: nowrap; }
+    .field-chips { display: flex; align-items: center; gap: 7px; flex-wrap: wrap; }
+    .field-chip { display: inline-flex; align-items: center; gap: 7px; cursor: pointer; user-select: none; border: 1px solid #e1e9ed; border-radius: 99px; padding: 5px 10px; background: #fbfcfd; color: #526a77; font-size: 11px; font-weight: 700; }
+    .field-chip:has(input:checked) { color: #08766f; background: #eff9f7; border-color: #b8e2dc; }
+    .field-chip input { accent-color: var(--teal); width: 13px; height: 13px; margin: 0; }
+    .fields-hint { color: #8a9aa3; font-size: 10px; margin-right: auto; }
+    .print-range { display: none; color: #5b6f7a; font-size: 12px; margin-top: 10px; }
+    .report-card { margin-top: 18px; padding: 0 20px 22px; overflow: visible; }
+    .report-tabs { display: flex; gap: 4px; border-bottom: 1px solid var(--line); margin: 0 -1px 18px; overflow-x: auto; }
+    .report-tab { position: relative; flex: 0 0 auto; border: 0; background: transparent; color: #6d808b; padding: 15px 17px 13px; font-size: 13px; font-weight: 800; }
+    .report-tab.active { color: var(--teal-dark); }
+    .report-tab.active::after { content: ""; position: absolute; height: 3px; bottom: -1px; right: 13px; left: 13px; border-radius: 4px 4px 0 0; background: var(--teal); }
+    .tab-count { display: inline-flex; align-items: center; justify-content: center; min-width: 22px; height: 21px; margin-right: 5px; padding: 0 6px; border-radius: 99px; background: #edf3f5; color: #5d727e; font-size: 10px; }
+    .report-tab.active .tab-count { color: var(--teal-dark); background: var(--teal-soft); }
+    .panel[hidden] { display: none !important; }
+    .view-heading { display: flex; justify-content: space-between; align-items: center; gap: 16px; margin: 2px 0 13px; }
+    .view-heading h2 { margin: 0; font-size: 17px; }
+    .view-heading p { margin: 3px 0 0; color: var(--muted); font-size: 11px; }
+    .view-summary { display: flex; align-items: center; gap: 7px; flex-wrap: wrap; }
+    .summary-pill { display: inline-flex; align-items: center; gap: 6px; border: 1px solid #e3ebee; border-radius: 99px; background: #fbfcfd; color: #5a707c; padding: 6px 10px; font-size: 11px; }
+    .summary-pill strong { color: var(--ink); font-size: 12px; }
+    .summary-pill.emphasis { border-color: #c9e8e3; background: var(--teal-soft); color: #08766f; }
+    .table-card { border: 1px solid var(--line); border-radius: 13px; overflow: hidden; background: #fff; }
+    .table-scroll { overflow: auto; max-width: 100%; }
+    .data-table { width: 100%; border-collapse: separate; border-spacing: 0; font-size: 12px; white-space: nowrap; }
+    .data-table thead th { position: sticky; top: 0; z-index: 1; background: #f2f7f8; color: #5b707c; font-size: 11px; font-weight: 800; padding: 11px 12px; border-bottom: 1px solid #dce6ea; text-align: right; }
+    .data-table tbody td { padding: 10px 12px; border-bottom: 1px solid #edf1f3; color: #334d5b; }
+    .data-table tbody tr:last-child td { border-bottom: 0; }
+    .data-table tbody tr:hover td { background: #f8fbfb; }
+    .sort-btn { display: inline-flex; align-items: center; gap: 5px; border: 0; padding: 0; background: transparent; color: inherit; font: inherit; font-weight: inherit; }
+    .sort-mark { color: #9aaab2; font-size: 10px; }
+    .sort-btn[aria-sort="ascending"] .sort-mark, .sort-btn[aria-sort="descending"] .sort-mark { color: var(--teal); }
+    .number-cell { color: #778b96 !important; font-variant-numeric: tabular-nums; }
+    .code-cell { direction: ltr; text-align: right; font-variant-numeric: tabular-nums; color: #55707d !important; }
+    .absence-count { display: inline-flex; align-items: center; justify-content: center; min-width: 0; border-radius: 6px; background: #fff4e5; color: #aa6d15; padding: 1px 0; font-weight: 800; }
+    .dept-cell { color: #526b77 !important; }
+    .table-footer { display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 10px 13px; background: #fbfcfd; border-top: 1px solid #edf1f3; color: #71838d; font-size: 10px; }
+    .table-footer strong { color: #435e6b; }
+    .dept-toolbar { display: flex; align-items: center; justify-content: space-between; gap: 14px; flex-wrap: wrap; padding: 13px 14px; border: 1px solid var(--line); border-radius: 12px; background: #fbfdfd; margin-bottom: 15px; }
+    .dept-filter-wrap { display: flex; align-items: center; gap: 9px; flex-wrap: wrap; }
+    .filter-label { color: #586e7a; font-size: 12px; font-weight: 800; }
+    .dropdown { position: relative; }
+    .dropdown-btn { min-width: 130px; display: inline-flex; justify-content: space-between; align-items: center; gap: 15px; border: 1px solid #d8e3e7; background: #fff; color: #385562; border-radius: 9px; padding: 8px 11px; font-size: 12px; font-weight: 800; }
+    .dropdown-btn:hover { border-color: #9dcac4; }
+    .dropdown-menu { position: absolute; z-index: 5; top: calc(100% + 7px); right: 0; width: 245px; max-height: 290px; overflow: auto; display: none; padding: 7px; border: 1px solid #d8e3e7; border-radius: 12px; background: #fff; box-shadow: 0 16px 34px #17304220; }
+    .dropdown.open .dropdown-menu { display: block; }
+    .dropdown-option { display: flex; align-items: center; justify-content: space-between; gap: 12px; border-radius: 8px; padding: 8px 9px; cursor: pointer; color: #455e6b; font-size: 12px; }
+    .dropdown-option:hover { background: #f3f8f8; }
+    .dropdown-option span:first-of-type { display: flex; align-items: center; gap: 8px; }
+    .dropdown-option input { accent-color: var(--teal); width: 14px; height: 14px; margin: 0; }
+    .option-count { color: #83949d; font-size: 10px; }
+    .dropdown-separator { height: 1px; background: #edf1f3; margin: 5px 4px; }
+    .range-stats { display: flex; align-items: center; gap: 8px 18px; flex-wrap: wrap; color: #667b86; font-size: 11px; }
+    .range-stats span { display: inline-flex; align-items: center; gap: 5px; }
+    .range-stats strong { color: #274653; }
+    .range-stats .stat-icon { color: var(--teal); font-size: 14px; }
+    .layout-control { display: flex; align-items: center; gap: 7px; color: #647984; font-size: 11px; white-space: nowrap; }
+    .layout-control-label { font-weight: 800; }
+    .layout-choice { border: 1px solid #dce6e9; border-radius: 7px; padding: 4px 8px; background: #fff; color: #70838d; font-size: 10px; }
+    .layout-choice.active { border-color: #a8d9d3; background: var(--teal-soft); color: #08766f; font-weight: 800; }
+    .dept-list { display: flex; flex-direction: column; gap: 15px; }
+    .dept-section { overflow: hidden; border: 1px solid var(--line); border-radius: 13px; background: #fff; }
+    .dept-heading { display: flex; align-items: center; justify-content: flex-start; gap: 8px; padding: 11px 15px; background: linear-gradient(90deg, #f7fbfb, #f1f7f7); border-bottom: 1px solid #e4edef; }
+    .dept-heading-title { display: flex; align-items: center; gap: 7px; font-size: 13px; font-weight: 900; color: #254653; }
+    .dept-heading-icon { width: 25px; height: 25px; display: grid; place-items: center; border-radius: 8px; background: #e2f3f0; color: var(--teal); font-size: 12px; }
+    .dept-heading-count { margin-right: 1px; border: 1px solid #cfe9e4; border-radius: 99px; padding: 2px 7px; background: #fff; color: #08766f; font-size: 10px; font-weight: 800; white-space: nowrap; }
+    .dept-table-wrap { overflow: auto; }
+    .block-table { width: max-content; min-width: 0; margin-inline: auto; table-layout: auto; border-collapse: separate; border-spacing: 0; font-size: 11px; white-space: nowrap; }
+    .block-table th { background: #fbfcfd; color: #6b7f89; padding: 5px 2px; border-bottom: 1px solid #e5ecef; text-align: center; font-size: 10px; }
+    .block-table td { padding: 5px 2px; border-bottom: 1px solid #edf1f3; color: #3c5662; text-align: center; }
+    .block-table tr:last-child td { border-bottom: 0; }
+    .block-table .block-start { border-right: 2px solid #cfdddf; }
+    .block-table th.block-start { border-right-color: #b8cbcf; }
+    .block-table tbody tr:hover td { background: #f8fbfb; }
+    .empty-state { padding: 35px 16px; text-align: center; color: #80929a; font-size: 12px; }
+    .empty-icon { width: 42px; height: 42px; display: grid; place-items: center; margin: 0 auto 8px; border-radius: 14px; background: #f2f7f8; color: #80969e; font-size: 19px; }
+    .note-line { display: flex; align-items: center; gap: 8px; margin: 14px 2px 0; color: #7e9098; font-size: 10px; }
+    .note-line .note-dot { width: 6px; height: 6px; border-radius: 50%; background: #d59b39; }
+    .toast { position: fixed; left: 22px; bottom: 22px; z-index: 9; max-width: min(420px, calc(100vw - 44px)); padding: 11px 15px; border-radius: 11px; background: #193a4b; color: #fff; box-shadow: 0 8px 24px #17304235; font-size: 12px; opacity: 0; transform: translateY(8px); pointer-events: none; transition: .2s; }
+    .toast.show { opacity: 1; transform: translateY(0); }
+    @media (max-width: 850px) {
+      .shell { padding: 13px 12px 34px; }
+      .common-grid { grid-template-columns: 1fr 1fr; }
+      .toolbar-actions { grid-column: 1 / -1; }
+      .fields-hint { margin-right: 0; width: 100%; }
+      .dept-toolbar { align-items: flex-start; }
+      .range-stats { width: 100%; }
+    }
+    @media (max-width: 560px) {
+      .top-meta .user-pill { display: none; }
+      .page-heading { align-items: flex-start; flex-direction: column; gap: 9px; }
+      .common-card { padding: 15px 13px; }
+      .common-grid { grid-template-columns: 1fr 1fr; gap: 9px; }
+      .toolbar-actions { gap: 6px; }
+      .toolbar-actions .btn { flex: 1; padding-inline: 8px; }
+      .fields-box { align-items: flex-start; }
+      .report-card { padding: 0 11px 15px; }
+      .view-heading { align-items: flex-start; flex-direction: column; }
+      .dept-filter-wrap { width: 100%; }
+      .dropdown { flex: 1; }
+      .dropdown-btn { width: 100%; }
+      .layout-control { width: 100%; }
+      .range-stats { gap: 6px 12px; }
+    }
+    @media print {
+      body { background: #fff; min-width: 0; }
+      .shell { max-width: none; padding: 0; }
+      .topbar, .main-nav, .heading-status, .common-grid, .fields-box, .report-tabs,
+      .dept-filter-wrap, .layout-control, .note-line, .table-footer, .toast { display: none !important; }
+      .page-heading { margin: 0 0 12px; }
+      .page-heading p { margin-top: 2px; }
+      .print-range { display: block; }
+      .card, .table-card, .dept-section { box-shadow: none; break-inside: avoid; }
+      .report-card { border: 0; padding: 0; margin: 0; }
+      .dept-toolbar { border: 0; padding: 0 0 8px; margin: 0; }
+      .range-stats { width: 100%; }
+      .panel[hidden] { display: none !important; }
+      .data-table, .block-table { font-size: 9px; }
+      .data-table th, .data-table td { padding: 5px 6px; }
+      .block-table th, .block-table td { padding: 5px 2px; text-align: center; }
+      .table-scroll, .dept-table-wrap { overflow: visible; }
+      .block-table { min-width: 0; width: max-content; }
+    }
+  </style>
+</head>
+<body>
+  <main class="shell">
+    <header class="topbar">
+      <div class="brand">
+        <div class="brand-mark" aria-hidden="true">غـ</div>
+        <div><span class="brand-title">سامانهٔ مدیریت تغذیه</span><span class="brand-subtitle">پنل مدیریتی · گزارش‌ها</span></div>
+      </div>
+      <div class="top-meta">
+        <span class="demo-pill"><span aria-hidden="true">●</span> پیش‌نمایش با دادهٔ نمونه</span>
+        <span class="user-pill">مدیر سامانه&nbsp; · &nbsp;امروز</span>
+      </div>
+    </header>
+
+    <nav class="main-nav" aria-label="بخش‌های اصلی">
+      <button class="nav-item" type="button"><span class="nav-mark"></span>داشبورد</button>
+      <button class="nav-item" type="button"><span class="nav-mark"></span>سفارش‌های امروز</button>
+      <button class="nav-item" type="button"><span class="nav-mark"></span>گزارش‌گیری</button>
+      <button class="nav-item active" type="button" aria-current="page"><span class="nav-mark"></span>گزارش غایبین</button>
+    </nav>
+
+    <section class="page-heading">
+      <div>
+        <div class="eyebrow">گزارش مستقل</div>
+        <h1>گزارش غایبین ناهار</h1>
+        <p>فهرست پرسنلی که در بازهٔ انتخاب‌شده سفارش دارند اما فیش ناهار برایشان ثبت نشده است.</p>
+      </div>
+      <span class="heading-status"><i></i> آمادهٔ مشاهده</span>
+    </section>
+
+    <section class="card common-card" aria-labelledby="commonTitle">
+      <h2 class="section-title" id="commonTitle"><span class="section-icon" aria-hidden="true">⌕</span>تنظیمات مشترک گزارش</h2>
+      <form id="filterForm">
+        <div class="common-grid">
+          <label class="field">از تاریخ (شمسی)
+            <input id="fromDate" name="from" type="text" inputmode="numeric" value="۱۴۰۵/۰۷/۰۱" aria-label="تاریخ شروع گزارش">
+          </label>
+          <label class="field">تا تاریخ (شمسی)
+            <input id="toDate" name="to" type="text" inputmode="numeric" value="۱۴۰۵/۰۷/۳۰" aria-label="تاریخ پایان گزارش">
+          </label>
+          <button class="btn btn-primary" type="submit" id="viewButton">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M3 12s3.2-6 9-6 9 6 9 6-3.2 6-9 6-9-6-9-6Z"/><circle cx="12" cy="12" r="2.5"/></svg>
+            مشاهده
+          </button>
+          <div class="toolbar-actions">
+            <button class="btn btn-light" type="button" id="excelButton" title="دادهٔ نمونه به‌صورت CSV سازگار با Excel دریافت می‌شود">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M12 3v12m0 0 4-4m-4 4-4-4M5 17v3h14v-3"/></svg>
+              خروجی اکسل
+            </button>
+            <button class="btn btn-light" type="button" id="printButton">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M7 8V3h10v5M7 17H5a2 2 0 0 1-2-2v-4a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2h-2"/><path d="M7 14h10v7H7z"/><path d="M18 11h.01"/></svg>
+              پرینت
+            </button>
+          </div>
+        </div>
+        <div class="fields-box" aria-label="فیلدهای قابل نمایش">
+          <span class="fields-label">فیلدهای گزارش:</span>
+          <div class="field-chips" id="fieldChoices"></div>
+          <span class="fields-hint">انتخاب فیلدها بین دو نمای گزارش مشترک است.</span>
+        </div>
+      </form>
+      <div class="print-range" id="printRange"></div>
+    </section>
+
+    <section class="card report-card" aria-label="انواع گزارش غایبین">
+      <div class="report-tabs" role="tablist" aria-label="نوع گزارش">
+        <button class="report-tab active" id="tabFlat" type="button" role="tab" aria-selected="true" aria-controls="panelFlat" data-tab="flat">فهرست یک‌جا <span class="tab-count" id="flatTabCount">۲۴</span></button>
+        <button class="report-tab" id="tabDept" type="button" role="tab" aria-selected="false" aria-controls="panelDept" data-tab="dept">بر اساس معاونت</button>
+      </div>
+
+      <div class="panel" id="panelFlat" role="tabpanel" aria-labelledby="tabFlat">
+        <div class="view-heading">
+          <div><h2>فهرست یک‌جای پرسنل غایب</h2><p>چیدمان دو‌ستونه؛ برای مرتب‌سازی، عنوان هر ستون را انتخاب کنید.</p></div>
+          <div class="view-summary" id="flatSummary"></div>
+        </div>
+        <div class="table-card">
+          <div class="table-scroll" id="flatTableWrap"></div>
+          <div class="table-footer"><span>فیلدهای قابل مشاهده از بخش تنظیمات مشترک کنترل می‌شوند.</span><span>افراد یکتا: <strong id="flatUniqueCount">۲۴</strong></span></div>
+        </div>
+      </div>
+
+      <div class="panel" id="panelDept" role="tabpanel" aria-labelledby="tabDept" hidden>
+        <div class="dept-toolbar">
+          <div class="dept-filter-wrap">
+            <span class="filter-label">فیلتر معاونت:</span>
+            <div class="dropdown" id="deptDropdown">
+              <button class="dropdown-btn" type="button" id="deptDropdownButton" aria-expanded="false" aria-controls="deptDropdownMenu"><span id="deptButtonText">همه</span><span aria-hidden="true">▾</span></button>
+              <div class="dropdown-menu" id="deptDropdownMenu" role="group" aria-label="انتخاب معاونت‌ها"></div>
+            </div>
+          </div>
+          <div class="range-stats" id="deptStats"></div>
+          <div class="layout-control" aria-label="تعداد بلوک در هر ردیف">
+            <span class="layout-control-label">بلوک در هر ردیف:</span>
+            <button class="layout-choice" type="button" data-blocks="1" aria-pressed="false">۱</button>
+            <button class="layout-choice" type="button" data-blocks="2" aria-pressed="false">۲</button>
+            <button class="layout-choice active" type="button" data-blocks="3" aria-pressed="true">۳</button>
+          </div>
+        </div>
+        <div class="dept-list" id="deptList"></div>
+      </div>
+
+      <div class="note-line"><span class="note-dot"></span>این پیش‌نمایش با داده‌های ساختگی است؛ هیچ اطلاعاتی از سامانه یا پایگاه داده خوانده نمی‌شود.</div>
+    </section>
+  </main>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script>
+    // دادهٔ نمایشی؛ برای پیش‌نمایش ظاهر و تعامل‌هاست و دادهٔ واقعی سامانه نیست.
+    const people = [
+      { pc:'1001', first:'علی', last:'رضایی', deputy:'معاونت اداری', count:4 },
+      { pc:'1002', first:'رضا', last:'کاظمی', deputy:'معاونت اداری', count:3 },
+      { pc:'1003', first:'سارا', last:'محمدی', deputy:'معاونت اداری', count:2 },
+      { pc:'1004', first:'مریم', last:'کریمی', deputy:'معاونت اداری', count:1 },
+      { pc:'1005', first:'حسین', last:'احمدی', deputy:'معاونت اداری', count:1 },
+      { pc:'1006', first:'فاطمه', last:'نوری', deputy:'معاونت اداری', count:1 },
+      { pc:'1007', first:'نیما', last:'جعفری', deputy:'معاونت اداری', count:2 },
+      { pc:'1008', first:'زهرا', last:'صادقی', deputy:'معاونت اداری', count:1 },
+      { pc:'2001', first:'محمد', last:'موسوی', deputy:'معاونت فنی', count:5 },
+      { pc:'2002', first:'لیلا', last:'حیدری', deputy:'معاونت فنی', count:4 },
+      { pc:'2003', first:'امیر', last:'مرادی', deputy:'معاونت فنی', count:3 },
+      { pc:'2004', first:'پریسا', last:'اکبری', deputy:'معاونت فنی', count:2 },
+      { pc:'2005', first:'بابک', last:'قاسمی', deputy:'معاونت فنی', count:2 },
+      { pc:'2006', first:'نرگس', last:'رحیمی', deputy:'معاونت فنی', count:1 },
+      { pc:'3001', first:'سروش', last:'رستمی', deputy:'معاونت پشتیبانی', count:4 },
+      { pc:'3002', first:'مینا', last:'عباسی', deputy:'معاونت پشتیبانی', count:3 },
+      { pc:'3003', first:'حامد', last:'یزدانی', deputy:'معاونت پشتیبانی', count:2 },
+      { pc:'3004', first:'الهام', last:'فلاح', deputy:'معاونت پشتیبانی', count:2 },
+      { pc:'4001', first:'رویا', last:'مهدوی', deputy:'معاونت آموزش', count:4 },
+      { pc:'4002', first:'فرهاد', last:'ابراهیمی', deputy:'معاونت آموزش', count:3 },
+      { pc:'4003', first:'نازنین', last:'نعمتی', deputy:'معاونت آموزش', count:2 },
+      { pc:'5001', first:'سعید', last:'قربانی', deputy:'معاونت مالی', count:4 },
+      { pc:'5002', first:'میترا', last:'شریفی', deputy:'معاونت مالی', count:3 },
+      { pc:'5003', first:'پویا', last:'بهرامی', deputy:'معاونت مالی', count:2 },
+    ];
+    const fields = [
+      { key:'row', label:'ردیف' },
+      { key:'pc', label:'کد پرسنلی' },
+      { key:'first', label:'نام' },
+      { key:'last', label:'نام خانوادگی' },
+      { key:'deputy', label:'معاونت' },
+      { key:'count', label:'تعداد غیبت' },
+    ];
+    const departments = [...new Set(people.map(person => person.deputy))];
+    const state = {
+      activeTab: 'flat',
+      selectedFields: new Set(fields.map(field => field.key)),
+      selectedDepartments: new Set(['all']),
+      blocks: 3,
+      sortKey: 'pc',
+      sortDirection: 'asc',
+      from: '۱۴۰۵/۰۷/۰۱',
+      to: '۱۴۰۵/۰۷/۳۰',
+    };
+    const faDigits = value => String(value).replace(/\d/g, digit => '۰۱۲۳۴۵۶۷۸۹'[Number(digit)]);
+    const esc = value => String(value ?? '').replace(/[&<>"']/g, char => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
+    const selectedFields = () => fields.filter(field => state.selectedFields.has(field.key));
+    const totalPortions = list => list.reduce((sum, person) => sum + person.count, 0);
+    const originalOrder = new Map(people.map((person, index) => [person.pc, index]));
+    const rangeLabel = () => `${state.from} تا ${state.to}`;
+    const uniqueRows = list => list.length;
+    const showToast = message => {
+      const toast = document.getElementById('toast');
+      toast.textContent = message;
+      toast.classList.add('show');
+      clearTimeout(showToast.timer);
+      showToast.timer = setTimeout(() => toast.classList.remove('show'), 2600);
+    };
+    const cellValue = (person, key, index) => {
+      if (key === 'row') return faDigits(index + 1);
+      if (key === 'count') return `<span class="absence-count">${faDigits(person.count)}</span>`;
+      if (key === 'pc') return `<span class="code-cell">${esc(person.pc)}</span>`;
+      if (key === 'deputy') return `<span class="dept-cell">${esc(person.deputy)}</span>`;
+      return esc(person[key] || '—');
+    };
+    const fieldChipMarkup = () => fields.map(field => `
+      <label class="field-chip"><input type="checkbox" data-field="${field.key}" ${state.selectedFields.has(field.key) ? 'checked' : ''}><span>${field.label}</span></label>
+    `).join('');
+    const sortedPeople = list => [...list].sort((a, b) => {
+      const left = state.sortKey === 'row' ? originalOrder.get(a.pc) : a[state.sortKey];
+      const right = state.sortKey === 'row' ? originalOrder.get(b.pc) : b[state.sortKey];
+      const compare = state.sortKey === 'count' || state.sortKey === 'row'
+        ? Number(left) - Number(right)
+        : String(left).localeCompare(String(right), 'fa', { numeric:true });
+      return compare * (state.sortDirection === 'asc' ? 1 : -1);
+    });
+    function renderFlatTable() {
+      const rows = sortedPeople(people);
+      document.getElementById('flatTableWrap').innerHTML = blockTableMarkup(rows, 2, true);
+      document.getElementById('flatSummary').innerHTML = `
+        <span class="summary-pill emphasis"><strong>${faDigits(uniqueRows(people))}</strong> نفر یکتا</span>
+        <span class="summary-pill"><strong>${faDigits(totalPortions(people))}</strong> پرس</span>`;
+      document.getElementById('flatUniqueCount').textContent = faDigits(uniqueRows(people));
+      document.getElementById('flatTabCount').textContent = faDigits(uniqueRows(people));
+    }
+    function renderDepartmentDropdown() {
+      const allSelected = state.selectedDepartments.has('all');
+      const chosen = allSelected ? ['همه'] : [...state.selectedDepartments];
+      document.getElementById('deptButtonText').textContent = chosen.length > 2 && !allSelected ? `${chosen.length} معاونت انتخاب شد` : chosen.join('، ');
+      const allOption = `<label class="dropdown-option"><span><input type="checkbox" data-dept="all" ${allSelected ? 'checked' : ''}> همهٔ معاونت‌ها</span><span class="option-count">${faDigits(people.length)}</span></label>`;
+      const options = departments.map(department => {
+        const count = people.filter(person => person.deputy === department).length;
+        const checked = state.selectedDepartments.has(department);
+        return `<label class="dropdown-option"><span><input type="checkbox" data-dept="${esc(department)}" ${checked ? 'checked' : ''}> ${esc(department)}</span><span class="option-count">${faDigits(count)} نفر</span></label>`;
+      }).join('');
+      document.getElementById('deptDropdownMenu').innerHTML = `${allOption}<div class="dropdown-separator"></div>${options}`;
+    }
+    function filteredPeople() {
+      if (state.selectedDepartments.has('all')) return people;
+      return people.filter(person => state.selectedDepartments.has(person.deputy));
+    }
+    function blockTableMarkup(rows, blocks, sortable = false) {
+      const cols = selectedFields();
+      if (!cols.length) return `<div class="empty-state">برای نمایش، دست‌کم یک فیلد انتخاب کنید.</div>`;
+      const head = Array.from({ length:blocks }, (_, block) => cols.map((field, index) => {
+        const active = state.sortKey === field.key;
+        const sort = active ? state.sortDirection : 'none';
+        const mark = active ? (state.sortDirection === 'asc' ? '↑' : '↓') : '↕';
+        const label = sortable
+          ? `<button type="button" class="sort-btn" data-sort="${field.key}" aria-sort="${sort}">${field.label}<span class="sort-mark">${mark}</span></button>`
+          : field.label;
+        return `<th class="${index === 0 && block > 0 ? 'block-start' : ''}">${label}</th>`;
+      }).join('')).join('');
+      const lineCount = Math.ceil(rows.length / blocks);
+      const body = Array.from({ length:lineCount }, (_, line) => {
+        let cells = '';
+        for (let block = 0; block < blocks; block++) {
+          const personIndex = line * blocks + block;
+          const person = rows[personIndex];
+          if (!person) {
+            cells += cols.map((_, index) => `<td class="${index === 0 && block > 0 ? 'block-start' : ''}"></td>`).join('');
+            continue;
+          }
+          cells += cols.map((field, index) => `<td class="${index === 0 && block > 0 ? 'block-start' : ''} ${field.key === 'row' ? 'number-cell' : ''}">${cellValue(person, field.key, personIndex)}</td>`).join('');
+        }
+        return `<tr>${cells}</tr>`;
+      }).join('');
+      const emptyRow = `<tr><td colspan="${cols.length * blocks}" class="empty-state">موردی برای نمایش پیدا نشد.</td></tr>`;
+      return `<table class="block-table"><thead><tr>${head}</tr></thead><tbody>${body || emptyRow}</tbody></table>`;
+    }
+    function renderDepartments() {
+      renderDepartmentDropdown();
+      const rows = filteredPeople();
+      const selectedLabel = state.selectedDepartments.has('all') ? 'همهٔ معاونت‌ها' : [...state.selectedDepartments].join('، ');
+      document.getElementById('deptStats').innerHTML = `
+        <span><b class="stat-icon">●</b> تعداد غایبین این بازه: <strong>${faDigits(uniqueRows(rows))} نفر</strong></span>
+        <span><b class="stat-icon">◷</b> تاریخ: <strong>${esc(rangeLabel())}</strong></span>
+        <span><b class="stat-icon">▤</b> مجموع: <strong>${faDigits(totalPortions(rows))} پرس</strong></span>
+        <span><b class="stat-icon">⌖</b> معاونت: <strong>${esc(selectedLabel)}</strong></span>`;
+      const groups = state.selectedDepartments.has('all') ? departments : departments.filter(department => state.selectedDepartments.has(department));
+      const content = groups.map(department => {
+        const groupRows = rows.filter(person => person.deputy === department);
+        if (!groupRows.length) return '';
+        return `<section class="dept-section">
+          <header class="dept-heading"><div class="dept-heading-title"><span class="dept-heading-icon">▦</span><span>${esc(department)}</span><span class="dept-heading-count">(${faDigits(groupRows.length)} نفر · ${faDigits(totalPortions(groupRows))} پرس)</span></div></header>
+          <div class="dept-table-wrap">${blockTableMarkup(groupRows, state.blocks)}</div>
+        </section>`;
+      }).join('');
+      document.getElementById('deptList').innerHTML = content || `<div class="empty-state card"><div class="empty-icon">⌕</div>برای معاونت‌های انتخاب‌شده، غایبی در این بازه ثبت نشده است.</div>`;
+    }
+    function renderAll() {
+      document.getElementById('fieldChoices').innerHTML = fieldChipMarkup();
+      renderFlatTable();
+      renderDepartments();
+      document.getElementById('printRange').textContent = `بازهٔ گزارش: ${rangeLabel()} · نوع نمایش: ${state.activeTab === 'flat' ? 'فهرست یک‌جا' : 'بر اساس معاونت'}`;
+    }
+    document.getElementById('filterForm').addEventListener('submit', event => {
+      event.preventDefault();
+      const from = document.getElementById('fromDate').value.trim();
+      const to = document.getElementById('toDate').value.trim();
+      if (!from || !to) { showToast('تاریخ شروع و پایان را وارد کنید.'); return; }
+      state.from = from;
+      state.to = to;
+      renderAll();
+      showToast('گزارش نمونه برای بازهٔ انتخاب‌شده نمایش داده شد.');
+    });
+    document.getElementById('fieldChoices').addEventListener('change', event => {
+      const input = event.target.closest('[data-field]');
+      if (!input) return;
+      if (!input.checked && state.selectedFields.size === 1) {
+        input.checked = true;
+        showToast('حداقل یک فیلد باید انتخاب شود.');
+        return;
+      }
+      if (input.checked) state.selectedFields.add(input.dataset.field);
+      else state.selectedFields.delete(input.dataset.field);
+      renderAll();
+    });
+    document.getElementById('flatTableWrap').addEventListener('click', event => {
+      const button = event.target.closest('[data-sort]');
+      if (!button) return;
+      const key = button.dataset.sort;
+      if (state.sortKey === key) state.sortDirection = state.sortDirection === 'asc' ? 'desc' : 'asc';
+      else { state.sortKey = key; state.sortDirection = 'asc'; }
+      renderFlatTable();
+    });
+    document.querySelector('.report-tabs').addEventListener('click', event => {
+      const button = event.target.closest('[data-tab]');
+      if (!button) return;
+      state.activeTab = button.dataset.tab;
+      document.querySelectorAll('.report-tab').forEach(tab => {
+        const active = tab === button;
+        tab.classList.toggle('active', active);
+        tab.setAttribute('aria-selected', String(active));
+      });
+      document.getElementById('panelFlat').hidden = state.activeTab !== 'flat';
+      document.getElementById('panelDept').hidden = state.activeTab !== 'dept';
+      document.getElementById('printRange').textContent = `بازهٔ گزارش: ${rangeLabel()} · نوع نمایش: ${state.activeTab === 'flat' ? 'فهرست یک‌جا' : 'بر اساس معاونت'}`;
+    });
+    document.getElementById('deptDropdownButton').addEventListener('click', event => {
+      event.stopPropagation();
+      const dropdown = document.getElementById('deptDropdown');
+      const open = dropdown.classList.toggle('open');
+      event.currentTarget.setAttribute('aria-expanded', String(open));
+    });
+    document.getElementById('deptDropdownMenu').addEventListener('change', event => {
+      const input = event.target.closest('[data-dept]');
+      if (!input) return;
+      const dept = input.dataset.dept;
+      if (dept === 'all') {
+        state.selectedDepartments = new Set(['all']);
+      } else {
+        state.selectedDepartments.delete('all');
+        if (input.checked) state.selectedDepartments.add(dept);
+        else state.selectedDepartments.delete(dept);
+        if (!state.selectedDepartments.size) state.selectedDepartments = new Set(['all']);
+      }
+      renderDepartments();
+    });
+    document.addEventListener('click', event => {
+      if (!event.target.closest('#deptDropdown')) {
+        document.getElementById('deptDropdown').classList.remove('open');
+        document.getElementById('deptDropdownButton').setAttribute('aria-expanded', 'false');
+      }
+    });
+    document.querySelectorAll('[data-blocks]').forEach(button => button.addEventListener('click', () => {
+      state.blocks = Number(button.dataset.blocks);
+      document.querySelectorAll('[data-blocks]').forEach(item => {
+        const active = item === button;
+        item.classList.toggle('active', active);
+        item.setAttribute('aria-pressed', String(active));
+      });
+      renderDepartments();
+    }));
+    document.getElementById('excelButton').addEventListener('click', () => {
+      const rows = state.activeTab === 'dept' ? filteredPeople() : people;
+      const cols = selectedFields();
+      const csvRows = [cols.map(field => field.label), ...rows.map((person, index) => cols.map(field => {
+        if (field.key === 'row') return String(index + 1);
+        return String(person[field.key] ?? '');
+      }))];
+      const csv = '\ufeff' + csvRows.map(row => row.map(value => `"${String(value).replace(/"/g, '""')}"`).join(',')).join('\r\n');
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(new Blob([csv], { type:'text/csv;charset=utf-8' }));
+      link.download = `گزارش-غایبین-${state.from.replaceAll('/', '-')}.csv`;
+      link.click();
+      URL.revokeObjectURL(link.href);
+      showToast('فایل نمونهٔ سازگار با Excel دریافت شد؛ داده‌ها نمایشی هستند.');
+    });
+    document.getElementById('printButton').addEventListener('click', () => window.print());
+    renderAll();
+  </script>
+</body>
+</html>

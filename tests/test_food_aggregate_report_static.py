@@ -50,14 +50,28 @@ def main() -> int:
     agg_body = php[agg_start:agg_end]
     check(agg_body.count("SELECT COUNT(*) FROM food_orders") == 1,
           "شمارش سفارشها از food_orders انجام نمیشود")
-    check("status = \"active\"" in agg_body,
-          "شمارش سفارشها وضعیت active را فیلتر نمیکند")
+    check("food_order_report_summary($from, $to, 'lunch')" in agg_body
+          and "food_order_report_summary($from, $to, 'dinner')" in agg_body,
+          "شمارش سفارش‌های ناهار و شام از منبع رسمی گزارش نمی‌آید")
     check("print_status = 'printed'" in agg_body,
           "فیشهای چاپشده فیلتر نشدهاند")
-    check("event_type IN ('printed','print','guest')" in agg_body,
-          "فیشهای چاپی legacy به تفکیک مهمان/پرسنل وارد نمیشوند")
-    check("$expected = $counts['lunch_orders'] - $counts['printed_final'];" in agg_body,
-          "مغایرت باید فقط با سفارشهای ناهار، هم scope گزارش غایبین، سنجیده شود")
+    check("event_type IN ('printed','print','guest','auto_printed','auto_guest')" in agg_body,
+          "رویدادهای فیزیکی، legacy و خودکار به تفکیک مهمان/پرسنل خوانده نمی‌شوند")
+    check("function food_ticket_aggregate_identity_sets(array $orderRows, array $printedPeople): array" in php,
+          "مبنای هویت‌محور گزارش تعریف نشده است")
+    identity_start = php.find("function food_ticket_aggregate_identity_sets(")
+    identity_end = php.find("function food_ticket_aggregate_diagnostics(", identity_start)
+    identity_body = php[identity_start:identity_end]
+    check("food_ticket_digits($row['nat'] ?? '')" in identity_body
+          and "'pc:' . $personnel" in identity_body,
+          "هویت سفارش با کد ملی و fallback کد پرسنلی ساخته نمی‌شود")
+    check("if ($key === '' && $personnel !== '')" in identity_body
+          and "$byPersonnel[$date . '|' . $personnel] ?? ''" in identity_body,
+          "فیش با fallback کد پرسنلی در برابر سفارش تطبیق داده نمی‌شود")
+    check("$expected = (int) ($diagnostics['expected_absent_count'] ?? 0);" in agg_body,
+          "غایب موردانتظار از مجموعهٔ هویت‌های یکتا محاسبه نمی‌شود")
+    check("$counts['lunch_orders'] - $counts['printed_final']" not in agg_body,
+          "تفریق خام تعداد سفارش و رویداد فیش نباید مبنای غایبین باشد")
     check("food_ticket_aggregate_diagnostics($from, $to, $printedPeople, $counts, $sourceNotes)" in agg_body,
           "تفکیک علل مغایرت در پاسخ گزارش وجود ندارد")
     check("food_ticket_api_absent($from, $to)" in agg_body,
@@ -110,21 +124,21 @@ def main() -> int:
     check("reportClassicView()" in html, "تب اول به محتوای قدیمی وصل نیست")
 
     # ۵ شمارنده + مغایرت
-    for label in ("تعداد کل سفارشها", "فیش مهمان چاپ شده",
-                  "فیش چاپشده قطعی", "تعداد غایبین", "مغایرت"):
+    for label in ("سفارش‌ها", "فیش خودکار پرسنل", "فیش خودکار مهمان",
+                  "فیش مهمان ثبت‌شده", "تطبیق غایبین ناهار"):
         check(label in html, f"شمارنده «{label}» در UI نیست")
 
     # انتخاب روز / فیلد / استخراج / چاپ / اسامی
     for marker in ('id="aggregate-filter"', "data-agg-field=",
                    'data-action="aggregate-export"', 'data-action="aggregate-print"',
-                   "aggregate-today", "نفراتی که فیش چاپشده دارند", "غایبین"):
+                   "aggregate-today", "هویت دارای فیش ناهار", "فهرست غایبین"):
         check(marker in html, f"قابلیت UI وجود ندارد: {marker}")
 
     # دادههای سنگین نباید در localStorage ذخیره شوند
     check("aggregate:_ag" in html, "دادهٔ موقت aggregate در persist ذخیره میشود")
 
     # ۶) نسخه پنل بالا رفته باشد ----------------------------------------------
-    check("PANEL_VERSION='1.37.43'" in html,
+    check("PANEL_VERSION='1.37.56'" in html,
           "نسخهٔ پنل برای جلوگیری از کش قدیمی بالا نرفته است")
 
     # ۷) اجرای تست رفتاری JS --------------------------------------------------

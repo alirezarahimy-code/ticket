@@ -104,6 +104,13 @@ class ReconciliationPhpTests(unittest.TestCase):
         text = PHP.read_text(encoding="utf-8")
         self.assertIn("'remaining_quantity' => $receivedQuantity === null ? null : $receivedQuantity - $served", text)
 
+    def test_disposition_must_equal_server_remaining_and_reject_stale_ui_snapshot(self) -> None:
+        text = PHP.read_text(encoding="utf-8")
+        self.assertIn("function food_reconciliation_expected_remaining_assert(array $body, int $serverRemaining): void", text)
+        self.assertIn("$expected !== $serverRemaining", text)
+        self.assertIn("if ($sum !== $remaining)", text)
+        self.assertNotIn("if ($sum > $remaining)", text)
+
 
 class ReconciliationJsTests(unittest.TestCase):
     def test_js_copies_stay_byte_identical(self) -> None:
@@ -123,6 +130,9 @@ class ReconciliationJsTests(unittest.TestCase):
                 "دورریز (ضایعات)",
                 "نگه‌داری برای وعدهٔ بعد",
                 "سایر",
+                "leftover_expected_remaining: m.remaining",
+                "sum !== remaining",
+                "باید دقیقاً برابر",
                 "کسر سفارش",
                 "اضافه سفارش",
                 "غایبین",

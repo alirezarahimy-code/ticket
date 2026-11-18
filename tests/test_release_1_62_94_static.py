@@ -103,12 +103,13 @@ class GuestReconciliationColumnTests(unittest.TestCase):
         self.assertIn("'total_employee_orders' => $currentEmployees + (int) $row['cancelled_employee_orders']", text)
         self.assertGreaterEqual(text.count("$item['total_employee_orders']"), 1)
 
-    def test_gap_basis_text_documents_total_demand(self) -> None:
+    def test_gap_basis_text_documents_current_total_demand(self) -> None:
         text = read(JS_PRIMARY)
-        self.assertIn("تقاضای کل = سفارش فعال پرسنل + درخواست فعال مهمان (نفرات)", text)
-        self.assertIn("کسری/اضافهٔ سفارش روی همین تقاضای کل است", text)
+        self.assertIn("مبنای گزارش، وضعیت فعلی سفارش‌ها و درخواست‌هاست", text)
+        self.assertIn("تقاضای فعلی = سفارش فعال پرسنل + درخواست فعال مهمان (نفرات)", text)
+        self.assertIn("کسری/اضافهٔ سفارش بر پایهٔ همین تقاضای فعلی است", text)
         php = read(RECON_PHP)
-        self.assertIn("تقاضای کل = سفارش فعال پرسنل + درخواست فعال مهمان (نفرات)", php)
+        self.assertIn("مبنای تقاضا: وضعیت فعلی سفارش‌ها/درخواست‌ها", php)
 
     def test_js_copies_stay_byte_identical(self) -> None:
         self.assertEqual(JS_PRIMARY.read_bytes(), JS_MIRROR.read_bytes())

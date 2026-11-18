@@ -190,8 +190,12 @@ chk(
     'گزارش «تطبیق» همچنان شرط print_status=printed دارد (برای مهمان)'
 );
 chk(
-    strpos($recon, "event_type NOT IN ('guest', 'auto_guest')") !== false,
-    'گزارش تطبیق مهمان را از شمارش کارکنان جدا می‌کند'
+    strpos($recon, "event_type IN ('guest', 'auto_guest') AND print_status = 'printed'") !== false,
+    'گزارش تطبیق تعداد رویدادهای مهمانِ چاپ‌شده را جداگانه می‌شمارد'
+);
+chk(
+    strpos($recon, "event_type IN ('printed', 'print', 'auto_printed')") !== false,
+    'شمارش کارکنان فقط رویدادهای فیش معتبرِ تحویل‌شده را می‌پذیرد'
 );
 
 // ── ۸) رابط کاربری: وعده و برچسب درست ──────────────────────────────────

@@ -1121,7 +1121,7 @@
       }).join('') + '</tbody></table></div>' : '<div class="fm-empty">برای این ماه فاکتوری ثبت نشده است.</div>';
     var loading = state.reconciliationLoading ? '<div class="fm-spinner">در حال دریافت گزارش تطبیق…</div>' : '';
     var errors = !state.reconciliationLoaded && !state.reconciliationLoading ? '<div class="fm-empty">برای دریافت گزارش، بازهٔ تاریخ و ماه را انتخاب کنید.</div>' : '';
-    return '<section class="fm-card fm-reconciliation-report"><div class="fm-toolbar"><div><h3>تطبیق سفارش، خرید و توزیع غذا</h3><span class="fm-small">تقاضای کل = سفارش فعال پرسنل + درخواست فعال مهمان (نفرات)؛ لغوشده‌ها جدا هستند و وارد این جمع نمی‌شوند. کسری/اضافهٔ سفارش روی همین تقاضای کل است.</span></div><button class="btn secondary" type="button" data-fm-action="reconciliation-export"' + (!state.reconciliationLoaded || state.reconciliationLoading ? ' disabled' : '') + '>خروجی Excel</button></div>'
+    return '<section class="fm-card fm-reconciliation-report"><div class="fm-toolbar"><div><h3>تطبیق سفارش، خرید و توزیع غذا</h3><span class="fm-small">مبنای گزارش، وضعیت فعلی سفارش‌ها و درخواست‌هاست (نه snapshot زمان ثبت سفارش پیمانکار): تقاضای فعلی = سفارش فعال پرسنل + درخواست فعال مهمان (نفرات)؛ لغوشده‌ها جدا هستند و وارد این جمع نمی‌شوند. کسری/اضافهٔ سفارش بر پایهٔ همین تقاضای فعلی است.</span></div><button class="btn secondary" type="button" data-fm-action="reconciliation-export"' + (!state.reconciliationLoaded || state.reconciliationLoading ? ' disabled' : '') + '>خروجی Excel</button></div>'
       + '<form id="fm-reconciliation-filter" class="fm-order-date"><label class="fm-field">از تاریخ شمسی<input type="text" name="from" data-jalali inputmode="numeric" placeholder="۱۴۰۵/۰۷/۰۱" value="' + esc(faDigits(from)) + '" required></label><label class="fm-field">تا تاریخ شمسی<input type="text" name="to" data-jalali inputmode="numeric" placeholder="۱۴۰۵/۰۷/۳۰" value="' + esc(faDigits(to)) + '" required></label><label class="fm-field">ماه فاکتور (شمسی)<input type="text" name="month" data-jalali-month inputmode="numeric" placeholder="۱۴۰۵/۰۷" value="' + esc(faDigits(month)) + '" required></label><label class="fm-field">وعده<select name="meal_type"><option value="all"' + (state.reconciliationMealType === 'all' ? ' selected' : '') + '>همه</option><option value="lunch"' + (state.reconciliationMealType === 'lunch' ? ' selected' : '') + '>ناهار</option><option value="dinner"' + (state.reconciliationMealType === 'dinner' ? ' selected' : '') + '>شام</option></select></label><button class="btn primary" type="submit">نمایش گزارش</button></form>'
       + loading + errors + (state.reconciliationLoaded ? invoiceSummary + '<div class="fm-alert">«پرس فاکتور ماهانه» و «جمع تحویل روزانه» دو عدد مستقل‌اند؛ فقط اختلافشان گزارش می‌شود و هرگز با هم جمع نمی‌شوند. «پرس سفارش/تحویل پیمانکار» در این جدول یک عدد واحد است (در ۹۹٫۹٪ موارد سفارش و تحویل برابرند).</div><section class="fm-section-gap"><h3>تطبیق روزانه</h3>' + dailyTable + '</section>' + dailyForm + '<section class="fm-section-gap"><h3>فاکتورهای ماه ' + esc(faDigits(month)) + '</h3>' + invoiceTable + '</section>' + invoiceForm + renderLeftoverModal() : '') + '</section>';
   }
@@ -1140,7 +1140,7 @@
       + '<section class="fm-leftover-modal" role="dialog" aria-modal="true" aria-labelledby="fm-leftover-title">'
       + '<header><h3 id="fm-leftover-title">تعیین تکلیف غذای باقیمانده</h3><p>امروز برابر با «' + faDigits(remaining) + '» عدد غذا باقیمانده · ' + esc(dateJalali) + ' · ' + esc(mealLabel) + '</p></header>'
       + '<div class="fm-leftover-modal-body" id="fm-leftover-form">'
-      + '<p class="fm-leftover-hint">سرنوشت غذاهای باقیمانده را مشخص کنید؛ می‌توانید چند گزینه را هم‌زمان انتخاب کنید. مجموع تعدادها نباید از «' + faDigits(remaining) + '» پرس بیشتر شود.</p>'
+      + '<p class="fm-leftover-hint">سرنوشت همهٔ غذاهای باقیمانده را مشخص کنید؛ می‌توانید چند گزینه را هم‌زمان انتخاب کنید، اما مجموع تعدادها باید دقیقاً برابر «' + faDigits(remaining) + '» پرس باشد.</p>'
       + row('staff', 'توزیع بین پرسنل همین شرکت')
       + row('waste', 'دورریز (ضایعات)')
       + row('keep', 'نگه‌داری برای وعدهٔ بعد')
@@ -1197,7 +1197,11 @@
       sum += counts[key];
     }
     if (sum === 0) { leftoverInlineError('حداقل یک گزینه را تیک بزنید و تعداد را وارد کنید.'); return; }
-    if (sum > remaining) { leftoverInlineError('مجموع تعیین تکلیف (' + faDigits(sum) + ' پرس) از ماندهٔ امروز (' + faDigits(remaining) + ' پرس) بیشتر است.'); return; }
+    if (sum !== remaining) {
+      var relation = sum < remaining ? 'کمتر' : 'بیشتر';
+      leftoverInlineError('مجموع تعیین تکلیف (' + faDigits(sum) + ' پرس) از ماندهٔ امروز (' + faDigits(remaining) + ' پرس) ' + relation + ' است؛ مجموع باید دقیقاً با مانده برابر باشد.');
+      return;
+    }
     var otherNote = String((form.querySelector('[name="leftover_other_note"]') || {}).value || '').trim();
     var merged = {
       food_date: m.body.food_date, meal_type: m.body.meal_type, action: m.body.action,
@@ -1205,7 +1209,7 @@
       note: m.body.note, edit_reason: m.body.edit_reason,
       leftover_staff_quantity: counts.staff, leftover_waste_quantity: counts.waste,
       leftover_keep_quantity: counts.keep, leftover_other_quantity: counts.other,
-      leftover_other_note: otherNote,
+      leftover_other_note: otherNote, leftover_expected_remaining: m.remaining,
     };
     var confirmButton = root.querySelector('[data-fm-action="leftover-confirm"]');
     if (confirmButton) { confirmButton.disabled = true; confirmButton.textContent = 'در حال ثبت…'; }

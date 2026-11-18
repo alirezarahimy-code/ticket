@@ -15203,8 +15203,8 @@
             "id": "PAGE-009",
             "path": "chatbot.php",
             "area": "PAGE",
-            "lines": 3404,
-            "file_fingerprint": "8ef6710d76ef",
+            "lines": 3417,
+            "file_fingerprint": "41b98e047c14",
             "blocks": [
                 {
                     "kind": "region",
@@ -15383,9 +15383,9 @@
                     "kind": "function",
                     "anchor": "chatbot_answer",
                     "line_start": 201,
-                    "line_end": 401,
-                    "lines": 201,
-                    "fingerprint": "82b154559f7f",
+                    "line_end": 414,
+                    "lines": 214,
+                    "fingerprint": "d59e4d942a8f",
                     "risk": {
                         "score": 1,
                         "flags": {
@@ -15396,9 +15396,9 @@
                 },
                 {
                     "kind": "region",
-                    "anchor": "بلوک رویه‌ای 402-442",
-                    "line_start": 402,
-                    "line_end": 442,
+                    "anchor": "بلوک رویه‌ای 415-455",
+                    "line_start": 415,
+                    "line_end": 455,
                     "lines": 41,
                     "fingerprint": "822d1442bbd5",
                     "risk": {
@@ -15410,8 +15410,8 @@
                 {
                     "kind": "function",
                     "anchor": "chatbot_expand_words",
-                    "line_start": 443,
-                    "line_end": 465,
+                    "line_start": 456,
+                    "line_end": 478,
                     "lines": 23,
                     "fingerprint": "5f954b91e598",
                     "risk": {
@@ -15423,8 +15423,8 @@
                 {
                     "kind": "function",
                     "anchor": "chatbot_edit_distance",
-                    "line_start": 467,
-                    "line_end": 481,
+                    "line_start": 480,
+                    "line_end": 494,
                     "lines": 15,
                     "fingerprint": "3e42887feeaa",
                     "risk": {
@@ -15436,8 +15436,8 @@
                 {
                     "kind": "function",
                     "anchor": "chatbot_typo_match",
-                    "line_start": 483,
-                    "line_end": 496,
+                    "line_start": 496,
+                    "line_end": 509,
                     "lines": 14,
                     "fingerprint": "4ce790b3f162",
                     "risk": {
@@ -15448,9 +15448,9 @@
                 },
                 {
                     "kind": "region",
-                    "anchor": "بلوک رویه‌ای 497-500",
-                    "line_start": 497,
-                    "line_end": 500,
+                    "anchor": "بلوک رویه‌ای 510-513",
+                    "line_start": 510,
+                    "line_end": 513,
                     "lines": 4,
                     "fingerprint": "3c2fc31ff388",
                     "risk": {
@@ -15462,8 +15462,8 @@
                 {
                     "kind": "function",
                     "anchor": "chatbot_contains_word",
-                    "line_start": 501,
-                    "line_end": 508,
+                    "line_start": 514,
+                    "line_end": 521,
                     "lines": 8,
                     "fingerprint": "fa8f02fb9a22",
                     "risk": {
@@ -15475,8 +15475,8 @@
                 {
                     "kind": "function",
                     "anchor": "chatbot_guide_tokens",
-                    "line_start": 510,
-                    "line_end": 524,
+                    "line_start": 523,
+                    "line_end": 537,
                     "lines": 15,
                     "fingerprint": "87cb59dd14c7",
                     "risk": {
@@ -15488,8 +15488,8 @@
                 {
                     "kind": "function",
                     "anchor": "chatbot_guide_index",
-                    "line_start": 526,
-                    "line_end": 609,
+                    "line_start": 539,
+                    "line_end": 622,
                     "lines": 84,
                     "fingerprint": "04eb13b8189a",
                     "risk": {
@@ -15503,8 +15503,8 @@
                 {
                     "kind": "function",
                     "anchor": "chatbot_guide_search",
-                    "line_start": 611,
-                    "line_end": 643,
+                    "line_start": 624,
+                    "line_end": 656,
                     "lines": 33,
                     "fingerprint": "7a6a932d4770",
                     "risk": {
@@ -15516,8 +15516,8 @@
                 {
                     "kind": "function",
                     "anchor": "chatbot_guide_suggestions",
-                    "line_start": 645,
-                    "line_end": 670,
+                    "line_start": 658,
+                    "line_end": 683,
                     "lines": 26,
                     "fingerprint": "165ca77dcf8b",
                     "risk": {
@@ -15529,8 +15529,8 @@
                 {
                     "kind": "function",
                     "anchor": "chatbot_guide_reply",
-                    "line_start": 672,
-                    "line_end": 677,
+                    "line_start": 685,
+                    "line_end": 690,
                     "lines": 6,
                     "fingerprint": "655897c65dfa",
                     "risk": {
@@ -15542,8 +15542,8 @@
                 {
                     "kind": "function",
                     "anchor": "chatbot_guide_answer",
-                    "line_start": 679,
-                    "line_end": 692,
+                    "line_start": 692,
+                    "line_end": 705,
                     "lines": 14,
                     "fingerprint": "07247c684d3e",
                     "risk": {
@@ -15555,8 +15555,8 @@
                 {
                     "kind": "function",
                     "anchor": "chatbot_api_handle",
-                    "line_start": 694,
-                    "line_end": 777,
+                    "line_start": 707,
+                    "line_end": 790,
                     "lines": 84,
                     "fingerprint": "d94d06471bb0",
                     "risk": {
@@ -15574,8 +15574,8 @@
                 {
                     "kind": "function",
                     "anchor": "chatbot_save_faq",
-                    "line_start": 779,
-                    "line_end": 809,
+                    "line_start": 792,
+                    "line_end": 822,
                     "lines": 31,
                     "fingerprint": "a5271c1151cd",
                     "risk": {
@@ -15589,8 +15589,8 @@
                 {
                     "kind": "function",
                     "anchor": "chatbot_save_tts",
-                    "line_start": 811,
-                    "line_end": 866,
+                    "line_start": 824,
+                    "line_end": 879,
                     "lines": 56,
                     "fingerprint": "19b56899a1de",
                     "risk": {
@@ -15602,8 +15602,8 @@
                 {
                     "kind": "function",
                     "anchor": "chatbot_widget_defaults",
-                    "line_start": 868,
-                    "line_end": 890,
+                    "line_start": 881,
+                    "line_end": 903,
                     "lines": 23,
                     "fingerprint": "17ba07f2c7ef",
                     "risk": {
@@ -15615,8 +15615,8 @@
                 {
                     "kind": "function",
                     "anchor": "chatbot_widget_config",
-                    "line_start": 892,
-                    "line_end": 940,
+                    "line_start": 905,
+                    "line_end": 953,
                     "lines": 49,
                     "fingerprint": "e3bfbfe458c5",
                     "risk": {
@@ -15628,8 +15628,8 @@
                 {
                     "kind": "function",
                     "anchor": "chatbot_save_widget",
-                    "line_start": 942,
-                    "line_end": 984,
+                    "line_start": 955,
+                    "line_end": 997,
                     "lines": 43,
                     "fingerprint": "e5f7c8691314",
                     "risk": {
@@ -15641,8 +15641,8 @@
                 {
                     "kind": "function",
                     "anchor": "chatbot_tts_config",
-                    "line_start": 986,
-                    "line_end": 1000,
+                    "line_start": 999,
+                    "line_end": 1013,
                     "lines": 15,
                     "fingerprint": "9abfa668c638",
                     "risk": {
@@ -15654,8 +15654,8 @@
                 {
                     "kind": "function",
                     "anchor": "chatbot_tts_proc_available",
-                    "line_start": 1002,
-                    "line_end": 1010,
+                    "line_start": 1015,
+                    "line_end": 1023,
                     "lines": 9,
                     "fingerprint": "220c599450ba",
                     "risk": {
@@ -15667,8 +15667,8 @@
                 {
                     "kind": "function",
                     "anchor": "chatbot_tts_find_espeak",
-                    "line_start": 1012,
-                    "line_end": 1038,
+                    "line_start": 1025,
+                    "line_end": 1051,
                     "lines": 27,
                     "fingerprint": "3a097605f3b1",
                     "risk": {
@@ -15680,8 +15680,8 @@
                 {
                     "kind": "function",
                     "anchor": "chatbot_tts_find_piper",
-                    "line_start": 1040,
-                    "line_end": 1063,
+                    "line_start": 1053,
+                    "line_end": 1076,
                     "lines": 24,
                     "fingerprint": "936b0563b020",
                     "risk": {
@@ -15693,8 +15693,8 @@
                 {
                     "kind": "function",
                     "anchor": "chatbot_tts_piper_model_rank",
-                    "line_start": 1065,
-                    "line_end": 1098,
+                    "line_start": 1078,
+                    "line_end": 1111,
                     "lines": 34,
                     "fingerprint": "60a85dc39418",
                     "risk": {
@@ -15706,8 +15706,8 @@
                 {
                     "kind": "function",
                     "anchor": "chatbot_tts_piper_model",
-                    "line_start": 1100,
-                    "line_end": 1141,
+                    "line_start": 1113,
+                    "line_end": 1154,
                     "lines": 42,
                     "fingerprint": "2d11fef25553",
                     "risk": {
@@ -15721,8 +15721,8 @@
                 {
                     "kind": "function",
                     "anchor": "chatbot_tts_active",
-                    "line_start": 1143,
-                    "line_end": 1173,
+                    "line_start": 1156,
+                    "line_end": 1186,
                     "lines": 31,
                     "fingerprint": "07c6f9b16fdf",
                     "risk": {
@@ -15734,8 +15734,8 @@
                 {
                     "kind": "function",
                     "anchor": "chatbot_tts_length_scale",
-                    "line_start": 1175,
-                    "line_end": 1181,
+                    "line_start": 1188,
+                    "line_end": 1194,
                     "lines": 7,
                     "fingerprint": "2e3dd26173d0",
                     "risk": {
@@ -15747,8 +15747,8 @@
                 {
                     "kind": "function",
                     "anchor": "chatbot_tts_status",
-                    "line_start": 1183,
-                    "line_end": 1210,
+                    "line_start": 1196,
+                    "line_end": 1223,
                     "lines": 28,
                     "fingerprint": "1bfb071aa986",
                     "risk": {
@@ -15760,8 +15760,8 @@
                 {
                     "kind": "function",
                     "anchor": "chatbot_tts_rules_version",
-                    "line_start": 1212,
-                    "line_end": 1215,
+                    "line_start": 1225,
+                    "line_end": 1228,
                     "lines": 4,
                     "fingerprint": "03b979d1e968",
                     "risk": {
@@ -15773,8 +15773,8 @@
                 {
                     "kind": "function",
                     "anchor": "chatbot_tts_word_replace",
-                    "line_start": 1217,
-                    "line_end": 1226,
+                    "line_start": 1230,
+                    "line_end": 1239,
                     "lines": 10,
                     "fingerprint": "2ea732a66136",
                     "risk": {
@@ -15786,8 +15786,8 @@
                 {
                     "kind": "function",
                     "anchor": "chatbot_tts_ascii_digits",
-                    "line_start": 1228,
-                    "line_end": 1235,
+                    "line_start": 1241,
+                    "line_end": 1248,
                     "lines": 8,
                     "fingerprint": "070c9ffed016",
                     "risk": {
@@ -15799,8 +15799,8 @@
                 {
                     "kind": "function",
                     "anchor": "chatbot_tts_ascii_letters",
-                    "line_start": 1237,
-                    "line_end": 1243,
+                    "line_start": 1250,
+                    "line_end": 1256,
                     "lines": 7,
                     "fingerprint": "cdb596f16d56",
                     "risk": {
@@ -15812,8 +15812,8 @@
                 {
                     "kind": "function",
                     "anchor": "chatbot_tts_digits_spoken",
-                    "line_start": 1245,
-                    "line_end": 1259,
+                    "line_start": 1258,
+                    "line_end": 1272,
                     "lines": 15,
                     "fingerprint": "3f738238f0a5",
                     "risk": {
@@ -15825,8 +15825,8 @@
                 {
                     "kind": "function",
                     "anchor": "chatbot_tts_three_digit",
-                    "line_start": 1261,
-                    "line_end": 1287,
+                    "line_start": 1274,
+                    "line_end": 1300,
                     "lines": 27,
                     "fingerprint": "4b265cda96fe",
                     "risk": {
@@ -15838,8 +15838,8 @@
                 {
                     "kind": "function",
                     "anchor": "chatbot_tts_int_to_words",
-                    "line_start": 1289,
-                    "line_end": 1314,
+                    "line_start": 1302,
+                    "line_end": 1327,
                     "lines": 26,
                     "fingerprint": "10bbbd1b94cb",
                     "risk": {
@@ -15851,8 +15851,8 @@
                 {
                     "kind": "function",
                     "anchor": "chatbot_tts_number_token",
-                    "line_start": 1316,
-                    "line_end": 1333,
+                    "line_start": 1329,
+                    "line_end": 1346,
                     "lines": 18,
                     "fingerprint": "67f0527a9017",
                     "risk": {
@@ -15864,8 +15864,8 @@
                 {
                     "kind": "function",
                     "anchor": "chatbot_tts_number_int_string",
-                    "line_start": 1335,
-                    "line_end": 1345,
+                    "line_start": 1348,
+                    "line_end": 1358,
                     "lines": 11,
                     "fingerprint": "a28c22bfed07",
                     "risk": {
@@ -15877,8 +15877,8 @@
                 {
                     "kind": "function",
                     "anchor": "chatbot_tts_ordinal",
-                    "line_start": 1347,
-                    "line_end": 1359,
+                    "line_start": 1360,
+                    "line_end": 1372,
                     "lines": 13,
                     "fingerprint": "3eb09b67a6e2",
                     "risk": {
@@ -15890,8 +15890,8 @@
                 {
                     "kind": "function",
                     "anchor": "chatbot_tts_month_name",
-                    "line_start": 1361,
-                    "line_end": 1365,
+                    "line_start": 1374,
+                    "line_end": 1378,
                     "lines": 5,
                     "fingerprint": "e3ef87169618",
                     "risk": {
@@ -15903,8 +15903,8 @@
                 {
                     "kind": "function",
                     "anchor": "chatbot_tts_dates_times",
-                    "line_start": 1367,
-                    "line_end": 1400,
+                    "line_start": 1380,
+                    "line_end": 1413,
                     "lines": 34,
                     "fingerprint": "c32442f047c6",
                     "risk": {
@@ -15916,8 +15916,8 @@
                 {
                     "kind": "function",
                     "anchor": "chatbot_tts_ids",
-                    "line_start": 1402,
-                    "line_end": 1442,
+                    "line_start": 1415,
+                    "line_end": 1455,
                     "lines": 41,
                     "fingerprint": "d594e5e59241",
                     "risk": {
@@ -15929,8 +15929,8 @@
                 {
                     "kind": "function",
                     "anchor": "chatbot_tts_numbers_to_words",
-                    "line_start": 1444,
-                    "line_end": 1472,
+                    "line_start": 1457,
+                    "line_end": 1485,
                     "lines": 29,
                     "fingerprint": "f12e972cd596",
                     "risk": {
@@ -15942,8 +15942,8 @@
                 {
                     "kind": "function",
                     "anchor": "chatbot_tts_letter_name",
-                    "line_start": 1474,
-                    "line_end": 1484,
+                    "line_start": 1487,
+                    "line_end": 1497,
                     "lines": 11,
                     "fingerprint": "2560a32e925f",
                     "risk": {
@@ -15955,8 +15955,8 @@
                 {
                     "kind": "function",
                     "anchor": "chatbot_tts_log_unknown",
-                    "line_start": 1486,
-                    "line_end": 1497,
+                    "line_start": 1499,
+                    "line_end": 1510,
                     "lines": 12,
                     "fingerprint": "af64f0beb8c2",
                     "risk": {
@@ -15970,8 +15970,8 @@
                 {
                     "kind": "function",
                     "anchor": "chatbot_tts_spell_acronyms",
-                    "line_start": 1499,
-                    "line_end": 1522,
+                    "line_start": 1512,
+                    "line_end": 1535,
                     "lines": 24,
                     "fingerprint": "98b55cf43f70",
                     "risk": {
@@ -15983,8 +15983,8 @@
                 {
                     "kind": "function",
                     "anchor": "chatbot_tts_unknown_latin",
-                    "line_start": 1524,
-                    "line_end": 1549,
+                    "line_start": 1537,
+                    "line_end": 1562,
                     "lines": 26,
                     "fingerprint": "0890223a7f2d",
                     "risk": {
@@ -15996,8 +15996,8 @@
                 {
                     "kind": "function",
                     "anchor": "chatbot_tts_symbols",
-                    "line_start": 1551,
-                    "line_end": 1564,
+                    "line_start": 1564,
+                    "line_end": 1577,
                     "lines": 14,
                     "fingerprint": "cc03f5e00b7e",
                     "risk": {
@@ -16009,8 +16009,8 @@
                 {
                     "kind": "function",
                     "anchor": "chatbot_tts_strip_markdown",
-                    "line_start": 1566,
-                    "line_end": 1573,
+                    "line_start": 1579,
+                    "line_end": 1586,
                     "lines": 8,
                     "fingerprint": "19ece98df6a2",
                     "risk": {
@@ -16022,8 +16022,8 @@
                 {
                     "kind": "function",
                     "anchor": "chatbot_tts_zwnj_policy",
-                    "line_start": 1575,
-                    "line_end": 1580,
+                    "line_start": 1588,
+                    "line_end": 1593,
                     "lines": 6,
                     "fingerprint": "c27a10e6ffe6",
                     "risk": {
@@ -16037,8 +16037,8 @@
                 {
                     "kind": "function",
                     "anchor": "chatbot_tts_apply_zwnj",
-                    "line_start": 1582,
-                    "line_end": 1592,
+                    "line_start": 1595,
+                    "line_end": 1605,
                     "lines": 11,
                     "fingerprint": "b3efb49c432e",
                     "risk": {
@@ -16052,8 +16052,8 @@
                 {
                     "kind": "function",
                     "anchor": "chatbot_tts_he_yezafe",
-                    "line_start": 1594,
-                    "line_end": 1601,
+                    "line_start": 1607,
+                    "line_end": 1614,
                     "lines": 8,
                     "fingerprint": "a9eea3c995ee",
                     "risk": {
@@ -16065,8 +16065,8 @@
                 {
                     "kind": "function",
                     "anchor": "chatbot_tts_lexicon",
-                    "line_start": 1603,
-                    "line_end": 1629,
+                    "line_start": 1616,
+                    "line_end": 1642,
                     "lines": 27,
                     "fingerprint": "6e9852c4189a",
                     "risk": {
@@ -16078,8 +16078,8 @@
                 {
                     "kind": "function",
                     "anchor": "chatbot_tts_lexicon_hash",
-                    "line_start": 1631,
-                    "line_end": 1635,
+                    "line_start": 1644,
+                    "line_end": 1648,
                     "lines": 5,
                     "fingerprint": "be8f0a865530",
                     "risk": {
@@ -16091,8 +16091,8 @@
                 {
                     "kind": "function",
                     "anchor": "chatbot_tts_lexicon_apply",
-                    "line_start": 1637,
-                    "line_end": 1648,
+                    "line_start": 1650,
+                    "line_end": 1661,
                     "lines": 12,
                     "fingerprint": "7a37623449f5",
                     "risk": {
@@ -16104,8 +16104,8 @@
                 {
                     "kind": "function",
                     "anchor": "chatbot_tts_spoken_path",
-                    "line_start": 1650,
-                    "line_end": 1653,
+                    "line_start": 1663,
+                    "line_end": 1666,
                     "lines": 4,
                     "fingerprint": "273ec57a184d",
                     "risk": {
@@ -16117,8 +16117,8 @@
                 {
                     "kind": "function",
                     "anchor": "chatbot_tts_spoken_map",
-                    "line_start": 1655,
-                    "line_end": 1663,
+                    "line_start": 1668,
+                    "line_end": 1676,
                     "lines": 9,
                     "fingerprint": "d33a785e00b5",
                     "risk": {
@@ -16132,8 +16132,8 @@
                 {
                     "kind": "function",
                     "anchor": "chatbot_tts_spoken_set",
-                    "line_start": 1665,
-                    "line_end": 1682,
+                    "line_start": 1678,
+                    "line_end": 1695,
                     "lines": 18,
                     "fingerprint": "bfe49a3d9d26",
                     "risk": {
@@ -16147,8 +16147,8 @@
                 {
                     "kind": "function",
                     "anchor": "chatbot_tts_spoken_for",
-                    "line_start": 1684,
-                    "line_end": 1695,
+                    "line_start": 1697,
+                    "line_end": 1708,
                     "lines": 12,
                     "fingerprint": "52b6f478b68a",
                     "risk": {
@@ -16160,8 +16160,8 @@
                 {
                     "kind": "function",
                     "anchor": "chatbot_tts_clean",
-                    "line_start": 1697,
-                    "line_end": 1708,
+                    "line_start": 1710,
+                    "line_end": 1721,
                     "lines": 12,
                     "fingerprint": "2e8f564ddd1a",
                     "risk": {
@@ -16173,8 +16173,8 @@
                 {
                     "kind": "function",
                     "anchor": "chatbot_tts_trim_length",
-                    "line_start": 1710,
-                    "line_end": 1724,
+                    "line_start": 1723,
+                    "line_end": 1737,
                     "lines": 15,
                     "fingerprint": "ba1b3f37010c",
                     "risk": {
@@ -16186,8 +16186,8 @@
                 {
                     "kind": "function",
                     "anchor": "chatbot_tts_colloquial",
-                    "line_start": 1726,
-                    "line_end": 1771,
+                    "line_start": 1739,
+                    "line_end": 1784,
                     "lines": 46,
                     "fingerprint": "8725df48548f",
                     "risk": {
@@ -16199,8 +16199,8 @@
                 {
                     "kind": "function",
                     "anchor": "chatbot_tts_phrase",
-                    "line_start": 1773,
-                    "line_end": 1790,
+                    "line_start": 1786,
+                    "line_end": 1803,
                     "lines": 18,
                     "fingerprint": "d1113b536de2",
                     "risk": {
@@ -16212,8 +16212,8 @@
                 {
                     "kind": "function",
                     "anchor": "chatbot_tts_limit_phrase",
-                    "line_start": 1792,
-                    "line_end": 1826,
+                    "line_start": 1805,
+                    "line_end": 1839,
                     "lines": 35,
                     "fingerprint": "f96b05093aec",
                     "risk": {
@@ -16225,8 +16225,8 @@
                 {
                     "kind": "function",
                     "anchor": "chatbot_tts_vocalize",
-                    "line_start": 1828,
-                    "line_end": 1835,
+                    "line_start": 1841,
+                    "line_end": 1848,
                     "lines": 8,
                     "fingerprint": "3d2e296f3ac0",
                     "risk": {
@@ -16238,8 +16238,8 @@
                 {
                     "kind": "function",
                     "anchor": "chatbot_tts_ezafe_skip_first",
-                    "line_start": 1837,
-                    "line_end": 1850,
+                    "line_start": 1850,
+                    "line_end": 1863,
                     "lines": 14,
                     "fingerprint": "3924b062eeea",
                     "risk": {
@@ -16251,8 +16251,8 @@
                 {
                     "kind": "function",
                     "anchor": "chatbot_tts_ezafe_skip_second",
-                    "line_start": 1852,
-                    "line_end": 1863,
+                    "line_start": 1865,
+                    "line_end": 1876,
                     "lines": 12,
                     "fingerprint": "53b33656e945",
                     "risk": {
@@ -16264,8 +16264,8 @@
                 {
                     "kind": "function",
                     "anchor": "chatbot_tts_silent_heh",
-                    "line_start": 1865,
-                    "line_end": 1876,
+                    "line_start": 1878,
+                    "line_end": 1889,
                     "lines": 12,
                     "fingerprint": "ac5ecf720398",
                     "risk": {
@@ -16277,8 +16277,8 @@
                 {
                     "kind": "function",
                     "anchor": "chatbot_tts_ezafe_nouns",
-                    "line_start": 1878,
-                    "line_end": 1889,
+                    "line_start": 1891,
+                    "line_end": 1902,
                     "lines": 12,
                     "fingerprint": "670920fcaabe",
                     "risk": {
@@ -16290,8 +16290,8 @@
                 {
                     "kind": "function",
                     "anchor": "chatbot_tts_ezafe_pairs_builtin",
-                    "line_start": 1891,
-                    "line_end": 1902,
+                    "line_start": 1904,
+                    "line_end": 1915,
                     "lines": 12,
                     "fingerprint": "6853e0679481",
                     "risk": {
@@ -16303,8 +16303,8 @@
                 {
                     "kind": "function",
                     "anchor": "chatbot_tts_overlay_map",
-                    "line_start": 1904,
-                    "line_end": 1924,
+                    "line_start": 1917,
+                    "line_end": 1937,
                     "lines": 21,
                     "fingerprint": "80fa5cc37835",
                     "risk": {
@@ -16316,8 +16316,8 @@
                 {
                     "kind": "function",
                     "anchor": "chatbot_tts_ezafe_pairs",
-                    "line_start": 1926,
-                    "line_end": 1938,
+                    "line_start": 1939,
+                    "line_end": 1951,
                     "lines": 13,
                     "fingerprint": "8f870cb98385",
                     "risk": {
@@ -16329,8 +16329,8 @@
                 {
                     "kind": "function",
                     "anchor": "chatbot_tts_ezafe_mode",
-                    "line_start": 1940,
-                    "line_end": 1947,
+                    "line_start": 1953,
+                    "line_end": 1960,
                     "lines": 8,
                     "fingerprint": "df33d6484494",
                     "risk": {
@@ -16342,8 +16342,8 @@
                 {
                     "kind": "function",
                     "anchor": "chatbot_tts_word_bare",
-                    "line_start": 1949,
-                    "line_end": 1953,
+                    "line_start": 1962,
+                    "line_end": 1966,
                     "lines": 5,
                     "fingerprint": "997deef81095",
                     "risk": {
@@ -16355,8 +16355,8 @@
                 {
                     "kind": "function",
                     "anchor": "chatbot_tts_mark_ezafe_first",
-                    "line_start": 1955,
-                    "line_end": 1974,
+                    "line_start": 1968,
+                    "line_end": 1987,
                     "lines": 20,
                     "fingerprint": "39712c810071",
                     "risk": {
@@ -16368,8 +16368,8 @@
                 {
                     "kind": "function",
                     "anchor": "chatbot_tts_ezafe",
-                    "line_start": 1976,
-                    "line_end": 2026,
+                    "line_start": 1989,
+                    "line_end": 2039,
                     "lines": 51,
                     "fingerprint": "d867f13af888",
                     "risk": {
@@ -16381,8 +16381,8 @@
                 {
                     "kind": "function",
                     "anchor": "chatbot_tts_colloquial_enabled",
-                    "line_start": 2028,
-                    "line_end": 2032,
+                    "line_start": 2041,
+                    "line_end": 2045,
                     "lines": 5,
                     "fingerprint": "d7b44b71fdb4",
                     "risk": {
@@ -16394,8 +16394,8 @@
                 {
                     "kind": "function",
                     "anchor": "chatbot_tts_prepare",
-                    "line_start": 2034,
-                    "line_end": 2066,
+                    "line_start": 2047,
+                    "line_end": 2079,
                     "lines": 33,
                     "fingerprint": "1c897478a506",
                     "risk": {
@@ -16407,8 +16407,8 @@
                 {
                     "kind": "function",
                     "anchor": "chatbot_tts_lab_variant",
-                    "line_start": 2068,
-                    "line_end": 2087,
+                    "line_start": 2081,
+                    "line_end": 2100,
                     "lines": 20,
                     "fingerprint": "02eb9557e3ea",
                     "risk": {
@@ -16420,8 +16420,8 @@
                 {
                     "kind": "function",
                     "anchor": "chatbot_tts_lab_harakat",
-                    "line_start": 2089,
-                    "line_end": 2115,
+                    "line_start": 2102,
+                    "line_end": 2128,
                     "lines": 27,
                     "fingerprint": "eebffdcd7cb7",
                     "risk": {
@@ -16433,8 +16433,8 @@
                 {
                     "kind": "function",
                     "anchor": "chatbot_tts_stages",
-                    "line_start": 2117,
-                    "line_end": 2155,
+                    "line_start": 2130,
+                    "line_end": 2168,
                     "lines": 39,
                     "fingerprint": "5da9633fd1b3",
                     "risk": {
@@ -16446,8 +16446,8 @@
                 {
                     "kind": "function",
                     "anchor": "chatbot_tts_espeak_data_path",
-                    "line_start": 2157,
-                    "line_end": 2173,
+                    "line_start": 2170,
+                    "line_end": 2186,
                     "lines": 17,
                     "fingerprint": "484e135e6016",
                     "risk": {
@@ -16459,8 +16459,8 @@
                 {
                     "kind": "function",
                     "anchor": "chatbot_tts_ipa",
-                    "line_start": 2175,
-                    "line_end": 2204,
+                    "line_start": 2188,
+                    "line_end": 2217,
                     "lines": 30,
                     "fingerprint": "c79c7372f092",
                     "risk": {
@@ -16472,8 +16472,8 @@
                 {
                     "kind": "function",
                     "anchor": "chatbot_tts_model_json_report",
-                    "line_start": 2206,
-                    "line_end": 2257,
+                    "line_start": 2219,
+                    "line_end": 2270,
                     "lines": 52,
                     "fingerprint": "1bf66432d9b2",
                     "risk": {
@@ -16485,8 +16485,8 @@
                 {
                     "kind": "function",
                     "anchor": "chatbot_tts_lab_filename",
-                    "line_start": 2259,
-                    "line_end": 2263,
+                    "line_start": 2272,
+                    "line_end": 2276,
                     "lines": 5,
                     "fingerprint": "92be2d9626e7",
                     "risk": {
@@ -16498,8 +16498,8 @@
                 {
                     "kind": "function",
                     "anchor": "chatbot_tts_lab_run",
-                    "line_start": 2265,
-                    "line_end": 2291,
+                    "line_start": 2278,
+                    "line_end": 2304,
                     "lines": 27,
                     "fingerprint": "08eaecb21c91",
                     "risk": {
@@ -16513,8 +16513,8 @@
                 {
                     "kind": "function",
                     "anchor": "chatbot_tts_voice_id",
-                    "line_start": 2293,
-                    "line_end": 2297,
+                    "line_start": 2306,
+                    "line_end": 2310,
                     "lines": 5,
                     "fingerprint": "6d919cb3d696",
                     "risk": {
@@ -16526,8 +16526,8 @@
                 {
                     "kind": "function",
                     "anchor": "chatbot_tts_wait_exit",
-                    "line_start": 2299,
-                    "line_end": 2312,
+                    "line_start": 2312,
+                    "line_end": 2325,
                     "lines": 14,
                     "fingerprint": "108f0ff018d8",
                     "risk": {
@@ -16541,8 +16541,8 @@
                 {
                     "kind": "function",
                     "anchor": "chatbot_tts_taskkill",
-                    "line_start": 2314,
-                    "line_end": 2344,
+                    "line_start": 2327,
+                    "line_end": 2357,
                     "lines": 31,
                     "fingerprint": "c005082cfa33",
                     "risk": {
@@ -16557,8 +16557,8 @@
                 {
                     "kind": "function",
                     "anchor": "chatbot_tts_exec",
-                    "line_start": 2346,
-                    "line_end": 2434,
+                    "line_start": 2359,
+                    "line_end": 2447,
                     "lines": 89,
                     "fingerprint": "28a10cd40a04",
                     "risk": {
@@ -16573,8 +16573,8 @@
                 {
                     "kind": "function",
                     "anchor": "chatbot_tts_is_valid_wav",
-                    "line_start": 2436,
-                    "line_end": 2440,
+                    "line_start": 2449,
+                    "line_end": 2453,
                     "lines": 5,
                     "fingerprint": "3fdcc41d8bdd",
                     "risk": {
@@ -16586,8 +16586,8 @@
                 {
                     "kind": "function",
                     "anchor": "chatbot_tts_run_espeak",
-                    "line_start": 2442,
-                    "line_end": 2464,
+                    "line_start": 2455,
+                    "line_end": 2477,
                     "lines": 23,
                     "fingerprint": "2a8e17ba6f96",
                     "risk": {
@@ -16602,8 +16602,8 @@
                 {
                     "kind": "function",
                     "anchor": "chatbot_tts_run_piper",
-                    "line_start": 2466,
-                    "line_end": 2513,
+                    "line_start": 2479,
+                    "line_end": 2526,
                     "lines": 48,
                     "fingerprint": "22346ce5e00e",
                     "risk": {
@@ -16618,8 +16618,8 @@
                 {
                     "kind": "function",
                     "anchor": "chatbot_tts_probe_piper",
-                    "line_start": 2515,
-                    "line_end": 2529,
+                    "line_start": 2528,
+                    "line_end": 2542,
                     "lines": 15,
                     "fingerprint": "2954611da00c",
                     "risk": {
@@ -16631,8 +16631,8 @@
                 {
                     "kind": "function",
                     "anchor": "chatbot_tts_probe_engine",
-                    "line_start": 2531,
-                    "line_end": 2543,
+                    "line_start": 2544,
+                    "line_end": 2556,
                     "lines": 13,
                     "fingerprint": "ffb8b80e1007",
                     "risk": {
@@ -16643,9 +16643,9 @@
                 },
                 {
                     "kind": "region",
-                    "anchor": "بلوک رویه‌ای 2544-2545",
-                    "line_start": 2544,
-                    "line_end": 2545,
+                    "anchor": "بلوک رویه‌ای 2557-2558",
+                    "line_start": 2557,
+                    "line_end": 2558,
                     "lines": 2,
                     "fingerprint": "2efb7b8c5669",
                     "risk": {
@@ -16657,8 +16657,8 @@
                 {
                     "kind": "function",
                     "anchor": "chatbot_tts_voice_status",
-                    "line_start": 2546,
-                    "line_end": 2592,
+                    "line_start": 2559,
+                    "line_end": 2605,
                     "lines": 47,
                     "fingerprint": "dcbb03039fa4",
                     "risk": {
@@ -16672,8 +16672,8 @@
                 {
                     "kind": "function",
                     "anchor": "chatbot_tts_chunks",
-                    "line_start": 2594,
-                    "line_end": 2620,
+                    "line_start": 2607,
+                    "line_end": 2633,
                     "lines": 27,
                     "fingerprint": "bcad41ab7686",
                     "risk": {
@@ -16685,8 +16685,8 @@
                 {
                     "kind": "function",
                     "anchor": "chatbot_tts_wav_parse",
-                    "line_start": 2622,
-                    "line_end": 2657,
+                    "line_start": 2635,
+                    "line_end": 2670,
                     "lines": 36,
                     "fingerprint": "ed71919b5d7c",
                     "risk": {
@@ -16698,8 +16698,8 @@
                 {
                     "kind": "function",
                     "anchor": "chatbot_tts_wav_concat",
-                    "line_start": 2659,
-                    "line_end": 2698,
+                    "line_start": 2672,
+                    "line_end": 2711,
                     "lines": 40,
                     "fingerprint": "ad099e6a06d5",
                     "risk": {
@@ -16711,8 +16711,8 @@
                 {
                     "kind": "function",
                     "anchor": "chatbot_tts_say",
-                    "line_start": 2700,
-                    "line_end": 2757,
+                    "line_start": 2713,
+                    "line_end": 2770,
                     "lines": 58,
                     "fingerprint": "228ab76e5219",
                     "risk": {
@@ -16727,8 +16727,8 @@
                 {
                     "kind": "function",
                     "anchor": "chatbot_tts_lab_default_phrases",
-                    "line_start": 2759,
-                    "line_end": 2788,
+                    "line_start": 2772,
+                    "line_end": 2801,
                     "lines": 30,
                     "fingerprint": "ef37093a764c",
                     "risk": {
@@ -16740,8 +16740,8 @@
                 {
                     "kind": "function",
                     "anchor": "chatbot_tts_render_lab",
-                    "line_start": 2790,
-                    "line_end": 2850,
+                    "line_start": 2803,
+                    "line_end": 2863,
                     "lines": 61,
                     "fingerprint": "86e7532c6da4",
                     "risk": {
@@ -16753,8 +16753,8 @@
                 {
                     "kind": "function",
                     "anchor": "chatbot_tts_write_overlay",
-                    "line_start": 2852,
-                    "line_end": 2873,
+                    "line_start": 2865,
+                    "line_end": 2886,
                     "lines": 22,
                     "fingerprint": "02173425a7c3",
                     "risk": {
@@ -16768,8 +16768,8 @@
                 {
                     "kind": "function",
                     "anchor": "chatbot_tts_corpus_texts",
-                    "line_start": 2875,
-                    "line_end": 2898,
+                    "line_start": 2888,
+                    "line_end": 2911,
                     "lines": 24,
                     "fingerprint": "5f5c7d5e4153",
                     "risk": {
@@ -16783,8 +16783,8 @@
                 {
                     "kind": "function",
                     "anchor": "chatbot_tts_propose_pair",
-                    "line_start": 2900,
-                    "line_end": 2904,
+                    "line_start": 2913,
+                    "line_end": 2917,
                     "lines": 5,
                     "fingerprint": "b70f9fb06039",
                     "risk": {
@@ -16796,8 +16796,8 @@
                 {
                     "kind": "function",
                     "anchor": "chatbot_tts_mine_pairs",
-                    "line_start": 2906,
-                    "line_end": 2945,
+                    "line_start": 2919,
+                    "line_end": 2958,
                     "lines": 40,
                     "fingerprint": "d2719367b642",
                     "risk": {
@@ -16809,8 +16809,8 @@
                 {
                     "kind": "function",
                     "anchor": "chatbot_tts_save_mined_pairs",
-                    "line_start": 2947,
-                    "line_end": 2982,
+                    "line_start": 2960,
+                    "line_end": 2995,
                     "lines": 36,
                     "fingerprint": "eae5b5d18d5c",
                     "risk": {
@@ -16822,8 +16822,8 @@
                 {
                     "kind": "function",
                     "anchor": "chatbot_tts_render_pair_miner",
-                    "line_start": 2984,
-                    "line_end": 3004,
+                    "line_start": 2997,
+                    "line_end": 3017,
                     "lines": 21,
                     "fingerprint": "fac7cc1cbf1a",
                     "risk": {
@@ -16835,8 +16835,8 @@
                 {
                     "kind": "function",
                     "anchor": "chatbot_render_admin",
-                    "line_start": 3006,
-                    "line_end": 3198,
+                    "line_start": 3019,
+                    "line_end": 3211,
                     "lines": 193,
                     "fingerprint": "5290acf16c00",
                     "risk": {
@@ -16852,8 +16852,8 @@
                 {
                     "kind": "function",
                     "anchor": "chatbot_render_widget",
-                    "line_start": 3200,
-                    "line_end": 3403,
+                    "line_start": 3213,
+                    "line_end": 3416,
                     "lines": 204,
                     "fingerprint": "c0b63d58369b",
                     "risk": {
@@ -32116,8 +32116,8 @@
             "id": "PAGE-029",
             "path": "food-ticket.php",
             "area": "PAGE",
-            "lines": 6041,
-            "file_fingerprint": "45322ec99a3f",
+            "lines": 6042,
+            "file_fingerprint": "cc939d79ab3a",
             "blocks": [
                 {
                     "kind": "region",
@@ -32177,7 +32177,7 @@
                     "line_start": 45,
                     "line_end": 62,
                     "lines": 18,
-                    "fingerprint": "11bd28b3740b",
+                    "fingerprint": "1ced0b7e3d39",
                     "risk": {
                         "score": 0,
                         "flags": []
@@ -34046,9 +34046,9 @@
                     "kind": "function",
                     "anchor": "food_ticket_render_page",
                     "line_start": 5862,
-                    "line_end": 6040,
-                    "lines": 179,
-                    "fingerprint": "cb702d2ef378",
+                    "line_end": 6041,
+                    "lines": 180,
+                    "fingerprint": "77169f21a7e3",
                     "risk": {
                         "score": 6,
                         "flags": {
@@ -34125,16 +34125,16 @@
             "id": "PAGE-031",
             "path": "help-guide.php",
             "area": "PAGE",
-            "lines": 723,
-            "file_fingerprint": "c3dab0cb5557",
+            "lines": 724,
+            "file_fingerprint": "c5304b17b056",
             "blocks": [
                 {
                     "kind": "region",
-                    "anchor": "بلوک رویه‌ای 1-723",
+                    "anchor": "بلوک رویه‌ای 1-724",
                     "line_start": 1,
-                    "line_end": 723,
-                    "lines": 723,
-                    "fingerprint": "c3dab0cb5557",
+                    "line_end": 724,
+                    "lines": 724,
+                    "fingerprint": "c5304b17b056",
                     "risk": {
                         "score": 5,
                         "flags": {
@@ -41945,8 +41945,8 @@
             "id": "CORE-020",
             "path": "lib\/release-notes.php",
             "area": "CORE",
-            "lines": 370,
-            "file_fingerprint": "400d5293c0c7",
+            "lines": 371,
+            "file_fingerprint": "b57da5ae5d13",
             "blocks": [
                 {
                     "kind": "region",
@@ -41965,9 +41965,9 @@
                     "kind": "function",
                     "anchor": "release_notes_all",
                     "line_start": 27,
-                    "line_end": 110,
-                    "lines": 84,
-                    "fingerprint": "ca81969aacc9",
+                    "line_end": 111,
+                    "lines": 85,
+                    "fingerprint": "ac4ca57e1647",
                     "risk": {
                         "score": 0,
                         "flags": []
@@ -41977,8 +41977,8 @@
                 {
                     "kind": "function",
                     "anchor": "release_notes_version_key",
-                    "line_start": 112,
-                    "line_end": 116,
+                    "line_start": 113,
+                    "line_end": 117,
                     "lines": 5,
                     "fingerprint": "b4aabd992a4d",
                     "risk": {
@@ -41992,8 +41992,8 @@
                 {
                     "kind": "function",
                     "anchor": "release_notes_current",
-                    "line_start": 118,
-                    "line_end": 135,
+                    "line_start": 119,
+                    "line_end": 136,
                     "lines": 18,
                     "fingerprint": "be9f2f469f8d",
                     "risk": {
@@ -42005,8 +42005,8 @@
                 {
                     "kind": "function",
                     "anchor": "release_notes_history",
-                    "line_start": 137,
-                    "line_end": 161,
+                    "line_start": 138,
+                    "line_end": 162,
                     "lines": 25,
                     "fingerprint": "35645c8bcd79",
                     "risk": {
@@ -42018,8 +42018,8 @@
                 {
                     "kind": "function",
                     "anchor": "release_notes_render_items",
-                    "line_start": 163,
-                    "line_end": 175,
+                    "line_start": 164,
+                    "line_end": 176,
                     "lines": 13,
                     "fingerprint": "201a31a35ac9",
                     "risk": {
@@ -42031,8 +42031,8 @@
                 {
                     "kind": "function",
                     "anchor": "release_notes_dashboard_card",
-                    "line_start": 177,
-                    "line_end": 265,
+                    "line_start": 178,
+                    "line_end": 266,
                     "lines": 89,
                     "fingerprint": "eb4266106cce",
                     "risk": {
@@ -42046,8 +42046,8 @@
                 {
                     "kind": "function",
                     "anchor": "release_notes_history_html",
-                    "line_start": 267,
-                    "line_end": 320,
+                    "line_start": 268,
+                    "line_end": 321,
                     "lines": 54,
                     "fingerprint": "764c8761473a",
                     "risk": {
@@ -42059,8 +42059,8 @@
                 {
                     "kind": "function",
                     "anchor": "release_notes_page_html",
-                    "line_start": 322,
-                    "line_end": 338,
+                    "line_start": 323,
+                    "line_end": 339,
                     "lines": 17,
                     "fingerprint": "0d0ff2094fb2",
                     "risk": {
@@ -42072,8 +42072,8 @@
                 {
                     "kind": "function",
                     "anchor": "release_notes_page_single",
-                    "line_start": 340,
-                    "line_end": 369,
+                    "line_start": 341,
+                    "line_end": 370,
                     "lines": 30,
                     "fingerprint": "7a285d831e05",
                     "risk": {
@@ -66342,7 +66342,7 @@
             "path": "tests\/test_food_aggregate_report_static.py",
             "area": "TEST",
             "lines": 149,
-            "file_fingerprint": "76e1c8ae14a4",
+            "file_fingerprint": "fa89283db301",
             "blocks": [
                 {
                     "kind": "block",
@@ -66376,7 +66376,7 @@
                     "line_start": 29,
                     "line_end": 149,
                     "lines": 121,
-                    "fingerprint": "af347ee39112",
+                    "fingerprint": "12887810ca4e",
                     "risk": {
                         "score": 2,
                         "flags": {
@@ -67257,7 +67257,7 @@
             "path": "tests\/test_food_day_visit_static.py",
             "area": "TEST",
             "lines": 105,
-            "file_fingerprint": "27d6a59e0f90",
+            "file_fingerprint": "c5aaacea9d6b",
             "blocks": [
                 {
                     "kind": "block",
@@ -67291,7 +67291,7 @@
                     "line_start": 10,
                     "line_end": 105,
                     "lines": 96,
-                    "fingerprint": "e5f67029616a",
+                    "fingerprint": "3d210b929525",
                     "risk": {
                         "score": 0,
                         "flags": []
@@ -79777,7 +79777,7 @@
             "path": "tests\/test_release_1_62_4_fixes_static.py",
             "area": "TEST",
             "lines": 73,
-            "file_fingerprint": "4d46af74c0be",
+            "file_fingerprint": "e7af7974bfd3",
             "blocks": [
                 {
                     "kind": "block",
@@ -79824,7 +79824,7 @@
                     "line_start": 26,
                     "line_end": 36,
                     "lines": 11,
-                    "fingerprint": "360888215fc9",
+                    "fingerprint": "e0f80ddf61c9",
                     "risk": {
                         "score": 0,
                         "flags": []
@@ -81529,16 +81529,16 @@
             "id": "TEST-180",
             "path": "tests\/test_release_1_63_2_r21_package.py",
             "area": "TEST",
-            "lines": 111,
-            "file_fingerprint": "8dbfda32b3e9",
+            "lines": 121,
+            "file_fingerprint": "91d88859022f",
             "blocks": [
                 {
                     "kind": "block",
                     "anchor": "مقدمهٔ فایل",
                     "line_start": 1,
-                    "line_end": 36,
-                    "lines": 36,
-                    "fingerprint": "77577c36bb4e",
+                    "line_end": 39,
+                    "lines": 39,
+                    "fingerprint": "0772120ee7d6",
                     "risk": {
                         "score": 1,
                         "flags": {
@@ -81550,10 +81550,10 @@
                 {
                     "kind": "block",
                     "anchor": "test_1632_r21_is_a_valid_cumulative_installable_package",
-                    "line_start": 37,
-                    "line_end": 111,
-                    "lines": 75,
-                    "fingerprint": "a818f2a9dfaf",
+                    "line_start": 40,
+                    "line_end": 121,
+                    "lines": 82,
+                    "fingerprint": "75cf58d29fc9",
                     "risk": {
                         "score": 0,
                         "flags": []
@@ -94052,16 +94052,16 @@
             "id": "TOOL-025",
             "path": "tools\/build_1_63_2_update_r21.py",
             "area": "TOOL",
-            "lines": 278,
-            "file_fingerprint": "6e00d74a97d2",
+            "lines": 286,
+            "file_fingerprint": "9972a29b634f",
             "blocks": [
                 {
                     "kind": "block",
                     "anchor": "مقدمهٔ فایل",
                     "line_start": 1,
-                    "line_end": 85,
-                    "lines": 85,
-                    "fingerprint": "a7becb30588c",
+                    "line_end": 87,
+                    "lines": 87,
+                    "fingerprint": "8adb42130493",
                     "risk": {
                         "score": 1,
                         "flags": {
@@ -94073,8 +94073,8 @@
                 {
                     "kind": "block",
                     "anchor": "sha256",
-                    "line_start": 86,
-                    "line_end": 89,
+                    "line_start": 88,
+                    "line_end": 91,
                     "lines": 4,
                     "fingerprint": "775c87ac30d4",
                     "risk": {
@@ -94086,8 +94086,8 @@
                 {
                     "kind": "block",
                     "anchor": "read_source",
-                    "line_start": 90,
-                    "line_end": 96,
+                    "line_start": 92,
+                    "line_end": 98,
                     "lines": 7,
                     "fingerprint": "967ce2d5f77b",
                     "risk": {
@@ -94099,25 +94099,23 @@
                 {
                     "kind": "block",
                     "anchor": "report_text",
-                    "line_start": 97,
-                    "line_end": 136,
-                    "lines": 40,
-                    "fingerprint": "1b5230f914cb",
+                    "line_start": 99,
+                    "line_end": 144,
+                    "lines": 46,
+                    "fingerprint": "b835a5095b78",
                     "risk": {
-                        "score": 1,
-                        "flags": {
-                            "write_no_tx": 1
-                        }
+                        "score": 0,
+                        "flags": []
                     },
                     "id": "TOOL-025.04"
                 },
                 {
                     "kind": "block",
                     "anchor": "render_download_page",
-                    "line_start": 137,
-                    "line_end": 167,
+                    "line_start": 145,
+                    "line_end": 175,
                     "lines": 31,
-                    "fingerprint": "94ed2dd4925d",
+                    "fingerprint": "0edacd7f836c",
                     "risk": {
                         "score": 1,
                         "flags": {
@@ -94129,10 +94127,10 @@
                 {
                     "kind": "block",
                     "anchor": "main",
-                    "line_start": 168,
-                    "line_end": 231,
+                    "line_start": 176,
+                    "line_end": 239,
                     "lines": 64,
-                    "fingerprint": "d50475c1a366",
+                    "fingerprint": "fa5ef01d1f41",
                     "risk": {
                         "score": 0,
                         "flags": []
@@ -94142,8 +94140,8 @@
                 {
                     "kind": "block",
                     "anchor": "add",
-                    "line_start": 232,
-                    "line_end": 278,
+                    "line_start": 240,
+                    "line_end": 286,
                     "lines": 47,
                     "fingerprint": "bc7b1b80a849",
                     "risk": {

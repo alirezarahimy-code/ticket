@@ -311,6 +311,19 @@ function chatbot_answer(string $question, array $user): array
         ]);
     }
 
+    $asksAbsentLunchReport = chatbot_has_any($norm, ['غایبین', 'غایبان', 'غایب'])
+        && chatbot_has_any($norm, ['گزارش', 'فهرست', 'لیست']);
+    if ($asksAbsentLunchReport) {
+        $absentAnswer = 'در پنل «سامانه مدیریت غذا»، گزینهٔ مستقل «غایبین ناهار» را از منوی اصلی باز کنید؛ این گزارش دیگر در فهرست نوع‌های تب «گزارش‌ها» نیست. بازهٔ شمسی را انتخاب کنید؛ هر ردیف یک پرس سفارش‌شدهٔ ناهار است که فیش چاپ‌شده ندارد. می‌توانید ستون‌ها را انتخاب کنید، فهرست را بر اساس معاونت ببینید و خروجی XLSX یا چاپ بگیرید. چاپ این فهرست، رویداد چاپ فیش یا آمار پایش را تغییر نمی‌دهد.';
+        if (user_can($user, 'food.reports')) {
+            return chatbot_reply($user, $question, $absentAnswer, true, null, 'food_absent_lunch_report', 0.0, [
+                'url' => 'index.php?page=food-ticket',
+                'label' => 'رفتن به گزارش غایبین ناهار',
+            ]);
+        }
+        return chatbot_reply($user, $question, $absentAnswer . ' اگر این گزینه را در پنل نمی‌بینید، از مدیر سامانه دسترسی «گزارش‌های غذا» را بخواهید.', true, null, 'food_absent_lunch_report');
+    }
+
     $mentionsTicket = chatbot_has_any($norm, CHATBOT_WORDS_TICKET);
     $asksTicketCancellation = $mentionsTicket && chatbot_has_any($norm, CHATBOT_WORDS_CANCEL);
     if ($asksTicketCancellation) {

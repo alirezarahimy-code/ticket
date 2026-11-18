@@ -15,6 +15,8 @@ const vm = require('vm');
 
 const root = path.resolve(__dirname, '..');
 const html = fs.readFileSync(path.join(root, 'food-ticket-web/index.html'), 'utf8');
+const releaseNotesPhp = fs.readFileSync(path.join(root, 'food-ticket-release-notes.php'), 'utf8');
+const foodTicketPhp = fs.readFileSync(path.join(root, 'food-ticket.php'), 'utf8');
 const source = [...html.matchAll(/<script>([\s\S]*?)<\/script>/g)].map((m) => m[1]).join('\n');
 
 let pass = 0;
@@ -204,7 +206,7 @@ check('امنیت: تگ iframe در پیام escape شده', !out.includes('<ifr
 check('امنیت: متن escape شده دیده می‌شود', out.includes('&lt;img'));
 
 /* ── ۸) خود صفحه: جای درست قرارگیری ──────────────────────────────────── */
-check('تابع connections آزمون را بعد از فرم نشان می‌دهد', /\$\{selftestBox\(\)\}<\/section>/.test(html));
+check('تابع connections آزمون را پس از فرم نشان می‌دهد', html.includes('${selftestBox()}${autoReceiptBackfillBox()}</section>'));
 check('آزمون بعد از فرم تنظیمات تردد است', html.indexOf('</form>${selftestBox()}') > html.indexOf('id="connection-form"'));
 
 
@@ -228,12 +230,21 @@ sandbox.window.__ftReleaseNotes = {
 };
 const banner = releaseNotesBanner();
 check('بنر تغییرات: عنوان نسخه را نشان می‌دهد', banner.includes('به‌روزرسانی ۱.۶۲.۹۷'));
+releaseNotesBanner();
+check('بنر تغییرات: رندر مجدد در همان بازدید شمارنده را دوباره مصرف نمی‌کند', sandbox.window.__ftRnSeen['1.62.97'] === 1);
 check('بنر تغییرات: عنوان تغییر را نشان می‌دهد', banner.includes('آزمون جامع Worker'));
 check('بنر تغییرات: فقط ۴ آیتم اول را نشان می‌دهد', banner.includes('کارت آزمون جامع اضافه شد') && !banner.includes('مورد پنجم که در بنر'));
 check('بنر تغییرات: شمارش بقیه را می‌گوید', banner.includes('۱ مورد دیگر'));
 check('بنر تغییرات: پاورقی را نشان می‌دهد', banner.includes('هیچ تغییری در مسیر چاپ'));
 check('بنر تغییرات: دکمهٔ بستن دارد', banner.includes('data-action="dismiss-release-notes"'));
 check('بنر تغییرات: شناسهٔ نسخه برای localStorage دارد', banner.includes('data-version="1.62.97"'));
+check('یادداشت سمت سرور برای r23 شناسهٔ اعلان تازه دارد', releaseNotesPhp.includes("'notification_id' => '1.63.2-r23'"));
+check('GET /api/config شناسهٔ اعلان را از یادداشت جاری می‌فرستد', foodTicketPhp.includes("'releaseNotes' => function_exists('food_ticket_release_notes_current')") && foodTicketPhp.includes('food_ticket_api_json(food_ticket_api_config($user));'));
+sandbox.window.__ftReleaseNotes = { version: '1.63.2', notification_id: '1.63.2-r23', title: 'اعلان تازه', label: 'r23', items: [], footnote: '' };
+sandbox.window.__ftRnDismissed = new Set(['1.63.2']);
+sandbox.window.__ftRnSeen = { '1.63.2': 2 };
+sandbox.window.__ftRnPageCounted = new Set();
+check('اعلان r23 با دیده/بسته‌شدن اعلان ۱.۶۳.۲ قبلی پنهان نمی‌شود', releaseNotesBanner().includes('data-version="1.63.2-r23"'));
 
 /* رگرسیون: باگ «بستن کار نمی‌کند» — بستن باید حافظهٔ درون‌برنامه‌ای هم داشته باشد،
    وگرنه وقتی localStorage مسدود است بنر در render() بعدی برمی‌گردد. */
@@ -242,11 +253,13 @@ sandbox.window.__ftRnDismissed = new Set(['1.62.97']);
 check('بنر تغییرات: بستن در حافظه، رندر بعدی را قطع می‌کند', releaseNotesBanner() === '');
 sandbox.window.__ftRnDismissed = new Set();
 sandbox.window.__ftRnSeen = { '1.62.97': 2 };
+sandbox.window.__ftRnPageCounted = new Set();
 check('بنر تغییرات: سقف دو نمایش در حافظه رعایت می‌شود', releaseNotesBanner() === '');
 /* وقتی localStorage در دسترس نیست، شمارندهٔ حافظه تنها مرجع است: پس از دو بار
    باید بسته بماند — همان چیزی که در حالت ناشناس/سیاست سازمانی رخ می‌دهد. */
 sandbox.window.__ftRnSeen = {};
 sandbox.window.__ftRnDismissed = new Set();
+sandbox.window.__ftRnPageCounted = new Set();
 sandbox.localStorage = {
   getItem() { throw new Error('storage blocked'); },
   setItem() { throw new Error('storage blocked'); },
