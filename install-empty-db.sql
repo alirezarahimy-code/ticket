@@ -1640,9 +1640,8 @@ INSERT IGNORE INTO schema_updates (version, migration) VALUES
     ('1.62.88', '030-logging-notification-idempotency-and-ticket-history.sql'),
     ('1.62.88', '031-food-worker-window.sql'),
     ('1.62.88', '032-schema-updates-baseline.sql'),
-    -- ۰۳۳ فقط backfill داده‌های legacy است؛ نصب تازه چنین رکوردهایی ندارد.
-    -- پس در baseline ثبت می‌شود تا گارد سلامت هشدار کاذب «مهاجرت اجرا نشده» ندهد.
-    ('1.62.88', '033-logging-legacy-context-collation.sql'),
+    -- ۰۳۳ فقط داده‌های قدیمی را اصلاح می‌کند؛ عمداً در خط مبنا ثبت نمی‌شود تا
+    -- به‌عنوان مهاجرت داده‌ایِ امن و قابل‌اجرای مجدد جداگانه انجام شود.
     ('1.62.88', '034-logging-escalation.sql'),
     -- ۰۳۶ و ۰۳۷ هم در اسکیما اعمال شده‌اند (ستون‌های leftover_* و backfill تحویل).
     ('1.62.95', '036-food-meal-leftover-disposition.sql'),
