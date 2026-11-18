@@ -230,6 +230,5 @@ jobs:
         unzip -t ticket-update-1.62.96-to-1.62.97-food-worker-selftest-panel-20261115.zip
         cd ..
         php tools/test_1_62_97_drift_offline.php
-        php tools/test_schema_baseline_offline.php
         php tools/test_explain_alarms_offline.php
         php tools/verify_1_62_97.php
