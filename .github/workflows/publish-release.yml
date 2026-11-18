@@ -65,7 +65,10 @@ jobs:
           # If the release tag already exists, its commit must be this exact source.
           # This applies equally to push and workflow_dispatch; never mix assets from
           # a different source revision into an existing Release.
-          if git ls-remote --exit-code --tags origin "refs/tags/$RELEASE_TAG" >/dev/null 2>&1; then
+          # Without --exit-code, a missing tag is a successful empty result.
+          # Transport/authentication errors remain non-zero and fail this step under set -e.
+          TAG_REF_OUTPUT=$(git ls-remote --tags origin "refs/tags/$RELEASE_TAG")
+          if [ -n "$TAG_REF_OUTPUT" ]; then
             git fetch --no-tags origin "refs/tags/$RELEASE_TAG:refs/tags/$RELEASE_TAG"
             release_commit=$(git rev-parse "$RELEASE_TAG^{commit}")
             if [ "$release_commit" != "$GITHUB_SHA" ]; then
@@ -180,6 +183,17 @@ jobs:
               esac
             done
           fi
+          # Attach each checksum sidecar together with its package.
+          ZIP_ATTACH=("${ATTACH[@]}")
+          for package in "${ZIP_ATTACH[@]}"; do
+            sidecar="$package.sha256"
+            if [ ! -f "$sidecar" ]; then
+              echo "::error::فایل checksum برای بسته وجود ندارد: $sidecar"
+              exit 1
+            fi
+            ATTACH+=("$sidecar")
+          done
+
           if [ ${#ATTACH[@]} -eq 0 ]; then
             echo "::error::هیچ فایلی برای پیوست نسخهٔ $RELEASE_VERSION نیست"
             exit 1
@@ -223,15 +237,46 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           RELEASE_TAG: ${{ steps.cfg.outputs.release_tag }}
+          RELEASE_VERSION: ${{ steps.cfg.outputs.version }}
         run: |
           set -euo pipefail
           shopt -s nullglob
           REPO="${GITHUB_REPOSITORY}"
-          {
-            echo "## لینک‌های دانلود مستقیم"
-            echo ""
+          MANIFEST="downloads/RELEASE-ASSETS-$RELEASE_VERSION.txt"
+          ASSETS=()
+
+          if [ -f "$MANIFEST" ]; then
+            while IFS= read -r line; do
+              line="$(echo "$line" | tr -d '\r' | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')"
+              [ -z "$line" ] && continue
+              case "$line" in \#*) continue;; esac
+              ASSETS+=("$line" "$line.sha256")
+            done < "$MANIFEST"
+          else
             for f in downloads/*.zip; do
-              name=$(basename "$f")
+              case "$(basename "$f")" in
+                *-"$RELEASE_VERSION".zip|*"$RELEASE_VERSION"-*.zip)
+                  name=$(basename "$f")
+                  ASSETS+=("$name" "$name.sha256")
+                  ;;
+              esac
+            done
+          fi
+
+          if [ ${#ASSETS[@]} -eq 0 ]; then
+            echo "::error::هیچ Assetی برای Release $RELEASE_TAG پیدا نشد"
+            exit 1
+          fi
+
+          {
+            echo "## لینک‌های مستقیم فایل‌های پیوست‌شده"
+            echo ""
+            for name in "${ASSETS[@]}"; do
+              path="downloads/$name"
+              if [ ! -f "$path" ]; then
+                echo "::error::فایل پیوست‌شونده موجود نیست: $path"
+                exit 1
+              fi
               url="https://github.com/${REPO}/releases/download/${RELEASE_TAG}/${name}"
               echo "- \`$name\`"
               echo ""
