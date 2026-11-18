@@ -4,8 +4,8 @@
 
 ## فایل‌های r23
 
-- [دانلود بستهٔ r23 از پیش‌نمایش (ZIP)](ticket-update-1.63-to-1.63.2-r23-panel-render-notice-fix-20261106.zip)
-- [دانلود مستقیم از Release رسمی GitHub (ZIP)](https://github.com/alirezarahimy-code/ticket/releases/download/v1.63.2-r23/ticket-update-1.63-to-1.63.2-r23-panel-render-notice-fix-20261106.zip)
+- [دانلود مستقیم بستهٔ r23 از Release رسمی GitHub (ZIP)](https://github.com/alirezarahimy-code/ticket/releases/download/v1.63.2-r23/ticket-update-1.63-to-1.63.2-r23-panel-render-notice-fix-20261106.zip)
+- [پیش‌نمایش صفحهٔ دانلود در مخزن](https://github.com/alirezarahimy-code/ticket/blob/arena/c417681f-ticket/downloads/index.html)
 - [SHA-256 در مخزن GitHub](https://raw.githubusercontent.com/alirezarahimy-code/ticket/arena/c417681f-ticket/downloads/ticket-update-1.63-to-1.63.2-r23-panel-render-notice-fix-20261106.zip.sha256)
 - [گزارش ممیزی و آزمون‌ها در مخزن GitHub](https://raw.githubusercontent.com/alirezarahimy-code/ticket/arena/c417681f-ticket/downloads/CHANGE-REPORT-FA-1.63.2-r23-panel-render-notice-fix.md)
 
