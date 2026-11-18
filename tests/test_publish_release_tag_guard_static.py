@@ -69,7 +69,7 @@ raise SystemExit(99)
             "FAKE_TAG_COMMIT": tag_commit,
         }
     )
-    script = "set -euo pipefail\\nRELEASE_TAG=v1.2.3\\nGITHUB_SHA=abc123\\n" + probe
+    script = chr(10).join(["set -euo pipefail", "RELEASE_TAG=v1.2.3", "GITHUB_SHA=abc123", probe])
     return subprocess.run(
         ["bash", "-c", script],
         check=False,
