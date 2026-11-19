@@ -1,0 +1,32 @@
+// قرارداد استقرار تب «غایبین ناهار» — اجرا: node tests/js/food-absent-lunch-tab.test.js
+'use strict';
+const fs = require('fs'), path = require('path'), assert = require('assert');
+const root = path.resolve(__dirname, '../..');
+const read = f => fs.readFileSync(path.join(root, f), 'utf8');
+const html = read('food-ticket-web/index.html');
+const php = read('food-ticket.php');
+const guide = read('help-guide.php');
+const bot = read('chatbot.php');
+
+assert(html.includes("['absent-lunch','غایبین ناهار']"), 'تب تازه به REPORT_TABS صفحهٔ گزارشها اضافه شده');
+assert(html.includes("['reconciliation','تطبیق خرید و توزیع'],['absent-lunch','غایبین ناهار']]"), 'آرایهٔ REPORT_TABS معتبر است');
+assert(html.includes("tab==='absent-lunch')body=window.AbsentLunchReport?window.AbsentLunchReport.html()"), 'reportView محتوای تب را رندر میکند');
+assert(html.includes("window.AbsentLunchReport.load(false)"), 'render لودر تب را صدا میزند');
+assert(!html.includes('option value="absent"'), 'گزینهٔ قدیمی نوع گزارش حذف شده');
+assert(!html.includes("['absent-report','غایبین ناهار']"), 'نمای مستقل/ناوبری جداگانه اضافه نشده');
+assert(html.includes("state.reportTab='absent-lunch'"), 'حالت ذخیرهشدهٔ قدیمی به تب تازه هدایت میشود');
+assert(html.includes("PANEL_VERSION='1.37.57'") && php.includes("FOOD_TICKET_PANEL_VERSION = '1.37.57'"), 'نسخههای پنل هماهنگاند');
+assert(html.includes('window.AbsentLunchReport={html:html,load:load'), 'ماژول تب تعریف شده');
+assert(html.includes('function mapped(items,orgMap)'), 'نگاشت افراد نقشهٔ سازمانی را همراه گزارش میگیرد');
+assert(html.includes('map=state.__orgMap||null') && html.includes('window.FoodOrgGroups.groupOf(map,r)'), 'گروهبندی معاونت نقشهٔ تازه را دوباره میخواند');
+assert(html.includes('window.AbsentLunchReport?window.AbsentLunchReport.html()'), 'استارتاپ قبل از تعریف ماژول امن است');
+assert(html.includes('if(active())load(false)'), 'تب ذخیرهشده در استارتاپ بارگذاری میشود');
+assert(html.includes('data-absent-lunch-block=') && html.includes('[1,2,3].map(function(n)'), 'کنترل بلوک ۱/۲/۳ برگشته');
+assert(!html.includes('data-absent-lunch-field="food"'), 'فیلد نوع غذا حذف شده');
+assert(html.includes('width:100%!important') && html.includes('table-layout:fixed'), 'لیست همیشه تمامعرض صفحه');
+assert(html.includes('body.absent-lunch-printing'), 'چاپ محدود به همین تب است');
+assert(html.includes("'food.reports'") || php.includes("'reports' => $fpCan('food.reports')"), 'مجوز همان reports/food.reports');
+assert(guide.includes('گزارش مستقل غایبین ناهار') && guide.includes('بر اساس معاونت'), 'راهنما بهروز شده');
+assert(bot.includes("'food_absent_lunch_report'") && bot.includes("'رفتن به گزارش غایبین ناهار'"), 'چتبات بهروز شده');
+assert(php.includes("SELECT id FROM users WHERE employee_number = ?") && php.includes("'declared_absent'"), 'بکاند هویت کد پرسنلی و غیبت اعلامشده دارد');
+console.log('food-absent-lunch-tab: OK');

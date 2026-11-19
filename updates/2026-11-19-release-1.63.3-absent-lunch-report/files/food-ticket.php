@@ -1,0 +1,6053 @@
+<?php
+declare(strict_types=1);
+
+defined('APP_ROOT') || exit;
+
+if (is_file(__DIR__ . '/food-ticket-env.php')) {
+    require_once __DIR__ . '/food-ticket-env.php';
+}
+// پنجرهٔ کاری باید پیش از food_ticket_config() در دسترس باشد تا پیش‌فرض‌های آن
+// به آرایهٔ تنظیمات اضافه شوند (مهاجرت ۰۳۱).
+if (is_file(__DIR__ . '/food-ticket-window.php')) {
+    require_once __DIR__ . '/food-ticket-window.php';
+}
+if (!function_exists('food_ticket_enqueue_print') && is_file(__DIR__ . '/food-ticket-runtime.php')) {
+    require_once __DIR__ . '/food-ticket-runtime.php';
+}
+if (is_file(__DIR__ . '/food-ticket-engine.php')) {
+    require_once __DIR__ . '/food-ticket-engine.php';
+}
+if (is_file(__DIR__ . '/food-ticket-netprint.php')) {
+    require_once __DIR__ . '/food-ticket-netprint.php';
+}
+if (is_file(__DIR__ . '/food-ticket-groups.php')) {
+    require_once __DIR__ . '/food-ticket-groups.php';
+}
+if (is_file(__DIR__ . '/food-order.php')) {
+    require_once __DIR__ . '/food-order.php';
+}
+if (is_file(__DIR__ . '/food-reconciliation.php')) {
+    require_once __DIR__ . '/food-reconciliation.php';
+}
+if (is_file(__DIR__ . '/food-ticket-auto-receipts.php')) {
+    require_once __DIR__ . '/food-ticket-auto-receipts.php';
+}
+if (is_file(__DIR__ . '/food-ticket-order-source.php')) {
+    require_once __DIR__ . '/food-ticket-order-source.php';
+}
+if (is_file(__DIR__ . '/food-ticket-web-host.php')) {
+    require_once __DIR__ . '/food-ticket-web-host.php';
+}
+// آزمون جامع worker/چاپ/مدیریت — همان منطقی که ابزار CLI استفاده می‌کند.
+if (is_file(__DIR__ . '/food-ticket-selftest.php')) {
+    require_once __DIR__ . '/food-ticket-selftest.php';
+}
+// «تغییرات این به‌روزرسانی» داخل خود پنل (مستقل از index.php/۱.۶۳).
+if (is_file(__DIR__ . '/food-ticket-release-notes.php')) {
+    require_once __DIR__ . '/food-ticket-release-notes.php';
+}
+if (is_file(__DIR__ . '/food-ticket-templates.php')) {
+    require_once __DIR__ . '/food-ticket-templates.php';
+}
+if (is_file(__DIR__ . '/food-order-import.php')) {
+    require_once __DIR__ . '/food-order-import.php';
+}
+if (is_file(__DIR__ . '/food-ticket-import.php')) {
+    require_once __DIR__ . '/food-ticket-import.php';
+}
+
+/** نسخهٔ پنل (food-ticket-web/index.html). پنل همان عدد را دارد و اگر مرورگر
+ *  نسخهٔ کش‌شدهٔ قدیمی را نشان دهد، خودش هشدار می‌دهد. */
+const FOOD_TICKET_PANEL_VERSION = '1.37.57';
+
+function food_ticket_panel_version(): string
+{
+    return FOOD_TICKET_PANEL_VERSION;
+}
+
+function food_ticket_is_primary_admin(array $user): bool
+{
+    return function_exists('user_is_primary_admin') ? user_is_primary_admin($user) : (($user['role'] ?? '') === 'admin' && (int) ($user['is_primary_admin'] ?? 0) === 1);
+}
+
+function food_ticket_is_support_manager(array $user): bool
+{
+    return in_array((string) ($user['role'] ?? ''), ['manager', 'support_manager'], true) && user_service_group($user) === 'support';
+}
+
+function food_ticket_is_allowed(array $user): bool
+{
+    if (function_exists('user_can')) {
+        return user_can_any($user, ['food.dashboard', 'food.monitor', 'food.reports', 'food.employees', 'food.guest', 'food.groups', 'food.db', 'food.printer', 'food.design', 'food.health', 'food.menu', 'food.manual_attendance', 'food.emergency_window']);
+    }
+    return food_ticket_is_primary_admin($user) || food_ticket_is_support_manager($user);
+}
+
+/** کد ویرایش لازم برای مسیرهای نوشتن هر بخش (نگاشت مسیر ← کد ویرایش). */
+function food_ticket_route_edit_permission(string $route): ?string
+{
+    if (in_array($route, ['food-groups', 'absence-save', 'absence-clear', 'food-visit-cancel'], true)) {
+        return 'food.groups_edit';
+    }
+    if ($route === 'food-manual-attendance') {
+        return 'food.manual_attendance_edit';
+    }
+    if ($route === 'orders-import') {
+        return 'food.db_edit';
+    }
+    if (in_array($route, ['employees', 'employees-import'], true)) {
+        return 'food.employees_edit';
+    }
+    if (in_array($route, ['guest-cards', 'guest-cap'], true)) {
+        return 'food.guest_edit';
+    }
+    if (in_array($route, ['database-file', 'test-connections', 'diag-source_row-delete', 'browse-file', 'browse-folder', 'browse-list', 'cleanup-source_row'], true)
+        || (function_exists('food_ticket_legacy_key') && $route === food_ticket_legacy_key('route_test'))
+        || (function_exists('food_ticket_route_is_test_attendance') && food_ticket_route_is_test_attendance($route))) {
+        return 'food.db_edit';
+    }
+    if (in_array($route, ['printers', 'test-print', 'calibrate-print', 'print-align', 'print-diag'], true)) {
+        return 'food.printer_edit';
+    }
+    if ($route === 'template' || $route === 'templates' || str_starts_with($route, 'templates/')) {
+        return 'food.design_edit';
+    }
+    if ($route === 'self-test') {
+        return 'food.health_edit';
+    }
+    if ($route === 'process') {
+        return 'food.manual_attendance_edit';
+    }
+    if (in_array($route, ['reprint-errors', 'delivery'], true)) {
+        return $route === 'delivery' ? 'food.manual_attendance_edit' : 'food.printer_edit';
+    }
+    // لغو فیش همان مجوز ثبت دستی را می‌خواهد (همان کسی که می‌تواند ثبت کند).
+    if ($route === 'cancel-ticket') {
+        return 'food.manual_attendance_edit';
+    }
+    return null;
+}
+
+/** این مسیرها حتی با GET کار ثبتی/مخرب انجام می‌دهند، پس همیشه کد ویرایش می‌خواهند. */
+function food_ticket_route_edit_always(string $route): bool
+{
+    return $route === 'diag-source_row-delete';
+}
+
+function food_ticket_route_allowed(array $user, string $route): bool
+{
+    if (str_starts_with($route, 'food-menu/')) {
+        if (food_ticket_is_primary_admin($user)) {
+            return true;
+        }
+        if (!function_exists('user_can')) {
+            return false;
+        }
+        $method = strtoupper((string) ($_SERVER['REQUEST_METHOD'] ?? 'GET'));
+        $readMenu = [
+            'food-menu/status', 'food-menu/month', 'food-menu/catalog', 'food-menu/cancel-requests',
+            'food-menu/emergency/people', 'food-menu/emergency/orders', 'food-menu/bulk-snapshot',
+            'food-menu/guest-requests',
+        ];
+        $writeMenu = [
+            'food-menu/catalog', 'food-menu/day', 'food-menu/cancel-request-decide',
+            'food-menu/emergency/order', 'food-menu/emergency/cancel', 'food-menu/bulk-apply',
+            'food-menu/cancel-request-cutoff',
+            'food-menu/guest-request-update', 'food-menu/guest-request-cancel', 'food-menu/guest-request-delete',
+            'food-menu/reconciliation-save', 'food-menu/invoice-upload',
+        ];
+        $reportRoutes = [
+            'food-menu/orders', 'food-menu/orders-export', 'food-menu/statistics', 'food-menu/export',
+            'food-menu/printed-delivery', 'food-menu/printed-delivery-export', 'food-menu/employee-search',
+            'food-menu/group-orders', 'food-menu/groups', 'food-menu/reconciliation',
+            'food-menu/invoice-file', 'food-menu/reconciliation-export',
+            // ۱.۶۳.۴ — نگاشت سازمانی برای «نمایش بر اساس معاونت» در گزارش‌های غذا.
+            'food-menu/org-map',
+        ];
+        if ($route === 'food-menu/emergency-window-state') {
+            return $method === 'GET' && user_can($user, 'food.emergency_window');
+        }
+        if ($route === 'food-menu/emergency-window') {
+            return $method === 'POST' && user_can($user, 'food.emergency_window_edit');
+        }
+        // ثبت خودکار فیش برای روزهای گذشته — نوشتن است، پس مجوز ویرایش منو.
+        if ($route === 'backfill-auto-receipts') {
+            return $method === 'POST' && user_can($user, 'food.menu_edit');
+        }
+        if ($route === 'food-menu/emergency/lookup') {
+            return $method === 'POST' && user_can($user, 'food.menu');
+        }
+        if (in_array($route, $reportRoutes, true)) {
+            return $method === 'GET' && user_can($user, 'food.reports');
+        }
+        if (in_array($route, $writeMenu, true) && $method !== 'GET') {
+            return user_can($user, 'food.menu_edit');
+        }
+        if (in_array($route, $readMenu, true) && $method === 'GET') {
+            return user_can($user, 'food.menu');
+        }
+        return false;
+    }
+    if (food_ticket_is_primary_admin($user)) {
+        return true;
+    }
+    if (!function_exists('user_can')) {
+        return food_ticket_is_support_manager($user)
+            && (in_array($route, ['login', 'sso-login', 'monitoring', 'employees', 'orders', 'reports/export', 'report-data', 'guest-requests-report', 'aggregate-report', 'aggregate-report-export', 'dashboard', 'dashboard-data', 'health', 'self-test', 'test-connections', 'config', 'database-file', 'session'], true)
+                || (function_exists('food_ticket_route_is_test_attendance') && food_ticket_route_is_test_attendance($route)));
+    }
+    if (in_array($route, ['login', 'sso-login'], true)) {
+        return food_ticket_is_allowed($user);
+    }
+    if ($route === 'config') {
+        $method = strtoupper((string) ($_SERVER['REQUEST_METHOD'] ?? 'GET'));
+        $views = ['food.db', 'food.printer', 'food.guest', 'food.design', 'food.health', 'food.manual_attendance', 'food.emergency_window'];
+        $edits = ['food.db_edit', 'food.printer_edit', 'food.guest_edit', 'food.design_edit', 'food.health_edit', 'food.manual_attendance_edit', 'food.emergency_window_edit'];
+        foreach ($method === 'GET' ? $views : $edits as $permission) {
+            if (user_can($user, $permission)) {
+                return true;
+            }
+        }
+        return false;
+    }
+    if (in_array($route, ['dashboard-data'], true)) {
+        return strtoupper((string) ($_SERVER['REQUEST_METHOD'] ?? 'GET')) === 'GET' && user_can($user, 'food.dashboard');
+    }
+    if ($route === 'report-data') {
+        return strtoupper((string) ($_SERVER['REQUEST_METHOD'] ?? 'GET')) === 'GET' && user_can($user, 'food.reports');
+    }
+    if ($route === 'monitoring') {
+        return strtoupper((string) ($_SERVER['REQUEST_METHOD'] ?? 'GET')) === 'GET' && user_can($user, 'food.monitor');
+    }
+    if (in_array($route, ['orders'], true)) {
+        return strtoupper((string) ($_SERVER['REQUEST_METHOD'] ?? 'GET')) === 'GET' && user_can($user, 'food.dashboard');
+    }
+    $routePermission = [
+        'dashboard' => 'food.dashboard',
+        'dashboard-data' => 'food.dashboard',
+        'report-data' => 'food.reports',
+        'monitoring' => 'food.monitor',
+        'absent' => 'food.reports',
+        'guest-requests-report' => 'food.reports',
+        'aggregate-report' => 'food.reports',
+        'aggregate-report-export' => 'food.reports',
+        'orders' => 'food.dashboard',
+        'reports/export' => 'food.reports',
+        'employees' => 'food.employees',
+        'employees-import' => 'food.employees',
+        'orders-import' => 'food.db',
+        'employees-sample' => 'food.employees',
+        'guest-cards' => 'food.guest',
+        'guest-cap' => 'food.guest',
+        'food-groups' => 'food.groups',
+        'food-manual-attendance' => 'food.manual_attendance',
+        'food-visit-cancel' => 'food.groups',
+        'database-file' => 'food.db',
+        'printers' => 'food.printer',
+        'test-print' => 'food.printer',
+        'calibrate-print' => 'food.printer',
+        'print-align' => 'food.printer',
+        'print-diag' => 'food.printer',
+        'test-connections' => 'food.db',
+        'test-attendance' => 'food.db',
+        'template' => 'food.design',
+        'templates' => 'food.design',
+        'templates/preview' => 'food.design',
+        'templates/delete' => 'food.design',
+        'templates/activate' => 'food.design',
+        'templates/logo' => 'food.design',
+        'templates/group-mode' => 'food.design',
+        'templates/group-design' => 'food.design',
+        'health' => 'food.health',
+        'self-test' => 'food.health',
+        // آزمون جامع worker/چاپ/مدیریت، در انتهای صفحهٔ «اتصال پایگاه‌ها» — فقط‌خواندنی.
+        'worker-selftest' => 'food.db',
+        'process' => 'food.manual_attendance',
+        'reprint-errors' => 'food.printer',
+        // غیبت روزانه بخشی از گروه‌های غذاست؛ خواندن با food.groups و هر ویرایش با food.groups_edit.
+        'absence-status' => 'food.groups',
+        'absence-save' => 'food.groups',
+        'absence-clear' => 'food.groups',
+        'delivery' => 'food.manual_attendance',
+        // لغو فیش: بدون این سطر، $routePermission برای مسیر null می‌ماند و
+        // food_ticket_route_allowed همیشه false برمی‌گرداند — یعنی حتی برای
+        // مدیر پشتیبانی که «ثبت دستی» و «ثبت غیبت» را دارد، دکمهٔ لغو بی‌صدا
+        // ۴۰۳ می‌گرفت و هیچ فیشی لغو نمی‌شد. (گزارش کاربر: «لغو عمل نمی‌کند»)
+        'cancel-ticket' => 'food.manual_attendance',
+        'diag-source_row-delete' => 'food.db',
+        // سازگاری: لینک قدیمی «آزمون اتصال منبع تردد»
+        (function_exists('food_ticket_legacy_key') ? food_ticket_legacy_key('route_test') : 'test-source') => 'food.db',
+        'cleanup-source_row' => 'food.monitor',
+    ][$route] ?? null;
+    // مشاهده با کد بخش؛ هر کار ثبتی/مخرب با کد «ویرایش» همان بخش.
+    $routeEdit = food_ticket_route_edit_permission($route);
+    // فقط مسیرهایی که در نگاشت دسترسی‌اند تغییر می‌کنند؛ مسیر ناشناخته همچنان بسته می‌ماند.
+    if ($routeEdit !== null && $routePermission !== null) {
+        $routeIsRead = strtoupper((string) ($_SERVER['REQUEST_METHOD'] ?? 'GET')) === 'GET';
+        if (!$routeIsRead || food_ticket_route_edit_always($route)) {
+            $routePermission = $routeEdit;
+        }
+    }
+    return $routePermission !== null && user_can($user, $routePermission);
+}
+
+function require_food_ticket_access(): array
+{
+    $user = require_login();
+    if (!food_ticket_is_allowed($user)) {
+        http_response_code(403);
+        exit('این بخش فقط برای ادمین اصلی و مدیر پشتیبانی قابل استفاده است.');
+    }
+    return $user;
+}
+
+function food_ticket_web_url(?array $user = null): string
+{
+    $base = rtrim(food_ticket_windows_service_base_url(), '/') . '/index.html?mode=integrated';
+    $brand = food_ticket_brand_params();
+    if ($brand) {
+        $base .= '&' . http_build_query($brand);
+    }
+    if (!$user || !food_ticket_is_allowed($user)) {
+        return $base;
+    }
+    return $base . '&sso=' . rawurlencode(food_ticket_sso_token($user));
+}
+
+function food_ticket_windows_service_base_url(): string
+{
+    $base = trim((string) cfg('food_ticket.web_url', 'http://127.0.0.1:8080/'));
+    if (!preg_match('#^https?://[^\s/]+(?::\d+)?(?:/[^\s]*)?$#i', $base)) {
+        $base = 'http://127.0.0.1:8080/';
+    }
+    $base = preg_replace('#/index\.html(?:\?.*)?$#i', '', $base) ?: $base;
+    return rtrim($base, '/') . '/';
+}
+
+function food_ticket_sso_token(array $user): string
+{
+    $jti = bin2hex(random_bytes(16));
+    $payload = rtrim(strtr(base64_encode((string) json_encode([
+        'user_id' => (int) ($user['id'] ?? 0),
+        'role' => (string) ($user['role'] ?? ''),
+        'service_group' => user_service_group($user),
+        'exp' => time() + 120,
+        'jti' => $jti,
+    ], JSON_UNESCAPED_SLASHES)), '+/', '-_'), '=');
+    $key = (string) cfg('food_ticket.sso_key', cfg('app.key', ''));
+    $signature = hash_hmac('sha256', $payload, $key);
+    return $payload . '.' . $signature;
+}
+
+function food_ticket_sso_consume_jti(string $jti): bool
+{
+    $jti = preg_replace('/[^a-f0-9]/i', '', $jti) ?? '';
+    if (strlen($jti) < 16) {
+        return false;
+    }
+    $dir = APP_ROOT . '/storage/sso_jti';
+    if (!is_dir($dir)) {
+        @mkdir($dir, 0750, true);
+    }
+    $path = $dir . '/' . $jti . '.used';
+    if (is_file($path)) {
+        return false;
+    }
+    @file_put_contents($path, (string) time());
+    // پاکسازی توکن‌های قدیمی‌تر از ۱۰ دقیقه
+    foreach (glob($dir . '/*.used') ?: [] as $file) {
+        if (@filemtime($file) < time() - 600) {
+            @unlink($file);
+        }
+    }
+    return true;
+}
+
+function food_ticket_main_url(): string
+{
+    $configured = trim((string) cfg('app.base_url', ''));
+    if ($configured !== '' && preg_match('#^https?://#i', $configured)) {
+        return rtrim($configured, '/') . '/index.php';
+    }
+    $scheme = (!empty($_SERVER['HTTPS']) && strtolower((string) $_SERVER['HTTPS']) !== 'off') ? 'https' : 'http';
+    $host = trim((string) ($_SERVER['HTTP_HOST'] ?? '127.0.0.1'));
+    $directory = str_replace('\\', '/', dirname((string) ($_SERVER['SCRIPT_NAME'] ?? '/index.php')));
+    $directory = rtrim($directory, '/.');
+    return $scheme . '://' . $host . ($directory === '' ? '' : $directory) . '/index.php';
+}
+
+function food_ticket_brand_params(): array
+{
+    $name = trim((string) setting('food_ticket_brand_name', (string) setting('app_name', (string) cfg('app.name', 'سامانه مدیریت غذا'))));
+    if (function_exists('food_ticket_is_legacy_brand_name') ? food_ticket_is_legacy_brand_name($name) : $name === '') {
+        $name = 'سامانه مدیریت غذا';
+    }
+    $logo = trim((string) setting('food_ticket_brand_logo', (string) setting('app_logo', (string) cfg('app.logo', ''))));
+    if ($logo !== '' && !preg_match('#^https?://#i', $logo)) {
+        $mainUrl = food_ticket_main_url();
+        $mainRoot = substr($mainUrl, 0, -strlen('/index.php'));
+        $logo = rtrim($mainRoot, '/') . '/' . ltrim($logo, '/');
+    }
+    return array_filter([
+        'brand_name' => $name,
+        'brand_logo' => $logo,
+        'return_url' => food_ticket_main_url(),
+    ], static fn (string $value): bool => $value !== '');
+}
+
+/**
+ * یافتن مسیر واقعی فایل روی ویندوز (حروف بزرگ/کوچک مهم نیست)
+ * اگر فایل پیدا نشود، اولین نامزد برگردانده می‌شود.
+ */
+function food_ticket_resolve_path(array $candidates): string
+{
+    foreach ($candidates as $p) {
+        $p = str_replace(['/', '\\'], DIRECTORY_SEPARATOR, (string) $p);
+        if ($p !== '' && is_file($p)) {
+            $rp = realpath($p);
+            return $rp !== false ? $rp : $p;
+        }
+    }
+    $first = (string) ($candidates[0] ?? '');
+    return str_replace(['/', '\\'], DIRECTORY_SEPARATOR, $first);
+}
+
+/**
+ * مسیر پیش‌فرض فایل منبع تردد (Access).
+ *
+ * مقادیر از لایهٔ محیطی خوانده می‌شوند (نصب‌های موجود ابزار حضور و غیاب) و از پنل
+ * («تنظیمات سیستم → اتصال پایگاه‌ها») قابل تغییرند. هیچ مسیر ثابتی داخل کد نوشته نشده.
+ */
+function food_ticket_attendance_default_path(): string
+{
+    $paths = food_ticket_env_legacy_paths();
+    return food_ticket_resolve_path(array_slice($paths, 0, 4));
+}
+
+function food_ticket_attendance_factory_password(): string
+{
+    return food_ticket_env_value('factory_password');
+}
+
+function food_ticket_config(bool $reload = false): array
+{
+    static $config;
+    if ($reload) {
+        $config = null;
+    }
+    if ($config !== null) {
+        return $config;
+    }
+    $defaults = [
+        'id' => 1, 'enabled' => 1, 'attendance_path' => food_ticket_attendance_default_path(), 'attendance_password_enc' => '',
+        'printer_mode' => 'tcp_raw',
+        'printer_host' => '', 'printer_port' => 9100, 'printer_share' => '',
+        'poll_seconds' => 2, 'max_batch' => 100, 'guest_card_uids' => '',
+        'max_guest_daily' => 20, 'cut_source_rows' => 1, 'updated_by' => null,
+    ];
+    // ستون‌های پنجرهٔ کاری (مهاجرت ۰۳۱). روی نصب‌هایی که هنوز مهاجرت نکرده‌اند
+    // این ستون‌ها وجود ندارند، پس فقط آن‌هایی که واقعاً در جدول هستند SELECT می‌شوند.
+    if (function_exists('food_ticket_window_defaults')) {
+        $defaults += food_ticket_window_defaults();
+    }
+    try {
+        $colPath = food_ticket_db_column('attendance_path');
+        $colPwd = food_ticket_db_column('attendance_password_enc');
+        $colCut = food_ticket_db_column('cut_source_rows');
+        foreach ([$colPath, $colPwd, $colCut] as $column) {
+            if (!preg_match('/^[A-Za-z0-9_]+$/', $column)) {
+                throw new RuntimeException('نام ستون تنظیمات تردد معتبر نیست.');
+            }
+        }
+        $optional = '';
+        if (function_exists('food_ticket_window_defaults') && function_exists('food_ticket_config_has_column')) {
+            foreach (array_keys(food_ticket_window_defaults()) as $windowColumn) {
+                if (food_ticket_config_has_column($windowColumn)) {
+                    $optional .= ', `' . $windowColumn . '`';
+                }
+            }
+        }
+        $sql = 'SELECT id, enabled, `' . $colPath . '` AS attendance_path, `' . $colPwd . '` AS attendance_password_enc, '
+            . 'printer_mode, printer_host, printer_port, printer_share, poll_seconds, max_batch, guest_card_uids, '
+            . 'max_guest_daily, `' . $colCut . '` AS cut_source_rows, updated_by' . $optional . ' FROM food_ticket_config WHERE id = 1';
+        $row = db()->query($sql)->fetch() ?: [];
+        // پایگاه‌داده‌های نصب‌شده نام ستون‌های قدیمی دارند → نگاشت به نام‌های منطقی کد
+        if (function_exists('food_ticket_config_alias_row')) {
+            $row = food_ticket_config_alias_row($row);
+        }
+        $config = array_merge($defaults, $row);
+        $config['printer_mode'] = food_ticket_normalize_printer_mode($config['printer_mode'] ?? 'tcp_raw');
+    } catch (Throwable) {
+        $config = $defaults;
+    }
+    // مسیر ذخیره‌شده در پنل بر پیش‌فرض‌های قدیمی اولویت دارد؛ فقط نصب‌هایی که هنوز
+    // مسیر خالی دارند از مسیر محیطیِ کشف‌شده استفاده می‌کنند.
+    if (trim((string) ($config['attendance_path'] ?? '')) === '') {
+        $config['attendance_path'] = $defaults['attendance_path'];
+    }
+    $config['enabled'] = 1;
+    $config['cut_source_rows'] = 1;
+    return $config;
+}
+
+
+function food_ticket_normalize_printer_mode(mixed $mode): string
+{
+    $mode = strtolower(trim((string) $mode));
+    // مقدار ذخیره‌شده باید با ENUM جدول food_ticket_config هم‌خوان باشد:
+    // ENUM('tcp_raw','windows_share') — windows_queue عمداً به windows_share نگاشت می‌شود.
+    if (in_array($mode, ['windows', 'windows_queue', 'windows_share', 'share', 'windows-spooler', 'spooler', 'win'], true)) {
+        return 'windows_share';
+    }
+    if (in_array($mode, ['socket', 'tcp', 'tcp_raw', 'raw', 'network'], true)) {
+        return 'tcp_raw';
+    }
+    return $mode !== '' ? $mode : 'tcp_raw';
+}
+
+/**
+ * آدرس چاپگر شبکه را تمیز می‌کند: tcp://، فاصله و «:پورت» چسبیده به آدرس را جدا می‌کند و اعتبارسنجی می‌کند.
+ * @return array{0:string,1:int} [host, port]
+ */
+function food_ticket_normalize_printer_host(string $host, int $port = 9100): array
+{
+    $host = trim($host);
+    $host = (string) preg_replace('#^[a-z][a-z0-9+.-]*://#i', '', $host);
+    $host = trim($host, " \t\n\r\0\x0B/\\");
+    if (preg_match('/^(\[[0-9a-f:]+\]|[^:\s]+):(\d{1,5})$/i', $host, $m)) {
+        $host = trim($m[1], '[]');
+        $port = (int) $m[2];
+    }
+    if ($host !== '' && !preg_match('/^[A-Za-z0-9._-]+$/', $host) && !filter_var($host, FILTER_VALIDATE_IP)) {
+        throw new RuntimeException('آدرس چاپگر شبکه معتبر نیست. فقط IP یا نام میزبان (مثلاً 192.168.1.50) وارد کنید.');
+    }
+    return [$host, max(1, min(65535, $port))];
+}
+
+/** برچسب خوانا و مقصد واقعی چاپ بر اساس حالت ذخیره‌شده (برای لاگ و پیام‌ها). */
+function food_ticket_printer_label(array $config): string
+{
+    $mode = food_ticket_normalize_printer_mode($config['printer_mode'] ?? 'tcp_raw');
+    $host = trim((string) ($config['printer_host'] ?? ''));
+    $share = trim((string) ($config['printer_share'] ?? ''));
+    if ($mode === 'tcp_raw') {
+        return $host !== '' ? $host . ':' . max(1, (int) ($config['printer_port'] ?? 9100)) : '';
+    }
+    return $share !== '' ? $share : $host;
+}
+
+/**
+ * ستون printer_mode باید VARCHAR یا ENUM شامل هر دو مقدار باشد؛ در نصب‌های قدیمی ENUM ناقص باعث می‌شد
+ * مقدار tcp_raw ذخیره نشود و حالت به ویندوز برگردد. این تابع یک‌بار ساختار را اصلاح می‌کند.
+ */
+function food_ticket_ensure_printer_mode_column(): void
+{
+    static $done = false;
+    if ($done) {
+        return;
+    }
+    $done = true;
+    try {
+        $row = db()->query("SHOW COLUMNS FROM food_ticket_config LIKE 'printer_mode'")->fetch() ?: [];
+        $type = strtolower((string) ($row['Type'] ?? ''));
+        $isEnum = str_starts_with($type, 'enum');
+        if ($isEnum && (!str_contains($type, "'tcp_raw'") || !str_contains($type, "'windows_share'"))) {
+            db()->exec("ALTER TABLE food_ticket_config MODIFY printer_mode VARCHAR(20) NOT NULL DEFAULT 'tcp_raw'");
+        }
+    } catch (Throwable $e) {
+        app_error_log('[food-ticket] ensure printer_mode column: ' . $e->getMessage());
+    }
+}
+
+function food_ticket_installed(): bool
+{
+    try {
+        return (bool) db()->query("SHOW TABLES LIKE 'food_ticket_config'")->fetchColumn()
+            && (bool) db()->query("SHOW TABLES LIKE 'food_ticket_events'")->fetchColumn();
+    } catch (Throwable) {
+        return false;
+    }
+}
+
+function food_ticket_key(): string
+{
+    return hash('sha256', (string) cfg('app.key', 'food-ticket-change-me'), true);
+}
+
+function food_ticket_encrypt(string $value): string
+{
+    if ($value === '') {
+        return '';
+    }
+    $iv = random_bytes(12);
+    $tag = '';
+    $cipher = openssl_encrypt($value, 'aes-256-gcm', food_ticket_key(), OPENSSL_RAW_DATA, $iv, $tag);
+    return $cipher === false ? '' : base64_encode($iv . $tag . $cipher);
+}
+
+function food_ticket_decrypt(?string $value): string
+{
+    if (!$value) {
+        return '';
+    }
+    $raw = base64_decode($value, true);
+    if ($raw === false || strlen($raw) < 28) {
+        return '';
+    }
+    $plain = openssl_decrypt(substr($raw, 28), 'aes-256-gcm', food_ticket_key(), OPENSSL_RAW_DATA, substr($raw, 0, 12), substr($raw, 12, 16));
+    return $plain === false ? '' : $plain;
+}
+
+/**
+ * رمز واقعیِ فایل Access منبع تردد را برمی‌گرداند.
+ *
+ * ترتیب اولویت (پچ ۱.۳۴ — رفع P0):
+ *   ۱) رمز ذخیره‌شده در جدول تنظیمات با کلید attendance_password_enc (فرم «تنظیمات چاپ» یا ابزار
+ *      tools/set_attendance_password.php). این مقدار AES-256-GCM رمزنگاری‌شده است.
+ *   ۲) رمز داخل food-ticket-config.php (کلید password یا attendance_password) — استقرارهای قدیمی.
+ *   ۳) رمز ثابت پیش‌فرض کارخانه (مقدار محیطی، قابل تغییر از پنل) — سازگاری کامل با نصب‌های فعلی.
+ *
+ * علت: قبلاً همیشه رمز ثابت کارخانه برگردانده می‌شد و اگر رمز فایل Access عوض می‌شد، هیچ راهی
+ * برای به‌روزرسانی از پنل نبود و موتور غذا با خطای اتصال می‌خوابید.
+ */
+function food_ticket_attendance_password(array $config): string
+{
+    // ۱) رمز ذخیره‌شده در جدول food_ticket_config (همان جایی که فرم/ابزار ذخیره می‌کند)
+    try {
+        $row = function_exists('food_ticket_config') ? food_ticket_config() : [];
+        $candidates = [
+            (string) ($row['attendance_password_enc'] ?? ''),
+            function_exists('food_ticket_setting_password_enc') ? food_ticket_setting_password_enc() : '',
+        ];
+        foreach ($candidates as $stored) {
+            if ($stored === '') {
+                continue;
+            }
+            $plain = food_ticket_decrypt($stored);
+            if ($plain !== '') {
+                return $plain;
+            }
+        }
+        if (trim((string) ($candidates[0] ?? '')) !== '') {
+            // ciphertext هست ولی باز نشد (app.key عوض شده) → به مسیرهای بعدی برمی‌گردیم
+            app_error_log('[food-ticket] attendance_password_enc decrypt failed (app.key mismatch?)');
+        }
+    } catch (Throwable) {
+        // دسترسی به جدول تنظیمات ممکن نبود → مسیرهای بعدی
+    }
+
+    // ۲) مقدار داخل فایل تنظیمات food-ticket-config.php
+    foreach (['password', 'attendance_password', 'access_password'] as $key) {
+        $value = trim((string) ($config[$key] ?? ''));
+        if ($value !== '') {
+            return $value;
+        }
+    }
+
+    // ۳) رمز ثابت پیش‌فرض
+    return food_ticket_attendance_factory_password();
+}
+
+/** آیا رمز منبع تردد از تنظیمات (نه مقدار پیش‌فرض) آمده است؟ برای نمایش وضعیت در ابزار/پنل. */
+function food_ticket_attendance_password_source(): string
+{
+    try {
+        $row = function_exists('food_ticket_config') ? food_ticket_config() : [];
+        $stored = trim((string) ($row['attendance_password_enc'] ?? ''));
+        if ($stored !== '') {
+            return food_ticket_decrypt($stored) !== '' ? 'settings' : 'settings_undecryptable';
+        }
+        $fallback = function_exists('food_ticket_setting_password_enc') ? food_ticket_setting_password_enc() : '';
+        if ($fallback !== '') {
+            return food_ticket_decrypt($fallback) !== '' ? 'settings' : 'settings_undecryptable';
+        }
+    } catch (Throwable) {
+    }
+    return 'default';
+}
+
+function food_ticket_ident(string $name): string
+{
+    if (!preg_match('/^[A-Za-z0-9_ ]+$/u', $name)) {
+        throw new RuntimeException('نام جدول Access معتبر نیست.');
+    }
+    return '[' . str_replace(']', ']]', $name) . ']';
+}
+
+/**
+ * روشن/خاموش کردن نگه‌داشتن اتصال Access بین چرخه‌های Worker.
+ *
+ * چرا؟ هر odbc_connect روی فایل Access روی شبکه (SMB) بین ۰٫۵ تا ۲ ثانیه طول می‌کشد،
+ * چون Jet باید فایل قفل .laccdb را بسازد و بعد حذف کند. وقتی Worker هر ثانیه یک بار
+ * چرخه می‌زند، همین هزینه بزرگ‌ترین بخش تأخیر چاپ است. با نگه‌داشتن اتصال، این هزینه
+ * فقط یک بار در شروع پنجرهٔ کاری پرداخت می‌شود.
+ *
+ * فقط Worker این را روشن می‌کند؛ درخواست‌های وب همچنان اتصال کوتاه‌عمر می‌گیرند.
+ */
+function food_ticket_odbc_pool(?bool $enable = null): bool
+{
+    static $enabled = false;
+    if ($enable !== null && $enable !== $enabled) {
+        if (!$enable) {
+            food_ticket_odbc_release();
+        }
+        $enabled = $enable;
+    }
+    return $enabled;
+}
+
+/**
+ * اتصال نگه‌داشته‌شده را واقعاً می‌بندد و قفل Access را آزاد می‌کند.
+ * Worker این را هنگام خروج از پنجرهٔ کاری، بعد از هر چرخهٔ خطادار و هنگام پایان کار صدا می‌زند.
+ */
+function food_ticket_odbc_release(): void
+{
+    $handle = food_ticket_odbc_pool_handle();
+    if ($handle !== null && (is_resource($handle) || is_object($handle)) && function_exists('odbc_close')) {
+        @odbc_close($handle);
+    }
+    food_ticket_odbc_pool_handle(false, null, '');
+}
+
+/**
+ * نگهدارندهٔ وضعیت استخر اتصال. فقط از food_ticket_odbc* صدا زده می‌شود.
+ *
+ * @return mixed اتصال نگه‌داشته‌شده یا null
+ */
+function food_ticket_odbc_pool_handle(bool $store = false, mixed $handle = null, string $key = '')
+{
+    static $pooled = null;
+    static $pooledKey = '';
+    static $pooledAt = 0;
+    if ($store) {
+        $pooled = $handle;
+        $pooledKey = $key;
+        $pooledAt = $handle === null ? 0 : time();
+        return $pooled;
+    }
+    if ($pooled === null) {
+        return null;
+    }
+    // کلید عوض شده (مسیر/رمز تغییر کرده) یا اتصال کهنه شده ⇒ دور انداخته شود.
+    // سقف ۶۰۰ ثانیه عمداً محافظه‌کارانه است تا اگر فایل‌سرور وسط روز ریست شد،
+    // Worker حداکثر ۱۰ دقیقه با هندل مرده کار نکند.
+    if (($key !== '' && $key !== $pooledKey) || (time() - $pooledAt) > 600) {
+        return null;
+    }
+    if (!is_resource($pooled) && !is_object($pooled)) {
+        return null;
+    }
+    return $pooled;
+}
+
+function food_ticket_odbc(string $path, string $password = '')
+{
+    $poolKey = $path . '|' . $password;
+    if (food_ticket_odbc_pool()) {
+        $existing = food_ticket_odbc_pool_handle(false, null, $poolKey);
+        if ($existing !== null) {
+            return $existing;
+        }
+        // هندل قبلی یا کهنه بود یا مربوط به مسیر دیگری؛ قبل از اتصال تازه آزادش کن.
+        food_ticket_odbc_release();
+    }
+    $path = trim(str_replace(['/', "\0"], [DIRECTORY_SEPARATOR === '\\' ? '\\' : '/', ''], $path));
+    // نرمال‌سازی مسیر ویندوز
+    if (strncasecmp(PHP_OS, 'WIN', 3) === 0) {
+        $path = str_replace('/', '\\', $path);
+    }
+    if ($path === '') {
+        throw new RuntimeException('مسیر دیتابیس Access خالی است.');
+    }
+    if (!is_file($path)) {
+        throw new RuntimeException('فایل Access در مسیر داده‌شده پیدا نشد (از نظر PHP): ' . $path . ' — مسیر را از همان سرور Windows که Apache/PHP روی آن اجرا می‌شود بررسی کنید.');
+    }
+    // 1) PHP ODBC — چند نام رایج درایور
+    $odbcErrors = [];
+    if (function_exists('odbc_connect')) {
+        $drivers = array_unique(array_filter([
+            (string) cfg('food_ticket.odbc_driver', ''),
+            'Microsoft Access Driver (*.mdb, *.accdb)',
+            'Microsoft Access Driver (*.mdb)',
+            'Driver do Microsoft Access (*.mdb)',
+        ]));
+        foreach ($drivers as $driver) {
+            $connection = sprintf('Driver={%s};Dbq=%s;Uid=Admin;Pwd=%s;', $driver, $path, $password);
+            $handle = @odbc_connect($connection, '', '');
+            if ($handle) {
+                if (food_ticket_odbc_pool()) {
+                    food_ticket_odbc_pool_handle(true, $handle, $poolKey);
+                }
+                return $handle;
+            }
+            $odbcErrors[] = $driver . ': ' . (string) odbc_errormsg();
+        }
+    } else {
+        $odbcErrors[] = 'افزونه odbc در PHP نصب/فعال نیست';
+    }
+    $odbcError = implode(' | ', $odbcErrors);
+    // 2) Fallback: PowerShell + ACE/Jet/ADODB/ODBC (بدون نیاز به php_odbc)
+    if (strncasecmp(PHP_OS, 'WIN', 3) === 0) {
+        return [
+            '__ft_ps' => true,
+            'path' => $path,
+            'password' => $password,
+            'odbc_hint' => $odbcError,
+        ];
+    }
+    throw new RuntimeException('خواندن Access ممکن نشد. ODBC: ' . $odbcError . ' — روی ویندوز از PowerShell/ACE هم پشتیبانی می‌شود.');
+}
+
+function food_ticket_is_ps_access($connection): bool
+{
+    return is_array($connection) && !empty($connection['__ft_ps']);
+}
+
+function food_ticket_access_close($connection): void
+{
+    if (food_ticket_is_ps_access($connection)) {
+        return;
+    }
+    // اتصال نگه‌داشته‌شدهٔ Worker نباید در پایان هر چرخه بسته شود؛
+    // بستن آن با food_ticket_odbc_release() انجام می‌شود.
+    if (food_ticket_odbc_pool() && $connection !== null && $connection === food_ticket_odbc_pool_handle()) {
+        return;
+    }
+    if (is_resource($connection) || (is_object($connection) && function_exists('odbc_close'))) {
+        @odbc_close($connection);
+    }
+}
+
+/**
+ * خواندن جدول Access با PowerShell + Microsoft ACE/Jet OLEDB
+ */
+function food_ticket_access_rows_powershell(array $handle, string $table, int $limit = 500, ?string $orderSql = null, ?string $whereSql = null): array
+{
+    $path = (string) ($handle['path'] ?? '');
+    $password = (string) ($handle['password'] ?? '');
+    $limit = max(1, min(50000, $limit));
+    $sql = 'SELECT TOP ' . $limit . ' * FROM ' . food_ticket_ident($table);
+    if ($whereSql) {
+        $sql .= ' WHERE ' . $whereSql;
+    }
+    if ($orderSql) {
+        $sql .= ' ORDER BY ' . $orderSql;
+    }
+    $payload = base64_encode((string) json_encode([
+        'path' => $path,
+        'password' => $password,
+        'sql' => $sql,
+    ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
+    // چند روش اتصال: OLEDB دستی، ADODB COM، ODBC — برای دور زدن خطای ISAM
+    $ps = <<<'PS'
+$ErrorActionPreference = 'Stop'
+[Console]::OutputEncoding = New-Object System.Text.UTF8Encoding $false
+$OutputEncoding = New-Object System.Text.UTF8Encoding $false
+$data = [Text.Encoding]::UTF8.GetString([Convert]::FromBase64String('__FT_PAYLOAD__')) | ConvertFrom-Json
+$path = [string]$data.path
+$pwd = [string]$data.password
+$sql = [string]$data.sql
+if (-not (Test-Path -LiteralPath $path)) { [Console]::Error.WriteLine("FILE_NOT_FOUND: $path"); exit 3 }
+
+function Convert-Rows($readerOrTable) {
+  $rows = @()
+  if ($readerOrTable -is [System.Data.DataTable]) {
+    foreach ($row in $readerOrTable.Rows) {
+      $item = @{}
+      foreach ($column in $readerOrTable.Columns) {
+        $value = $row[$column.ColumnName]
+        if ($value -is [System.DBNull]) { $item[$column.ColumnName] = $null }
+        elseif ($value -is [datetime]) { $item[$column.ColumnName] = $value.ToString('yyyy-MM-dd HH:mm:ss') }
+        else { $item[$column.ColumnName] = $value }
+      }
+      $rows += $item
+    }
+  }
+  return $rows
+}
+
+$errors = @()
+
+# --- A) OLEDB با رشته اتصال دستی (بدون ConnectionStringBuilder) ---
+$oleProviders = @('Microsoft.ACE.OLEDB.12.0','Microsoft.ACE.OLEDB.16.0','Microsoft.Jet.OLEDB.4.0')
+foreach ($prov in $oleProviders) {
+  $conn = $null
+  try {
+    $cs = "Provider=$prov;Data Source=$path;Persist Security Info=False;"
+    if ($pwd -ne '') { $cs += "Jet OLEDB:Database Password=$pwd;" }
+    $conn = New-Object System.Data.OleDb.OleDbConnection($cs)
+    $conn.Open()
+    $cmd = $conn.CreateCommand(); $cmd.CommandText = $sql
+    $adapter = New-Object System.Data.OleDb.OleDbDataAdapter($cmd)
+    $table = New-Object System.Data.DataTable
+    [void]$adapter.Fill($table)
+    $rows = Convert-Rows $table
+    $json = if ($rows.Count -eq 0) { '[]' } else { (ConvertTo-Json -InputObject $rows -Compress -Depth 6) }
+  $bytes = [Text.Encoding]::UTF8.GetBytes([string]$json)
+  Write-Output ('B64:' + [Convert]::ToBase64String($bytes))
+    exit 0
+  } catch {
+    $errors += "OLEDB $prov : $($_.Exception.Message)"
+  } finally {
+    if ($conn) { try { $conn.Dispose() } catch {} }
+  }
+}
+
+# --- B) ADODB COM ---
+foreach ($prov in $oleProviders) {
+  $conn = $null
+  try {
+    $cs = "Provider=$prov;Data Source=$path;"
+    if ($pwd -ne '') { $cs += "Jet OLEDB:Database Password=$pwd;" }
+    $conn = New-Object -ComObject ADODB.Connection
+    $conn.Open($cs)
+    $rs = $conn.Execute($sql)
+    $rows = @()
+    while (-not $rs.EOF) {
+      $item = @{}
+      foreach ($field in $rs.Fields) {
+        $v = $field.Value
+        if ($null -eq $v) { $item[$field.Name] = $null }
+        elseif ($v -is [datetime]) { $item[$field.Name] = ([datetime]$v).ToString('yyyy-MM-dd HH:mm:ss') }
+        else { $item[$field.Name] = "$v" }
+      }
+      $rows += $item
+      $rs.MoveNext()
+    }
+    $rs.Close(); $conn.Close()
+    $json = if ($rows.Count -eq 0) { '[]' } else { (ConvertTo-Json -InputObject $rows -Compress -Depth 6) }
+  $bytes = [Text.Encoding]::UTF8.GetBytes([string]$json)
+  Write-Output ('B64:' + [Convert]::ToBase64String($bytes))
+    exit 0
+  } catch {
+    $errors += "ADODB $prov : $($_.Exception.Message)"
+    if ($conn) { try { $conn.Close() } catch {} }
+  }
+}
+
+# --- C) ODBC Access Driver ---
+$odbcDrivers = @(
+  'Microsoft Access Driver (*.mdb, *.accdb)',
+  'Microsoft Access Driver (*.mdb)'
+)
+foreach ($drv in $odbcDrivers) {
+  $conn = $null
+  try {
+    $cs = "Driver={$drv};Dbq=$path;Uid=Admin;Pwd=$pwd;"
+    $conn = New-Object System.Data.Odbc.OdbcConnection($cs)
+    $conn.Open()
+    $cmd = $conn.CreateCommand(); $cmd.CommandText = $sql
+    $adapter = New-Object System.Data.Odbc.OdbcDataAdapter($cmd)
+    $table = New-Object System.Data.DataTable
+    [void]$adapter.Fill($table)
+    $rows = Convert-Rows $table
+    $json = if ($rows.Count -eq 0) { '[]' } else { (ConvertTo-Json -InputObject $rows -Compress -Depth 6) }
+  $bytes = [Text.Encoding]::UTF8.GetBytes([string]$json)
+  Write-Output ('B64:' + [Convert]::ToBase64String($bytes))
+    exit 0
+  } catch {
+    $errors += "ODBC $drv : $($_.Exception.Message)"
+  } finally {
+    if ($conn) { try { $conn.Dispose() } catch {} }
+  }
+}
+
+[Console]::Error.WriteLine(($errors -join ' | '))
+exit 2
+PS;
+    $ps = str_replace('__FT_PAYLOAD__', $payload, $ps);
+    $tmp = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'ft_acc_' . bin2hex(random_bytes(4)) . '.ps1';
+    if (@file_put_contents($tmp, "\xEF\xBB\xBF" . $ps) === false) {
+        throw new RuntimeException('نوشتن اسکریپت خواندن Access ناموفق بود.');
+    }
+    // ترجیح powershell 64-bit سیستم
+    $psExe = 'powershell';
+    $sysPs = getenv('SystemRoot') ? (rtrim((string) getenv('SystemRoot'), '\\') . '\\System32\\WindowsPowerShell\\v1.0\\powershell.exe') : '';
+    if ($sysPs !== '' && is_file($sysPs)) {
+        $psExe = $sysPs;
+    }
+    $cmd = escapeshellarg($psExe) . ' -NoProfile -ExecutionPolicy Bypass -File ' . escapeshellarg($tmp);
+    $output = [];
+    $code = 0;
+    @exec($cmd . ' 2>&1', $output, $code);
+    @unlink($tmp);
+    $text = trim(implode("\n", $output));
+    if ($code === 0) {
+        // خروجی PowerShell به صورت B64: برای جلوگیری از خراب شدن UTF-8 فارسی
+        if (str_starts_with($text, 'B64:')) {
+            $decoded = base64_decode(substr($text, 4), true);
+            $text = is_string($decoded) ? $decoded : '';
+        }
+        if ($text === '' || $text === '[]') {
+            return [];
+        }
+        $data = json_decode($text, true);
+        if ($data === null && $text !== 'null') {
+            $data = json_decode('[' . $text . ']', true);
+        }
+        if (!is_array($data)) {
+            return [];
+        }
+        if ($data !== [] && array_keys($data) !== range(0, count($data) - 1)) {
+            $data = [$data];
+        }
+        $rows = [];
+        foreach ($data as $row) {
+            if (!is_array($row)) {
+                continue;
+            }
+            $norm = [];
+            $columns = [];
+            foreach ($row as $k => $v) {
+                $key = food_ticket_normalize_column((string) $k);
+                if (is_string($v)) {
+                    $v = food_ticket_utf8($v);
+                }
+                $norm[$key] = $v;
+                $columns[$key] = (string) $k;
+            }
+            $uid = food_ticket_row_value($norm, ['L_UID', 'LUID', 'UID', 'PersonnelCode', 'UserCode', 'EmpCode', 'UserID']);
+            $card = food_ticket_row_value($norm, ['C_Card', 'Card', 'CardUID', 'CardNo', 'CardNumber', 'RFID', 'C_CARD']);
+            $date = food_ticket_row_value($norm, ['C_Date', 'C_DATE', 'PunchDate', 'Date']);
+            $time = food_ticket_row_value($norm, ['C_Time', 'C_TIME', 'PunchTime', 'Time']);
+            $rows[] = [
+                'row' => $norm,
+                'columns' => $columns,
+                'uid' => food_ticket_code($uid ?? ''),
+                'card' => food_ticket_code($card ?? ''),
+                'date_raw' => $date,
+                'time_raw' => $time,
+            ];
+        }
+        return $rows;
+    }
+    $hint = (string) ($handle['odbc_hint'] ?? '');
+    throw new RuntimeException(
+        'خواندن Access ناموفق بود. ' . ($text !== '' ? $text : 'exit ' . $code) .
+        ($hint !== '' ? ' | ODBC PHP: ' . $hint : '') .
+        ' — راه‌حل: 1) Microsoft Access Database Engine 2016 Redistributable (هم‌معماری با PHP، معمولاً 64-bit) را نصب کنید 2) یا در php.ini مقدار extension=odbc را فعال کنید 3) مسیر فایل .mdb/.accdb را از همان سرور بررسی کنید.'
+    );
+}
+
+
+function food_ticket_access_delete_powershell(array $handle, string $sql, array $params): bool
+{
+    $result = food_ticket_access_delete_powershell_ex($handle, $sql, $params);
+    return !empty($result['ok']);
+}
+
+/**
+ * حذف دقیق از Access با PowerShell و برگرداندن نتیجهٔ واقعی:
+ * matched = تعداد ردیف‌های تطبیق‌یافته، affected = تعداد ردیف‌های حذف‌شده.
+ * ⚠️ نسخهٔ قبلی در حالت «۰ تطبیق» هم ok=true برمی‌گرداند و همین باعث می‌شد
+ * سامانه حذف را «موفق» گزارش کند در حالی که رکورد SOURCE_TABLE دست‌نخورده مانده بود.
+ *
+ * @return array{ok:bool,matched:int,affected:int,error:string}
+ */
+function food_ticket_access_delete_powershell_ex(array $handle, string $sql, array $params, bool $allowMany = false): array
+{
+    $fail = static function (string $msg, int $matched = -1, int $affected = 0): array {
+        return ['ok' => false, 'matched' => $matched, 'affected' => $affected, 'error' => $msg];
+    };
+    $payload = base64_encode((string) json_encode([
+        'path' => (string) ($handle['path'] ?? ''),
+        'password' => (string) ($handle['password'] ?? ''),
+        'sql' => $sql,
+        'params' => array_values($params),
+        // allowMany فقط برای پاک‌سازی دسته‌ای با کلید اصلی (هر شرط یکتا) استفاده می‌شود.
+        'allowMany' => $allowMany,
+    ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
+    $ps = <<<'PS'
+$ErrorActionPreference = 'Stop'
+$data = [Text.Encoding]::UTF8.GetString([Convert]::FromBase64String('__FT_PAYLOAD__')) | ConvertFrom-Json
+$match = [regex]::Match([string]$data.sql, '^\s*DELETE\s+FROM\s+(.+?)\s+WHERE\s+(.+)\s*$', [System.Text.RegularExpressions.RegexOptions]::IgnoreCase)
+if (-not $match.Success) { [Console]::Error.WriteLine('Unsupported exact-delete statement'); exit 2 }
+$countSql = 'SELECT COUNT(*) FROM ' + $match.Groups[1].Value + ' WHERE ' + $match.Groups[2].Value
+$providers = @('Microsoft.ACE.OLEDB.16.0', 'Microsoft.ACE.OLEDB.12.0', 'Microsoft.Jet.OLEDB.4.0')
+$errors = @()
+foreach ($provider in $providers) {
+  $connection = $null
+  try {
+    $builder = New-Object System.Data.OleDb.OleDbConnectionStringBuilder
+    $builder.Provider = $provider
+    $builder.DataSource = [string]$data.path
+    $builder['Persist Security Info'] = $false
+    if ([string]$data.password -ne '') { $builder['Jet OLEDB:Database Password'] = [string]$data.password }
+    $connection = New-Object System.Data.OleDb.OleDbConnection($builder.ConnectionString)
+    $connection.Open()
+    $command = $connection.CreateCommand()
+    $command.CommandText = $countSql
+    $matches = [int]$command.ExecuteScalar()
+    if ($matches -eq 0) { @{ ok = $false; matched = 0; affected = 0; error = 'NO_MATCH' } | ConvertTo-Json -Compress; exit 0 }
+    if ($matches -gt 1 -and -not [bool]$data.allowMany) { @{ ok = $false; matched = $matches; affected = 0; error = "MATCHED $matches rows" } | ConvertTo-Json -Compress; exit 0 }
+    $command.CommandText = [string]$data.sql
+    if (@($data.params).Count -gt 0) { foreach ($value in @($data.params)) {
+      $parameter = $command.Parameters.Add('?', [System.Data.OleDb.OleDbType]::VarWChar, 255)
+      if ($null -eq $value) {
+        $parameter.Value = [DBNull]::Value
+      } elseif ($value -is [bool]) {
+        $parameter.OleDbType = [System.Data.OleDb.OleDbType]::Boolean
+        $parameter.Value = $value
+      } elseif ($value -is [int] -or $value -is [long]) {
+        $parameter.OleDbType = [System.Data.OleDb.OleDbType]::BigInt
+        $parameter.Value = $value
+      } elseif ($value -is [double] -or $value -is [decimal]) {
+        $parameter.OleDbType = [System.Data.OleDb.OleDbType]::Double
+        $parameter.Value = $value
+      } elseif ($value -is [string] -and $value -match '^\d{4}-\d{2}-\d{2}( \d{2}:\d{2}:\d{2})?$') {
+        try {
+          $parameter.OleDbType = [System.Data.OleDb.OleDbType]::Date
+          $parameter.Value = [DateTime]::Parse($value, [Globalization.CultureInfo]::InvariantCulture)
+        } catch {
+          $parameter.OleDbType = [System.Data.OleDb.OleDbType]::VarWChar
+          $parameter.Value = $value
+        }
+      } else {
+        $parameter.Value = [string]$value
+      }
+    }
+    }
+    $affected = $command.ExecuteNonQuery()
+    if ([bool]$data.allowMany) {
+      if ($affected -lt 1) { @{ ok = $false; matched = $matches; affected = $affected; error = 'DELETE affected no rows' } | ConvertTo-Json -Compress; exit 0 }
+    } elseif ($affected -ne 1) {
+      throw [Exception]::new("DELETE affected $affected rows; expected exactly one")
+    }
+    @{ ok = $true; matched = $matches; affected = $affected } | ConvertTo-Json -Compress
+    exit 0
+  } catch {
+    $errors += ($provider + ': ' + $_.Exception.Message)
+  } finally {
+    if ($connection) { $connection.Dispose() }
+  }
+}
+[Console]::Error.WriteLine(($errors -join ' | '))
+exit 2
+PS;
+    $ps = str_replace('__FT_PAYLOAD__', $payload, $ps);
+    $tmp = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'ft_del_' . bin2hex(random_bytes(4)) . '.ps1';
+    if (@file_put_contents($tmp, $ps, LOCK_EX) === false) {
+        app_error_log('Food ticket PowerShell delete script could not be written.');
+        return $fail('نوشتن اسکریپت PowerShell حذف ممکن نشد.');
+    }
+    try {
+        $output = [];
+        $code = 0;
+        @exec('powershell -NoLogo -NoProfile -NonInteractive -ExecutionPolicy Bypass -File ' . escapeshellarg($tmp) . ' 2>&1', $output, $code);
+        if ($code !== 0) {
+            app_error_log('Food ticket Access DELETE failed: ' . implode(' ', $output));
+            return $fail('اجرای PowerShell با کد ' . $code . ' پایان یافت: ' . implode(' ', $output));
+        }
+        $result = json_decode(trim(implode("\n", $output)), true);
+        if (!is_array($result)) {
+            app_error_log('Food ticket Access DELETE returned unparsable output: ' . implode(' ', $output));
+            return $fail('خروجی PowerShell قابل خواندن نبود.');
+        }
+        return [
+            'ok' => !empty($result['ok']),
+            'matched' => array_key_exists('matched', $result) ? (int) $result['matched'] : -1,
+            'affected' => array_key_exists('affected', $result) ? (int) $result['affected'] : 0,
+            'error' => (string) ($result['error'] ?? ''),
+        ];
+    } finally {
+        @unlink($tmp);
+    }
+}
+
+function food_ticket_normalize_column(string $name): string
+{
+    return strtolower((string) preg_replace('/[^\p{L}\p{N}]+/u', '_', trim($name)));
+}
+
+function food_ticket_row_value(array $row, array $names): mixed
+{
+    foreach ($names as $name) {
+        $key = food_ticket_normalize_column($name);
+        if (array_key_exists($key, $row)) {
+            return $row[$key];
+        }
+    }
+    return null;
+}
+
+
+function food_ticket_access_rows($connection, string $table, int $limit = 500, ?string $orderSql = null, ?string $whereSql = null, bool $strict = false): array
+{
+    if (food_ticket_is_ps_access($connection)) {
+        return food_ticket_access_rows_powershell($connection, $table, $limit, $orderSql, $whereSql);
+    }
+    $limit = max(1, min(50000, $limit));
+    $sql = 'SELECT TOP ' . $limit . ' * FROM ' . food_ticket_ident($table);
+    if ($whereSql) {
+        $sql .= ' WHERE ' . $whereSql;
+    }
+    if ($orderSql) {
+        $sql .= ' ORDER BY ' . $orderSql;
+    }
+    $result = @odbc_exec($connection, $sql);
+    if (!$result && $strict) {
+        // حالت سخت‌گیر: خطای فیلتر/مرتب‌سازی باید به فراخواننده برسد، نه اینکه ردیف‌های فیلترنشده برگردد.
+        throw new RuntimeException('کوئری Access ناموفق بود: ' . (string) odbc_errormsg($connection) . ' | SQL: ' . $sql);
+    }
+    if (!$result) {
+        // بدون ORDER/WHERE دوباره تلاش (بعضی جداول لینک‌شده محدودند)
+        $result = @odbc_exec($connection, 'SELECT TOP ' . $limit . ' * FROM ' . food_ticket_ident($table));
+    }
+    if (!$result) {
+        throw new RuntimeException('خواندن جدول Access ناموفق بود: ' . (string) odbc_errormsg($connection));
+    }
+    $rows = [];
+    $fieldNames = [];
+    $fieldTypes = [];
+    for ($i = 1; $i <= odbc_num_fields($result); $i++) {
+        $fieldNames[] = (string) odbc_field_name($result, $i);
+        $fieldTypes[food_ticket_normalize_column((string) odbc_field_name($result, $i))] = strtolower((string) @odbc_field_type($result, $i));
+    }
+    while ($raw = odbc_fetch_array($result)) {
+        $row = [];
+        $columns = [];
+        foreach ($fieldNames as $field) {
+            $key = food_ticket_normalize_column($field);
+            $val = $raw[$field] ?? null;
+            if (is_string($val)) {
+                $val = food_ticket_utf8($val);
+            }
+            $row[$key] = $val;
+            $columns[$key] = $field;
+        }
+        $uid = food_ticket_row_value($row, ['L_UID', 'LUID', 'UID', 'PersonnelCode', 'UserCode', 'EmpCode', 'UserID']);
+        $card = food_ticket_row_value($row, ['C_Card', 'Card', 'CardUID', 'CardNo', 'CardNumber', 'RFID', 'C_CARD']);
+        $date = food_ticket_row_value($row, ['C_Date', 'C_DATE', 'PunchDate', 'Date']);
+        $time = food_ticket_row_value($row, ['C_Time', 'C_TIME', 'PunchTime', 'Time']);
+        $rows[] = [
+            'row' => $row,
+            'columns' => $columns,
+            'types' => $fieldTypes,
+            'uid' => food_ticket_code($uid ?? ''),
+            'card' => food_ticket_code($card ?? ''),
+            'date_raw' => $date,
+            'time_raw' => $time,
+        ];
+    }
+    return $rows;
+}
+
+function food_ticket_normalize_digits(string $value): string
+{
+    $persian = ['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹', '٠', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩'];
+    $latin = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
+    return str_replace($persian, $latin, $value);
+}
+
+/**
+ * نرمال‌سازی «ورودی تاریخ از رابط کاربری» به Y-m-d میلادی.
+ * هم شمسی (۱۴۰۵/۰۷/۱۴ یا ۱۴۰۵۰۷۱۴) و هم میلادی (2026-10-06 یا 20261006) پذیرفته می‌شود.
+ * قالب انتقال داده با API همان Y-m-d میلادی می‌ماند (هیچ API‌ای عوض نشده است).
+ *
+ * @return string|null Y-m-d میلادی یا null اگر قابل تشخیص نباشد
+ */
+function food_ticket_iso_date_input(mixed $value): ?string
+{
+    if ($value instanceof DateTimeInterface) {
+        return $value->format('Y-m-d');
+    }
+    $raw = trim(food_ticket_normalize_digits((string) ($value ?? '')));
+    if ($raw === '') {
+        return null;
+    }
+    // ⚠️ دام: «1405-07-14» شمسی است، نه ۱۴۰۵ میلادی. تشخیص بر اساس بازهٔ سال انجام می‌شود
+    // (سال‌های ۱۲۰۰–۱۶۰۰ شمسی، سال‌های ۱۷۰۰–۲۱۰۰ میلادی).
+    if (preg_match('/^(\d{4})[\/-](\d{1,2})[\/-](\d{1,2})$/', $raw, $m) === 1) {
+        $y = (int) $m[1];
+        $mo = (int) $m[2];
+        $da = (int) $m[3];
+        if ($y >= 1700 && $y <= 2100 && checkdate($mo, $da, $y)) {
+            return sprintf('%04d-%02d-%02d', $y, $mo, $da);
+        }
+        if ($y >= 1200 && $y <= 1600) {
+            return food_ticket_jalali_to_gregorian($y, $mo, $da);
+        }
+        return null;
+    }
+    return food_ticket_parse_date($raw);
+}
+
+/**
+ * تبدیل تاریخ شمسی به میلادی — مستقل از bootstrap.
+ * همان الگوریتم تقویم مشترک سامانه (bootstrap.php → jalali_to_gregorian و
+ * assets/jalali-calendar.js → j2g) تا همه‌جا یک نتیجه بدهد. این نسخهٔ محلی فقط
+ * زمانی استفاده می‌شود که تابع سامانه در دسترس نباشد (مثلاً Worker مستقل).
+ *
+ * @return string|null Y-m-d میلادی یا null اگر ورودی معتبر نباشد
+ */
+function food_ticket_jalali_to_gregorian(int $jy, int $jm, int $jd): ?string
+{
+    if ($jy < 1200 || $jy > 1600 || $jm < 1 || $jm > 12 || $jd < 1 || $jd > 31) {
+        return null;
+    }
+    $jy2 = $jy - 979;
+    $jm2 = $jm - 1;
+    $jd2 = $jd - 1;
+    $jdn = 365 * $jy2 + intdiv($jy2, 33) * 8 + intdiv(($jy2 % 33) + 3, 4);
+    for ($i = 0; $i < $jm2; $i++) {
+        $jdn += $i < 6 ? 31 : 30;
+    }
+    $jdn += $jd2;
+    $gdn = $jdn + 79;
+    $gy = 1600 + 400 * intdiv($gdn, 146097);
+    $gdn %= 146097;
+    $leap = true;
+    if ($gdn >= 36525) {
+        $gdn--;
+        $gy += 100 * intdiv($gdn, 36524);
+        $gdn %= 36524;
+        if ($gdn >= 365) {
+            $gdn++;
+        } else {
+            $leap = false;
+        }
+    }
+    $gy += 4 * intdiv($gdn, 1461);
+    $gdn %= 1461;
+    if ($gdn >= 366) {
+        $leap = false;
+        $gdn--;
+        $gy += intdiv($gdn, 365);
+        $gdn %= 365;
+    }
+    $gd = $gdn + 1;
+    $monthDays = [0, 31, $leap ? 29 : 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+    $gm = 1;
+    while ($gm <= 12 && $gd > $monthDays[$gm]) {
+        $gd -= $monthDays[$gm];
+        $gm++;
+    }
+    if ($gm > 12 || !checkdate($gm, $gd, $gy)) {
+        return null;
+    }
+    return sprintf('%04d-%02d-%02d', $gy, $gm, $gd);
+}
+
+/**
+ * تبدیل تاریخ خام Access به Y-m-d میلادی.
+ * پشتیبانی: میلادی، شمسی (1403/07/08 یا 14030708)، رقم فارسی، سریال OLE.
+ */
+function food_ticket_parse_date(mixed $value): ?string
+{
+    if ($value instanceof DateTimeInterface) {
+        return $value->format('Y-m-d');
+    }
+    if ($value === null || $value === '') {
+        return null;
+    }
+
+    $tryJalali = static function (int $y, int $m, int $d): ?string {
+        if ($y < 1200 || $y > 1500 || $m < 1 || $m > 12 || $d < 1 || $d > 31) {
+            return null;
+        }
+        if (!function_exists('jalali_to_gregorian')) {
+            // Worker/CLI مستقل: نسخهٔ محلی همان الگوریتم سامانه
+            return food_ticket_jalali_to_gregorian($y, $m, $d);
+        }
+        [$gy, $gm, $gd] = jalali_to_gregorian($y, $m, $d);
+        if (checkdate($gm, $gd, $gy)) {
+            return sprintf('%04d-%02d-%02d', $gy, $gm, $gd);
+        }
+        return null;
+    };
+
+    // عدد خالص (int/float از Access)
+    if (is_numeric($value) && !is_string($value)) {
+        $n = (float) $value;
+        // سریال OLE فقط در بازه معقول تاریخ‌های مدرن (~1955 تا ~2040)
+        if ($n > 20000 && $n < 60000) {
+            $dt = new DateTimeImmutable('1899-12-30');
+            return $dt->modify('+' . (int) $n . ' days')->format('Y-m-d');
+        }
+        // yyyymmdd عددی: میلادی یا شمسی
+        $digits = sprintf('%08d', (int) $n);
+        if (strlen($digits) >= 8) {
+            $y = (int) substr($digits, 0, 4);
+            $m = (int) substr($digits, 4, 2);
+            $d = (int) substr($digits, 6, 2);
+            if ($y >= 1990 && $y <= 2100 && checkdate($m, $d, $y)) {
+                return sprintf('%04d-%02d-%02d', $y, $m, $d);
+            }
+            $jalali = $tryJalali($y, $m, $d);
+            if ($jalali !== null) {
+                return $jalali;
+            }
+        }
+    }
+
+    $value = food_ticket_normalize_digits(trim((string) $value));
+    // جداکننده شمسی رایج: 1403/7/8 یا 1403-07-08
+    if (preg_match('/^(\d{4})[\/\-\.](\d{1,2})[\/\-\.](\d{1,2})/', $value, $m)) {
+        $y = (int) $m[1];
+        $mo = (int) $m[2];
+        $d = (int) $m[3];
+        if ($y >= 1990 && $y <= 2100 && checkdate($mo, $d, $y)) {
+            return sprintf('%04d-%02d-%02d', $y, $mo, $d);
+        }
+        $jalali = $tryJalali($y, $mo, $d);
+        if ($jalali !== null) {
+            return $jalali;
+        }
+    }
+
+    $digits = preg_replace('/\D+/', '', $value) ?? '';
+    if (strlen($digits) === 8) {
+        $y = (int) substr($digits, 0, 4);
+        $mo = (int) substr($digits, 4, 2);
+        $d = (int) substr($digits, 6, 2);
+        if ($y >= 1990 && $y <= 2100 && checkdate($mo, $d, $y)) {
+            return sprintf('%04d-%02d-%02d', $y, $mo, $d);
+        }
+        $jalali = $tryJalali($y, $mo, $d);
+        if ($jalali !== null) {
+            return $jalali;
+        }
+    }
+    // yyyymm (بدون روز) را رد می‌کنیم
+    foreach (['Y-m-d', 'Y/m/d', 'd/m/Y', 'm/d/Y', 'Y-m-d H:i:s'] as $fmt) {
+        $dt = DateTimeImmutable::createFromFormat($fmt, substr($value, 0, strlen($fmt) + 6));
+        if ($dt instanceof DateTimeImmutable) {
+            $y = (int) $dt->format('Y');
+            // اگر createFromFormat سال شمسی را میلادی فرض کرده، رد کن
+            if ($y >= 1990 && $y <= 2100) {
+                return $dt->format('Y-m-d');
+            }
+        }
+    }
+    if (strtotime($value) !== false) {
+        $ts = strtotime($value);
+        $y = (int) date('Y', $ts);
+        if ($y >= 1990 && $y <= 2100) {
+            return date('Y-m-d', $ts);
+        }
+    }
+    return null;
+}
+
+function food_ticket_parse_time(mixed $value): ?string
+{
+    if ($value instanceof DateTimeInterface) {
+        return $value->format('H:i:s');
+    }
+    if ($value === null || $value === '') {
+        return null;
+    }
+    // OLE fraction of day
+    if (is_numeric($value)) {
+        $number = (float) $value;
+        if ($number >= 0 && $number < 1) {
+            return gmdate('H:i:s', (int) round($number * 86400));
+        }
+        // 130523 یا 83000 (083000 بدون صفر) → همیشه ۶ رقم
+        $asInt = (int) $number;
+        if ($asInt >= 0 && $asInt <= 235959) {
+            $digits = sprintf('%06d', $asInt);
+            $h = (int) substr($digits, 0, 2);
+            $i = (int) substr($digits, 2, 2);
+            $s = (int) substr($digits, 4, 2);
+            if ($h <= 23 && $i <= 59 && $s <= 59) {
+                return sprintf('%02d:%02d:%02d', $h, $i, $s);
+            }
+        }
+    }
+    $value = trim((string) $value);
+    $digits = preg_replace('/\D+/', '', $value) ?? '';
+    if (strlen($digits) === 5) {
+        $digits = '0' . $digits;
+    }
+    if (strlen($digits) === 4) {
+        $digits .= '00';
+    }
+    if (strlen($digits) === 6) {
+        $h = (int) substr($digits, 0, 2);
+        $i = (int) substr($digits, 2, 2);
+        $s = (int) substr($digits, 4, 2);
+        if ($h <= 23 && $i <= 59 && $s <= 59) {
+            return sprintf('%02d:%02d:%02d', $h, $i, $s);
+        }
+    }
+    foreach (['H:i:s', 'H:i'] as $format) {
+        $dt = DateTimeImmutable::createFromFormat($format, $value);
+        if ($dt instanceof DateTimeImmutable) {
+            return $dt->format('H:i:s');
+        }
+    }
+    return null;
+}
+
+function food_ticket_source_key(array $item): string
+{
+    $normalize = static function (mixed $value): mixed {
+        if (is_bool($value) || $value === null) {
+            return $value === true ? '1' : ($value === false ? '0' : '');
+        }
+        if (is_scalar($value)) {
+            return food_ticket_normalize_digits(trim((string) $value));
+        }
+        if ($value instanceof DateTimeInterface) {
+            return $value->format('Y-m-d H:i:s');
+        }
+        if (is_array($value)) {
+            $out = [];
+            foreach ($value as $k => $v) {
+                if (is_array($v) || is_object($v)) {
+                    $enc = json_encode($v, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_PARTIAL_OUTPUT_ON_ERROR);
+                    $out[(string) $k] = is_string($enc) ? $enc : '';
+                } elseif (is_bool($v) || $v === null) {
+                    $out[(string) $k] = $v === true ? '1' : ($v === false ? '0' : '');
+                } else {
+                    $out[(string) $k] = is_scalar($v) ? (string) $v : '';
+                }
+            }
+            return $out;
+        }
+        return '';
+    };
+
+    $payload = [
+        $normalize($item['uid'] ?? ''),
+        $normalize($item['card'] ?? ''),
+        $normalize($item['date_raw'] ?? ''),
+        $normalize($item['time_raw'] ?? ''),
+        $normalize($item['row'] ?? []),
+    ];
+    $flags = JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES;
+    if (defined('JSON_INVALID_UTF8_SUBSTITUTE')) {
+        $flags |= JSON_INVALID_UTF8_SUBSTITUTE;
+    }
+    if (defined('JSON_PARTIAL_OUTPUT_ON_ERROR')) {
+        $flags |= JSON_PARTIAL_OUTPUT_ON_ERROR;
+    }
+    $json = json_encode($payload, $flags);
+    if (!is_string($json) || $json === '') {
+        $json = implode('|', [
+            (string) ($item['uid'] ?? ''),
+            (string) ($item['card'] ?? ''),
+            is_scalar($item['date_raw'] ?? null) ? (string) $item['date_raw'] : '',
+            is_scalar($item['time_raw'] ?? null) ? (string) $item['time_raw'] : '',
+            (string) microtime(true),
+        ]);
+    }
+    return hash('sha256', $json);
+}
+
+/**
+ * نرمال‌سازی کد پرسنلی از Access/دستگاه:
+ * 377.0 → 377 | 0377 → 377 | ۰۰۳۷۷ → 377 | " 377 " → 377
+ */
+function food_ticket_code(mixed $value): string
+{
+    if ($value === null || $value === '') {
+        return '';
+    }
+    if (is_numeric($value) && !is_string($value)) {
+        return (string) (int) round((float) $value);
+    }
+    // کاراکترهای نامرئی (نیم‌فاصله، RLM/LRM، NBSP، BOM) و فاصله‌ها را حذف کن؛
+    // در داده‌های AD/اکسل رایج‌اند و باعث می‌شوند «377» با «377‌» برابر نباشد.
+    $clean = preg_replace('/[\x{200B}-\x{200F}\x{202A}-\x{202E}\x{2060}-\x{2064}\x{FEFF}\x{00A0}\s]+/u', '', (string) $value);
+    $value = food_ticket_normalize_digits(trim($clean ?? (string) $value));
+    if (preg_match('/^(\d+)\.0+$/', $value, $m)) {
+        $value = $m[1];
+    }
+    if (preg_match('/^\d+$/', $value)) {
+        $value = ltrim($value, '0');
+        if ($value === '') {
+            $value = '0';
+        }
+    }
+    return $value;
+}
+
+function food_ticket_digits(mixed $value): string
+{
+    return preg_replace('/\D+/', '', food_ticket_normalize_digits((string) $value)) ?? '';
+}
+
+function food_ticket_find_user(string $personnelCode): ?array
+{
+    if (function_exists('food_ticket_find_user_strict')) {
+        return food_ticket_find_user_strict($personnelCode);
+    }
+    $code = food_ticket_code($personnelCode);
+    if ($code === '' || $code === '0') {
+        return null;
+    }
+    $query = db()->prepare(
+        'SELECT id, full_name, employee_number, national_code, is_active FROM users
+         WHERE employee_number = ? OR employee_number = ? OR username = ? LIMIT 1'
+    );
+    $query->execute([$personnelCode, $code, $code]);
+    return $query->fetch() ?: null;
+}
+
+
+function food_ticket_guest_cards(array $config): array
+{
+    if (db_table_exists('food_ticket_guest_cards')) {
+        try {
+            $rows = db()->query('SELECT card_uid FROM food_ticket_guest_cards WHERE is_active = 1 ORDER BY id')->fetchAll(PDO::FETCH_COLUMN);
+            $hasRows = (int) db()->query('SELECT COUNT(*) FROM food_ticket_guest_cards')->fetchColumn() > 0;
+            if ($hasRows) {
+                return array_values(array_unique(array_filter(array_map(static function (mixed $card): string {
+                    return strtoupper(preg_replace('/[\s:-]+/', '', trim((string) $card)) ?? '');
+                }, $rows))));
+            }
+        } catch (Throwable) {
+            // Fall back to the legacy config while an older installation is being upgraded.
+        }
+    }
+    $raw = str_replace([';', '،'], ',', (string) ($config['guest_card_uids'] ?? ''));
+    $cards = [];
+    foreach (explode(',', $raw) as $card) {
+        $card = strtoupper(preg_replace('/[\s:-]+/', '', trim($card)) ?? '');
+        if ($card !== '') {
+            $cards[] = $card;
+        }
+    }
+    return array_values(array_unique($cards));
+}
+
+/** کلید یکتای شمارهٔ کارت: حذف فاصله/خط‌تیره/دونقطه/کاراکتر نامرئی، حروف بزرگ، حذف صفرهای ابتدایی شمارهٔ کاملاً عددی */
+function food_ticket_card_key(string $card): string
+{
+    $n = strtoupper((string) preg_replace('/[\s:\-\x{200B}-\x{200F}\x{202A}-\x{202E}\x{FEFF}\x{00A0}]+/u', '', trim($card)));
+    if ($n !== '' && preg_match('/^\d+$/', $n)) {
+        $n = ltrim($n, '0');
+        if ($n === '') {
+            $n = '0';
+        }
+    }
+    return $n;
+}
+
+/**
+ * برابری دو شمارهٔ کارت.
+ * قبلاً «پایان‌یافتن با» در هر دو جهت کافی بود؛ یعنی کارت مهمانِ کوتاه (مثل «1» یا «80») با هر کارت/UID دیگری
+ * که به همان ختم می‌شد (مثل 45645E1 یا 380) برابر حساب می‌شد و پرسنل «مهمان» شناخته می‌شدند.
+ * اکنون فقط برابریِ کامل، یا پسوند مشترک با حداقل ۶ نویسه (برای دستگاه‌هایی که بایت پیشوند اضافه می‌کنند).
+ */
+function food_ticket_card_equals(string $a, string $b): bool
+{
+    $a = food_ticket_card_key($a);
+    $b = food_ticket_card_key($b);
+    if ($a === '' || $b === '' || $a === '0' || $b === '0') {
+        return false;
+    }
+    if ($a === $b) {
+        return true;
+    }
+    return min(strlen($a), strlen($b)) >= 6 && (str_ends_with($a, $b) || str_ends_with($b, $a));
+}
+
+function food_ticket_guest_card(string $card, array $config): ?array
+{
+    if (food_ticket_card_key($card) === '') {
+        return null;
+    }
+    if (db_table_exists('food_ticket_guest_cards')) {
+        try {
+            $rows = db()->query('SELECT id, card_uid, guest_name, daily_limit FROM food_ticket_guest_cards WHERE is_active = 1 ORDER BY id')->fetchAll();
+            foreach ($rows as $row) {
+                if (food_ticket_card_equals($card, (string) ($row['card_uid'] ?? ''))) {
+                    return $row;
+                }
+            }
+            if ((int) db()->query('SELECT COUNT(*) FROM food_ticket_guest_cards')->fetchColumn() > 0) {
+                return null;
+            }
+        } catch (Throwable) {
+            // Fall back to the legacy config while an older installation is being upgraded.
+        }
+    }
+    foreach (food_ticket_guest_cards($config) as $guest) {
+        if (food_ticket_card_equals($card, (string) $guest)) {
+            return ['card_uid' => $guest, 'guest_name' => 'مهمان', 'daily_limit' => 0];
+        }
+    }
+    return null;
+}
+
+function food_ticket_is_guest(string $card, array $config): bool
+{
+    return food_ticket_guest_card($card, $config) !== null;
+}
+
+function food_ticket_existing_source(string $sourceKey): ?array
+{
+    $query = db()->prepare('SELECT * FROM food_ticket_events WHERE source_key = ? LIMIT 1');
+    $query->execute([$sourceKey]);
+    return $query->fetch() ?: null;
+}
+
+function food_ticket_existing_ticket(string $ticketKey): ?array
+{
+    $query = db()->prepare('SELECT * FROM food_ticket_events WHERE ticket_key = ? LIMIT 1');
+    $query->execute([$ticketKey]);
+    return $query->fetch() ?: null;
+}
+
+/**
+ * نگاشت event_type به مقادیر مجاز ENUM جدول food_ticket_events
+ * تا INSERT/UPDATE با خطای Data truncated شکست نخورد.
+ */
+function food_ticket_normalize_event_type(mixed $type): string
+{
+    $type = strtolower(trim((string) $type));
+    $allowed = [
+        'printed', 'print_error', 'no_food', 'unknown', 'inactive',
+        'repeat', 'guest', 'auto_printed', 'auto_guest', 'guest_limit', 'config_error',
+    ];
+    if (in_array($type, $allowed, true)) {
+        return $type;
+    }
+    // نگاشت انواع داخلی موتور که در ENUM نیستند
+    return match ($type) {
+        'outside_meal' => 'no_food',
+        // «ردیف قدیمی/خارج از بازه» خطای پیکربندی است، نه «سفارش نداشتن»؛
+        // قبلاً به no_food نگاشت می‌شد و در گزارش با «بدون غذا» اشتباه می‌شد.
+        'skipped_old' => 'config_error',
+        'unknown_uid' => 'unknown',
+        'duplicate', 'retry', 'retry_exhausted', 'print' => 'printed',
+        default => 'config_error',
+    };
+}
+
+function food_ticket_normalize_print_status(mixed $status): string
+{
+    $status = strtolower(trim((string) $status));
+    $allowed = ['not_printed', 'pending', 'printing', 'printed', 'print_error', 'failed', 'held_absent'];
+    if (in_array($status, $allowed, true)) {
+        return $status;
+    }
+    return 'not_printed';
+}
+
+function food_ticket_event_meal_type_supported(): bool
+{
+    static $supported = null;
+    if ($supported !== null) {
+        return $supported;
+    }
+    try {
+        if (function_exists('food_ticket_auto_receipt_columns')) {
+            $supported = in_array('meal_type', food_ticket_auto_receipt_columns(db(), 'food_ticket_events'), true);
+        } else {
+            $stmt = db()->query("SELECT COUNT(*) FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'food_ticket_events' AND COLUMN_NAME = 'meal_type'");
+            $supported = (int) $stmt->fetchColumn() > 0;
+        }
+    } catch (Throwable) {
+        $supported = false;
+    }
+    return $supported;
+}
+
+function food_ticket_add_event(array $event): int
+{
+    $columns = '(source_key, source_uid, source_card, punch_date, punch_time, personnel_code, user_id, national_code, full_name, food_type, ticket_key, event_type, print_status, last_error, source_payload, processed_at';
+    $values = 'VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW()';
+    $args = [
+        $event['source_key'], $event['source_uid'] ?? null, $event['source_card'] ?? null,
+        $event['punch_date'] ?? null, $event['punch_time'] ?? null, $event['personnel_code'] ?? null,
+        $event['user_id'] ?? null, $event['national_code'] ?? null, $event['full_name'] ?? null,
+        $event['food_type'] ?? null, $event['ticket_key'] ?? null,
+        food_ticket_normalize_event_type($event['event_type'] ?? 'config_error'),
+        food_ticket_normalize_print_status($event['print_status'] ?? 'not_printed'),
+        $event['last_error'] ?? null, $event['source_payload'] ?? null,
+    ];
+    // وضعیت تحویل food جدا از وضعیت چاپ نگه داشته می‌شود (اگر ستون ساخته شده باشد).
+    if (function_exists('food_ticket_delivery_supported') && food_ticket_delivery_supported()) {
+        $columns .= ', delivery_status';
+        $values .= ', ?';
+        $deliveryStatus = (string) ($event['delivery_status'] ?? 'pending');
+        $args[] = in_array($deliveryStatus, ['pending', 'delivered'], true) ? $deliveryStatus : 'pending';
+    }
+    if (array_key_exists('meal_type', $event) && food_ticket_event_meal_type_supported()) {
+        $mealType = strtolower(trim((string) $event['meal_type']));
+        $columns .= ', meal_type';
+        $values .= ', ?';
+        $args[] = in_array($mealType, ['lunch', 'dinner'], true) ? $mealType : null;
+    }
+    $query = db()->prepare('INSERT INTO food_ticket_events ' . $columns . ') ' . $values . ')');
+    $query->execute($args);
+    return (int) db()->lastInsertId();
+}
+
+function food_ticket_update_event(int $id, string $status, string $type, ?string $error = null): void
+{
+    db()->prepare('UPDATE food_ticket_events SET print_status = ?, event_type = ?, print_attempts = print_attempts + 1, last_error = ?, processed_at = NOW() WHERE id = ?')
+        ->execute([
+            food_ticket_normalize_print_status($status),
+            food_ticket_normalize_event_type($type),
+            $error,
+            $id,
+        ]);
+}
+
+function food_ticket_source_delete_where(array $item): ?string
+{
+    $uid = trim((string) ($item['uid'] ?? ''));
+    $card = trim((string) ($item['card'] ?? ''));
+    $date = $item['date_raw'] ?? null;
+    $time = $item['time_raw'] ?? null;
+    if (($uid === '' && $card === '') || $date === null || $date === '' || $time === null || $time === '') {
+        app_error_log('[food-ticket] delete_source: exact uid/card/date/time identity is incomplete');
+        return null;
+    }
+
+    $numericTypes = ['integer', 'int', 'smallint', 'tinyint', 'bigint', 'counter', 'long', 'double', 'float', 'real', 'numeric', 'decimal', 'currency', 'byte', 'single', 'autonumber'];
+    $skipTypes = ['longvarchar', 'longvarbinary', 'varbinary', 'binary', 'memo', 'ole', 'timestamp', 'datetime', 'date', 'time', 'bit', 'boolean', 'yesno'];
+
+    $isNumericLiteral = static fn (string $v): bool => (bool) preg_match('/^-?\d+(\.\d+)?$/', $v);
+
+    $row = is_array($item['row'] ?? null) ? $item['row'] : [];
+    $columns = is_array($item['columns'] ?? null) ? $item['columns'] : [];
+    $types = is_array($item['types'] ?? null) ? $item['types'] : [];
+    $parts = [];
+    foreach ($row as $key => $value) {
+        if (!is_scalar($value) && $value !== null) {
+            continue;
+        }
+        $column = (string) ($columns[$key] ?? $key);
+        if ($column === '') {
+            continue;
+        }
+        $type = (string) ($types[$key] ?? '');
+        // ODBC ممکن است مقدارها را به‌صورت رشته برگرداند؛ شرط با نوع واقعی ستون ساخته می‌شود.
+        // ستون‌های memo/باینری در شناسهٔ دقیق وارد نمی‌شوند.
+        if ($type !== '' && in_array($type, $skipTypes, true) && !food_ticket_source_is_temporal((string) $key, $type)) {
+            continue;
+        }
+        $isTemporal = food_ticket_source_is_temporal((string) $key, $type);
+        $identifier = food_ticket_ident($column);
+        if ($value === null) {
+            $parts[] = $identifier . ' IS NULL';
+            continue;
+        }
+        if (is_bool($value)) {
+            continue;
+        }
+        if (is_int($value)) {
+            $parts[] = $identifier . ' = ' . $value;
+            continue;
+        }
+        if (is_float($value)) {
+            $parts[] = $identifier . ' = ' . sprintf('%.14G', $value);
+            continue;
+        }
+        $text = (string) $value;
+        if ($isTemporal) {
+            /*
+             * ۱.۶۳.۱-r18 — اصلاح «ردیف از جدول تردد حذف نمی‌شود».
+             *
+             * پیش‌تر همهٔ ستون‌های ردیف در شرط می‌آمدند. جدول تردد ستون
+             * تاریخ/ساعت دارد و مقدار آن از ODBC به‌صورت «YYYY-MM-DD HH:MM:SS»
+             * برمی‌گردد، در حالی که Access آن را با کسری از ثانیه ذخیره
+             * می‌کند. نتیجه: `C_Time = #...12:34:56#` هیچ ردیفی تطبیق
+             * نمی‌داد و هر سه استراتژی حذف شکست می‌خوردند — ردیف می‌ماند،
+             * درست همان چیزی که کاربر دید.
+             *
+             * حالا ستون زمان با بازهٔ یک‌ثانیه‌ای مقایسه می‌شود، نه برابری
+             * دقیق. ستون تاریخ (اگر Date خالص باشد) همان برابری می‌ماند.
+             */
+            $kind = food_ticket_source_column_kind((string) $key);
+            if ($kind === 'time' || $kind === 'datetime') {
+                $seconds = food_ticket_source_seconds_of_day($text);
+                if ($seconds !== null) {
+                    /*
+                     * تاریخِ همراه هم لازم است، حتی برای ستون «زمان»:
+                     * Access مقدار ساعت‌تنها را به‌صورت #1899-12-30 HH:MM:SS#
+                     * ذخیره می‌کند. اگر آن تاریخ را دور بریزیم و فقط
+                     * #HH:MM:SS# بنویسیم، Jet ممکن است این را «امروز»
+                     * تفسیر کند و ردیف دیگری تطبیق بخورد.
+                     *
+                     * پس هر تاریخی که در مقدار اصلی هست حفظ می‌شود؛ اگر
+                     * نیست، فقط ساعت مقایسه می‌شود (ستون Short Text).
+                     */
+                    $day = (preg_match('/(\d{4}-\d{2}-\d{2})/', $text, $dm) === 1) ? $dm[1] : null;
+                    $parts[] = food_ticket_source_time_where($identifier, $seconds, $day);
+                    continue;
+                }
+            }
+            $parts[] = $identifier . ' = ' . food_ticket_source_sql_literal($text);
+            continue;
+        }
+        $numberLiteral = trim(food_ticket_normalize_digits($text));
+        $numericType = food_ticket_source_type_kind($type) === 'numeric' || in_array($type, $numericTypes, true);
+        $useNumber = $numericType && $isNumericLiteral($numberLiteral);
+        if ($type !== '' && $numericType && !$useNumber) {
+            continue; // مقدار غیرعددی در ستون عددی؛ از شرط حذف
+        }
+        $parts[] = $useNumber
+            ? $identifier . ' = ' . $numberLiteral
+            : $identifier . " = '" . str_replace("'", "''", $text) . "'";
+    }
+    return $parts ? implode(' AND ', $parts) : null;
+}
+
+/**
+ * ستون کلید اصلی جدول SOURCE_TABLE را از خود ردیف کشف می‌کند (اگر وجود داشته باشد).
+ * حذف با کلید اصلی همیشه دقیق است و به نوع/لحن متن یا قالب تاریخ وابسته نیست.
+ *
+ * @return array{column:string,value:int,where:string}|null
+ */
+function food_ticket_source_primary_key(array $item): ?array
+{
+    $row = is_array($item['row'] ?? null) ? $item['row'] : [];
+    $columns = is_array($item['columns'] ?? null) ? $item['columns'] : [];
+    if (!$row) {
+        return null;
+    }
+    $candidates = [
+        'id', 'source_row_id', 'source_row_id', 'recordid', 'record_id', 'rowid', 'row_id',
+        'pk', 'pkey', 'primarykey', 'primary_key', 'autoid', 'auto_id', 'identity', 'counter',
+    ];
+    foreach ($candidates as $candidate) {
+        if (!array_key_exists($candidate, $row)) {
+            continue;
+        }
+        $value = $row[$candidate];
+        if ($value === null || is_bool($value) || is_array($value)) {
+            continue;
+        }
+        $text = trim(food_ticket_normalize_digits((string) $value));
+        if ($text === '' || preg_match('/^\d+$/', $text) !== 1) {
+            continue;
+        }
+        $column = (string) ($columns[$candidate] ?? $candidate);
+        if ($column === '') {
+            continue;
+        }
+        return [
+            'column' => $column,
+            'value' => (int) $text,
+            'where' => food_ticket_ident($column) . ' = ' . (int) $text,
+        ];
+    }
+    return null;
+}
+
+/** نوع دادهٔ گزارش‌شده از ODBC/Access را به یک گروه قابل استفاده برای SQL تبدیل می‌کند. */
+function food_ticket_source_type_kind(string $type): string
+{
+    $type = strtolower(trim($type));
+    if ($type === '') {
+        return 'unknown';
+    }
+    // اول تاریخ/زمان، چون برخی برچسب‌ها ممکن است هم‌زمان واژه‌های مشابه داشته باشند.
+    if (preg_match('/timestamp|datetime|dbdate|dbtime|date|time/', $type) === 1) {
+        return 'temporal';
+    }
+    // متن باید پیش از numeric بررسی شود؛ مثلاً LONGVARCHAR متن است، نه عدد LONG.
+    if (preg_match('/char|text|string|memo|binary|blob|guid|uuid/', $type) === 1) {
+        return 'text';
+    }
+    if (preg_match('/bit|bool|yes.?no/', $type) === 1) {
+        return 'boolean';
+    }
+    if (preg_match('/int|long|counter|autonumber|numeric|number|decimal|currency|double|float|real|byte/', $type) === 1) {
+        return 'numeric';
+    }
+    return 'unknown';
+}
+
+/** آیا ستون، تاریخ/زمان است؟ نوع صریح ستون درایور بر نام ستون اولویت دارد. */
+function food_ticket_source_is_temporal(string $columnKey, string $type): bool
+{
+    $kind = food_ticket_source_type_kind($type);
+    if ($kind === 'temporal') {
+        return true;
+    }
+    if ($kind !== 'unknown') {
+        // برای C_Date/C_Time از نوع Short Text نباید literal تاریخ #...# ساخته شود.
+        return false;
+    }
+    return in_array($columnKey, [
+        'c_date', 'c_time', 'c_datetime', 'c_timestamp', 'punchdate', 'punchtime', 'punch_date', 'punch_time',
+        'date', 'time', 'datetime', 'created_at', 'updated_at', 'insert_date', 'insert_time',
+    ], true);
+}
+
+/**
+ * نوع یک ستون تاریخ‌مانند را از نامش تشخیص می‌دهد: time / date / datetime / null.
+ *
+ * چرا لازم شد: در جدول تردد ستون‌های C_Date و C_Time جدا هستند و Access
+ * مقدار را با کسری از ثانیه ذخیره می‌کند. برابری دقیق روی زمان هیچ ردیفی
+ * تطبیق نمی‌داد و ردیف تردد برای همیشه در جدول می‌ماند.
+ */
+function food_ticket_source_column_kind(string $key): ?string
+{
+    $k = strtolower(trim($key));
+    if ($k === '') {
+        return null;
+    }
+    // زمان خالص: c_time، punchtime، punch_time، time، insert_time
+    if (preg_match('/(^|_)(c_)?time$|(^|_)time$|punchtime/', $k) === 1 && !preg_match('/datetime|timestamp/', $k)) {
+        return 'time';
+    }
+    // تاریخ+زمان در یک ستون
+    if (preg_match('/datetime|timestamp|created_at|updated_at/', $k) === 1) {
+        return 'datetime';
+    }
+    // تاریخ خالص: c_date، punch_date، date
+    if (preg_match('/(^|_)(c_)?date$|(^|_)date$|punchdate/', $k) === 1) {
+        return 'date';
+    }
+    return null;
+}
+
+/**
+ * «HH:MM:SS» (یا هر قالبی که ساعت را دارد) را به ثانیهٔ روز تبدیل می‌کند.
+ * null = زمان قابل تشخیص نیست، پس باید مسیر برابری دقیق طی شود.
+ */
+function food_ticket_source_seconds_of_day(string $value): ?int
+{
+    $text = trim(food_ticket_normalize_digits($value));
+    if ($text === '') {
+        return null;
+    }
+    // YYYY-MM-DD HH:MM:SS  یا  YYYY-MM-DDTHH:MM:SS
+    if (preg_match('/(\d{1,2}):(\d{2}):(\d{2})/', $text, $m) === 1) {
+        $h = (int) $m[1];
+        $i = (int) $m[2];
+        $s = (int) $m[3];
+        if ($h > 23 || $i > 59 || $s > 59) {
+            return null;
+        }
+        return $h * 3600 + $i * 60 + $s;
+    }
+    // فقط HH:MM بدون ثانیه
+    if (preg_match('/^(\d{1,2}):(\d{2})$/', $text, $m) === 1) {
+        return (int) $m[1] * 3600 + (int) $m[2] * 60;
+    }
+    return null;
+}
+
+/**
+ * برای یک ثانیهٔ روز، یک عبارت مقایسه‌ای می‌سازد که همان ثانیه را بگیرد
+ * حتی وقتی Access کسری از ثانیه ذخیره کرده است.
+ *
+ * روش: میانهٔ همان ثانیه (s + 0.5) با بازهٔ یک‌ثانیه‌ای. در Jet/Access
+ * می‌توان از #HH:MM:SS# استفاده کرد و بازه را با TimeValue ساخت، ولی
+ * ساده‌ترین شکل قابل‌حمل: مقایسه با ستون زمانِ عددیِ روز از طریق
+ * توابع تاریخ. اینجا از الگوی زیر استفاده می‌کنیم که در Jet پشتیبانی
+ * می‌شود و به کسر ثانیه حساس نیست:
+ *
+ *     C_Time >= #HH:MM:SS# AND C_Time < #HH:MM:(SS+1)#
+ *
+ * و چون این تابع فقط «کران پایین» برمی‌گرداند، فراخواننده هر دو طرف را
+ * با food_ticket_source_time_literal_range می‌سازد.
+ */
+function food_ticket_source_time_literal_sod(int $seconds): string
+{
+    $seconds = max(0, min(86399, $seconds));
+    $h = intdiv($seconds, 3600);
+    $i = intdiv($seconds % 3600, 60);
+    $s = $seconds % 60;
+    return sprintf('#%02d:%02d:%02d#', $h, $i, $s);
+}
+
+/**
+ * بازهٔ «همان ثانیه» برای ستون زمان: s <= Time < s+1
+ *
+ * چرا بازه و نه برابری: Access مقدار زمان را با کسری از ثانیه ذخیره
+ * می‌کند و ODBC همان کسر را برنمی‌گرداند. `Time = #12:34:56#` هیچ ردیفی
+ * نمی‌گیرد، ولی `>= 12:34:56 AND < 12:34:57` همان ردیف را می‌گیرد —
+ * بدون این‌که ردیف مجاور را قربانی کند.
+ *
+ * @return array{0:string,1:string} [کران پایین, کران بالا]
+ */
+function food_ticket_source_time_between(int $seconds): array
+{
+    $seconds = max(0, min(86399, $seconds));
+    $end = min(86399, $seconds + 1);
+    // ثانیهٔ ۸۶۳۹۹ (۲۳:۵۹:۵۹): کران بالا نمی‌تواند ۲۴:۰۰:۰۰ باشد؛
+    // از = استفاده می‌کنیم که همان یک ثانیه را بگیرد.
+    return [$seconds, $end];
+}
+
+/**
+ * عبارت SQL بازهٔ زمانی برای ستون تاریخ/زمانِ Access.
+ * $column نام ستون، $seconds ثانیهٔ روز، $withDate تاریخ YYYY-MM-DD یا null.
+ */
+function food_ticket_source_time_where(string $column, int $seconds, ?string $date = null): string
+{
+    [$from, $to] = food_ticket_source_time_between($seconds);
+    $datePrefix = '';
+    $validDate = null;
+    if ($date !== null && preg_match('/^(\d{4})-(\d{2})-(\d{2})$/', $date, $dm) === 1) {
+        if (!checkdate((int) $dm[2], (int) $dm[3], (int) $dm[1])) {
+            // تاریخ نامعتبر نباید شرط را به «فقط ساعت» تنزل دهد و رکورد دیگری را حذف کند.
+            return '(1 = 0)';
+        }
+        $validDate = $date;
+        $datePrefix = $date . ' ';
+    }
+    $lo = $datePrefix . trim(food_ticket_source_time_literal_sod($from), '#');
+    if ($to <= $from) {
+        // ۲۳:۵۹:۵۹ — اگر تاریخ کامل داریم، کران بالا نیمه‌شب روز بعد است؛
+        // در ستونِ صرفاً زمان، خودِ کران پایین آخرین ثانیهٔ ممکن را می‌گیرد.
+        if ($validDate !== null) {
+            $nextDate = (new DateTimeImmutable($validDate))->modify('+1 day')->format('Y-m-d');
+            return '(' . $column . ' >= #' . $lo . '# AND ' . $column . ' < #' . $nextDate . ' 00:00:00#)';
+        }
+        return '(' . $column . ' >= #' . $lo . '#)';
+    }
+    $hi = $datePrefix . trim(food_ticket_source_time_literal_sod($to), '#');
+    return '(' . $column . ' >= #' . $lo . '# AND ' . $column . ' < #' . $hi . '#)';
+}
+
+/** یک کلید تاریخ/زمان را به شکل «#YYYY-MM-DD HH:MM:SS#» برای Jet/Access می‌نویسد (کوتاه‌ترین شکل ممکن). */
+function food_ticket_source_time_literal(string $value): string
+{
+    $text = trim(food_ticket_normalize_digits($value));
+    if (preg_match('/^(\d{4})-(\d{2})-(\d{2})[ T](\d{2}):(\d{2}):(\d{2})$/', $text, $m) === 1) {
+        if ($m[4] === '00' && $m[5] === '00' && $m[6] === '00') {
+            return '#' . $m[1] . '-' . $m[2] . '-' . $m[3] . ' 00:00:00#';
+        }
+        return '#' . $m[1] . '-' . $m[2] . '-' . $m[3] . ' ' . $m[4] . ':' . $m[5] . ':' . $m[6] . '#';
+    }
+    if (preg_match('/^\d{2}:\d{2}:\d{2}$/', $text) === 1) {
+        // ستون زمانی در Access به‌صورت تاریخ پایه ۱۸۹۹ ذخیره می‌شود؛ همان مقدار کامل نوشته می‌شود.
+        return '#1899-12-30 ' . $text . '#';
+    }
+    return $text;
+}
+
+/**
+ * نوشتن یک مقدار به‌شکل literal امن برای Jet/Access:
+ * مقدار استاندارد تاریخ/زمان → #...# ، عدد → بدون نقل‌قول ، بقیه → رشتهٔ نقل‌قول‌شده.
+ */
+function food_ticket_source_sql_literal(string $text): string
+{
+    $literal = food_ticket_source_time_literal($text);
+    if (str_starts_with($literal, '#')) {
+        return $literal;
+    }
+    $trimmed = trim($text);
+    if (preg_match('/^-?\d+(\.\d+)?$/', $trimmed) === 1) {
+        return $trimmed;
+    }
+    return "'" . str_replace("'", "''", $text) . "'";
+}
+
+/** Literal برای ستون مشخص: نوعِ واقعی ستون تعیین می‌کند متن، عدد یا تاریخ فرستاده شود. */
+function food_ticket_source_column_sql_literal(string $text, string $columnKey, string $type): string
+{
+    $kind = food_ticket_source_type_kind($type);
+    if ($kind === 'temporal' || ($kind === 'unknown' && food_ticket_source_is_temporal($columnKey, $type))) {
+        return food_ticket_source_sql_literal($text);
+    }
+    if ($kind === 'numeric') {
+        $number = trim(food_ticket_normalize_digits($text));
+        if (preg_match('/^-?\d+(\.\d+)?$/', $number) === 1) {
+            return $number;
+        }
+    }
+    // Short Text، حتی اگر مقدارش شبیه تاریخ یا عدد باشد، باید رشته بماند.
+    return "'" . str_replace("'", "''", $text) . "'";
+}
+
+/**
+ * فهرست شرط‌های حذف، به‌ترتیب اولویت. اولین شرطی که دقیقاً یک ردیف تطبیق کند، حذف می‌شود.
+ *
+ * ۱) کلید اصلی (دقیق‌ترین و مستقل از نوع ستون‌ها)
+ * ۲) تطبیق کامل ردیف (همهٔ ستون‌ها با نوع درست؛ ستون‌های memo/باینری و تاریخ‌ها با قالب Access)
+ * ۳) شناسهٔ کمینه: uid (و کارت در صورت وجود) + تاریخ + ساعت
+ *
+ * @return array{0:string,1:string}[] هر عضو: [برچسب، WHERE]
+ */
+function food_ticket_source_delete_candidates(array $item): array
+{
+    $out = [];
+
+    $pk = food_ticket_source_primary_key($item);
+    if ($pk !== null) {
+        $out[] = ['primary_key:' . $pk['column'], $pk['where']];
+    }
+
+    $exact = food_ticket_source_delete_where($item);
+    if ($exact !== null) {
+        $out[] = ['exact_row', $exact];
+    }
+
+    $minimal = food_ticket_source_minimal_where($item);
+    if ($minimal !== null) {
+        $out[] = ['uid_date_time', $minimal];
+    }
+
+    return $out;
+}
+
+/** شناسهٔ کمینه: ستون کد پرسنلی/L_UID (و کارت) به‌همراه تاریخ و ساعت. */
+function food_ticket_source_minimal_where(array $item): ?string
+{
+    $uid = trim((string) ($item['uid'] ?? ''));
+    $card = trim((string) ($item['card'] ?? ''));
+    $date = $item['date_raw'] ?? null;
+    $time = $item['time_raw'] ?? null;
+    if (($uid === '' && $card === '') || $date === null || $date === '' || $time === null || $time === '') {
+        return null;
+    }
+    $row = is_array($item['row'] ?? null) ? $item['row'] : [];
+    $columns = is_array($item['columns'] ?? null) ? $item['columns'] : [];
+    $types = is_array($item['types'] ?? null) ? $item['types'] : [];
+    $parts = [];
+
+    $uidKey = null;
+    foreach (['l_uid', 'luid', 'uid', 'personnelcode', 'usercode', 'empcode', 'userid'] as $key) {
+        if (array_key_exists($key, $row)) {
+            $uidKey = $key;
+            break;
+        }
+    }
+    if ($uidKey !== null && $uid !== '') {
+        $uidType = (string) ($types[$uidKey] ?? '');
+        $uidLiteral = food_ticket_source_column_sql_literal($uid, $uidKey, $uidType);
+        $parts[] = food_ticket_ident((string) ($columns[$uidKey] ?? $uidKey)) . ' = ' . $uidLiteral;
+    } elseif ($card !== '') {
+        foreach (['c_card', 'card', 'carduid', 'cardno', 'cardnumber', 'rfid'] as $key) {
+            if (array_key_exists($key, $row)) {
+                $cardType = (string) ($types[$key] ?? '');
+                $cardLiteral = food_ticket_source_column_sql_literal($card, $key, $cardType);
+                $parts[] = food_ticket_ident((string) ($columns[$key] ?? $key)) . ' = ' . $cardLiteral;
+                break;
+            }
+        }
+    }
+    if (!$parts) {
+        return null;
+    }
+
+    $dateKey = null;
+    foreach (['c_date', 'cdate', 'punchdate', 'date'] as $key) {
+        if (array_key_exists($key, $row)) { $dateKey = $key; break; }
+    }
+    $timeKey = null;
+    foreach (['c_time', 'ctime', 'punchtime', 'time'] as $key) {
+        if (array_key_exists($key, $row)) { $timeKey = $key; break; }
+    }
+    if ($dateKey !== null) {
+        $dateType = (string) ($types[$dateKey] ?? '');
+        $dateLiteral = food_ticket_source_column_sql_literal((string) $date, $dateKey, $dateType);
+        $parts[] = food_ticket_ident((string) ($columns[$dateKey] ?? $dateKey)) . ' = ' . $dateLiteral;
+    }
+    if ($timeKey !== null) {
+        $timeType = (string) ($types[$timeKey] ?? '');
+        $timeColumn = food_ticket_ident((string) ($columns[$timeKey] ?? $timeKey));
+        $timeText = (string) $time;
+        $timeKind = food_ticket_source_column_kind((string) $timeKey);
+        $seconds = food_ticket_source_is_temporal((string) $timeKey, $timeType)
+            && ($timeKind === 'time' || $timeKind === 'datetime')
+            ? food_ticket_source_seconds_of_day($timeText)
+            : null;
+        if ($seconds !== null) {
+            // مسیر fallback هم باید کسری ثانیهٔ Access را تحمل کند؛ برابری دقیق دوباره همان ردیف را جا می‌گذارد.
+            $day = preg_match('/(\d{4}-\d{2}-\d{2})/', $timeText, $dm) === 1 ? $dm[1] : null;
+            $parts[] = food_ticket_source_time_where($timeColumn, $seconds, $day);
+        } else {
+            $timeLiteral = food_ticket_source_column_sql_literal($timeText, $timeKey, $timeType);
+            $parts[] = $timeColumn . ' = ' . $timeLiteral;
+        }
+    }
+    return $parts ? implode(' AND ', $parts) : null;
+}
+
+/**
+ * حذف ردیف مصرف‌شده از SOURCE_TABLE.
+ *
+ * @param array|null $out خروجی تشخیصی: strategy/deleted/reason/matched/tried
+ * @return bool true فقط وقتی واقعاً یک ردیف حذف شده باشد یا حذف عمداً خاموش باشد و `cut_source_rows` = 0 نباشد.
+ *              خروجی false هرگز به‌معنای «حذف شد» گزارش نمی‌شود.
+ */
+function food_ticket_delete_source($connection, array $item, array $config, ?array &$out = null): bool
+{
+    $out = is_array($out) ? $out : [];
+    $out = ['strategy' => null, 'deleted' => false, 'reason' => '', 'matched' => null, 'tried' => []];
+    $sourceKey = food_ticket_source_key($item);
+
+    if (!(int) ($config['cut_source_rows'] ?? 1)) {
+        $out['reason'] = 'cut_source_rows خاموش است (حذف عمداً انجام نمی‌شود).';
+        $out['skipped'] = true;
+        return false;
+    }
+
+    $candidates = food_ticket_source_delete_candidates($item);
+    if (!$candidates) {
+        $out['reason'] = 'شناسهٔ ردیف ناقص است (uid/کارت/تاریخ/ساعت یا کلید اصلی در دست نیست).';
+        app_error_log('[food-ticket] delete_source: incomplete identity uid=' . (string) ($item['uid'] ?? '') . ' key=' . $sourceKey);
+        return false;
+    }
+
+    $table = food_ticket_ident(food_ticket_source_table());
+    $errors = [];
+    foreach ($candidates as [$label, $where]) {
+        $out['tried'][] = $label;
+        $countSql = 'SELECT COUNT(*) FROM ' . $table . ' WHERE ' . $where;
+        $deleteSql = 'DELETE FROM ' . $table . ' WHERE ' . $where;
+        try {
+            if (food_ticket_is_ps_access($connection)) {
+                $result = food_ticket_access_delete_powershell_ex($connection, $deleteSql, []);
+                $out['matched'] = (int) $result['matched'];
+                if ((int) $result['matched'] === 0) {
+                    $errors[] = $label . ': هیچ ردیفی تطبیق نکرد';
+                    continue;
+                }
+                if ((int) $result['matched'] > 1) {
+                    $errors[] = $label . ': ' . (int) $result['matched'] . ' ردیف تطبیق کرد (حذف انجام نشد)';
+                    continue;
+                }
+                if (empty($result['ok'])) {
+                    throw new RuntimeException('خطای PowerShell: ' . (string) ($result['error'] ?? 'نامشخص'));
+                }
+                if ((int) $result['affected'] !== 1) {
+                    $errors[] = $label . ': فرمان حذف ' . (int) $result['affected'] . ' ردیف را تحت تأثیر قرار داد';
+                    continue;
+                }
+            } else {
+                $countResult = @odbc_exec($connection, $countSql);
+                if ($countResult === false || !@odbc_fetch_row($countResult)) {
+                    throw new RuntimeException('شمارش تطبیق SOURCE_TABLE ناموفق بود: ' . (string) @odbc_errormsg($connection));
+                }
+                $matches = (int) @odbc_result($countResult, 1);
+                $out['matched'] = $matches;
+                if ($matches === 0) {
+                    $errors[] = $label . ': هیچ ردیفی تطبیق نکرد';
+                    continue;
+                }
+                if ($matches !== 1) {
+                    $errors[] = $label . ': ' . $matches . ' ردیف تطبیق کرد (حذف انجام نشد)';
+                    continue;
+                }
+                $deleteResult = @odbc_exec($connection, $deleteSql);
+                if ($deleteResult === false) {
+                    throw new RuntimeException('حذف ردیف SOURCE_TABLE ناموفق بود: ' . (string) @odbc_errormsg($connection));
+                }
+                $affected = (int) @odbc_num_rows($deleteResult);
+                if ($affected !== 1) {
+                    $verify = @odbc_exec($connection, $countSql);
+                    if ($verify === false || !@odbc_fetch_row($verify) || (int) @odbc_result($verify, 1) !== 0) {
+                        $errors[] = $label . ': پس از حذف، ردیف هنوز در SOURCE_TABLE هست';
+                        continue;
+                    }
+                }
+            }
+            $out['strategy'] = $label;
+            $out['deleted'] = true;
+            $out['reason'] = '';
+            app_error_log('[food-ticket] delete_source OK strategy=' . $label . ' uid=' . (string) ($item['uid'] ?? '') . ' key=' . $sourceKey);
+            return true;
+        } catch (Throwable $e) {
+            $errors[] = $label . ': ' . $e->getMessage();
+        }
+    }
+
+    $out['reason'] = $errors ? implode(' | ', $errors) : 'حذف ناموفق بود.';
+    $out['where'] = $candidates[count($candidates) - 1][1];
+    app_error_log('[food-ticket] delete_source FAILED uid=' . (string) ($item['uid'] ?? '')
+        . ' key=' . $sourceKey . ' tried=' . implode(',', $out['tried']) . ' detail=' . $out['reason']);
+    return false;
+}
+
+/**
+ * نتیجهٔ حذف منبع را روی خود فیش ثبت می‌کند (ستون‌های ۱.۳۳).
+ * اگر ستون‌ها موجود نباشند، اول ساخته می‌شوند؛ در صورت شکست، بی‌صدا رد می‌شود
+ * تا چرخهٔ پردازش هرگز به‌خاطر ثبت گزارش متوقف نشود.
+ */
+function food_ticket_mark_source_delete(int $eventId, bool $deleted, string $note = ''): bool
+{
+    if ($eventId <= 0) {
+        return false;
+    }
+    if (function_exists('food_ticket_source_delete_supported') && !food_ticket_source_delete_supported()
+        && function_exists('food_ticket_events_ensure_source_delete')) {
+        food_ticket_events_ensure_source_delete();
+    }
+    if (function_exists('food_ticket_source_delete_supported') && !food_ticket_source_delete_supported()) {
+        return false;
+    }
+    try {
+        $stmt = db()->prepare('UPDATE food_ticket_events SET source_deleted = ?, source_deleted_at = ?, source_delete_note = ? WHERE id = ?');
+        $stmt->execute([
+            $deleted ? 1 : 0,
+            $deleted ? date('Y-m-d H:i:s') : null,
+            $note !== '' ? mb_substr($note, 0, 250) : null,
+            $eventId,
+        ]);
+        return true;
+    } catch (Throwable $e) {
+        app_error_log('[food-source-delete] mark failed id=' . $eventId . ': ' . $e->getMessage());
+        return false;
+    }
+}
+
+function food_ticket_text(array $event): string
+{
+    if (function_exists('food_ticket_render_from_template')) {
+        return food_ticket_render_from_template($event);
+    }
+    $lines = [
+        '==============================',
+        '       فیش غذای پرسنل',
+        '==============================',
+        'نام: ' . ($event['full_name'] ?: '-'),
+        'کد ملی: ' . ($event['national_code'] ?: '-'),
+        'کد پرسنلی: ' . ($event['personnel_code'] ?: '-'),
+        'نوع غذا: ' . ($event['food_type'] ?: '-'),
+        'تاریخ: ' . ($event['punch_date'] ?: date('Y-m-d')),
+        'ساعت: ' . ($event['punch_time'] ?: date('H:i:s')),
+        '------------------------------',
+        'نوش جان',
+        '',
+        '',
+    ];
+    return implode("\n", $lines) . "\n";
+}
+
+/**
+ * چاپ شبکه (۹۱۰۰) یا صف/اشتراک ویندوز.
+ * برای فارسی پایدار، در ویندوز از Out-Printer / copy raw استفاده می‌شود.
+ */
+
+/**
+ * فهرست چاپگرهای نصب‌شده روی سرور Windows (Spooler).
+ * @return list<string>
+ */
+function food_ticket_list_windows_printers(): array
+{
+    $names = [];
+    if (strncasecmp(PHP_OS, 'WIN', 3) !== 0) {
+        return $names;
+    }
+    // کش ۲ دقیقه‌ای: هر فراخوانی تا ۳ پردازش PowerShell/wmic اجرا می‌کرد (چند ثانیه).
+    $cacheFile = (defined('APP_ROOT') ? APP_ROOT : dirname(__DIR__)) . '/storage/printers.cache.json';
+    if (is_file($cacheFile) && (time() - (int) @filemtime($cacheFile)) < 120) {
+        $cached = json_decode((string) @file_get_contents($cacheFile), true);
+        if (is_array($cached) && $cached) {
+            return array_values(array_map('strval', $cached));
+        }
+    }
+    $commands = [
+        'powershell -NoProfile -Command "[Console]::OutputEncoding=[Text.UTF8Encoding]::UTF8; Get-Printer | ForEach-Object { $_.Name }"',
+        'powershell -NoProfile -Command "Get-CimInstance -ClassName Win32_Printer | ForEach-Object { $_.Name }"',
+        'wmic printer get name',
+    ];
+    foreach ($commands as $cmd) {
+        $output = [];
+        $code = 0;
+        @exec($cmd . ' 2>&1', $output, $code);
+        foreach ($output as $line) {
+            $name = trim((string) $line);
+            if ($name === '' || strcasecmp($name, 'Name') === 0) {
+                continue;
+            }
+            if (preg_match('/error|exception|not recognized|access denied/i', $name)) {
+                continue;
+            }
+            $names[] = $name;
+        }
+        if ($names) {
+            break;
+        }
+    }
+    $names = array_values(array_unique($names));
+    sort($names, SORT_NATURAL | SORT_FLAG_CASE);
+    if ($names) {
+        @file_put_contents($cacheFile, json_encode(array_values($names), JSON_UNESCAPED_UNICODE), LOCK_EX);
+    }
+    return $names;
+}
+
+function food_ticket_send_to_printer(array $event, array $config): void
+{
+    // همان مسیر صف چاپ (قالب کامل فیش + چاپ شبکه تصویری یا صف ویندوز) تا «چاپ آزمایشی» با فیش واقعی یکی باشد.
+    $config['printer_mode'] = food_ticket_normalize_printer_mode($config['printer_mode'] ?? 'tcp_raw');
+    if ($config['printer_mode'] === 'tcp_raw') {
+        [$config['printer_host'], $config['printer_port']] = food_ticket_normalize_printer_host((string) ($config['printer_host'] ?? ''), (int) ($config['printer_port'] ?? 9100));
+        if (trim((string) $config['printer_host']) === '') {
+            throw new RuntimeException('آدرس چاپگر شبکه (IP) تنظیم نشده است.');
+        }
+    } elseif (trim((string) ($config['printer_share'] ?? '')) === '' && trim((string) ($config['printer_host'] ?? '')) === '') {
+        throw new RuntimeException('نام چاپگر ویندوز تنظیم نشده است.');
+    }
+    if (!function_exists('food_ticket_template') || !function_exists('food_ticket_send_raw_payload')) {
+        throw new RuntimeException('ماژول چاپ بارگذاری نشده است.');
+    }
+    $tpl = food_ticket_template();
+    $text = food_ticket_render_from_template($event, $tpl);
+    food_ticket_send_raw_payload($text, $config, $tpl, $event);
+}
+
+function food_ticket_send_windows(string $text, string $printerName): void
+{
+    if ($printerName === '') {
+        throw new RuntimeException('نام چاپگر ویندوز خالی است.');
+    }
+    $spoolDir = APP_ROOT . '/storage/food_ticket_spool';
+    $printDir = APP_ROOT . '/storage/food_ticket_prints';
+    foreach ([$spoolDir, $printDir] as $dir) {
+        if (!is_dir($dir)) {
+            @mkdir($dir, 0750, true);
+        }
+    }
+    $stamp = date('Ymd_His') . '_' . bin2hex(random_bytes(3));
+    $file = $spoolDir . '/ticket_' . $stamp . '.txt';
+    $archive = $printDir . '/fish_' . $stamp . '.txt';
+    $payload = "\xEF\xBB\xBF" . $text;
+    if (@file_put_contents($file, $payload) === false) {
+        throw new RuntimeException('نوشتن فایل موقت چاپ ناموفق بود.');
+    }
+    @file_put_contents($archive, $payload);
+
+    if (strncasecmp(PHP_OS, 'WIN', 3) !== 0) {
+        // غیر ویندوز: فقط آرشیو فایل کافی است
+        return;
+    }
+
+    $psPrinter = str_replace("'", "''", $printerName);
+    $psFile = str_replace("'", "''", $file);
+    $isPdf = (bool) preg_match('/pdf|xps|onenote|fax/i', $printerName);
+
+    if (str_starts_with($printerName, '\\\\')) {
+        $cmd = 'cmd /c copy /b ' . escapeshellarg($file) . ' ' . escapeshellarg($printerName);
+    } elseif ($isPdf) {
+        // Print-to-PDF در حساب SYSTEM معمولاً دیالوگ ذخیره ندارد.
+        // فایل متنی فیش در storage/food_ticket_prints ذخیره شده؛ Out-Printer هم تلاش می‌شود.
+        $cmd = 'powershell -NoProfile -Command "'
+            . '$ErrorActionPreference=\'Stop\';'
+            . 'try { Get-Content -LiteralPath \'' . $psFile . '\' -Encoding UTF8 | Out-Printer -Name \'' . $psPrinter . '\' } '
+            . 'catch { Write-Output $_.Exception.Message; exit 1 }"';
+    } else {
+        $cmd = 'powershell -NoProfile -Command "Get-Content -LiteralPath \'' . $psFile . '\' -Encoding UTF8 | Out-Printer -Name \'' . $psPrinter . '\'"';
+    }
+    $output = [];
+    $code = 0;
+    @exec($cmd . ' 2>&1', $output, $code);
+    if ($code !== 0) {
+        // برای PDF اگر Out-Printer شکست خورد، آرشیو فایل را موفقیت نسبی حساب نکن — خطا بده با مسیر فایل
+        if ($isPdf) {
+            throw new RuntimeException(
+                'چاپ PDF از سرویس/SYSTEM معمولاً بدون پوشه خروجی پیش‌فرض کار نمی‌کند. '
+                . 'فیش متنی اینجا ذخیره شد: ' . $archive . ' | ' . implode(' ', $output)
+            );
+        }
+        throw new RuntimeException('چاپ ویندوز ناموفق: ' . implode(' ', $output) . ' | فایل: ' . $archive);
+    }
+}
+
+function food_ticket_print_event(int $id, array $config, int $maxAttempts = 3): void
+{
+    $query = db()->prepare('SELECT * FROM food_ticket_events WHERE id = ? LIMIT 1');
+    $query->execute([$id]);
+    $event = $query->fetch();
+    if (!$event) {
+        throw new RuntimeException('رکورد فیش پیدا نشد.');
+    }
+    $attempts = (int) ($event['print_attempts'] ?? 0);
+    if ($attempts >= $maxAttempts && in_array((string) ($event['print_status'] ?? ''), ['print_error', 'printing'], true)) {
+        throw new RuntimeException('سقف تلاش چاپ برای این فیش تمام شده است.');
+    }
+    db()->prepare('UPDATE food_ticket_events SET print_status = "printing", print_attempts = print_attempts + 1, last_error = NULL WHERE id = ?')->execute([$id]);
+    try {
+        food_ticket_send_to_printer($event, $config);
+        db()->prepare('UPDATE food_ticket_events SET print_status = "printed", event_type = "printed", processed_at = NOW(), last_error = NULL WHERE id = ?')->execute([$id]);
+        if (function_exists('food_ticket_mark_delivered_on_print')) {
+            food_ticket_mark_delivered_on_print($id);
+        }
+    } catch (Throwable $exception) {
+        db()->prepare('UPDATE food_ticket_events SET print_status = "print_error", event_type = "print_error", processed_at = NOW(), last_error = ? WHERE id = ?')->execute([$exception->getMessage(), $id]);
+        throw $exception;
+    }
+}
+
+function food_ticket_process_batch(?int $requestedLimit = null): array
+{
+    if (function_exists('food_ticket_process_batch_v2')) {
+        return food_ticket_process_batch_v2($requestedLimit);
+    }
+    $summary = ['processed' => 0, 'printed' => 0, 'errors' => 1, 'skipped' => 0, 'message' => 'موتور پایش بارگذاری نشد.'];
+    return $summary;
+}
+
+/**
+ * پاک‌سازی «ردیف‌های باقی‌مانده» در SOURCE_TABLE برای فیش‌هایی که قبلاً ثبت شده‌اند.
+ *
+ * چرا لازم است؟ ردیف‌هایی که در دورهٔ باگ (تطبیق صفر + گزارش موفقیت کاذب) در SOURCE_TABLE
+ * انبار شده‌اند، با اصلاح کد به‌تنهایی پاک نمی‌شوند؛ این تابع همان‌ها را با شناسهٔ
+ * ذخیره‌شده در source_payload پیدا و حذف می‌کند.
+ *
+ * اصول ایمنی: هر شرط حذف باید «دقیقاً» به ردیف مورد نظر برسد؛ اگر چند ردیف تطبیق کند
+ * حذف انجام نمی‌شود (به‌جز حالت کلید اصلی که ذاتاً یکتاست و به‌صورت دسته‌ای با IN حذف می‌شود).
+ *
+ * @param int      $days   بازهٔ روزهای اخیر (پیش‌فرض ۷)
+ * @param bool     $dryRun فقط تشخیص؛ هیچ حذفی انجام نمی‌شود
+ * @param int|null $limit  سقف ردیف‌های بررسی‌شده
+ * @return array{ok:bool,checked:int,matched:int,deleted:int,failed:int,skipped:int,mode:string,items:array<int,array<string,mixed>>}
+ */
+function food_ticket_cleanup_source_rows(int $days = 7, bool $dryRun = false, ?int $limit = null): array
+{
+    $config = food_ticket_config(true);
+    $out = ['ok' => true, 'checked' => 0, 'matched' => 0, 'deleted' => 0, 'failed' => 0, 'skipped' => 0, 'mode' => '', 'items' => []];
+    $days = max(1, min(60, $days));
+    $limit = max(1, min(300, (int) ($limit ?? 60)));
+
+    if (function_exists('food_ticket_events_ensure_source_delete')) {
+        try {
+            food_ticket_events_ensure_source_delete();
+        } catch (Throwable $e) {
+            app_error_log('[food-cleanup] ensure failed: ' . $e->getMessage());
+        }
+    }
+    $hasSourceDelete = function_exists('food_ticket_source_delete_supported') && food_ticket_source_delete_supported();
+    $attendancePath = trim((string) ($config['attendance_path'] ?? ''));
+    if ($attendancePath === '') {
+        throw new RuntimeException('مسیر فایل منبع تردد تنظیم نشده است.');
+    }
+
+    // ردیف‌هایی که «وضعیت حذف» آن‌ها تأیید نشده است (شامل ردیف‌های قبل از Migration 1.33).
+    $where = $hasSourceDelete
+        ? 'WHERE (source_deleted = 0 OR source_deleted IS NULL) AND punch_date >= DATE_SUB(CURDATE(), INTERVAL ? DAY)'
+        : 'WHERE punch_date >= DATE_SUB(CURDATE(), INTERVAL ? DAY)';
+    $stmt = db()->prepare('SELECT id, punch_date, punch_time, source_uid, source_card, source_payload
+        FROM food_ticket_events ' . $where . ' ORDER BY id DESC LIMIT ' . $limit);
+    $stmt->execute([$days - 1]);
+    $events = $stmt->fetchAll();
+    $out['checked'] = count($events);
+    if (!$events) {
+        $out['mode'] = 'بدون ردیف';
+        return $out;
+    }
+
+    $attendancePassword = function_exists('food_ticket_attendance_password')
+        ? food_ticket_attendance_password($config)
+        : (function_exists('food_ticket_attendance_factory_password') ? food_ticket_attendance_factory_password() : '');
+    $sourceDb = food_ticket_odbc($attendancePath, $attendancePassword);
+    $out['mode'] = food_ticket_is_ps_access($sourceDb) ? 'PowerShell (OLEDB)' : 'ODBC';
+
+    // آیتم قابل‌استفاده در مسیر حذف را از payload ذخیره‌شده می‌سازیم.
+    $buildItem = static function (array $event): array {
+        $row = [];
+        $payload = (string) ($event['source_payload'] ?? '');
+        if ($payload !== '') {
+            $decoded = json_decode($payload, true);
+            if (is_array($decoded)) {
+                $row = $decoded;
+            }
+        }
+        $dateRaw = $row['c_date'] ?? null;
+        $timeRaw = $row['c_time'] ?? null;
+        return [
+            'row' => $row,
+            'columns' => [], // کلیدهای نرمال‌شده با نام واقعی ستون Access یکسان‌اند (Jet به بزرگی/کوچکی حساس نیست)
+            'uid' => trim((string) ($event['source_uid'] ?? '')),
+            'card' => trim((string) ($event['source_card'] ?? '')),
+            'date_raw' => $dateRaw !== null ? $dateRaw : (string) ($event['punch_date'] ?? ''),
+            'time_raw' => $timeRaw !== null ? $timeRaw : (string) ($event['punch_time'] ?? ''),
+        ];
+    };
+
+    $mark = static function (int $eventId, bool $deleted, string $note) use ($hasSourceDelete): void {
+        if (!$hasSourceDelete || !function_exists('food_ticket_mark_source_delete')) {
+            return;
+        }
+        try {
+            food_ticket_mark_source_delete($eventId, $deleted, $note);
+        } catch (Throwable $e) {
+            app_error_log('[food-cleanup] mark failed id=' . $eventId . ': ' . $e->getMessage());
+        }
+    };
+
+    try {
+        // ── ۱) دستهٔ کلید اصلی: یک فرمان IN برای چند ردیف (سریع، دقیق) ──
+        $pkGroups = [];   // column => [value => eventId]
+        $rest = [];       // ردیف‌های بدون کلید اصلی
+        foreach ($events as $event) {
+            $item = $buildItem($event);
+            $pk = food_ticket_source_primary_key($item);
+            if ($pk !== null && !$dryRun) {
+                $pkGroups[$pk['column']][(int) $pk['value']] = (int) $event['id'];
+            } else {
+                $rest[] = ['event' => $event, 'item' => $item, 'pk' => $pk];
+            }
+        }
+        foreach ($pkGroups as $column => $values) {
+            foreach (array_chunk($values, 40, true) as $chunk) {
+                $ids = array_map('intval', array_keys($chunk));
+                $whereIn = food_ticket_ident((string) $column) . ' IN (' . implode(',', $ids) . ')';
+                try {
+                    if (food_ticket_is_ps_access($sourceDb)) {
+                        $result = food_ticket_access_delete_powershell_ex($sourceDb, 'DELETE FROM ' . food_ticket_ident(food_ticket_source_table()) . ' WHERE ' . $whereIn, [], true);
+                        $okDel = !empty($result['ok']) && (int) $result['affected'] >= 1;
+                        $matched = (int) $result['matched'];
+                        $affected = (int) $result['affected'];
+                        $note = $okDel ? 'primary_key_batch:' . $column : ('batch_failed: ' . (string) ($result['error'] ?? ''));
+                    } else {
+                        $countRes = @odbc_exec($sourceDb, 'SELECT COUNT(*) FROM ' . food_ticket_ident(food_ticket_source_table()) . ' WHERE ' . $whereIn);
+                        $matched = 0;
+                        if ($countRes !== false && @odbc_fetch_row($countRes)) {
+                            $matched = (int) @odbc_result($countRes, 1);
+                        }
+                        $affected = 0;
+                        if ($matched >= 1) {
+                            $delRes = @odbc_exec($sourceDb, 'DELETE FROM ' . food_ticket_ident(food_ticket_source_table()) . ' WHERE ' . $whereIn);
+                            if ($delRes !== false) {
+                                $affected = (int) @odbc_num_rows($delRes);
+                            }
+                        }
+                        $okDel = $affected >= 1;
+                        $note = $okDel ? 'primary_key_batch:' . $column : 'batch_failed (matched=' . $matched . ')';
+                    }
+                    $out['matched'] += $matched;
+                    foreach ($chunk as $value => $eventId) {
+                        if ($okDel) {
+                            $out['deleted']++;
+                            $mark((int) $eventId, true, $note);
+                        } else {
+                            $out['failed']++;
+                            $mark((int) $eventId, false, $note);
+                        }
+                    }
+                } catch (Throwable $e) {
+                    $out['failed'] += count($chunk);
+                    app_error_log('[food-cleanup] batch delete failed: ' . $e->getMessage());
+                }
+                if ($dryRun) {
+                    break;
+                }
+            }
+        }
+
+        // ── ۲) ردیف‌های بدون کلید اصلی: همان زنجیرهٔ شرط‌های دقیق ──
+        foreach ($rest as $entry) {
+            $event = $entry['event'];
+            $item = $entry['item'];
+            if ($dryRun) {
+                $candidates = food_ticket_source_delete_candidates($item);
+                $out['items'][] = [
+                    'id' => (int) $event['id'],
+                    'punch' => (string) $event['punch_date'] . ' ' . (string) $event['punch_time'],
+                    'uid' => (string) $event['source_uid'],
+                    'primary_key' => $entry['pk'],
+                    'candidates' => array_map(static fn (array $c): array => ['label' => $c[0], 'where' => $c[1]], $candidates),
+                ];
+                continue;
+            }
+            $del = [];
+            $okDel = food_ticket_delete_source($sourceDb, $item, $config, $del);
+            if ($okDel) {
+                $out['deleted']++;
+            } elseif (!empty($del['skipped'])) {
+                $out['skipped']++;
+            } else {
+                $out['failed']++;
+                $out['items'][] = [
+                    'id' => (int) $event['id'],
+                    'uid' => (string) $event['source_uid'],
+                    'reason' => (string) ($del['reason'] ?? ''),
+                    'tried' => $del['tried'] ?? [],
+                ];
+            }
+            $out['matched'] += (int) ($del['matched'] ?? 0);
+            $mark((int) $event['id'], (bool) $okDel, (string) ($del['strategy'] ?? ($del['reason'] ?? '')));
+        }
+    } finally {
+        if (function_exists('food_ticket_access_close')) {
+            food_ticket_access_close($sourceDb);
+        }
+    }
+
+    if (!$dryRun && function_exists('activity_log')) {
+        try {
+            activity_log([
+                'action_code' => 'food_ticket_cleanup_source_rows',
+                'module' => 'food',
+                'target_type' => 'food_ticket_event',
+                'target_id' => 0,
+                'target_label' => 'پاک‌سازی ردیف‌های باقی‌مانده SOURCE_TABLE',
+                'meta' => ['checked' => $out['checked'], 'deleted' => $out['deleted'], 'failed' => $out['failed'], 'days' => $days],
+            ]);
+        } catch (Throwable) {
+        }
+    }
+    $out['ok'] = $out['failed'] === 0;
+    return $out;
+}
+
+function food_ticket_retry_failed(int $limit = 50): array
+{
+    $config = food_ticket_config(true);
+    if (!(int) ($config['enabled'] ?? 0)) {
+        return ['ok' => 0, 'queued' => 0, 'failed' => 0, 'disabled' => true];
+    }
+    $lock = @fopen(APP_ROOT . '/storage/food-ticket.lock', 'c');
+    if (!$lock || !@flock($lock, LOCK_EX | LOCK_NB)) {
+        if (is_resource($lock)) {
+            fclose($lock);
+        }
+        return ['ok' => 0, 'failed' => 1];
+    }
+    $pendingOnly = (function_exists('food_ticket_delivery_supported') && food_ticket_delivery_supported())
+        ? ' AND (delivery_status IS NULL OR delivery_status = "pending")' : '';
+    $query = db()->prepare('SELECT id FROM food_ticket_events WHERE print_status IN ("print_error", "failed")' . $pendingOnly . ' ORDER BY updated_at ASC LIMIT ' . max(1, min(200, $limit)));
+    $query->execute();
+    $queued = 0;
+    $failed = 0;
+    try {
+        foreach ($query->fetchAll(PDO::FETCH_COLUMN) as $id) {
+            try {
+                try {
+                    db()->prepare('UPDATE food_ticket_events SET retry_count = 0, print_attempts = 0, next_retry_at = NULL WHERE id = ? AND print_status IN ("print_error", "failed")')->execute([(int) $id]);
+                } catch (Throwable) {
+                    db()->prepare('UPDATE food_ticket_events SET print_attempts = 0 WHERE id = ? AND print_status IN ("print_error", "failed")')->execute([(int) $id]);
+                }
+                food_ticket_enqueue_print((int) $id, $config);
+                $queued++;
+            } catch (Throwable) {
+                $failed++;
+            }
+        }
+    } finally {
+        @flock($lock, LOCK_UN);
+        fclose($lock);
+    }
+    $q = function_exists('food_ticket_process_print_queue') ? food_ticket_process_print_queue_locked($config) : ['printed' => 0];
+    if (function_exists('activity_log')) {
+        try {
+            activity_log([
+                'action_code' => 'food_ticket_retry',
+                'module' => 'food',
+                'target_type' => 'food_ticket_event',
+                'target_id' => 0,
+                'target_label' => 'چاپ مجدد خطاها',
+                'meta' => ['queued' => $queued, 'failed' => $failed, 'printed' => (int) ($q['printed'] ?? 0)],
+            ]);
+        } catch (Throwable) {
+        }
+    }
+    return ['ok' => (int) ($q['printed'] ?? 0), 'queued' => $queued, 'failed' => $failed + (int) ($q['failed'] ?? 0), 'queue' => $q];
+}
+
+function food_ticket_worker_heartbeat(array $result = [], ?Throwable $error = null): void
+{
+    try {
+        if (!db_table_exists('food_ticket_worker_status')) {
+            return;
+        }
+        $status = $error ? 'error' : ((int) ($result['errors'] ?? 0) > 0 ? 'warning' : 'ok');
+        $message = $error ? $error->getMessage() : (string) ($result['message'] ?? 'چرخه پردازش انجام شد.');
+        db()->prepare('INSERT INTO food_ticket_worker_status (id, host_name, process_id, last_seen, status, last_message, last_error, processed_count, printed_count, error_count) VALUES (1, ?, ?, NOW(), ?, ?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE host_name = VALUES(host_name), process_id = VALUES(process_id), last_seen = NOW(), status = VALUES(status), last_message = VALUES(last_message), last_error = VALUES(last_error), processed_count = VALUES(processed_count), printed_count = VALUES(printed_count), error_count = VALUES(error_count)')->execute([
+            gethostname() ?: 'unknown', (int) (getmypid() ?: 0), $status, $message,
+            $error?->getMessage(), (int) ($result['processed'] ?? 0), (int) ($result['printed'] ?? 0), (int) ($result['errors'] ?? ($error ? 1 : 0)),
+        ]);
+    } catch (Throwable $heartbeatError) {
+        app_error_log('Food ticket heartbeat failed: ' . $heartbeatError->getMessage());
+    }
+}
+
+function food_ticket_test_connections(array $config): string
+{
+    $sourceDb = null;
+    $messages = [];
+    try {
+        if (trim((string) ($config['attendance_path'] ?? '')) === '') {
+            throw new RuntimeException('تنظیم اتصال تردد کامل نیست.');
+        }
+        $sourceDb = food_ticket_odbc((string) $config['attendance_path'], food_ticket_attendance_password($config));
+        food_ticket_access_rows($sourceDb, food_ticket_source_table(), 1);
+        $messages[] = 'اتصال تردد موفق بود.';
+    } catch (Throwable $e) {
+        $messages[] = 'اتصال تردد ناموفق بود.';
+    } finally {
+        food_ticket_access_close($sourceDb);
+    }
+    try {
+        food_order_schema_ensure();
+        $messages[] = 'بررسی سفارش‌ها موفق بود.';
+    } catch (Throwable $e) {
+        $messages[] = 'بررسی سفارش‌ها ناموفق بود.';
+    }
+    try {
+        food_ticket_send_to_printer([
+            'full_name' => 'تست چاپ',
+            'national_code' => '0000000000',
+            'personnel_code' => 'TEST',
+            'food_type' => 'فیش آزمایشی',
+            'punch_date' => date('Y-m-d'),
+            'punch_time' => date('H:i:s'),
+        ], $config);
+        $messages[] = 'فیش آزمایشی به چاپگر ارسال شد.';
+    } catch (Throwable $e) {
+        $messages[] = 'چاپ آزمایشی: ' . $e->getMessage();
+    }
+    return implode(' | ', $messages);
+}
+
+function food_ticket_save_config(array $data, array $user): void
+{
+    require_food_ticket_access();
+    if (!food_ticket_installed()) {
+        throw new RuntimeException('ابتدا upgrade-1.9-food-ticket.sql را روی دیتابیس اجرا کنید.');
+    }
+    $current = food_ticket_config();
+    // اتصال سفارش Access قطع است؛ مقادیر قبلی صرفاً برای rollback نگه داشته می‌شوند و از ورودی قابل تغییر نیستند.
+    $password = trim((string) ($data['attendance_password'] ?? ''));
+    if ($password !== '') {
+        $passwordEnc = food_ticket_encrypt($password);
+        if ($passwordEnc === '' || food_ticket_decrypt($passwordEnc) !== $password) {
+            throw new RuntimeException('رمزنگاری رمز Access ناموفق بود. مقدار app.key در config.php را بررسی کنید (نباید خالی باشد).');
+        }
+    } else {
+        $passwordEnc = (string) ($current['attendance_password_enc'] ?? '');
+    }
+    food_ticket_ensure_printer_mode_column();
+    $wantedMode = food_ticket_normalize_printer_mode($data['printer_mode'] ?? $data['mode'] ?? 'tcp_raw');
+    if (!in_array($wantedMode, ['tcp_raw', 'windows_share'], true)) {
+        $wantedMode = 'tcp_raw';
+    }
+    [$wantedHost, $wantedPort] = food_ticket_normalize_printer_host((string) ($data['printer_host'] ?? ''), (int) ($data['printer_port'] ?? 9100));
+    $data['printer_host'] = $wantedHost;
+    $data['printer_port'] = $wantedPort;
+    if ($wantedMode === 'tcp_raw' && $wantedHost === '') {
+        throw new RuntimeException('برای چاپ شبکه‌ای باید IP یا نام چاپگر را وارد کنید.');
+    }
+    // نام واقعی ستون‌های مسیر/رمز/حذف ردیف: نام تازه در دیتابیس‌های جدید، نام قدیمی در نصب‌های قبلی
+    $colPath = food_ticket_db_column('attendance_path');
+    $colPwd = food_ticket_db_column('attendance_password_enc');
+    $colCut = food_ticket_db_column('cut_source_rows');
+    $query = db()->prepare('INSERT INTO food_ticket_config (id, enabled, ' . $colPath . ', ' . $colPwd . ', printer_mode, printer_host, printer_port, printer_share, poll_seconds, max_batch, guest_card_uids, max_guest_daily, ' . $colCut . ', updated_by) VALUES (1, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE enabled = VALUES(enabled), ' . $colPath . ' = VALUES(' . $colPath . '), ' . $colPwd . ' = VALUES(' . $colPwd . '), printer_mode = VALUES(printer_mode), printer_host = VALUES(printer_host), printer_port = VALUES(printer_port), printer_share = VALUES(printer_share), poll_seconds = VALUES(poll_seconds), max_batch = VALUES(max_batch), guest_card_uids = VALUES(guest_card_uids), max_guest_daily = VALUES(max_guest_daily), ' . $colCut . ' = VALUES(' . $colCut . '), updated_by = VALUES(updated_by)');
+    $query->execute([
+        !empty($data['enabled']) ? 1 : 0, trim((string) ($data['attendance_path'] ?? '')), $passwordEnc,
+        $wantedMode, $wantedHost,
+        $wantedPort, trim((string) ($data['printer_share'] ?? '')),
+        max(1, min(60, (int) ($data['poll_seconds'] ?? 2))), max(1, min(5000, (int) ($data['max_batch'] ?? 100))),
+        trim((string) ($data['guest_card_uids'] ?? '')), max(0, min(10000, (int) ($data['max_guest_daily'] ?? 20))),
+        !empty($data['cut_source_rows']) ? 1 : 0, (int) $user['id'],
+    ]);
+    // خواندن مجدد: اگر پایگاه‌داده مقدار را عوض کرده یا نپذیرفته باشد، همین‌جا خطای روشن بدهیم.
+    $saved = db()->query('SELECT printer_mode, printer_host, printer_port FROM food_ticket_config WHERE id = 1')->fetch() ?: [];
+    $savedMode = food_ticket_normalize_printer_mode($saved['printer_mode'] ?? '');
+    if ($savedMode !== $wantedMode) {
+        throw new RuntimeException('حالت چاپ در پایگاه‌داده ذخیره نشد (انتظار: ' . $wantedMode . '، ذخیره‌شده: ' . ($saved['printer_mode'] ?? '—') . '). ستون printer_mode جدول food_ticket_config را بررسی کنید.');
+    }
+    if (trim((string) ($saved['printer_host'] ?? '')) !== $wantedHost) {
+        throw new RuntimeException('آدرس IP چاپگر در پایگاه‌داده ذخیره نشد؛ مقدار واردشده با مقدار خوانده‌شده برابر نیست.');
+    }
+    if ((int) ($saved['printer_port'] ?? 0) !== $wantedPort) {
+        throw new RuntimeException('پورت چاپگر در پایگاه‌داده ذخیره نشد؛ مقدار واردشده با مقدار خوانده‌شده برابر نیست.');
+    }
+    // تنظیمات پنجرهٔ کاری جداگانه نوشته می‌شوند تا نصب‌های بدون مهاجرت ۰۳۱ نشکنند.
+    $windowSaved = [];
+    if (function_exists('food_ticket_window_save')) {
+        try {
+            $windowSaved = food_ticket_window_save($data);
+        } catch (Throwable $windowError) {
+            app_error_log('Food ticket window settings not saved: ' . $windowError->getMessage());
+        }
+    }
+    food_ticket_config(true);
+    save_audit_required((int) $user['id'], 'food_ticket_config_saved', null, array_merge(
+        ['printer_mode' => $wantedMode, 'printer_host' => $wantedHost],
+        $windowSaved === [] ? [] : ['window' => $windowSaved]
+    ));
+}
+
+function food_ticket_handle_post(string $action, array $user): void
+{
+    if (!in_array($action, ['food_ticket_save_config', 'food_ticket_test', 'food_ticket_process', 'food_ticket_retry'], true)) {
+        return;
+    }
+    require_food_ticket_access();
+    if ($action === 'food_ticket_save_config') {
+        food_ticket_save_config($_POST, $user);
+        flash('success', 'تنظیمات چاپ فیش ذخیره شد.');
+    } elseif ($action === 'food_ticket_test') {
+        flash('success', food_ticket_test_connections(food_ticket_config()));
+    } elseif ($action === 'food_ticket_process') {
+        $result = food_ticket_process_batch();
+        flash($result['errors'] > 0 ? 'warning' : 'success', $result['message']);
+    } else {
+        $result = food_ticket_retry_failed();
+        if (!empty($result['disabled'])) {
+            flash('warning', 'چاپ فیش در تنظیمات غیرفعال است.');
+        } else {
+            flash($result['failed'] > 0 ? 'warning' : 'success', 'چاپ مجدد موفق: ' . $result['ok'] . ' | ناموفق: ' . $result['failed']);
+        }
+    }
+    redirect('index.php?page=food-ticket');
+}
+
+function food_ticket_label(string $value): string
+{
+    return [
+        'printed' => 'چاپ‌شده', 'print_error' => 'خطای چاپ', 'no_food' => 'غذا ندارد',
+        'unknown' => 'کاربر ناشناس', 'inactive' => 'کاربر غیرفعال', 'repeat' => 'تردد مجدد',
+        'guest' => 'فیش مهمان', 'auto_printed' => 'چاپ خودکار', 'auto_guest' => 'چاپ خودکار مهمان', 'guest_limit' => 'سقف مهمان', 'config_error' => 'خطای تنظیمات',
+        'unknown_uid' => 'L_UID ناشناخته', 'group' => 'فیش گروهی',
+    ][$value] ?? $value;
+}
+
+/**
+ * تبدیل رشتهٔ Windows-1256 (کدپیج ANSI فارسی/عربی ویندوز) به UTF-8.
+ * بدون وابستگی به mbstring (که نام CP1256 را نمی‌شناسد)؛ ابتدا iconv، در غیر این صورت جدول داخلی.
+ */
+function food_ticket_cp1256_to_utf8(string $s): string
+{
+    if (function_exists('iconv')) {
+        try {
+            $out = @iconv('CP1256', 'UTF-8//IGNORE', $s);
+            if (is_string($out) && $out !== '') {
+                return $out;
+            }
+        } catch (Throwable $e) {
+            // ادامه با جدول داخلی
+        }
+    }
+    static $map = null;
+    if ($map === null) {
+        $map = [
+        "\x80" => "\u{20AC}",
+        "\x81" => "\u{67E}",
+        "\x82" => "\u{201A}",
+        "\x83" => "\u{192}",
+        "\x84" => "\u{201E}",
+        "\x85" => "\u{2026}",
+        "\x86" => "\u{2020}",
+        "\x87" => "\u{2021}",
+        "\x88" => "\u{2C6}",
+        "\x89" => "\u{2030}",
+        "\x8A" => "\u{679}",
+        "\x8B" => "\u{2039}",
+        "\x8C" => "\u{152}",
+        "\x8D" => "\u{686}",
+        "\x8E" => "\u{698}",
+        "\x8F" => "\u{688}",
+        "\x90" => "\u{6AF}",
+        "\x91" => "\u{2018}",
+        "\x92" => "\u{2019}",
+        "\x93" => "\u{201C}",
+        "\x94" => "\u{201D}",
+        "\x95" => "\u{2022}",
+        "\x96" => "\u{2013}",
+        "\x97" => "\u{2014}",
+        "\x98" => "\u{6A9}",
+        "\x99" => "\u{2122}",
+        "\x9A" => "\u{691}",
+        "\x9B" => "\u{203A}",
+        "\x9C" => "\u{153}",
+        "\x9D" => "\u{200C}",
+        "\x9E" => "\u{200D}",
+        "\x9F" => "\u{6BA}",
+        "\xA0" => "\u{A0}",
+        "\xA1" => "\u{60C}",
+        "\xA2" => "\u{A2}",
+        "\xA3" => "\u{A3}",
+        "\xA4" => "\u{A4}",
+        "\xA5" => "\u{A5}",
+        "\xA6" => "\u{A6}",
+        "\xA7" => "\u{A7}",
+        "\xA8" => "\u{A8}",
+        "\xA9" => "\u{A9}",
+        "\xAA" => "\u{6BE}",
+        "\xAB" => "\u{AB}",
+        "\xAC" => "\u{AC}",
+        "\xAD" => "\u{AD}",
+        "\xAE" => "\u{AE}",
+        "\xAF" => "\u{AF}",
+        "\xB0" => "\u{B0}",
+        "\xB1" => "\u{B1}",
+        "\xB2" => "\u{B2}",
+        "\xB3" => "\u{B3}",
+        "\xB4" => "\u{B4}",
+        "\xB5" => "\u{B5}",
+        "\xB6" => "\u{B6}",
+        "\xB7" => "\u{B7}",
+        "\xB8" => "\u{B8}",
+        "\xB9" => "\u{B9}",
+        "\xBA" => "\u{61B}",
+        "\xBB" => "\u{BB}",
+        "\xBC" => "\u{BC}",
+        "\xBD" => "\u{BD}",
+        "\xBE" => "\u{BE}",
+        "\xBF" => "\u{61F}",
+        "\xC0" => "\u{6C1}",
+        "\xC1" => "\u{621}",
+        "\xC2" => "\u{622}",
+        "\xC3" => "\u{623}",
+        "\xC4" => "\u{624}",
+        "\xC5" => "\u{625}",
+        "\xC6" => "\u{626}",
+        "\xC7" => "\u{627}",
+        "\xC8" => "\u{628}",
+        "\xC9" => "\u{629}",
+        "\xCA" => "\u{62A}",
+        "\xCB" => "\u{62B}",
+        "\xCC" => "\u{62C}",
+        "\xCD" => "\u{62D}",
+        "\xCE" => "\u{62E}",
+        "\xCF" => "\u{62F}",
+        "\xD0" => "\u{630}",
+        "\xD1" => "\u{631}",
+        "\xD2" => "\u{632}",
+        "\xD3" => "\u{633}",
+        "\xD4" => "\u{634}",
+        "\xD5" => "\u{635}",
+        "\xD6" => "\u{636}",
+        "\xD7" => "\u{D7}",
+        "\xD8" => "\u{637}",
+        "\xD9" => "\u{638}",
+        "\xDA" => "\u{639}",
+        "\xDB" => "\u{63A}",
+        "\xDC" => "\u{640}",
+        "\xDD" => "\u{641}",
+        "\xDE" => "\u{642}",
+        "\xDF" => "\u{643}",
+        "\xE0" => "\u{E0}",
+        "\xE1" => "\u{644}",
+        "\xE2" => "\u{E2}",
+        "\xE3" => "\u{645}",
+        "\xE4" => "\u{646}",
+        "\xE5" => "\u{647}",
+        "\xE6" => "\u{648}",
+        "\xE7" => "\u{E7}",
+        "\xE8" => "\u{E8}",
+        "\xE9" => "\u{E9}",
+        "\xEA" => "\u{EA}",
+        "\xEB" => "\u{EB}",
+        "\xEC" => "\u{649}",
+        "\xED" => "\u{64A}",
+        "\xEE" => "\u{EE}",
+        "\xEF" => "\u{EF}",
+        "\xF0" => "\u{64B}",
+        "\xF1" => "\u{64C}",
+        "\xF2" => "\u{64D}",
+        "\xF3" => "\u{64E}",
+        "\xF4" => "\u{F4}",
+        "\xF5" => "\u{64F}",
+        "\xF6" => "\u{650}",
+        "\xF7" => "\u{F7}",
+        "\xF8" => "\u{651}",
+        "\xF9" => "\u{F9}",
+        "\xFA" => "\u{652}",
+        "\xFB" => "\u{FB}",
+        "\xFC" => "\u{FC}",
+        "\xFD" => "\u{200E}",
+        "\xFE" => "\u{200F}",
+        "\xFF" => "\u{6D2}"
+        ];
+    }
+    return strtr($s, $map);
+}
+
+/**
+ * تبدیل هر مقدار به رشته UTF-8 امن برای JSON
+ */
+function food_ticket_utf8(mixed $value): string
+{
+    if ($value === null) {
+        return '';
+    }
+    if (is_bool($value)) {
+        return $value ? '1' : '0';
+    }
+    if (is_int($value) || is_float($value)) {
+        return (string) $value;
+    }
+    $s = (string) $value;
+    if ($s === '') {
+        return '';
+    }
+    $s = preg_replace('/[\x00-\x08\x0B\x0C\x0E-\x1F]/', '', $s) ?? $s;
+
+    $hasArabic = (bool) preg_match('/\p{Arabic}/u', $s);
+    $hasHigh = (bool) preg_match('/[\x80-\xFF]/', $s);
+    $hasQuestionMojibake = (bool) preg_match('/\?{2,}/', $s) || (bool) preg_match('/[\x80-\xFF].*\?|\?.*[\x80-\xFF]/s', $s);
+    $isUtf8 = function_exists('mb_check_encoding') ? mb_check_encoding($s, 'UTF-8') : (bool) preg_match('//u', $s);
+
+    // اگر عربی یونیکد ندارد ولی بایت‌های غیر ASCII دارد → احتمالاً CP1256/CP1252 است
+    if ((!$hasArabic && $hasHigh) || !$isUtf8 || $hasQuestionMojibake) {
+        $converted = food_ticket_cp1256_to_utf8($s);
+        if ($converted !== '' && (preg_match('/\p{Arabic}/u', $converted) || !$hasArabic)) {
+            $s = $converted;
+        }
+        // تلاش دوم: Windows-1252 → UTF-8
+        if (!preg_match('/\p{Arabic}/u', $s) && $hasHigh && function_exists('mb_convert_encoding')) {
+            $try = @mb_convert_encoding($s, 'UTF-8', 'Windows-1256,Windows-1252,ISO-8859-1');
+            if (is_string($try) && preg_match('/\p{Arabic}/u', $try)) {
+                $s = $try;
+            }
+        }
+        do {
+            $s = preg_replace('/(?<=\p{Arabic})\?|\?(?=\p{Arabic})/u', "\u{06CC}", $s, -1, $fixedYeh) ?? $s;
+        } while (!empty($fixedYeh));
+        if (function_exists('mb_check_encoding') && !mb_check_encoding($s, 'UTF-8')) {
+            $s = (string) @iconv('UTF-8', 'UTF-8//IGNORE', $s);
+        }
+    }
+    return $s;
+}
+
+function food_ticket_api_json(array $payload, int $status = 200): never
+{
+    while (ob_get_level() > 0) {
+        ob_end_clean();
+    }
+    http_response_code($status);
+    header('Content-Type: application/json; charset=utf-8');
+    header('Cache-Control: no-store');
+    $flags = JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES;
+    if (defined('JSON_INVALID_UTF8_SUBSTITUTE')) {
+        $flags |= JSON_INVALID_UTF8_SUBSTITUTE;
+    }
+    $json = json_encode($payload, $flags);
+    if ($json === false) {
+        $json = json_encode([
+            'error' => 'خطا در ساخت JSON: ' . json_last_error_msg(),
+            'items' => [],
+        ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+    }
+    echo $json !== false ? $json : '{"error":"json_encode failed","items":[]}';
+    exit;
+}
+
+function food_ticket_api_body(): array
+{
+    $raw = file_get_contents('php://input');
+    if (!is_string($raw) || trim($raw) === '') {
+        return [];
+    }
+    $body = json_decode($raw, true);
+    return is_array($body) ? $body : [];
+}
+
+/**
+ * وضعیت «همان چیزی که واقعاً در پایگاه‌داده نشسته» برای چاپگر.
+ * پنل با این خروجی می‌تواند بگوید کدام مقدار ذخیره شده و آیا با انتخاب کاربر یکی است.
+ */
+function food_ticket_api_printer_state(): array
+{
+    $config = food_ticket_config(true);
+    $mode = food_ticket_normalize_printer_mode($config['printer_mode'] ?? 'tcp_raw');
+    $host = trim((string) ($config['printer_host'] ?? ''));
+    $port = max(1, (int) ($config['printer_port'] ?? 9100));
+    $share = trim((string) ($config['printer_share'] ?? ''));
+    $npTarget = function_exists('food_ticket_np_target') ? food_ticket_np_target() : ['host' => '', 'port' => 9100, 'source' => 'none'];
+    return [
+        'printer' => [
+            'ok' => true,
+            'mode' => $mode === 'tcp_raw' ? 'socket' : 'windows-spooler',
+            'mode_db' => $mode,
+            'host' => $host,
+            'port' => $port,
+            'name' => $share,
+            'share' => $share,
+            'ready' => $mode === 'tcp_raw' ? $host !== '' : $share !== '',
+            'target' => $host !== '' ? ($host . ':' . $port) : ($share !== '' ? $share : ''),
+            'calibration_host' => (string) ($npTarget['host'] ?? ''),
+            'calibration_source' => (string) ($npTarget['source'] ?? 'none'),
+        ],
+    ];
+}
+
+/**
+ * عیب‌یابی چاپگر: چه چیزی ذخیره شده، کارت کالیبراسیون کجا می‌رود و آیا چاپگر پاسخ می‌دهد.
+ */
+function food_ticket_api_print_diag(): array
+{
+    $state = food_ticket_api_printer_state();
+    $printer = $state['printer'];
+    $reachable = null;
+    $reachableError = '';
+    if ($printer['mode_db'] === 'tcp_raw' && $printer['host'] !== '') {
+        $errno = 0;
+        $errstr = '';
+        $sock = @fsockopen((string) $printer['host'], (int) $printer['port'], $errno, $errstr, 3);
+        if ($sock) {
+            fclose($sock);
+            $reachable = true;
+        } else {
+            $reachable = false;
+            $reachableError = $errstr !== '' ? $errstr : ('خطا ' . $errno);
+        }
+    }
+    $fileError = '';
+    $fileConfig = [];
+    if (function_exists('food_ticket_np_json_file')) {
+        try {
+            $path = food_ticket_np_json_file();
+            $fileConfig = ['path' => $path, 'exists' => is_file($path), 'writable' => is_file($path) ? is_writable($path) : is_writable(dirname($path))];
+            if (is_file($path)) {
+                $fileConfig['content'] = json_decode((string) @file_get_contents($path), true) ?: [];
+            }
+        } catch (Throwable $e) {
+            $fileError = $e->getMessage();
+        }
+    }
+    $align = function_exists('food_ticket_np_align_state') ? food_ticket_np_align_state() : [];
+    return [
+        'ok' => true,
+        'panel_version_expected' => FOOD_TICKET_PANEL_VERSION,
+        'printer' => $printer,
+        'reachable' => $reachable,
+        'reachable_error' => $reachableError,
+        'align' => $align,
+        'netprint_file' => $fileConfig,
+        'netprint_file_error' => $fileError,
+        'verdict' => [],
+    ];
+}
+
+function food_ticket_api_config(array $user = []): array
+{
+    $config = food_ticket_config();
+    $brand = food_ticket_brand_params();
+    $template = function_exists('food_ticket_template') ? food_ticket_template() : [];
+    // هویت دیتابیس برای مرورگر: اگر دیتابیس خام/تازه نصب شده باشد، پنل باید کش قدیمی
+    // localStorage خود را دور بریزد تا داده‌ای که در دیتابیس نیست نمایش داده نشود.
+    $dbState = function_exists('db_install_state')
+        ? db_install_state()
+        : ['token' => '', 'fresh' => true, 'existing' => false, 'counts' => []];
+    $payload = [
+        'db' => $dbState,
+        // «تغییرات این به‌روزرسانی» — پنل این را در نوار بالای صفحه نشان می‌دهد.
+        'releaseNotes' => function_exists('food_ticket_release_notes_current')
+            ? food_ticket_release_notes_current()
+            : null,
+        'attendancePath' => (string) ($config['attendance_path'] ?? ''),
+        'attendanceTable' => food_ticket_source_table(),
+        // مقادیر legacy برای سازگاری API؛ در رابط کاربری نمایش داده نمی‌شوند.
+        'pollSeconds' => (int) ($config['poll_seconds'] ?? 2),
+        'guestCardUIDs' => implode(',', food_ticket_guest_cards($config)),
+        'maxGuestTicketsPerDay' => (int) ($config['max_guest_daily'] ?? 20),
+        'guestCapMode' => food_guest_cap_mode(),
+        'guestCapStart' => substr(food_guest_cap_start(), 0, 5),
+        'guestCapCutoff' => substr(food_guest_cap_cutoff(), 0, 5),
+        'guestCapEnd' => substr(food_guest_cap_end(), 0, 5),
+        'guestRequestSameDayCutoff' => food_guest_request_same_day_cutoff(),
+        'guestFoodType' => 'مهمان',
+        'cutSourceRows' => !empty($config['cut_source_rows']),
+        'enabled' => !empty($config['enabled']),
+        // بازهٔ کاری دستگاه تردد؛ پنل هم مقادیر را نشان می‌دهد و هم وضعیت لحظه‌ای را.
+        'window' => function_exists('food_ticket_window_state')
+            ? (static function (array $config): array {
+                $state = food_ticket_window_state($config);
+                $defaults = food_ticket_window_defaults();
+                return [
+                    'enabled' => (int) ($config['window_enabled'] ?? $defaults['window_enabled']) === 1,
+                    'days' => food_ticket_window_days($config['window_days'] ?? $defaults['window_days']),
+                    'start' => substr((string) ($config['window_start'] ?? $defaults['window_start']), 0, 5),
+                    'end' => substr((string) ($config['window_end'] ?? $defaults['window_end']), 0, 5),
+                    'marginBefore' => (int) ($config['window_margin_before_minutes'] ?? $defaults['window_margin_before_minutes']),
+                    'marginAfter' => (int) ($config['window_margin_after_minutes'] ?? $defaults['window_margin_after_minutes']),
+                    'idlePollSeconds' => (int) ($config['idle_poll_seconds'] ?? $defaults['idle_poll_seconds']),
+                    'activePollMs' => (int) ($config['active_poll_ms'] ?? $defaults['active_poll_ms']),
+                    'persistentSource' => (int) ($config['persistent_source_connection'] ?? $defaults['persistent_source_connection']) === 1,
+                    'effectiveStart' => $state['start'],
+                    'effectiveEnd' => $state['end'],
+                    'openNow' => (bool) $state['open'],
+                    'reason' => (string) $state['reason'],
+                    'nextOpen' => (string) $state['next_open_label'],
+                    'supported' => function_exists('food_ticket_config_has_column') && food_ticket_config_has_column('window_enabled'),
+                ];
+            })($config)
+            : null,
+        'brandName' => (string) ($brand['brand_name'] ?? 'سامانه مدیریت غذا'),
+        'brandLogo' => (string) ($brand['brand_logo'] ?? ''),
+        'panelVersion' => FOOD_TICKET_PANEL_VERSION,
+        // «تغییرات این به‌روزرسانی» — بنر بالای پنل (مستقل از index.php/۱.۶۳).
+        'releaseNotes' => function_exists('food_ticket_release_notes_current')
+            ? food_ticket_release_notes_current()
+            : null,
+        'printer' => [
+            'mode' => (food_ticket_normalize_printer_mode($config['printer_mode'] ?? 'tcp_raw') === 'tcp_raw' ? 'socket' : 'windows-spooler'),
+            'mode_db' => food_ticket_normalize_printer_mode($config['printer_mode'] ?? 'tcp_raw'),
+            'host' => (string) ($config['printer_host'] ?? ''),
+            'port' => (int) ($config['printer_port'] ?? 9100),
+            'name' => (string) ($config['printer_share'] ?? ''),
+            'share' => (string) ($config['printer_share'] ?? ''),
+            'ready' => (trim((string)($config['printer_host'] ?? '')) !== '' || trim((string)($config['printer_share'] ?? '')) !== ''),
+            'encoding' => 'CP864',
+            'company' => (string) ($template['company'] ?? ''),
+            'title' => (string) ($template['title'] ?? ''),
+            'footer' => (string) ($template['footer'] ?? ''),
+            'showLogo' => !empty($template['show_logo']),
+            'paper' => '80mm',
+        ],
+    ];
+    if ($user && function_exists('user_can')) {
+        if (!user_can($user, 'food.db')) {
+            foreach (['db', 'attendancePath', 'attendanceTable', 'pollSeconds', 'cutSourceRows', 'enabled'] as $key) {
+                unset($payload[$key]);
+            }
+        }
+        if (!user_can($user, 'food.guest')) {
+            foreach (['guestCardUIDs', 'maxGuestTicketsPerDay', 'guestCapMode', 'guestCapStart', 'guestCapCutoff', 'guestCapEnd', 'guestRequestSameDayCutoff', 'guestFoodType'] as $key) {
+                unset($payload[$key]);
+            }
+        }
+        if (!user_can($user, 'food.printer')) {
+            if (user_can($user, 'food.design') && isset($payload['printer'])) {
+                $payload['printer'] = array_intersect_key($payload['printer'], array_flip(['company', 'title', 'footer', 'showLogo', 'paper']));
+            } else {
+                unset($payload['printer']);
+            }
+        } elseif (!user_can($user, 'food.design') && isset($payload['printer'])) {
+            foreach (['company', 'title', 'footer', 'showLogo', 'paper'] as $key) {
+                unset($payload['printer'][$key]);
+            }
+        }
+        unset($payload['brandName'], $payload['brandLogo']);
+    }
+    return $payload;
+}
+
+
+/**
+ * گزارش غایبین: سفارش داده‌اند ولی فیش چاپ‌شده ندارند.
+ * @return list<array{nat:string,pc:string,first:string,last:string,food:string,foodDate:string,status:string}>
+ */
+/**
+ * گزارش سفارش مهمان: فقط درخواست‌های فعال بازه؛ deputy = 'all' یا شناسهٔ معاونت.
+ * فهرست معاونت‌ها هم برای ساخت لیست کشویی برگردانده می‌شود.
+ */
+function food_ticket_api_guest_requests_report(string $from, string $to, string $deputy): array
+{
+    $deputies = [];
+    if (function_exists('org_deputy_units')) {
+        $deputies = array_map(
+            static fn (array $u): array => ['id' => (int) $u['id'], 'name' => (string) $u['name']],
+            org_deputy_units()
+        );
+    }
+    $sql = "SELECT r.id, r.request_date, r.meal_type, r.organization, r.guest_count, r.requester_name,
+                   r.status, r.deputy_unit_id, ou.name AS deputy_name, c.food_name
+              FROM food_guest_requests r
+              LEFT JOIN org_units ou ON ou.id = r.deputy_unit_id
+              LEFT JOIN food_catalog c ON c.id = r.food_id
+             WHERE r.created_by IS NOT NULL AND r.request_date BETWEEN ? AND ?";
+    $params = [$from, $to];
+    if ($deputy !== 'all') {
+        $sql .= ' AND r.deputy_unit_id = ?';
+        $params[] = (int) $deputy;
+    }
+    $sql .= ' ORDER BY ou.name, r.request_date, r.id';
+    $stmt = db()->prepare($sql);
+    $stmt->execute($params);
+    $items = [];
+    $summary = [
+        'active' => 0, 'cancelled' => 0, 'total' => 0,
+        'active_guest_count' => 0, 'cancelled_guest_count' => 0, 'total_guest_count' => 0,
+        'by_meal_type' => [
+            'lunch' => ['active' => 0, 'cancelled' => 0, 'total' => 0, 'guest_count' => 0],
+            'dinner' => ['active' => 0, 'cancelled' => 0, 'total' => 0, 'guest_count' => 0],
+        ],
+    ];
+    foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $r) {
+        $status = (string) ($r['status'] ?? 'active');
+        if (!in_array($status, ['active', 'cancelled'], true)) {
+            continue;
+        }
+        $mealType = food_order_meal_type($r['meal_type'] ?? 'lunch');
+        $guestCount = (int) ($r['guest_count'] ?? 0);
+        $summary[$status]++;
+        $summary['total']++;
+        $summary[$status . '_guest_count'] += $guestCount;
+        $summary['total_guest_count'] += $guestCount;
+        $summary['by_meal_type'][$mealType][$status]++;
+        $summary['by_meal_type'][$mealType]['total']++;
+        $summary['by_meal_type'][$mealType]['guest_count'] += $guestCount;
+        $items[] = [
+            'id' => (int) $r['id'],
+            'date' => (string) $r['request_date'],
+            'meal_type' => $mealType,
+            'organization' => (string) $r['organization'],
+            'guest_count' => $guestCount,
+            'food_name' => (string) ($r['food_name'] ?? ''),
+            'requester_name' => (string) $r['requester_name'],
+            'status' => $status,
+            'deputy_unit_id' => $r['deputy_unit_id'] === null ? null : (int) $r['deputy_unit_id'],
+            'deputy_name' => (string) ($r['deputy_name'] ?? ''),
+        ];
+    }
+    return ['items' => $items, 'summary' => $summary, 'deputies' => $deputies, 'from' => $from, 'to' => $to, 'deputy_id' => $deputy];
+}
+
+/**
+ * گزارش تجمیعی روزانه غذا: شمارش سفارشها، فیشهای مهمان، فیشهای چاپشدهٔ قطعی،
+ * غایبین و بررسی مغایرت، بههمراه فهرست اسامی برای نمایش/استخراج/چاپ.
+ * فقط خواندنی است و هیچ جدولی را تغییر نمیدهد.
+ */
+/** نام خانوادگی برای مرتبسازی فهرست اشخاص (آخرین واژهٔ نام). */
+function food_ticket_aggregate_last_name($person): string
+{
+    $split = trim((string) ($person['last_name'] ?? ''));
+    if ($split !== '') {
+        return $split;
+    }
+    $name = trim((string) preg_replace('/\s+/u', ' ', (string) ($person['name'] ?? '')));
+    if ($name === '') { return ''; }
+    $words = preg_split('/ /u', $name) ?: [];
+    return (string) end($words);
+}
+/** فهرست اشخاص را بر اساس نام خانوادگی، سپس نام کامل مرتب میکند. */
+function food_ticket_aggregate_sort_people(array &$people): void
+{
+    usort($people, static function ($a, $b): int {
+        $x = food_ticket_aggregate_last_name(is_array($a) ? $a : []);
+        $y = food_ticket_aggregate_last_name(is_array($b) ? $b : []);
+        $cmp = strcmp($x, $y);
+        return $cmp !== 0 ? $cmp : strcmp((string) ($a['name'] ?? ''), (string) ($b['name'] ?? ''));
+    });
+}
+function food_ticket_aggregate_diagnostics(string $fromDate, string $toDate, array $printedPeople, array $counts, array &$sourceNotes): array
+{
+    $orderRows = [];
+    try {
+        // همان منبع و همان scope ناهار که گزارش غایبین استفاده می‌کند.
+        $orderRows = food_ticket_api_orders($fromDate, '', $toDate);
+    } catch (Throwable $e) {
+        $sourceNotes[] = 'عیب‌یابی سفارش‌ها: ' . $e->getMessage();
+    }
+
+    $identities = [];
+    $byNational = [];
+    $byPersonnel = [];
+    $withoutNational = [];
+    $withoutNationalCount = 0;
+    foreach ($orderRows as $row) {
+        $date = (string) ($row['foodDate'] ?? '');
+        $national = food_ticket_digits($row['nat'] ?? '');
+        $personnel = trim((string) ($row['pc'] ?? ''));
+        if ($national === '') {
+            $withoutNationalCount++;
+            if (count($withoutNational) < 100) {
+                $withoutNational[] = ['date' => $date, 'name' => trim((string) ($row['first'] ?? '') . ' ' . (string) ($row['last'] ?? '')), 'first_name' => trim((string) ($row['first'] ?? '')), 'last_name' => trim((string) ($row['last'] ?? '')), 'pc' => $personnel];
+            }
+            continue;
+        }
+        $key = $date . '|nat:' . $national;
+        if (!isset($identities[$key])) {
+            $identities[$key] = ['date' => $date, 'nat' => $national, 'pc' => $personnel, 'name' => trim((string) ($row['first'] ?? '') . ' ' . (string) ($row['last'] ?? '')), 'first_name' => trim((string) ($row['first'] ?? '')), 'last_name' => trim((string) ($row['last'] ?? '')), 'rows' => 0];
+        }
+        $identities[$key]['rows']++;
+        $byNational[$date . '|' . $national] = $key;
+        if ($personnel !== '') {
+            $byPersonnel[$date . '|' . $personnel] = $key;
+        }
+    }
+
+    $duplicates = [];
+    $duplicateRows = 0;
+    $duplicateIdentityCount = 0;
+    foreach ($identities as $identity) {
+        if ((int) $identity['rows'] > 1) {
+            $duplicateIdentityCount++;
+            $duplicateRows += (int) $identity['rows'] - 1;
+            if (count($duplicates) < 100) {
+                $duplicates[] = $identity;
+            }
+        }
+    }
+
+    $matched = [];
+    $unmatchedPrintedEvents = [];
+    $unmatchedPrintedCount = 0;
+    $legacyPrintedEvents = [];
+    foreach ($printedPeople as $event) {
+        if (in_array((string) ($event['kind'] ?? ''), ['مهمان', 'چاپ خودکار مهمان'], true)
+            || (string) ($event['meal_type'] ?? 'lunch') !== 'lunch') {
+            continue;
+        }
+        $date = (string) ($event['date'] ?? '');
+        $national = food_ticket_digits($event['nat'] ?? '');
+        $personnel = trim((string) ($event['pc'] ?? ''));
+        $key = $national !== '' ? ($byNational[$date . '|' . $national] ?? '') : '';
+        if ($key === '' && $personnel !== '') {
+            $key = $byPersonnel[$date . '|' . $personnel] ?? '';
+        }
+        if ($key !== '') {
+            $matched[$key] = true;
+        } else {
+            $unmatchedPrintedCount++;
+            if (count($unmatchedPrintedEvents) < 100) {
+                $unmatchedPrintedEvents[] = ['event_id' => (int) ($event['event_id'] ?? 0), 'date' => $date, 'name' => (string) ($event['name'] ?? ''), 'first_name' => (string) ($event['first_name'] ?? ''), 'last_name' => (string) ($event['last_name'] ?? ''), 'pc' => $personnel, 'legacy_printed' => !empty($event['legacy_printed'])];
+            }
+        }
+        if (!empty($event['legacy_printed']) && count($legacyPrintedEvents) < 100) {
+            $legacyPrintedEvents[] = ['event_id' => (int) ($event['event_id'] ?? 0), 'date' => $date, 'name' => (string) ($event['name'] ?? ''), 'first_name' => (string) ($event['first_name'] ?? ''), 'last_name' => (string) ($event['last_name'] ?? ''), 'pc' => $personnel];
+        }
+    }
+
+    $unprintableCount = 0;
+    $unprintableOrders = [];
+    try {
+        $missingJoinsSql = "FROM food_orders o
+            LEFT JOIN users u ON u.id = o.employee_id
+            LEFT JOIN food_calendar_items i ON i.id = o.calendar_item_id
+            LEFT JOIN food_catalog c ON c.id = i.food_id
+            WHERE o.food_date BETWEEN ? AND ? AND o.meal_type = 'lunch' AND o.status = 'active'
+              AND (u.id IS NULL OR i.id IS NULL OR c.id IS NULL OR COALESCE(i.active, 0) <> 1 OR COALESCE(c.active, 0) <> 1)";
+        $countStmt = db()->prepare('SELECT COUNT(*) ' . $missingJoinsSql);
+        $countStmt->execute([$fromDate, $toDate]);
+        $unprintableCount = (int) $countStmt->fetchColumn();
+        if ($unprintableCount > 0) {
+            $rowsStmt = db()->prepare(
+                "SELECT o.id, o.food_date, o.employee_id, COALESCE(u.full_name, '') AS name,
+                        COALESCE(u.first_name, '') AS first_name, COALESCE(u.last_name, '') AS last_name,
+                        COALESCE(u.employee_number, '') AS personnel_code,
+                        CASE WHEN u.id IS NULL THEN 'کاربر سفارش پیدا نشد'
+                             WHEN i.id IS NULL THEN 'آیتم تقویم غذا پیدا نشد'
+                             WHEN c.id IS NULL THEN 'غذای کاتالوگ پیدا نشد'
+                             WHEN COALESCE(i.active, 0) <> 1 THEN 'آیتم تقویم غیرفعال است'
+                             WHEN COALESCE(c.active, 0) <> 1 THEN 'غذای کاتالوگ غیرفعال است' END AS issue
+                 " . $missingJoinsSql . ' ORDER BY o.food_date, o.id LIMIT 100'
+            );
+            $rowsStmt->execute([$fromDate, $toDate]);
+            foreach ($rowsStmt->fetchAll(PDO::FETCH_ASSOC) as $row) {
+                $unprintableFirst = trim((string) ($row['first_name'] ?? ''));
+                $unprintableLast = trim((string) ($row['last_name'] ?? ''));
+                if ($unprintableFirst === '' && $unprintableLast === '') { $unprintableLast = (string) $row['name']; }
+                $unprintableOrders[] = ['id' => (int) $row['id'], 'date' => (string) $row['food_date'], 'name' => (string) $row['name'], 'first_name' => $unprintableFirst, 'last_name' => $unprintableLast, 'pc' => (string) $row['personnel_code'], 'issue' => (string) $row['issue']];
+            }
+        }
+    } catch (Throwable $e) {
+        $sourceNotes[] = 'عیب‌یابی سفارش ناهارِ غیرقابل‌چاپ: ' . $e->getMessage();
+    }
+
+    $eventTypeStatusCounts = [];
+    try {
+        $eventsStmt = db()->prepare(
+            "SELECT event_type, COALESCE(meal_type, 'lunch') AS meal_type, print_status, COUNT(*) AS total
+             FROM food_ticket_events
+             WHERE punch_date BETWEEN ? AND ? AND event_type IN ('printed','print','guest','auto_printed','auto_guest')
+             GROUP BY event_type, COALESCE(meal_type, 'lunch'), print_status ORDER BY meal_type, event_type, print_status"
+        );
+        $eventsStmt->execute([$fromDate, $toDate]);
+        foreach ($eventsStmt->fetchAll(PDO::FETCH_ASSOC) as $row) {
+            $eventTypeStatusCounts[] = ['event_type' => (string) $row['event_type'], 'meal_type' => (string) $row['meal_type'], 'print_status' => (string) $row['print_status'], 'total' => (int) $row['total']];
+        }
+    } catch (Throwable $e) {
+        $sourceNotes[] = 'عیب‌یابی رویدادهای چاپ: ' . $e->getMessage();
+    }
+
+    return [
+        'active_lunch_orders' => (int) ($counts['lunch_orders'] ?? 0),
+        'active_dinner_orders' => (int) ($counts['dinner_orders'] ?? 0),
+        'active_other_meal_orders' => (int) ($counts['other_meal_orders'] ?? 0),
+        'reportable_lunch_rows' => count($orderRows),
+        'unique_lunch_identities' => count($identities),
+        'matched_printed_lunch_identities' => count($matched),
+        'orders_without_national_code' => $withoutNational,
+        'orders_without_national_code_count' => $withoutNationalCount,
+        'duplicate_order_identities' => $duplicates,
+        'duplicate_order_identity_count' => $duplicateIdentityCount,
+        'duplicate_order_rows' => $duplicateRows,
+        'unprintable_lunch_order_count' => $unprintableCount,
+        'unprintable_lunch_orders' => $unprintableOrders,
+        'unmatched_printed_events' => $unmatchedPrintedEvents,
+        'unmatched_printed_event_count' => $unmatchedPrintedCount,
+        'legacy_printed_events' => $legacyPrintedEvents,
+        'legacy_printed_event_count' => (int) ($counts['legacy_printed'] ?? 0),
+        'event_type_status_counts' => $eventTypeStatusCounts,
+        'absent_count' => (int) ($counts['absent'] ?? 0),
+        'difference' => (int) ($counts['difference'] ?? 0),
+    ];
+}
+
+function food_ticket_api_aggregate_report(string $fromDate, string $toDate): array
+{
+    $from = food_ticket_parse_date($fromDate);
+    $to = food_ticket_parse_date($toDate);
+    if ($from === null || $to === null || $from > $to) {
+        throw new RuntimeException('بازهٔ تاریخ گزارش تجمیعی معتبر نیست.');
+    }
+
+    $counts = [
+        'total_orders' => 0,
+        'lunch_orders' => 0,
+        'cancelled_orders' => 0,
+        'order_rows' => 0,
+        'dinner_orders' => 0,
+        'dinner_cancelled_orders' => 0,
+        'dinner_order_rows' => 0,
+        'other_meal_orders' => 0,
+        'printed_final' => 0, // total logical staff receipts used for lunch reconciliation
+        'printed_dinner' => 0, // total logical staff dinner receipts
+        'physical_printed_lunch' => 0,
+        'physical_printed_dinner' => 0,
+        'physical_guest_printed_lunch' => 0,
+        'physical_guest_printed_dinner' => 0,
+        'guest_printed_lunch' => 0,
+        'guest_printed_dinner' => 0,
+        'auto_printed_lunch' => 0,
+        'auto_printed_dinner' => 0,
+        'auto_guest_printed_lunch' => 0,
+        'auto_guest_printed_dinner' => 0,
+        'legacy_printed' => 0,
+    ];
+    $sourceNotes = [];
+    $lunchSummary = food_order_report_summary($from, $to, 'lunch');
+    $dinnerSummary = food_order_report_summary($from, $to, 'dinner');
+    $counts['total_orders'] = $counts['lunch_orders'] = $lunchSummary['active'];
+    $counts['cancelled_orders'] = $lunchSummary['cancelled'];
+    $counts['order_rows'] = $lunchSummary['total'];
+    $counts['dinner_orders'] = $dinnerSummary['active'];
+    $counts['dinner_cancelled_orders'] = $dinnerSummary['cancelled'];
+    $counts['dinner_order_rows'] = $dinnerSummary['total'];
+    try {
+        $other = db()->prepare("SELECT COUNT(*) FROM food_orders
+            WHERE food_date BETWEEN ? AND ? AND status = 'active' AND meal_type NOT IN ('lunch','dinner')");
+        $other->execute([$from, $to]);
+        $counts['other_meal_orders'] = (int) $other->fetchColumn();
+    } catch (Throwable $e) {
+        $sourceNotes[] = 'تفکیک سایر وعده‌ها: ' . $e->getMessage();
+    }
+
+    $printedPeople = [];
+    try {
+        $stmt = db()->prepare("SELECT e.id, e.full_name, e.personnel_code, e.national_code, e.punch_date, e.punch_time,
+                e.food_type, e.event_type, COALESCE(e.meal_type, 'lunch') AS meal_type, e.source_uid,
+                u.first_name AS user_first_name, u.last_name AS user_last_name
+            FROM food_ticket_events e
+            LEFT JOIN users u ON u.id = e.user_id
+            WHERE e.punch_date BETWEEN ? AND ? AND e.print_status = 'printed'
+              AND e.event_type IN ('printed','print','guest','auto_printed','auto_guest')
+            ORDER BY e.punch_date, e.meal_type, e.punch_time, e.id");
+        $stmt->execute([$from, $to]);
+        foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $row) {
+            $eventType = (string) ($row['event_type'] ?? '');
+            $mealType = food_order_meal_type($row['meal_type'] ?? 'lunch');
+            $isGuest = in_array($eventType, ['guest', 'auto_guest'], true);
+            $isAuto = in_array($eventType, ['auto_printed', 'auto_guest'], true);
+            $isLegacy = $eventType === 'print';
+            if ($isGuest) {
+                if ($mealType === 'dinner') {
+                    $counts['guest_printed_dinner']++;
+                    if ($eventType === 'auto_guest') $counts['auto_guest_printed_dinner']++;
+                    else $counts['physical_guest_printed_dinner']++;
+                } else {
+                    $counts['guest_printed_lunch']++;
+                    if ($eventType === 'auto_guest') $counts['auto_guest_printed_lunch']++;
+                    else $counts['physical_guest_printed_lunch']++;
+                }
+            } elseif ($mealType === 'dinner') {
+                $counts['printed_dinner']++;
+                if ($eventType === 'auto_printed') $counts['auto_printed_dinner']++;
+                else $counts['physical_printed_dinner']++;
+            } else {
+                // ثبت ناهار، فیزیکی یا خودکار، مبنای حذف از فهرست غایبین ناهار است.
+                $counts['printed_final']++;
+                if ($eventType === 'auto_printed') $counts['auto_printed_lunch']++;
+                else $counts['physical_printed_lunch']++;
+                if ($isLegacy) $counts['legacy_printed']++;
+            }
+
+            $autoLabel = $isAuto && function_exists('food_ticket_auto_receipt_label')
+                ? food_ticket_auto_receipt_label($eventType, (string) ($row['source_uid'] ?? ''))
+                : '';
+            $kind = $eventType === 'auto_printed' ? 'چاپ خودکار'
+                : ($eventType === 'auto_guest' ? 'چاپ خودکار مهمان'
+                    : ($eventType === 'guest' ? 'مهمان' : 'پرسنل'));
+            $evFirst = trim((string) ($row['user_first_name'] ?? ''));
+            $evLast = trim((string) ($row['user_last_name'] ?? ''));
+            if ($evFirst === '' && $evLast === '') {
+                $evLast = trim((string) ($row['full_name'] ?? ''));
+                $evFirst = '';
+            }
+            $printedPeople[] = [
+                'event_id' => (int) ($row['id'] ?? 0),
+                'first_name' => $evFirst,
+                'last_name' => $evLast,
+                'date' => (string) ($row['punch_date'] ?? ''),
+                'time' => (string) ($row['punch_time'] ?? ''),
+                'pc' => (string) ($row['personnel_code'] ?? ''),
+                'nat' => food_ticket_digits($row['national_code'] ?? ''),
+                'name' => (string) ($row['full_name'] ?? ''),
+                'food' => (string) ($row['food_type'] ?? ''),
+                'kind' => $kind,
+                'auto_label' => $autoLabel,
+                'meal_type' => $mealType,
+                'status' => $autoLabel !== '' ? $autoLabel : 'چاپ‌شده',
+                'legacy_printed' => $isLegacy,
+            ];
+        }
+    } catch (Throwable $e) {
+        $sourceNotes[] = 'فیش‌های چاپ‌شده: ' . $e->getMessage();
+        app_error_log('[aggregate-report] events: ' . $e->getMessage());
+        throw new RuntimeException('منابع گزارش تجمیعی در دسترس نیستند؛ آمار قابل محاسبه نیست.', 0, $e);
+    }
+
+    // غایبین (سفارش ناهار دارند ولی فیش ناهار نگرفته‌اند).
+    $absentPeople = [];
+    try {
+        foreach (food_ticket_api_absent($from, $to) as $row) {
+            $absFirst = trim((string) ($row['first'] ?? ''));
+            $absLast = trim((string) ($row['last'] ?? ''));
+            if ($absFirst === '' && $absLast === '') {
+                $absLast = trim((string) ($row['full_name'] ?? ''));
+            }
+            $absentPeople[] = [
+                'date' => (string) ($row['foodDate'] ?? $from),
+                'time' => '',
+                'pc' => (string) ($row['pc'] ?? ''),
+                'first_name' => $absFirst,
+                'last_name' => $absLast,
+                'name' => (trim($absFirst . ' ' . $absLast) !== '' ? trim($absFirst . ' ' . $absLast) : trim((string) ($row['full_name'] ?? ''))),
+                'food' => (string) ($row['food'] ?? ''),
+                'kind' => !empty($row['declared_absent']) ? 'غیبت اعلام‌شده' : 'غایب',
+                'meal_type' => 'lunch',
+                'status' => (string) ($row['status'] ?? 'غایب'),
+                'declared' => !empty($row['declared_absent']),
+            ];
+        }
+    } catch (Throwable $e) {
+        $sourceNotes[] = 'غایبین: ' . $e->getMessage();
+        app_error_log('[aggregate-report] absent: ' . $e->getMessage());
+        throw new RuntimeException('منابع گزارش تجمیعی در دسترس نیستند؛ آمار قابل محاسبه نیست.', 0, $e);
+    }
+
+    $counts['absent'] = count($absentPeople);
+    // فیش و غیبت شام جدا گزارش می‌شوند و در تفریق غایبین ناهار وارد نمی‌شوند.
+    $expected = $counts['lunch_orders'] - $counts['printed_final'];
+    $counts['expected_absent'] = $expected;
+    $counts['has_mismatch'] = ($expected !== $counts['absent']);
+    $counts['difference'] = $expected - $counts['absent'];
+
+    food_ticket_aggregate_sort_people($printedPeople);
+    food_ticket_aggregate_sort_people($absentPeople);
+    $diagnostics = food_ticket_aggregate_diagnostics($from, $to, $printedPeople, $counts, $sourceNotes);
+    $publicPrintedPeople = $printedPeople;
+    foreach ($publicPrintedPeople as &$person) {
+        // شناسه و کد ملی فقط برای تطبیق سمت سرور است و به مرورگر گزارش نمی‌شود.
+        unset($person['nat'], $person['event_id'], $person['legacy_printed']);
+    }
+    unset($person);
+    return [
+        'from' => $from,
+        'to' => $to,
+        'counts' => $counts,
+        'printed_people' => $publicPrintedPeople,
+        'absent_people' => $absentPeople,
+        'diagnostics' => $diagnostics,
+        'source_notes' => $sourceNotes,
+    ];
+}
+
+/** ستونهای قابلانتخاب گزارش تجمیعی (برای نمایش، استخراج و چاپ). */
+function food_ticket_aggregate_columns(): array
+{
+    return [
+        ['key' => 'row', 'label' => 'ردیف'],
+        ['key' => 'date', 'label' => 'تاریخ'],
+        ['key' => 'time', 'label' => 'ساعت'],
+        ['key' => 'pc', 'label' => 'کد پرسنلی'],
+        ['key' => 'first_name', 'label' => 'نام'],
+        ['key' => 'last_name', 'label' => 'نام خانوادگی'],
+        ['key' => 'food', 'label' => 'نوع غذا'],
+        ['key' => 'meal_type', 'label' => 'وعده'],
+        ['key' => 'kind', 'label' => 'نوع فیش'],
+        ['key' => 'status', 'label' => 'وضعیت'],
+    ];
+}
+
+/** خروجی XLSX گزارش تجمیعی — فقط ستونهای انتخابشده. */
+function food_ticket_aggregate_export(string $fromDate, string $toDate, string $fieldsRaw): never
+{
+    $report = food_ticket_api_aggregate_report($fromDate, $toDate);
+    $all = food_ticket_aggregate_columns();
+    $keys = array_values(array_unique(array_filter(array_map('trim', explode(',', $fieldsRaw)))));
+    $selected = array_values(array_filter($all, static fn (array $c): bool => in_array($c['key'], $keys, true)));
+    if ($selected === []) {
+        $selected = array_values(array_filter($all, static fn (array $c): bool => in_array($c['key'], ['row', 'pc', 'first_name', 'last_name', 'food'], true)));
+    }
+    $headers = array_map(static fn (array $c): string => $c['label'], $selected);
+    $rangeLabel = $report['from'] === $report['to']
+        ? food_order_jalali_label($report['from'])
+        : food_order_jalali_label($report['from']) . ' تا ' . food_order_jalali_label($report['to']);
+    $c = $report['counts'];
+    $rows = [];
+    $rows[] = ['گزارش تجمیعی غذا — بازه: ' . $rangeLabel];
+    $rows[] = ['سفارش فعال ناهار', $c['lunch_orders'], 'سفارش لغوشدهٔ ناهار', $c['cancelled_orders']];
+    $rows[] = ['مجموع ردیف‌های ناهار', $c['order_rows']];
+    $rows[] = ['سفارش فعال شام', $c['dinner_orders'], 'سفارش لغوشدهٔ شام', $c['dinner_cancelled_orders']];
+    $rows[] = ['مجموع ردیف‌های شام', $c['dinner_order_rows'], 'سایر وعده‌های فعال', $c['other_meal_orders']];
+    $rows[] = ['ثبت فیش ناهار در تطبیق (فیزیکی + خودکار)', $c['printed_final'], 'ثبت فیش شام (فیزیکی + خودکار)', $c['printed_dinner']];
+    $rows[] = ['چاپ فیزیکی پرسنل ناهار', $c['physical_printed_lunch'], 'چاپ فیزیکی پرسنل شام', $c['physical_printed_dinner']];
+    $rows[] = ['فیش خودکار پرسنل ناهار', $c['auto_printed_lunch'], 'فیش خودکار پرسنل شام', $c['auto_printed_dinner']];
+    $rows[] = ['فیش مهمان ثبت‌شدهٔ ناهار', $c['guest_printed_lunch'], 'فیش مهمان ثبت‌شدهٔ شام', $c['guest_printed_dinner']];
+    $rows[] = ['چاپ فیزیکی مهمان ناهار', $c['physical_guest_printed_lunch'], 'چاپ فیزیکی مهمان شام', $c['physical_guest_printed_dinner']];
+    $rows[] = ['فیش خودکار مهمان ناهار', $c['auto_guest_printed_lunch'], 'فیش خودکار مهمان شام', $c['auto_guest_printed_dinner']];
+    $rows[] = ['تعداد غایبین', $c['absent'], 'تفریق تخمینی، نه تطبیق فردی', $c['expected_absent'] ?? 0];
+    $rows[] = ['فیش چاپی به‌تنهایی تأیید مستقل تحویل فیزیکی غذا نیست.'];
+    $rows[] = ['فیش‌های قدیمی نوع print', $c['legacy_printed'], 'باقیماندهٔ مغایرت', $c['difference'] ?? 0];
+    $rows[] = ['مغایرت ناهار', $c['has_mismatch'] ? 'دارد' : 'ندارد', 'اختلاف', $c['difference'] ?? 0];
+    $rows[] = [];
+    $rows[] = ['فهرست نفراتی که فیش چاپشده دارند'];
+    $rows[] = $headers;
+    $i = 0;
+    foreach ($report['printed_people'] as $person) {
+        $i++;
+        $rows[] = food_ticket_aggregate_row($selected, $person + ['row' => $i, 'status' => 'چاپشده']);
+    }
+    $rows[] = [];
+    $rows[] = ['فهرست غایبین'];
+    $rows[] = $headers;
+    $i = 0;
+    foreach ($report['absent_people'] as $person) {
+        $i++;
+        $rows[] = food_ticket_aggregate_row($selected, $person + ['row' => $i, 'time' => '', 'kind' => '—']);
+    }
+    $token = preg_replace('/[^0-9A-Za-z_-]/', '', $report['from'] . '_' . $report['to']) ?: date('Y-m-d');
+    require_once __DIR__ . '/xlsx-writer.php';
+    $columnCount = max(1, count($headers));
+    $bytes = xlsx_build([[
+        'name' => 'گزارش تجمیعی',
+        'rows' => $rows,
+        'merges' => ['A1:' . xlsx_col_name($columnCount - 1) . '1'],
+        'widths' => array_fill(0, $columnCount, 22),
+    ]]);
+    xlsx_send('گزارش-تجمیعی-غذا-' . $token . '.xlsx', $bytes);
+}
+
+/** یک ردیف خروجی متناسب با ستونهای انتخابشده میسازد. */
+function food_ticket_aggregate_row(array $selected, array $person): array
+{
+    $out = [];
+    foreach ($selected as $column) {
+        $value = $person[$column['key']] ?? '';
+        if ($column['key'] === 'date' && $value !== '') {
+            $value = food_order_jalali_label((string) $value);
+        }
+        if ($column['key'] === 'time' && $value !== '') {
+            $value = substr((string) $value, 0, 5);
+        }
+        if ($column['key'] === 'meal_type') {
+            $value = (string) $value === 'dinner' ? 'شام' : 'ناهار';
+        }
+        if ($column['key'] === 'kind' && $person['declared'] ?? false) {
+            $value = 'غیبت اعلامشده';
+        }
+        $out[] = $value;
+    }
+    return $out;
+}
+
+function food_ticket_api_absent(string $fromDate, ?string $toDate = null): array
+{
+    $fromDate = food_ticket_parse_date($fromDate) ?: trim($fromDate);
+    $toDate = food_ticket_parse_date($toDate ?? $fromDate) ?: trim((string) ($toDate ?? $fromDate));
+    if ($fromDate === '' || $toDate === '' || $fromDate > $toDate) {
+        return [];
+    }
+    if (!function_exists('food_order_internal_items') || !function_exists('food_order_mode') || food_order_mode() !== 'INTERNAL-DB') {
+        throw new RuntimeException('گزارش غایبین در دسترس نیست.');
+    }
+
+    // سفارش‌های بازه فقط از منبع داخلی خوانده می‌شوند؛ خطای MySQL نباید به «بدون سفارش» تبدیل شود.
+    $orders = [];
+    try {
+        $items = food_ticket_api_orders($fromDate, '', $toDate);
+        foreach ($items as $it) {
+            $nat = food_ticket_digits((string) ($it['nat'] ?? ''));
+            $pc = trim((string) ($it['pc'] ?? ''));
+            if ($nat === '' && $pc === '') {
+                continue; // بدون کد ملی و پرسنلی هیچ تطبیق امنی ممکن نیست.
+            }
+            $day = (string) ($it['foodDate'] ?? $fromDate);
+            $identityKey = $nat !== '' ? 'nat:' . $nat : 'pc:' . $pc;
+            $orders[$day][$identityKey] = [
+                'nat' => $nat,
+                'pc' => $pc,
+                'first' => (string) ($it['first'] ?? ''),
+                'last' => (string) ($it['last'] ?? ''),
+                'food' => (string) ($it['food'] ?? ''),
+                'foodDate' => $day,
+            ];
+        }
+    } catch (Throwable $e) {
+        app_error_log('[absent] internal orders query failed: ' . $e->getMessage());
+        throw $e;
+    }
+
+    // کسانی که فیش چاپ‌شده دارند از لیست غایب خارج می‌شوند
+    $printed = [];
+    try {
+        $q = db()->prepare(
+            "SELECT punch_date, national_code, personnel_code FROM food_ticket_events
+             WHERE punch_date BETWEEN ? AND ?
+               AND print_status = 'printed'
+               AND COALESCE(meal_type, 'lunch') = 'lunch'
+               AND event_type IN ('printed','print','auto_printed')"
+        );
+        $q->execute([$fromDate, $toDate]);
+        foreach ($q->fetchAll() as $row) {
+            $day = (string) ($row['punch_date'] ?? '');
+            $nat = food_ticket_digits((string) ($row['national_code'] ?? ''));
+            if ($nat !== '') {
+                $printed[$day]['nat:' . $nat] = true;
+            }
+            $pc = trim((string) ($row['personnel_code'] ?? ''));
+            if ($pc !== '') {
+                $printed[$day]['pc:' . $pc] = true;
+            }
+        }
+    } catch (Throwable $e) {
+        app_error_log('[absent] events: ' . $e->getMessage());
+        throw new RuntimeException('وضعیت چاپ برای محاسبهٔ فیش‌های دریافت‌نشده در دسترس نیست.', 0, $e);
+    }
+
+    // «غایب اعلام‌شده»: کسانی که برای همان تاریخ در فرم گروه، غایب ثبت شده‌اند
+    // (آمار بازرسی گروه‌های بیرون از ساختمان) — این‌ها با برچسب جداگانه نمایش داده می‌شوند.
+    $declaredByDay = [];
+    if (function_exists('food_ticket_absence_ensure') && food_ticket_absence_ensure()) {
+        try {
+            $aq = db()->prepare('SELECT absence_date, user_id FROM food_ticket_daily_absence WHERE absence_date BETWEEN ? AND ?');
+            $aq->execute([$fromDate, $toDate]);
+            foreach ($aq->fetchAll() as $arow) {
+                $declaredByDay[(string) $arow['absence_date']][(int) $arow['user_id']] = true;
+            }
+        } catch (Throwable $e) {
+            app_error_log('[absent] declared absence: ' . $e->getMessage());
+        }
+    }
+    $userIdsByNational = [];
+    $userIdsByPersonnel = [];
+    $absent = [];
+    foreach ($orders as $day => $dayOrders) {
+        foreach ($dayOrders as $row) {
+            $nat = food_ticket_digits((string) ($row['nat'] ?? ''));
+            $pc = trim((string) ($row['pc'] ?? ''));
+            if (($nat !== '' && !empty($printed[$day]['nat:' . $nat]))
+                || ($pc !== '' && !empty($printed[$day]['pc:' . $pc]))) {
+                continue;
+            }
+            $row['full_name'] = trim(($row['first'] ?? '') . ' ' . ($row['last'] ?? ''));
+            $declared = false;
+            try {
+                $uid = 0;
+                if ($nat !== '') {
+                    if (!isset($userIdsByNational[$nat])) {
+                        $uq = db()->prepare('SELECT id FROM users WHERE national_code = ? OR national_code = ? LIMIT 1');
+                        $uq->execute([$nat, ltrim($nat, '0') ?: '0']);
+                        $userIdsByNational[$nat] = (int) ($uq->fetchColumn() ?: 0);
+                    }
+                    $uid = (int) $userIdsByNational[$nat];
+                } elseif ($pc !== '') {
+                    if (!isset($userIdsByPersonnel[$pc])) {
+                        $uq = db()->prepare('SELECT id FROM users WHERE employee_number = ? LIMIT 1');
+                        $uq->execute([$pc]);
+                        $userIdsByPersonnel[$pc] = (int) ($uq->fetchColumn() ?: 0);
+                    }
+                    $uid = (int) $userIdsByPersonnel[$pc];
+                }
+                $declared = $uid > 0 && !empty($declaredByDay[(string) $day][$uid]);
+            } catch (Throwable $e) {
+                app_error_log('[absent] user lookup: ' . $e->getMessage());
+            }
+            $row['declared_absent'] = $declared;
+            $row['status'] = $declared
+                ? 'غایب اعلام‌شده — فیش چاپ نشده'
+                : 'غایب — سفارش دارد، فیش چاپ نشده';
+            $absent[] = $row;
+        }
+    }
+    return $absent;
+}
+
+/**
+ * پایش رویدادها.
+ * پیش‌فرض (بدون بازه) = فقط «امروزِ کاری سامانه» (به وقت تهران)؛ اگر امروز رویدادی نباشد،
+ * خروجی خالی است — نه ۲۰۰ رکورد آخرِ همهٔ تاریخ‌ها. بازهٔ گذشته را باید گزارش‌ها بخواهند
+ * (from/to). داده‌های قبلی حذف نمی‌شوند.
+ */
+function food_ticket_api_monitoring(?string $fromDate = null, ?string $toDate = null): array
+{
+    $hasDelivery = function_exists('food_ticket_delivery_supported') && food_ticket_delivery_supported();
+    $deliveryCols = $hasDelivery ? ', delivery_status, delivered_at' : '';
+    // ⚠️ وضعیت واقعی حذف منبع: پیش از این مقدار همیشه true گزارش می‌شد و پنل
+    // «حذف‌شده از SOURCE_TABLE» را برای همهٔ ردیف‌ها نشان می‌داد، در حالی که ردیف‌ها
+    // هنوز در فایل Access بودند. اکنون از ستون واقعی خوانده می‌شود.
+    $hasSourceDelete = function_exists('food_ticket_source_delete_supported') && food_ticket_source_delete_supported();
+    $sourceDeleteCols = $hasSourceDelete ? ', source_deleted, source_delete_note' : '';
+    if ($fromDate === null || $toDate === null) {
+        try {
+            $today = (new DateTimeImmutable('now', new DateTimeZone('Asia/Tehran')))->format('Y-m-d');
+        } catch (Throwable) {
+            $today = date('Y-m-d');
+        }
+        $fromDate = $toDate = $today;
+    }
+    // Preserve the receipt snapshot; show the current order separately when available.
+    $baseSql = 'SELECT id, user_id, punch_date AS attendance_date, punch_time AS attendance_time, personnel_code AS pc_code, full_name, food_type, '
+        . 'event_type AS result, print_status, meal_type' . $deliveryCols . $sourceDeleteCols . ', ticket_key, last_error, '
+        . 'CASE WHEN source_payload LIKE \'%"group_id"%\' THEN 1 ELSE 0 END AS from_group, source_uid, '
+        . 'CASE WHEN source_uid = \'manual-attendance\' THEN source_payload ELSE NULL END AS manual_source_payload '
+        . 'FROM food_ticket_events WHERE punch_date BETWEEN ? AND ? AND event_type <> "unknown"';
+    $comparisonAvailable = true;
+    try {
+        $query = db()->prepare('SELECT e.*, o.id AS current_order_id, o.status AS current_order_status, c.food_name AS current_order_food '
+            . 'FROM (' . $baseSql . ') e '
+            . "LEFT JOIN food_orders o ON o.employee_id = e.user_id AND o.food_date = e.attendance_date AND o.meal_type = COALESCE(e.meal_type, 'lunch') "
+            . 'LEFT JOIN food_calendar_items i ON i.id = o.calendar_item_id '
+            . 'LEFT JOIN food_catalog c ON c.id = i.food_id ORDER BY e.id DESC');
+        $query->execute([$fromDate, $toDate]);
+        $monitorRows = $query->fetchAll();
+    } catch (Throwable $e) {
+        app_error_log('[food-monitoring] order comparison unavailable: ' . $e->getMessage());
+        $comparisonAvailable = false;
+        $query = db()->prepare($baseSql . ' ORDER BY id DESC');
+        $query->execute([$fromDate, $toDate]);
+        $monitorRows = $query->fetchAll();
+    }
+    return array_map(static function (array $row) use ($hasDelivery, $hasSourceDelete, $comparisonAvailable): array {
+        $rawResult = (string) ($row['result'] ?? '');
+        $rawStatus = (string) ($row['print_status'] ?? 'not_printed');
+        $autoLabel = function_exists('food_ticket_auto_receipt_label')
+            ? food_ticket_auto_receipt_label($rawResult, (string) ($row['source_uid'] ?? ''))
+            : '';
+        $resultLabel = $autoLabel !== '' ? $autoLabel : food_ticket_label($rawResult);
+        $sourcePayload = json_decode((string) ($row['manual_source_payload'] ?? ''), true);
+        $manualAttendance = is_array($sourcePayload) ? (array) ($sourcePayload['manual_attendance'] ?? []) : [];
+        $isManualAttendance = (string) ($row['source_uid'] ?? '') === 'manual-attendance' && $manualAttendance !== [];
+        if ($isManualAttendance && array_key_exists('with_ticket', $manualAttendance) && !$manualAttendance['with_ticket']) {
+            $resultLabel = 'تردد دستی (بدون فیش)';
+        } elseif ($isManualAttendance && !empty($manualAttendance['with_ticket']) && empty($manualAttendance['physical_print']) && $rawStatus === 'not_printed') {
+            $resultLabel = 'فیش صادر شد؛ چاپ فیزیکی انجام نشد';
+        }
+        // event_type در لحظهٔ ثبت «printed» است و بعد از شکست چاپ عوض نمی‌شود؛ برچسب باید از وضعیت واقعی چاپ بیاید.
+        if (in_array($rawResult, ['printed', 'guest', 'print'], true) && $rawStatus !== 'printed') {
+            if (in_array($rawStatus, ['pending', 'printing'], true)) {
+                $resultLabel = 'در صف چاپ';
+            } elseif (in_array($rawStatus, ['print_error', 'failed'], true)) {
+                $resultLabel = 'چاپ نشده';
+            }
+        }
+        $delivery = $hasDelivery ? (string) ($row['delivery_status'] ?? 'pending') : 'pending';
+        if ($rawStatus === 'held_absent') {
+            // فیشی که به‌خاطر اعلام غیبتِ عضو از صف چاپ خارج شده است
+            $resultLabel = 'متوقف — غایب اعلام‌شده';
+        } elseif ($rawResult === 'unknown' && str_starts_with((string) ($row['ticket_key'] ?? ''), 'unknown:')) {
+            // تردد با L_UID ناشناخته (نمایندهٔ بدون گروه) — متفاوت از «کاربر ناشناس» عادی
+            $resultLabel = 'L_UID ناشناخته';
+        } elseif ($delivery === 'delivered' && $rawStatus === 'printed' && $autoLabel === '') {
+            $resultLabel = 'تحویل شد';
+        }
+        return [
+            'id' => (int) ($row['id'] ?? 0),
+            'attendance_date' => (string) ($row['attendance_date'] ?? ''),
+            'attendance_time' => (string) ($row['attendance_time'] ?? ''),
+            'pc_code' => (string) ($row['pc_code'] ?? ''),
+            'full_name' => (string) ($row['full_name'] ?? ''),
+            'food_type' => (string) ($row['food_type'] ?? ''),
+            // Current order is not evidence that the original paper was wrong: it can change later.
+            'current_order_food' => $comparisonAvailable && (string) ($row['current_order_status'] ?? '') === 'active' ? (string) ($row['current_order_food'] ?? '') : '',
+            'current_order_state' => !$comparisonAvailable ? 'unavailable'
+                : (!str_starts_with((string) ($row['ticket_key'] ?? ''), 'food:') ? 'not_applicable'
+                    : ((int) ($row['current_order_id'] ?? 0) <= 0 ? 'missing'
+                        : ((string) ($row['current_order_status'] ?? '') !== 'active' ? 'cancelled'
+                            : ((string) ($row['current_order_food'] ?? '') === '' ? 'unavailable'
+                                : ((string) ($row['food_type'] ?? '') === (string) $row['current_order_food'] ? 'same' : 'different'))))),
+            'result' => $resultLabel,
+            'event_type' => $rawResult,
+            'meal_type' => in_array((string) ($row['meal_type'] ?? ''), ['lunch', 'dinner'], true) ? (string) $row['meal_type'] : 'lunch',
+            'auto_label' => $autoLabel,
+            'print_status' => $rawStatus,
+            'print_state_label' => $rawStatus === 'held_absent' ? 'متوقف — غایب اعلام‌شده' : '',
+            'delivery_status' => $delivery,
+            'delivered_at' => (string) ($row['delivered_at'] ?? ''),
+            'from_group' => (bool) (int) ($row['from_group'] ?? 0),
+            'ticket_key' => (string) ($row['ticket_key'] ?? ''),
+            'detail' => (string) ($row['last_error'] ?? ''),
+            // null = ستون‌های ۱.۳۳ ساخته نشده‌اند (وضعیت نامشخص)، false = واقعاً از SOURCE_TABLE پاک نشده است.
+            'source_deleted' => $hasSourceDelete ? (bool) ((int) ($row['source_deleted'] ?? 0) === 1) : null,
+            'source_delete_note' => $hasSourceDelete ? (string) ($row['source_delete_note'] ?? '') : '',
+        ];
+    }, $monitorRows);
+}
+
+
+/** کلیدهای ۸رقمی (میلادی و شمسی) برای یک تاریخ میلادی Y-m-d */
+function food_ticket_date_keys_for_iso(string $isoDate): array
+{
+    $keys = [];
+    if (preg_match('/^(\d{4})-(\d{2})-(\d{2})$/', $isoDate, $m)) {
+        $keys[] = $m[1] . $m[2] . $m[3];
+        if (function_exists('gregorian_to_jalali')) {
+            [$jy, $jm, $jd] = gregorian_to_jalali((int) $m[1], (int) $m[2], (int) $m[3]);
+            $keys[] = sprintf('%04d%02d%02d', $jy, $jm, $jd);
+        }
+    }
+    return $keys;
+}
+
+
+/**
+ * کلید ۸رقمی تاریخ برای فیلتر سفارش (شمسی یا میلادی)
+ * 1405/07/11 و 1405/7/11 و 2026-10-03
+ */
+function food_ticket_order_date_key(mixed $value): string
+{
+    if ($value === null || $value === '') {
+        return '';
+    }
+    $s = food_ticket_normalize_digits(trim((string) $value));
+    // جداکننده‌های رایج
+    $s = str_replace(['\\', '.', '-', ' ', '／', '٫'], '/', $s);
+    $s = preg_replace('#/+#', '/', $s) ?? $s;
+    if (preg_match('/(\d{4})\/(\d{1,2})\/(\d{1,2})/', $s, $m)) {
+        return sprintf('%04d%02d%02d', (int) $m[1], (int) $m[2], (int) $m[3]);
+    }
+    // yyyymmdd بدون جداکننده
+    $d = preg_replace('/\D+/', '', $s) ?? '';
+    if (strlen($d) >= 8) {
+        return substr($d, 0, 8);
+    }
+    $parsed = food_ticket_parse_date($value);
+    if ($parsed !== null && preg_match('/^(\d{4})-(\d{2})-(\d{2})$/', $parsed, $m)) {
+        return $m[1] . $m[2] . $m[3];
+    }
+    return '';
+}
+
+function food_ticket_api_orders(string $foodDate, string $jalaliHint = '', ?string $toDate = null): array
+{
+    if (!function_exists('food_order_internal_items')) {
+        throw new RuntimeException('ماژول سفارش‌ها در دسترس نیست.');
+    }
+    $from = food_order_iso_date(food_ticket_parse_date($foodDate) ?: $foodDate);
+    $toInput = $toDate !== null ? (food_ticket_parse_date($toDate) ?: $toDate) : ($from ?? $foodDate);
+    $to = food_order_iso_date($toInput);
+    if ($from === null || $to === null) {
+        throw new RuntimeException('تاریخ سفارش معتبر نیست.');
+    }
+    return food_order_internal_items($from, $to);
+}
+
+/**
+ * کارمندانی که قبلاً فقط رکورد غذا (auth_source=food) داشتند، حساب محلی می‌گیرند.
+ * حساب دامین دست نمی‌خورد. اگر نام با کاربر دامینِ بدون کد پرسنلی یکی باشد، برای ربط پرسنل می‌ماند.
+ */
+function food_ticket_ensure_employee_local_accounts(): int
+{
+    static $done = false;
+    if ($done) {
+        return 0;
+    }
+    $done = true;
+    if (!function_exists('db')) {
+        return 0;
+    }
+    try {
+        $pdo = db();
+        $rows = $pdo->query("SELECT id, username, full_name, first_name, last_name, employee_number FROM users WHERE auth_source = 'food' AND employee_number IS NOT NULL AND TRIM(employee_number) <> ''")->fetchAll(PDO::FETCH_ASSOC);
+        if (!$rows) {
+            return 0;
+        }
+        if (is_file(__DIR__ . '/local-accounts.php')) {
+            require_once __DIR__ . '/local-accounts.php';
+        }
+        if (function_exists('lac_ensure_schema') && !lac_ensure_schema()) {
+            return 0;
+        }
+        if (!function_exists('lac_default_hash')) {
+            return 0;
+        }
+        $domainNoCode = [];
+        if (is_file(__DIR__ . '/food-personnel-link.php')) {
+            require_once __DIR__ . '/food-personnel-link.php';
+        }
+        if (function_exists('fpl_norm_name') && function_exists('fpl_person_name')) {
+            foreach ($pdo->query("SELECT full_name, first_name, last_name FROM users WHERE auth_source = 'ldap' AND (employee_number IS NULL OR TRIM(employee_number) = '')")->fetchAll(PDO::FETCH_ASSOC) as $domainRow) {
+                $key = fpl_norm_name(fpl_person_name($domainRow));
+                if ($key !== '') {
+                    $domainNoCode[$key] = true;
+                }
+            }
+        }
+        $employeeCodes = [];
+        $candidateCodes = [];
+        foreach ($rows as $row) {
+            $id = (int) ($row['id'] ?? 0);
+            $pc = function_exists('normalize_employee_number')
+                ? (string) (normalize_employee_number((string) ($row['employee_number'] ?? '')) ?? '')
+                : trim((string) ($row['employee_number'] ?? ''));
+            $employeeCodes[$id] = $pc;
+            if ($id > 0 && $pc !== '') {
+                $candidateCodes[$pc] = true;
+            }
+        }
+        // Batch username collision checks instead of one SELECT per employee on first panel load.
+        $existingUsernameIds = [];
+        foreach (array_chunk(array_keys($candidateCodes), 500) as $codeChunk) {
+            if ($codeChunk === []) { continue; }
+            $marks = implode(',', array_fill(0, count($codeChunk), '?'));
+            $existingNames = $pdo->prepare('SELECT id, username FROM users WHERE username IN (' . $marks . ')');
+            $existingNames->execute($codeChunk);
+            foreach ($existingNames->fetchAll(PDO::FETCH_ASSOC) as $existingName) {
+                $existingUsernameIds[(string) $existingName['username']][] = (int) $existingName['id'];
+            }
+        }
+        $convert = $pdo->prepare("UPDATE users SET username = ?, password_hash = ?, auth_source = 'local', role = 'local_user', must_change_password = 1 WHERE id = ?");
+        $hash = null;
+        $converted = 0;
+        $releasedUsernames = [];
+        foreach ($rows as $row) {
+            $id = (int) ($row['id'] ?? 0);
+            $pc = (string) ($employeeCodes[$id] ?? '');
+            if ($pc === '') {
+                continue;
+            }
+            if ($domainNoCode !== [] && function_exists('fpl_person_name')) {
+                $key = fpl_person_name($row);
+                if ($key !== '' && isset($domainNoCode[$key])) {
+                    continue;
+                }
+            }
+            $takenByAnother = false;
+            foreach ($existingUsernameIds[$pc] ?? [] as $usernameOwnerId) {
+                if ($usernameOwnerId !== $id && !isset($releasedUsernames[$pc])) {
+                    $takenByAnother = true;
+                    break;
+                }
+            }
+            if ($takenByAnother) {
+                continue;
+            }
+            if ($hash === null) {
+                $hash = lac_default_hash();
+            }
+            $convert->execute([$pc, $hash, $id]);
+            $oldUsername = (string) ($row['username'] ?? '');
+            if ($oldUsername !== '' && $oldUsername !== $pc) {
+                $releasedUsernames[$oldUsername] = true;
+            }
+            $converted++;
+        }
+        return $converted;
+    } catch (Throwable $exception) {
+        return 0;
+    }
+}
+
+function food_ticket_api_employees(): array
+{
+    food_ticket_ensure_employee_local_accounts();
+    $query = db()->query("SELECT id, employee_number, national_code, first_name, last_name, full_name, is_active FROM users WHERE employee_number IS NOT NULL AND TRIM(employee_number) <> '' ORDER BY is_active DESC, employee_number");
+    return array_map(static function (array $row): array {
+        $first = trim((string) ($row['first_name'] ?? ''));
+        $last = trim((string) ($row['last_name'] ?? ''));
+        if ($first === '' && $last === '') {
+            $parts = preg_split('/\s+/u', trim((string) ($row['full_name'] ?? '')), 2) ?: [];
+            $first = (string) ($parts[0] ?? '');
+            $last = (string) ($parts[1] ?? '');
+        }
+        return [
+            'id' => (int) ($row['id'] ?? 0),
+            'pc' => (string) ($row['employee_number'] ?? ''),
+            'nat' => (string) ($row['national_code'] ?? ''),
+            'first' => $first,
+            'last' => $last,
+            'active' => (bool) ($row['is_active'] ?? false),
+        ];
+    }, $query->fetchAll());
+}
+
+function food_ticket_normalize_guest_card(mixed $value): string
+{
+    return strtoupper(preg_replace('/[\s:-]+/', '', trim((string) $value)) ?? '');
+}
+
+function food_ticket_api_guest_cards(): array
+{
+    if (!db_table_exists('food_ticket_guest_cards')) {
+        throw new RuntimeException('ابتدا upgrade-1.12-food-ticket-management.sql را روی دیتابیس اجرا کنید.');
+    }
+    if (!(int) db()->query('SELECT COUNT(*) FROM food_ticket_guest_cards')->fetchColumn()) {
+        $insert = db()->prepare('INSERT IGNORE INTO food_ticket_guest_cards (card_uid, guest_name, daily_limit, is_active) VALUES (?, "مهمان", 0, 1)');
+        foreach (food_ticket_guest_cards(food_ticket_config()) as $card) {
+            $insert->execute([$card]);
+        }
+    }
+    $query = db()->query('SELECT id, card_uid, guest_name, daily_limit, is_active FROM food_ticket_guest_cards ORDER BY is_active DESC, id DESC');
+    return array_map(static fn (array $row): array => [
+        'id' => (int) ($row['id'] ?? 0),
+        'cardNumber' => (string) ($row['card_uid'] ?? ''),
+        'name' => (string) ($row['guest_name'] ?? 'مهمان'),
+        'dailyLimit' => (int) ($row['daily_limit'] ?? 0),
+        'active' => (bool) ($row['is_active'] ?? false),
+    ], $query->fetchAll());
+}
+
+function food_ticket_sync_guest_card_config(int $userId): void
+{
+    if (!db_table_exists('food_ticket_guest_cards') || !db_table_exists('food_ticket_config')) {
+        return;
+    }
+    $cards = db()->query('SELECT card_uid FROM food_ticket_guest_cards WHERE is_active = 1 ORDER BY id')->fetchAll(PDO::FETCH_COLUMN);
+    db()->prepare('UPDATE food_ticket_config SET guest_card_uids = ?, updated_by = ? WHERE id = 1')->execute([implode(',', array_map('strval', $cards)), $userId]);
+}
+
+function food_ticket_api_save_employee(array $data): void
+{
+    $id = max(0, (int) ($data['id'] ?? 0));
+    $personnelCode = (string) (normalize_employee_number($data['pc'] ?? $data['employee_number'] ?? '') ?? '');
+    $nationalCode = strtr(trim((string) ($data['nat'] ?? $data['national_code'] ?? '')), ['۰' => '0', '۱' => '1', '۲' => '2', '۳' => '3', '۴' => '4', '۵' => '5', '۶' => '6', '۷' => '7', '۸' => '8', '۹' => '9']);
+    $nationalCode = preg_replace('/\D+/', '', $nationalCode) ?? '';
+    $firstName = trim((string) ($data['first'] ?? $data['first_name'] ?? ''));
+    $lastName = trim((string) ($data['last'] ?? $data['last_name'] ?? ''));
+    if ($personnelCode === '' || $nationalCode === '' || $firstName === '' || $lastName === '') {
+        throw new RuntimeException('کد پرسنلی، کد ملی، نام و نام خانوادگی الزامی است.');
+    }
+    if (strlen($nationalCode) < 10 || strlen($nationalCode) > 30) {
+        throw new RuntimeException('کد ملی باید بین ۱۰ تا ۳۰ رقم باشد.');
+    }
+    $active = array_key_exists('active', $data) ? (!empty($data['active']) ? 1 : 0) : 1;
+    $fullName = trim($firstName . ' ' . $lastName);
+    $existing = db()->prepare('SELECT id FROM users WHERE employee_number = ? LIMIT 1');
+    $existing->execute([$personnelCode]);
+    $existingId = (int) ($existing->fetchColumn() ?: 0);
+    if ($id > 0 && $existingId > 0 && $existingId !== $id) {
+        throw new RuntimeException('این کد پرسنلی قبلاً ثبت شده است.');
+    }
+    // کد ملی باید یکتا باشد: اگر برای کارمند دیگری ثبت شده، ذخیره نمی‌شود (در ویرایش، خود همین کارمند مستثنا است).
+    $ownerStmt = db()->prepare('SELECT id, full_name FROM users WHERE national_code = ? AND id <> ? LIMIT 1');
+    $ownerStmt->execute([$nationalCode, $id ?: $existingId]);
+    $owner = $ownerStmt->fetch();
+    if ($owner) {
+        throw new RuntimeException('این کد ملی قبلاً برای کارمند «' . (string) $owner['full_name'] . '» ثبت شده است.');
+    }
+    $id = $id ?: $existingId;
+    if (is_file(__DIR__ . '/local-accounts.php')) {
+        require_once __DIR__ . '/local-accounts.php';
+    }
+    if (function_exists('lac_ensure_schema')) {
+        lac_ensure_schema();
+    }
+    $usernameTaken = static function (string $username, int $exceptId): bool {
+        $stmt = db()->prepare('SELECT COUNT(*) FROM users WHERE username = ? AND id <> ?');
+        $stmt->execute([$username, $exceptId]);
+        return (int) $stmt->fetchColumn() > 0;
+    };
+    if ($id > 0) {
+        $currentUser = db()->prepare('SELECT employee_number, auth_source FROM users WHERE id = ? LIMIT 1');
+        $currentUser->execute([$id]);
+        $current = $currentUser->fetch(PDO::FETCH_ASSOC) ?: null;
+        if ($current === null || trim((string) ($current['employee_number'] ?? '')) === '') {
+            throw new RuntimeException('کارمند پیدا نشد.');
+        }
+        $query = db()->prepare('UPDATE users SET full_name = ?, first_name = ?, last_name = ?, employee_number = ?, national_code = ?, is_active = ? WHERE id = ?');
+        $query->execute([$fullName, $firstName, $lastName, $personnelCode, $nationalCode, $active, $id]);
+        if ($query->rowCount() < 1) {
+            $check = db()->prepare('SELECT id FROM users WHERE id = ?');
+            $check->execute([$id]);
+            if (!$check->fetchColumn()) {
+                throw new RuntimeException('کارمند پیدا نشد.');
+            }
+        }
+        // رکورد قدیمی غذا (بدون ورود) مثل ایمپورت به حساب محلی تبدیل می‌شود؛ حساب دامین دست نمی‌خورد.
+        if ((string) ($current['auth_source'] ?? '') === 'food') {
+            if ($usernameTaken($personnelCode, $id)) {
+                throw new RuntimeException('نام کاربری «' . $personnelCode . '» قبلاً برای حساب دیگری استفاده شده است.');
+            }
+            $hash = function_exists('lac_default_hash') ? lac_default_hash() : password_hash('A@a12345', PASSWORD_DEFAULT);
+            db()->prepare("UPDATE users SET username = ?, password_hash = ?, auth_source = 'local', role = 'local_user', must_change_password = 1, is_active = ? WHERE id = ?")
+                ->execute([$personnelCode, $hash, $active, $id]);
+        }
+        return;
+    }
+    if ($usernameTaken($personnelCode, 0)) {
+        throw new RuntimeException('نام کاربری «' . $personnelCode . '» قبلاً برای حساب دیگری استفاده شده است.');
+    }
+    $hash = function_exists('lac_default_hash') ? lac_default_hash() : password_hash('A@a12345', PASSWORD_DEFAULT);
+    $query = db()->prepare("INSERT INTO users (username, password_hash, full_name, first_name, last_name, employee_number, national_code, role, auth_source, is_active, must_change_password) VALUES (?, ?, ?, ?, ?, ?, ?, 'local_user', 'local', ?, 1)");
+    $query->execute([$personnelCode, $hash, $fullName, $firstName, $lastName, $personnelCode, $nationalCode, $active]);
+}
+
+function food_ticket_api_save_guest_card(array $data, int $userId): void
+{
+    if (!db_table_exists('food_ticket_guest_cards')) {
+        throw new RuntimeException('ابتدا upgrade-1.12-food-ticket-management.sql را روی دیتابیس اجرا کنید.');
+    }
+    $id = max(0, (int) ($data['id'] ?? 0));
+    $card = food_ticket_normalize_guest_card($data['cardNumber'] ?? $data['card_uid'] ?? '');
+    $name = trim((string) ($data['guestName'] ?? $data['name'] ?? '')) ?: 'مهمان';
+    $dailyLimit = max(0, min(10000, (int) ($data['dailyLimit'] ?? 0)));
+    $active = array_key_exists('active', $data) ? (!empty($data['active']) ? 1 : 0) : 1;
+    if ($card === '' || strlen($card) > 120) {
+        throw new RuntimeException('شماره کارت مهمان معتبر نیست.');
+    }
+    if ($id > 0) {
+        $query = db()->prepare('UPDATE food_ticket_guest_cards SET card_uid = ?, guest_name = ?, daily_limit = ?, is_active = ?, updated_by = ? WHERE id = ?');
+        $query->execute([$card, $name, $dailyLimit, $active, $userId, $id]);
+    } else {
+        $query = db()->prepare('INSERT INTO food_ticket_guest_cards (card_uid, guest_name, daily_limit, is_active, updated_by) VALUES (?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE guest_name = VALUES(guest_name), daily_limit = VALUES(daily_limit), is_active = VALUES(is_active), updated_by = VALUES(updated_by)');
+        $query->execute([$card, $name, $dailyLimit, $active, $userId]);
+    }
+    food_ticket_sync_guest_card_config($userId);
+}
+
+function food_ticket_api_delete_guest_card(int $id, int $userId, string $cardNumber = ''): void
+{
+    if (!db_table_exists('food_ticket_guest_cards')) {
+        throw new RuntimeException('کارت مهمان پیدا نشد.');
+    }
+    if ($id > 0) {
+        $stmt = db()->prepare('DELETE FROM food_ticket_guest_cards WHERE id = ?');
+        $stmt->execute([$id]);
+        if ($stmt->rowCount() < 1) {
+            throw new RuntimeException('کارت مهمان پیدا نشد.');
+        }
+    } else {
+        $card = food_ticket_normalize_guest_card($cardNumber);
+        if ($card === '') {
+            throw new RuntimeException('کارت مهمان پیدا نشد.');
+        }
+        $stmt = db()->prepare('DELETE FROM food_ticket_guest_cards WHERE UPPER(REPLACE(REPLACE(REPLACE(card_uid, " ", ""), "-", ""), ":", "")) = ? OR card_uid = ?');
+        $stmt->execute([$card, $cardNumber]);
+        if ($stmt->rowCount() < 1) {
+            throw new RuntimeException('کارت مهمان پیدا نشد.');
+        }
+    }
+    food_ticket_sync_guest_card_config($userId);
+}
+
+/** Save and read back only the cap mode, independently of the other guest settings. */
+function food_ticket_save_guest_cap_mode(string $mode): string
+{
+    if (!in_array($mode, ['variable', 'requested'], true)) {
+        throw new RuntimeException('حالت سقف مهمان معتبر نیست.');
+    }
+    save_setting('food_guest_cap_mode', $mode);
+    if (function_exists('setting_forget_cache')) setting_forget_cache();
+    if (food_guest_cap_mode() !== $mode) throw new RuntimeException('ذخیرهٔ حالت سقف مهمان تأیید نشد.');
+    return $mode;
+}
+
+function food_ticket_api_save_config(array $data, array $user): void
+{
+    $dbFields = ['enabled', 'attendance', 'attendancePath', 'attendancePassword', 'attendanceTable', 'poll_seconds', 'pollSeconds', 'cutSourceRows', 'clear', 'clear_paths',
+        // بازهٔ کاری ورکر زیر همان مجوز ویرایش اتصال تردد قرار می‌گیرد.
+        'window_enabled', 'windowEnabled', 'window_days', 'windowDays', 'window_start', 'windowStart',
+        'window_end', 'windowEnd', 'window_margin_before_minutes', 'windowMarginBefore',
+        'window_margin_after_minutes', 'windowMarginAfter', 'idle_poll_seconds', 'idlePollSeconds',
+        'active_poll_ms', 'activePollMs', 'persistent_source_connection', 'persistentSourceConnection'];
+    $guestFields = ['guestCardUIDs', 'maxGuestTicketsPerDay', 'guestFoodType', 'guestCapMode', 'guestCapStart', 'guestCapCutoff', 'guestCapEnd', 'guestRequestSameDayCutoff'];
+    $printerPayload = is_array($data['printer'] ?? null) ? $data['printer'] : [];
+    $printerFields = ['printer_mode', 'printer_host', 'printer_port', 'printer_share'];
+    $designFields = ['company', 'title', 'footer', 'template'];
+    $hasDbFields = count(array_intersect(array_keys($data), $dbFields)) > 0;
+    $hasGuestFields = count(array_intersect(array_keys($data), $guestFields)) > 0;
+    $hasPrinterFields = count(array_intersect(array_keys($data), $printerFields)) > 0
+        || array_intersect(['mode', 'host', 'port', 'name'], array_keys($printerPayload)) !== [];
+    $hasDesignFields = array_intersect($designFields, array_keys($printerPayload)) !== []
+        || array_intersect($designFields, array_keys($data)) !== [];
+    if ($hasDbFields && !user_can($user, 'food.db_edit')) {
+        throw new RuntimeException('ویرایش اتصال پایگاه‌ها مجاز نیست.');
+    }
+    if ($hasGuestFields && !user_can($user, 'food.guest_edit')) {
+        throw new RuntimeException('ویرایش تنظیمات کارت مهمان مجاز نیست.');
+    }
+    if ($hasPrinterFields && !user_can($user, 'food.printer_edit')) {
+        throw new RuntimeException('ویرایش چاپگر مجاز نیست.');
+    }
+    if ($hasDesignFields && !user_can($user, 'food.design_edit')) {
+        throw new RuntimeException('ویرایش طراحی فیش مجاز نیست.');
+    }
+
+    if (array_key_exists('guestCapMode', $data) && !in_array((string) $data['guestCapMode'], ['variable', 'requested'], true)) {
+        throw new RuntimeException('حالت سقف مهمان معتبر نیست.');
+    }
+    $guestRequestSameDayCutoff = null;
+    if (array_key_exists('guestRequestSameDayCutoff', $data)) {
+        $rawCutoff = trim(food_ticket_normalize_digits((string) $data['guestRequestSameDayCutoff']));
+        if (!preg_match('/^(\d{1,2}):(\d{2})$/', $rawCutoff, $cutoffParts)
+            || (int) $cutoffParts[1] > 23
+            || (int) $cutoffParts[2] > 59) {
+            throw new RuntimeException('مهلت ثبت درخواست مهمان باید به‌صورت ساعت ۲۴ ساعته HH:MM باشد؛ مثلاً 09:30.');
+        }
+        $guestRequestSameDayCutoff = sprintf('%02d:%02d', (int) $cutoffParts[1], (int) $cutoffParts[2]);
+    }
+
+    // اگر چاپگر ویندوز انتخاب شد، حالت صف ویندوز اولویت دارد
+    // اگر از فرم printer.mode آمده، همان مبنا است (سوییچ Windows/TCP)
+    $printer = is_array($data['printer'] ?? null) ? $data['printer'] : [];
+    if (isset($printer['mode'])) {
+        $data['printer_mode'] = food_ticket_normalize_printer_mode($printer['mode']);
+    }
+    if (isset($printer['name'])) {
+        $data['printer_share'] = trim((string) $printer['name']);
+    }
+    if (isset($printer['host'])) {
+        $data['printer_host'] = trim((string) $printer['host']);
+    }
+    if (isset($printer['port'])) {
+        $data['printer_port'] = (int) $printer['port'];
+    }
+    // اگر IP چاپگر آمده و mode خالی است → tcp_raw
+    if (trim((string) ($printer['host'] ?? $data['printer_host'] ?? '')) !== '' && empty($data['printer_mode']) && empty($printer['mode'])) {
+        $data['printer_mode'] = 'tcp_raw';
+    }
+
+    $current = food_ticket_config();
+    $legacySourceKey = function_exists('food_ticket_legacy_key') ? food_ticket_legacy_key('api_object') : '';
+    $sourcePayload = is_array($data['attendance'] ?? null) ? $data['attendance'] : (is_array($data[$legacySourceKey] ?? null) ? $data[$legacySourceKey] : []);
+    $sourceDb = $sourcePayload;
+    $printer = is_array($data['printer'] ?? null) ? $data['printer'] : [];
+    $value = static function (array $source, string $key, mixed $fallback): mixed {
+        return array_key_exists($key, $source) ? $source[$key] : $fallback;
+    };
+    // ⚠️ محافظ ۱.۳۵: مقدار خالی هرگز جای مقدار سالمِ ذخیره‌شده را نمی‌گیرد.
+    // چرا: اگر پنل (به هر دلیلی، مثلاً کش خالی مرورگر) فرمی با فیلدهای خالی بفرستد،
+    // مسیر Access/سفارش و نام چاپگر پاک می‌شد و ماژول دیگر نمی‌توانست به سامانه وصل شود.
+    // برای پاک‌کردن عمدی باید clear=1 فرستاده شود.
+    $allowClear = !empty($data['clear']) || !empty($data['clear_paths']);
+    $keepIfEmpty = static function (string $incoming, mixed $stored) use ($allowClear): string {
+        $incoming = trim($incoming);
+        if ($incoming !== '') {
+            return $incoming;
+        }
+        return $allowClear ? '' : trim((string) $stored);
+    };
+    $attendancePath = $keepIfEmpty((string) $value($sourceDb, 'path', $value($data, 'attendancePath', $current['attendance_path'] ?? '')), $current['attendance_path'] ?? '');
+    // مسیر/جدول قدیمی سفارش Access از این API خوانده یا تغییر داده نمی‌شود.
+    $printerHost = $keepIfEmpty((string) $value($printer, 'host', $value($data, 'printerHost', $current['printer_host'] ?? '')), $current['printer_host'] ?? '');
+    $printerShare = $keepIfEmpty((string) $value($printer, 'name', $value($data, 'printerShare', $current['printer_share'] ?? '')), $current['printer_share'] ?? '');
+    $printerMode = food_ticket_normalize_printer_mode($value($printer, 'mode', $value($data, 'printer_mode', $current['printer_mode'] ?? 'tcp_raw')));
+    $modeExplicit = isset($printer['mode']) && trim((string) $printer['mode']) !== '';
+    if ($printerMode === 'windows_share' && $printerShare === '') {
+        if ($modeExplicit) {
+            throw new RuntimeException('برای چاپ از صف ویندوز باید نام چاپگر را انتخاب کنید.');
+        }
+        // درخواست قدیمی بدون mode صریح: اگر IP هست، حالت شبکه
+        if ($printerHost !== '') {
+            $printerMode = 'tcp_raw';
+        }
+    }
+    // اگر UI فیلد enabled نفرستد ولی مسیرها پر باشد → خودکار فعال
+    if (array_key_exists('enabled', $data)) {
+        $enabledFlag = !empty($data['enabled']) ? 1 : 0;
+    } elseif ($attendancePath !== '' && function_exists('food_order_mode') && food_order_mode() === 'INTERNAL-DB') {
+        $enabledFlag = 1;
+    } else {
+        $enabledFlag = !empty($current['enabled']) ? 1 : 0;
+    }
+    // کلیدهای پنجرهٔ کاری بدون تغییر عبور داده می‌شوند تا food_ticket_window_save()
+    // بتواند فقط فیلدهایی را که پنل واقعاً فرستاده به‌روزرسانی کند.
+    $windowPassthrough = [];
+    foreach ([
+        'window_enabled', 'windowEnabled', 'window_days', 'windowDays',
+        'window_start', 'windowStart', 'window_end', 'windowEnd',
+        'window_margin_before_minutes', 'windowMarginBefore',
+        'window_margin_after_minutes', 'windowMarginAfter',
+        'idle_poll_seconds', 'idlePollSeconds', 'active_poll_ms', 'activePollMs',
+        'persistent_source_connection', 'persistentSourceConnection',
+    ] as $windowKey) {
+        if (array_key_exists($windowKey, $data)) {
+            $windowPassthrough[$windowKey] = $data[$windowKey];
+        }
+    }
+    food_ticket_save_config($windowPassthrough + [
+        'enabled' => $enabledFlag,
+        'attendance_path' => $attendancePath,
+        'attendance_password' => $value($sourceDb, 'password', $value($data, 'attendancePassword', '')),
+        'printer_host' => $printerHost,
+        'printer_port' => $value($printer, 'port', $value($data, 'printerPort', $current['printer_port'] ?? 9100)),
+        'printer_share' => $printerShare,
+        'printer_mode' => $printerMode,
+        'poll_seconds' => max(1, min(60, (int) ($value($data, 'poll_seconds', $value($data, 'pollSeconds', $current['poll_seconds'] ?? 2)) ?: ($current['poll_seconds'] ?? 2)))),
+        'max_batch' => $value($data, 'max_batch', $current['max_batch'] ?? 100),
+        'guest_card_uids' => $value($data, 'guestCardUIDs', $current['guest_card_uids'] ?? ''),
+        'max_guest_daily' => $value($data, 'maxGuestTicketsPerDay', $current['max_guest_daily'] ?? 20),
+        'cut_source_rows' => $value($sourceDb, 'cut_source_rows', $value($data, 'cutSourceRows', $current['cut_source_rows'] ?? 1)),
+    ], $user);
+    if (array_key_exists('guestCapMode', $data)) {
+        $guestCapModeIn = (string) ($data['guestCapMode'] ?? '');
+        save_setting('food_guest_cap_mode', $guestCapModeIn);
+    }
+    $capTimeKeys = ['guestCapStart' => 'food_guest_cap_start', 'guestCapCutoff' => 'food_guest_cap_cutoff', 'guestCapEnd' => 'food_guest_cap_end'];
+    foreach ($capTimeKeys as $field => $settingKey) {
+        if (array_key_exists($field, $data) && preg_match('/^\d{2}:\d{2}$/', (string) $data[$field])) {
+            save_setting($settingKey, (string) $data[$field] . ':00');
+        }
+    }
+    if ($guestRequestSameDayCutoff !== null) {
+        save_setting('food_guest_request_same_day_cutoff', $guestRequestSameDayCutoff);
+    }
+    if (user_can($user, 'food.design_edit') && array_key_exists('brandName', $data) && trim((string) $data['brandName']) !== '') {
+        save_setting('food_ticket_brand_name', trim((string) $data['brandName']));
+        if (array_key_exists('brandLogo', $data)) {
+            save_setting('food_ticket_brand_logo', trim((string) $data['brandLogo']));
+        }
+    }
+}
+
+
+/**
+ * باز کردن دیالوگ انتخاب فایل/پوشه روی خود سرور Windows (بدون نیاز به سرویس C#).
+ * پنجره روی Desktop همان سرور باز می‌شود.
+ */
+
+/**
+ * مرورگر مسیر سرور (بدون دیالوگ دسکتاپ — مناسب IIS/Apache به‌صورت سرویس).
+ */
+function food_ticket_browse_list(?string $path = null, string $mode = 'file'): array
+{
+    if (strncasecmp(PHP_OS, 'WIN', 3) !== 0) {
+        throw new RuntimeException('مرور مسیر فقط روی سرور Windows در دسترس است. مسیر را دستی وارد کنید.');
+    }
+
+    $path = $path !== null ? trim(str_replace(['/', "\0"], ['\\', ''], $path)) : '';
+    if ($path === '') {
+        // لیست درایوها
+        $drives = [];
+        foreach (range('A', 'Z') as $letter) {
+            $root = $letter . ':\\';
+            if (@is_dir($root)) {
+                $drives[] = ['name' => $letter . ':', 'path' => $root, 'type' => 'drive'];
+            }
+        }
+        // اشتراک‌های رایج شبکه را دستی می‌توان تایپ کرد
+        return [
+            'path' => '',
+            'parent' => null,
+            'dirs' => $drives,
+            'files' => [],
+            'mode' => $mode,
+            'message' => 'یک درایو را انتخاب کنید یا مسیر UNC مثل \\\\server\\share را دستی وارد کنید.',
+        ];
+    }
+
+    // اجازه مسیر UNC
+    $real = $path;
+    if (!preg_match('/^[A-Za-z]:\\\\/', $path) && !str_starts_with($path, '\\\\')) {
+        throw new RuntimeException('مسیر نامعتبر است.');
+    }
+    if (!@is_dir($real) && !@is_file($real)) {
+        throw new RuntimeException('مسیر روی سرور یافت نشد: ' . $path);
+    }
+    if (@is_file($real)) {
+        return [
+            'path' => $real,
+            'parent' => dirname($real),
+            'dirs' => [],
+            'files' => [['name' => basename($real), 'path' => $real, 'type' => 'file']],
+            'mode' => $mode,
+            'selected' => $real,
+        ];
+    }
+
+    $parent = null;
+    if (preg_match('/^[A-Za-z]:\\\\$/', $real)) {
+        $parent = '';
+    } elseif (str_starts_with($real, '\\\\')) {
+        $parts = explode('\\', trim($real, '\\'));
+        $parent = count($parts) > 2 ? ('\\\\' . implode('\\', array_slice($parts, 0, -1))) : '';
+    } else {
+        $parent = dirname($real);
+    }
+
+    $dirs = [];
+    $files = [];
+    $items = @scandir($real) ?: [];
+    foreach ($items as $item) {
+        if ($item === '.' || $item === '..') {
+            continue;
+        }
+        $full = rtrim($real, '\\') . '\\' . $item;
+        if (@is_dir($full)) {
+            $dirs[] = ['name' => $item, 'path' => $full, 'type' => 'dir'];
+        } elseif ($mode !== 'folder') {
+            $ext = strtolower(pathinfo($item, PATHINFO_EXTENSION));
+            if (in_array($ext, ['mdb', 'accdb', ''], true) || $mode === 'any') {
+                $files[] = ['name' => $item, 'path' => $full, 'type' => 'file'];
+            }
+        }
+    }
+    usort($dirs, static fn ($a, $b) => strcasecmp($a['name'], $b['name']));
+    usort($files, static fn ($a, $b) => strcasecmp($a['name'], $b['name']));
+
+    return [
+        'path' => $real,
+        'parent' => $parent,
+        'dirs' => $dirs,
+        'files' => $files,
+        'mode' => $mode,
+    ];
+}
+
+function food_ticket_php_native_browse(string $route): array
+{
+    // سازگاری: اگر body خالی باشد فقط ریشه را برگردان
+    $body = [];
+    if (function_exists('food_ticket_api_body')) {
+        try {
+            $body = food_ticket_api_body();
+        } catch (Throwable) {
+            $body = [];
+        }
+    }
+    $path = isset($body['path']) ? (string) $body['path'] : '';
+    $mode = $route === 'browse-folder' ? 'folder' : 'file';
+    if (!empty($body['select']) && is_string($body['select'])) {
+        $selected = trim(str_replace('/', '\\', $body['select']));
+        if ($mode === 'folder' && @is_dir($selected)) {
+            return ['path' => $selected];
+        }
+        if ($mode === 'file' && @is_file($selected)) {
+            return ['path' => $selected];
+        }
+        throw new RuntimeException('مسیر انتخاب‌شده معتبر نیست.');
+    }
+    return food_ticket_browse_list($path === '' ? null : $path, $mode);
+}
+
+function food_ticket_windows_browse(string $route, array $user): array
+{
+    if (!food_ticket_is_primary_admin($user)) {
+        throw new RuntimeException('فقط ادمین اصلی می‌تواند مسیر پایگاه‌ها را انتخاب کند.');
+    }
+    // مرورگر فایل مبتنی بر لیست پوشه — بدون نیاز به Desktop/Session تعاملی
+    return food_ticket_php_native_browse($route);
+}
+
+
+/**
+ * وضعیت سلامت پنل — شکل پاسخ سازگار با SPA (renderHealthPayload)
+ */
+function food_ticket_api_health(): array
+{
+    $config = food_ticket_config(true);
+    $attendancePath = trim((string) ($config['attendance_path'] ?? ''));
+    $mode = food_ticket_normalize_printer_mode($config['printer_mode'] ?? 'tcp_raw');
+    $host = trim((string) ($config['printer_host'] ?? ''));
+    $port = (int) ($config['printer_port'] ?? 9100);
+    $name = trim((string) ($config['printer_share'] ?? ''));
+    $printerReady = $mode === 'tcp_raw' ? ($host !== '') : ($name !== '' || $host !== '');
+
+    $records = 0;
+    $lastEventAt = '';
+    $pending = 0;
+    $printError = 0;
+    $lastError = '';
+    try {
+        $records = (int) db()->query('SELECT COUNT(*) FROM food_ticket_events WHERE event_type <> "unknown"')->fetchColumn();
+        $pending = (int) db()->query('SELECT COUNT(*) FROM food_ticket_events WHERE event_type <> "unknown" AND print_status IN ("pending","printing")')->fetchColumn();
+        $printError = (int) db()->query('SELECT COUNT(*) FROM food_ticket_events WHERE event_type <> "unknown" AND print_status IN ("print_error","failed")')->fetchColumn();
+        $last = db()->query('SELECT created_at, last_error FROM food_ticket_events WHERE event_type <> "unknown" ORDER BY id DESC LIMIT 1')->fetch();
+        if ($last) {
+            $lastEventAt = (string) ($last['created_at'] ?? '');
+            $lastError = (string) ($last['last_error'] ?? '');
+        }
+    } catch (Throwable $e) {
+        $lastError = $e->getMessage();
+    }
+
+    $ssoOk = true;
+    try {
+        $ssoOk = strlen((string) (function_exists('cfg') ? cfg('app.key', 'x') : 'x')) >= 8;
+    } catch (Throwable) {
+        $ssoOk = false;
+    }
+
+    return [
+        'service' => 'ready',
+        'dotnet' => false, // موتور PHP worker
+        'php_worker' => true,
+        'database' => [
+            'path' => 'mysql:food_ticket_events',
+            'writable' => true,
+            'records' => $records,
+        ],
+        'access' => [
+            'configured' => $attendancePath !== '',
+            'path' => $attendancePath,
+            'live' => false,
+        ],
+        'printer' => [
+            'mode' => $mode === 'tcp_raw' ? 'socket' : 'windows-spooler',
+            'name' => $name,
+            'host' => $host,
+            'port' => $port,
+            'ready' => $printerReady,
+        ],
+        'queue' => [
+            'pending' => $pending,
+            'print_error' => $printError,
+            'last_event_at' => $lastEventAt,
+        ],
+        'sso' => $ssoOk,
+        'last_error' => $lastError,
+        'enabled' => !empty($config['enabled']),
+    ];
+}
+
+/**
+ * آزمون کامل موتور — معادل SelfTest سرویس ویندوز / منطق runtime
+ */
+function food_ticket_api_self_test(): array
+{
+    $checks = [];
+    $config = food_ticket_config(true);
+    $at = date('c');
+
+    // 1) منطق پارس تاریخ/ساعت و قالب
+    if (function_exists('food_ticket_self_test_logic')) {
+        $logic = food_ticket_self_test_logic();
+        $logicOk = !in_array(false, $logic, true);
+        $checks[] = [
+            'name' => 'منطق موتور (تاریخ/ساعت/قالب)',
+            'ok' => $logicOk,
+            'message' => $logicOk ? 'پارس تاریخ/ساعت و قالب فیش سالم است.' : ('خطا در: ' . implode(', ', array_keys(array_filter($logic, static fn ($v) => !$v)))),
+            'detail' => $logic,
+        ];
+    } else {
+        $checks[] = ['name' => 'منطق موتور', 'ok' => false, 'message' => 'food-ticket-runtime.php بارگذاری نشد.'];
+    }
+
+    // 2) MySQL events
+    try {
+        $count = (int) db()->query('SELECT COUNT(*) FROM food_ticket_events WHERE event_type <> "unknown"')->fetchColumn();
+        $checks[] = ['name' => 'دیتابیس داخلی مانیتورینگ', 'ok' => true, 'message' => "جدول events قابل خواندن است؛ {$count} رکورد."];
+    } catch (Throwable $e) {
+        $checks[] = ['name' => 'دیتابیس داخلی مانیتورینگ', 'ok' => false, 'message' => $e->getMessage()];
+    }
+
+    // 3) منبع تردد
+    $sourceDb = null;
+    try {
+        $attendancePath = trim((string) ($config['attendance_path'] ?? ''));
+        if ($attendancePath === '') {
+            throw new RuntimeException('مسیر منبع تردد تنظیم نشده است.');
+        }
+        $sourceDb = food_ticket_odbc($attendancePath, food_ticket_attendance_password($config));
+        food_ticket_access_rows($sourceDb, food_ticket_source_table(), 3);
+        $checks[] = ['name' => 'تردد', 'ok' => true, 'message' => 'اتصال موفق است.'];
+    } catch (Throwable $e) {
+        $checks[] = ['name' => 'تردد', 'ok' => false, 'message' => 'اتصال برقرار نشد.'];
+    } finally {
+        if (function_exists('food_ticket_access_close')) {
+            food_ticket_access_close($sourceDb);
+        }
+    }
+
+    // 4) بررسی دسترس‌پذیری سفارش‌ها
+    try {
+        food_order_schema_ensure();
+        $checks[] = ['name' => 'سفارش‌ها', 'ok' => true, 'message' => 'بررسی سفارش‌ها موفق بود.'];
+    } catch (Throwable $e) {
+        $checks[] = ['name' => 'سفارش‌ها', 'ok' => false, 'message' => 'بررسی سفارش‌ها ناموفق بود.'];
+    }
+
+    // 5) Printer config (بدون اجبار چاپ فیزیکی — فقط آمادگی)
+    $mode = food_ticket_normalize_printer_mode($config['printer_mode'] ?? 'tcp_raw');
+    $host = trim((string) ($config['printer_host'] ?? ''));
+    $name = trim((string) ($config['printer_share'] ?? ''));
+    if ($mode === 'tcp_raw') {
+        $ok = $host !== '';
+        $msg = $ok ? ("چاپگر شبکه: {$host}:" . (int) ($config['printer_port'] ?? 9100)) : 'آدرس چاپگر شبکه (Host) تنظیم نشده است.';
+    } else {
+        $ok = $name !== '' || $host !== '';
+        $msg = $ok ? ('چاپگر Windows: ' . ($name ?: $host)) : 'نام چاپگر Windows تنظیم نشده است.';
+    }
+    $checks[] = ['name' => 'چاپگر (تنظیمات)', 'ok' => $ok, 'message' => $msg];
+
+    // 6) enabled flag
+    $enabled = !empty($config['enabled']);
+    $checks[] = [
+        'name' => 'فعال‌بودن پردازش',
+        'ok' => $enabled,
+        'message' => $enabled ? 'پردازش چاپ فیش فعال است.' : 'پردازش غیرفعال است — مسیرها را ذخیره کنید یا enabled را روشن کنید.',
+    ];
+
+    $allOk = true;
+    foreach ($checks as $c) {
+        if (empty($c['ok'])) {
+            $allOk = false;
+            break;
+        }
+    }
+
+    return [
+        'ok' => $allOk,
+        'checks' => $checks,
+        'at' => $at,
+        'message' => $allOk ? 'آزمون کامل موفق بود.' : 'برخی بررسی‌ها ناموفق بود.',
+    ];
+}
+
+function food_ticket_api_upload_access_file(array $user): never
+{
+    $kind = strtolower(trim((string) ($_POST['kind'] ?? '')));
+    if ($kind !== 'attendance') {
+        food_ticket_api_json(['error' => 'نوع فایل پشتیبانی نمی‌شود.'], 400);
+    }
+    $upload = $_FILES['file'] ?? null;
+    if (!is_array($upload) || (int) ($upload['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_OK) {
+        food_ticket_api_json(['error' => 'فایل دریافت نشد یا بارگذاری ناقص بود.'], 400);
+    }
+    $originalName = (string) ($upload['name'] ?? '');
+    $extension = strtolower(pathinfo($originalName, PATHINFO_EXTENSION));
+    if (!in_array($extension, ['mdb', 'accdb'], true)) {
+        food_ticket_api_json(['error' => 'فقط فایل‌های .mdb و .accdb مجاز هستند.'], 400);
+    }
+    $size = (int) ($upload['size'] ?? 0);
+    if ($size < 1 || $size > 128 * 1024 * 1024) {
+        food_ticket_api_json(['error' => 'اندازهٔ فایل باید کمتر از ۱۲۸ مگابایت باشد.'], 413);
+    }
+    if (!is_uploaded_file((string) ($upload['tmp_name'] ?? ''))) {
+        food_ticket_api_json(['error' => 'اعتبار فایل بارگذاری‌شده تأیید نشد.'], 400);
+    }
+    $dir = APP_ROOT . '/storage/private/food_ticket_access';
+    if (!is_dir($dir) && !@mkdir($dir, 0700, true) && !is_dir($dir)) {
+        food_ticket_api_json(['error' => 'پوشهٔ امن نگهداری فایل دیتابیس ساخته نشد.'], 500);
+    }
+    // جلوگیری از دسترسی مستقیم HTTP حتی در استقرارهایی که storage زیر web-root است.
+    @file_put_contents($dir . '/.htaccess', "Require all denied\nOptions -Indexes\n");
+    @file_put_contents($dir . '/web.config', '<?xml version="1.0" encoding="UTF-8"?><configuration><system.webServer><security><authorization><remove users="*" roles="" verbs=""/><add accessType="Deny" users="*"/></authorization></security><directoryBrowse enabled="false"/></system.webServer></configuration>');
+    $filename = $kind . '-' . bin2hex(random_bytes(12)) . '.' . $extension;
+    $destination = $dir . '/' . $filename;
+    if (!@move_uploaded_file((string) $upload['tmp_name'], $destination)) {
+        food_ticket_api_json(['error' => 'ذخیرهٔ فایل در پوشهٔ امن سرور ناموفق بود.'], 500);
+    }
+    @chmod($destination, 0600);
+    $realPath = realpath($destination);
+    if (!is_string($realPath) || $realPath === '') {
+        @unlink($destination);
+        food_ticket_api_json(['error' => 'مسیر نهایی فایل روی سرور خوانده نشد.'], 500);
+    }
+    $pdo = db();
+    $pdo->beginTransaction();
+    try {
+        $column = food_ticket_db_column('attendance_path');
+        if (!preg_match('/^[A-Za-z0-9_]+$/', $column)) {
+            throw new RuntimeException('نام ستون مسیر دیتابیس معتبر نیست.');
+        }
+        $exists = $pdo->query('SELECT id FROM food_ticket_config WHERE id = 1')->fetchColumn();
+        if ($exists === false) {
+            throw new RuntimeException('ردیف تنظیمات فیش غذا ساخته نشده است؛ ابتدا تنظیمات را در پنل ذخیره کنید.');
+        }
+        $stmt = $pdo->prepare('UPDATE food_ticket_config SET `' . $column . '` = ? WHERE id = 1');
+        $stmt->execute([$realPath]);
+        $savedPath = db()->query('SELECT `' . $column . '` FROM food_ticket_config WHERE id = 1')->fetchColumn();
+        if (!is_string($savedPath) || $savedPath !== $realPath) {
+            throw new RuntimeException('مسیر فایل در تنظیمات ذخیره نشد یا با مسیر بارگذاری‌شده یکی نیست.');
+        }
+        save_audit_required((int) ($user['id'] ?? 0), 'food_ticket_access_database_uploaded', null, ['kind' => $kind, 'filename' => $filename, 'size' => $size]);
+        food_ticket_config(true);
+        $pdo->commit();
+        food_ticket_api_json(['ok' => true, 'kind' => $kind, 'path' => $realPath, 'message' => 'فایل بارگذاری شد و مسیر سرور ذخیره شد.']);
+    } catch (Throwable $e) {
+        if ($pdo->inTransaction()) {
+            $pdo->rollBack();
+        }
+        @unlink($destination);
+        food_ticket_api_json(['error' => 'فایل بارگذاری شد اما مسیر در تنظیمات ذخیره نشد: ' . $e->getMessage()], 500);
+    }
+}
+
+function food_ticket_api_handle(string $route, array $user): never
+{
+    require_food_ticket_access();
+    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+        require_csrf();
+    }
+    // قفل فایل session را همین‌جا آزاد کن: پایش، سلامت، سفارش‌ها و چاپگرها هم‌زمان صدا زده می‌شوند و تا پایان
+    // هر درخواست کند (Access/PowerShell) بقیه پشت قفل session صف می‌ماندند؛ همین باعث «اسلوموشن» شدن فرم می‌شد.
+    if (function_exists('session_write_close') && session_status() === PHP_SESSION_ACTIVE) {
+        @session_write_close();
+    }
+    $route = rawurldecode(ltrim(trim($route), '/'));
+    if (str_starts_with($route, 'api/')) {
+        $route = substr($route, 4);
+    }
+    // querystring داخل route نماند
+    if (str_contains($route, '?')) {
+        $route = strstr($route, '?', true) ?: $route;
+    }
+    $perfRoute = substr((string) preg_replace('/[^a-z0-9_\/-]/i', '', $route), 0, 80);
+    $perfMethod = strtoupper((string) ($_SERVER['REQUEST_METHOD'] ?? 'GET'));
+    $perfStartedAt = microtime(true);
+    register_shutdown_function(static function () use ($perfRoute, $perfMethod, $perfStartedAt): void {
+        $durationMs = (int) round((microtime(true) - $perfStartedAt) * 1000);
+        if ($durationMs >= 1000) {
+            error_log('ITSM slow food-ticket API: route=' . $perfRoute . '; method=' . $perfMethod . '; duration_ms=' . $durationMs . '; status=' . http_response_code());
+        }
+    });
+    if (!food_ticket_route_allowed($user, $route)) {
+        food_ticket_api_json(['error' => 'دسترسی شما به این بخش از پنل چاپ فیش مجاز نیست.'], 403);
+    }
+    if (str_starts_with($route, 'food-menu/')) {
+        if (!function_exists('food_order_menu_api_handle')) {
+            food_ticket_api_json(['error' => 'ماژول برنامه غذایی بارگذاری نشده است.'], 503);
+        }
+        food_order_menu_api_handle($route, $user);
+    }
+    try {
+        if ($_SERVER['REQUEST_METHOD'] === 'GET' && $route === 'config') {
+            food_ticket_api_json(food_ticket_api_config($user));
+        }
+        if ($_SERVER['REQUEST_METHOD'] === 'GET' && $route === 'diag-source_row-delete') {
+            // ابزار تشخیص حذف SOURCE_TABLE — فقط خواندنی؛ با ?delete=1 یک ردیف نمونه واقعاً حذف می‌شود.
+            require APP_ROOT . '/tools/diag_source_row_delete.php';
+            exit;
+        }
+        if ($_SERVER['REQUEST_METHOD'] === 'GET' && in_array($route, ['dashboard-data', 'report-data'], true)) {
+            $from = food_ticket_parse_date((string) ($_GET['from'] ?? ''));
+            $to = food_ticket_parse_date((string) ($_GET['to'] ?? ''));
+            if ($from === null || $to === null || $from > $to) {
+                food_ticket_api_json(['error' => 'بازهٔ تاریخ معتبر نیست.'], 400);
+            }
+            $lunchSummary = food_order_report_summary($from, $to, 'lunch');
+            $dinnerSummary = food_order_report_summary($from, $to, 'dinner');
+            // هر دو endpoint ردیف‌های ناهار/شام و فعال/لغوشده را نگه می‌دارند؛ داشبورد هم XLSX کامل می‌سازد.
+            $orderRows = food_order_report_rows_range($from, $to);
+            $monitoringRows = food_ticket_api_monitoring($from, $to);
+            food_ticket_api_json([
+                'monitoring' => $monitoringRows,
+                'items' => $monitoringRows,
+                'orders' => $orderRows,
+                'order_summary' => $lunchSummary,
+                'dinner_order_summary' => $dinnerSummary,
+                'order_summaries' => ['lunch' => $lunchSummary, 'dinner' => $dinnerSummary],
+                'active_employee_count' => (int) db()->query('SELECT COUNT(*) FROM users WHERE is_active = 1')->fetchColumn(),
+                'from' => $from,
+                'to' => $to,
+            ]);
+        }
+        if ($_SERVER['REQUEST_METHOD'] === 'GET' && $route === 'monitoring') {
+            $fromRaw = isset($_GET['from']) ? (string) $_GET['from'] : null;
+            $toRaw = isset($_GET['to']) ? (string) $_GET['to'] : null;
+            if (($fromRaw === null) !== ($toRaw === null)) {
+                food_ticket_api_json(['error' => 'تاریخ شروع و پایان گزارش باید با هم ارسال شوند.'], 400);
+            }
+            if ($fromRaw !== null) {
+                $from = food_ticket_parse_date($fromRaw);
+                $to = food_ticket_parse_date((string) $toRaw);
+                if ($from === null || $to === null || $from > $to) {
+                    food_ticket_api_json(['error' => 'بازهٔ تاریخ گزارش معتبر نیست.'], 400);
+                }
+                food_ticket_api_json(['items' => food_ticket_api_monitoring($from, $to), 'from' => $from, 'to' => $to]);
+            }
+            food_ticket_api_json(['items' => food_ticket_api_monitoring()]);
+        }
+        if ($_SERVER['REQUEST_METHOD'] === 'GET' && $route === 'aggregate-report') {
+            $aggFrom = food_ticket_parse_date((string) ($_GET['from'] ?? ''));
+            $aggTo = food_ticket_parse_date((string) ($_GET['to'] ?? ''));
+            if ($aggFrom === null || $aggTo === null || $aggFrom > $aggTo) {
+                food_ticket_api_json(['error' => 'بازهٔ تاریخ گزارش تجمیعی معتبر نیست.'], 400);
+            }
+            food_ticket_api_json(['ok' => true] + food_ticket_api_aggregate_report($aggFrom, $aggTo)
+                + ['columns' => food_ticket_aggregate_columns()]);
+        }
+        if ($_SERVER['REQUEST_METHOD'] === 'GET' && $route === 'aggregate-report-export') {
+            $aggFrom = food_ticket_parse_date((string) ($_GET['from'] ?? ''));
+            $aggTo = food_ticket_parse_date((string) ($_GET['to'] ?? ''));
+            if ($aggFrom === null || $aggTo === null || $aggFrom > $aggTo) {
+                food_ticket_api_json(['error' => 'بازهٔ تاریخ گزارش تجمیعی معتبر نیست.'], 400);
+            }
+            food_ticket_aggregate_export($aggFrom, $aggTo, (string) ($_GET['fields'] ?? ''));
+        }
+        if ($_SERVER['REQUEST_METHOD'] === 'GET' && $route === 'absent') {
+            $legacyDate = (string) ($_GET['date'] ?? $_GET['food_date'] ?? '');
+            $fromRaw = isset($_GET['from']) ? (string) $_GET['from'] : ($legacyDate !== '' ? $legacyDate : date('Y-m-d'));
+            $toRaw = isset($_GET['to']) ? (string) $_GET['to'] : ($legacyDate !== '' ? $legacyDate : $fromRaw);
+            $from = food_ticket_parse_date($fromRaw);
+            $to = food_ticket_parse_date($toRaw);
+            if ($from === null || $to === null || $from > $to) {
+                food_ticket_api_json(['error' => 'بازهٔ تاریخ گزارش معتبر نیست.'], 400);
+            }
+            food_ticket_api_json(['items' => food_ticket_api_absent($from, $to), 'from' => $from, 'to' => $to]);
+        }
+        if ($_SERVER['REQUEST_METHOD'] === 'GET' && $route === 'guest-requests-report') {
+            // گزارش درخواست‌های غذای مهمان مدیران؛ فیلتر معاونت: all یا شناسهٔ معاونت
+            $from = food_ticket_parse_date((string) ($_GET['from'] ?? ''));
+            $to = food_ticket_parse_date((string) ($_GET['to'] ?? ''));
+            if ($from === null || $to === null || $from > $to) {
+                food_ticket_api_json(['error' => 'بازهٔ تاریخ گزارش معتبر نیست.'], 400);
+            }
+            $deputyRaw = trim((string) ($_GET['deputy_id'] ?? 'all'));
+            if ($deputyRaw !== 'all' && !ctype_digit($deputyRaw)) {
+                food_ticket_api_json(['error' => 'فیلتر معاونت معتبر نیست.'], 400);
+            }
+            food_ticket_api_json(food_ticket_api_guest_requests_report($from, $to, $deputyRaw));
+        }
+        if ($_SERVER['REQUEST_METHOD'] === 'GET' && $route === 'employees') {
+            food_ticket_api_json(['items' => food_ticket_api_employees()]);
+        }
+        if ($_SERVER['REQUEST_METHOD'] === 'GET' && $route === 'guest-cards') {
+            $guestConfig = food_ticket_config();
+            food_ticket_api_json([
+                'items' => food_ticket_api_guest_cards(),
+                'maxGuestTicketsPerDay' => (int) ($guestConfig['max_guest_daily'] ?? 20),
+                'guestCapMode' => food_guest_cap_mode(),
+                'guestCapStart' => substr(food_guest_cap_start(), 0, 5),
+                'guestCapCutoff' => substr(food_guest_cap_cutoff(), 0, 5),
+                'guestCapEnd' => substr(food_guest_cap_end(), 0, 5),
+                'guestRequestSameDayCutoff' => food_guest_request_same_day_cutoff(),
+            ]);
+        }
+        if ($_SERVER['REQUEST_METHOD'] === 'POST' && $route === 'guest-cap') {
+            // The mode is independent of the rest of the guest form and its optional fields.
+            $body = food_ticket_api_body();
+            $mode = food_ticket_save_guest_cap_mode((string) ($body['mode'] ?? ''));
+            food_ticket_api_json(['ok' => true, 'mode' => $mode]);
+        }
+        if ($_SERVER['REQUEST_METHOD'] === 'GET' && $route === 'guest-cap') {
+            // سقف فعلی: یا جمع درخواست مهمان معاونت‌ها، یا تعداد داخل ساختمان
+            $nowTime = date('H:i:s');
+            $today = function_exists('food_order_today') ? food_order_today() : date('Y-m-d');
+            $requested = function_exists('food_guest_requested_total') ? food_guest_requested_total($today) : null;
+            $capNow = food_guest_cap_mode() === 'requested'
+                ? $requested
+                : food_ticket_guest_variable_cap($today, $nowTime);
+            $insideNow = null;
+            try {
+                $insideNow = (int) db()->query('SELECT COUNT(*) FROM traffic_visits WHERE visit_date = CURDATE() AND exit_time IS NULL')->fetchColumn();
+            } catch (Throwable) {
+                $insideNow = null;
+            }
+            $guestCfg = food_ticket_config();
+            try {
+                $issued = food_ticket_guest_issued_total($today);
+            } catch (Throwable $e) {
+                $issued = null;
+            }
+            food_ticket_api_json([
+                'mode' => food_guest_cap_mode(),
+                'time' => substr($nowTime, 0, 5),
+                'cap' => $capNow,
+                'requested' => $requested,
+                'issued' => $issued,
+                'remaining' => $issued === null || $capNow === null ? null : max(0, $capNow - $issued),
+                'inside' => $insideNow,
+                'fallback' => (int) ($guestCfg['max_guest_daily'] ?? 0),
+            ]);
+        }
+        if ($_SERVER['REQUEST_METHOD'] === 'GET' && $route === 'food-manual-attendance') {
+            $manualDate = food_ticket_iso_date_input($_GET['date'] ?? '') ?? food_ticket_manual_attendance_today();
+            food_ticket_api_json(food_ticket_api_manual_attendance($manualDate));
+        }
+        if ($_SERVER['REQUEST_METHOD'] === 'POST' && $route === 'food-manual-attendance') {
+            $body = food_ticket_api_body();
+            // ۱.۶۲.۹: ثبت دستی برای امروز یا روزهای قبل مجاز است؛ تاریخ آینده را خود تابع رد می‌کند.
+            $manualDate = food_ticket_iso_date_input($body['date'] ?? '') ?? food_ticket_manual_attendance_today();
+            $body['date'] = $manualDate;
+            $result = food_ticket_api_manual_attendance_save_many($body, $user);
+            food_ticket_api_json($result + food_ticket_api_manual_attendance($manualDate));
+        }
+        if ($_SERVER['REQUEST_METHOD'] === 'GET' && $route === 'food-groups') {
+            $groupsDate = (string) ($_GET['date'] ?? '');
+            if ($groupsDate !== '') {
+                $parsedDate = food_ticket_parse_date($groupsDate);
+                $groupsDate = $parsedDate ?? '';
+            }
+            food_ticket_api_json(food_ticket_api_groups($groupsDate, $user));
+        }
+        // وضعیت غیبت روزانه برای فرم مدیریت گروه/کارکنان (بدون صفحهٔ جداگانه)
+        if ($_SERVER['REQUEST_METHOD'] === 'GET' && $route === 'absence-status') {
+            $absenceGroup = (int) ($_GET['group_id'] ?? $_GET['group'] ?? 0);
+            // date= شمسی (۱۴۰۵/۰۷/۱۴) یا میلادی (2026-10-06) پذیرفته می‌شود
+            $absenceDate = food_ticket_iso_date_input($_GET['date'] ?? '') ?? date('Y-m-d');
+            food_ticket_api_json(food_ticket_api_absence_status($absenceGroup, $absenceDate, $user));
+        }
+        if ($_SERVER['REQUEST_METHOD'] === 'GET' && $route === 'orders') {
+            $reqDate = (string) ($_GET['date'] ?? date('Y-m-d'));
+            $reqJalali = trim((string) ($_GET['jalali'] ?? ''));
+            $reqTo = trim((string) ($_GET['to'] ?? '')) ?: null;
+            food_ticket_api_json(['items' => food_ticket_api_orders($reqDate, $reqJalali, $reqTo)]);
+        }
+        if ($_SERVER['REQUEST_METHOD'] === 'GET' && $route === 'print-diag') {
+            food_ticket_api_json(food_ticket_api_print_diag());
+        }
+        if ($_SERVER['REQUEST_METHOD'] === 'GET' && $route === 'printers') {
+            $config = food_ticket_config();
+            $installed = food_ticket_list_windows_printers();
+            $saved = trim((string) ($config['printer_share'] ?? ''));
+            $items = $installed;
+            if ($saved !== '' && !in_array($saved, $items, true)) {
+                array_unshift($items, $saved);
+            }
+            // حالت شبکه مستقیم هم قابل نمایش است
+            $host = trim((string) ($config['printer_host'] ?? ''));
+            $port = (int) ($config['printer_port'] ?? 9100);
+            $tcpLabel = $host !== '' ? ($host . ':' . $port) : '';
+            $modeDb = food_ticket_normalize_printer_mode($config['printer_mode'] ?? 'tcp_raw');
+            food_ticket_api_json([
+                'items' => array_values(array_unique($items)),
+                'installed' => $installed,
+                'mode' => $modeDb === 'tcp_raw' ? 'socket' : 'windows-spooler',
+                'selected' => $saved,
+                'tcp' => $tcpLabel,
+                'host' => $host,
+                'port' => $port,
+                'share' => $saved,
+                'hint' => $installed
+                    ? 'چاپگرهای نصب‌شده روی سرور Windows'
+                    : 'چاپگر نصب‌شده پیدا نشد. روی سرور Windows درایور چاپگر را نصب کنید یا حالت IP:9100 را استفاده کنید.',
+            ]);
+        }
+        if ($_SERVER['REQUEST_METHOD'] === 'POST' && in_array($route, ['login', 'sso-login'], true)) {
+            food_ticket_api_json(['ok' => true, 'role' => $user['role'] ?? 'manager']);
+        }
+        $isTestAttendance = function_exists('food_ticket_route_is_test_attendance') && food_ticket_route_is_test_attendance($route);
+        if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($route === 'test-connections' || $isTestAttendance)) {
+            $config = food_ticket_config(true);
+            $result = [
+                'ok' => false,
+                'message' => '',
+                'attendance_ok' => false,
+                'orders_ok' => false,
+                'printer_ok' => false,
+                'attendance_path' => (string) ($config['attendance_path'] ?? ''),
+                'enabled' => !empty($config['enabled']),
+            ];
+            $parts = [];
+            $sourceDb = $orders = null;
+            try {
+                if (trim((string) ($config['attendance_path'] ?? '')) === '') {
+                    throw new RuntimeException('تنظیم اتصال تردد کامل نیست.');
+                }
+                $sourceDb = food_ticket_odbc((string) $config['attendance_path'], food_ticket_attendance_password($config));
+                food_ticket_access_rows($sourceDb, food_ticket_source_table(), 3);
+                $result['attendance_ok'] = true;
+                $parts[] = 'اتصال تردد موفق بود.';
+            } catch (Throwable $e) {
+                $parts[] = 'اتصال تردد ناموفق بود.';
+            } finally {
+                food_ticket_access_close($sourceDb);
+            }
+            try {
+                food_order_schema_ensure();
+                $result['orders_ok'] = true;
+                $parts[] = 'بررسی سفارش‌ها موفق بود.';
+            } catch (Throwable $e) {
+                $parts[] = 'بررسی سفارش‌ها ناموفق بود.';
+            }
+            try {
+                $host = trim((string) ($config['printer_host'] ?? ''));
+                $port = (int) ($config['printer_port'] ?? 9100);
+                if ($host !== '' && food_ticket_normalize_printer_mode($config['printer_mode'] ?? 'tcp_raw') === 'tcp_raw') {
+                    $errno = 0;
+                    $errstr = '';
+                    $sock = @fsockopen($host, $port, $errno, $errstr, 3);
+                    if ($sock) {
+                        fclose($sock);
+                        $result['printer_ok'] = true;
+                        $parts[] = "چاپگر TCP $host:$port در دسترس است";
+                    } else {
+                        $parts[] = "چاپگر TCP $host:$port : " . ($errstr ?: "خطا $errno");
+                    }
+                } else {
+                    $parts[] = 'چاپگر TCP تنظیم نشده یا حالت windows_share است (در تست اتصال سوکت بررسی نشد).';
+                }
+            } catch (Throwable $e) {
+                $parts[] = 'چاپگر: ' . $e->getMessage();
+            }
+            $result['ok'] = $result['attendance_ok'] && $result['orders_ok'];
+            $result['message'] = implode(' | ', $parts);
+            // ۱.۳۷: فهرست خط‌به‌خط مشکلات تا پنل بتواند شماره‌دار و خوانا نشان دهد
+            $result['lines'] = array_values($parts);
+            $result['issues'] = [];
+            foreach ([
+                ['اتصال تردد', !empty($result['attendance_ok'])],
+                ['سفارش‌ها', !empty($result['orders_ok'])],
+                ['چاپگر فیش', !empty($result['printer_ok'])],
+            ] as $pair) {
+                if (!$pair[1]) {
+                    $result['issues'][] = $pair[0];
+                }
+            }
+            $result['printer_hint'] = !empty($result['printer_ok'])
+                ? ''
+                : 'چاپگر فیش: در همین صفحه روش چاپ (شبکه/صف ویندوز) و آدرس یا نام چاپگر را ذخیره کنید؛ سپس «چاپ آزمایشی» بزنید. برای سفیدیِ بالای فیش هم کادر «تراز دقیق لبه‌های کاغذ» را ببینید.';
+            // فرانت در حالت !r.ok فقط فیلد error را نشان می‌دهد
+            if (!$result['ok']) {
+                $result['error'] = $result['message'];
+            }
+            food_ticket_api_json($result, $result['ok'] ? 200 : 400);
+        }
+        if ($_SERVER['REQUEST_METHOD'] === 'POST' && $route === 'database-file') {
+            food_ticket_api_upload_access_file($user);
+        }
+        if ($_SERVER['REQUEST_METHOD'] === 'POST' && $route === 'config') {
+            food_ticket_api_save_config(food_ticket_api_body(), $user);
+            // ۱.۳۷.۲: پنل باید همان مقداری را ببیند که واقعاً در پایگاه‌داده نشست؛
+            // «آی‌پی پاک می‌شود / روش چاپ برمی‌گردد» بدون این بازخورد قابل تشخیص نبود.
+            food_ticket_api_json(['ok' => true] + food_ticket_api_printer_state());
+        }
+        if ($_SERVER['REQUEST_METHOD'] === 'POST' && in_array($route, ['browse-file', 'browse-folder', 'browse-list'], true)) {
+            food_ticket_api_json(food_ticket_windows_browse($route === 'browse-list' ? ((food_ticket_api_body()['mode'] ?? '') === 'folder' ? 'browse-folder' : 'browse-file') : $route, $user));
+        }
+        if (in_array($_SERVER['REQUEST_METHOD'] ?? 'GET', ['GET', 'POST'], true) && $route === 'orders-import' && function_exists('food_order_import_handle')) {
+            // فرم ایمپورت سفارش‌های قبلی (Access/Excel/CSV) → جدول داخلی food_orders
+            food_order_import_handle($user);
+        }
+        if ($_SERVER['REQUEST_METHOD'] === 'POST' && $route === 'employees-import') {
+            // ورودی multipart است (نه JSON)؛ فایل در $_FILES و گزینه‌ها در $_POST.
+            food_ticket_employees_import_handle($user);
+        }
+        if ($_SERVER['REQUEST_METHOD'] === 'POST' && $route === 'employees') {
+            $body = food_ticket_api_body();
+            if (($body['action'] ?? '') === 'deactivate') {
+                $id = max(0, (int) ($body['id'] ?? 0));
+                if ($id < 1) {
+                    throw new RuntimeException('کارمند پیدا نشد.');
+                }
+                $target = db()->prepare('SELECT role, is_primary_admin FROM users WHERE id = ? LIMIT 1');
+                $target->execute([$id]);
+                $row = $target->fetch() ?: [];
+                if (in_array((string) ($row['role'] ?? ''), ['primary_admin'], true) || (int) ($row['is_primary_admin'] ?? 0) === 1) {
+                    throw new RuntimeException('امکان غیرفعال کردن مدیر سامانه از این بخش وجود ندارد.');
+                }
+                db()->prepare('UPDATE users SET is_active = 0 WHERE id = ? AND employee_number IS NOT NULL AND role <> "admin"')->execute([$id]);
+            } else {
+                food_ticket_api_save_employee($body);
+            }
+            food_ticket_api_json(['ok' => true, 'items' => food_ticket_api_employees()]);
+        }
+        if ($_SERVER['REQUEST_METHOD'] === 'POST' && $route === 'guest-cards') {
+            $body = food_ticket_api_body();
+            if (($body['action'] ?? '') === 'delete') {
+                food_ticket_api_delete_guest_card((int) ($body['id'] ?? 0), (int) ($user['id'] ?? 0), (string) ($body['cardNumber'] ?? $body['card_uid'] ?? ''));
+            } else {
+                food_ticket_api_save_guest_card($body, (int) ($user['id'] ?? 0));
+            }
+            food_ticket_api_json(['ok' => true, 'items' => food_ticket_api_guest_cards()]);
+        }
+        if ($_SERVER['REQUEST_METHOD'] === 'POST' && $route === 'food-groups') {
+            $body = food_ticket_api_body();
+            if (($body['action'] ?? '') === 'delete') {
+                food_ticket_api_delete_group((int) ($body['id'] ?? 0), (int) ($user['id'] ?? 0));
+            } else {
+                food_ticket_api_save_group($body, (int) ($user['id'] ?? 0));
+            }
+            food_ticket_api_json(['ok' => true] + food_ticket_api_groups('', $user));
+        }
+        if ($_SERVER['REQUEST_METHOD'] === 'POST' && $route === 'food-visit-cancel') {
+            $body = food_ticket_api_body();
+            $cleared = food_ticket_api_cancel_day_visit($user, (int) ($body['user_id'] ?? $body['employee_id'] ?? 0));
+            food_ticket_api_json(['ok' => true, 'message' => (string) ($cleared['message'] ?? 'اعلام امروز لغو شد.')] + food_ticket_api_groups('', $user));
+        }
+        if ($_SERVER['REQUEST_METHOD'] === 'POST' && $route === 'process') {
+            // ستون‌های «وضعیت واقعی حذف منبع» یک‌بار پیش از پردازش تضمین می‌شوند (Migration 1.33).
+            if (function_exists('food_ticket_events_ensure_source_delete')) {
+                try {
+                    food_ticket_events_ensure_source_delete();
+                } catch (Throwable $e) {
+                    app_error_log('[food-source-delete] ensure failed: ' . $e->getMessage());
+                }
+            }
+            $summary = food_ticket_process_batch();
+            if (function_exists('food_ticket_process_print_queue')) {
+                try {
+                    $q = food_ticket_process_print_queue_locked(food_ticket_config(true));
+                    $summary['queue_print'] = $q;
+                    $summary['printed'] = (int) ($summary['printed'] ?? 0) + (int) ($q['printed'] ?? 0);
+                } catch (Throwable $e) {
+                    $summary['queue_error'] = $e->getMessage();
+                }
+            }
+            if (!empty($summary['group_unknown'])) {
+                $summary['group_warning'] = 'تردد با L_UID ناشناخته ثبت شد: ' . (string) ($summary['group_unknown_uid'] ?? '') . ' (بدون فیش گروهی)';
+            }
+            if (empty($summary['message'])) {
+                $summary['message'] = sprintf(
+                    'SOURCE_TABLE→پردازش: %d | صف:%d | چاپ:%d | بدون‌غذا:%d | ناشناس:%d | مهمان:%d | تکرار:%d | خطا:%d',
+                    (int) ($summary['processed'] ?? 0),
+                    (int) ($summary['queued'] ?? 0),
+                    (int) ($summary['printed'] ?? 0),
+                    (int) ($summary['no_food'] ?? 0),
+                    (int) ($summary['unknown'] ?? 0),
+                    (int) ($summary['guest'] ?? 0),
+                    (int) ($summary['repeat'] ?? 0),
+                    (int) ($summary['errors'] ?? 0)
+                );
+                if (!empty($summary['group_runs'])) {
+                    $summary['message'] .= sprintf(
+                        ' | گروه:%d | غایب:%d | ثبت‌ناشده(L_UID):%d',
+                        (int) $summary['group_runs'],
+                        (int) ($summary['absent'] ?? 0),
+                        (int) ($summary['group_unknown'] ?? 0)
+                    );
+                }
+            }
+            food_ticket_api_json($summary);
+        }
+        // ثبت غیبت روزانه (بخشی از فرم گروه‌ها) — قفل بعد از اولین تردد معتبر نماینده
+        if ($_SERVER['REQUEST_METHOD'] === 'POST' && $route === 'absence-save') {
+            $body = food_ticket_api_body();
+            food_ticket_api_json(food_ticket_api_absence_save($body, $user));
+        }
+        if ($_SERVER['REQUEST_METHOD'] === 'POST' && $route === 'absence-clear') {
+            $body = food_ticket_api_body();
+            $groupId = (int) ($body['group_id'] ?? $body['groupId'] ?? 0);
+            $date = food_ticket_iso_date_input($body['date'] ?? '') ?? date('Y-m-d');
+            food_ticket_api_json(food_ticket_api_absence_clear($groupId, $date, trim((string) ($body['reason'] ?? '')), $user));
+        }
+        // ثبت تحویل غذا: مستقل از چاپ؛ فیش تحویل‌شده دوباره چاپ نمی‌شود
+        if ($_SERVER['REQUEST_METHOD'] === 'POST' && $route === 'delivery') {
+            $body = food_ticket_api_body();
+            $action = ((string) ($body['action'] ?? 'deliver')) === 'undeliver' ? 'undeliver' : 'deliver';
+            if ($action === 'undeliver' && !food_ticket_can_override_absence($user)) {
+                food_ticket_api_json(['error' => 'لغو تحویل فقط با دسترسی سطح بالاتر امکان دارد.'], 403);
+            }
+            food_ticket_api_json(food_ticket_api_delivery((int) ($body['id'] ?? $body['event_id'] ?? 0), $action, trim((string) ($body['reason'] ?? '')), $user));
+        }
+        if ($_SERVER['REQUEST_METHOD'] === 'POST' && $route === 'cancel-ticket') {
+            // لغو فیش یک روز و برگرداندن شخص به «تردد این روز ثبت نشده».
+            // با mark_absent (پیش‌فرض ۱) شخص غایب ثبت می‌شود و خودکار در
+            // فهرست غایبان می‌آید.
+            $body = food_ticket_api_body();
+            $cancelUserId = (int) ($body['user_id'] ?? $body['id'] ?? 0);
+            $cancelDate = food_ticket_iso_date_input($body['date'] ?? '') ?? '';
+            if ($cancelDate === '') {
+                food_ticket_api_json(['error' => 'تاریخ معتبر نیست.'], 400);
+            }
+            // پیش‌فرض: هم فیش لغو شود (ردیف «غذا سفارش داده ولی فیش چاپ نشده»
+            // تا قابل صدور مجدد باشد) و هم شخص در فهرست غایبان بیاید.
+            // کاربر انتظار دارد بعد از لغو، از «غذا گرفته» خارج و در «غایبین» دیده شود.
+            $cancelMarkAbsent = !array_key_exists('mark_absent', $body)
+                || (bool) filter_var($body['mark_absent'], FILTER_VALIDATE_BOOLEAN);
+            food_ticket_api_json(food_ticket_cancel_ticket_for_user(
+                $cancelUserId,
+                $cancelDate,
+                $user,
+                trim((string) ($body['reason'] ?? '')),
+                $cancelMarkAbsent
+            ));
+        }
+        if ($_SERVER['REQUEST_METHOD'] === 'POST' && $route === 'cleanup-source_row') {
+            // پاک‌سازی ردیف‌های باقی‌مانده در SOURCE_TABLE برای فیش‌های ثبت‌شده (dry_run=1 فقط تشخیص).
+            $body = food_ticket_api_body();
+            food_ticket_api_json(food_ticket_cleanup_source_rows(
+                (int) ($body['days'] ?? 7),
+                (bool) (int) ($body['dry_run'] ?? 0),
+                isset($body['limit']) ? (int) $body['limit'] : null
+            ));
+        }
+        if ($_SERVER['REQUEST_METHOD'] === 'POST' && $route === 'reprint-errors') {
+            if (!(int) (food_ticket_config(true)['enabled'] ?? 0)) {
+                food_ticket_api_json(['error' => 'چاپ فیش غیرفعال است.'], 409);
+            }
+            $result = food_ticket_retry_failed();
+            food_ticket_api_json([
+                'printed' => $result['ok'],
+                'queued' => (int) ($result['queued'] ?? 0),
+                'failed' => $result['failed'],
+                'deleted' => 0,
+                // فقط فیش‌های چاپ‌نشده/خطادار دوباره در صف رفته‌اند؛ فیش‌های چاپ‌شده و تحویل‌شده دست‌نخورده‌اند.
+                'queue' => $result['queue'] ?? [],
+            ]);
+        }
+        if ($_SERVER['REQUEST_METHOD'] === 'POST' && $route === 'reports/export') {
+            throw new RuntimeException('خروجی گزارش از همین مرورگر ساخته می‌شود.');
+        }
+        
+        if (($route === 'templates' || str_starts_with($route, 'templates/')) && function_exists('food_ticket_templates_api')) {
+            food_ticket_templates_api($route, $user);
+        }
+        if ($_SERVER['REQUEST_METHOD'] === 'GET' && $route === 'template') {
+            food_ticket_api_json(['template' => function_exists('food_ticket_template') ? food_ticket_template() : []]);
+        }
+        if ($_SERVER['REQUEST_METHOD'] === 'POST' && $route === 'template') {
+            $body = food_ticket_api_body();
+            $tpl = is_array($body['template'] ?? null) ? $body['template'] : $body;
+            food_ticket_save_template($tpl);
+            food_ticket_print_log(null, null, null, null, null, 'template_saved', 0, 'by user ' . (int) $user['id']);
+            food_ticket_api_json(['ok' => true, 'template' => food_ticket_template()]);
+        }
+        if ($route === 'calibrate-print') {
+            // کارت کالیبراسیون: خط‌کش میلی‌متری که از ردیف صفر شروع می‌شود (مبنای اندازه‌گیری head_offset_mm)
+            $calCfg = food_ticket_np_settings();
+            $card = food_ticket_np_calibration_print($calCfg);
+            if (function_exists('system_log')) {
+                system_log('info', 'food-printer', 'چاپ کارت کالیبراسیون', [
+                    'ok' => $card['ok'],
+                    'bytes' => $card['bytes'],
+                    'printer' => $card['host'] . ':' . $card['port'],
+                ]);
+            }
+            $state = food_ticket_np_align_state($calCfg);
+            food_ticket_api_json([
+                'ok' => $card['ok'],
+                'message' => $card['message'],
+                'printer' => $card['host'] . ':' . $card['port'],
+                'bytes' => $card['bytes'],
+                'align' => $state,
+                'suggested' => [
+                    'head_offset_mm' => $state['head_offset_mm'] > 0 ? $state['head_offset_mm'] : 20.0,
+                    'step_mm' => 0.5,
+                ],
+            ], $card['ok'] ? 200 : 409);
+        }
+
+        if ($_SERVER['REQUEST_METHOD'] === 'GET' && $route === 'employees-sample') {
+            // دانلود نمونهٔ فایل کارکنان از خود سرور (لینک «⬇️ دانلود نمونهٔ فایل اکسل» در پنل).
+            // چرا از سرور؟ چون پنل هم می‌تواند داخل index.php?page=food-ticket میزبانی شود و هم
+            // مستقل؛ مسیر نسبی در حالت اول به پوشهٔ برنامه نمی‌رسد. این مسیر در هر دو حالت کار می‌کند.
+            $format = strtolower(trim((string) ($_GET['format'] ?? 'xlsx')));
+            $format = $format === 'csv' ? 'csv' : 'xlsx';
+            $file = $format === 'csv' ? 'employees-sample.csv' : 'employees-sample.xlsx';
+            $root = defined('APP_ROOT') ? APP_ROOT : dirname(__DIR__);
+            $path = $root . '/food-ticket-web/samples/' . $file;
+            if (!is_file($path)) {
+                food_ticket_api_json(['error' => 'نمونهٔ فایل روی سرور پیدا نشد: food-ticket-web/samples/' . $file], 404);
+            }
+            if (function_exists('system_log')) {
+                system_log('info', 'food-employees', 'دانلود نمونهٔ فایل کارکنان', ['file' => $file, 'by' => (int) ($user['id'] ?? 0)]);
+            }
+            while (ob_get_level() > 0) {
+                @ob_end_clean();
+            }
+            $download = 'نمونه-لیست-کارکنان.' . $format;
+            header('Content-Type: ' . ($format === 'csv'
+                ? 'text/csv; charset=utf-8'
+                : 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'));
+            header("Content-Disposition: attachment; filename=\"employees-sample.$format\"; filename*=UTF-8''" . rawurlencode($download));
+            header('Content-Length: ' . (string) filesize($path));
+            header('Cache-Control: private, max-age=0, no-store');
+            header('X-Content-Type-Options: nosniff');
+            readfile($path);
+            exit;
+        }
+
+        if ($route === 'print-align') {
+            // GET → وضعیت فعلی | POST → ذخیرهٔ مقادیر (test=1 ⇒ بلافاصله کارت کالیبراسیون چاپ شود)
+            if ($_SERVER['REQUEST_METHOD'] === 'GET') {
+                food_ticket_api_json(['ok' => true, 'align' => food_ticket_np_align_state()]);
+            }
+            $payload = food_ticket_api_body();
+            $patch = [];
+            foreach (['head_offset_mm', 'edge_align', 'tail_mm', 'line_dots', 'reverse_feed_cmd', 'cut_mode', 'top_gap_mm', 'fit_bottom', 'feed_lines', 'threshold', 'win_top_shift_mm', 'dots_per_mm'] as $key) {
+                if (array_key_exists($key, $payload)) {
+                    $patch[$key] = $payload[$key];
+                }
+            }
+            if ($patch === []) {
+                food_ticket_api_json(['ok' => false, 'error' => 'هیچ مقدار معتبری برای ذخیره فرستاده نشد.'], 422);
+            }
+            $written = food_ticket_np_write_json($patch);
+            if ($written['error'] !== '') {
+                food_ticket_api_json(['ok' => false, 'error' => $written['error']], 500);
+            }
+            $state = food_ticket_np_align_state();
+            $message = $state['hint'];
+            if (!empty($payload['test'])) {
+                $card = food_ticket_np_calibration_print();
+                $message .= ' ' . $card['message'];
+            }
+            if (function_exists('system_log')) {
+                system_log('info', 'food-printer', 'ذخیرهٔ تنظیمات تراز چاپ', [
+                    'keys' => array_keys($patch),
+                    'active' => $state['active'],
+                    'head_offset_mm' => $state['head_offset_mm'],
+                ]);
+            }
+            food_ticket_api_json([
+                'ok' => true,
+                'message' => $message,
+                'file' => $written['file'],
+                'saved' => array_intersect_key($written['saved'], $patch),
+                'align' => $state,
+                'printer' => food_ticket_np_target()['host'],
+            ]);
+        }
+
+        if ($_SERVER['REQUEST_METHOD'] === 'POST' && $route === 'test-print') {
+            $config = food_ticket_config(true);
+            $body = food_ticket_api_body();
+            $printerBody = is_array($body['printer'] ?? null) ? $body['printer'] : $body;
+            if (isset($printerBody['mode'])) {
+                $config['printer_mode'] = food_ticket_normalize_printer_mode($printerBody['mode']);
+            }
+            if (isset($printerBody['host'])) {
+                $config['printer_host'] = trim((string) $printerBody['host']);
+            }
+            if (isset($printerBody['port'])) {
+                $config['printer_port'] = max(1, (int) $printerBody['port']);
+            }
+            if (isset($printerBody['name']) || isset($printerBody['share'])) {
+                $config['printer_share'] = trim((string) ($printerBody['name'] ?? $printerBody['share'] ?? ''));
+            }
+            $sample = [
+                'id' => 1001,
+                'department' => 'واحد آزمایشی',
+                'full_name' => 'نمونه تست',
+                'national_code' => '0000000000',
+                'personnel_code' => 'TEST',
+                'food_type' => 'فیش آزمایشی',
+                'punch_date' => date('Y-m-d'),
+                'punch_time' => date('H:i:s'),
+                'ticket_key' => 'test:' . date('YmdHis'),
+                'event_type' => 'printed',
+            ];
+            // «چاپ آزمایشی» می‌تواند یک قالب مشخص را (بدون فعال‌کردن آن) امتحان کند؛ بدون template_id قالب فعال چاپ می‌شود.
+            $forceTpl = (int) ($body['template_id'] ?? 0);
+            if ($forceTpl > 0 && function_exists('food_ticket_tpl_force')) {
+                food_ticket_tpl_force($forceTpl);
+            }
+            try {
+                food_ticket_send_to_printer($sample, $config);
+            } finally {
+                if (function_exists('food_ticket_tpl_force')) {
+                    food_ticket_tpl_force(null);
+                }
+            }
+            $mode = food_ticket_normalize_printer_mode($config['printer_mode'] ?? 'tcp_raw');
+            $printerLabel = $mode === 'tcp_raw'
+                ? (trim((string) ($config['printer_host'] ?? '')) . ':' . (int) ($config['printer_port'] ?? 9100))
+                : (trim((string) ($config['printer_share'] ?? '')) ?: trim((string) ($config['printer_host'] ?? '')));
+            food_ticket_print_log(null, 'test-print', null, $sample['ticket_key'], $printerLabel, 'test_print', 0, 'ok');
+            food_ticket_api_json([
+                'ok' => true,
+                'message' => 'فیش آزمایشی ارسال شد → ' . ($printerLabel !== '' && $printerLabel !== ':' ? $printerLabel : '(چاپگر تنظیم نشده)') . ' | حالت: ' . $mode,
+                'mode' => $mode,
+                'target' => $printerLabel,
+            ]);
+        }
+        
+
+        if ($_SERVER['REQUEST_METHOD'] === 'GET' && $route === 'session') {
+            food_ticket_api_json([
+                'ok' => true,
+                'authenticated' => true,
+                'role' => (string) ($user['role'] ?? ''),
+                'name' => (string) ($user['full_name'] ?? $user['username'] ?? ''),
+            ]);
+        }
+
+        if ($_SERVER['REQUEST_METHOD'] === 'POST' && in_array($route, ['login', 'sso-login'], true)) {
+            // در حالت یکپارچه با سامانه درخواست، session از قبل معتبر است
+            food_ticket_api_json([
+                'ok' => true,
+                'role' => (string) ($user['role'] ?? 'manager'),
+                'authenticated' => true,
+            ]);
+        }
+
+        if ($_SERVER['REQUEST_METHOD'] === 'GET' && $route === 'health') {
+            food_ticket_api_json(food_ticket_api_health());
+        }
+
+        if ($_SERVER['REQUEST_METHOD'] === 'POST' && $route === 'self-test') {
+            food_ticket_api_json(food_ticket_api_self_test());
+        }
+
+        // ── ثبت خودکار فیش برای روزهای گذشته ────────────────────────────
+        // چرا این مسیر لازم شد: گذر پایان‌روزِ Worker فقط «دیروز» و «امروز» را
+        // پر می‌کند. روزهایی که Worker نبود/خاموش بود/این کد را نداشت، برای
+        // همیشه سوراخ می‌مانند. این مسیر همان تابع واقعی سامانه را روی بازهٔ
+        // دلخواه اجرا می‌کند — نه یک بازنویسی موازی.
+        // idempotent است (کلید یکتای sha256)، پس اجرای دوباره بی‌خطر است.
+        if ($_SERVER['REQUEST_METHOD'] === 'POST' && $route === 'backfill-auto-receipts') {
+            $raw = (string) file_get_contents('php://input');
+            $body = json_decode($raw, true);
+            if (!is_array($body)) {
+                $body = $_POST;
+            }
+            $from = trim((string) ($body['from'] ?? ''));
+            $to   = trim((string) ($body['to'] ?? ''));
+            $apply = !empty($body['apply']);
+
+            $ok = static fn (string $d): bool => (bool) preg_match('/^\d{4}-\d{2}-\d{2}$/', $d)
+                && checkdate((int) substr($d, 5, 2), (int) substr($d, 8, 2), (int) substr($d, 0, 4));
+            if (!$ok($from) || !$ok($to)) {
+                food_ticket_api_json(['error' => 'بازهٔ تاریخ معتبر نیست (YYYY-MM-DD).'], 400);
+            }
+            if ($from > $to) {
+                food_ticket_api_json(['error' => 'تاریخ شروع بعد از پایان است.'], 400);
+            }
+            // سقف ۴۰۰ روز: جلوی اشتباه تایپی مثل ۱۴۰۰-۰۱-۰۱ را می‌گیرد.
+            $span = (new DateTimeImmutable($from))->diff(new DateTimeImmutable($to))->days;
+            if ($span > 400) {
+                food_ticket_api_json(['error' => 'بازه بیش از ۴۰۰ روز است.'], 400);
+            }
+            if (!function_exists('food_ticket_auto_receipts_run')) {
+                food_ticket_api_json(['error' => 'کتابخانهٔ ثبت خودکار فیش بارگذاری نشد.'], 500);
+            }
+            if (!food_ticket_auto_receipt_schema_ready()) {
+                food_ticket_api_json(['error' => 'ساختار ثبت خودکار آماده نیست (مهاجرت ۰۲۱).'], 400);
+            }
+
+            $days = [];
+            $sum = ['staff' => 0, 'guest' => 0, 'already' => 0, 'absence' => 0, 'real_event' => 0, 'locked' => 0];
+            $cursor = new DateTimeImmutable($from);
+            $end = new DateTimeImmutable($to);
+            while ($cursor <= $end) {
+                $d = $cursor->format('Y-m-d');
+                $cursor = $cursor->modify('+1 day');
+                if (!$apply) {
+                    // گزارش: فقط تعداد کاندید، بدون نوشتن.
+                    $q = db()->prepare("SELECT SUM(meal_type='dinner') AS d, SUM(meal_type='lunch') AS l
+                                        FROM food_orders WHERE food_date = ? AND status='active' AND meal_type IN ('lunch','dinner')");
+                    $q->execute([$d]);
+                    $c = $q->fetch() ?: [];
+                    $dn = (int) ($c['d'] ?? 0);
+                    $ln = (int) ($c['l'] ?? 0);
+                    if ($dn === 0 && $ln === 0) {
+                        continue;
+                    }
+                    $h = food_ticket_auto_receipt_holiday($d);
+                    $days[] = ['date' => $d, 'holiday' => (bool) $h['holiday'], 'dinner' => $dn,
+                               'lunch' => $h['holiday'] ? $ln : 0, 'lunch_skipped' => $h['holiday'] ? 0 : $ln];
+                    continue;
+                }
+                try {
+                    $r = food_ticket_auto_receipts_run($d);
+                } catch (Throwable $e) {
+                    $days[] = ['date' => $d, 'error' => $e->getMessage()];
+                    continue;
+                }
+                if (!empty($r['locked'])) {
+                    $sum['locked']++;
+                    $days[] = ['date' => $d, 'locked' => true];
+                    continue;
+                }
+                $sum['staff'] += (int) $r['staff_created'];
+                $sum['guest'] += (int) $r['guest_created'];
+                $sum['already'] += (int) $r['already_registered'];
+                $sum['absence'] += (int) $r['skipped_absence'];
+                $sum['real_event'] += (int) $r['skipped_real_event'];
+                $days[] = [
+                    'date' => $d,
+                    'holiday' => (bool) $r['holiday'],
+                    'created' => (int) $r['staff_created'] + (int) $r['guest_created'],
+                    'staff' => (int) $r['staff_created'],
+                    'guest' => (int) $r['guest_created'],
+                    'already' => (int) $r['already_registered'],
+                    'absence' => (int) $r['skipped_absence'],
+                    'real_event' => (int) $r['skipped_real_event'],
+                ];
+            }
+            food_ticket_api_json([
+                'from' => $from, 'to' => $to, 'apply' => $apply,
+                'days' => $days, 'totals' => $sum,
+                'created' => $sum['staff'] + $sum['guest'],
+            ]);
+        }
+        // آزمون جامع Worker/چاپ/مدیریت — همان کتابخانه‌ای که CLI استفاده می‌کند.
+        // فقط‌خواندنی: هیچ فیشی چاپ نمی‌شود و هیچ تنظیمی تغییر نمی‌کند.
+        if (in_array($_SERVER['REQUEST_METHOD'] ?? 'GET', ['GET', 'POST'], true) && $route === 'worker-selftest') {
+            if (!function_exists('food_ticket_selftest_run')) {
+                food_ticket_api_json(['error' => 'کتابخانهٔ آزمون (food-ticket-selftest.php) بارگذاری نشد.'], 500);
+            }
+            $payload = food_ticket_selftest_run([
+                'config' => food_ticket_config(true),
+                'source' => 'panel',
+                'dry_print' => true,
+            ]);
+            $payload['text'] = food_ticket_selftest_text($payload);
+            $payload['ok'] = (int) ($payload['verdict']['counts']['fail'] ?? 0) === 0;
+            food_ticket_api_json($payload);
+        }
+
+        food_ticket_api_json(['error' => 'مسیر API چاپ فیش پیدا نشد.'], 404);
+    } catch (Throwable $exception) {
+        $location = basename($exception->getFile()) . ':' . $exception->getLine();
+        app_error_log('[food-ticket-api] route=' . $route . ' failed at ' . $location . ': ' . $exception->getMessage());
+        if (function_exists('system_log')) {
+            system_log('error', 'food-ticket-api', $exception->getMessage(), ['route' => $route, 'location' => $location]);
+        }
+        food_ticket_api_json(['error' => $exception->getMessage()], 400);
+    }
+}
+
+function food_ticket_render_safe_replace(string $search, string $replace, string $subject): string
+{
+    // PHP 8 throws ValueError for an empty search string. A stale/invalid label
+    // map must not make the food panel fail to render.
+    if ($search === '' || $subject === '') {
+        return $subject;
+    }
+    try {
+        $result = str_replace($search, $replace, $subject);
+        return is_string($result) ? $result : $subject;
+    } catch (Throwable $exception) {
+        app_error_log('food-ticket: optional HTML replacement skipped: ' . $exception->getMessage());
+        return $subject;
+    }
+}
+
+function food_ticket_render_page(array $user): void
+{
+    $renderStartedAt = microtime(true);
+    register_shutdown_function(static function () use ($renderStartedAt): void {
+        $durationMs = (int) round((microtime(true) - $renderStartedAt) * 1000);
+        if ($durationMs >= 1000) {
+            error_log('ITSM slow food-ticket render: duration_ms=' . $durationMs . '; status=' . http_response_code());
+        }
+    });
+    require_food_ticket_access();
+    $file = APP_ROOT . '/food-ticket-web/index.html';
+    $html = is_file($file) ? file_get_contents($file) : false;
+    if (!is_string($html) || $html === '') {
+        http_response_code(500);
+        app_error_log('food-ticket: food-ticket-web/index.html پیدا نشد یا خالی است: ' . $file);
+        exit('رابط کامل چاپ فیش پیدا نشد. فایل food-ticket-web/index.html را بررسی کنید.');
+    }
+    $apiBase = 'index.php?page=food-ticket&food_api=';
+    $brand = food_ticket_brand_params();
+    $nonce = htmlspecialchars(csp_nonce(), ENT_QUOTES, 'UTF-8');
+    $bootstrap = function_exists('food_ticket_web_host_bootstrap')
+        ? food_ticket_web_host_bootstrap($apiBase, csrf_token(), is_array($brand) ? $brand : [], (string) ($user['role'] ?? ''), food_ticket_is_primary_admin($user), $nonce, function_exists('db_install_state') ? db_install_state() : null)
+        : '';
+    $canMenuEdit = function_exists('user_can') ? user_can($user, 'food.menu_edit') : food_ticket_is_primary_admin($user);
+    $canMenuView = function_exists('user_can') ? user_can($user, 'food.menu') : food_ticket_is_primary_admin($user);
+    $canOrderClose = $canMenuEdit;
+    $canFoodMenu = $canMenuView || $canMenuEdit;
+    // دسترسی هر بخش پنل از روی کدهای food.* (ادمین اصلی همه‌چیز). سرور هم هر درخواست را جداگانه کنترل می‌کند.
+    $fpIsPrimary = food_ticket_is_primary_admin($user);
+    $fpCan = static fn (string $code): bool => $fpIsPrimary || (function_exists('user_can') && user_can($user, $code));
+    $fpCanManageGuestRequests = function_exists('food_guest_request_is_reviewer') && food_guest_request_is_reviewer($user);
+    $fpViews = [
+        'dashboard' => $fpCan('food.dashboard'),
+        'live' => $fpCan('food.monitor'),
+        'employees' => $fpCan('food.employees'),
+        'food-menu' => $fpCan('food.menu') || $fpCan('food.menu_edit'),
+        'food-groups' => $fpCan('food.groups'),
+        'reports' => $fpCan('food.reports'),
+        'settings' => $fpCan('food.db') || $fpCan('food.printer') || $fpCan('food.guest') || $fpCan('food.design') || $fpCan('food.health') || $fpCan('food.manual_attendance') || $fpCan('food.emergency_window'),
+    ];
+    $fpSections = [
+        'connections' => $fpCan('food.db'),
+        'printer' => $fpCan('food.printer'),
+        'guests' => $fpCan('food.guest'),
+        'ticket-design' => $fpCan('food.design'),
+        'health' => $fpCan('food.health'),
+        'manual-attendance' => $fpCan('food.manual_attendance'),
+        'emergency-window' => $fpCan('food.emergency_window'),
+    ];
+    $fpSectionEdits = [
+        'connections' => $fpCan('food.db_edit'),
+        'printer' => $fpCan('food.printer_edit'),
+        'guests' => $fpCan('food.guest_edit'),
+        'ticket-design' => $fpCan('food.design_edit'),
+        'health' => $fpCan('food.health_edit'),
+        'manual-attendance' => $fpCan('food.manual_attendance_edit'),
+        'emergency-window' => $fpCan('food.emergency_window_edit'),
+    ];
+    $fpGroupsEdit = $fpCan('food.groups_edit');
+    $bootstrap .= '<script nonce="' . $nonce . '">window.FOOD_TICKET_VIEWS=' . json_encode($fpViews) . ';window.FOOD_TICKET_SECTIONS=' . json_encode($fpSections) . ';window.FOOD_TICKET_SECTION_EDITS=' . json_encode($fpSectionEdits)
+        . ';window.FOOD_TICKET_CAN_GROUPS_EDIT=' . ($fpGroupsEdit ? 'true' : 'false')
+        . ';window.FOOD_TICKET_CAN_EMPLOYEES_EDIT=' . ($fpCan('food.employees_edit') ? 'true' : 'false')
+        . ';window.FOOD_TICKET_CAN_DB_EDIT=' . ($fpCan('food.db_edit') ? 'true' : 'false')
+        . ';window.FOOD_TICKET_CAN_PRINTER_EDIT=' . ($fpCan('food.printer_edit') ? 'true' : 'false')
+        . ';window.FOOD_TICKET_CAN_MANUAL_ATTENDANCE_EDIT=' . ($fpCan('food.manual_attendance_edit') ? 'true' : 'false')
+        . ';window.FOOD_TICKET_CAN_MANUAL_ATTENDANCE=' . ($fpCan('food.manual_attendance_edit') ? 'true' : 'false')
+        . ';window.FOOD_TICKET_CAN_MANUAL_TICKET=' . ($fpCan('food.manual_attendance_edit') ? 'true' : 'false')
+        . ';window.FOOD_TICKET_CAN_CANCEL_VISIT=' . ($fpCan('food.groups_edit') ? 'true' : 'false')
+        . ';window.FOOD_TICKET_CAN_FOOD_MENU=' . ($canFoodMenu ? 'true' : 'false')
+        . ';window.FOOD_TICKET_CAN_MENU=' . ($canMenuView ? 'true' : 'false')
+        . ';window.FOOD_TICKET_CAN_MENU_EDIT=' . ($canMenuEdit ? 'true' : 'false')
+        . ';window.FOOD_TICKET_CAN_ORDER_CLOSE=' . ($canOrderClose ? 'true' : 'false')
+        . ';window.FOOD_TICKET_CAN_EMERGENCY=' . ($canMenuEdit ? 'true' : 'false')
+        . ';window.FOOD_TICKET_CAN_GUEST_REQUEST_MANAGE=' . ($canMenuEdit ? 'true' : 'false')
+        . ';window.FOOD_TICKET_IS_PRIMARY_ADMIN=' . (food_ticket_is_primary_admin($user) ? 'true' : 'false')
+        . ';window.FOOD_TICKET_USER_ID=' . (int) ($user['id'] ?? 0) . ';</script>';
+    // برچسب‌های قدیمی (نام‌های نسخه‌های پیشین) در متن نمایش داده نشوند:
+    // نگاشت از لایهٔ محیطی می‌آید تا سورس سامانه هیچ نام برندی نداشته باشد.
+    $legacyLabels = function_exists('food_ticket_legacy_display_map') ? food_ticket_legacy_display_map() : [];
+    if (!is_array($legacyLabels)) {
+        $legacyLabels = [];
+    }
+    foreach ($legacyLabels as $legacy => $replacement) {
+        if (!is_scalar($legacy) || !is_scalar($replacement)) {
+            continue;
+        }
+        $legacy = (string) $legacy;
+        if ($legacy === '') {
+            continue;
+        }
+        $html = food_ticket_render_safe_replace($legacy, (string) $replacement, $html);
+    }
+    $holidayJson = '[]';
+    try {
+        $__h = db()->query('SELECT holiday_date, title FROM holidays WHERE is_active = 1')->fetchAll();
+        $__out = [];
+        foreach ($__h as $__row) {
+            $g = (string) $__row['holiday_date'];
+            $parts = explode('-', substr($g, 0, 10));
+            if (count($parts) === 3) {
+                [$gy, $gm, $gd] = [(int) $parts[0], (int) $parts[1], (int) $parts[2]];
+                [$jy, $jm, $jd] = gregorian_to_jalali($gy, $gm, $gd);
+                $__out[] = ['date' => $g, 'jalali' => sprintf('%04d/%02d/%02d', $jy, $jm, $jd), 'title' => (string) $__row['title']];
+            }
+        }
+        $holidayJson = json_encode($__out, JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT);
+    } catch (Throwable) {
+        $holidayJson = '[]';
+    }
+    $jalaliBoot = '<script nonce="' . $nonce . '">window.ITSM_HOLIDAYS=' . $holidayJson . ';</script><script src="assets/jalali-calendar.js?v=2"></script>';
+
+    // میزبانی مقاوم: نام دارایی‌های پنل از خود پوشه خوانده می‌شود تا نسخه‌های تازهٔ index.html
+    // (شمارهٔ نسخه/نام فایل متفاوت) هم بدون تغییر کد PHP درست سرو شوند.
+    $assetNames = [];
+    $assetDir = APP_ROOT . '/food-ticket-web/assets';
+    if (is_dir($assetDir)) {
+        foreach ((array) scandir($assetDir) as $entry) {
+            $entry = (string) $entry;
+            if ($entry !== '' && $entry[0] !== '.' && is_file($assetDir . '/' . $entry)) {
+                $assetNames[] = $entry;
+            }
+        }
+    }
+    if (function_exists('food_ticket_web_host_html')) {
+        try {
+            $hosted = food_ticket_web_host_html($html, [
+                'nonce' => $nonce,
+                'bootstrap' => $bootstrap,
+                'jalali_boot' => $jalaliBoot,
+                'assets' => $assetNames,
+                'theme_href' => 'assets/style.css?v=3.4.34',
+                'theme_mode_href' => 'assets/theme-mode.css?v=3',
+                'theme_mode' => app_theme_mode(),
+            ]);
+            if (is_array($hosted) && is_string($hosted['html'] ?? null)) {
+                $html = $hosted['html'];
+            }
+            $notes = (array) ($hosted['notes'] ?? []);
+            if (!in_array('bootstrap:brand', $notes, true) && !in_array('bootstrap:already', $notes, true)) {
+                app_error_log('food-ticket: لنگرهای index.html تغییر کرده‌اند؛ بوت‌استرپ از مسیر جایگزین تزریق شد (' . implode(',', $notes) . ')');
+            }
+        } catch (Throwable $exception) {
+            app_error_log('food-ticket: HTML host transformation skipped (' . basename($exception->getFile()) . ':' . $exception->getLine() . '): ' . $exception->getMessage());
+        }
+        if (!$assetNames) {
+            app_error_log('food-ticket: پوشهٔ food-ticket-web/assets خالی یا ناموجود است؛ دارایی‌های پنل ناقص کپی شده‌اند.');
+        }
+    }
+    // Page layout design is an optional enhancement: a missing helper or a stale
+    // saved layout must never prevent the print panel itself from opening.
+    $layoutCss = '';
+    $layoutAssets = '';
+    $layoutAdminFlag = '0';
+    try {
+        if (function_exists('admin_layout_design_css_for_page') && function_exists('admin_layout_design_is_admin')) {
+            $layoutCss = admin_layout_design_css_for_page('food-ticket');
+            $isLayoutAdmin = admin_layout_design_is_admin($user);
+            $layoutAdminFlag = $isLayoutAdmin ? '1' : '0';
+            if ($isLayoutAdmin) {
+                $layoutAssets = '<link rel="stylesheet" href="assets/admin-layout-design.css?v=9">';
+            }
+            if ($layoutCss !== '') {
+                $layoutAssets .= '<style id="admin-page-layout-rules">' . $layoutCss . '</style>';
+            }
+        }
+    } catch (Throwable $exception) {
+        app_error_log('food-ticket: page layout enhancement skipped: ' . $exception->getMessage());
+        $layoutCss = '';
+        $layoutAssets = '';
+        $layoutAdminFlag = '0';
+    }
+    $html = preg_replace('/<body\\b/', '<body data-layout-page="food-ticket" data-layout-design-admin="' . $layoutAdminFlag . '"', $html, 1) ?? $html;
+    $html = food_ticket_render_safe_replace('</head>', $layoutAssets . '</head>', $html);
+    if ($layoutAdminFlag === '1') {
+        $html = food_ticket_render_safe_replace('</body>', '<script src="assets/admin-layout-design.js?v=10"></script></body>', $html);
+    }
+    echo $html;
+    return;
+}
