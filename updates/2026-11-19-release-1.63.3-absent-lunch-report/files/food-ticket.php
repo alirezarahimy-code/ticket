@@ -4064,6 +4064,13 @@ function food_ticket_api_absent(string $fromDate, ?string $toDate = null): array
  * خروجی خالی است — نه ۲۰۰ رکورد آخرِ همهٔ تاریخ‌ها. بازهٔ گذشته را باید گزارش‌ها بخواهند
  * (from/to). داده‌های قبلی حذف نمی‌شوند.
  */
+
+/**
+ * پایش رویدادها.
+ * پیش‌فرض (بدون بازه) = فقط «امروزِ کاری سامانه» (به وقت تهران)؛ اگر امروز رویدادی نباشد،
+ * خروجی خالی است — نه ۲۰۰ رکورد آخرِ همهٔ تاریخ‌ها. بازهٔ گذشته را باید گزارش‌ها بخواهند
+ * (from/to). داده‌های قبلی حذف نمی‌شوند.
+ */
 function food_ticket_api_monitoring(?string $fromDate = null, ?string $toDate = null): array
 {
     $hasDelivery = function_exists('food_ticket_delivery_supported') && food_ticket_delivery_supported();

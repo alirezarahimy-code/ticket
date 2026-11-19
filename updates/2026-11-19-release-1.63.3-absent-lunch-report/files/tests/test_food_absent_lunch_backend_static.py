@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""نگهبان بکاند ۱٫۶۳٫۳ — منطق گزارش غایبین."""
+"""نگهبان بکاند ۱٫۶۳٫۳ — بدون تغییر نسبت به بستهٔ اولیه، فقط ناهار."""
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]

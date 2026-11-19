@@ -92,48 +92,87 @@ label.field .browse-btn{max-width:100%}
 <script defer src="assets/food-capitalio-dashboard-r42.js?v=1.62.2-dashboard-fix"></script>
 <style>#screen.food-dashboard-host{max-width:none;min-width:0;width:100%;margin:0;padding:0;overflow-x:hidden}</style>
 <style>
-
-/* ۱.۶۳٫۳ — تب «غایبین ناهار» داخل صفحهٔ گزارشها */
-.alr-card{background:var(--food-white);border:1px solid var(--food-line);border-radius:16px;padding:19px;box-shadow:var(--food-shadow)}
-.alr-fields{display:flex;flex-wrap:wrap;align-items:center;gap:8px 14px}
-.alr-chip{display:inline-flex;align-items:center;gap:5px;white-space:nowrap;font-size:13px;font-weight:600;cursor:pointer}
-.alr-chip input{accent-color:var(--teal)}
-.alr-blocks{display:flex;align-items:center;gap:7px;flex-wrap:wrap;margin-top:13px;padding-top:12px;border-top:1px solid var(--food-line)}
-.alr-blocks-label{font-weight:800;font-size:12px;color:var(--muted)}
-.alr-block-btn{border:1px solid var(--food-line);border-radius:8px;padding:5px 12px;background:var(--food-white);color:var(--muted);font-size:12px;font-weight:800}
-.alr-block-btn.active{border-color:var(--teal);background:var(--teal-light);color:var(--navy)}
-.alr-hint{color:var(--muted);font-size:11px}
+/* ۱٫۶۳٫۳ — تب «غایبین ناهار»: نسخهٔ نهایی (چارت، ۳ تب، چاپ خالص، انتخاب چندمعاونتی) */
+.alr-card{background:var(--food-white);border:1px solid var(--food-line);border-radius:16px;padding:17px;box-shadow:var(--food-shadow)}
+.alr-filter{display:flex;align-items:flex-end;gap:10px;flex-wrap:wrap}
+.alr-chip{display:inline-flex;align-items:center;gap:5px;border:1px solid var(--food-line);border-radius:99px;padding:4px 10px;background:var(--food-white);color:var(--muted);font-size:11px;font-weight:800;white-space:nowrap}
+.alr-chip b{color:var(--teal)}
+.alr-fields{display:flex;flex-wrap:wrap;align-items:center;gap:7px 11px;padding:10px 12px;border:1px solid var(--food-line);border-radius:10px;background:var(--food-paper)}
+.alr-fields-label{font-size:11px;font-weight:800;color:var(--muted)}
+.alr-field-chip{display:inline-flex;align-items:center;gap:5px;border:1px solid var(--food-line);border-radius:99px;padding:4px 9px;background:var(--food-white);font-size:11px;font-weight:700}
+.alr-field-chip input{accent-color:var(--teal)}
+.alr-blocks{display:flex;align-items:center;gap:7px;flex-wrap:wrap;margin-top:10px}
+.alr-block-btn{border:1px solid var(--food-line);border-radius:8px;padding:4px 11px;background:var(--food-white);color:var(--muted);font-size:11px;font-weight:800;cursor:pointer}
+.alr-block-btn.active{background:var(--teal-light);border-color:var(--teal);color:var(--navy)}
+.alr-tabs{display:flex;gap:6px;flex-wrap:wrap;border-bottom:1px solid var(--food-line);padding-bottom:9px;margin-bottom:12px}
+.alr-tab{border:1px solid var(--food-line);border-radius:9px 9px 0 0;background:var(--food-paper);color:var(--muted);padding:8px 13px;font:inherit;font-size:12px;font-weight:800;cursor:pointer}
+.alr-tab.active{background:var(--teal);border-color:var(--teal);color:#fff}
+.alr-tools{display:flex;align-items:center;gap:9px;flex-wrap:wrap;padding:10px 12px;border:1px dashed var(--food-line);border-radius:10px;background:var(--food-paper);margin-bottom:12px}
+.alr-tools input[type=search]{min-height:33px;border:1px solid var(--food-line);border-radius:8px;background:var(--food-white);color:var(--ink);padding:5px 10px;font:inherit;font-size:12px;min-width:220px}
+.alr-seg{display:inline-flex;border:1px solid var(--food-line);border-radius:8px;overflow:hidden}
+.alr-seg button{border:0;background:var(--food-white);color:var(--muted);padding:5px 11px;font:inherit;font-size:11px;font-weight:800;cursor:pointer}
+.alr-seg button.active{background:var(--teal);color:#fff}
+.alr-chart{border:1px solid var(--food-line);border-radius:11px;background:var(--food-white);padding:13px;margin-bottom:12px}
+.alr-chart-head{display:flex;align-items:baseline;justify-content:space-between;gap:9px;flex-wrap:wrap;margin-bottom:9px}
+.alr-chart-head h3{margin:0;font-family:var(--font-display,inherit);font-size:14px;color:var(--navy)}
+.alr-range{font-size:11px;font-weight:800;color:var(--teal);white-space:nowrap}
+.alr-all{display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:800;color:var(--navy);background:var(--teal-light);border:1px solid var(--teal);border-radius:99px;padding:4px 10px;cursor:pointer;white-space:nowrap}
+.alr-all input{accent-color:var(--teal)}
+.alr-plot{border:1px solid var(--food-line);border-radius:9px;background:var(--food-paper);padding:7px 9px}
+.alr-row{display:flex;align-items:center;gap:9px;height:34px;transition:opacity .15s}
+.alr-row.off{opacity:.38}
+.alr-check{display:inline-flex;align-items:center;flex:none}
+.alr-check input{accent-color:var(--teal);width:14px;height:14px;cursor:pointer}
+.alr-name{flex:0 0 178px;min-width:0;font-size:12px;font-weight:800;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:pointer}
+.alr-track{position:relative;flex:1;height:16px;border-radius:5px;background:var(--food-white);border:1px solid var(--food-line);overflow:hidden}
+.alr-grid{position:absolute;top:0;bottom:0;width:0;border-right:1px dashed var(--food-line);z-index:2}
+.alr-fill{position:absolute;right:0;top:0;height:100%;border-radius:4px 0 0 4px;z-index:1}
+.alr-mean{position:absolute;top:-2px;bottom:-2px;width:0;border-right:2px dashed var(--danger);z-index:3}
+.alr-val{flex:0 0 92px;font-size:11px;font-weight:800;color:var(--ink);white-space:nowrap}
+.alr-row.max .alr-val{color:var(--teal)}
+.alr-row.min .alr-val{color:var(--gold)}
+.alr-axis{display:flex;align-items:center;justify-content:space-between;gap:5px;margin-top:7px;padding-top:6px;border-top:1px solid var(--food-line);font-size:10px;font-weight:800;color:var(--muted)}
+.alr-axis .alr-tick{color:var(--muted);opacity:.75}
+.alr-legend{display:flex;gap:7px;flex-wrap:wrap;margin-top:9px}
+.alr-legend span{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--food-line);border-radius:99px;padding:4px 10px;background:var(--food-white);color:var(--muted);font-size:11px;font-weight:800;cursor:pointer}
+.alr-legend span b{color:var(--navy)}
+.alr-legend i{width:10px;height:10px;border-radius:3px;display:inline-block;flex:none}
+.alr-legend .alr-mean-key{cursor:default}
+.alr-legend .alr-mean-key i{background:transparent;border-right:2px dashed var(--danger);border-radius:0;width:3px;height:12px}
+.alr-food{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:12px}
+.alr-food span{border-radius:99px;padding:4px 10px;font-size:11px;font-weight:800;background:var(--teal-light);color:var(--navy);border:1px solid var(--food-line)}
+.alr-group{margin:0 0 16px;border:1px solid var(--food-line);border-radius:11px;overflow:hidden;break-inside:avoid}
+.alr-group-head{padding:9px 13px;background:var(--food-paper);border-bottom:1px solid var(--food-line)}
+.alr-group-head h4{margin:0;display:flex;align-items:baseline;gap:9px;flex-wrap:wrap;font-size:14px;color:var(--navy);font-weight:800}
+.alr-group-head h4 b{font-size:13px;font-weight:800;color:var(--teal);white-space:nowrap}
 .alr-table-wrap{overflow:auto}
-.alr-table{width:100%!important;max-width:100%!important;min-width:0!important;table-layout:fixed;border-collapse:separate;border-spacing:0;font-size:12px;white-space:nowrap;margin-inline:auto}
-.alr-table th,.alr-table td{overflow:hidden;text-overflow:ellipsis;text-align:center;padding:8px 7px;border-bottom:1px solid var(--food-line)}
-.alr-table thead th{position:sticky;top:0;z-index:1;background:var(--food-paper);color:var(--muted);font-size:11px;font-weight:800}
+.alr-table{width:100%!important;max-width:100%!important;min-width:0!important;table-layout:fixed;border-collapse:separate;border-spacing:0;font-size:11px;white-space:nowrap;margin-inline:auto}
+.alr-table th,.alr-table td{overflow:hidden;text-overflow:ellipsis;text-align:center;padding:6px 5px;border-bottom:1px solid var(--food-line)}
+.alr-table thead th{position:sticky;top:0;background:var(--food-paper);color:var(--muted);font-size:10px;font-weight:800}
 .alr-table tbody td{color:var(--ink)}
 .alr-table tbody tr:hover td{background:var(--teal-light)}
 .alr-table .alr-block-start{border-right:2px solid var(--food-line)}
-.alr-sort{border:0;background:transparent;color:inherit;font:inherit;font-weight:inherit;padding:0}
+.alr-sort{border:0;background:transparent;color:inherit;font:inherit;font-weight:inherit;padding:0;cursor:pointer}
 .alr-sort:hover{color:var(--teal)}
-.alr-pill{border-radius:99px;padding:2px 9px;font-size:10px;font-weight:800;background:var(--food-paper);color:var(--muted)}
+.alr-pill{border-radius:99px;padding:1px 8px;font-size:10px;font-weight:800;background:var(--food-paper);color:var(--muted)}
 .alr-pill.declared{background:var(--teal-light);color:var(--navy)}
-.alr-group{margin-top:16px}
-.alr-group-head{display:flex;justify-content:center;align-items:baseline;gap:6px;margin:0 0 7px}
-.alr-group-head h3{margin:0;font-size:15px}
-.alr-group-head span{color:var(--muted);font-size:13px;font-weight:600}
-.alr-info{font-size:12px;color:var(--teal);font-weight:800}
-#absentLunchPrint{display:none}
-body.absent-lunch-printing > *:not(#absentLunchPrint){display:none!important}
-body.absent-lunch-printing #absentLunchPrint{display:block!important;background:#fff;color:#111;padding:0;margin:0}
-#absentLunchPrint h1{text-align:center;font-size:18px;margin:0 0 6px}
-#absentLunchPrint .alr-tab-title{text-align:center;font-size:13px;font-weight:800;margin:0 0 12px}
-#absentLunchPrint h2{font-size:12px;margin:12px 0 5px}
-#absentLunchPrint .alr-group{break-inside:avoid}
+.alr-empty{text-align:center;color:var(--muted);padding:14px}
+.alr-info{font-size:11px;color:var(--muted);font-weight:700}
+#alrPrint{display:none}
 @media print{
- #absentLunchPrint .alr-table{width:100%!important;table-layout:fixed;border-collapse:collapse}
- #absentLunchPrint .alr-table col{width:auto!important}
- #absentLunchPrint .alr-table thead{display:table-header-group}
- #absentLunchPrint .alr-table th,#absentLunchPrint .alr-table td{border:1px solid #666;padding:4px 3px;font-size:9px;color:#111!important;background:#fff!important}
- #absentLunchPrint tr{break-inside:avoid}
- @page{margin:10mm}
+ html,body{background:#fff!important}
+ body>*:not(#alrPrint){display:none!important}
+ #alrPrint{display:block!important;background:#fff;color:#111;padding:0;margin:0}
+ #alrPrint h1{text-align:center;font-size:18px;margin:0 0 5px;color:#111}
+ #alrPrint .alr-tab-title{text-align:center;font-size:12px;font-weight:800;margin:0 0 12px;color:#334}
+ #alrPrint .alr-table{width:100%!important;table-layout:fixed;border-collapse:collapse}
+ #alrPrint .alr-table col{width:auto!important}
+ #alrPrint .alr-table thead{display:table-header-group}
+ #alrPrint th,#alrPrint td{border:1px solid #777;padding:3px;font-size:8px;color:#111!important;background:#fff!important}
+ #alrPrint tr,#alrPrint .alr-group{break-inside:avoid}
 }
+@media(max-width:720px){.alr-name{flex-basis:110px}.alr-val{flex-basis:76px}}
+.alr-chips,.alr-classic-chips{display:inline-flex;align-items:center;gap:6px;flex-wrap:wrap;margin-inline-start:auto}
 </style>
 </head>
 <body>
@@ -429,7 +468,7 @@ function guestDeputyField(r){const list=state.guestOrdersDeputies||[];const sel=
 function guestDeputyLabel(r){const sel=String(r.deputy_id||'all');if(sel==='all')return 'همه';const d=(state.guestOrdersDeputies||[]).find(x=>String(x.id)===sel);return d?d.name:'—'}
 function guestRowHtml(e){return `<tr><td>${faDate(e.date)}</td><td>${esc(e.pc)}</td><td>${esc(e.org)}</td><td>${esc(e.count)}</td><td>${esc(e.food||'—')}</td><td>${esc(e.name)}</td><td>${esc(e.result)}</td></tr>`}
 function loadGuestOrdersReport(){if(!serviceMode)return Promise.resolve();const{from,to}=reportRange(),dep=(state.report&&state.report.deputy_id)||'all',seq=++classicRequestSeq;return api('/api/guest-requests-report?from='+encodeURIComponent(from)+'&to='+encodeURIComponent(to)+'&deputy_id='+encodeURIComponent(dep)).then(x=>{if(seq!==classicRequestSeq)return;state.guestOrdersRows=x.items||[];state.guestOrdersSummary=x.summary||null;state.guestOrdersDeputies=x.deputies||[];state.classicError='';state.classicUpdatedAt=new Date().toISOString();persist();if(view==='reports'&&state.report?.type==='guest-orders')safeReportRender()}).catch(e=>{if(seq!==classicRequestSeq)return;state.guestOrdersRows=[];state.guestOrdersSummary=null;state.classicError=e.message||'خطا در دریافت گزارش سفارش مهمان';if(view==='reports'&&state.report?.type==='guest-orders')safeReportRender()})}
-function reportForm(){const r=state.report||{from:todayJalali(),to:todayJalali(),type:'attendance'};const from=isoDateFor(r.from),to=isoDateFor(r.to);const rows=state.reportEvents.filter(x=>isoDateFor(x.date)>=from&&isoDateFor(x.date)<=to);return `<section>${heading('گزارش‌گیری','گزارش تردد، فیش، مهمان، سفارش و خطا با بازهٔ شمسی','<button class="btn primary" data-action="export">خروجی XLSX</button><button class="btn ghost" data-action="print-report">چاپ گزارش</button>')}<form class="card form-grid" id="report-filter"><label class="field">از تاریخ (شمسی)<input name="from" value="${esc(r.from)}" placeholder="۱۴۰۵/۰۷/۰۱"></label><label class="field">تا تاریخ (شمسی)<input name="to" value="${esc(r.to)}" placeholder="۱۴۰۵/۰۷/۳۰"></label><label class="field">نوع گزارش<select name="type"><option value="attendance" ${r.type==='attendance'?'selected':''}>گزارش تردد و چاپ</option><option value="guest" ${r.type==='guest'?'selected':''}>گزارش کارت مهمان</option><option value="orders" ${r.type==='orders'?'selected':''}>گزارش سفارش غذا</option><option value="errors" ${r.type==='errors'?'selected':''}>گزارش خطا و چاپ مجدد</option><option value="guest-orders" ${r.type==='guest-orders'?'selected':''}>سفارش مهمان (درخواست مدیران)</option></select></label>${r.type==='guest-orders'?guestDeputyField(r):''}<div class="form-actions"><button class="btn primary">نمایش گزارش</button></div></form><div class="grid section-gap"><div class="card stat"><span class="label">تعداد رکورد</span><strong>${rows.length}</strong></div><div class="card stat"><span class="label">چاپ‌شده</span><strong>${rows.filter(x=>x.status==='printed').length}</strong></div><div class="card stat"><span class="label">بدون سفارش</span><strong>${rows.filter(x=>x.result==='غذا ندارد').length}</strong></div><div class="card stat"><span class="label">خطا</span><strong>${rows.filter(x=>x.status==='bad'||x.status==='print_error').length}</strong></div></div><div class="card table-wrap section-gap"><table class="table"><thead><tr><th>تاریخ شمسی</th>${isGuestOrders?'<th>معاونت</th><th>سازمان / شرکت</th><th>تعداد</th><th>نوع غذا</th><th>درخواست‌دهنده</th><th>وضعیت</th>':'<th>ساعت</th><th>کد پرسنلی</th><th>نام</th><th>غذا</th><th>نتیجه</th><th>SOURCE_TABLE</th>'}</tr></thead><tbody>${rows.map(e=>isGuestOrders?guestRowHtml(e):`<tr><td>${faDate(e.date)}</td><td>${timeLabel(e.time)}</td><td>${esc(e.pc)}</td><td>${esc(e.name)}</td><td>${esc(e.food||'—')}</td><td>${esc(e.result)}</td><td>${e.deleted===true?'<span class="status ok" title="'+esc(e.deleteNote||'')+'">حذف شد</span>':e.deleted===false?'<span class="status bad" title="'+esc(e.deleteNote||'')+'">در SOURCE_TABLE</span>':'<span class="status warn">نامشخص</span>'}</td></tr>`).join('')||`<tr><td colspan="7" class="empty">رکوردی در بازه انتخاب‌شده وجود ندارد.</td></tr>`}</tbody></table></div></section>`}
+function reportForm(){const r=state.report||{from:todayJalali(),to:todayJalali(),type:'attendance'};const from=isoDateFor(r.from),to=isoDateFor(r.to);const rows=state.reportEvents.filter(x=>isoDateFor(x.date)>=from&&isoDateFor(x.date)<=to);return `<section>${heading('گزارش‌گیری','گزارش تردد، فیش، مهمان، سفارش و خطا با بازهٔ شمسی','<button class="btn primary" data-action="export">خروجی XLSX</button><button class="btn ghost" data-action="print-report">چاپ گزارش</button>')}<form class="card form-grid" id="report-filter"><label class="field">از تاریخ (شمسی)<input name="from" value="${esc(r.from)}" placeholder="۱۴۰۵/۰۷/۰۱"></label><label class="field">تا تاریخ (شمسی)<input name="to" value="${esc(r.to)}" placeholder="۱۴۰۵/۰۷/۳۰"></label><label class="field">نوع گزارش<select name="type"><option value="attendance" ${r.type==='attendance'?'selected':''}>گزارش تردد و چاپ</option><option value="guest" ${r.type==='guest'?'selected':''}>گزارش کارت مهمان</option><option value="orders" ${r.type==='orders'?'selected':''}>گزارش سفارش غذا</option><option value="errors" ${r.type==='errors'?'selected':''}>گزارش خطا و چاپ مجدد</option><option value="guest-orders" ${r.type==='guest-orders'?'selected':''}>سفارش مهمان (درخواست مدیران)</option></select></label>${r.type==='guest-orders'?guestDeputyField(r):''}<div class="form-actions"><button class="btn primary">نمایش گزارش</button></div>${classicChips}</form><div class="grid section-gap"><div class="card stat"><span class="label">تعداد رکورد</span><strong>${rows.length}</strong></div><div class="card stat"><span class="label">چاپ‌شده</span><strong>${rows.filter(x=>x.status==='printed').length}</strong></div><div class="card stat"><span class="label">بدون سفارش</span><strong>${rows.filter(x=>x.result==='غذا ندارد').length}</strong></div><div class="card stat"><span class="label">خطا</span><strong>${rows.filter(x=>x.status==='bad'||x.status==='print_error').length}</strong></div></div><div class="card table-wrap section-gap"><table class="table"><thead><tr><th>تاریخ شمسی</th>${isGuestOrders?'<th>معاونت</th><th>سازمان / شرکت</th><th>تعداد</th><th>نوع غذا</th><th>درخواست‌دهنده</th><th>وضعیت</th>':'<th>ساعت</th><th>کد پرسنلی</th><th>نام</th><th>غذا</th><th>نتیجه</th><th>SOURCE_TABLE</th>'}</tr></thead><tbody>${rows.map(e=>isGuestOrders?guestRowHtml(e):`<tr><td>${faDate(e.date)}</td><td>${timeLabel(e.time)}</td><td>${esc(e.pc)}</td><td>${esc(e.name)}</td><td>${esc(e.food||'—')}</td><td>${esc(e.result)}</td><td>${e.deleted===true?'<span class="status ok" title="'+esc(e.deleteNote||'')+'">حذف شد</span>':e.deleted===false?'<span class="status bad" title="'+esc(e.deleteNote||'')+'">در SOURCE_TABLE</span>':'<span class="status warn">نامشخص</span>'}</td></tr>`).join('')||`<tr><td colspan="7" class="empty">رکوردی در بازه انتخاب‌شده وجود ندارد.</td></tr>`}</tbody></table></div></section>`}
   function versionBanner(){const expected=window.__ftPanelExpected||'';if(!expected||expected===PANEL_VERSION)return '';return `<div class="card version-warning"><b>⚠️ فایل پنل شما قدیمی است (نسخهٔ ${esc(PANEL_VERSION)} در مرورگر، نسخهٔ ${esc(expected)} روی سرور).</b><p>مرورگر نسخهٔ کش‌شدهٔ قدیمی <b dir="ltr">food-ticket-web/index.html</b> را نشان می‌دهد؛ به همین دلیل بعضی اصلاحات (حفظ IP، سوئیچ روش چاپ، اعداد کالیبراسیون) دیده نمی‌شود. با <b dir="ltr">Ctrl+F5</b> صفحه را تازه کنید. اگر باز هم همین پیام را دیدید، فایل کامل <b>01-ویرایش‌شده</b> بسته را دوباره روی سرور کپی کنید.</p></div>`}
 /* ── «تغییرات این به‌روزرسانی» — از API پنل غذا می‌آید (food-ticket-release-notes.php) ──
    مستقل از index.php و بستهٔ ۱.۶۳، تا تغییرات ۱.۶۲.۹۷ همین‌جا دیده شود.
@@ -806,7 +845,7 @@ function reportClassicView(){
  const fallback=dates[0]||new Date().toISOString().slice(0,10),fallbackEnd=dates[dates.length-1]||fallback;
  const r=state.report||{from:faDate(fallback),to:faDate(fallbackEnd),type:'attendance'};
  const from=isoDateFor(r.from)||fallback,to=isoDateFor(r.to)||fallbackEnd;
- const rows=currentReportRows().rows,isAbsent=r.type==='absent',isGuestOrders=r.type==='guest-orders',isOrders=r.type==='orders';
+ const rows=currentReportRows().rows,classicChips=`<div class="alr-classic-chips"><span class="alr-chip" data-classic-chip="records">تعداد رکورد <b>${toFaDigits(rows.length)}</b></span><span class="alr-chip" data-classic-chip="printed">چاپشده <b>${toFaDigits(rows.filter(x=>x.status==='printed'||String(x.result||'').includes('چاپ')).length)}</b></span><span class="alr-chip" data-classic-chip="auto">چاپ خودکار <b>${toFaDigits(rows.filter(x=>String(x.result||'').includes('خودکار')).length)}</b></span><span class="alr-chip" data-classic-chip="nofood">بدون غذا <b>${toFaDigits(rows.filter(x=>!x.food).length)}</b></span><span class="alr-chip" data-classic-chip="errors">خطا <b>${toFaDigits(rows.filter(x=>x.status==='error'||String(x.result||'').includes('خطا')).length)}</b></span></div>`,isAbsent=r.type==='absent',isGuestOrders=r.type==='guest-orders',isOrders=r.type==='orders';
  const count=(meal,status)=>rows.filter(x=>x.meal_type===meal&&x.status===status).length;
  let statCards='';
  if(isGuestOrders){
@@ -1106,195 +1145,244 @@ document.addEventListener('change',function(e){if(!e.target||e.target.name!=='gu
 setInterval(function(){var box=document.getElementById('guest-cap-live');if(box&&box.style.display!=='none'&&typeof loadGuestCap==='function')loadGuestCap();},60000);
 </script>
 <script>
-
-/* ۱٫۶۳٫۳ — تب «غایبین ناهار» داخل صفحهٔ گزارشها (سامانه مدیریت غذا ← گزارشها).
-   نمای مستقل/ناوبری جداگانهای اضافه نمیشود؛ مجوز همان reports/food.reports است. */
+/* ۱٫۶۳٫۳ — تب «غایبین ناهار»، نسخهٔ نهایی تأییدشده (۳ تب + چارت + چاپ خالص + انتخاب چندمعاونتی).
+   داخل «سامانه مدیریت غذا ← گزارشها»؛ نه نمای مستقل، نه تغییر route/مجوز/بکاند. */
 (function(){
 'use strict';
-var FIELDS=[{key:'row',label:'ردیف'},{key:'pc',label:'کد پرسنلی'},{key:'first',label:'نام'},{key:'last',label:'نام خانوادگی'},{key:'deputy',label:'معاونت'},{key:'count',label:'تعداد غیبت'},{key:'date',label:'آخرین تاریخ'},{key:'status',label:'وضعیت غیبت'}];
-var FKEY='food-ticket-absent-fields-v1',BKEY='food-ticket-absent-blocks-v1';
-var S={rows:[],key:'',seq:0,loading:false,error:'',sort:{key:'pc',dir:'asc'},org:false};
+var FIELDS=[{key:'row',label:'ردیف'},{key:'pc',label:'کد پرسنلی'},{key:'first',label:'نام'},{key:'last',label:'نام خانوادگی'},
+ {key:'dep',label:'معاونت'},{key:'count',label:'تعداد غیبت'},{key:'food',label:'نوع غذا'},{key:'jal',label:'تاریخ غیبت'},{key:'status',label:'وضعیت غیبت'}];
+var TAB_FIELDS={flat:['row','pc','first','last','dep','count','jal','status'],dept:['row','pc','first','last','dep','count','status'],detail:['row','pc','first','last','dep','food','jal','status']};
+var FKEY='food-ticket-absent-fields-v2',BKEY='food-ticket-absent-blocks-v1';
+var PAL=['var(--teal)','var(--navy-2)','var(--gold)','var(--danger)','#4f91c6','#8a63c9','#d9812b'];
+var S={rows:[],key:'',seq:0,loading:false,error:'',tab:'detail',blocks:1,metric:'people',chart:true,query:'',deps:new Set(),
+  fieldsByTab:{flat:new Set(TAB_FIELDS.flat),dept:new Set(TAB_FIELDS.dept),detail:new Set(TAB_FIELDS.detail)},
+  sort:{key:'iso',dir:'asc'}};
+try{var raw=localStorage.getItem(FKEY);if(raw){var saved=JSON.parse(raw);Object.keys(TAB_FIELDS).forEach(function(t){if(Array.isArray(saved[t])){var v=saved[t].filter(function(k){return TAB_FIELDS[t].indexOf(k)>=0});if(v.length)S.fieldsByTab[t]=new Set(v)}})}var bb=Number(localStorage.getItem(BKEY));if(bb===2||bb===3)S.blocks=bb;}catch(e){}
+function saveFields(){try{var o={};Object.keys(TAB_FIELDS).forEach(function(t){o[t]=Array.from(S.fieldsByTab[t])});localStorage.setItem(FKEY,JSON.stringify(o))}catch(e){}}
+function saveBlocks(){try{localStorage.setItem(BKEY,String(S.blocks))}catch(e){}}
 function active(){return typeof view!=='undefined'&&view==='reports'&&(state.reportTab||'classic')==='absent-lunch';}
+function syncIndeterminate(){var all=document.querySelector('[data-alr-all]');if(!all)return;var n=allDeps().length;all.checked=S.deps.size===n&&n>0;all.indeterminate=S.deps.size>0&&S.deps.size<n}
+function rerender(){if(typeof render==='function')render();setTimeout(syncIndeterminate,0)}
 function fa(n){return typeof toFaDigits==='function'?toFaDigits(n):String(n);}
-function cols(){try{var raw=localStorage.getItem(FKEY);if(raw){var k=JSON.parse(raw);var c=FIELDS.filter(function(f){return k.indexOf(f.key)>=0;});if(c.length)return c;}}catch(e){}return FIELDS.slice(0,6);}
-function saveCols(a){try{localStorage.setItem(FKEY,JSON.stringify(a.map(function(f){return f.key;})));}catch(e){}}
-function blocks(){try{var b=Number(localStorage.getItem(BKEY));return b===2||b===3?b:1;}catch(e){return 1;}}
-function setBlocks(b){try{localStorage.setItem(BKEY,String(b));}catch(e){}}
-function plain(p,k,i){return k==='row'?fa(i+1):k==='status'?p.status:String(p[k]==null?'':p[k]);}
-function cell(p,k,i){
- if(k==='row')return fa(i+1);
- if(k==='count')return '<b>'+fa(p.count)+'</b>';
- if(k==='status')return '<span class="alr-pill'+(p.declared?' declared':'')+'" title="'+esc(p.status)+'">'+esc(p.short)+'</span>';
- return esc(p[k]||'—');
-}
-function sorted(rows){
- var pairs=rows.map(function(r,i){return{r:r,i:i};}),s=S.sort;
- if(s.key)pairs.sort(function(a,b){
-  var x=s.key==='row'?a.i:a.r[s.key],y=s.key==='row'?b.i:b.r[s.key];
-  var cmp=(s.key==='row'||s.key==='count')?(Number(x)-Number(y)):String(x==null?'':x).localeCompare(String(y==null?'':y),'fa',{numeric:true,sensitivity:'base'});
-  return cmp?(s.dir==='desc'?-cmp:cmp):a.i-b.i;
- });
- return pairs.map(function(o){return o.r;});
-}
-function percents(rows,c,b){
- var w=c.map(function(col){var mx=String(col.label).length;rows.forEach(function(p,i){mx=Math.max(mx,String(plain(p,col.key,i)).length);});return Math.max(5,Math.min(30,mx+2));});
- var all=[];for(var i=0;i<b;i++)all=all.concat(w);
- var total=all.reduce(function(s,x){return s+x;},0);
- return all.map(function(x){return (x/total*100).toFixed(3)+'%';});
-}
-function table(rows,b,sortable){
- var c=cols();if(!c.length)return '<div class="notice">حداقل یک فیلد را انتخاب کنید.</div>';
- b=Math.max(1,Math.min(3,Number(b)||1));
- var cg='<colgroup>'+percents(rows,c,b).map(function(w){return '<col style="width:'+w+'">';}).join('')+'</colgroup>';
- var head='<tr>';
- for(var k=0;k<b;k++)head+=c.map(function(f,j){
-  var on=S.sort.key===f.key,mark=on?(S.sort.dir==='desc'?' ▼':' ▲'):'';
-  var label=sortable?'<button type="button" class="alr-sort" data-absent-lunch-sort="'+f.key+'">'+esc(f.label+mark)+'</button>':esc(f.label);
-  return '<th class="'+(j===0&&k>0?'alr-block-start':'')+'">'+label+'</th>';
- }).join('');
- head+='</tr>';
- var lines=Math.ceil(rows.length/b),body='';
- for(var line=0;line<lines;line++){
-  var tds='';
-  for(var k2=0;k2<b;k2++){
-   var idx=line*b+k2,p=rows[idx];
-   if(!p){tds+=c.map(function(_,j){return '<td class="'+(j===0&&k2>0?'alr-block-start':'')+'"></td>';}).join('');continue;}
-   tds+=c.map(function(f,j){return '<td class="'+(j===0&&k2>0?'alr-block-start':'')+'" title="'+esc(plain(p,f.key,idx))+'">'+cell(p,f.key,idx)+'</td>';}).join('');
-  }
-  body+='<tr>'+tds+'</tr>';
- }
- var empty='<tr><td colspan="'+c.length*b+'" class="empty">در این بازه غایبی ثبت نشده است.</td></tr>';
- return '<div class="alr-card alr-table-wrap"><table class="alr-table">'+cg+'<thead>'+head+'</thead><tbody>'+(body||empty)+'</tbody></table></div>';
-}
-function groups(rows){
- var out={},order=[],map=state.__orgMap||null;
- rows.forEach(function(r){
-  var g=r.deputy||'بدون معاونت سازمانی';
-  if(map&&window.FoodOrgGroups&&typeof window.FoodOrgGroups.groupOf==='function'){
-   var grp=window.FoodOrgGroups.groupOf(map,r);
-   g=grp&&grp.label?grp.label:'بدون معاونت سازمانی';
-  }
-  if(!out[g]){out[g]=[];order.push(g);}out[g].push(r);
- });
- return order.map(function(g){return{name:g,rows:out[g]};});
-}
+function esc2(s){return typeof esc==='function'?esc(s):String(s==null?'':s).replace(/[&<>"']/g,function(c){return({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c]});}
+function jal(iso){try{return typeof faDate==='function'?faDate(iso):iso}catch(e){return iso}}
+function depColor(name){return PAL[Math.max(0,allDeps().indexOf(name))%PAL.length]}
+function allDeps(){var m={},o=[];S.rows.forEach(function(r){if(!m[r.dep]){m[r.dep]=1;o.push(r.dep)}});return o.sort(function(a,b){return a.localeCompare(b,'fa')})}
+function selectedDeps(){return Array.from(S.deps)}
+function filtered(){var q=String(S.query||'').trim(),d=selectedDeps();return S.rows.filter(function(r){
+  if(d.indexOf(r.dep)<0)return false;
+  if(q&&(r.first+r.last+r.pc+r.dep+r.food+r.jal).indexOf(q)<0)return false;
+  return true;})}
+function sorted(rows){var s=S.sort;return rows.slice().sort(function(a,b){var x=a[s.key],y=b[s.key];var c=String(x==null?'':x).localeCompare(String(y==null?'':y),'en',{numeric:true});return c?(s.dir==='desc'?-c:c):0})}
+function activeFields(){return FIELDS.filter(function(f){return TAB_FIELDS[S.tab].indexOf(f.key)>=0&&S.fieldsByTab[S.tab].has(f.key)})}
+function tabTitle(){return S.tab==='detail'?'تفکیک و جزئیات':(S.tab==='dept'?'بر اساس معاونت':'فهرست یکجا')}
+
 function mapped(items,orgMap){
- var by={},order=[];
- (items||[]).forEach(function(it){
-  var pc=String(it.pc||''),nat=String(it.nat||''),key=pc||nat||String(it.full_name||'');if(!key)return;
-  if(!by[key]){by[key]={pc:pc||'—',nat:nat,first:String(it.first||''),last:String(it.last||''),deputy:'بدون معاونت سازمانی',count:0,date:'',status:'غایب — سفارش دارد، فیش چاپ نشده',short:'غایب',declared:false};order.push(by[key]);}
-  var r=by[key];r.count+=1;
-  var d=String(it.foodDate||'');if(d>r.date)r.date=d;
-  if(it.declared_absent){r.declared=true;r.status='غایب اعلامشده — فیش چاپ نشده';r.short='غایب اعلامشده';}
- });
  var map=orgMap||state.__orgMap||null;
- if(map&&window.FoodOrgGroups&&typeof window.FoodOrgGroups.groupOf==='function')order.forEach(function(r){var g=window.FoodOrgGroups.groupOf(map,r);r.deputy=g&&g.label?g.label:'بدون معاونت سازمانی';});
- return order;
+ return (items||[]).map(function(it){
+  var declared=!!it.declared_absent;
+  var r={pc:String(it.pc||it.nat||'—'),nat:String(it.nat||''),first:String(it.first||''),last:String(it.last||''),
+   food:String(it.food||''),iso:String(it.foodDate||''),jal:jal(String(it.foodDate||'')),
+   dep:'بدون معاونت سازمانی',deputy:'بدون معاونت سازمانی',declared:declared,
+   status:declared?'غایب اعلامشده — فیش چاپ نشده':'غایب — سفارش دارد، فیش چاپ نشده',short:declared?'غایب اعلامشده':'غایب'};
+  try{if(map&&window.FoodOrgGroups&&typeof window.FoodOrgGroups.groupOf==='function'){
+   var g=window.FoodOrgGroups.groupOf(map,r);if(g&&g.label){r.dep=g.label;r.deputy=g.label}}}catch(e){}
+  return r;});
 }
-function rangeInputs(){var r=state.report||{},f=r.from||faDate(reportRange().from);return{from:f,to:r.to||f};}
 function load(force){
  var r=reportRange(),key=r.from+'|'+r.to;
  if(!force&&S.key===key)return Promise.resolve();
  S.key=key;if(!serviceMode)return Promise.resolve();
  S.loading=true;S.error='';var seq=++S.seq;
- var apiP=api('/api/absent?from='+encodeURIComponent(r.from)+'&to='+encodeURIComponent(r.to));
  var mapP=Promise.resolve(null);
  try{if(window.FoodOrgGroups&&typeof loadOrgMap==='function')mapP=Promise.resolve(loadOrgMap());}catch(e){}
- return Promise.all([apiP,mapP.catch(function(){return null;})]).then(function(res){
-  if(seq!==S.seq||S.key!==key)return;
-  var x=res[0]||{};
-  S.rows=mapped(Array.isArray(x.items)?x.items:[],res[1]||state.__orgMap||null);
-  S.loading=false;if(active())render();
- }).catch(function(e){if(seq!==S.seq)return;S.rows=[];S.loading=false;S.error=e.message||'خطا در دریافت گزارش غایبین ناهار';if(active())render();});
+ return Promise.all([api('/api/absent?from='+encodeURIComponent(r.from)+'&to='+encodeURIComponent(r.to)),mapP.catch(function(){return null})])
+  .then(function(res){
+   if(seq!==S.seq||S.key!==key)return;
+   S.rows=mapped(res[0]&&Array.isArray(res[0].items)?res[0].items:[],res[1]||state.__orgMap||null);
+   S.loading=false;S.deps=new Set(allDeps());
+   if(active())rerender();
+  }).catch(function(e){if(seq!==S.seq)return;S.rows=[];S.deps=new Set();S.loading=false;S.error=e.message||'خطا در دریافت گزارش غایبین ناهار';if(active())rerender();});
 }
-function html(){
- var ri=rangeInputs(),b=blocks(),c=cols(),rows=sorted(S.rows),people=rows.length;
- var portions=rows.reduce(function(s,r){return s+r.count;},0);
- var chosen={};c.forEach(function(f){chosen[f.key]=true;});
- var range='<form class="card form-grid" id="absent-lunch-filter"><label class="field">از تاریخ (شمسی)<input name="from" value="'+esc(ri.from)+'" placeholder="۱۴۰۵/۰۸/۲۷"></label><label class="field">تا تاریخ (شمسی)<input name="to" value="'+esc(ri.to)+'" placeholder="۱۴۰۵/۰۸/۲۸"></label><div class="form-actions"><button class="btn primary">نمایش گزارش</button><button type="button" class="btn ghost" data-action="absent-lunch-today">امروز</button></div></form>';
- var stats='<div class="grid section-gap"><div class="card stat"><span class="label">مجموع پرس</span><strong>'+fa(portions)+' پرس</strong></div><div class="card stat"><span class="label">افراد یکتا</span><strong>'+fa(people)+' نفر</strong></div></div>';
- var chips='<div class="card section-gap"><div class="alr-fields"><strong class="alr-blocks-label">فیلدهای گزارش:</strong>'+FIELDS.map(function(f){return '<label class="alr-chip"><input type="checkbox" data-absent-lunch-field="'+f.key+'" '+(chosen[f.key]?'checked':'')+'><span>'+esc(f.label)+'</span></label>';}).join('')+'</div>'+
-  '<div class="alr-blocks"><span class="alr-blocks-label">بلوک در هر ردیف:</span>'+[1,2,3].map(function(n){return '<button type="button" class="alr-block-btn '+(b===n?'active':'')+'" data-absent-lunch-block="'+n+'" aria-pressed="'+(b===n)+'">'+fa(n)+'</button>';}).join('')+'<span class="alr-hint">لیست همیشه تمامعرض صفحه است؛ فاصلهٔ فیلدها خودکار تنظیم میشود.</span></div></div>';
- var views='<div class="agg-tabs section-gap" role="group" aria-label="نحوهٔ نمایش غایبین ناهار"><button type="button" class="agg-tab '+(!S.org?'active':'')+'" data-absent-lunch-view="off">فهرست یکجا</button><button type="button" class="agg-tab '+(S.org?'active':'')+'" data-absent-lunch-view="on">بر اساس معاونت</button></div>';
- var notice=!serviceMode?'<div class="notice warn">برای گزارش واقعی، پنل باید متصل به سرویس باشد.</div>':S.error?'<div class="notice warn">خطا: '+esc(S.error)+'؛ بازخوانی کنید.</div>':S.loading?'<div class="notice">در حال دریافت گزارش…</div>':'';
- var list;
- if(S.org){
-  var gs=groups(rows),map=state.__orgMap||null;
-  if(!map&&window.FoodOrgGroups&&!window.__alrOrgTried){window.__alrOrgTried=true;loadOrgMap().then(function(){if(active())render();});}
-  list=gs.map(function(g){return '<section class="alr-group"><div class="alr-group-head"><h3>'+esc(g.name)+'</h3><span>('+fa(g.rows.length)+' نفر · '+fa(g.rows.reduce(function(s,r){return s+r.count;},0))+' پرس)</span></div>'+table(g.rows,b,false)+'</section>';}).join('')||'<div class="notice">در این بازه غایبی ثبت نشده است.</div>';
- }else list=table(rows,b,true);
- var actions='<button class="btn primary" data-action="absent-lunch-export">خروجی XLSX</button><button class="btn ghost" data-action="absent-lunch-print">چاپ فهرست</button><button class="btn ghost" data-action="absent-lunch-refresh">بازخوانی</button>';
- return '<section>'+heading('گزارش غایبین ناهار','فهرست سفارشهای ناهاری که فیش دریافت نکردهاند؛ هر ردیف معادل یک پرس است.',actions)+range+stats+notice+chips+views+list+'<div class="alr-info section-gap">بلوک: '+fa(b)+' · فیلدها: '+fa(c.length)+' · ستونها: '+fa(c.length*b)+' · عرض لیست ۱۰۰٪ صفحه</div></section>';
+
+/* ---------- چارت جمعوجور + تیک چندمعاونتی + «همه» ---------- */
+function chartGroups(){
+ var q=String(S.query||'').trim();
+ var rows=S.rows.filter(function(r){return !q||(r.first+r.last+r.pc+r.dep+r.food+r.jal).indexOf(q)>=0});
+ var m={},order=[];
+ rows.forEach(function(r){if(!m[r.dep]){m[r.dep]={name:r.dep,people:{},portions:0};order.push(r.dep)}
+  var g=m[r.dep];g.people[r.pc]=1;g.portions++});
+ return order.map(function(n){var g=m[n];return{name:n,people:Object.keys(g.people).length,portions:g.portions}});
 }
+function rangeLabel(){var r=reportRange();return 'شروع بازه: '+jal(r.from)+' ← پایان بازه: '+jal(r.to)}
+function daysForChart(){var out=[];try{var r=reportRange(),a=new Date(r.from+'T00:00:00'),b=new Date(r.to+'T00:00:00');for(var d=new Date(a),n=0;d<=b&&n<12;d.setDate(d.getDate()+1),n++)out.push(jal(d.toISOString().slice(0,10)).slice(-2))}catch(e){}return out}
+function chartHtml(){
+ var gs=chartGroups().map(function(g){return{name:g.name,v:S.metric==='people'?g.people:g.portions,people:g.people,portions:g.portions}})
+  .filter(function(g){return g.v>0}).sort(function(a,b){return b.v-a.v});
+ if(!gs.length)return '<div class="alr-empty">موردی یافت نشد.</div>';
+ var max=Math.max.apply(null,gs.map(function(g){return g.v}))||1,total=gs.reduce(function(s,g){return s+g.v},0),mean=total/gs.length,meanPct=(mean/max*100).toFixed(2)+'%';
+ var all=allDeps(),sel=selectedDeps(),allOn=sel.length===all.length&&all.length>0;
+ var h='<label class="alr-all"><input type="checkbox" data-alr-all'+(allOn?' checked':'')+'> همه معاونتها</label>';
+ h+='<div class="alr-plot">';
+ gs.forEach(function(g,i){
+  var on=sel.indexOf(g.name)>=0,w=(g.v/max*100).toFixed(2)+'%';
+  h+='<div class="alr-row'+(i===0?' max':'')+(i===gs.length-1?' min':'')+(on?'':' off')+'" data-alr-row="'+esc2(g.name)+'">'+
+   '<label class="alr-check"><input type="checkbox" data-alr-dep-check="'+esc2(g.name)+'"'+(on?' checked':'')+'></label>'+
+   '<span class="alr-name" data-alr-dep-toggle="'+esc2(g.name)+'" title="'+esc2(g.name)+'">'+esc2(g.name)+'</span>'+
+   '<span class="alr-track"><i class="alr-grid" style="right:25%"></i><i class="alr-grid" style="right:50%"></i><i class="alr-grid" style="right:75%"></i>'+
+    '<i class="alr-mean" style="right:'+meanPct+'"></i><i class="alr-fill" style="width:'+w+';background:'+depColor(g.name)+'"></i></span>'+
+   '<span class="alr-val">'+fa(g.v)+' '+(S.metric==='people'?'نفر':'وعده')+'</span></div>';
+ });
+ h+='</div>';
+ var days=daysForChart();
+ h+='<div class="alr-axis"><span>'+esc2(rangeLabel())+'</span>'+days.map(function(x){return '<span class="alr-tick">'+x+'</span>'}).join('')+'</div>';
+ h+='<div class="alr-legend">'+gs.map(function(g,i){return '<span data-alr-dep-toggle="'+esc2(g.name)+'"><i style="background:'+depColor(g.name)+'"></i>'+esc2(g.name)+
+   ' <b>'+fa(g.people)+' نفر · '+fa(g.portions)+' وعده</b>'+(i===0?' ▼ بیشترین':'')+(i===gs.length-1?' ▲ کمترین':'')+'</span>'}).join('')+
+   '<span class="alr-mean-key"><i></i>میانگین '+fa(mean.toFixed(1))+'</span></div>';
+ return h;
+}
+
+/* ---------- جدول ---------- */
+function cell(r,f,i){if(f.key==='row')return fa(i+1);if(f.key==='count')return fa(r.count||1);
+ if(f.key==='status')return '<span class="alr-pill'+(r.declared?' declared':'')+'" title="'+esc2(r.status)+'">'+esc2(r.short||'غایب')+'</span>';
+ return esc2(r[f.key]==null?'—':r[f.key])}
+function plain(r,f,i){return f.key==='row'?String(i+1):f.key==='count'?String(r.count||1):String(r[f.key]==null?'':r[f.key])}
+function percents(rows,c,b){var w=c.map(function(f){var mx=String(f.label).length;rows.forEach(function(r,i){mx=Math.max(mx,plain(r,f,i).length)});return Math.max(5,Math.min(28,mx+2))});
+ var all=[];for(var i=0;i<b;i++)all=all.concat(w);var t=all.reduce(function(s,x){return s+x},0);return all.map(function(x){return(x/t*100).toFixed(3)+'%'})}
+function tableHtml(rows,b,sortable){
+ var c=activeFields();if(!c.length)return '<div class="alr-empty">حداقل یک فیلد را انتخاب کنید.</div>';
+ var cg='<colgroup>'+percents(rows,c,b).map(function(w){return '<col style="width:'+w+'">'}).join('')+'</colgroup>';
+ var head='<tr>';for(var k=0;k<b;k++)head+=c.map(function(f,j){return '<th class="'+(j===0&&k>0?'alr-block-start':'')+'">'+
+  (sortable?'<button type="button" class="alr-sort" data-alr-sort="'+f.key+'">'+esc2(f.label)+'</button>':esc2(f.label))+'</th>'}).join('');head+='</tr>';
+ var lines=Math.ceil(rows.length/b),body='';
+ for(var line=0;line<lines;line++){var tds='';
+  for(var k2=0;k2<b;k2++){var idx=line*b+k2,r=rows[idx];
+   tds+=!r?c.map(function(_,j){return '<td class="'+(j===0&&k2>0?'alr-block-start':'')+'"></td>'}).join(''):
+    c.map(function(f,j){return '<td class="'+(j===0&&k2>0?'alr-block-start':'')+'" title="'+esc2(plain(r,f,idx))+'">'+cell(r,f,idx)+'</td>'}).join('')}
+  body+='<tr>'+tds+'</tr>'}
+ if(!body)body='<tr><td colspan="'+c.length*b+'" class="alr-empty">در این بازه غایبی ثبت نشده است.</td></tr>';
+ return '<div class="alr-table-wrap"><table class="alr-table">'+cg+'<thead>'+head+'</thead><tbody>'+body+'</tbody></table></div>';
+}
+function rowsForMode(mode){
+ var rows=sorted(filtered());if(mode==='detail')return rows;
+ var m={},order=[];rows.forEach(function(r){var u=m[r.pc];
+  if(!u){u=Object.assign({},r,{count:0});m[r.pc]=u;order.push(u)}
+  u.count++;if(r.iso>=u.iso){u.iso=r.iso;u.jal=r.jal;u.food=r.food;u.status=r.status;u.short=r.short;u.declared=r.declared}});
+ return order;
+}
+function groupStats(){var m={};filtered().forEach(function(r){if(!m[r.dep])m[r.dep]={people:{},portions:0};m[r.dep].people[r.pc]=1;m[r.dep].portions++});return m}
+function groupedHtml(mode){
+ var rows=mode==='detail'?rowsForMode('detail'):rowsForMode('dept'),stats=groupStats(),gs={},order=[];
+ rows.forEach(function(r){if(!gs[r.dep]){gs[r.dep]=[];order.push(r.dep)}gs[r.dep].push(r)});
+ if(!order.length)return '<div class="alr-empty">'+(S.deps.size?'موردی یافت نشد.':'هیچ معاونتی انتخاب نشده؛ تیک «همه معاونتها» را بزنید.')+'</div>';
+ order.sort(function(a,b){return(stats[b]?stats[b].portions:0)-(stats[a]?stats[a].portions:0)||a.localeCompare(b,'fa')});
+ return order.map(function(dep){var st=stats[dep]||{people:{},portions:0};
+  return '<section class="alr-group"><div class="alr-group-head"><h4>'+esc2(dep)+' <b>'+fa(Object.keys(st.people).length)+' نفر · '+fa(st.portions)+' وعده</b></h4></div>'+
+   tableHtml(gs[dep],S.blocks,false)+'</section>'}).join('');
+}
+function viewHtml(sortable){
+ if(S.tab==='flat')return tableHtml(rowsForMode('flat'),S.blocks,sortable);
+ if(S.tab==='dept')return groupedHtml('dept');
+ return groupedHtml('detail');
+}
+function foodSummary(){var m={},o=[];filtered().forEach(function(r){if(!m[r.food]){m[r.food]=0;o.push(r.food)}m[r.food]++});
+ return o.sort(function(a,b){return m[b]-m[a]}).map(function(f){return '<span>'+esc2(f||'—')+' '+fa(m[f])+'</span>'}).join('')}
+
+/* ---------- XLSX واقعی (همان action رسمی پنل) ---------- */
 function exportXlsx(){
- if(S.loading||S.error){toast('گزارش معتبر دریافت نشده است.');return;}
- var helper=window.ITSM_LIST_SORT;
- if(!helper||typeof helper.exportXlsx!=='function'){toast('ابزار ساخت XLSX بارگذاری نشده است.');return;}
- var c=cols(),rows=sorted(S.rows),r=reportRange();
+ if(S.loading||S.error){toast('گزارش معتبر دریافت نشده است.');return}
+ var c=activeFields(),rows=S.tab==='detail'?rowsForMode('detail'):rowsForMode('flat'),r=reportRange();
  var name='گزارش-غایبین-ناهار-'+r.from+(r.from!==r.to?'_'+r.to:'');
- var title='گزارش غایبین ناهار — '+faDate(r.from)+(r.from!==r.to?' تا '+faDate(r.to):'');
+ var title='گزارش غایبین ناهار — '+jal(r.from)+(r.from!==r.to?' تا '+jal(r.to):'');
  var token=window.ITSM_CSRF||window.FOOD_TICKET_CSRF||'';
  fetch('index.php?action=export_view_xlsx',{method:'POST',credentials:'same-origin',
   headers:{'Content-Type':'application/json','X-CSRF-Token':token},
-  body:JSON.stringify({title:title,filename:name,headers:c.map(function(f){return f.label;}),
-   rows:rows.map(function(p,i){return c.map(function(f){return plain(p,f.key,i);});})})})
-  .then(function(res){if(!res.ok)throw new Error('export failed');return res.blob();})
-  .then(function(blob){
-   var url=URL.createObjectURL(blob),a=document.createElement('a');
-   a.href=url;a.download=name+'.xlsx';document.body.appendChild(a);a.click();a.remove();
-   setTimeout(function(){URL.revokeObjectURL(url);},1000);
-   toast('فایل XLSX ساخته شد ('+fa(rows.length)+' ردیف).');
-  }).catch(function(){toast('ساخت XLSX ناموفق بود؛ دوباره تلاش کنید.');});
+  body:JSON.stringify({title:title,filename:name,headers:c.map(function(f){return f.label}),
+   rows:rows.map(function(p,i){return c.map(function(f){return plain(p,f,i)})})})})
+  .then(function(res){if(!res.ok)throw new Error('export failed');return res.blob()})
+  .then(function(blob){var url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=name+'.xlsx';
+   document.body.appendChild(a);a.click();a.remove();setTimeout(function(){URL.revokeObjectURL(url)},1000);
+   toast('فایل XLSX ساخته شد ('+fa(rows.length)+' ردیف).')})
+  .catch(function(){toast('ساخت XLSX ناموفق بود؛ دوباره تلاش کنید.')});
 }
-function printSections(){
- var rows=sorted(S.rows);
- if(!S.org)return[{name:'',rows:rows}];
- return groups(rows).map(function(g){return{name:g.name,rows:g.rows};});
-}
+/* ---------- چاپ خالص: فقط عنوان گزارش + عنوان تب + لیست؛ بعد از کنسل هم فرم سرجاست ---------- */
 function preparePrint(){
- var b=blocks(),c=cols(),secs=printSections();
- var area=document.getElementById('absentLunchPrint');
- if(!area){area=document.createElement('div');area.id='absentLunchPrint';document.body.appendChild(area);}
- area.innerHTML='<h1>گزارش غایبین ناهار</h1><div class="alr-tab-title">'+(S.org?'بر اساس معاونت':'فهرست یکجا')+'</div>'+
-  (secs.map(function(s){return '<div class="alr-group">'+(s.name?'<h2>'+esc(s.name)+'</h2>':'')+table(s.rows,b,false)+'</div>';}).join('')||'<p>موردی برای نمایش نیست.</p>');
- var total=c.length*b,lines=secs.reduce(function(a,s){return a+Math.ceil(s.rows.length/b);},0);
+ var area=document.getElementById('alrPrint');
+ if(!area){area=document.createElement('div');area.id='alrPrint';document.body.appendChild(area)}
+ area.innerHTML='<h1>گزارش غایبین ناهار</h1><div class="alr-tab-title">'+esc2(tabTitle())+'</div>'+viewHtml(false);
  var dyn=document.getElementById('alrPrintDyn');
- if(!dyn){dyn=document.createElement('style');dyn.id='alrPrintDyn';document.head.appendChild(dyn);}
- dyn.textContent='@page{size:A4 '+(total>8||lines>28?'landscape':'portrait')+';margin:10mm}#absentLunchPrint .alr-table th,#absentLunchPrint .alr-table td{font-size:'+(total>12?8:total>8?9:10)+'px}';
- document.body.classList.add('absent-lunch-printing');
+ if(!dyn){dyn=document.createElement('style');dyn.id='alrPrintDyn';document.head.appendChild(dyn)}
+ var cols=activeFields().length*S.blocks;
+ dyn.textContent='@page{size:A4 '+(cols>10?'landscape':'portrait')+';margin:10mm}#alrPrint th,#alrPrint td{font-size:'+(cols>14?8:9)+'px}';
 }
+
+/* ---------- نمای تب ---------- */
+function html(){
+ var r=state.report||{},from=r.from||jal(reportRange().from),ri={from:from,to:r.to||from};
+ var people=Object.keys(S.rows.reduce(function(m,x){m[x.pc]=1;return m},{})).length,portions=S.rows.length,deps=allDeps().length;
+ var range='<form class="card alr-filter" id="alr-filter"><label class="field">از تاریخ (شمسی)<input name="from" value="'+esc2(ri.from)+'"></label><label class="field">تا تاریخ (شمسی)<input name="to" value="'+esc2(ri.to)+'"></label>'+
+  '<div class="form-actions"><button class="btn primary">نمایش گزارش</button><button type="button" class="btn ghost" data-action="absent-lunch-today">امروز</button></div>'+
+  '<div class="alr-chips"><span class="alr-chip">مجموع پرس <b>'+fa(portions)+'</b></span><span class="alr-chip">افراد یکتا <b>'+fa(people)+'</b></span><span class="alr-chip">معاونتها <b>'+fa(deps)+'</b></span></div>'+
+  '<button type="button" class="btn" data-action="absent-lunch-export">خروجی XLSX</button><button type="button" class="btn ghost" data-action="absent-lunch-print">چاپ فهرست</button><button type="button" class="btn ghost" data-action="absent-lunch-refresh">بازخوانی</button></form>';
+ var fields='<div class="alr-fields"><span class="alr-fields-label">فیلدهای گزارش:</span>'+TAB_FIELDS[S.tab].map(function(k){
+  var f=FIELDS.filter(function(x){return x.key===k})[0];
+  return '<label class="alr-field-chip"><input type="checkbox" data-alr-field="'+k+'"'+(S.fieldsByTab[S.tab].has(k)?' checked':'')+'> '+esc2(f.label)+'</label>'}).join('')+'</div>';
+ var blocks='<div class="alr-blocks"><span class="alr-fields-label">بلوک در هر ردیف:</span>'+[1,2,3].map(function(n){return '<button type="button" class="alr-block-btn '+(S.blocks===n?'active':'')+'" data-alr-block="'+n+'" aria-pressed="'+(S.blocks===n)+'">'+fa(n)+'</button>'}).join('')+'</div>';
+ var tabs='<div class="alr-tabs" role="tablist">'+[['flat','فهرست یکجا'],['dept','بر اساس معاونت'],['detail','تفکیک و جزئیات']].map(function(t){return '<button type="button" class="alr-tab '+(S.tab===t[0]?'active':'')+'" data-alr-tab="'+t[0]+'" role="tab" aria-selected="'+(S.tab===t[0])+'">'+t[1]+'</button>'}).join('')+'</div>';
+ var tools='<div class="alr-tools"><input type="search" id="alrSearch" placeholder="جستجو: نام / کد پرسنلی / نوع غذا / معاونت" value="'+esc2(S.query)+'"><span class="alr-fields-label">نمودار:</span><span class="alr-seg"><button type="button" data-alr-metric="people" class="'+(S.metric==='people'?'active':'')+'">افراد</button><button type="button" data-alr-metric="portions" class="'+(S.metric==='portions'?'active':'')+'">وعدهها</button></span><button type="button" class="btn ghost" data-action="absent-lunch-chart">'+(S.chart?'پنهان کردن نمودار':'نمایش نمودار')+'</button></div>';
+ var chart=S.chart?'<section class="alr-chart"><div class="alr-chart-head"><h3>نمودار معاونتها</h3><span class="alr-range">'+fa(daysForChart().length)+' روز</span></div><div id="alrChart">'+chartHtml()+'</div></section>':'';
+ var notice=!serviceMode?'<div class="notice warn">برای گزارش واقعی، پنل باید متصل به سرویس باشد.</div>':S.error?'<div class="notice warn">خطا: '+esc2(S.error)+'؛ بازخوانی کنید.</div>':S.loading?'<div class="notice">در حال دریافت گزارش…</div>':'';
+ setTimeout(syncIndeterminate,0);
+ return '<section>'+heading('گزارش غایبین ناهار','','')+range+notice+fields+blocks+tabs+tools+chart+
+  '<div class="alr-food">'+foodSummary()+'</div><div id="alrList">'+viewHtml(true)+'</div>'+
+  '<div class="alr-info">بلوک: '+fa(S.blocks)+' · فیلدها: '+fa(activeFields().length)+' · معاونتهای انتخابشده: '+fa(selectedDeps().length)+' از '+fa(deps)+'</div></section>';
+}
+
+/* ---------- رویدادها (delegation؛ DOM بعد از render پنل عوض میشود) ---------- */
 document.addEventListener('click',function(e){
  var t=e.target;if(!t||!t.closest)return;
- var v=t.closest('[data-absent-lunch-view]');
- if(v){e.preventDefault();e.stopImmediatePropagation();S.org=v.dataset.absentLunchView==='on';if(S.org&&window.FoodOrgGroups)loadOrgMap().then(function(){if(active())render();});render();return;}
- var b=t.closest('[data-absent-lunch-block]');
- if(b){e.preventDefault();e.stopImmediatePropagation();setBlocks(Number(b.dataset.absentLunchBlock));render();return;}
- var s=t.closest('[data-absent-lunch-sort]');
- if(s){e.preventDefault();e.stopImmediatePropagation();var k=s.dataset.absentLunchSort;if(S.sort.key!==k)S.sort={key:k,dir:'asc'};else S.sort.dir=S.sort.dir==='asc'?'desc':'asc';render();return;}
+ var tab=t.closest('[data-alr-tab]');if(tab){e.preventDefault();e.stopImmediatePropagation();S.tab=tab.dataset.alrTab;rerender();return}
+ var b=t.closest('[data-alr-block]');if(b){e.preventDefault();e.stopImmediatePropagation();S.blocks=Number(b.dataset.alrBlock)||1;saveBlocks();rerender();return}
+ var m=t.closest('[data-alr-metric]');if(m){e.preventDefault();e.stopImmediatePropagation();S.metric=m.dataset.alrMetric;rerender();return}
+ var s=t.closest('[data-alr-sort]');if(s){e.preventDefault();e.stopImmediatePropagation();var k=s.dataset.alrSort;
+  if(S.sort.key!==k)S.sort={key:k,dir:'asc'};else S.sort.dir=S.sort.dir==='asc'?'desc':'asc';rerender();return}
+ var tg=t.closest('[data-alr-dep-toggle]');if(tg){e.preventDefault();e.stopImmediatePropagation();toggleDep(tg.dataset.alrDepToggle);return}
  var a=t.closest('[data-action]');if(!a)return;var n=a.dataset.action;
  if(String(n).indexOf('absent-lunch-')!==0)return;
  e.preventDefault();e.stopImmediatePropagation();
  if(n==='absent-lunch-export')exportXlsx();
- else if(n==='absent-lunch-print'){preparePrint();window.print();}
- else if(n==='absent-lunch-refresh'){S.key='';load(true);}
- else if(n==='absent-lunch-today'){var d=todayJalali();state.report=Object.assign({},state.report||{},{from:d,to:d});persist();S.key='';load(true);render();}
+ else if(n==='absent-lunch-print'){preparePrint();window.print()}
+ else if(n==='absent-lunch-refresh'){S.key='';load(true)}
+ else if(n==='absent-lunch-chart'){S.chart=!S.chart;rerender()}
+ else if(n==='absent-lunch-today'){var d=todayJalali();state.report=Object.assign({},state.report||{},{from:d,to:d});persist();S.key='';load(true);rerender()}
 },true);
+function toggleDep(name){if(S.deps.has(name))S.deps.delete(name);else S.deps.add(name);rerender()}
 document.addEventListener('change',function(e){
- var box=e.target;if(!box||!box.dataset||!box.dataset.absentLunchField)return;
- var boxes=Array.prototype.slice.call(document.querySelectorAll('[data-absent-lunch-field]')),chosen=boxes.filter(function(x){return x.checked;}).map(function(x){return x.dataset.absentLunchField;});
- if(!chosen.length){box.checked=true;toast('حداقل یک فیلد باید انتخاب شود.');return;}
- saveCols(FIELDS.filter(function(f){return chosen.indexOf(f.key)>=0;}));render();
+ var box=e.target;if(!box||!box.dataset)return;
+ if(box.dataset.alrAll!==undefined){e.stopImmediatePropagation();
+  S.deps=box.checked?new Set(allDeps()):new Set();rerender();return}
+ if(box.dataset.alrDepCheck){e.stopImmediatePropagation();
+  if(box.checked)S.deps.add(box.dataset.alrDepCheck);else S.deps.delete(box.dataset.alrDepCheck);rerender();return}
+ if(box.dataset.alrField){e.stopImmediatePropagation();var k=box.dataset.alrField,set=S.fieldsByTab[S.tab];
+  if(box.checked)set.add(k);else set.delete(k);
+  if(!set.size){box.checked=true;set.add(k);toast('حداقل یک فیلد لازم است.');return}
+  saveFields();rerender();return}
+},true);
+document.addEventListener('input',function(e){
+ if(!e.target||e.target.id!=='alrSearch')return;e.stopImmediatePropagation();
+ S.query=e.target.value;
+ var box=document.getElementById('alrSearch'),pos=box?box.selectionStart:null;
+ rerender();var n=document.getElementById('alrSearch');if(n){n.focus();try{n.setSelectionRange(pos,pos)}catch(x){}}
 },true);
 document.addEventListener('submit',function(e){
- if(!e.target||e.target.id!=='absent-lunch-filter')return;
+ if(!e.target||e.target.id!=='alr-filter')return;
  e.preventDefault();e.stopImmediatePropagation();
  var d=new FormData(e.target),f=String(d.get('from')||'').trim(),t=String(d.get('to')||'').trim();
- if(!f||!t||isoDateFor(f)>isoDateFor(t)){toast('بازهٔ تاریخ معتبر نیست.');return;}
- state.report=Object.assign({},state.report||{},{from:f,to:t});persist();S.key='';load(true);render();
+ if(!f||!t||isoDateFor(f)>isoDateFor(t)){toast('بازهٔ تاریخ معتبر نیست.');return}
+ state.report=Object.assign({},state.report||{},{from:f,to:t});persist();S.key='';load(true);rerender();
 },true);
-window.addEventListener('afterprint',function(){document.body.classList.remove('absent-lunch-printing');});
-window.addEventListener('beforeprint',function(){if(active())preparePrint();});
-window.AbsentLunchReport={html:html,load:load,preparePrint:preparePrint,active:active};
+window.addEventListener('beforeprint',function(){if(active())preparePrint()});
+window.AbsentLunchReport={html:html,load:load,preparePrint:preparePrint,active:active,state:S,chartHtml:chartHtml,viewHtml:viewHtml,rowsForMode:rowsForMode,tabTitle:tabTitle};
 if(active())load(false);
 })();
 

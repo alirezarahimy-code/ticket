@@ -3,7 +3,7 @@
   "version": "1.63.3",
   "requires_version": "1.63.2",
   "date": "2026-11-19",
-  "title": "تب «غایبین ناهار» داخل صفحهٔ گزارشهای سامانه مدیریت غذا",
+  "title": "نسخهٔ نهایی تب «غایبین ناهار» داخل صفحهٔ گزارشها (چارت، ۳ زیرنما، تیک چندمعاونتی، چاپ خالص)",
   "panel_version": "1.37.57",
   "migrations": [],
   "files": [
@@ -14,20 +14,22 @@
     "food-ticket.php",
     "help-guide.php",
     "tests/js/food-absent-lunch-tab.test.js",
+    "tests/js/food-absent-lunch-runtime.test.js",
     "tests/test_food_absent_lunch_backend_static.py",
     "tests/test_food_absent_lunch_tab_static.py"
   ],
   "sha256": {
     "VERSION": "6cb0846ab460091ee459ce6fe2e6472cbc93093909ea611d827b48768602b74e",
-    "food-ticket.php": "6530e77cfd9c1be28f6e0213d038b4a6f7bfd257de433b1574d9b14a6065e860",
-    "food-ticket-web/index.html": "d8fa8786cc1dd1399186acb6c8b687a71382487b91140e14400dd9952adb184c",
-    "help-guide.php": "826fa49c4ccab29f9a9a0a0bc7db5fcabed81a4d350200fda66f83d9c3437b85",
-    "chatbot.php": "0a909176dc339d3151a606fa2c2fde451f0dec097816f97b5614d2a36ac63863",
-    "downloads/CHANGE-REPORT-FA-1.63.3.md": "373ef19f00638e7f46534a9ac1260a535303f1d0a486a0d179a3412665dd869c",
-    "tests/js/food-absent-lunch-tab.test.js": "563b9cff44a4193efdefa82c56a00339994518c62bb811c4840357ea4c5053d6",
-    "tests/test_food_absent_lunch_tab_static.py": "dbf22f88324194f2df6df2cb9cacf88cbc07d9ec84b6f2a55ac4777d84470c98",
-    "tests/test_food_absent_lunch_backend_static.py": "0c2504a84077cdd3f66478634b83c0f619c04067093d9567126d4c62f6746fa1"
+    "chatbot.php": "ca8f9104302d2c5f216cca490bd301ecf07b694d367aff3fef24aabb01d737fa",
+    "downloads/CHANGE-REPORT-FA-1.63.3.md": "da25d1e0f7214c5461a2031448ea27288dbc18488cf69745ebd6ab4ad1777990",
+    "food-ticket-web/index.html": "54f207dbd920968eb7518fc4648b60f70a6ed086988039f8b784652da67522d6",
+    "food-ticket.php": "1e074cfc96fc60caa055376d064db7d476ffc347f498182b61a961c971cae978",
+    "help-guide.php": "23aed863553e3c2f38f60021e166e45982e836948b7818255ccd1e9e7d315d99",
+    "tests/js/food-absent-lunch-tab.test.js": "137363f6aa6e382ae34d57d2fefdc021aa880a62633e6cfa6268277c35dd795d",
+    "tests/js/food-absent-lunch-runtime.test.js": "9f6cc4cd6be798f47c94c0076938cb102c1169ac91423ec58f84dff45474261a",
+    "tests/test_food_absent_lunch_backend_static.py": "fb62a88865d50ee191bb1c3b6ae86edad91785af11aa26291a8f7e8d98d92572",
+    "tests/test_food_absent_lunch_tab_static.py": "0547d6504a0ab58b0d6ea64740fdea748a92dae755e6640a33d2df278ab646ad"
   },
-  "description": "Adds the absent-lunch report as a tab inside the food reports page (no standalone view).",
-  "notes": "پیشنیاز ۱٫۶۳٫۲؛ مهاجرت دیتابیس ندارد. پشتیبان و نصب آزمایشی الزامی. گزارش قدیمی «نوع گزارش=غایبین» حذف و حالت ذخیرهشده به تب تازه هدایت میشود. نسخهٔ پنل ۱٫۳۷٫۵۷؛ پس از نصب Ctrl+F5 کنید."
+  "description": "Final 1.63.3: absent-lunch report tab with three subviews, compact chart, per-deputy checkboxes + \"all deputies\", pure print, XLSX.",
+  "notes": "پیشنیاز ۱٫۶۳٫۲؛ مهاجرت دیتابیس ندارد. پشتیبان و نصب آزمایشی الزامی. بستهٔ نهایی جایگزین بستهٔ اولیهٔ همان ورژن شد؛ SHA تازه است. بکاند فقط ناهار میگیرد و تغییر نکرده. نسخهٔ پنل ۱٫۳۷٫۵۷؛ پس از نصب Ctrl+F5 کنید."
 }
