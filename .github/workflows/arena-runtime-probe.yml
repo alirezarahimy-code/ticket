@@ -1,7 +1,9 @@
 name: Arena runtime transport probe
 
 on:
-  workflow_dispatch:
+  push:
+    branches: [ arena/dacdd8a7-ticket ]
+    paths: [ .arena-runtime/trigger.txt ]
 
 permissions:
   contents: write
