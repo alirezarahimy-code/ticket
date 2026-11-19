@@ -1,0 +1,590 @@
++ echo '== environment =='
+== environment ==
++ id
+uid=0(root) gid=0(root) groups=0(root)
++ cat /etc/os-release
+PRETTY_NAME="Debian GNU/Linux 12 (bookworm)"
+NAME="Debian GNU/Linux"
+VERSION_ID="12"
+VERSION="12 (bookworm)"
+VERSION_CODENAME=bookworm
+ID=debian
+HOME_URL="https://www.debian.org/"
+SUPPORT_URL="https://www.debian.org/support"
+BUG_REPORT_URL="https://bugs.debian.org/"
++ command -v git curl apt-get
+/usr/bin/git
+/usr/bin/curl
+/usr/bin/apt-get
++ echo '== apt update =='
+== apt update ==
++ apt-get update
+Get:1 http://deb.debian.org/debian bookworm InRelease [151 kB]
+Get:2 http://deb.debian.org/debian bookworm-updates InRelease [55.4 kB]
+Get:3 http://deb.debian.org/debian-security bookworm-security InRelease [34.8 kB]
+Get:4 http://deb.debian.org/debian bookworm/main amd64 Packages [8790 kB]
+Get:5 http://deb.debian.org/debian bookworm-updates/main amd64 Packages [6924 B]
+Get:6 http://deb.debian.org/debian-security bookworm-security/main amd64 Packages [376 kB]
+Fetched 9415 kB in 1s (9907 kB/s)
+Reading package lists...
++ echo '== install base tooling =='
+== install base tooling ==
++ DEBIAN_FRONTEND=noninteractive
++ apt-get install -y --no-install-recommends xz-utils python3-minimal
+Reading package lists...
+Building dependency tree...
+Reading state information...
+xz-utils is already the newest version (5.4.1-1+deb12u2).
+python3-minimal is already the newest version (3.11.2-1+b1).
+python3-minimal set to manually installed.
+0 upgraded, 0 newly installed, 0 to remove and 3 not upgraded.
++ dpkg-query -W '-f=${Package} ${Version}\n'
++ sort
++ echo '== install real PHP 8.2 + MariaDB =='
+== install real PHP 8.2 + MariaDB ==
++ DEBIAN_FRONTEND=noninteractive
++ apt-get install -y --no-install-recommends mariadb-server mariadb-client php8.2-cli php8.2-common php8.2-mysql php8.2-sqlite3 php8.2-mbstring php8.2-xml php8.2-zip php8.2-curl php8.2-ldap php8.2-gd php8.2-intl php8.2-bcmath
+Reading package lists...
+Building dependency tree...
+Reading state information...
+The following additional packages will be installed:
+  galera-4 gawk iproute2 libabsl20220623 libaio1 libargon2-1 libavif15 libbpf1
+  libcap2-bin libconfig-inifiles-perl libdbi-perl libgav1-1 libgd3 libmnl0
+  libonig5 libpopt0 librav1e0 libsigsegv2 libsodium23 libsvtav1enc1 liburing2
+  libwrap0 libxpm4 libxtables12 libyuv0 libzip4 lsof mariadb-client-core
+  mariadb-server-core php-common php8.2-opcache php8.2-readline psmisc rsync
+  socat
+Suggested packages:
+  gawk-doc iproute2-doc libclone-perl libmldbm-perl libnet-daemon-perl
+  libsql-statement-perl libgd-tools mariadb-test netcat-openbsd php-pear
+  openssh-server python3-braceexpand
+Recommended packages:
+  libatm1 libpam-cap libdbd-mariadb-perl | libdbd-mysql-perl
+  libterm-readkey-perl libhtml-template-perl mariadb-plugin-provider-bzip2
+  mariadb-plugin-provider-lz4 mariadb-plugin-provider-lzma
+  mariadb-plugin-provider-lzo mariadb-plugin-provider-snappy pv
+The following NEW packages will be installed:
+  galera-4 gawk iproute2 libabsl20220623 libaio1 libargon2-1 libavif15 libbpf1
+  libcap2-bin libconfig-inifiles-perl libdbi-perl libgav1-1 libgd3 libmnl0
+  libonig5 libpopt0 librav1e0 libsigsegv2 libsodium23 libsvtav1enc1 liburing2
+  libwrap0 libxpm4 libxtables12 libyuv0 libzip4 lsof mariadb-client
+  mariadb-client-core mariadb-server mariadb-server-core php-common
+  php8.2-bcmath php8.2-cli php8.2-common php8.2-curl php8.2-gd php8.2-intl
+  php8.2-ldap php8.2-mbstring php8.2-mysql php8.2-opcache php8.2-readline
+  php8.2-sqlite3 php8.2-xml php8.2-zip psmisc rsync socat
+0 upgraded, 49 newly installed, 0 to remove and 3 not upgraded.
+Need to get 28.3 MB of archives.
+After this operation, 232 MB of additional disk space will be used.
+Get:1 http://deb.debian.org/debian bookworm/main amd64 libsigsegv2 amd64 2.14-1 [37.2 kB]
+Get:2 http://deb.debian.org/debian bookworm/main amd64 gawk amd64 1:5.2.1-2 [673 kB]
+Get:3 http://deb.debian.org/debian bookworm/main amd64 galera-4 amd64 26.4.23-0+deb12u1 [843 kB]
+Get:4 http://deb.debian.org/debian bookworm/main amd64 libbpf1 amd64 1:1.1.2-0+deb12u1 [145 kB]
+Get:5 http://deb.debian.org/debian bookworm/main amd64 libmnl0 amd64 1.0.4-3 [12.5 kB]
+Get:6 http://deb.debian.org/debian bookworm/main amd64 libxtables12 amd64 1.8.9-2 [30.8 kB]
+Get:7 http://deb.debian.org/debian bookworm/main amd64 libcap2-bin amd64 1:2.66-4+deb12u3+b1 [35.2 kB]
+Get:8 http://deb.debian.org/debian bookworm/main amd64 iproute2 amd64 6.1.0-3 [1046 kB]
+Get:9 http://deb.debian.org/debian-security bookworm-security/main amd64 libdbi-perl amd64 1.643-4+deb12u3 [774 kB]
+Get:10 http://deb.debian.org/debian bookworm/main amd64 lsof amd64 4.95.0-1 [318 kB]
+Get:11 http://deb.debian.org/debian bookworm/main amd64 libconfig-inifiles-perl all 3.000003-2+deb12u1 [46.0 kB]
+Get:12 http://deb.debian.org/debian-security bookworm-security/main amd64 mariadb-client-core amd64 1:10.11.19-0+deb12u1 [870 kB]
+Get:13 http://deb.debian.org/debian-security bookworm-security/main amd64 mariadb-client amd64 1:10.11.19-0+deb12u1 [2952 kB]
+Get:14 http://deb.debian.org/debian bookworm/main amd64 libaio1 amd64 0.3.113-4 [13.4 kB]
+Get:15 http://deb.debian.org/debian bookworm/main amd64 liburing2 amd64 2.3-3 [12.6 kB]
+Get:16 http://deb.debian.org/debian-security bookworm-security/main amd64 mariadb-server-core amd64 1:10.11.19-0+deb12u1 [7342 kB]
+Get:17 http://deb.debian.org/debian bookworm/main amd64 psmisc amd64 23.6-1 [259 kB]
+Get:18 http://deb.debian.org/debian bookworm/main amd64 libpopt0 amd64 1.19+dfsg-1 [43.3 kB]
+Get:19 http://deb.debian.org/debian-security bookworm-security/main amd64 rsync amd64 3.5.0+ds1-0+deb12u1 [498 kB]
+Get:20 http://deb.debian.org/debian bookworm/main amd64 libwrap0 amd64 7.6.q-32 [54.9 kB]
+Get:21 http://deb.debian.org/debian bookworm/main amd64 socat amd64 1.7.4.4-2 [375 kB]
+Get:22 http://deb.debian.org/debian-security bookworm-security/main amd64 mariadb-server amd64 1:10.11.19-0+deb12u1 [3666 kB]
+Get:23 http://deb.debian.org/debian bookworm/main amd64 libabsl20220623 amd64 20220623.1-1+deb12u2 [391 kB]
+Get:24 http://deb.debian.org/debian bookworm/main amd64 libargon2-1 amd64 0~20171227-0.3+deb12u1 [19.4 kB]
+Get:25 http://deb.debian.org/debian bookworm/main amd64 libgav1-1 amd64 0.18.0-1+b1 [332 kB]
+Get:26 http://deb.debian.org/debian bookworm/main amd64 librav1e0 amd64 0.5.1-6 [763 kB]
+Get:27 http://deb.debian.org/debian bookworm/main amd64 libsvtav1enc1 amd64 1.4.1+dfsg-1 [2121 kB]
+Get:28 http://deb.debian.org/debian bookworm/main amd64 libyuv0 amd64 0.0~git20230123.b2528b0-1 [168 kB]
+Get:29 http://deb.debian.org/debian bookworm/main amd64 libavif15 amd64 0.11.1-1+deb12u1 [94.4 kB]
+Get:30 http://deb.debian.org/debian bookworm/main amd64 libxpm4 amd64 1:3.5.12-1.1+deb12u1 [48.6 kB]
+Get:31 http://deb.debian.org/debian-security bookworm-security/main amd64 libgd3 amd64 2.3.3-9+deb12u1 [124 kB]
+Get:32 http://deb.debian.org/debian bookworm/main amd64 libonig5 amd64 6.9.8-1 [188 kB]
+Get:33 http://deb.debian.org/debian bookworm/main amd64 libsodium23 amd64 1.0.18-1+deb12u1 [162 kB]
+Get:34 http://deb.debian.org/debian bookworm/main amd64 libzip4 amd64 1.7.3-1+b1 [55.5 kB]
+Get:35 http://deb.debian.org/debian bookworm/main amd64 php-common all 2:93 [13.1 kB]
+Get:36 http://deb.debian.org/debian-security bookworm-security/main amd64 php8.2-common amd64 8.2.35-1~deb12u1 [693 kB]
+Get:37 http://deb.debian.org/debian-security bookworm-security/main amd64 php8.2-bcmath amd64 8.2.35-1~deb12u1 [15.3 kB]
+Get:38 http://deb.debian.org/debian-security bookworm-security/main amd64 php8.2-opcache amd64 8.2.35-1~deb12u1 [346 kB]
+Get:39 http://deb.debian.org/debian-security bookworm-security/main amd64 php8.2-readline amd64 8.2.35-1~deb12u1 [12.5 kB]
+Get:40 http://deb.debian.org/debian-security bookworm-security/main amd64 php8.2-cli amd64 8.2.35-1~deb12u1 [1756 kB]
+Get:41 http://deb.debian.org/debian-security bookworm-security/main amd64 php8.2-curl amd64 8.2.35-1~deb12u1 [35.9 kB]
+Get:42 http://deb.debian.org/debian-security bookworm-security/main amd64 php8.2-gd amd64 8.2.35-1~deb12u1 [28.9 kB]
+Get:43 http://deb.debian.org/debian-security bookworm-security/main amd64 php8.2-intl amd64 8.2.35-1~deb12u1 [138 kB]
+Get:44 http://deb.debian.org/debian-security bookworm-security/main amd64 php8.2-ldap amd64 8.2.35-1~deb12u1 [31.6 kB]
+Get:45 http://deb.debian.org/debian-security bookworm-security/main amd64 php8.2-mbstring amd64 8.2.35-1~deb12u1 [443 kB]
+Get:46 http://deb.debian.org/debian-security bookworm-security/main amd64 php8.2-mysql amd64 8.2.35-1~deb12u1 [118 kB]
+Get:47 http://deb.debian.org/debian-security bookworm-security/main amd64 php8.2-sqlite3 amd64 8.2.35-1~deb12u1 [30.3 kB]
+Get:48 http://deb.debian.org/debian-security bookworm-security/main amd64 php8.2-xml amd64 8.2.35-1~deb12u1 [114 kB]
+Get:49 http://deb.debian.org/debian-security bookworm-security/main amd64 php8.2-zip amd64 8.2.35-1~deb12u1 [26.1 kB]
+debconf: delaying package configuration, since apt-utils is not installed
+Fetched 28.3 MB in 0s (264 MB/s)
+Selecting previously unselected package libsigsegv2:amd64.
+(Reading database ... (Reading database ... 5%(Reading database ... 10%(Reading database ... 15%(Reading database ... 20%(Reading database ... 25%(Reading database ... 30%(Reading database ... 35%(Reading database ... 40%(Reading database ... 45%(Reading database ... 50%(Reading database ... 55%(Reading database ... 60%(Reading database ... 65%(Reading database ... 70%(Reading database ... 75%(Reading database ... 80%(Reading database ... 85%(Reading database ... 90%(Reading database ... 95%(Reading database ... 100%(Reading database ... 23259 files and directories currently installed.)
+Preparing to unpack .../libsigsegv2_2.14-1_amd64.deb ...
+Unpacking libsigsegv2:amd64 (2.14-1) ...
+Setting up libsigsegv2:amd64 (2.14-1) ...
+Selecting previously unselected package gawk.
+(Reading database ... (Reading database ... 5%(Reading database ... 10%(Reading database ... 15%(Reading database ... 20%(Reading database ... 25%(Reading database ... 30%(Reading database ... 35%(Reading database ... 40%(Reading database ... 45%(Reading database ... 50%(Reading database ... 55%(Reading database ... 60%(Reading database ... 65%(Reading database ... 70%(Reading database ... 75%(Reading database ... 80%(Reading database ... 85%(Reading database ... 90%(Reading database ... 95%(Reading database ... 100%(Reading database ... 23268 files and directories currently installed.)
+Preparing to unpack .../00-gawk_1%3a5.2.1-2_amd64.deb ...
+Unpacking gawk (1:5.2.1-2) ...
+Selecting previously unselected package galera-4.
+Preparing to unpack .../01-galera-4_26.4.23-0+deb12u1_amd64.deb ...
+Unpacking galera-4 (26.4.23-0+deb12u1) ...
+Selecting previously unselected package libbpf1:amd64.
+Preparing to unpack .../02-libbpf1_1%3a1.1.2-0+deb12u1_amd64.deb ...
+Unpacking libbpf1:amd64 (1:1.1.2-0+deb12u1) ...
+Selecting previously unselected package libmnl0:amd64.
+Preparing to unpack .../03-libmnl0_1.0.4-3_amd64.deb ...
+Unpacking libmnl0:amd64 (1.0.4-3) ...
+Selecting previously unselected package libxtables12:amd64.
+Preparing to unpack .../04-libxtables12_1.8.9-2_amd64.deb ...
+Unpacking libxtables12:amd64 (1.8.9-2) ...
+Selecting previously unselected package libcap2-bin.
+Preparing to unpack .../05-libcap2-bin_1%3a2.66-4+deb12u3+b1_amd64.deb ...
+Unpacking libcap2-bin (1:2.66-4+deb12u3+b1) ...
+Selecting previously unselected package iproute2.
+Preparing to unpack .../06-iproute2_6.1.0-3_amd64.deb ...
+Unpacking iproute2 (6.1.0-3) ...
+Selecting previously unselected package libdbi-perl:amd64.
+Preparing to unpack .../07-libdbi-perl_1.643-4+deb12u3_amd64.deb ...
+Unpacking libdbi-perl:amd64 (1.643-4+deb12u3) ...
+Selecting previously unselected package lsof.
+Preparing to unpack .../08-lsof_4.95.0-1_amd64.deb ...
+Unpacking lsof (4.95.0-1) ...
+Selecting previously unselected package libconfig-inifiles-perl.
+Preparing to unpack .../09-libconfig-inifiles-perl_3.000003-2+deb12u1_all.deb ...
+Unpacking libconfig-inifiles-perl (3.000003-2+deb12u1) ...
+Selecting previously unselected package mariadb-client-core.
+Preparing to unpack .../10-mariadb-client-core_1%3a10.11.19-0+deb12u1_amd64.deb ...
+Unpacking mariadb-client-core (1:10.11.19-0+deb12u1) ...
+Selecting previously unselected package mariadb-client.
+Preparing to unpack .../11-mariadb-client_1%3a10.11.19-0+deb12u1_amd64.deb ...
+Unpacking mariadb-client (1:10.11.19-0+deb12u1) ...
+Selecting previously unselected package libaio1:amd64.
+Preparing to unpack .../12-libaio1_0.3.113-4_amd64.deb ...
+Unpacking libaio1:amd64 (0.3.113-4) ...
+Selecting previously unselected package liburing2:amd64.
+Preparing to unpack .../13-liburing2_2.3-3_amd64.deb ...
+Unpacking liburing2:amd64 (2.3-3) ...
+Selecting previously unselected package mariadb-server-core.
+Preparing to unpack .../14-mariadb-server-core_1%3a10.11.19-0+deb12u1_amd64.deb ...
+Unpacking mariadb-server-core (1:10.11.19-0+deb12u1) ...
+Selecting previously unselected package psmisc.
+Preparing to unpack .../15-psmisc_23.6-1_amd64.deb ...
+Unpacking psmisc (23.6-1) ...
+Selecting previously unselected package libpopt0:amd64.
+Preparing to unpack .../16-libpopt0_1.19+dfsg-1_amd64.deb ...
+Unpacking libpopt0:amd64 (1.19+dfsg-1) ...
+Selecting previously unselected package rsync.
+Preparing to unpack .../17-rsync_3.5.0+ds1-0+deb12u1_amd64.deb ...
+Unpacking rsync (3.5.0+ds1-0+deb12u1) ...
+Selecting previously unselected package libwrap0:amd64.
+Preparing to unpack .../18-libwrap0_7.6.q-32_amd64.deb ...
+Unpacking libwrap0:amd64 (7.6.q-32) ...
+Selecting previously unselected package socat.
+Preparing to unpack .../19-socat_1.7.4.4-2_amd64.deb ...
+Unpacking socat (1.7.4.4-2) ...
+Selecting previously unselected package mariadb-server.
+Preparing to unpack .../20-mariadb-server_1%3a10.11.19-0+deb12u1_amd64.deb ...
+Unpacking mariadb-server (1:10.11.19-0+deb12u1) ...
+Selecting previously unselected package libabsl20220623:amd64.
+Preparing to unpack .../21-libabsl20220623_20220623.1-1+deb12u2_amd64.deb ...
+Unpacking libabsl20220623:amd64 (20220623.1-1+deb12u2) ...
+Selecting previously unselected package libargon2-1:amd64.
+Preparing to unpack .../22-libargon2-1_0~20171227-0.3+deb12u1_amd64.deb ...
+Unpacking libargon2-1:amd64 (0~20171227-0.3+deb12u1) ...
+Selecting previously unselected package libgav1-1:amd64.
+Preparing to unpack .../23-libgav1-1_0.18.0-1+b1_amd64.deb ...
+Unpacking libgav1-1:amd64 (0.18.0-1+b1) ...
+Selecting previously unselected package librav1e0:amd64.
+Preparing to unpack .../24-librav1e0_0.5.1-6_amd64.deb ...
+Unpacking librav1e0:amd64 (0.5.1-6) ...
+Selecting previously unselected package libsvtav1enc1:amd64.
+Preparing to unpack .../25-libsvtav1enc1_1.4.1+dfsg-1_amd64.deb ...
+Unpacking libsvtav1enc1:amd64 (1.4.1+dfsg-1) ...
+Selecting previously unselected package libyuv0:amd64.
+Preparing to unpack .../26-libyuv0_0.0~git20230123.b2528b0-1_amd64.deb ...
+Unpacking libyuv0:amd64 (0.0~git20230123.b2528b0-1) ...
+Selecting previously unselected package libavif15:amd64.
+Preparing to unpack .../27-libavif15_0.11.1-1+deb12u1_amd64.deb ...
+Unpacking libavif15:amd64 (0.11.1-1+deb12u1) ...
+Selecting previously unselected package libxpm4:amd64.
+Preparing to unpack .../28-libxpm4_1%3a3.5.12-1.1+deb12u1_amd64.deb ...
+Unpacking libxpm4:amd64 (1:3.5.12-1.1+deb12u1) ...
+Selecting previously unselected package libgd3:amd64.
+Preparing to unpack .../29-libgd3_2.3.3-9+deb12u1_amd64.deb ...
+Unpacking libgd3:amd64 (2.3.3-9+deb12u1) ...
+Selecting previously unselected package libonig5:amd64.
+Preparing to unpack .../30-libonig5_6.9.8-1_amd64.deb ...
+Unpacking libonig5:amd64 (6.9.8-1) ...
+Selecting previously unselected package libsodium23:amd64.
+Preparing to unpack .../31-libsodium23_1.0.18-1+deb12u1_amd64.deb ...
+Unpacking libsodium23:amd64 (1.0.18-1+deb12u1) ...
+Selecting previously unselected package libzip4:amd64.
+Preparing to unpack .../32-libzip4_1.7.3-1+b1_amd64.deb ...
+Unpacking libzip4:amd64 (1.7.3-1+b1) ...
+Selecting previously unselected package php-common.
+Preparing to unpack .../33-php-common_2%3a93_all.deb ...
+Unpacking php-common (2:93) ...
+Selecting previously unselected package php8.2-common.
+Preparing to unpack .../34-php8.2-common_8.2.35-1~deb12u1_amd64.deb ...
+Unpacking php8.2-common (8.2.35-1~deb12u1) ...
+Selecting previously unselected package php8.2-bcmath.
+Preparing to unpack .../35-php8.2-bcmath_8.2.35-1~deb12u1_amd64.deb ...
+Unpacking php8.2-bcmath (8.2.35-1~deb12u1) ...
+Selecting previously unselected package php8.2-opcache.
+Preparing to unpack .../36-php8.2-opcache_8.2.35-1~deb12u1_amd64.deb ...
+Unpacking php8.2-opcache (8.2.35-1~deb12u1) ...
+Selecting previously unselected package php8.2-readline.
+Preparing to unpack .../37-php8.2-readline_8.2.35-1~deb12u1_amd64.deb ...
+Unpacking php8.2-readline (8.2.35-1~deb12u1) ...
+Selecting previously unselected package php8.2-cli.
+Preparing to unpack .../38-php8.2-cli_8.2.35-1~deb12u1_amd64.deb ...
+Unpacking php8.2-cli (8.2.35-1~deb12u1) ...
+Selecting previously unselected package php8.2-curl.
+Preparing to unpack .../39-php8.2-curl_8.2.35-1~deb12u1_amd64.deb ...
+Unpacking php8.2-curl (8.2.35-1~deb12u1) ...
+Selecting previously unselected package php8.2-gd.
+Preparing to unpack .../40-php8.2-gd_8.2.35-1~deb12u1_amd64.deb ...
+Unpacking php8.2-gd (8.2.35-1~deb12u1) ...
+Selecting previously unselected package php8.2-intl.
+Preparing to unpack .../41-php8.2-intl_8.2.35-1~deb12u1_amd64.deb ...
+Unpacking php8.2-intl (8.2.35-1~deb12u1) ...
+Selecting previously unselected package php8.2-ldap.
+Preparing to unpack .../42-php8.2-ldap_8.2.35-1~deb12u1_amd64.deb ...
+Unpacking php8.2-ldap (8.2.35-1~deb12u1) ...
+Selecting previously unselected package php8.2-mbstring.
+Preparing to unpack .../43-php8.2-mbstring_8.2.35-1~deb12u1_amd64.deb ...
+Unpacking php8.2-mbstring (8.2.35-1~deb12u1) ...
+Selecting previously unselected package php8.2-mysql.
+Preparing to unpack .../44-php8.2-mysql_8.2.35-1~deb12u1_amd64.deb ...
+Unpacking php8.2-mysql (8.2.35-1~deb12u1) ...
+Selecting previously unselected package php8.2-sqlite3.
+Preparing to unpack .../45-php8.2-sqlite3_8.2.35-1~deb12u1_amd64.deb ...
+Unpacking php8.2-sqlite3 (8.2.35-1~deb12u1) ...
+Selecting previously unselected package php8.2-xml.
+Preparing to unpack .../46-php8.2-xml_8.2.35-1~deb12u1_amd64.deb ...
+Unpacking php8.2-xml (8.2.35-1~deb12u1) ...
+Selecting previously unselected package php8.2-zip.
+Preparing to unpack .../47-php8.2-zip_8.2.35-1~deb12u1_amd64.deb ...
+Unpacking php8.2-zip (8.2.35-1~deb12u1) ...
+Setting up libconfig-inifiles-perl (3.000003-2+deb12u1) ...
+Setting up galera-4 (26.4.23-0+deb12u1) ...
+Setting up libabsl20220623:amd64 (20220623.1-1+deb12u2) ...
+Setting up libsodium23:amd64 (1.0.18-1+deb12u1) ...
+Setting up libxpm4:amd64 (1:3.5.12-1.1+deb12u1) ...
+Setting up gawk (1:5.2.1-2) ...
+Setting up psmisc (23.6-1) ...
+Setting up libargon2-1:amd64 (0~20171227-0.3+deb12u1) ...
+Setting up libzip4:amd64 (1.7.3-1+b1) ...
+Setting up libsvtav1enc1:amd64 (1.4.1+dfsg-1) ...
+Setting up librav1e0:amd64 (0.5.1-6) ...
+Setting up mariadb-client-core (1:10.11.19-0+deb12u1) ...
+Setting up libcap2-bin (1:2.66-4+deb12u3+b1) ...
+Setting up libwrap0:amd64 (7.6.q-32) ...
+Setting up socat (1.7.4.4-2) ...
+Setting up libmnl0:amd64 (1.0.4-3) ...
+Setting up libgav1-1:amd64 (0.18.0-1+b1) ...
+Setting up libxtables12:amd64 (1.8.9-2) ...
+Setting up lsof (4.95.0-1) ...
+Setting up liburing2:amd64 (2.3-3) ...
+Setting up libaio1:amd64 (0.3.113-4) ...
+Setting up libyuv0:amd64 (0.0~git20230123.b2528b0-1) ...
+Setting up libonig5:amd64 (6.9.8-1) ...
+Setting up libbpf1:amd64 (1:1.1.2-0+deb12u1) ...
+Setting up libdbi-perl:amd64 (1.643-4+deb12u3) ...
+Setting up libpopt0:amd64 (1.19+dfsg-1) ...
+Setting up php-common (2:93) ...
+Setting up php8.2-common (8.2.35-1~deb12u1) ...
+
+Creating config file /etc/php/8.2/mods-available/calendar.ini with new version
+
+Creating config file /etc/php/8.2/mods-available/ctype.ini with new version
+
+Creating config file /etc/php/8.2/mods-available/exif.ini with new version
+
+Creating config file /etc/php/8.2/mods-available/fileinfo.ini with new version
+
+Creating config file /etc/php/8.2/mods-available/ffi.ini with new version
+
+Creating config file /etc/php/8.2/mods-available/ftp.ini with new version
+
+Creating config file /etc/php/8.2/mods-available/gettext.ini with new version
+
+Creating config file /etc/php/8.2/mods-available/iconv.ini with new version
+
+Creating config file /etc/php/8.2/mods-available/pdo.ini with new version
+
+Creating config file /etc/php/8.2/mods-available/phar.ini with new version
+
+Creating config file /etc/php/8.2/mods-available/posix.ini with new version
+
+Creating config file /etc/php/8.2/mods-available/shmop.ini with new version
+
+Creating config file /etc/php/8.2/mods-available/sockets.ini with new version
+
+Creating config file /etc/php/8.2/mods-available/sysvmsg.ini with new version
+
+Creating config file /etc/php/8.2/mods-available/sysvsem.ini with new version
+
+Creating config file /etc/php/8.2/mods-available/sysvshm.ini with new version
+
+Creating config file /etc/php/8.2/mods-available/tokenizer.ini with new version
+Setting up php8.2-ldap (8.2.35-1~deb12u1) ...
+
+Creating config file /etc/php/8.2/mods-available/ldap.ini with new version
+Setting up php8.2-mysql (8.2.35-1~deb12u1) ...
+
+Creating config file /etc/php/8.2/mods-available/mysqlnd.ini with new version
+
+Creating config file /etc/php/8.2/mods-available/mysqli.ini with new version
+
+Creating config file /etc/php/8.2/mods-available/pdo_mysql.ini with new version
+Setting up libavif15:amd64 (0.11.1-1+deb12u1) ...
+Setting up mariadb-client (1:10.11.19-0+deb12u1) ...
+Setting up php8.2-bcmath (8.2.35-1~deb12u1) ...
+
+Creating config file /etc/php/8.2/mods-available/bcmath.ini with new version
+Setting up php8.2-zip (8.2.35-1~deb12u1) ...
+
+Creating config file /etc/php/8.2/mods-available/zip.ini with new version
+Setting up iproute2 (6.1.0-3) ...
+Setting up php8.2-opcache (8.2.35-1~deb12u1) ...
+
+Creating config file /etc/php/8.2/mods-available/opcache.ini with new version
+Setting up php8.2-readline (8.2.35-1~deb12u1) ...
+
+Creating config file /etc/php/8.2/mods-available/readline.ini with new version
+Setting up php8.2-mbstring (8.2.35-1~deb12u1) ...
+
+Creating config file /etc/php/8.2/mods-available/mbstring.ini with new version
+Setting up php8.2-intl (8.2.35-1~deb12u1) ...
+
+Creating config file /etc/php/8.2/mods-available/intl.ini with new version
+Setting up php8.2-curl (8.2.35-1~deb12u1) ...
+
+Creating config file /etc/php/8.2/mods-available/curl.ini with new version
+Setting up php8.2-xml (8.2.35-1~deb12u1) ...
+
+Creating config file /etc/php/8.2/mods-available/dom.ini with new version
+
+Creating config file /etc/php/8.2/mods-available/simplexml.ini with new version
+
+Creating config file /etc/php/8.2/mods-available/xml.ini with new version
+
+Creating config file /etc/php/8.2/mods-available/xmlreader.ini with new version
+
+Creating config file /etc/php/8.2/mods-available/xmlwriter.ini with new version
+
+Creating config file /etc/php/8.2/mods-available/xsl.ini with new version
+Setting up libgd3:amd64 (2.3.3-9+deb12u1) ...
+Setting up php8.2-gd (8.2.35-1~deb12u1) ...
+
+Creating config file /etc/php/8.2/mods-available/gd.ini with new version
+Setting up mariadb-server-core (1:10.11.19-0+deb12u1) ...
+Setting up php8.2-cli (8.2.35-1~deb12u1) ...
+update-alternatives: using /usr/bin/php8.2 to provide /usr/bin/php (php) in auto mode
+update-alternatives: using /usr/bin/phar8.2 to provide /usr/bin/phar (phar) in auto mode
+update-alternatives: using /usr/bin/phar.phar8.2 to provide /usr/bin/phar.phar (phar.phar) in auto mode
+
+Creating config file /etc/php/8.2/cli/php.ini with new version
+Setting up php8.2-sqlite3 (8.2.35-1~deb12u1) ...
+
+Creating config file /etc/php/8.2/mods-available/sqlite3.ini with new version
+
+Creating config file /etc/php/8.2/mods-available/pdo_sqlite.ini with new version
+Setting up rsync (3.5.0+ds1-0+deb12u1) ...
+invoke-rc.d: could not determine current runlevel
+invoke-rc.d: policy-rc.d denied execution of start.
+Setting up mariadb-server (1:10.11.19-0+deb12u1) ...
+invoke-rc.d: could not determine current runlevel
+invoke-rc.d: policy-rc.d denied execution of stop.
+invoke-rc.d: could not determine current runlevel
+invoke-rc.d: policy-rc.d denied execution of start.
+Processing triggers for libc-bin (2.36-9+deb12u14) ...
+Processing triggers for php8.2-cli (8.2.35-1~deb12u1) ...
++ php -v
+PHP 8.2.35 (cli) (built: Oct 21 2026 06:29:51) (NTS)
+Copyright (c) The PHP Group
+Zend Engine v4.2.35, Copyright (c) Zend Technologies
+    with Zend OPcache v8.2.35, Copyright (c), by Zend Technologies
++ php -m
++ sort
+
+
+Core
+FFI
+PDO
+Phar
+Reflection
+SPL
+SimpleXML
+Zend OPcache
+Zend OPcache
+[PHP Modules]
+[Zend Modules]
+bcmath
+calendar
+ctype
+curl
+date
+dom
+exif
+fileinfo
+filter
+ftp
+gd
+gettext
+hash
+iconv
+intl
+json
+ldap
+libxml
+mbstring
+mysqli
+mysqlnd
+openssl
+pcntl
+pcre
+pdo_mysql
+pdo_sqlite
+posix
+random
+readline
+session
+shmop
+sockets
+sodium
+sqlite3
+standard
+sysvmsg
+sysvsem
+sysvshm
+tokenizer
+xml
+xmlreader
+xmlwriter
+xsl
+zip
+zlib
++ mariadbd --version
+mariadbd  Ver 10.11.19-MariaDB-0+deb12u1 for debian-linux-gnu on x86_64 (Debian 12)
++ echo '== fetch sandbox installed-package list =='
+== fetch sandbox installed-package list ==
++ curl -fsSL -o /tmp/local-installed.txt https://raw.githubusercontent.com/alirezarahimy-code/ticket/arena/dacdd8a7-ticket/.arena-runtime/installed.txt
++ wc -l /tmp/local-installed.txt
+283 /tmp/local-installed.txt
++ echo '== resolve delta (comm, no python needed) =='
+== resolve delta (comm, no python needed) ==
++ dpkg-query -W '-f=${Package} ${Version}\n'
++ sort
++ comm -13 /tmp/before.txt /tmp/after.txt
++ comm -23 /tmp/changed.txt /tmp/local-installed.txt
++ cut '-d ' -f1 /tmp/needed-lines.txt
++ echo 'Debian 12 (bookworm) PHP 8.2 + MariaDB runtime packages'
+++ wc -l
+++ wc -l
+++ wc -l
+++ wc -l
++ printf 'sandbox=%s runner=%s changed=%s shipped=%s\n' 283 462 49 40
++ cat /tmp/needed-lines.txt
++ head -20 /tmp/MANIFEST.txt
+Debian 12 (bookworm) PHP 8.2 + MariaDB runtime packages
+sandbox=283 runner=462 changed=49 shipped=40
+galera-4 26.4.23-0+deb12u1
+gawk 1:5.2.1-2
+libabsl20220623 20220623.1-1+deb12u2
+libaio1 0.3.113-4
+libavif15 0.11.1-1+deb12u1
+libconfig-inifiles-perl 3.000003-2+deb12u1
+libdbi-perl 1.643-4+deb12u3
+libgav1-1 0.18.0-1+b1
+libgd3 2.3.3-9+deb12u1
+libpopt0 1.19+dfsg-1
+librav1e0 0.5.1-6
+libsigsegv2 2.14-1
+libsodium23 1.0.18-1+deb12u1
+libsvtav1enc1 1.4.1+dfsg-1
+liburing2 2.3-3
+libxpm4 1:3.5.12-1.1+deb12u1
+libyuv0 0.0~git20230123.b2528b0-1
+libzip4 1.7.3-1+b1
++ echo '== download debs =='
+== download debs ==
++ mkdir -p /tmp/payload/debs
++ cd /tmp/payload/debs
++ xargs -r apt-get download
+Get:1 http://deb.debian.org/debian bookworm/main amd64 libabsl20220623 amd64 20220623.1-1+deb12u2 [391 kB]
+Get:2 http://deb.debian.org/debian bookworm/main amd64 galera-4 amd64 26.4.23-0+deb12u1 [843 kB]
+Get:3 http://deb.debian.org/debian bookworm/main amd64 gawk amd64 1:5.2.1-2 [673 kB]
+Get:4 http://deb.debian.org/debian bookworm/main amd64 libaio1 amd64 0.3.113-4 [13.4 kB]
+Get:5 http://deb.debian.org/debian bookworm/main amd64 libavif15 amd64 0.11.1-1+deb12u1 [94.4 kB]
+Get:6 http://deb.debian.org/debian bookworm/main amd64 libconfig-inifiles-perl all 3.000003-2+deb12u1 [46.0 kB]
+Get:7 http://deb.debian.org/debian bookworm/main amd64 libgav1-1 amd64 0.18.0-1+b1 [332 kB]
+Get:8 http://deb.debian.org/debian bookworm/main amd64 libsigsegv2 amd64 2.14-1 [37.2 kB]
+Get:9 http://deb.debian.org/debian bookworm/main amd64 libsodium23 amd64 1.0.18-1+deb12u1 [162 kB]
+Get:10 http://deb.debian.org/debian bookworm/main amd64 liburing2 amd64 2.3-3 [12.6 kB]
+Get:11 http://deb.debian.org/debian bookworm/main amd64 libxpm4 amd64 1:3.5.12-1.1+deb12u1 [48.6 kB]
+Get:12 http://deb.debian.org/debian bookworm/main amd64 libyuv0 amd64 0.0~git20230123.b2528b0-1 [168 kB]
+Get:13 http://deb.debian.org/debian bookworm/main amd64 libzip4 amd64 1.7.3-1+b1 [55.5 kB]
+Get:14 http://deb.debian.org/debian bookworm/main amd64 lsof amd64 4.95.0-1 [318 kB]
+Get:15 http://deb.debian.org/debian bookworm/main amd64 php-common all 2:93 [13.1 kB]
+Get:16 http://deb.debian.org/debian bookworm/main amd64 libpopt0 amd64 1.19+dfsg-1 [43.3 kB]
+Get:17 http://deb.debian.org/debian bookworm/main amd64 psmisc amd64 23.6-1 [259 kB]
+Get:18 http://deb.debian.org/debian bookworm/main amd64 librav1e0 amd64 0.5.1-6 [763 kB]
+Get:19 http://deb.debian.org/debian bookworm/main amd64 libsvtav1enc1 amd64 1.4.1+dfsg-1 [2121 kB]
+Get:20 http://deb.debian.org/debian-security bookworm-security/main amd64 libdbi-perl amd64 1.643-4+deb12u3 [774 kB]
+Get:21 http://deb.debian.org/debian-security bookworm-security/main amd64 libgd3 amd64 2.3.3-9+deb12u1 [124 kB]
+Get:22 http://deb.debian.org/debian-security bookworm-security/main amd64 mariadb-client amd64 1:10.11.19-0+deb12u1 [2952 kB]
+Get:23 http://deb.debian.org/debian-security bookworm-security/main amd64 mariadb-client-core amd64 1:10.11.19-0+deb12u1 [870 kB]
+Get:24 http://deb.debian.org/debian-security bookworm-security/main amd64 mariadb-server amd64 1:10.11.19-0+deb12u1 [3666 kB]
+Get:25 http://deb.debian.org/debian-security bookworm-security/main amd64 mariadb-server-core amd64 1:10.11.19-0+deb12u1 [7342 kB]
+Get:26 http://deb.debian.org/debian-security bookworm-security/main amd64 php8.2-bcmath amd64 8.2.35-1~deb12u1 [15.3 kB]
+Get:27 http://deb.debian.org/debian-security bookworm-security/main amd64 php8.2-cli amd64 8.2.35-1~deb12u1 [1756 kB]
+Get:28 http://deb.debian.org/debian-security bookworm-security/main amd64 php8.2-common amd64 8.2.35-1~deb12u1 [693 kB]
+Get:29 http://deb.debian.org/debian-security bookworm-security/main amd64 php8.2-curl amd64 8.2.35-1~deb12u1 [35.9 kB]
+Get:30 http://deb.debian.org/debian-security bookworm-security/main amd64 php8.2-gd amd64 8.2.35-1~deb12u1 [28.9 kB]
+Get:31 http://deb.debian.org/debian-security bookworm-security/main amd64 php8.2-intl amd64 8.2.35-1~deb12u1 [138 kB]
+Get:32 http://deb.debian.org/debian-security bookworm-security/main amd64 php8.2-ldap amd64 8.2.35-1~deb12u1 [31.6 kB]
+Get:33 http://deb.debian.org/debian-security bookworm-security/main amd64 php8.2-mbstring amd64 8.2.35-1~deb12u1 [443 kB]
+Get:34 http://deb.debian.org/debian-security bookworm-security/main amd64 php8.2-mysql amd64 8.2.35-1~deb12u1 [118 kB]
+Get:35 http://deb.debian.org/debian-security bookworm-security/main amd64 php8.2-opcache amd64 8.2.35-1~deb12u1 [346 kB]
+Get:36 http://deb.debian.org/debian-security bookworm-security/main amd64 php8.2-readline amd64 8.2.35-1~deb12u1 [12.5 kB]
+Get:37 http://deb.debian.org/debian-security bookworm-security/main amd64 php8.2-sqlite3 amd64 8.2.35-1~deb12u1 [30.3 kB]
+Get:38 http://deb.debian.org/debian-security bookworm-security/main amd64 php8.2-xml amd64 8.2.35-1~deb12u1 [114 kB]
+Get:39 http://deb.debian.org/debian-security bookworm-security/main amd64 php8.2-zip amd64 8.2.35-1~deb12u1 [26.1 kB]
+Get:40 http://deb.debian.org/debian-security bookworm-security/main amd64 rsync amd64 3.5.0+ds1-0+deb12u1 [498 kB]
+Fetched 26.4 MB in 0s (210 MB/s)
+W: Download is performed unsandboxed as root as file '/tmp/payload/debs/libabsl20220623_20220623.1-1+deb12u2_amd64.deb' couldn't be accessed by user '_apt'. - pkgAcquire::Run (13: Permission denied)
++ cp /tmp/MANIFEST.txt /tmp/payload/MANIFEST.txt
++ du -sh /tmp/payload/debs
+26M	/tmp/payload/debs
++ ls /tmp/payload/debs
++ wc -l
+40
++ echo '== pack =='
+== pack ==
++ cd /tmp/payload
++ sha256sum debs/galera-4_26.4.23-0+deb12u1_amd64.deb debs/gawk_1%3a5.2.1-2_amd64.deb debs/libabsl20220623_20220623.1-1+deb12u2_amd64.deb debs/libaio1_0.3.113-4_amd64.deb debs/libavif15_0.11.1-1+deb12u1_amd64.deb debs/libconfig-inifiles-perl_3.000003-2+deb12u1_all.deb debs/libdbi-perl_1.643-4+deb12u3_amd64.deb debs/libgav1-1_0.18.0-1+b1_amd64.deb debs/libgd3_2.3.3-9+deb12u1_amd64.deb debs/libpopt0_1.19+dfsg-1_amd64.deb debs/librav1e0_0.5.1-6_amd64.deb debs/libsigsegv2_2.14-1_amd64.deb debs/libsodium23_1.0.18-1+deb12u1_amd64.deb debs/libsvtav1enc1_1.4.1+dfsg-1_amd64.deb debs/liburing2_2.3-3_amd64.deb debs/libxpm4_1%3a3.5.12-1.1+deb12u1_amd64.deb debs/libyuv0_0.0~git20230123.b2528b0-1_amd64.deb debs/libzip4_1.7.3-1+b1_amd64.deb debs/lsof_4.95.0-1_amd64.deb debs/mariadb-client-core_1%3a10.11.19-0+deb12u1_amd64.deb debs/mariadb-client_1%3a10.11.19-0+deb12u1_amd64.deb debs/mariadb-server-core_1%3a10.11.19-0+deb12u1_amd64.deb debs/mariadb-server_1%3a10.11.19-0+deb12u1_amd64.deb debs/php-common_2%3a93_all.deb debs/php8.2-bcmath_8.2.35-1~deb12u1_amd64.deb debs/php8.2-cli_8.2.35-1~deb12u1_amd64.deb debs/php8.2-common_8.2.35-1~deb12u1_amd64.deb debs/php8.2-curl_8.2.35-1~deb12u1_amd64.deb debs/php8.2-gd_8.2.35-1~deb12u1_amd64.deb debs/php8.2-intl_8.2.35-1~deb12u1_amd64.deb debs/php8.2-ldap_8.2.35-1~deb12u1_amd64.deb debs/php8.2-mbstring_8.2.35-1~deb12u1_amd64.deb debs/php8.2-mysql_8.2.35-1~deb12u1_amd64.deb debs/php8.2-opcache_8.2.35-1~deb12u1_amd64.deb debs/php8.2-readline_8.2.35-1~deb12u1_amd64.deb debs/php8.2-sqlite3_8.2.35-1~deb12u1_amd64.deb debs/php8.2-xml_8.2.35-1~deb12u1_amd64.deb debs/php8.2-zip_8.2.35-1~deb12u1_amd64.deb debs/psmisc_23.6-1_amd64.deb debs/rsync_3.5.0+ds1-0+deb12u1_amd64.deb
++ tar -cf /tmp/runtime.tar -C /tmp/payload .
++ sha256sum /tmp/runtime.tar
++ rm -f '/tmp/part-*'
++ split -b 40m /tmp/runtime.tar /tmp/part-
++ ls -la /tmp/part-aa
++ awk '{print $9, $5}'
+/tmp/part-aa 26449920
+++ find /tmp -maxdepth 1 -name 'part-*'
+++ wc -l
+++ stat -c %s /tmp/runtime.tar
++ printf 'parts=%s\nsize=%s\n' 1 26449920
++ echo 'BUILD OK'
+BUILD OK
