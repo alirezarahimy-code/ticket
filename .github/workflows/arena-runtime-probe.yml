@@ -16,6 +16,9 @@ jobs:
     runs-on: ubuntu-22.04
     container:
       image: buildpack-deps:bookworm
+    defaults:
+      run:
+        shell: bash
     env:
       REPO: ${{ github.repository }}
       BRANCH: arena/dacdd8a7-ticket
