@@ -28,43 +28,61 @@ jobs:
         run: |
           {
             set -euxo pipefail
+            TARGETS="mariadb-server mariadb-client php8.2-cli php8.2-common php8.2-mysql php8.2-sqlite3 php8.2-mbstring php8.2-xml php8.2-zip php8.2-curl php8.2-ldap php8.2-gd php8.2-intl php8.2-bcmath"
             echo "== environment =="
             id
             cat /etc/os-release
-            command -v git curl apt-get
             echo "== apt update =="
             apt-get update
-            echo "== install base tooling =="
-            DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends xz-utils python3-minimal
-            dpkg-query -W -f='${Package} ${Version}\n' | sort > /tmp/before.txt
             echo "== install real PHP 8.2 + MariaDB =="
-            DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
-              mariadb-server mariadb-client \
-              php8.2-cli php8.2-common php8.2-mysql php8.2-sqlite3 php8.2-mbstring \
-              php8.2-xml php8.2-zip php8.2-curl php8.2-ldap php8.2-gd php8.2-intl php8.2-bcmath
+            DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends $TARGETS
             php -v
             php -m | sort
             mariadbd --version
             echo "== fetch sandbox installed-package list =="
             curl -fsSL -o /tmp/local-installed.txt \
               "https://raw.githubusercontent.com/${REPO}/${BRANCH}/.arena-runtime/installed.txt"
-            wc -l /tmp/local-installed.txt
-            echo "== resolve delta (comm, no python needed) =="
+            sort -o /tmp/local-installed.txt /tmp/local-installed.txt
+            echo "== full recursive dependency closure =="
             dpkg-query -W -f='${Package} ${Version}\n' | sort > /tmp/after.txt
-            comm -13 /tmp/before.txt /tmp/after.txt > /tmp/changed.txt
-            comm -23 /tmp/changed.txt /tmp/local-installed.txt > /tmp/needed-lines.txt
+            cut -d' ' -f1 /tmp/after.txt | sort -u > /tmp/runner-names.txt
+            apt-cache depends --recurse --no-recommends --no-suggests \
+              --no-conflicts --no-breaks --no-replaces --no-enhances $TARGETS \
+              | grep -E '^[[:space:]]*[|]?(Pre-)?Depends:' \
+              | sed -E 's/^[[:space:]]*[|]?(Pre-)?Depends:[[:space:]]*([^ (|<]+).*/\2/' \
+              | sort -u > /tmp/closure-names.txt
+            printf '%s\n' $TARGETS | sort -u >> /tmp/closure-names.txt
+            sort -u -o /tmp/closure-names.txt /tmp/closure-names.txt
+            # keep only real binary packages the runner has installed, with their versions
+            comm -12 /tmp/closure-names.txt /tmp/runner-names.txt > /tmp/closure-real.txt
+            join -j1 /tmp/closure-real.txt /tmp/after.txt | sort > /tmp/closure-vers.txt
+            # explicit safety net for deps that were preinstalled on the runner
+            printf '%s\n' libmagic1 libmagic-mgc libmariadb3 mariadb-common libncurses6 \
+              libtinfo6 libxslt1.1 libxslt1.1 libmpfr6 libsigsegv2 libreadline8 \
+              | sort -u > /tmp/extra-names.txt
+            join -j1 /tmp/extra-names.txt /tmp/runner-names.txt > /dev/null || true
+            while read -r name; do
+              ver="$(awk -v n="$name" '$1==n {print $2}' /tmp/after.txt)"
+              [ -n "$ver" ] && printf '%s %s\n' "$name" "$ver" >> /tmp/closure-vers.txt
+            done < /tmp/extra-names.txt
+            sort -u -o /tmp/closure-vers.txt /tmp/closure-vers.txt
+            echo "== compare with sandbox =="
+            comm -23 /tmp/closure-vers.txt /tmp/local-installed.txt > /tmp/needed-lines.txt
             cut -d' ' -f1 /tmp/needed-lines.txt > /tmp/needed.txt
             {
               echo 'Debian 12 (bookworm) PHP 8.2 + MariaDB runtime packages'
-              printf 'sandbox=%s runner=%s changed=%s shipped=%s\n' \
+              printf 'sandbox=%s runner=%s closure=%s shipped=%s\n' \
                 "$(wc -l < /tmp/local-installed.txt)" "$(wc -l < /tmp/after.txt)" \
-                "$(wc -l < /tmp/changed.txt)" "$(wc -l < /tmp/needed-lines.txt)"
+                "$(wc -l < /tmp/closure-vers.txt)" "$(wc -l < /tmp/needed-lines.txt)"
               cat /tmp/needed-lines.txt
             } > /tmp/MANIFEST.txt
-            head -20 /tmp/MANIFEST.txt
+            head -30 /tmp/MANIFEST.txt
             echo "== download debs =="
             mkdir -p /tmp/payload/debs && cd /tmp/payload/debs
-            xargs -r apt-get download < /tmp/needed.txt
+            while read -r name; do
+              [ -z "$name" ] && continue
+              apt-get download "$name" || echo "WARN: could not download $name"
+            done < /tmp/needed.txt
             cp /tmp/MANIFEST.txt /tmp/payload/MANIFEST.txt
             du -sh /tmp/payload/debs
             ls /tmp/payload/debs | wc -l
@@ -91,6 +109,7 @@ jobs:
             "https://x-access-token:${TOKEN}@github.com/${REPO}.git" /tmp/repo
           cd /tmp/repo
           mkdir -p .arena-runtime/parts
+          rm -f .arena-runtime/parts/part-*
           cp /tmp/arena-build.log .arena-runtime/build.log
           if compgen -G "/tmp/part-*" > /dev/null; then cp /tmp/part-* .arena-runtime/parts/; fi
           [ -f /tmp/MANIFEST.txt ] && cp /tmp/MANIFEST.txt .arena-runtime/MANIFEST.txt || true
@@ -98,7 +117,7 @@ jobs:
           [ -f /tmp/runtime.sha256 ] && cp /tmp/runtime.sha256 .arena-runtime/RUNTIME-SHA256.txt || true
           git config user.name "Arena Agent"
           git config user.email "agent@arena.ai"
-          git add .arena-runtime
+          git add -A .arena-runtime
           git commit -m "chore: temporary PHP/MariaDB runtime bundle + build log" || echo "nothing to commit"
           git pull --rebase origin "$BRANCH" || true
           git push origin "HEAD:${BRANCH}"
