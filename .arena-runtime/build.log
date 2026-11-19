@@ -1,3 +1,4 @@
++ TARGETS='mariadb-server mariadb-client php8.2-cli php8.2-common php8.2-mysql php8.2-sqlite3 php8.2-mbstring php8.2-xml php8.2-zip php8.2-curl php8.2-ldap php8.2-gd php8.2-intl php8.2-bcmath'
 + echo '== environment =='
 == environment ==
 + id
@@ -12,10 +13,6 @@ ID=debian
 HOME_URL="https://www.debian.org/"
 SUPPORT_URL="https://www.debian.org/support"
 BUG_REPORT_URL="https://bugs.debian.org/"
-+ command -v git curl apt-get
-/usr/bin/git
-/usr/bin/curl
-/usr/bin/apt-get
 + echo '== apt update =='
 == apt update ==
 + apt-get update
@@ -25,21 +22,8 @@ Get:3 http://deb.debian.org/debian-security bookworm-security InRelease [34.8 kB
 Get:4 http://deb.debian.org/debian bookworm/main amd64 Packages [8790 kB]
 Get:5 http://deb.debian.org/debian bookworm-updates/main amd64 Packages [6924 B]
 Get:6 http://deb.debian.org/debian-security bookworm-security/main amd64 Packages [376 kB]
-Fetched 9415 kB in 1s (9907 kB/s)
+Fetched 9415 kB in 1s (10.8 MB/s)
 Reading package lists...
-+ echo '== install base tooling =='
-== install base tooling ==
-+ DEBIAN_FRONTEND=noninteractive
-+ apt-get install -y --no-install-recommends xz-utils python3-minimal
-Reading package lists...
-Building dependency tree...
-Reading state information...
-xz-utils is already the newest version (5.4.1-1+deb12u2).
-python3-minimal is already the newest version (3.11.2-1+b1).
-python3-minimal set to manually installed.
-0 upgraded, 0 newly installed, 0 to remove and 3 not upgraded.
-+ dpkg-query -W '-f=${Package} ${Version}\n'
-+ sort
 + echo '== install real PHP 8.2 + MariaDB =='
 == install real PHP 8.2 + MariaDB ==
 + DEBIAN_FRONTEND=noninteractive
@@ -125,7 +109,7 @@ Get:47 http://deb.debian.org/debian-security bookworm-security/main amd64 php8.2
 Get:48 http://deb.debian.org/debian-security bookworm-security/main amd64 php8.2-xml amd64 8.2.35-1~deb12u1 [114 kB]
 Get:49 http://deb.debian.org/debian-security bookworm-security/main amd64 php8.2-zip amd64 8.2.35-1~deb12u1 [26.1 kB]
 debconf: delaying package configuration, since apt-utils is not installed
-Fetched 28.3 MB in 0s (264 MB/s)
+Fetched 28.3 MB in 0s (114 MB/s)
 Selecting previously unselected package libsigsegv2:amd64.
 (Reading database ... (Reading database ... 5%(Reading database ... 10%(Reading database ... 15%(Reading database ... 20%(Reading database ... 25%(Reading database ... 30%(Reading database ... 35%(Reading database ... 40%(Reading database ... 45%(Reading database ... 50%(Reading database ... 55%(Reading database ... 60%(Reading database ... 65%(Reading database ... 70%(Reading database ... 75%(Reading database ... 80%(Reading database ... 85%(Reading database ... 90%(Reading database ... 95%(Reading database ... 100%(Reading database ... 23259 files and directories currently installed.)
 Preparing to unpack .../libsigsegv2_2.14-1_amd64.deb ...
@@ -481,110 +465,542 @@ mariadbd  Ver 10.11.19-MariaDB-0+deb12u1 for debian-linux-gnu on x86_64 (Debian 
 + echo '== fetch sandbox installed-package list =='
 == fetch sandbox installed-package list ==
 + curl -fsSL -o /tmp/local-installed.txt https://raw.githubusercontent.com/alirezarahimy-code/ticket/arena/dacdd8a7-ticket/.arena-runtime/installed.txt
-+ wc -l /tmp/local-installed.txt
-283 /tmp/local-installed.txt
-+ echo '== resolve delta (comm, no python needed) =='
-== resolve delta (comm, no python needed) ==
++ sort -o /tmp/local-installed.txt /tmp/local-installed.txt
++ echo '== full recursive dependency closure =='
+== full recursive dependency closure ==
 + dpkg-query -W '-f=${Package} ${Version}\n'
 + sort
-+ comm -13 /tmp/before.txt /tmp/after.txt
-+ comm -23 /tmp/changed.txt /tmp/local-installed.txt
++ cut '-d ' -f1 /tmp/after.txt
++ sort -u
++ apt-cache depends --recurse --no-recommends --no-suggests --no-conflicts --no-breaks --no-replaces --no-enhances mariadb-server mariadb-client php8.2-cli php8.2-common php8.2-mysql php8.2-sqlite3 php8.2-mbstring php8.2-xml php8.2-zip php8.2-curl php8.2-ldap php8.2-gd php8.2-intl php8.2-bcmath
++ grep -E '^[[:space:]]*[|]?(Pre-)?Depends:'
++ sed -E 's/^[[:space:]]*[|]?(Pre-)?Depends:[[:space:]]*([^ (|<]+).*/\2/'
++ sort -u
++ printf '%s\n' mariadb-server mariadb-client php8.2-cli php8.2-common php8.2-mysql php8.2-sqlite3 php8.2-mbstring php8.2-xml php8.2-zip php8.2-curl php8.2-ldap php8.2-gd php8.2-intl php8.2-bcmath
++ sort -u
++ sort -u -o /tmp/closure-names.txt /tmp/closure-names.txt
++ comm -12 /tmp/closure-names.txt /tmp/runner-names.txt
++ join -j1 /tmp/closure-real.txt /tmp/after.txt
++ sort
++ printf '%s\n' libmagic1 libmagic-mgc libmariadb3 mariadb-common libncurses6 libtinfo6 libxslt1.1 libxslt1.1 libmpfr6 libsigsegv2 libreadline8
++ sort -u
++ join -j1 /tmp/extra-names.txt /tmp/runner-names.txt
++ read -r name
+++ awk -v n=libmagic-mgc '$1==n {print $2}' /tmp/after.txt
++ ver=1:5.44-3
++ '[' -n 1:5.44-3 ']'
++ printf '%s %s\n' libmagic-mgc 1:5.44-3
++ read -r name
+++ awk -v n=libmagic1 '$1==n {print $2}' /tmp/after.txt
++ ver=1:5.44-3
++ '[' -n 1:5.44-3 ']'
++ printf '%s %s\n' libmagic1 1:5.44-3
++ read -r name
+++ awk -v n=libmariadb3 '$1==n {print $2}' /tmp/after.txt
++ ver=1:10.11.19-0+deb12u1
++ '[' -n 1:10.11.19-0+deb12u1 ']'
++ printf '%s %s\n' libmariadb3 1:10.11.19-0+deb12u1
++ read -r name
+++ awk -v n=libmpfr6 '$1==n {print $2}' /tmp/after.txt
++ ver=4.2.0-1
++ '[' -n 4.2.0-1 ']'
++ printf '%s %s\n' libmpfr6 4.2.0-1
++ read -r name
+++ awk -v n=libncurses6 '$1==n {print $2}' /tmp/after.txt
++ ver=6.4-4
++ '[' -n 6.4-4 ']'
++ printf '%s %s\n' libncurses6 6.4-4
++ read -r name
+++ awk -v n=libreadline8 '$1==n {print $2}' /tmp/after.txt
++ ver=8.2-1.3
++ '[' -n 8.2-1.3 ']'
++ printf '%s %s\n' libreadline8 8.2-1.3
++ read -r name
+++ awk -v n=libsigsegv2 '$1==n {print $2}' /tmp/after.txt
++ ver=2.14-1
++ '[' -n 2.14-1 ']'
++ printf '%s %s\n' libsigsegv2 2.14-1
++ read -r name
+++ awk -v n=libtinfo6 '$1==n {print $2}' /tmp/after.txt
++ ver=6.4-4
++ '[' -n 6.4-4 ']'
++ printf '%s %s\n' libtinfo6 6.4-4
++ read -r name
+++ awk -v n=libxslt1.1 '$1==n {print $2}' /tmp/after.txt
++ ver=1.1.35-1+deb12u4
++ '[' -n 1.1.35-1+deb12u4 ']'
++ printf '%s %s\n' libxslt1.1 1.1.35-1+deb12u4
++ read -r name
+++ awk -v n=mariadb-common '$1==n {print $2}' /tmp/after.txt
++ ver=1:10.11.19-0+deb12u1
++ '[' -n 1:10.11.19-0+deb12u1 ']'
++ printf '%s %s\n' mariadb-common 1:10.11.19-0+deb12u1
++ read -r name
++ sort -u -o /tmp/closure-vers.txt /tmp/closure-vers.txt
++ echo '== compare with sandbox =='
+== compare with sandbox ==
++ comm -23 /tmp/closure-vers.txt /tmp/local-installed.txt
 + cut '-d ' -f1 /tmp/needed-lines.txt
 + echo 'Debian 12 (bookworm) PHP 8.2 + MariaDB runtime packages'
 ++ wc -l
 ++ wc -l
 ++ wc -l
 ++ wc -l
-+ printf 'sandbox=%s runner=%s changed=%s shipped=%s\n' 283 462 49 40
++ printf 'sandbox=%s runner=%s closure=%s shipped=%s\n' 283 462 167 66
 + cat /tmp/needed-lines.txt
-+ head -20 /tmp/MANIFEST.txt
++ head -30 /tmp/MANIFEST.txt
 Debian 12 (bookworm) PHP 8.2 + MariaDB runtime packages
-sandbox=283 runner=462 changed=49 shipped=40
+sandbox=283 runner=462 closure=167 shipped=66
 galera-4 26.4.23-0+deb12u1
 gawk 1:5.2.1-2
 libabsl20220623 20220623.1-1+deb12u2
 libaio1 0.3.113-4
+libaom3 3.6.0-1+deb12u3
 libavif15 0.11.1-1+deb12u1
+libbrotli1 1.0.9-2+deb12u1
 libconfig-inifiles-perl 3.000003-2+deb12u1
+libcurl4 7.88.1-10+deb12u15
 libdbi-perl 1.643-4+deb12u3
+libde265-0 1.0.11-1+deb12u3
+libexpat1 2.5.0-1+deb12u5
 libgav1-1 0.18.0-1+b1
 libgd3 2.3.3-9+deb12u1
+liblzma5 5.4.1-1+deb12u2
+libmagic-mgc 1:5.44-3
+libmagic1 1:5.44-3
+libmariadb3 1:10.11.19-0+deb12u1
+libncurses6 6.4-4
+libpcre2-8-0 10.42-1+deb12u2
+libperl5.36 5.36.0-7+deb12u4
+libpng16-16 1.6.39-2+deb12u6
 libpopt0 1.19+dfsg-1
 librav1e0 0.5.1-6
+libsasl2-2 2.1.28+dfsg-10+deb12u1
+libsasl2-modules-db 2.1.28+dfsg-10+deb12u1
 libsigsegv2 2.14-1
 libsodium23 1.0.18-1+deb12u1
-libsvtav1enc1 1.4.1+dfsg-1
-liburing2 2.3-3
-libxpm4 1:3.5.12-1.1+deb12u1
-libyuv0 0.0~git20230123.b2528b0-1
-libzip4 1.7.3-1+b1
 + echo '== download debs =='
 == download debs ==
 + mkdir -p /tmp/payload/debs
 + cd /tmp/payload/debs
-+ xargs -r apt-get download
++ read -r name
++ '[' -z galera-4 ']'
++ apt-get download galera-4
+Get:1 http://deb.debian.org/debian bookworm/main amd64 galera-4 amd64 26.4.23-0+deb12u1 [843 kB]
+Fetched 843 kB in 0s (13.7 MB/s)
+W: Download is performed unsandboxed as root as file '/tmp/payload/debs/galera-4_26.4.23-0+deb12u1_amd64.deb' couldn't be accessed by user '_apt'. - pkgAcquire::Run (13: Permission denied)
++ read -r name
++ '[' -z gawk ']'
++ apt-get download gawk
+Get:1 http://deb.debian.org/debian bookworm/main amd64 gawk amd64 1:5.2.1-2 [673 kB]
+Fetched 673 kB in 0s (11.5 MB/s)
+W: Download is performed unsandboxed as root as file '/tmp/payload/debs/gawk_1%3a5.2.1-2_amd64.deb' couldn't be accessed by user '_apt'. - pkgAcquire::Run (13: Permission denied)
++ read -r name
++ '[' -z libabsl20220623 ']'
++ apt-get download libabsl20220623
 Get:1 http://deb.debian.org/debian bookworm/main amd64 libabsl20220623 amd64 20220623.1-1+deb12u2 [391 kB]
-Get:2 http://deb.debian.org/debian bookworm/main amd64 galera-4 amd64 26.4.23-0+deb12u1 [843 kB]
-Get:3 http://deb.debian.org/debian bookworm/main amd64 gawk amd64 1:5.2.1-2 [673 kB]
-Get:4 http://deb.debian.org/debian bookworm/main amd64 libaio1 amd64 0.3.113-4 [13.4 kB]
-Get:5 http://deb.debian.org/debian bookworm/main amd64 libavif15 amd64 0.11.1-1+deb12u1 [94.4 kB]
-Get:6 http://deb.debian.org/debian bookworm/main amd64 libconfig-inifiles-perl all 3.000003-2+deb12u1 [46.0 kB]
-Get:7 http://deb.debian.org/debian bookworm/main amd64 libgav1-1 amd64 0.18.0-1+b1 [332 kB]
-Get:8 http://deb.debian.org/debian bookworm/main amd64 libsigsegv2 amd64 2.14-1 [37.2 kB]
-Get:9 http://deb.debian.org/debian bookworm/main amd64 libsodium23 amd64 1.0.18-1+deb12u1 [162 kB]
-Get:10 http://deb.debian.org/debian bookworm/main amd64 liburing2 amd64 2.3-3 [12.6 kB]
-Get:11 http://deb.debian.org/debian bookworm/main amd64 libxpm4 amd64 1:3.5.12-1.1+deb12u1 [48.6 kB]
-Get:12 http://deb.debian.org/debian bookworm/main amd64 libyuv0 amd64 0.0~git20230123.b2528b0-1 [168 kB]
-Get:13 http://deb.debian.org/debian bookworm/main amd64 libzip4 amd64 1.7.3-1+b1 [55.5 kB]
-Get:14 http://deb.debian.org/debian bookworm/main amd64 lsof amd64 4.95.0-1 [318 kB]
-Get:15 http://deb.debian.org/debian bookworm/main amd64 php-common all 2:93 [13.1 kB]
-Get:16 http://deb.debian.org/debian bookworm/main amd64 libpopt0 amd64 1.19+dfsg-1 [43.3 kB]
-Get:17 http://deb.debian.org/debian bookworm/main amd64 psmisc amd64 23.6-1 [259 kB]
-Get:18 http://deb.debian.org/debian bookworm/main amd64 librav1e0 amd64 0.5.1-6 [763 kB]
-Get:19 http://deb.debian.org/debian bookworm/main amd64 libsvtav1enc1 amd64 1.4.1+dfsg-1 [2121 kB]
-Get:20 http://deb.debian.org/debian-security bookworm-security/main amd64 libdbi-perl amd64 1.643-4+deb12u3 [774 kB]
-Get:21 http://deb.debian.org/debian-security bookworm-security/main amd64 libgd3 amd64 2.3.3-9+deb12u1 [124 kB]
-Get:22 http://deb.debian.org/debian-security bookworm-security/main amd64 mariadb-client amd64 1:10.11.19-0+deb12u1 [2952 kB]
-Get:23 http://deb.debian.org/debian-security bookworm-security/main amd64 mariadb-client-core amd64 1:10.11.19-0+deb12u1 [870 kB]
-Get:24 http://deb.debian.org/debian-security bookworm-security/main amd64 mariadb-server amd64 1:10.11.19-0+deb12u1 [3666 kB]
-Get:25 http://deb.debian.org/debian-security bookworm-security/main amd64 mariadb-server-core amd64 1:10.11.19-0+deb12u1 [7342 kB]
-Get:26 http://deb.debian.org/debian-security bookworm-security/main amd64 php8.2-bcmath amd64 8.2.35-1~deb12u1 [15.3 kB]
-Get:27 http://deb.debian.org/debian-security bookworm-security/main amd64 php8.2-cli amd64 8.2.35-1~deb12u1 [1756 kB]
-Get:28 http://deb.debian.org/debian-security bookworm-security/main amd64 php8.2-common amd64 8.2.35-1~deb12u1 [693 kB]
-Get:29 http://deb.debian.org/debian-security bookworm-security/main amd64 php8.2-curl amd64 8.2.35-1~deb12u1 [35.9 kB]
-Get:30 http://deb.debian.org/debian-security bookworm-security/main amd64 php8.2-gd amd64 8.2.35-1~deb12u1 [28.9 kB]
-Get:31 http://deb.debian.org/debian-security bookworm-security/main amd64 php8.2-intl amd64 8.2.35-1~deb12u1 [138 kB]
-Get:32 http://deb.debian.org/debian-security bookworm-security/main amd64 php8.2-ldap amd64 8.2.35-1~deb12u1 [31.6 kB]
-Get:33 http://deb.debian.org/debian-security bookworm-security/main amd64 php8.2-mbstring amd64 8.2.35-1~deb12u1 [443 kB]
-Get:34 http://deb.debian.org/debian-security bookworm-security/main amd64 php8.2-mysql amd64 8.2.35-1~deb12u1 [118 kB]
-Get:35 http://deb.debian.org/debian-security bookworm-security/main amd64 php8.2-opcache amd64 8.2.35-1~deb12u1 [346 kB]
-Get:36 http://deb.debian.org/debian-security bookworm-security/main amd64 php8.2-readline amd64 8.2.35-1~deb12u1 [12.5 kB]
-Get:37 http://deb.debian.org/debian-security bookworm-security/main amd64 php8.2-sqlite3 amd64 8.2.35-1~deb12u1 [30.3 kB]
-Get:38 http://deb.debian.org/debian-security bookworm-security/main amd64 php8.2-xml amd64 8.2.35-1~deb12u1 [114 kB]
-Get:39 http://deb.debian.org/debian-security bookworm-security/main amd64 php8.2-zip amd64 8.2.35-1~deb12u1 [26.1 kB]
-Get:40 http://deb.debian.org/debian-security bookworm-security/main amd64 rsync amd64 3.5.0+ds1-0+deb12u1 [498 kB]
-Fetched 26.4 MB in 0s (210 MB/s)
+Fetched 391 kB in 0s (7428 kB/s)
 W: Download is performed unsandboxed as root as file '/tmp/payload/debs/libabsl20220623_20220623.1-1+deb12u2_amd64.deb' couldn't be accessed by user '_apt'. - pkgAcquire::Run (13: Permission denied)
++ read -r name
++ '[' -z libaio1 ']'
++ apt-get download libaio1
+Get:1 http://deb.debian.org/debian bookworm/main amd64 libaio1 amd64 0.3.113-4 [13.4 kB]
+Fetched 13.4 kB in 0s (538 kB/s)
+W: Download is performed unsandboxed as root as file '/tmp/payload/debs/libaio1_0.3.113-4_amd64.deb' couldn't be accessed by user '_apt'. - pkgAcquire::Run (13: Permission denied)
++ read -r name
++ '[' -z libaom3 ']'
++ apt-get download libaom3
+Get:1 http://deb.debian.org/debian-security bookworm-security/main amd64 libaom3 amd64 3.6.0-1+deb12u3 [1851 kB]
+Fetched 1851 kB in 0s (26.5 MB/s)
+W: Download is performed unsandboxed as root as file '/tmp/payload/debs/libaom3_3.6.0-1+deb12u3_amd64.deb' couldn't be accessed by user '_apt'. - pkgAcquire::Run (13: Permission denied)
++ read -r name
++ '[' -z libavif15 ']'
++ apt-get download libavif15
+Get:1 http://deb.debian.org/debian bookworm/main amd64 libavif15 amd64 0.11.1-1+deb12u1 [94.4 kB]
+Fetched 94.4 kB in 0s (2698 kB/s)
+W: Download is performed unsandboxed as root as file '/tmp/payload/debs/libavif15_0.11.1-1+deb12u1_amd64.deb' couldn't be accessed by user '_apt'. - pkgAcquire::Run (13: Permission denied)
++ read -r name
++ '[' -z libbrotli1 ']'
++ apt-get download libbrotli1
+Get:1 http://deb.debian.org/debian-security bookworm-security/main amd64 libbrotli1 amd64 1.0.9-2+deb12u1 [275 kB]
+Fetched 275 kB in 0s (5943 kB/s)
+W: Download is performed unsandboxed as root as file '/tmp/payload/debs/libbrotli1_1.0.9-2+deb12u1_amd64.deb' couldn't be accessed by user '_apt'. - pkgAcquire::Run (13: Permission denied)
++ read -r name
++ '[' -z libconfig-inifiles-perl ']'
++ apt-get download libconfig-inifiles-perl
+Get:1 http://deb.debian.org/debian bookworm/main amd64 libconfig-inifiles-perl all 3.000003-2+deb12u1 [46.0 kB]
+Fetched 46.0 kB in 0s (1284 kB/s)
+W: Download is performed unsandboxed as root as file '/tmp/payload/debs/libconfig-inifiles-perl_3.000003-2+deb12u1_all.deb' couldn't be accessed by user '_apt'. - pkgAcquire::Run (13: Permission denied)
++ read -r name
++ '[' -z libcurl4 ']'
++ apt-get download libcurl4
+Get:1 http://deb.debian.org/debian bookworm/main amd64 libcurl4 amd64 7.88.1-10+deb12u15 [392 kB]
+Fetched 392 kB in 0s (7250 kB/s)
+W: Download is performed unsandboxed as root as file '/tmp/payload/debs/libcurl4_7.88.1-10+deb12u15_amd64.deb' couldn't be accessed by user '_apt'. - pkgAcquire::Run (13: Permission denied)
++ read -r name
++ '[' -z libdbi-perl ']'
++ apt-get download libdbi-perl
+Get:1 http://deb.debian.org/debian-security bookworm-security/main amd64 libdbi-perl amd64 1.643-4+deb12u3 [774 kB]
+Fetched 774 kB in 0s (12.6 MB/s)
+W: Download is performed unsandboxed as root as file '/tmp/payload/debs/libdbi-perl_1.643-4+deb12u3_amd64.deb' couldn't be accessed by user '_apt'. - pkgAcquire::Run (13: Permission denied)
++ read -r name
++ '[' -z libde265-0 ']'
++ apt-get download libde265-0
+Get:1 http://deb.debian.org/debian-security bookworm-security/main amd64 libde265-0 amd64 1.0.11-1+deb12u3 [186 kB]
+Fetched 186 kB in 0s (4318 kB/s)
+W: Download is performed unsandboxed as root as file '/tmp/payload/debs/libde265-0_1.0.11-1+deb12u3_amd64.deb' couldn't be accessed by user '_apt'. - pkgAcquire::Run (13: Permission denied)
++ read -r name
++ '[' -z libexpat1 ']'
++ apt-get download libexpat1
+Get:1 http://deb.debian.org/debian-security bookworm-security/main amd64 libexpat1 amd64 2.5.0-1+deb12u5 [108 kB]
+Fetched 108 kB in 0s (2961 kB/s)
+W: Download is performed unsandboxed as root as file '/tmp/payload/debs/libexpat1_2.5.0-1+deb12u5_amd64.deb' couldn't be accessed by user '_apt'. - pkgAcquire::Run (13: Permission denied)
++ read -r name
++ '[' -z libgav1-1 ']'
++ apt-get download libgav1-1
+Get:1 http://deb.debian.org/debian bookworm/main amd64 libgav1-1 amd64 0.18.0-1+b1 [332 kB]
+Fetched 332 kB in 0s (6315 kB/s)
+W: Download is performed unsandboxed as root as file '/tmp/payload/debs/libgav1-1_0.18.0-1+b1_amd64.deb' couldn't be accessed by user '_apt'. - pkgAcquire::Run (13: Permission denied)
++ read -r name
++ '[' -z libgd3 ']'
++ apt-get download libgd3
+Get:1 http://deb.debian.org/debian-security bookworm-security/main amd64 libgd3 amd64 2.3.3-9+deb12u1 [124 kB]
+Fetched 124 kB in 0s (3326 kB/s)
+W: Download is performed unsandboxed as root as file '/tmp/payload/debs/libgd3_2.3.3-9+deb12u1_amd64.deb' couldn't be accessed by user '_apt'. - pkgAcquire::Run (13: Permission denied)
++ read -r name
++ '[' -z liblzma5 ']'
++ apt-get download liblzma5
+Get:1 http://deb.debian.org/debian-security bookworm-security/main amd64 liblzma5 amd64 5.4.1-1+deb12u2 [206 kB]
+Fetched 206 kB in 0s (4512 kB/s)
+W: Download is performed unsandboxed as root as file '/tmp/payload/debs/liblzma5_5.4.1-1+deb12u2_amd64.deb' couldn't be accessed by user '_apt'. - pkgAcquire::Run (13: Permission denied)
++ read -r name
++ '[' -z libmagic-mgc ']'
++ apt-get download libmagic-mgc
+Get:1 http://deb.debian.org/debian bookworm/main amd64 libmagic-mgc amd64 1:5.44-3 [305 kB]
+Fetched 305 kB in 0s (6009 kB/s)
+W: Download is performed unsandboxed as root as file '/tmp/payload/debs/libmagic-mgc_1%3a5.44-3_amd64.deb' couldn't be accessed by user '_apt'. - pkgAcquire::Run (13: Permission denied)
++ read -r name
++ '[' -z libmagic1 ']'
++ apt-get download libmagic1
+Get:1 http://deb.debian.org/debian bookworm/main amd64 libmagic1 amd64 1:5.44-3 [104 kB]
+Fetched 104 kB in 0s (2471 kB/s)
+W: Download is performed unsandboxed as root as file '/tmp/payload/debs/libmagic1_1%3a5.44-3_amd64.deb' couldn't be accessed by user '_apt'. - pkgAcquire::Run (13: Permission denied)
++ read -r name
++ '[' -z libmariadb3 ']'
++ apt-get download libmariadb3
+Get:1 http://deb.debian.org/debian-security bookworm-security/main amd64 libmariadb3 amd64 1:10.11.19-0+deb12u1 [180 kB]
+Fetched 180 kB in 0s (4062 kB/s)
+W: Download is performed unsandboxed as root as file '/tmp/payload/debs/libmariadb3_1%3a10.11.19-0+deb12u1_amd64.deb' couldn't be accessed by user '_apt'. - pkgAcquire::Run (13: Permission denied)
++ read -r name
++ '[' -z libncurses6 ']'
++ apt-get download libncurses6
+Get:1 http://deb.debian.org/debian bookworm/main amd64 libncurses6 amd64 6.4-4 [103 kB]
+Fetched 103 kB in 0s (2908 kB/s)
+W: Download is performed unsandboxed as root as file '/tmp/payload/debs/libncurses6_6.4-4_amd64.deb' couldn't be accessed by user '_apt'. - pkgAcquire::Run (13: Permission denied)
++ read -r name
++ '[' -z libpcre2-8-0 ']'
++ apt-get download libpcre2-8-0
+Get:1 http://deb.debian.org/debian-security bookworm-security/main amd64 libpcre2-8-0 amd64 10.42-1+deb12u2 [262 kB]
+Fetched 262 kB in 0s (5418 kB/s)
+W: Download is performed unsandboxed as root as file '/tmp/payload/debs/libpcre2-8-0_10.42-1+deb12u2_amd64.deb' couldn't be accessed by user '_apt'. - pkgAcquire::Run (13: Permission denied)
++ read -r name
++ '[' -z libperl5.36 ']'
++ apt-get download libperl5.36
+Get:1 http://deb.debian.org/debian-security bookworm-security/main amd64 libperl5.36 amd64 5.36.0-7+deb12u4 [4208 kB]
+Fetched 4208 kB in 0s (52.0 MB/s)
+W: Download is performed unsandboxed as root as file '/tmp/payload/debs/libperl5.36_5.36.0-7+deb12u4_amd64.deb' couldn't be accessed by user '_apt'. - pkgAcquire::Run (13: Permission denied)
++ read -r name
++ '[' -z libpng16-16 ']'
++ apt-get download libpng16-16
+Get:1 http://deb.debian.org/debian-security bookworm-security/main amd64 libpng16-16 amd64 1.6.39-2+deb12u6 [277 kB]
+Fetched 277 kB in 0s (5936 kB/s)
+W: Download is performed unsandboxed as root as file '/tmp/payload/debs/libpng16-16_1.6.39-2+deb12u6_amd64.deb' couldn't be accessed by user '_apt'. - pkgAcquire::Run (13: Permission denied)
++ read -r name
++ '[' -z libpopt0 ']'
++ apt-get download libpopt0
+Get:1 http://deb.debian.org/debian bookworm/main amd64 libpopt0 amd64 1.19+dfsg-1 [43.3 kB]
+Fetched 43.3 kB in 0s (1265 kB/s)
+W: Download is performed unsandboxed as root as file '/tmp/payload/debs/libpopt0_1.19+dfsg-1_amd64.deb' couldn't be accessed by user '_apt'. - pkgAcquire::Run (13: Permission denied)
++ read -r name
++ '[' -z librav1e0 ']'
++ apt-get download librav1e0
+Get:1 http://deb.debian.org/debian bookworm/main amd64 librav1e0 amd64 0.5.1-6 [763 kB]
+Fetched 763 kB in 0s (12.9 MB/s)
+W: Download is performed unsandboxed as root as file '/tmp/payload/debs/librav1e0_0.5.1-6_amd64.deb' couldn't be accessed by user '_apt'. - pkgAcquire::Run (13: Permission denied)
++ read -r name
++ '[' -z libsasl2-2 ']'
++ apt-get download libsasl2-2
+Get:1 http://deb.debian.org/debian-security bookworm-security/main amd64 libsasl2-2 amd64 2.1.28+dfsg-10+deb12u1 [59.9 kB]
+Fetched 59.9 kB in 0s (1615 kB/s)
+W: Download is performed unsandboxed as root as file '/tmp/payload/debs/libsasl2-2_2.1.28+dfsg-10+deb12u1_amd64.deb' couldn't be accessed by user '_apt'. - pkgAcquire::Run (13: Permission denied)
++ read -r name
++ '[' -z libsasl2-modules-db ']'
++ apt-get download libsasl2-modules-db
+Get:1 http://deb.debian.org/debian-security bookworm-security/main amd64 libsasl2-modules-db amd64 2.1.28+dfsg-10+deb12u1 [20.5 kB]
+Fetched 20.5 kB in 0s (806 kB/s)
+W: Download is performed unsandboxed as root as file '/tmp/payload/debs/libsasl2-modules-db_2.1.28+dfsg-10+deb12u1_amd64.deb' couldn't be accessed by user '_apt'. - pkgAcquire::Run (13: Permission denied)
++ read -r name
++ '[' -z libsigsegv2 ']'
++ apt-get download libsigsegv2
+Get:1 http://deb.debian.org/debian bookworm/main amd64 libsigsegv2 amd64 2.14-1 [37.2 kB]
+Fetched 37.2 kB in 0s (1304 kB/s)
+W: Download is performed unsandboxed as root as file '/tmp/payload/debs/libsigsegv2_2.14-1_amd64.deb' couldn't be accessed by user '_apt'. - pkgAcquire::Run (13: Permission denied)
++ read -r name
++ '[' -z libsodium23 ']'
++ apt-get download libsodium23
+Get:1 http://deb.debian.org/debian bookworm/main amd64 libsodium23 amd64 1.0.18-1+deb12u1 [162 kB]
+Fetched 162 kB in 0s (2958 kB/s)
+W: Download is performed unsandboxed as root as file '/tmp/payload/debs/libsodium23_1.0.18-1+deb12u1_amd64.deb' couldn't be accessed by user '_apt'. - pkgAcquire::Run (13: Permission denied)
++ read -r name
++ '[' -z libssh2-1 ']'
++ apt-get download libssh2-1
+Get:1 http://deb.debian.org/debian-security bookworm-security/main amd64 libssh2-1 amd64 1.10.0-3+deb12u1 [176 kB]
+Fetched 176 kB in 0s (4188 kB/s)
+W: Download is performed unsandboxed as root as file '/tmp/payload/debs/libssh2-1_1.10.0-3+deb12u1_amd64.deb' couldn't be accessed by user '_apt'. - pkgAcquire::Run (13: Permission denied)
++ read -r name
++ '[' -z libssl3 ']'
++ apt-get download libssl3
+Get:1 http://deb.debian.org/debian-security bookworm-security/main amd64 libssl3 amd64 3.0.22-1~deb12u2 [2040 kB]
+Fetched 2040 kB in 0s (29.8 MB/s)
+W: Download is performed unsandboxed as root as file '/tmp/payload/debs/libssl3_3.0.22-1~deb12u2_amd64.deb' couldn't be accessed by user '_apt'. - pkgAcquire::Run (13: Permission denied)
++ read -r name
++ '[' -z libsvtav1enc1 ']'
++ apt-get download libsvtav1enc1
+Get:1 http://deb.debian.org/debian bookworm/main amd64 libsvtav1enc1 amd64 1.4.1+dfsg-1 [2121 kB]
+Fetched 2121 kB in 0s (29.2 MB/s)
+W: Download is performed unsandboxed as root as file '/tmp/payload/debs/libsvtav1enc1_1.4.1+dfsg-1_amd64.deb' couldn't be accessed by user '_apt'. - pkgAcquire::Run (13: Permission denied)
++ read -r name
++ '[' -z liburing2 ']'
++ apt-get download liburing2
+Get:1 http://deb.debian.org/debian bookworm/main amd64 liburing2 amd64 2.3-3 [12.6 kB]
+Fetched 12.6 kB in 0s (488 kB/s)
+W: Download is performed unsandboxed as root as file '/tmp/payload/debs/liburing2_2.3-3_amd64.deb' couldn't be accessed by user '_apt'. - pkgAcquire::Run (13: Permission denied)
++ read -r name
++ '[' -z libxml2 ']'
++ apt-get download libxml2
+Get:1 http://deb.debian.org/debian bookworm/main amd64 libxml2 amd64 2.9.14+dfsg-1.3~deb12u6 [689 kB]
+Fetched 689 kB in 0s (11.2 MB/s)
+W: Download is performed unsandboxed as root as file '/tmp/payload/debs/libxml2_2.9.14+dfsg-1.3~deb12u6_amd64.deb' couldn't be accessed by user '_apt'. - pkgAcquire::Run (13: Permission denied)
++ read -r name
++ '[' -z libxpm4 ']'
++ apt-get download libxpm4
+Get:1 http://deb.debian.org/debian bookworm/main amd64 libxpm4 amd64 1:3.5.12-1.1+deb12u1 [48.6 kB]
+Fetched 48.6 kB in 0s (1425 kB/s)
+W: Download is performed unsandboxed as root as file '/tmp/payload/debs/libxpm4_1%3a3.5.12-1.1+deb12u1_amd64.deb' couldn't be accessed by user '_apt'. - pkgAcquire::Run (13: Permission denied)
++ read -r name
++ '[' -z libxslt1.1 ']'
++ apt-get download libxslt1.1
+Get:1 http://deb.debian.org/debian bookworm/main amd64 libxslt1.1 amd64 1.1.35-1+deb12u4 [232 kB]
+Fetched 232 kB in 0s (5104 kB/s)
+W: Download is performed unsandboxed as root as file '/tmp/payload/debs/libxslt1.1_1.1.35-1+deb12u4_amd64.deb' couldn't be accessed by user '_apt'. - pkgAcquire::Run (13: Permission denied)
++ read -r name
++ '[' -z libyuv0 ']'
++ apt-get download libyuv0
+Get:1 http://deb.debian.org/debian bookworm/main amd64 libyuv0 amd64 0.0~git20230123.b2528b0-1 [168 kB]
+Fetched 168 kB in 0s (3862 kB/s)
+W: Download is performed unsandboxed as root as file '/tmp/payload/debs/libyuv0_0.0~git20230123.b2528b0-1_amd64.deb' couldn't be accessed by user '_apt'. - pkgAcquire::Run (13: Permission denied)
++ read -r name
++ '[' -z libzip4 ']'
++ apt-get download libzip4
+Get:1 http://deb.debian.org/debian bookworm/main amd64 libzip4 amd64 1.7.3-1+b1 [55.5 kB]
+Fetched 55.5 kB in 0s (1419 kB/s)
+W: Download is performed unsandboxed as root as file '/tmp/payload/debs/libzip4_1.7.3-1+b1_amd64.deb' couldn't be accessed by user '_apt'. - pkgAcquire::Run (13: Permission denied)
++ read -r name
++ '[' -z lsof ']'
++ apt-get download lsof
+Get:1 http://deb.debian.org/debian bookworm/main amd64 lsof amd64 4.95.0-1 [318 kB]
+Fetched 318 kB in 0s (6319 kB/s)
+W: Download is performed unsandboxed as root as file '/tmp/payload/debs/lsof_4.95.0-1_amd64.deb' couldn't be accessed by user '_apt'. - pkgAcquire::Run (13: Permission denied)
++ read -r name
++ '[' -z mariadb-client ']'
++ apt-get download mariadb-client
+Get:1 http://deb.debian.org/debian-security bookworm-security/main amd64 mariadb-client amd64 1:10.11.19-0+deb12u1 [2952 kB]
+Fetched 2952 kB in 0s (37.7 MB/s)
+W: Download is performed unsandboxed as root as file '/tmp/payload/debs/mariadb-client_1%3a10.11.19-0+deb12u1_amd64.deb' couldn't be accessed by user '_apt'. - pkgAcquire::Run (13: Permission denied)
++ read -r name
++ '[' -z mariadb-client-core ']'
++ apt-get download mariadb-client-core
+Get:1 http://deb.debian.org/debian-security bookworm-security/main amd64 mariadb-client-core amd64 1:10.11.19-0+deb12u1 [870 kB]
+Fetched 870 kB in 0s (14.1 MB/s)
+W: Download is performed unsandboxed as root as file '/tmp/payload/debs/mariadb-client-core_1%3a10.11.19-0+deb12u1_amd64.deb' couldn't be accessed by user '_apt'. - pkgAcquire::Run (13: Permission denied)
++ read -r name
++ '[' -z mariadb-common ']'
++ apt-get download mariadb-common
+Get:1 http://deb.debian.org/debian-security bookworm-security/main amd64 mariadb-common all 1:10.11.19-0+deb12u1 [27.6 kB]
+Fetched 27.6 kB in 0s (1075 kB/s)
+W: Download is performed unsandboxed as root as file '/tmp/payload/debs/mariadb-common_1%3a10.11.19-0+deb12u1_all.deb' couldn't be accessed by user '_apt'. - pkgAcquire::Run (13: Permission denied)
++ read -r name
++ '[' -z mariadb-server ']'
++ apt-get download mariadb-server
+Get:1 http://deb.debian.org/debian-security bookworm-security/main amd64 mariadb-server amd64 1:10.11.19-0+deb12u1 [3666 kB]
+Fetched 3666 kB in 0s (44.0 MB/s)
+W: Download is performed unsandboxed as root as file '/tmp/payload/debs/mariadb-server_1%3a10.11.19-0+deb12u1_amd64.deb' couldn't be accessed by user '_apt'. - pkgAcquire::Run (13: Permission denied)
++ read -r name
++ '[' -z mariadb-server-core ']'
++ apt-get download mariadb-server-core
+Get:1 http://deb.debian.org/debian-security bookworm-security/main amd64 mariadb-server-core amd64 1:10.11.19-0+deb12u1 [7342 kB]
+Fetched 7342 kB in 0s (80.0 MB/s)
+W: Download is performed unsandboxed as root as file '/tmp/payload/debs/mariadb-server-core_1%3a10.11.19-0+deb12u1_amd64.deb' couldn't be accessed by user '_apt'. - pkgAcquire::Run (13: Permission denied)
++ read -r name
++ '[' -z mysql-common ']'
++ apt-get download mysql-common
+Get:1 http://deb.debian.org/debian bookworm/main amd64 mysql-common all 5.8+1.1.0 [6636 B]
+Fetched 6636 B in 0s (277 kB/s)
+W: Download is performed unsandboxed as root as file '/tmp/payload/debs/mysql-common_5.8+1.1.0_all.deb' couldn't be accessed by user '_apt'. - pkgAcquire::Run (13: Permission denied)
++ read -r name
++ '[' -z perl ']'
++ apt-get download perl
+Get:1 http://deb.debian.org/debian-security bookworm-security/main amd64 perl amd64 5.36.0-7+deb12u4 [239 kB]
+Fetched 239 kB in 0s (4961 kB/s)
+W: Download is performed unsandboxed as root as file '/tmp/payload/debs/perl_5.36.0-7+deb12u4_amd64.deb' couldn't be accessed by user '_apt'. - pkgAcquire::Run (13: Permission denied)
++ read -r name
++ '[' -z perl-base ']'
++ apt-get download perl-base
+Get:1 http://deb.debian.org/debian-security bookworm-security/main amd64 perl-base amd64 5.36.0-7+deb12u4 [1610 kB]
+Fetched 1610 kB in 0s (22.9 MB/s)
+W: Download is performed unsandboxed as root as file '/tmp/payload/debs/perl-base_5.36.0-7+deb12u4_amd64.deb' couldn't be accessed by user '_apt'. - pkgAcquire::Run (13: Permission denied)
++ read -r name
++ '[' -z perl-modules-5.36 ']'
++ apt-get download perl-modules-5.36
+Get:1 http://deb.debian.org/debian-security bookworm-security/main amd64 perl-modules-5.36 all 5.36.0-7+deb12u4 [2817 kB]
+Fetched 2817 kB in 0s (35.3 MB/s)
+W: Download is performed unsandboxed as root as file '/tmp/payload/debs/perl-modules-5.36_5.36.0-7+deb12u4_all.deb' couldn't be accessed by user '_apt'. - pkgAcquire::Run (13: Permission denied)
++ read -r name
++ '[' -z php-common ']'
++ apt-get download php-common
+Get:1 http://deb.debian.org/debian bookworm/main amd64 php-common all 2:93 [13.1 kB]
+Fetched 13.1 kB in 0s (472 kB/s)
+W: Download is performed unsandboxed as root as file '/tmp/payload/debs/php-common_2%3a93_all.deb' couldn't be accessed by user '_apt'. - pkgAcquire::Run (13: Permission denied)
++ read -r name
++ '[' -z php8.2-bcmath ']'
++ apt-get download php8.2-bcmath
+Get:1 http://deb.debian.org/debian-security bookworm-security/main amd64 php8.2-bcmath amd64 8.2.35-1~deb12u1 [15.3 kB]
+Fetched 15.3 kB in 0s (614 kB/s)
+W: Download is performed unsandboxed as root as file '/tmp/payload/debs/php8.2-bcmath_8.2.35-1~deb12u1_amd64.deb' couldn't be accessed by user '_apt'. - pkgAcquire::Run (13: Permission denied)
++ read -r name
++ '[' -z php8.2-cli ']'
++ apt-get download php8.2-cli
+Get:1 http://deb.debian.org/debian-security bookworm-security/main amd64 php8.2-cli amd64 8.2.35-1~deb12u1 [1756 kB]
+Fetched 1756 kB in 0s (25.1 MB/s)
+W: Download is performed unsandboxed as root as file '/tmp/payload/debs/php8.2-cli_8.2.35-1~deb12u1_amd64.deb' couldn't be accessed by user '_apt'. - pkgAcquire::Run (13: Permission denied)
++ read -r name
++ '[' -z php8.2-common ']'
++ apt-get download php8.2-common
+Get:1 http://deb.debian.org/debian-security bookworm-security/main amd64 php8.2-common amd64 8.2.35-1~deb12u1 [693 kB]
+Fetched 693 kB in 0s (11.8 MB/s)
+W: Download is performed unsandboxed as root as file '/tmp/payload/debs/php8.2-common_8.2.35-1~deb12u1_amd64.deb' couldn't be accessed by user '_apt'. - pkgAcquire::Run (13: Permission denied)
++ read -r name
++ '[' -z php8.2-curl ']'
++ apt-get download php8.2-curl
+Get:1 http://deb.debian.org/debian-security bookworm-security/main amd64 php8.2-curl amd64 8.2.35-1~deb12u1 [35.9 kB]
+Fetched 35.9 kB in 0s (1284 kB/s)
+W: Download is performed unsandboxed as root as file '/tmp/payload/debs/php8.2-curl_8.2.35-1~deb12u1_amd64.deb' couldn't be accessed by user '_apt'. - pkgAcquire::Run (13: Permission denied)
++ read -r name
++ '[' -z php8.2-gd ']'
++ apt-get download php8.2-gd
+Get:1 http://deb.debian.org/debian-security bookworm-security/main amd64 php8.2-gd amd64 8.2.35-1~deb12u1 [28.9 kB]
+Fetched 28.9 kB in 0s (1033 kB/s)
+W: Download is performed unsandboxed as root as file '/tmp/payload/debs/php8.2-gd_8.2.35-1~deb12u1_amd64.deb' couldn't be accessed by user '_apt'. - pkgAcquire::Run (13: Permission denied)
++ read -r name
++ '[' -z php8.2-intl ']'
++ apt-get download php8.2-intl
+Get:1 http://deb.debian.org/debian-security bookworm-security/main amd64 php8.2-intl amd64 8.2.35-1~deb12u1 [138 kB]
+Fetched 138 kB in 0s (3112 kB/s)
+W: Download is performed unsandboxed as root as file '/tmp/payload/debs/php8.2-intl_8.2.35-1~deb12u1_amd64.deb' couldn't be accessed by user '_apt'. - pkgAcquire::Run (13: Permission denied)
++ read -r name
++ '[' -z php8.2-ldap ']'
++ apt-get download php8.2-ldap
+Get:1 http://deb.debian.org/debian-security bookworm-security/main amd64 php8.2-ldap amd64 8.2.35-1~deb12u1 [31.6 kB]
+Fetched 31.6 kB in 0s (1188 kB/s)
+W: Download is performed unsandboxed as root as file '/tmp/payload/debs/php8.2-ldap_8.2.35-1~deb12u1_amd64.deb' couldn't be accessed by user '_apt'. - pkgAcquire::Run (13: Permission denied)
++ read -r name
++ '[' -z php8.2-mbstring ']'
++ apt-get download php8.2-mbstring
+Get:1 http://deb.debian.org/debian-security bookworm-security/main amd64 php8.2-mbstring amd64 8.2.35-1~deb12u1 [443 kB]
+Fetched 443 kB in 0s (8675 kB/s)
+W: Download is performed unsandboxed as root as file '/tmp/payload/debs/php8.2-mbstring_8.2.35-1~deb12u1_amd64.deb' couldn't be accessed by user '_apt'. - pkgAcquire::Run (13: Permission denied)
++ read -r name
++ '[' -z php8.2-mysql ']'
++ apt-get download php8.2-mysql
+Get:1 http://deb.debian.org/debian-security bookworm-security/main amd64 php8.2-mysql amd64 8.2.35-1~deb12u1 [118 kB]
+Fetched 118 kB in 0s (2737 kB/s)
+W: Download is performed unsandboxed as root as file '/tmp/payload/debs/php8.2-mysql_8.2.35-1~deb12u1_amd64.deb' couldn't be accessed by user '_apt'. - pkgAcquire::Run (13: Permission denied)
++ read -r name
++ '[' -z php8.2-opcache ']'
++ apt-get download php8.2-opcache
+Get:1 http://deb.debian.org/debian-security bookworm-security/main amd64 php8.2-opcache amd64 8.2.35-1~deb12u1 [346 kB]
+Fetched 346 kB in 0s (6527 kB/s)
+W: Download is performed unsandboxed as root as file '/tmp/payload/debs/php8.2-opcache_8.2.35-1~deb12u1_amd64.deb' couldn't be accessed by user '_apt'. - pkgAcquire::Run (13: Permission denied)
++ read -r name
++ '[' -z php8.2-readline ']'
++ apt-get download php8.2-readline
+Get:1 http://deb.debian.org/debian-security bookworm-security/main amd64 php8.2-readline amd64 8.2.35-1~deb12u1 [12.5 kB]
+Fetched 12.5 kB in 0s (499 kB/s)
+W: Download is performed unsandboxed as root as file '/tmp/payload/debs/php8.2-readline_8.2.35-1~deb12u1_amd64.deb' couldn't be accessed by user '_apt'. - pkgAcquire::Run (13: Permission denied)
++ read -r name
++ '[' -z php8.2-sqlite3 ']'
++ apt-get download php8.2-sqlite3
+Get:1 http://deb.debian.org/debian-security bookworm-security/main amd64 php8.2-sqlite3 amd64 8.2.35-1~deb12u1 [30.3 kB]
+Fetched 30.3 kB in 0s (1138 kB/s)
+W: Download is performed unsandboxed as root as file '/tmp/payload/debs/php8.2-sqlite3_8.2.35-1~deb12u1_amd64.deb' couldn't be accessed by user '_apt'. - pkgAcquire::Run (13: Permission denied)
++ read -r name
++ '[' -z php8.2-xml ']'
++ apt-get download php8.2-xml
+Get:1 http://deb.debian.org/debian-security bookworm-security/main amd64 php8.2-xml amd64 8.2.35-1~deb12u1 [114 kB]
+Fetched 114 kB in 0s (2648 kB/s)
+W: Download is performed unsandboxed as root as file '/tmp/payload/debs/php8.2-xml_8.2.35-1~deb12u1_amd64.deb' couldn't be accessed by user '_apt'. - pkgAcquire::Run (13: Permission denied)
++ read -r name
++ '[' -z php8.2-zip ']'
++ apt-get download php8.2-zip
+Get:1 http://deb.debian.org/debian-security bookworm-security/main amd64 php8.2-zip amd64 8.2.35-1~deb12u1 [26.1 kB]
+Fetched 26.1 kB in 0s (845 kB/s)
+W: Download is performed unsandboxed as root as file '/tmp/payload/debs/php8.2-zip_8.2.35-1~deb12u1_amd64.deb' couldn't be accessed by user '_apt'. - pkgAcquire::Run (13: Permission denied)
++ read -r name
++ '[' -z psmisc ']'
++ apt-get download psmisc
+Get:1 http://deb.debian.org/debian bookworm/main amd64 psmisc amd64 23.6-1 [259 kB]
+Fetched 259 kB in 0s (5588 kB/s)
+W: Download is performed unsandboxed as root as file '/tmp/payload/debs/psmisc_23.6-1_amd64.deb' couldn't be accessed by user '_apt'. - pkgAcquire::Run (13: Permission denied)
++ read -r name
++ '[' -z rsync ']'
++ apt-get download rsync
+Get:1 http://deb.debian.org/debian-security bookworm-security/main amd64 rsync amd64 3.5.0+ds1-0+deb12u1 [498 kB]
+Fetched 498 kB in 0s (9424 kB/s)
+W: Download is performed unsandboxed as root as file '/tmp/payload/debs/rsync_3.5.0+ds1-0+deb12u1_amd64.deb' couldn't be accessed by user '_apt'. - pkgAcquire::Run (13: Permission denied)
++ read -r name
++ '[' -z tzdata ']'
++ apt-get download tzdata
+Get:1 http://deb.debian.org/debian-security bookworm-security/main amd64 tzdata all 2026f-0+deb12u1 [308 kB]
+Fetched 308 kB in 0s (5922 kB/s)
+W: Download is performed unsandboxed as root as file '/tmp/payload/debs/tzdata_2026f-0+deb12u1_all.deb' couldn't be accessed by user '_apt'. - pkgAcquire::Run (13: Permission denied)
++ read -r name
++ '[' -z x11-common ']'
++ apt-get download x11-common
+Get:1 http://deb.debian.org/debian bookworm/main amd64 x11-common all 1:7.7+23 [252 kB]
+Fetched 252 kB in 0s (5336 kB/s)
+W: Download is performed unsandboxed as root as file '/tmp/payload/debs/x11-common_1%3a7.7+23_all.deb' couldn't be accessed by user '_apt'. - pkgAcquire::Run (13: Permission denied)
++ read -r name
 + cp /tmp/MANIFEST.txt /tmp/payload/MANIFEST.txt
 + du -sh /tmp/payload/debs
-26M	/tmp/payload/debs
+42M	/tmp/payload/debs
 + ls /tmp/payload/debs
 + wc -l
-40
+66
 + echo '== pack =='
 == pack ==
 + cd /tmp/payload
-+ sha256sum debs/galera-4_26.4.23-0+deb12u1_amd64.deb debs/gawk_1%3a5.2.1-2_amd64.deb debs/libabsl20220623_20220623.1-1+deb12u2_amd64.deb debs/libaio1_0.3.113-4_amd64.deb debs/libavif15_0.11.1-1+deb12u1_amd64.deb debs/libconfig-inifiles-perl_3.000003-2+deb12u1_all.deb debs/libdbi-perl_1.643-4+deb12u3_amd64.deb debs/libgav1-1_0.18.0-1+b1_amd64.deb debs/libgd3_2.3.3-9+deb12u1_amd64.deb debs/libpopt0_1.19+dfsg-1_amd64.deb debs/librav1e0_0.5.1-6_amd64.deb debs/libsigsegv2_2.14-1_amd64.deb debs/libsodium23_1.0.18-1+deb12u1_amd64.deb debs/libsvtav1enc1_1.4.1+dfsg-1_amd64.deb debs/liburing2_2.3-3_amd64.deb debs/libxpm4_1%3a3.5.12-1.1+deb12u1_amd64.deb debs/libyuv0_0.0~git20230123.b2528b0-1_amd64.deb debs/libzip4_1.7.3-1+b1_amd64.deb debs/lsof_4.95.0-1_amd64.deb debs/mariadb-client-core_1%3a10.11.19-0+deb12u1_amd64.deb debs/mariadb-client_1%3a10.11.19-0+deb12u1_amd64.deb debs/mariadb-server-core_1%3a10.11.19-0+deb12u1_amd64.deb debs/mariadb-server_1%3a10.11.19-0+deb12u1_amd64.deb debs/php-common_2%3a93_all.deb debs/php8.2-bcmath_8.2.35-1~deb12u1_amd64.deb debs/php8.2-cli_8.2.35-1~deb12u1_amd64.deb debs/php8.2-common_8.2.35-1~deb12u1_amd64.deb debs/php8.2-curl_8.2.35-1~deb12u1_amd64.deb debs/php8.2-gd_8.2.35-1~deb12u1_amd64.deb debs/php8.2-intl_8.2.35-1~deb12u1_amd64.deb debs/php8.2-ldap_8.2.35-1~deb12u1_amd64.deb debs/php8.2-mbstring_8.2.35-1~deb12u1_amd64.deb debs/php8.2-mysql_8.2.35-1~deb12u1_amd64.deb debs/php8.2-opcache_8.2.35-1~deb12u1_amd64.deb debs/php8.2-readline_8.2.35-1~deb12u1_amd64.deb debs/php8.2-sqlite3_8.2.35-1~deb12u1_amd64.deb debs/php8.2-xml_8.2.35-1~deb12u1_amd64.deb debs/php8.2-zip_8.2.35-1~deb12u1_amd64.deb debs/psmisc_23.6-1_amd64.deb debs/rsync_3.5.0+ds1-0+deb12u1_amd64.deb
++ sha256sum debs/galera-4_26.4.23-0+deb12u1_amd64.deb debs/gawk_1%3a5.2.1-2_amd64.deb debs/libabsl20220623_20220623.1-1+deb12u2_amd64.deb debs/libaio1_0.3.113-4_amd64.deb debs/libaom3_3.6.0-1+deb12u3_amd64.deb debs/libavif15_0.11.1-1+deb12u1_amd64.deb debs/libbrotli1_1.0.9-2+deb12u1_amd64.deb debs/libconfig-inifiles-perl_3.000003-2+deb12u1_all.deb debs/libcurl4_7.88.1-10+deb12u15_amd64.deb debs/libdbi-perl_1.643-4+deb12u3_amd64.deb debs/libde265-0_1.0.11-1+deb12u3_amd64.deb debs/libexpat1_2.5.0-1+deb12u5_amd64.deb debs/libgav1-1_0.18.0-1+b1_amd64.deb debs/libgd3_2.3.3-9+deb12u1_amd64.deb debs/liblzma5_5.4.1-1+deb12u2_amd64.deb debs/libmagic-mgc_1%3a5.44-3_amd64.deb debs/libmagic1_1%3a5.44-3_amd64.deb debs/libmariadb3_1%3a10.11.19-0+deb12u1_amd64.deb debs/libncurses6_6.4-4_amd64.deb debs/libpcre2-8-0_10.42-1+deb12u2_amd64.deb debs/libperl5.36_5.36.0-7+deb12u4_amd64.deb debs/libpng16-16_1.6.39-2+deb12u6_amd64.deb debs/libpopt0_1.19+dfsg-1_amd64.deb debs/librav1e0_0.5.1-6_amd64.deb debs/libsasl2-2_2.1.28+dfsg-10+deb12u1_amd64.deb debs/libsasl2-modules-db_2.1.28+dfsg-10+deb12u1_amd64.deb debs/libsigsegv2_2.14-1_amd64.deb debs/libsodium23_1.0.18-1+deb12u1_amd64.deb debs/libssh2-1_1.10.0-3+deb12u1_amd64.deb debs/libssl3_3.0.22-1~deb12u2_amd64.deb debs/libsvtav1enc1_1.4.1+dfsg-1_amd64.deb debs/liburing2_2.3-3_amd64.deb debs/libxml2_2.9.14+dfsg-1.3~deb12u6_amd64.deb debs/libxpm4_1%3a3.5.12-1.1+deb12u1_amd64.deb debs/libxslt1.1_1.1.35-1+deb12u4_amd64.deb debs/libyuv0_0.0~git20230123.b2528b0-1_amd64.deb debs/libzip4_1.7.3-1+b1_amd64.deb debs/lsof_4.95.0-1_amd64.deb debs/mariadb-client-core_1%3a10.11.19-0+deb12u1_amd64.deb debs/mariadb-client_1%3a10.11.19-0+deb12u1_amd64.deb debs/mariadb-common_1%3a10.11.19-0+deb12u1_all.deb debs/mariadb-server-core_1%3a10.11.19-0+deb12u1_amd64.deb debs/mariadb-server_1%3a10.11.19-0+deb12u1_amd64.deb debs/mysql-common_5.8+1.1.0_all.deb debs/perl-base_5.36.0-7+deb12u4_amd64.deb debs/perl-modules-5.36_5.36.0-7+deb12u4_all.deb debs/perl_5.36.0-7+deb12u4_amd64.deb debs/php-common_2%3a93_all.deb debs/php8.2-bcmath_8.2.35-1~deb12u1_amd64.deb debs/php8.2-cli_8.2.35-1~deb12u1_amd64.deb debs/php8.2-common_8.2.35-1~deb12u1_amd64.deb debs/php8.2-curl_8.2.35-1~deb12u1_amd64.deb debs/php8.2-gd_8.2.35-1~deb12u1_amd64.deb debs/php8.2-intl_8.2.35-1~deb12u1_amd64.deb debs/php8.2-ldap_8.2.35-1~deb12u1_amd64.deb debs/php8.2-mbstring_8.2.35-1~deb12u1_amd64.deb debs/php8.2-mysql_8.2.35-1~deb12u1_amd64.deb debs/php8.2-opcache_8.2.35-1~deb12u1_amd64.deb debs/php8.2-readline_8.2.35-1~deb12u1_amd64.deb debs/php8.2-sqlite3_8.2.35-1~deb12u1_amd64.deb debs/php8.2-xml_8.2.35-1~deb12u1_amd64.deb debs/php8.2-zip_8.2.35-1~deb12u1_amd64.deb debs/psmisc_23.6-1_amd64.deb debs/rsync_3.5.0+ds1-0+deb12u1_amd64.deb debs/tzdata_2026f-0+deb12u1_all.deb debs/x11-common_1%3a7.7+23_all.deb
 + tar -cf /tmp/runtime.tar -C /tmp/payload .
 + sha256sum /tmp/runtime.tar
 + rm -f '/tmp/part-*'
 + split -b 40m /tmp/runtime.tar /tmp/part-
-+ ls -la /tmp/part-aa
++ ls -la /tmp/part-aa /tmp/part-ab
 + awk '{print $9, $5}'
-/tmp/part-aa 26449920
+/tmp/part-aa 41943040
+/tmp/part-ab 1464320
 ++ find /tmp -maxdepth 1 -name 'part-*'
 ++ wc -l
 ++ stat -c %s /tmp/runtime.tar
-+ printf 'parts=%s\nsize=%s\n' 1 26449920
++ printf 'parts=%s\nsize=%s\n' 2 43407360
 + echo 'BUILD OK'
 BUILD OK

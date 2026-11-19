@@ -1,2 +1,2 @@
-parts=1
-size=26449920
+parts=2
+size=43407360
