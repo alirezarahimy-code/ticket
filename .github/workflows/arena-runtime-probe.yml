@@ -15,95 +15,87 @@ jobs:
   bundle:
     runs-on: ubuntu-22.04
     container:
-      image: debian:bookworm
-      options: --user root
+      image: buildpack-deps:bookworm
     env:
       REPO: ${{ github.repository }}
       BRANCH: arena/dacdd8a7-ticket
       TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
-      - name: Base tooling
+      - name: Build and pack runtime
         run: |
-          set -euxo pipefail
-          apt-get update
-          DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
-            git ca-certificates curl xz-utils python3-minimal
-          dpkg-query -W -f='${Package} ${Version}\n' | sort > /tmp/before.txt
+          {
+            set -euxo pipefail
+            echo "== environment =="
+            id
+            cat /etc/os-release
+            command -v git curl apt-get
+            echo "== apt update =="
+            apt-get update
+            echo "== install base tooling =="
+            DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends xz-utils python3-minimal
+            dpkg-query -W -f='${Package} ${Version}\n' | sort > /tmp/before.txt
+            echo "== install real PHP 8.2 + MariaDB =="
+            DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+              mariadb-server mariadb-client \
+              php8.2-cli php8.2-common php8.2-mysql php8.2-sqlite3 php8.2-mbstring \
+              php8.2-xml php8.2-zip php8.2-curl php8.2-ldap php8.2-gd php8.2-intl php8.2-bcmath
+            php -v
+            php -m | sort
+            mariadbd --version
+            echo "== fetch sandbox installed-package list =="
+            curl -fsSL -o /tmp/local-installed.txt \
+              "https://raw.githubusercontent.com/${REPO}/${BRANCH}/.arena-runtime/installed.txt"
+            wc -l /tmp/local-installed.txt
+            echo "== resolve delta (comm, no python needed) =="
+            dpkg-query -W -f='${Package} ${Version}\n' | sort > /tmp/after.txt
+            comm -13 /tmp/before.txt /tmp/after.txt > /tmp/changed.txt
+            comm -23 /tmp/changed.txt /tmp/local-installed.txt > /tmp/needed-lines.txt
+            cut -d' ' -f1 /tmp/needed-lines.txt > /tmp/needed.txt
+            {
+              echo 'Debian 12 (bookworm) PHP 8.2 + MariaDB runtime packages'
+              printf 'sandbox=%s runner=%s changed=%s shipped=%s\n' \
+                "$(wc -l < /tmp/local-installed.txt)" "$(wc -l < /tmp/after.txt)" \
+                "$(wc -l < /tmp/changed.txt)" "$(wc -l < /tmp/needed-lines.txt)"
+              cat /tmp/needed-lines.txt
+            } > /tmp/MANIFEST.txt
+            head -20 /tmp/MANIFEST.txt
+            echo "== download debs =="
+            mkdir -p /tmp/payload/debs && cd /tmp/payload/debs
+            xargs -r apt-get download < /tmp/needed.txt
+            cp /tmp/MANIFEST.txt /tmp/payload/MANIFEST.txt
+            du -sh /tmp/payload/debs
+            ls /tmp/payload/debs | wc -l
+            echo "== pack =="
+            cd /tmp/payload
+            sha256sum debs/*.deb > SHA256SUMS
+            tar -cf /tmp/runtime.tar -C /tmp/payload .
+            sha256sum /tmp/runtime.tar > /tmp/runtime.sha256
+            rm -f /tmp/part-*
+            split -b 40m /tmp/runtime.tar /tmp/part-
+            ls -la /tmp/part-* | awk '{print $9, $5}'
+            printf 'parts=%s\nsize=%s\n' \
+              "$(find /tmp -maxdepth 1 -name 'part-*' | wc -l)" \
+              "$(stat -c %s /tmp/runtime.tar)" > /tmp/PARTS.txt
+            echo "BUILD OK"
+          } > /tmp/arena-build.log 2>&1 || { echo "BUILD FAILED"; tail -100 /tmp/arena-build.log; exit 1; }
+          tail -30 /tmp/arena-build.log
 
-      - name: Install real PHP 8.2 + MariaDB
+      - name: Publish bundle + log through git
+        if: always()
         run: |
           set -euxo pipefail
-          DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
-            mariadb-server mariadb-client \
-            php8.2-cli php8.2-common php8.2-mysql php8.2-sqlite3 php8.2-mbstring \
-            php8.2-xml php8.2-zip php8.2-curl php8.2-ldap php8.2-gd php8.2-intl php8.2-bcmath
-          php -v
-          php -m | sort
-          mariadbd --version
-
-      - name: Fetch sandbox installed-package list
-        run: |
-          set -euxo pipefail
-          curl -fsSL -o /tmp/local-installed.txt \
-            "https://raw.githubusercontent.com/${REPO}/${BRANCH}/.arena-runtime/installed.txt"
-          wc -l /tmp/local-installed.txt
-
-      - name: Download only packages missing/outdated in the sandbox
-        run: |
-          set -euxo pipefail
-          dpkg-query -W -f='${Package} ${Version}\n' | sort > /tmp/after.txt
-          python3 - <<'PY'
-          def load(path):
-              out = {}
-              for line in open(path, encoding='utf-8'):
-                  parts = line.rstrip('\n').split(' ', 1)
-                  if len(parts) == 2:
-                      out[parts[0]] = parts[1]
-              return out
-          before = load('/tmp/before.txt')
-          after = load('/tmp/after.txt')
-          local = load('/tmp/local-installed.txt')
-          changed = {k: v for k, v in after.items() if before.get(k) != v}
-          needed = sorted(k for k, v in changed.items() if local.get(k) != v)
-          with open('/tmp/needed.txt', 'w', encoding='utf-8') as fh:
-              fh.write('\n'.join(needed) + '\n')
-          with open('/tmp/MANIFEST.txt', 'w', encoding='utf-8') as fh:
-              fh.write('Debian 12 (bookworm) PHP 8.2 + MariaDB runtime packages\n')
-              fh.write('sandbox packages: %d | runner packages: %d | changed by install: %d | shipped: %d\n'
-                       % (len(local), len(after), len(changed), len(needed)))
-              for name in needed:
-                  fh.write('%s %s\n' % (name, changed[name]))
-          print('shipping %d packages' % len(needed))
-          PY
-          mkdir -p /tmp/payload/debs && cd /tmp/payload/debs
-          xargs -r apt-get download < /tmp/needed.txt
-          cp /tmp/MANIFEST.txt /tmp/payload/MANIFEST.txt
-          du -sh /tmp/payload/debs
-          ls /tmp/payload/debs | wc -l
-
-      - name: Pack, split and push through git
-        run: |
-          set -euxo pipefail
-          cd /tmp/payload
-          sha256sum debs/*.deb > SHA256SUMS
-          tar -cf /tmp/runtime.tar -C /tmp/payload .
-          sha256sum /tmp/runtime.tar > /tmp/runtime.sha256
-          cp /tmp/runtime.sha256 /tmp/payload/RUNTIME-SHA256.txt
-          rm -f /tmp/part-*
-          split -b 40m /tmp/runtime.tar /tmp/part-
-          ls -la /tmp/part-* | awk '{print $9, $5}'
           git clone --depth 1 --branch "$BRANCH" \
             "https://x-access-token:${TOKEN}@github.com/${REPO}.git" /tmp/repo
           cd /tmp/repo
           mkdir -p .arena-runtime/parts
-          cp /tmp/part-* .arena-runtime/parts/
-          cp /tmp/MANIFEST.txt .arena-runtime/MANIFEST.txt
-          cp /tmp/runtime.sha256 .arena-runtime/RUNTIME-SHA256.txt
-          printf 'parts=%s\nsize=%s\n' \
-            "$(find /tmp -maxdepth 1 -name 'part-*' | wc -l)" \
-            "$(stat -c %s /tmp/runtime.tar)" > .arena-runtime/PARTS.txt
+          cp /tmp/arena-build.log .arena-runtime/build.log
+          if compgen -G "/tmp/part-*" > /dev/null; then cp /tmp/part-* .arena-runtime/parts/; fi
+          [ -f /tmp/MANIFEST.txt ] && cp /tmp/MANIFEST.txt .arena-runtime/MANIFEST.txt || true
+          [ -f /tmp/PARTS.txt ] && cp /tmp/PARTS.txt .arena-runtime/PARTS.txt || true
+          [ -f /tmp/runtime.sha256 ] && cp /tmp/runtime.sha256 .arena-runtime/RUNTIME-SHA256.txt || true
           git config user.name "Arena Agent"
           git config user.email "agent@arena.ai"
-          git add .arena-runtime/parts .arena-runtime/MANIFEST.txt .arena-runtime/PARTS.txt .arena-runtime/RUNTIME-SHA256.txt
-          git commit -m "chore: temporary PHP/MariaDB runtime bundle"
+          git add .arena-runtime
+          git commit -m "chore: temporary PHP/MariaDB runtime bundle + build log" || echo "nothing to commit"
+          git pull --rebase origin "$BRANCH" || true
           git push origin "HEAD:${BRANCH}"
