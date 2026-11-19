@@ -1,0 +1,36 @@
+name: Arena runtime transport probe
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  actions: read
+
+jobs:
+  probe:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref_name }}
+
+      - name: Create marker
+        run: |
+          mkdir -p .arena-runtime
+          printf 'probe-ok %s\n' "$(date -u +%FT%TZ)" > .arena-runtime/probe.txt
+          cat .arena-runtime/probe.txt
+
+      - name: Upload marker artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: arena-probe
+          path: .arena-runtime/probe.txt
+
+      - name: Commit marker to branch
+        run: |
+          git config user.name "Arena Agent"
+          git config user.email "agent@arena.ai"
+          git add .arena-runtime/probe.txt
+          git commit -m "chore: runtime transport probe" || echo "nothing to commit"
+          git push origin "HEAD:${{ github.ref_name }}"
