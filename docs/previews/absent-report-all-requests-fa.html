@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="fa" dir="rtl" data-theme-mode="light" data-preview-version="2">
+<html lang="fa" dir="rtl" data-theme-mode="light" data-preview-version="3">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -159,6 +159,35 @@ body.printing #printArea{display:block!important;background:#fff;color:#111;padd
 }
 @media(max-width:720px){.bar-label{flex-basis:100px}.bar-val{flex-basis:76px}.shell{padding:9px}}
 
+/* === نسخهٔ ۳: جدایی صفحهها === */
+.page-switch{display:flex;gap:6px;flex-wrap:wrap;margin:0 0 14px;border-bottom:1px solid var(--food-line);padding-bottom:9px}
+.page-tab{border:1px solid var(--food-line);border-radius:9px 9px 0 0;background:var(--food-paper);color:var(--muted);padding:8px 15px;font:inherit;font-size:12px;font-weight:800;cursor:pointer}
+.page-tab.active{background:var(--navy);border-color:var(--navy);color:#fff}
+.page-note{font-size:11px;font-weight:700;color:var(--teal);margin:0 0 12px}
+[hidden]{display:none!important}
+/* === نسخهٔ ۳: چارت SVG بهسبک logging-dashboard === */
+.alr-chart-head{display:flex;align-items:baseline;justify-content:space-between;gap:9px;flex-wrap:wrap;margin-bottom:9px}
+.alr-chart-head h3{margin:0;font-family:var(--font-display);font-size:14px;color:var(--navy)}
+.alr-range{font-size:11px;font-weight:800;color:var(--teal);white-space:nowrap}
+.alr-svg{display:block;width:100%;height:auto;background:var(--food-white);border:1px solid var(--food-line);border-radius:10px}
+.alr-plot{fill:var(--food-paper);stroke:var(--food-line);stroke-width:1}
+.alr-grid{stroke:var(--food-line);stroke-width:1;stroke-dasharray:3 5}
+.alr-mean{stroke:var(--danger);stroke-width:1.5;stroke-dasharray:6 4}
+.alr-axis{fill:var(--muted);font-family:var(--font-body);font-size:11px;font-weight:700}
+.alr-name{fill:var(--ink);font-family:var(--font-body);font-size:12px;font-weight:800}
+.alr-val{fill:var(--ink);font-family:var(--font-body);font-size:11px;font-weight:800}
+.alr-date-line{stroke:var(--food-line);stroke-width:1.5}
+.alr-tick{stroke:var(--muted);stroke-width:1}
+.alr-legend{display:flex;gap:7px;flex-wrap:wrap;margin-top:10px}
+.alr-legend span{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--food-line);border-radius:99px;padding:4px 10px;background:var(--food-white);color:var(--muted);font-size:11px;font-weight:800;cursor:pointer}
+.alr-legend span b{color:var(--navy)}
+.alr-legend i{width:10px;height:10px;border-radius:3px;display:inline-block;flex:none}
+.alr-hint{font-size:10px;color:var(--muted);margin-top:7px}
+/* جدول گروهبندیشده مثل FoodOrgGroups */
+.group-head h4{margin:0;font-family:var(--font-display);font-size:14px;color:var(--navy)}
+#printArea .alr-svg{max-height:110mm}
+@media(max-width:720px){.alr-legend span{font-size:10px}}
+
 </style>
 </head>
 <body>
@@ -168,8 +197,8 @@ body.printing #printArea{display:block!important;background:#fff;color:#111;padd
     <div class="top-meta">
       <button class="btn ghost" id="themeSwitch" type="button">🌙 حالت شب</button>
       <span class="pill ok">تم دقیق سامانه</span>
-      <span class="pill ok">نسخهٔ ۲ · بهروزشده ۱۴۰۵/۰۸/۲۸</span>
-      <span class="pill">نمایش زنده از GitHub Pages</span>
+      <span class="pill ok">نسخهٔ ۳ · اعمال اصلاحات ۱ تا ۳</span>
+      <span class="pill">دو صفحهٔ مجزا · چارت زمیندار · جدول معاونت</span>
       <span class="pill">۱۴۰۵/۰۸/۲۸</span>
     </div>
   </header>
@@ -179,11 +208,18 @@ body.printing #printArea{display:block!important;background:#fff;color:#111;padd
     <span class="nav-item active">گزارشها</span>
   </nav>
   <section class="page-heading">
-    <div class="eyebrow">پیشنمایش تمام موارد درخواستی — نسخهٔ ۲، قابل مشاهده بهصورت زنده از GitHub Pages — هیچ تغییری در سامانه اعمال نشده</div>
+    <div class="eyebrow">نسخهٔ ۳ — اصلاحات ۱ (جدایی صفحهها)، ۲ (چارت زمیندار/محور/legend) و ۳ (جدول عیناً مثل «بر اساس معاونت») — هیچ تغییری در سامانه اعمال نشده</div>
     <h1>گزارش غایبین ناهار</h1>
-    <p>همهٔ اصلاحات ظاهری، زیرنمای سوم جزئیات، چارت معاونتها و پیشنهادهای کارآمدی در یک صفحهٔ مستقل.</p>
+    <p>دو صفحهٔ کاملاً مجزا: «گزارشگیری» و «غایبین ناهار». هیچ چیپ/فیلدی از یکی وارد دیگری نشده است.</p>
   </section>
 
+  <div class="page-switch" role="tablist">
+    <button class="page-tab" data-page="report" role="tab" aria-selected="false">صفحهٔ ۱ — گزارشگیری</button>
+    <button class="page-tab active" data-page="absent" role="tab" aria-selected="true">صفحهٔ ۲ — غایبین ناهار</button>
+  </div>
+  <p class="page-note">✅ اصلاح ۱: پنج چیپ فقط در صفحهٔ «گزارشگیری»، کنار «نمایش گزارش»؛ صفحهٔ غایبین فقط چیپهای خودش را دارد.</p>
+
+  <section id="pageReport" hidden>
   <section class="card" id="classicCard">
     <h2>① تب «گزارشگیری» — اصلاح ظاهری آمار</h2>
     <form class="filter-form" id="classicFilter" onsubmit="return false">
@@ -194,10 +230,13 @@ body.printing #printArea{display:block!important;background:#fff;color:#111;padd
       <div class="chips" id="classicChips"></div>
     </form>
     <div class="note">✅ پنج چیپ هماندازه داخل همان باکس تاریخ، دقیقاً کنار دکمهٔ «نمایش گزارش» — دیگر کارتهای گنده وجود ندارند.</div>
+    <div class="fields-box"><span class="fields-label">صفحهٔ گزارشگیری</span><span class="hint">فیلدها و جدول این صفحه دستنخوردهاند؛ فقط آمار کوچک و داخل همان باکس شده است.</span></div>
+  </section>
   </section>
 
+  <section id="pageAbsent">
   <section class="card" id="absentCard">
-    <h2>② تب «غایبین ناهار» — تنظیمات مشترک + اصلاح ظاهری آمار</h2>
+    <h2>صفحهٔ غایبین ناهار — تنظیمات مشترک + آمار کوچک (بدون چیپهای گزارشگیری)</h2>
     <form class="filter-form" id="absentFilter" onsubmit="return false">
       <label class="field">از تاریخ (شمسی)<input value="۱۴۰۵/۰۸/۲۴"></label>
       <label class="field">تا تاریخ (شمسی)<input value="۱۴۰۵/۰۸/۲۸"></label>
@@ -230,20 +269,20 @@ body.printing #printArea{display:block!important;background:#fff;color:#111;padd
 
     <div class="detail-tools" id="detailTools">
       <input type="search" id="searchBox" placeholder="جستجو: نام / کد پرسنلی / نوع غذا / معاونت">
-      <label class="field-chip"><input type="checkbox" id="compactBox"> فشردهسازی تاریخهای پیوسته</label>
       <span class="fields-label">نمودار:</span>
       <span class="seg"><button type="button" data-metric="people" class="active">افراد</button><button type="button" data-metric="portions">وعدهها</button></span>
       <button class="btn ghost" type="button" id="chartToggle">پنهان کردن نمودار</button>
-      <span class="hint">«نوع غذا» و «تاریخ غیبت» فقط در همین زیرنما هستند؛ دو نمای قبلی بدون «نوع غذا»اند.</span>
+      <span class="hint">زیرنمای سوم = همان تب «بر اساس معاونت» + ردیف تکراری بهازای هر غیبت (تاریخ + نوع غذا + وعده).</span>
     </div>
 
     <section class="chart-card" id="chartCard">
-      <h3>④ نمودار معاونتها — بیشترین / کمترین عضو غایب</h3>
+      <div class="alr-chart-head"><h3>نمودار معاونتها — بیشترین / کمترین عضو غایب</h3><span class="alr-range" id="chartRange"></span></div>
       <div class="chart" id="chart"></div>
     </section>
 
     <div class="food-summary" id="foodSummary"></div>
     <div id="list"></div>
+  </section>
   </section>
 </main>
 <div id="printArea" class="print-area" aria-hidden="true"></div>
@@ -252,12 +291,16 @@ body.printing #printArea{display:block!important;background:#fff;color:#111;padd
 <script>
 
 'use strict';
-const DATA = [{"pc": "۱۰۰۱", "first": "علی", "last": "احمدی", "dep": "معاونت اداری", "iso": "2026-11-15", "jal": "۱۴۰۵/۰۸/۲۵", "food": "چلوکباب", "status": "غایب", "declared": false}, {"pc": "۱۰۰۱", "first": "علی", "last": "احمدی", "dep": "معاونت اداری", "iso": "2026-11-16", "jal": "۱۴۰۵/۰۸/۲۶", "food": "قرمهسبزی", "status": "غایب", "declared": false}, {"pc": "۱۰۰۱", "first": "علی", "last": "احمدی", "dep": "معاونت اداری", "iso": "2026-11-17", "jal": "۱۴۰۵/۰۸/۲۷", "food": "چلوکباب", "status": "غایب", "declared": false}, {"pc": "۱۰۰۲", "first": "مریم", "last": "رضایی", "dep": "معاونت اداری", "iso": "2026-11-15", "jal": "۱۴۰۵/۰۸/۲۵", "food": "جوجهکباب", "status": "غایب اعلامشده", "declared": true}, {"pc": "۱۰۰۲", "first": "مریم", "last": "رضایی", "dep": "معاونت اداری", "iso": "2026-11-17", "jal": "۱۴۰۵/۰۸/۲۷", "food": "قرمهسبزی", "status": "غایب", "declared": false}, {"pc": "۱۰۰۳", "first": "حسن", "last": "کریمی", "dep": "معاونت اداری", "iso": "2026-11-14", "jal": "۱۴۰۵/۰۸/۲۴", "food": "چلوکباب", "status": "غایب", "declared": false}, {"pc": "۱۰۰۳", "first": "حسن", "last": "کریمی", "dep": "معاونت اداری", "iso": "2026-11-15", "jal": "۱۴۰۵/۰۸/۲۵", "food": "چلوکباب", "status": "غایب", "declared": false}, {"pc": "۱۰۰۳", "first": "حسن", "last": "کریمی", "dep": "معاونت اداری", "iso": "2026-11-16", "jal": "۱۴۰۵/۰۸/۲۶", "food": "عدسپلو", "status": "غایب", "declared": false}, {"pc": "۱۰۰۳", "first": "حسن", "last": "کریمی", "dep": "معاونت اداری", "iso": "2026-11-18", "jal": "۱۴۰۵/۰۸/۲۸", "food": "جوجهکباب", "status": "غایب", "declared": false}, {"pc": "۱۰۰۴", "first": "زهرا", "last": "محمدی", "dep": "معاونت اداری", "iso": "2026-11-16", "jal": "۱۴۰۵/۰۸/۲۶", "food": "قرمهسبزی", "status": "غایب", "declared": false}, {"pc": "۱۰۰۴", "first": "زهرا", "last": "محمدی", "dep": "معاونت اداری", "iso": "2026-11-18", "jal": "۱۴۰۵/۰۸/۲۸", "food": "چلوکباب", "status": "غایب", "declared": false}, {"pc": "۲۰۰۱", "first": "رضا", "last": "حسینی", "dep": "معاونت فنی", "iso": "2026-11-15", "jal": "۱۴۰۵/۰۸/۲۵", "food": "چلوکباب", "status": "غایب", "declared": false}, {"pc": "۲۰۰۱", "first": "رضا", "last": "حسینی", "dep": "معاونت فنی", "iso": "2026-11-17", "jal": "۱۴۰۵/۰۸/۲۷", "food": "قرمهسبزی", "status": "غایب", "declared": false}, {"pc": "۲۰۰۲", "first": "سارا", "last": "نوری", "dep": "معاونت فنی", "iso": "2026-11-16", "jal": "۱۴۰۵/۰۸/۲۶", "food": "جوجهکباب", "status": "غایب اعلامشده", "declared": true}, {"pc": "۲۰۰۲", "first": "سارا", "last": "نوری", "dep": "معاونت فنی", "iso": "2026-11-18", "jal": "۱۴۰۵/۰۸/۲۸", "food": "عدسپلو", "status": "غایب", "declared": false}, {"pc": "۳۰۰۱", "first": "محمد", "last": "صادقی", "dep": "معاونت مالی", "iso": "2026-11-15", "jal": "۱۴۰۵/۰۸/۲۵", "food": "چلوکباب", "status": "غایب", "declared": false}, {"pc": "۳۰۰۱", "first": "محمد", "last": "صادقی", "dep": "معاونت مالی", "iso": "2026-11-17", "jal": "۱۴۰۵/۰۸/۲۷", "food": "قرمهسبزی", "status": "غایب", "declared": false}];
-const FIELDS = [{"key": "row", "label": "ردیف"}, {"key": "pc", "label": "کد پرسنلی"}, {"key": "first", "label": "نام"}, {"key": "last", "label": "نام خانوادگی"}, {"key": "dep", "label": "معاونت"}, {"key": "food", "label": "نوع غذا"}, {"key": "jal", "label": "تاریخ غیبت"}, {"key": "status", "label": "وضعیت غیبت"}];
+const DATA = [{"pc": "۱۰۰۱", "first": "علی", "last": "احمدی", "dep": "معاونت اداری", "iso": "2026-11-15", "jal": "۱۴۰۵/۰۸/۲۵", "food": "چلوکباب", "status": "غایب", "declared": false, "meal": "ناهار"}, {"pc": "۱۰۰۱", "first": "علی", "last": "احمدی", "dep": "معاونت اداری", "iso": "2026-11-16", "jal": "۱۴۰۵/۰۸/۲۶", "food": "قرمهسبزی", "status": "غایب", "declared": false, "meal": "ناهار"}, {"pc": "۱۰۰۱", "first": "علی", "last": "احمدی", "dep": "معاونت اداری", "iso": "2026-11-17", "jal": "۱۴۰۵/۰۸/۲۷", "food": "چلوکباب", "status": "غایب", "declared": false, "meal": "ناهار"}, {"pc": "۱۰۰۲", "first": "مریم", "last": "رضایی", "dep": "معاونت اداری", "iso": "2026-11-15", "jal": "۱۴۰۵/۰۸/۲۵", "food": "جوجهکباب", "status": "غایب اعلامشده", "declared": true, "meal": "ناهار"}, {"pc": "۱۰۰۲", "first": "مریم", "last": "رضایی", "dep": "معاونت اداری", "iso": "2026-11-17", "jal": "۱۴۰۵/۰۸/۲۷", "food": "قرمهسبزی", "status": "غایب", "declared": false, "meal": "ناهار"}, {"pc": "۱۰۰۳", "first": "حسن", "last": "کریمی", "dep": "معاونت اداری", "iso": "2026-11-14", "jal": "۱۴۰۵/۰۸/۲۴", "food": "چلوکباب", "status": "غایب", "declared": false, "meal": "ناهار"}, {"pc": "۱۰۰۳", "first": "حسن", "last": "کریمی", "dep": "معاونت اداری", "iso": "2026-11-15", "jal": "۱۴۰۵/۰۸/۲۵", "food": "چلوکباب", "status": "غایب", "declared": false, "meal": "ناهار"}, {"pc": "۱۰۰۳", "first": "حسن", "last": "کریمی", "dep": "معاونت اداری", "iso": "2026-11-16", "jal": "۱۴۰۵/۰۸/۲۶", "food": "عدسپلو", "status": "غایب", "declared": false, "meal": "ناهار"}, {"pc": "۱۰۰۳", "first": "حسن", "last": "کریمی", "dep": "معاونت اداری", "iso": "2026-11-18", "jal": "۱۴۰۵/۰۸/۲۸", "food": "جوجهکباب", "status": "غایب", "declared": false, "meal": "ناهار"}, {"pc": "۱۰۰۴", "first": "زهرا", "last": "محمدی", "dep": "معاونت اداری", "iso": "2026-11-16", "jal": "۱۴۰۵/۰۸/۲۶", "food": "قرمهسبزی", "status": "غایب", "declared": false, "meal": "ناهار"}, {"pc": "۱۰۰۴", "first": "زهرا", "last": "محمدی", "dep": "معاونت اداری", "iso": "2026-11-18", "jal": "۱۴۰۵/۰۸/۲۸", "food": "چلوکباب", "status": "غایب", "declared": false, "meal": "ناهار"}, {"pc": "۲۰۰۱", "first": "رضا", "last": "حسینی", "dep": "معاونت فنی", "iso": "2026-11-15", "jal": "۱۴۰۵/۰۸/۲۵", "food": "چلوکباب", "status": "غایب", "declared": false, "meal": "ناهار"}, {"pc": "۲۰۰۱", "first": "رضا", "last": "حسینی", "dep": "معاونت فنی", "iso": "2026-11-17", "jal": "۱۴۰۵/۰۸/۲۷", "food": "قرمهسبزی", "status": "غایب", "declared": false, "meal": "ناهار"}, {"pc": "۲۰۰۲", "first": "سارا", "last": "نوری", "dep": "معاونت فنی", "iso": "2026-11-16", "jal": "۱۴۰۵/۰۸/۲۶", "food": "جوجهکباب", "status": "غایب اعلامشده", "declared": true, "meal": "ناهار"}, {"pc": "۲۰۰۲", "first": "سارا", "last": "نوری", "dep": "معاونت فنی", "iso": "2026-11-18", "jal": "۱۴۰۵/۰۸/۲۸", "food": "عدسپلو", "status": "غایب", "declared": false, "meal": "ناهار"}, {"pc": "۳۰۰۱", "first": "محمد", "last": "صادقی", "dep": "معاونت مالی", "iso": "2026-11-15", "jal": "۱۴۰۵/۰۸/۲۵", "food": "چلوکباب", "status": "غایب", "declared": false, "meal": "ناهار"}, {"pc": "۳۰۰۱", "first": "محمد", "last": "صادقی", "dep": "معاونت مالی", "iso": "2026-11-17", "jal": "۱۴۰۵/۰۸/۲۷", "food": "قرمهسبزی", "status": "غایب", "declared": false, "meal": "ناهار"}];
+const FIELDS = [{"key": "row", "label": "ردیف"}, {"key": "pc", "label": "کد پرسنلی"}, {"key": "first", "label": "نام"}, {"key": "last", "label": "نام خانوادگی"}, {"key": "dep", "label": "معاونت"}, {"key": "food", "label": "نوع غذا"}, {"key": "meal", "label": "وعده"}, {"key": "jal", "label": "تاریخ غیبت"}, {"key": "status", "label": "وضعیت غیبت"}];
 const FIELDS_OLD = [{"key": "row", "label": "ردیف"}, {"key": "pc", "label": "کد پرسنلی"}, {"key": "first", "label": "نام"}, {"key": "last", "label": "نام خانوادگی"}, {"key": "dep", "label": "معاونت"}, {"key": "status", "label": "وضعیت غیبت"}];
 const fa = v => String(v).replace(/\d/g, d => '۰۱۲۳۴۵۶۷۸۹'[Number(d)]);
 const esc = v => String(v ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const state = {tab:'detail', blocks:1, metric:'people', chart:true, compact:false, query:'', dep:'', fields:new Set(['row','pc','first','last','dep','food','jal','status']), sort:{key:'iso',dir:'asc'}};
+const state = {page:'absent', tab:'detail', blocks:1, metric:'people', chart:true, compact:false, query:'', dep:'', fields:new Set(['row','pc','first','last','dep','food','meal','jal','status']), sort:{key:'iso',dir:'asc'}};
+const PAL=['var(--teal)','var(--navy-2)','var(--gold)','var(--danger)','#4f91c6','#8a63c9','#d9812b'];
+const DEP_ORDER=[...new Set(DATA.map(r=>r.dep))].sort((a,b)=>a.localeCompare(b,'fa'));
+const depColor = name => PAL[Math.max(0,DEP_ORDER.indexOf(name)) % PAL.length];
+const RANGE_START='۱۴۰۵/۰۸/۲۴', RANGE_END='۱۴۰۵/۰۸/۲۸', RANGE_DAYS=['۲۴','۲۵','۲۶','۲۷','۲۸'];
 const toast = m => {const t=document.getElementById('toast');t.textContent=m;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2200)};
 const groups = () => {
   const g = new Map();
@@ -283,23 +326,53 @@ const visible = () => {
 };
 // ---------- چارت معاونتها ----------
 function chartHtml(){
-  const metric = state.metric==='people' ? 'people' : 'portions';
-  const rows = GROUPS.map(g => ({name:g.name, v: metric==='people'?g.people.length:g.portions}))
-                     .filter(r => r.v>0).sort((a,b)=>b.v-a.v);
-  const total = rows.reduce((s,r)=>s+r.v,0), max=Math.max(...rows.map(r=>r.v),1);
-  const mean = total/(rows.length||1);
-  const meanPct = (mean/max*100).toFixed(2)+'%';
-  return rows.map((r,i)=>{
-    const cls = i===0?'max':(i===rows.length-1?'min':'');
-    const tag = rows.length===1?'تنها معاونت':(i===0?'▼ بیشترین':(i===rows.length-1?'▲ کمترین':''));
-    const pct = (r.v/max*100).toFixed(2)+'%';
-    const share = (r.v/total*100).toFixed(0)+'٪';
-    return '<div class="bar-row '+cls+'" data-dep="'+esc(r.name)+'" title="کلیک: فیلتر جدول">'+
-      '<span class="bar-label">'+esc(r.name)+'</span>'+
-      '<span class="bar-track"><span class="bar-fill" style="width:'+pct+'"></span><span class="mean-line" style="left:'+meanPct+'"></span></span>'+
-      '<span class="bar-val">'+fa(r.v)+' '+(metric==='people'?'نفر':'وعده')+' <span class="bar-tag">'+tag+'</span> '+fa(share)+'</span></div>';
-  }).join('') + '<div class="chart-foot"><span>خطچین قرمز = میانگین ('+fa(mean.toFixed(1))+')</span><span>ترتیب نزولی · ' +
-      (metric==='people'?'افراد یکتا':'تعداد وعدهها')+' · فقط توکنهای تم اصلی</span></div>';
+  const metric=state.metric==='people'?'people':'portions';
+  const rows=GROUPS.map(g=>({name:g.name,v:metric==='people'?g.people.length:g.portions,
+                            people:g.people.length,portions:g.portions}))
+                  .filter(r=>r.v>0).sort((a,b)=>b.v-a.v);
+  if(!rows.length)return '<div class="empty">موردی یافت نشد.</div>';
+  const max=Math.max(...rows.map(r=>r.v),1), total=rows.reduce((s,r)=>s+r.v,0), mean=total/rows.length;
+  const W=1000,x0=70,x1=770,plotTop=18,plotH=Math.max(150,rows.length*54+30),plotBottom=plotTop+plotH;
+  const rowH=plotH/rows.length,barH=18,H=plotBottom+98;
+  let grid='<rect class="alr-plot" x="'+x0+'" y="'+plotTop+'" width="'+(x1-x0)+'" height="'+plotH+'"/>';
+  // خطوط grid عمودی = محور تعداد
+  for(let k=0;k<=4;k++){
+    const gx=x1-(x1-x0)*k/4, gv=Math.round(max*k/4);
+    grid+='<line class="alr-grid" x1="'+gx+'" y1="'+plotTop+'" x2="'+gx+'" y2="'+plotBottom+'"/>';
+    grid+='<text class="alr-axis" x="'+gx+'" y="'+(plotBottom+17)+'" text-anchor="middle">'+fa(gv)+'</text>';
+  }
+  // خطوط grid افقی = جداکنندهٔ ردیف معاونتها
+  for(let k=1;k<rows.length;k++){
+    const gy=plotTop+k*rowH;
+    grid+='<line class="alr-grid" x1="'+x0+'" y1="'+gy+'" x2="'+x1+'" y2="'+gy+'"/>';
+  }
+  // خط میانگین
+  const mx=x1-(mean/max)*(x1-x0);
+  grid+='<line class="alr-mean" x1="'+mx+'" y1="'+plotTop+'" x2="'+mx+'" y2="'+plotBottom+'"/>';
+  const bars=rows.map((r,i)=>{
+    const y=plotTop+i*rowH+(rowH-barH)/2, w=(r.v/max)*(x1-x0), x=x1-w;
+    const tag=i===0?' ▼ بیشترین':(i===rows.length-1?' ▲ کمترین':'');
+    return '<rect class="alr-bar" data-dep="'+esc(r.name)+'" rx="5" ry="5" x="'+x+'" y="'+y+'" width="'+w+'" height="'+barH+'" style="fill:'+depColor(r.name)+'"/>'+
+      '<text class="alr-name" x="985" y="'+(y+barH-4)+'" text-anchor="end">'+esc(r.name)+'</text>'+
+      '<text class="alr-val" x="'+(x-8)+'" y="'+(y+barH-4)+'" text-anchor="end">'+fa(r.v)+'</text>'+
+      '<text class="alr-axis" x="'+(x1-6)+'" y="'+(y-2)+'" text-anchor="end">'+tag.trim()+'</text>';
+  }).join('');
+  const axisTitle='<text class="alr-axis" x="'+((x0+x1)/2)+'" y="'+(plotBottom+34)+'" text-anchor="middle">تعداد '+(metric==='people'?'اعضای غایب':'وعدههای غیبت')+' ← محور افقی</text>';
+  const dateY=plotBottom+66;
+  let dateAxis='<line class="alr-date-line" x1="'+x1+'" y1="'+dateY+'" x2="'+x0+'" y2="'+dateY+'"/>';
+  RANGE_DAYS.forEach((d,i)=>{
+    const dx=x1-(x1-x0)*i/(RANGE_DAYS.length-1);
+    dateAxis+='<line class="alr-tick" x1="'+dx+'" y1="'+(dateY-4)+'" x2="'+dx+'" y2="'+(dateY+4)+'"/>';
+    dateAxis+='<text class="alr-axis" x="'+dx+'" y="'+(dateY-8)+'" text-anchor="middle">'+d+'</text>';
+  });
+  dateAxis+='<text class="alr-axis" x="'+x1+'" y="'+(dateY+21)+'" text-anchor="end">شروع بازه: '+RANGE_START+'</text>';
+  dateAxis+='<text class="alr-axis" x="'+x0+'" y="'+(dateY+21)+'" text-anchor="start">پایان بازه: '+RANGE_END+'</text>';
+  const svg='<svg class="alr-svg" viewBox="0 0 '+W+' '+H+'" role="img" aria-label="نمودار معاونتها بر اساس اعضای غایب">'+grid+bars+axisTitle+dateAxis+'</svg>';
+  const legend='<div class="alr-legend">'+rows.map((r,i)=>
+    '<span data-dep="'+esc(r.name)+'"><i style="background:'+depColor(r.name)+'"></i>'+esc(r.name)+
+    ' <b>'+fa(r.people)+' نفر · '+fa(r.portions)+' وعده</b>'+(i===0?' ▼ بیشترین':'')+(i===rows.length-1?' ▲ کمترین':'')+'</span>').join('')+
+    '</div><div class="alr-hint">خطچین قرمز = میانگین ('+fa(mean.toFixed(1))+') · رنگ هر میله = رنگ همان معاونت در legend · کلیک روی میله/legend جدول را فیلتر میکند.</div>';
+  return svg+legend;
 }
 // ---------- جدول ----------
 function cell(r,f,i){
@@ -349,31 +422,25 @@ function compactRows(rows){
   }); flush();
   return out;
 }
-function detailHtml(){
-  const rows=visible();
-  const gs=new Map();
-  rows.forEach(r=>{if(!gs.has(r.dep))gs.set(r.dep,new Map());
-    const p=gs.get(r.dep);if(!p.has(r.pc))p.set(r.pc,{pc:r.pc,first:r.first,last:r.last,rows:[]});p.get(r.pc).rows.push(r)});
+function rowsForMode(mode){
+  const rows=sorted(visible());
+  if(mode==='detail')return rows;                 // هر غیبت = یک ردیف (تکرار اعضا)
+  const seen=new Set();                          // تب «بر اساس معاونت»: هر فرد یکبار
+  return rows.filter(r=>{if(seen.has(r.pc))return false;seen.add(r.pc);return true});
+}
+function groupedHtml(mode){
+  const rows=rowsForMode(mode), gs=new Map();
+  rows.forEach(r=>{if(!gs.has(r.dep))gs.set(r.dep,[]);gs.get(r.dep).push(r)});
   if(!gs.size)return '<div class="empty">موردی یافت نشد.</div>';
-  const order=[...gs.keys()].sort((a,b)=>(gs.get(b).size-gs.get(a).size)||a.localeCompare(b,'fa'));
+  const order=[...gs.keys()].sort((a,b)=>(gs.get(b).length-gs.get(a).length)||a.localeCompare(b,'fa'));
   return order.map(dep=>{
-    const people=[...gs.get(dep).values()];
-    const portions=people.reduce((s,p)=>s+p.rows.length,0);
-    let inner='';
-    people.forEach(p=>{
-      const items=compactRows(p.rows);
-      const body=items.map(it=>{
-        if(it.type==='one')return '<tr><td colspan="8" style="text-align:right;padding:3px 10px">'+esc(it.r.jal)+' · '+esc(it.r.food)+'</td></tr>';
-        const a=it.rows[0].jal, b=it.rows[it.rows.length-1].jal;
-        return '<tr><td colspan="8" style="text-align:right;padding:3px 10px">'+esc(a)+'–'+esc(b)+' · '+fa(it.rows.length)+' وعده · '+esc([...new Set(it.rows.map(x=>x.food))].join(' / '))+'</td></tr>';
-      }).join('');
-      inner+='<div class="person"><div class="person-head"><b>'+esc(p.first+' '+p.last)+'</b>'+
-        '<span class="pc">'+esc(p.pc)+'</span><span class="cnt">'+fa(p.rows.length)+' وعده</span></div>'+
-        (state.compact?'<div class="table-wrap"><table><tbody>'+body+'</tbody></table></div>':tableHtml(sorted(p.rows),state.blocks,false))+'</div>';
-    });
-    return '<section class="group"><div class="group-head"><h4>'+esc(dep)+'</h4><span>('+fa(people.length)+' نفر · '+fa(portions)+' وعده)</span></div>'+inner+'</section>';
+    const rs=gs.get(dep), people=new Set(rs.map(r=>r.pc)).size;
+    const summary=mode==='detail'?(fa(people)+' نفر · '+fa(rs.length)+' وعده'):(fa(rs.length)+' نفر');
+    return '<section class="group" data-dep-group="'+esc(dep)+'"><div class="group-head"><h4>'+esc(dep)+
+      '</h4><span>'+summary+'</span></div>'+tableHtml(rs,state.blocks,false)+'</section>';
   }).join('');
 }
+function detailHtml(){return groupedHtml('detail');}
 // ---------- خلاصهٔ نوع غذا ----------
 function foodSummaryHtml(){
   const m=new Map();visible().forEach(r=>m.set(r.food,(m.get(r.food)||0)+1));
@@ -427,8 +494,8 @@ function exportXlsx(){
 function preparePrint(){
   const area=document.getElementById('printArea');
   area.innerHTML='<h1>گزارش غایبین ناهار</h1><div class="ptab">'+esc(tabTitle())+'</div>'+
-    (state.chart?'<div class="chart-card"><h3>نمودار معاونتها</h3><div class="chart">'+chartHtml()+'</div></div>':'')+
-    (state.tab==='detail'?detailHtml():tableHtml(sorted(visible()),state.blocks,false));
+    (state.chart?'<div class="chart-card"><h3>نمودار معاونتها · بازهٔ '+RANGE_START+' ← '+RANGE_END+'</h3><div class="chart">'+chartHtml()+'</div></div>':'')+
+    (state.tab==='detail'?groupedHtml('detail'):(state.tab==='dept'?groupedHtml('dept'):tableHtml(sorted(visible()),state.blocks,false)));
   const dyn=document.getElementById('printDyn');
   const cols=activeFields().length*state.blocks;
   dyn.textContent='@page{size:A4 '+(cols>10?'landscape':'portrait')+';margin:10mm}#printArea th,#printArea td{font-size:'+(cols>14?8:9)+'px}';
@@ -436,18 +503,26 @@ function preparePrint(){
 const tabTitle=()=>state.tab==='detail'?'جزئیات بهتفکیک معاونت و تاریخ':(state.tab==='dept'?'بر اساس معاونت':'فهرست یکجا');
 // ---------- رندر ----------
 function render(){
+  document.querySelectorAll('.page-tab').forEach(b=>{const a=b.dataset.page===state.page;b.classList.toggle('active',a);b.setAttribute('aria-selected',String(a))});
+  document.getElementById('pageReport').hidden=state.page!=='report';
+  document.getElementById('pageAbsent').hidden=state.page!=='absent';
   document.querySelectorAll('.report-tab').forEach(b=>{const a=b.dataset.tab===state.tab;b.classList.toggle('active',a);b.setAttribute('aria-selected',String(a))});
   document.getElementById('chartCard').hidden=!state.chart;
   document.getElementById('chart').innerHTML=chartHtml();
+  document.getElementById('chartRange').textContent='بازهٔ گزارش: '+RANGE_START+' ← '+RANGE_END+' · '+fa(RANGE_DAYS.length)+' روز · '+fa(DATA.length)+' وعده · '+fa(new Set(DATA.map(r=>r.pc)).size)+' نفر';
   document.getElementById('foodSummary').innerHTML=foodSummaryHtml();
   document.getElementById('detailTools').hidden=state.tab!=='detail';
   const c=state.tab==='detail'?FIELDS:FIELDS_OLD;
   document.getElementById('fieldChoices').innerHTML=c.map(f=>'<label class="field-chip"><input type="checkbox" data-field="'+f.key+'" '+(state.fields.has(f.key)?'checked':'')+'> '+esc(f.label)+'</label>').join('');
-  document.getElementById('list').innerHTML=state.tab==='detail'?detailHtml():tableHtml(sorted(visible()),state.blocks,true);
+  document.getElementById('list').innerHTML=state.tab==='detail'?groupedHtml('detail'):(state.tab==='dept'?groupedHtml('dept'):tableHtml(sorted(visible()),state.blocks,true));
   document.getElementById('printRange').textContent='بازه: ۱۴۰۵/۰۸/۲۴ تا ۱۴۰۵/۰۸/۲۸ · '+tabTitle()+' · '+fa(DATA.length)+' وعده · '+fa(new Set(DATA.map(r=>r.pc)).size)+' نفر';
   preparePrint();
 }
 // ---------- رویدادها ----------
+document.querySelector('.page-switch').addEventListener('click',e=>{
+  const b=e.target.closest('[data-page]');if(!b)return;state.page=b.dataset.page;render();
+  toast(state.page==='report'?'صفحهٔ گزارشگیری — آمار فقط همینجاست':'صفحهٔ غایبین ناهار — بدون چیپهای گزارشگیری');
+});
 document.getElementById('themeSwitch').addEventListener('click',()=>{
   const h=document.documentElement,dark=h.dataset.themeMode==='dark';
   h.dataset.themeMode=dark?'light':'dark';
@@ -473,7 +548,8 @@ document.getElementById('chart').addEventListener('click',e=>{
   render();toast(state.dep?'فیلتر: '+state.dep:'فیلتر برداشته شد');
 });
 document.getElementById('searchBox').addEventListener('input',e=>{state.query=e.target.value;state.dep='';render()});
-document.getElementById('compactBox').addEventListener('change',e=>{state.compact=e.target.checked;render()});
+const compactBox=document.getElementById('compactBox');
+if(compactBox)compactBox.addEventListener('change',e=>{state.compact=e.target.checked;render()});
 document.getElementById('fieldChoices').addEventListener('change',e=>{
   const k=e.target.dataset.field;if(!k)return;
   if(e.target.checked)state.fields.add(k);else state.fields.delete(k);
@@ -498,7 +574,7 @@ window.addEventListener('beforeprint',preparePrint);
 window.addEventListener('afterprint',()=>document.body.classList.remove('printing'));
 document.getElementById('printBtn').addEventListener('click',()=>document.body.classList.add('printing'));
 render();
-window.__PREVIEW__={state,DATA,GROUPS,chartHtml,detailHtml,xlsxBlob,preparePrint,render};
+window.__PREVIEW__={state,DATA,GROUPS,chartHtml,detailHtml,groupedHtml,rowsForMode,xlsxBlob,preparePrint,render,depColor,PAL};
 
 </script>
 </body></html>
