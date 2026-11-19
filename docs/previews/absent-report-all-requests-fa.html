@@ -108,8 +108,8 @@ body{background:var(--food-paper)!important;color:var(--ink)!important;font-fami
 .chart{display:flex;flex-direction:column;gap:9px;margin-top:8px}
 .bar-row{display:flex;align-items:center;gap:9px}
 .bar-label{flex:0 0 148px;font-size:11px;font-weight:800;color:var(--ink);text-align:right;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.bar-track{flex:1;position:relative;height:22px;border-radius:6px;background:var(--food-paper);border:1px solid var(--food-line);overflow:hidden}
-.bar-fill{height:100%;border-radius:5px 0 0 5px;background:var(--navy-2)}
+.bar-track{display:block;flex:1;position:relative;height:22px;border-radius:6px;background:var(--food-paper);border:1px solid var(--food-line);overflow:hidden}
+.bar-fill{display:block;height:100%;border-radius:5px 0 0 5px;background:var(--navy-2)}
 .bar-row.max .bar-fill{background:var(--teal)}
 .bar-row.min .bar-fill{background:var(--gold)}
 .bar-val{flex:0 0 96px;font-size:11px;font-weight:800;color:var(--muted);white-space:nowrap}
