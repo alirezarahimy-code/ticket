@@ -20,4 +20,5 @@ python3 tools/session-boot.py
 - قبل از هر تغییر کد، `python3 tools/find-in-system.py "موضوع"` را بزن تا محل دقیق را پیدا کنی.
 - تغییرات کوچک، قابلبازگشت و قابلبازبینی باشند؛ هیچ `DROP`/`force` بدون تأیید نزن.
 - فقط روی شاخهٔ فعال جلسه کار کن؛ `push --force` و `reset --hard` ممنوع.
+- تحویل هر نسخه/فایل فقط لینک متنی خام مستقیم GitHub پس از push؛ جزئیات: [`../docs/DELIVERY-LINK-CONTRACT-FA.md`](../docs/DELIVERY-LINK-CONTRACT-FA.md).
 - PHP/MySQL ممکن است در محیط موجود نباشد؛ تست ایستای جایگزین بنویس و محدودیت را اعلام کن.

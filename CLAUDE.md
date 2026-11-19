@@ -20,3 +20,6 @@ python3 tools/session-boot.py
 خروجی تازه را جایگزین زمینهٔ قبلی کن.
 
 راهنمای کوتاه انسانی: [`docs/SESSION-BOOT-FA.md`](docs/SESSION-BOOT-FA.md)
+
+**قرارداد تحویل:** هر نسخه/فایل فقط با لینک متنی خام مستقیم از GitHub (پس از push) —
+[`docs/DELIVERY-LINK-CONTRACT-FA.md`](docs/DELIVERY-LINK-CONTRACT-FA.md).
