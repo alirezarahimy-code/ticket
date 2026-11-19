@@ -16,7 +16,7 @@ path	category	lines	bytes
 .github/workflows/request-center-package-preview.yml	workflows	226	10325
 .github/workflows/request-center-t12-characterization.yml	workflows	93	2897
 .github/workflows/request-center-t12-scenarios.yml	workflows	128	4459
-.gitignore	config	31	519
+.gitignore	config	33	552
 .htaccess	config	24	788
 00-FULL-PACKAGE-1.62.73-FA.md	root-misc	27	3236
 00_APPLY_PATCH_FA.txt	root-misc	35	2629
@@ -189,6 +189,7 @@ cd-dvd.php	core	897	72941
 chatbot-tts-lexicon.php	core	14	472
 chatbot.php	core	3403	180145
 client-agent/Collect-Inventory.ps1	client-agent	147	7378
+config.php	core	60	1444
 config.sample.php	config	56	2332
 cron/.htaccess	cron	1	19
 cron/check_logging_health.php	cron	239	17449
@@ -214,6 +215,7 @@ cron/ticket_auto_close.php	cron	120	6167
 cron/verify_logging_integrity.php	cron	26	1365
 cron/verify_logging_release.php	cron	25	4981
 docs/ARCHITECTURE-FA.md	docs	167	17142
+docs/ARENA-RUNTIME-FA.md	docs	95	7217
 docs/ASSET-HOSTNAME-DISPLAY-FA.md	docs	155	7075
 docs/ASSET-IDENTITY-AND-LIVE-TEST-FA.md	docs	92	9629
 docs/ASSET-IDENTITY-RESET-FA.md	docs	158	9102
@@ -443,6 +445,7 @@ install-empty-db.sql	sql-root	1652	84912
 install-food-worker-SERVICE.bat	root-misc	40	857
 install-food-worker-SERVICE.ps1	root-misc	352	18384
 install.php	core	367	33296
+installed.lock	root-misc	1	25
 inventory.php	core	904	48725
 lib/activity-audit.php	lib	600	35057
 lib/asset-dedupe.php	lib	94	3055
@@ -571,7 +574,16 @@ session_bootstrap.php	core	161	9349
 status-food-worker-SERVICE.bat	root-misc	9	214
 status-food-worker-SERVICE.ps1	root-misc	107	4918
 storage/.htaccess	config	3	141
+storage/logs/db-circuit.json.lock	other	0	0
 storage/sessions/.htaccess	config	3	117
+storage/sessions/sess_03ucmhliu2e43tcn65l1dtf6ak	other	1	146
+storage/sessions/sess_1trodheg1u7btmirn73nfl9ee7	other	1	77
+storage/sessions/sess_939i3r2p4qhqh0bsfuepfc2p13	other	1	112
+storage/sessions/sess_e5nq0cirj4qgo6ifi6eksfu8b2	other	1	77
+storage/sessions/sess_edluloeu93a05iocdugtoqi8oi	other	1	77
+storage/sessions/sess_li55imvdug0f52te0te6b61f4o	other	1	77
+storage/sessions/sess_slq8gs0cpu3atanknmu3eovsg4	other	1	77
+storage/sessions/sess_uog5gld3mu6j3kn3d1r211usjn	other	1	181
 system-health.php	core	1339	98357
 system-update.php	core	414	22384
 tests/.htaccess	tests	1	19
@@ -845,6 +857,7 @@ tools/Run-Logging-Acceptance-1.62.83.ps1	tools	98	4026
 tools/Run-Logging-Acceptance-1.62.88.ps1	tools	99	4269
 tools/Run-Logging-Stress-1.62.88.ps1	tools	277	13638
 tools/apply_migration_033.php	tools	170	8232
+tools/arena-runtime-bringup.sh	tools	68	3064
 tools/asset_dedupe.php	tools	300	17033
 tools/asset_reset.php	tools	205	9240
 tools/asset_reset_restore.php	tools	158	5238

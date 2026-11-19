@@ -15,6 +15,8 @@ __pycache__/
 /food-ticket-env.php
 
 # Runtime data and user uploads must never be committed
+/installed.lock
+/.arena-runtime/
 /storage/*
 !/storage/.htaccess
 !/storage/sessions/
