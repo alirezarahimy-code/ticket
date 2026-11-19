@@ -1,7 +1,7 @@
 {
   "generated_by": "tools/build_system_map.py",
-  "total_files_indexed": 1453,
-  "total_lines_indexed": 291857,
+  "total_files_indexed": 1454,
+  "total_lines_indexed": 292360,
   "categories": {
     "actions": 17,
     "api": 2,
@@ -11,7 +11,7 @@
     "config": 11,
     "core": 47,
     "cron": 23,
-    "docs": 76,
+    "docs": 77,
     "food-web": 34,
     "history-downloads": 94,
     "history-updates": 370,
