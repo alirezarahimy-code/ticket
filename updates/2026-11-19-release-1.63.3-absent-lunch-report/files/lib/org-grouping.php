@@ -88,6 +88,18 @@ if (!function_exists('org_group_unit_index')) {
     }
 }
 
+if (!function_exists('org_group_display_label')) {
+    /** نام نمایشی واحد برای همهٔ شرکت‌ها (همکار با پیشوند «نام شرکت.») — اگر هلپر سازمان نباشد، نام خام برمی‌گردد. */
+    function org_group_display_label(array $unit): string
+    {
+        $name = (string) ($unit['name'] ?? '');
+        if (function_exists('org_unit_display_name')) {
+            return org_unit_display_name($name, (string) ($unit['unit_type'] ?? ''), (int) ($unit['company_id'] ?? 0));
+        }
+        return $name;
+    }
+}
+
 if (!function_exists('org_group_for_unit')) {
     /**
      * از یک واحد شروع می‌کند و تا رسیدن به سرشاخه بالا می‌رود.
@@ -110,18 +122,25 @@ if (!function_exists('org_group_for_unit')) {
         while ($current > 0 && isset($index[$current]) && $guard++ < 20) {
             $unit = $index[$current];
             $chain[] = $unit;
-            // هر واحدی که به شرکت دوم تعلق دارد، زیر «شرکت دوم» گزارش می‌شود —
-            // نه زیر معاونت/مدیریت خودش — چون ستون‌های ستادی دو شرکت جدا هستند.
+            // واحدهای شرکت همکار: واحدهای غیرسرشاخه زیر «شرکت همکار» گزارش می‌شوند —
+            // چون ستون‌های ستادی دو شرکت جدا هستند؛ اما سرشاخه‌های خودِ شرکت همکار
+            // (معاونت/مدیریت مستقل/دفتر/مستقل) باید به نام خودشان دیده شوند، نه زیر
+            // سطل کلی شرکت — نام نمایشی آن‌ها با پیشوند «نام شرکت.» یکتاست.
             if (isset($companyRoots[$unit['company_id']])) {
-                $root = $companyRoots[$unit['company_id']];
-                $root['path'] = org_group_chain_path($chain);
-                return $root;
+                $rootTypes = function_exists('org_root_types')
+                    ? org_root_types()
+                    : ['ceo', 'liaison', 'deputy', 'management', 'office', 'company_manager'];
+                if (!in_array((string) $unit['unit_type'], $rootTypes, true)) {
+                    $root = $companyRoots[$unit['company_id']];
+                    $root['path'] = org_group_chain_path($chain);
+                    return $root;
+                }
             }
             // معاونت در هر عمقی از مسیر: همان سرشاخه است.
             if ($unit['unit_type'] === 'deputy') {
                 return [
                     'key'      => 'unit-' . $unit['id'],
-                    'label'    => $unit['name'],
+                    'label'    => org_group_display_label($unit),
                     'type'     => 'deputy',
                     'unit_id'  => $unit['id'],
                     'company'  => $unit['company_id'],
@@ -133,7 +152,7 @@ if (!function_exists('org_group_for_unit')) {
             if ($unit['unit_type'] === 'management') {
                 return [
                     'key'      => 'unit-' . $unit['id'],
-                    'label'    => $unit['name'],
+                    'label'    => org_group_display_label($unit),
                     'type'     => 'management',
                     'unit_id'  => $unit['id'],
                     'company'  => $unit['company_id'],
@@ -144,7 +163,7 @@ if (!function_exists('org_group_for_unit')) {
             if ($unit['unit_type'] === 'liaison') {
                 return [
                     'key'      => 'unit-' . $unit['id'],
-                    'label'    => $unit['name'],
+                    'label'    => org_group_display_label($unit),
                     'type'     => 'liaison',
                     'unit_id'  => $unit['id'],
                     'company'  => $unit['company_id'],
@@ -155,7 +174,7 @@ if (!function_exists('org_group_for_unit')) {
             if ($unit['unit_type'] === 'office') {
                 return [
                     'key'      => 'unit-' . $unit['id'],
-                    'label'    => $unit['name'],
+                    'label'    => org_group_display_label($unit),
                     'type'     => 'office',
                     'unit_id'  => $unit['id'],
                     'company'  => $unit['company_id'],
@@ -172,7 +191,7 @@ if (!function_exists('org_group_for_unit')) {
                 if ($unit['unit_type'] === 'management') {
                     return [
                         'key'     => 'unit-' . $unit['id'],
-                        'label'   => $unit['name'],
+                        'label'   => org_group_display_label($unit),
                         'type'    => 'management',
                         'unit_id' => $unit['id'],
                         'company' => $unit['company_id'],
@@ -216,7 +235,7 @@ if (!function_exists('org_group_chain_path')) {
     {
         $names = [];
         foreach ($chain as $unit) {
-            $name = (string) $unit['name'];
+            $name = function_exists('org_group_display_label') ? org_group_display_label($unit) : (string) $unit['name'];
             // «مدیر شرکت همکار» و «مدیریت شرکت همکار» نباید پشت هم تکرار شوند.
             if ($name !== '' && ($names === [] || end($names) !== $name)) {
                 $names[] = $name;
@@ -270,7 +289,7 @@ if (!function_exists('org_group_meta_for_users')) {
                 $group = $companyRoots[$companyOf[$uid]];
                 $group['path'] = '';
             }
-            $group['unit_name'] = $unitId > 0 && isset($index[$unitId]) ? $index[$unitId]['name'] : '';
+            $group['unit_name'] = $unitId > 0 && isset($index[$unitId]) ? org_group_display_label($index[$unitId]) : '';
             $meta[$uid] = $group;
         }
         return $meta;

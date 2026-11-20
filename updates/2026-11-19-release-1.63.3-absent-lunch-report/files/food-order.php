@@ -1012,9 +1012,13 @@ function food_order_org_map(): array
     foreach ($index as $unit) {
         $type = (string) ($unit['unit_type'] ?? '');
         if (in_array($type, ['deputy', 'management', 'liaison', 'office', 'ceo'], true)) {
+            $label = (string) ($unit['name'] ?? '');
+            if (function_exists('org_unit_display_name')) {
+                $label = org_unit_display_name($label, $type, (int) ($unit['company_id'] ?? 0));
+            }
             $groups['unit-' . (int) $unit['id']] = [
                 'key'   => 'unit-' . (int) $unit['id'],
-                'label' => (string) ($unit['name'] ?? ''),
+                'label' => $label,
                 'type'  => $type,
             ];
         }

@@ -457,21 +457,26 @@ function request_center_ticket_number_peek(string $prefix): string
  * نام نمایشی یک واحد چارت برای چاپ در جزئیات تیکت — نسخهٔ مستقل همان منطق
  * org_unit_display_name() است (مسیر index.php هم از همان فایل استفاده می‌کند).
  * سرشاخهٔ company_manager همیشه با نام تنظیماتی شرکت نمایش داده می‌شود؛ liaison
- * پسوند «(مستقل)» می‌گیرد؛ بقیه همان نام چارت می‌مانند.
+ * پسوند «(مستقل)» می‌گیرد؛ هر واحدِ شرکت همکار با پیشوند «نام شرکت.» دیده می‌شود
+ * تا هم‌نام‌های شرکت اصلی و همکار در همه‌جا قابل تشخیص باشند.
  */
 function request_center_org_display_name(string $name, string $type, int $companyId): string
 {
+    if (function_exists('org_unit_display_name')) {
+        return org_unit_display_name($name, $type, $companyId);
+    }
     $label = trim($name);
     $type = trim($type);
+    $suffix = '';
     if ($type === 'liaison') {
-        return ($label === '' ? 'واحد مستقل' : $label) . ' (مستقل)';
-    }
-    if ($type !== 'company_manager') {
-        return $label !== '' ? $label : 'بخش سازمانی';
+        $label = $label === '' ? 'واحد مستقل' : $label;
+        $suffix = ' (مستقل)';
+    } elseif ($label === '') {
+        $label = $type === 'company_manager' ? 'شرکت همکار' : 'بخش سازمانی';
     }
     static $map = null;
     if ($map === null) {
-        $map = ['byId' => [], 'partner' => ''];
+        $map = ['byId' => [], 'typeById' => [], 'partner' => '', 'partnerType' => ''];
         try {
             $rows = db()->query('SELECT id, name, company_type FROM org_companies WHERE is_active = 1 ORDER BY id')->fetchAll(PDO::FETCH_ASSOC);
             foreach ($rows as $row) {
@@ -479,25 +484,31 @@ function request_center_org_display_name(string $name, string $type, int $compan
                 if ($companyName === '') {
                     continue;
                 }
-                $map['byId'][(int) $row['id']] = $companyName;
-                if ((string) ($row['company_type'] ?? '') === 'partner' && $map['partner'] === '') {
+                $id = (int) $row['id'];
+                $companyType = (string) ($row['company_type'] ?? '');
+                $map['byId'][$id] = $companyName;
+                $map['typeById'][$id] = $companyType;
+                if ($companyType === 'partner' && $map['partner'] === '') {
                     $map['partner'] = $companyName;
                 }
             }
         } catch (Throwable $ignored) {
-            $map = ['byId' => [], 'partner' => ''];
+            $map = ['byId' => [], 'typeById' => [], 'partner' => ''];
         }
     }
-    $display = $companyId > 0 ? ($map['byId'][$companyId] ?? '') : '';
-    if ($display === '') {
-        $display = $map['partner'];
+    $companyType = $companyId > 0 ? (string) ($map['typeById'][$companyId] ?? '') : '';
+    $companyName = $companyId > 0 ? (string) ($map['byId'][$companyId] ?? '') : '';
+    if ($companyName === '' && $companyType === 'partner') {
+        $companyName = $map['partner'];
     }
-    if ($display !== '') {
-        return $display;
+    if ($type === 'company_manager') {
+        return $companyName !== '' ? $companyName : $label;
     }
-    return $label !== '' ? $label : 'شرکت همکار';
+    if ($companyType === 'partner' && $companyName !== '') {
+        return $companyName . '.' . $label . $suffix;
+    }
+    return $label . $suffix;
 }
-
 /**
  * Read-only 6-root (۶ بخش) equivalent of org_root_units() for the independent
  * Request Center entry. The provider helper calls org_ensure_schema() and

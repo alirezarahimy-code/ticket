@@ -2355,7 +2355,7 @@ if ($page === 'settings') {
     if ($canManageSettingsUsers) {
         echo '<div class="settings-panel" id="org-admin-repair"><h2>ترمیم نقش‌ها و تشخیص ارجاع سازمانی</h2><p class="muted">ابزارهای بازبینی و اصلاح نقش‌های مدیران سازمانی و تشخیص مقصد ارجاع خودکار درخواست‌ها.</p>';
     if ($canManageSettingsUsers) {
-        $repairRows = db()->query('SELECT DISTINCT u.id, u.username, u.full_name, u.role, ou.name AS unit_name FROM users u JOIN org_units ou ON (ou.manager_user_id = u.id OR EXISTS (SELECT 1 FROM org_unit_managers oum WHERE oum.unit_id = ou.id AND oum.user_id = u.id)) WHERE u.is_active = 1 AND (u.role = "primary_admin" OR (u.role = "admin" AND u.is_primary_admin = 1)) AND ou.is_active = 1 ORDER BY u.full_name, ou.name')->fetchAll();
+        $repairRows = db()->query('SELECT DISTINCT u.id, u.username, u.full_name, u.role, ou.name AS unit_name, ou.unit_type AS unit_type, ou.company_id AS unit_company_id FROM users u JOIN org_units ou ON (ou.manager_user_id = u.id OR EXISTS (SELECT 1 FROM org_unit_managers oum WHERE oum.unit_id = ou.id AND oum.user_id = u.id)) WHERE u.is_active = 1 AND (u.role = "primary_admin" OR (u.role = "admin" AND u.is_primary_admin = 1)) AND ou.is_active = 1 ORDER BY u.full_name, ou.name')->fetchAll();
         $repairCandidates = [];
         foreach ($repairRows as $repairRow) {
             $repairId = (int) $repairRow['id'];
@@ -2363,7 +2363,7 @@ if ($page === 'settings') {
                 $repairCandidates[$repairId] = $repairRow;
                 $repairCandidates[$repairId]['unit_names'] = [];
             }
-            $repairCandidates[$repairId]['unit_names'][] = (string) $repairRow['unit_name'];
+            $repairCandidates[$repairId]['unit_names'][] = function_exists('org_unit_display_name') ? org_unit_display_name((string) $repairRow['unit_name'], (string) ($repairRow['unit_type'] ?? ''), (int) ($repairRow['unit_company_id'] ?? 0)) : (string) $repairRow['unit_name'];
         }
         echo '<section class="card form-card" id="repair-org-admin-roles"><h2>اصلاح مدیران سازمانی که ادمین اصلی شده‌اند</h2><p class="muted">این فهرست، ادمین‌های اصلیِ منصوب‌شده به معاونت/اداره را نشان می‌دهد. فقط افرادی را تیک بزنید که ادمین اصلی سامانه نیستند و اشتباهاً با انتساب سازمانی ادمین شده‌اند؛ نقش آن‌ها به «مدیر» برمی‌گردد و چارت و ارجاع‌های سازمانی حفظ می‌شود. دست‌کم یک ادمین اصلی واقعی باید باقی بماند.</p>';
         if ($repairCandidates === []) {
@@ -2379,7 +2379,7 @@ if ($page === 'settings') {
         echo '</section>';
 
         // ۱.۶۲.۶ — ترمیم مدیران سازمانی که نقش «مدیر پشتیبانی» دارند (مقصد اشتباه ارجاع خودکار پشتیبانی).
-        $supportRepairRows = db()->query('SELECT DISTINCT u.id, u.username, u.full_name, ou.name AS unit_name FROM users u JOIN org_units ou ON (ou.manager_user_id = u.id OR EXISTS (SELECT 1 FROM org_unit_managers oum WHERE oum.unit_id = ou.id AND oum.user_id = u.id)) WHERE u.is_active = 1 AND u.role = "support_manager" AND ou.is_active = 1 ORDER BY u.full_name, ou.name')->fetchAll();
+        $supportRepairRows = db()->query('SELECT DISTINCT u.id, u.username, u.full_name, ou.name AS unit_name, ou.unit_type AS unit_type, ou.company_id AS unit_company_id FROM users u JOIN org_units ou ON (ou.manager_user_id = u.id OR EXISTS (SELECT 1 FROM org_unit_managers oum WHERE oum.unit_id = ou.id AND oum.user_id = u.id)) WHERE u.is_active = 1 AND u.role = "support_manager" AND ou.is_active = 1 ORDER BY u.full_name, ou.name')->fetchAll();
         $supportRepairCandidates = [];
         foreach ($supportRepairRows as $supportRepairRow) {
             $supportRepairId = (int) $supportRepairRow['id'];
@@ -2387,7 +2387,7 @@ if ($page === 'settings') {
                 $supportRepairCandidates[$supportRepairId] = $supportRepairRow;
                 $supportRepairCandidates[$supportRepairId]['unit_names'] = [];
             }
-            $supportRepairCandidates[$supportRepairId]['unit_names'][] = (string) $supportRepairRow['unit_name'];
+            $supportRepairCandidates[$supportRepairId]['unit_names'][] = function_exists('org_unit_display_name') ? org_unit_display_name((string) $supportRepairRow['unit_name'], (string) ($supportRepairRow['unit_type'] ?? ''), (int) ($supportRepairRow['unit_company_id'] ?? 0)) : (string) $supportRepairRow['unit_name'];
         }
         echo '<section class="card form-card" id="repair-org-support-roles"><h2>اصلاح مدیران سازمانی که «مدیر پشتیبانی» شده‌اند</h2><p class="muted">درخواست‌های پشتیبانی به‌صورت خودکار به «مدیر پشتیبانی» ارجاع می‌شوند. اگر معاون یا مدیر اداره‌ای به‌اشتباه این نقش را داشته باشد، مسئول درخواست‌های پشتیبانی می‌شود. فقط افرادی را تیک بزنید که واقعاً مدیر واحد پشتیبانی نیستند؛ نقش آن‌ها به «مدیر» برمی‌گردد و چارت سازمانی حفظ می‌شود.</p>';
         if ($supportRepairCandidates === []) {

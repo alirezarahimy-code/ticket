@@ -203,8 +203,8 @@ manifest = {
                     'pure print, XLSX) + full section-17 scope: single-source remainder at day close, exact-equality guest '
                     'actuals popup (6 org roots + conditional "no anchor" row), chart-less guest registrations blocked, '
                     '6-section org lists everywhere, partner-company manager and CEO subtree visibility for guest requests.'),
-    'notes': ('پیشنیاز ۱٫۶۳٫۲؛ دارای دو مهاجرتِ idempotent است: 038-food-guest-actuals.sql (جدول food_guest_actuals) '
-              'و 039-liaison-manager-role-sync.sql (ارتقای مدیران واحدهای مستقل به نقش «مدیر»). پشتیبان و نصب آزمایشی الزامی. '
+    'notes': ('پیشنیاز ۱٫۶۳٫۲؛ دارای سه مهاجرتِ idempotent است: 038-food-guest-actuals.sql (جدول food_guest_actuals)، '
+              '039-liaison-manager-role-sync.sql (ارتقای مدیران واحدهای مستقل به نقش «مدیر») و 040-org-routing-departments.sql (نگاشت پایدار ردیف رسیدگی). پشتیبان و نصب آزمایشی الزامی. '
               'بستهٔ نهایی جایگزین بستهٔ اولیهٔ همان ورژن شد؛ SHA تازه است. '
               'نسخهٔ پنل ۱٫۳۷٫۵۸؛ پس از نصب Ctrl+F5 کنید. داده‌های تاریخی NULL مهمان هرگز بازنویسی نمی‌شوند.'),
 }

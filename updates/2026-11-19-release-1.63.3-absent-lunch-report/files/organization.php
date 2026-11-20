@@ -166,29 +166,36 @@ function org_company_display_name_for_id(int $companyId): string
 }
 
 /**
- * نام نمایشی هر واحد چارت برای نمایش در فهرست‌ها/گزارش‌ها:
+ * نام نمایشی هر واحد چارت برای نمایش در همهٔ فهرست‌ها/گزارش‌ها:
  *  - «مدیر شرکت همکار» (company_manager) همیشه با نام تنظیماتی شرکت همکار دیده می‌شود؛
  *  - «واحد مستقل (نمایندگی)» پسوند «(مستقل)» می‌گیرد؛
- *  - بقیه همان نام چارت می‌ماند.
+ *  - هر واحدِ شرکت همکار (به‌جز سرشاخهٔ شرکت) با پیشوند «نام شرکت همکار.» دیده می‌شود
+ *    (مثل «آریا ۲.اداری») تا معاونت/ادارهٔ هم‌نامِ شرکت اصلی و شرکت همکار در همه‌جا
+ *    قابل تشخیص باشند؛ نام شرکت اصلی بدون تغییر می‌ماند.
  */
 function org_unit_display_name(string $name, string $type, int $companyId): string
 {
     $label = trim($name);
     $type = trim($type);
+    $suffix = '';
     if ($type === 'liaison') {
-        return ($label === '' ? 'واحد مستقل' : $label) . ' (مستقل)';
+        $label = $label === '' ? 'واحد مستقل' : $label;
+        $suffix = ' (مستقل)';
+    } elseif ($label === '') {
+        $label = $type === 'company_manager' ? 'شرکت همکار' : 'بخش سازمانی';
+    }
+    $companyType = $companyId > 0 ? org_company_type_for_id($companyId) : '';
+    $companyName = $companyId > 0 ? org_company_display_name_for_id($companyId) : '';
+    if ($companyName === '' && $companyType === 'partner') {
+        $companyName = org_partner_company_display_name();
     }
     if ($type === 'company_manager') {
-        $companyName = $companyId > 0 ? org_company_display_name_for_id($companyId) : '';
-        if ($companyName === '') {
-            $companyName = org_partner_company_display_name();
-        }
-        if ($companyName !== '') {
-            return $companyName;
-        }
-        return $label !== '' ? $label : 'شرکت همکار';
+        return $companyName !== '' ? $companyName : $label;
     }
-    return $label !== '' ? $label : 'بخش سازمانی';
+    if ($companyType === 'partner' && $companyName !== '') {
+        return $companyName . '.' . $label . $suffix;
+    }
+    return $label . $suffix;
 }
 
 function org_company_by_id(int $companyId): ?array
@@ -455,14 +462,13 @@ function org_stored_attribution_root_id($storedId): int
     return org_nearest_root_id($id, false);
 }
 
-/** نوع شرکتِ یک واحد چارت (own|partner|'') با کش یک‌باره از org_companies. */
-function org_unit_company_type(array $unit): string
+/** نوع شرکت بر اساس شناسه (own|partner|'') با کش یک‌باره از org_companies. */
+function org_company_type_for_id(int $companyId): string
 {
-    static $map = null;
-    $companyId = (int) ($unit['company_id'] ?? 0);
     if ($companyId <= 0) {
         return '';
     }
+    static $map = null;
     if ($map === null) {
         $map = [];
         try {
@@ -476,6 +482,12 @@ function org_unit_company_type(array $unit): string
     return $map[$companyId] ?? '';
 }
 
+/** نوع شرکتِ یک واحد چارت (own|partner|'') */
+function org_unit_company_type(array $unit): string
+{
+    return org_company_type_for_id((int) ($unit['company_id'] ?? 0));
+}
+
 /**
  * نام ردیف رسیدگی (departments) برای یک سرشاخهٔ سازمانی.
  * شرکت اصلی: همان نام چارت (بدون تغییر). شرکت همکار: «نام شرکت همکار.نام سرشاخه»
@@ -484,7 +496,18 @@ function org_unit_company_type(array $unit): string
  */
 function org_routing_department_name(array $unit): string
 {
-    $display = function_exists('org_root_display_name') ? org_root_display_name($unit) : trim((string) ($unit['name'] ?? ''));
+    $rawName = trim((string) ($unit['name'] ?? ''));
+    $rawType = trim((string) ($unit['unit_type'] ?? ''));
+    $display = $rawName;
+    if ($rawType === 'liaison' && $display === '') {
+        $display = 'واحد مستقل';
+    }
+    if ($rawType === 'liaison') {
+        $display .= ' (مستقل)';
+    }
+    if ($display === '') {
+        $display = function_exists('org_root_display_name') ? org_root_display_name($unit) : '';
+    }
     if ((string) ($unit['unit_type'] ?? '') === '') {
         return $display;
     }
