@@ -252,6 +252,35 @@ function food_ticket_absence_ensure(): bool
  * Reconcile stored manual attendance records over an inclusive date range.
  * @return array{delivered:int,absences_cleared:int}
  */
+/**
+ * عبارتِ حذف‌شرط برای روز/وعدهٔ بسته‌شده — B3: بعد از بستن، هیچ تغییر خودکاری هم نباید
+ * وضعیت تحویل/غیبت آن روز+وعده را لمس کند. اگر جدول تطبیق در دسترس نباشد رشتهٔ خالی
+ * (fail-open نیمه‌مهاجرتی). $eventAlias: نام مستعار جدول رویداد در کوئری، یا '' برای
+ * کوئری بدون مستعار.
+ */
+function food_ticket_closed_meal_not_exists_sql(string $eventAlias = ''): string
+{
+    static $clauses = [];
+    if (isset($clauses[$eventAlias])) {
+        return $clauses[$eventAlias];
+    }
+    $clauses[$eventAlias] = '';
+    try {
+        $probe = db()->prepare("SELECT COUNT(*) FROM information_schema.TABLES WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'food_meal_reconciliations'");
+        $probe->execute();
+        if ((int) $probe->fetchColumn() > 0) {
+            $prefix = $eventAlias === '' ? '' : $eventAlias . '.';
+            $clauses[$eventAlias] = " AND NOT EXISTS (SELECT 1 FROM food_meal_reconciliations r"
+                . " WHERE r.food_date = {$prefix}punch_date"
+                . " AND r.meal_type = COALESCE({$prefix}meal_type, 'lunch')"
+                . " AND r.status = 'closed')";
+        }
+    } catch (Throwable $e) {
+        app_error_log('[food-reconcile] closed-day exclusion unavailable: ' . $e->getMessage());
+    }
+    return $clauses[$eventAlias];
+}
+
 function food_ticket_manual_attendance_reconcile_range(string $fromDate, string $toDate): array
 {
     static $done = [];
@@ -303,6 +332,8 @@ function food_ticket_manual_attendance_reconcile_range(string $fromDate, string 
             // موفق (food_ticket_mark_delivered_on_print در Worker) ثبت می‌شود.
             . 'AND COALESCE(print_status, "") <> "pending" '
             . 'AND (COALESCE(ticket_key, "") <> "" OR (source_uid = "manual-attendance" AND event_type = "printed"))'
+            . food_ticket_closed_meal_not_exists_sql()
+            . ' '
         );
         $tickets->execute([$fromDate, $toDate]);
         $delivered = $tickets->rowCount();
@@ -336,6 +367,8 @@ function food_ticket_manual_attendance_reconcile_range(string $fromDate, string 
             // چاپ فیزیکی: اگر در source_payload ثبت شده باشد، ردیف واقعاً در
             // صف چاپ بوده و نباید تحویل‌شده علامت بخورد.
             . 'AND COALESCE(source_payload, "") NOT LIKE "%\"physical_print\":true%" '
+            . food_ticket_closed_meal_not_exists_sql()
+            . ' '
         );
         $legacyGuests->execute([$fromDate, $toDate]);
         $delivered += $legacyGuests->rowCount();
@@ -365,6 +398,8 @@ function food_ticket_manual_attendance_reconcile_range(string $fromDate, string 
             . 'AND e.user_id IS NOT NULL '
             . 'AND e.source_uid = "manual-attendance" AND e.event_type IN ("printed", "no_food") '
             . 'AND a.created_at < e.created_at'
+            . food_ticket_closed_meal_not_exists_sql('e')
+            . ''
         );
         $absences->execute([$fromDate, $toDate]);
         $manualIds = array_map('intval', $absences->fetchAll(\PDO::FETCH_COLUMN));
@@ -404,6 +439,8 @@ function food_ticket_manual_attendance_reconcile_range(string $fromDate, string 
                 . 'AND r.run_kind = "first" AND r.status = "done" '
                 . 'AND e.event_type IN ("printed", "repeat") '
                 . 'AND a.created_at < r.created_at'
+                . food_ticket_closed_meal_not_exists_sql('e')
+                . ''
             );
             $groupProof->execute([$fromDate, $toDate]);
             $proofIds = array_map('intval', $groupProof->fetchAll(\PDO::FETCH_COLUMN));
@@ -2330,6 +2367,9 @@ function food_ticket_api_manual_attendance_save(int $userId, bool $withTicket, b
     $mealType = function_exists('food_order_meal_type')
         ? food_order_meal_type($mealType)
         : (in_array(strtolower(trim($mealType)), ['lunch', 'dinner'], true) ? strtolower(trim($mealType)) : 'lunch');
+    if (function_exists('food_meal_closed_guard')) {
+        food_meal_closed_guard($targetDate, $mealType, 'ثبت دستی حضور/فیش');
+    }
     $reason = trim($reason);
     if ($userId < 0) {
         throw new RuntimeException('یک کارمند را انتخاب کنید.');
@@ -3470,6 +3510,9 @@ function food_ticket_api_absence_save(array $data, array $actor = []): array
     if (preg_match('/^\d{4}-\d{2}-\d{2}$/', $date) !== 1) {
         throw new RuntimeException('تاریخ معتبر نیست؛ نمونهٔ درست: ۱۴۰۵/۰۷/۱۴');
     }
+    if (function_exists('food_meal_closed_guard')) {
+        food_meal_closed_guard($date, 'lunch', 'ثبت غیبت');
+    }
     if (food_ticket_groups_ensure()) {
         $gq = db()->prepare('SELECT id FROM food_ticket_groups WHERE id = ? LIMIT 1');
         $gq->execute([$groupId]);
@@ -3522,6 +3565,9 @@ function food_ticket_api_absence_clear(int $groupId, string $date, string $reaso
     if (preg_match('/^\d{4}-\d{2}-\d{2}$/', $date) !== 1) {
         throw new RuntimeException('تاریخ معتبر نیست؛ نمونهٔ درست: ۱۴۰۵/۰۷/۱۴');
     }
+    if (function_exists('food_meal_closed_guard')) {
+        food_meal_closed_guard($date, 'lunch', 'پاک‌سازی غیبت');
+    }
     $heldBefore = food_ticket_absence_held_count($groupId, $date);
     $removed = food_ticket_absence_clear_group($groupId, $date, $reason, $actor);
     $heldAfter = food_ticket_absence_held_count($groupId, $date);
@@ -3539,11 +3585,17 @@ function food_ticket_api_delivery(int $eventId, string $action, string $reason, 
             . 'علت: کاربر دیتابیس اجازهٔ ALTER ندارد یا اجرای Migration ناموفق بوده است. '
             . 'راه‌حل: فایل upgrade-1.32-food-group-representative-absence.sql را با کاربر دارای دسترسی روی دیتابیس اجرا کنید.');
     }
-    $q = db()->prepare('SELECT id, ticket_key, print_status, delivery_status FROM food_ticket_events WHERE id = ?');
+    $q = db()->prepare('SELECT id, ticket_key, print_status, delivery_status, punch_date, meal_type FROM food_ticket_events WHERE id = ?');
     $q->execute([$eventId]);
     $event = $q->fetch();
     if (!$event) {
         throw new RuntimeException('فیش پیدا نشد.');
+    }
+    if (function_exists('food_meal_closed_guard')) {
+        $deliveryMeal = function_exists('food_order_meal_type')
+            ? food_order_meal_type($event['meal_type'] ?? 'lunch')
+            : ((string) ($event['meal_type'] ?? '') === 'dinner' ? 'dinner' : 'lunch');
+        food_meal_closed_guard((string) ($event['punch_date'] ?? ''), $deliveryMeal, $action === 'undeliver' ? 'لغو تحویل' : 'ثبت تحویل');
     }
     if ($action === 'undeliver') {
         if ($reason === '') {
@@ -3591,6 +3643,7 @@ function food_ticket_cancel_ticket_for_user(int $userId, string $date, array $ac
         throw new RuntimeException('ویرایش ثبت دستی فیش/تردد مجاز نیست.');
     }
 
+
     // ── کدام ردیف را لغو کنیم؟ ────────────────────────────────────────
     // «آخرین ردیف» همیشه ردیفِ فیش نیست. کسی که صبح فیش خودکار گرفته و
     // بعد نمایندهٔ گروه ترددش را ثبت کرده، دو ردیف دارد: ردیفِ فیش
@@ -3602,7 +3655,7 @@ function food_ticket_cancel_ticket_for_user(int $userId, string $date, array $ac
     // قاعده: اولین ردیفی که «فیشِ واقعی» است (کلید دارد یا نوعش فیش است)
     // و هنوز لغو نشده؛ اگر هیچ‌کدام، آخرین ردیف غیر-repeat.
     $q = db()->prepare(
-        'SELECT id, event_type, print_status, delivery_status, source_key, source_uid, source_payload, ticket_key, food_type '
+        'SELECT id, event_type, print_status, delivery_status, source_key, source_uid, source_payload, ticket_key, food_type, meal_type '
         . 'FROM food_ticket_events WHERE user_id = ? AND punch_date = ? AND event_type <> "unknown" '
         . 'ORDER BY id DESC'
     );
@@ -3634,6 +3687,12 @@ function food_ticket_cancel_ticket_for_user(int $userId, string $date, array $ac
     $eventId = (int) ($event['id'] ?? 0);
     if ($eventId <= 0) {
         throw new RuntimeException('ردیف فیش معتبر نیست.');
+    }
+    if (function_exists('food_meal_closed_guard')) {
+        $cancelMeal = function_exists('food_order_meal_type')
+            ? food_order_meal_type($event['meal_type'] ?? 'lunch')
+            : ((string) ($event['meal_type'] ?? '') === 'dinner' ? 'dinner' : 'lunch');
+        food_meal_closed_guard($date, $cancelMeal, 'لغو فیش');
     }
     $printStatus = strtolower(trim((string) ($event['print_status'] ?? '')));
     $eventType = strtolower(trim((string) ($event['event_type'] ?? '')));

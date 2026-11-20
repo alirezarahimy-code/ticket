@@ -155,12 +155,15 @@ function food_ticket_route_allowed(array $user, string $route): bool
             'food-menu/cancel-request-cutoff',
             'food-menu/guest-request-update', 'food-menu/guest-request-cancel', 'food-menu/guest-request-delete',
             'food-menu/reconciliation-save', 'food-menu/invoice-upload',
+            'food-menu/guest-actuals',
         ];
         $reportRoutes = [
             'food-menu/orders', 'food-menu/orders-export', 'food-menu/statistics', 'food-menu/export',
             'food-menu/printed-delivery', 'food-menu/printed-delivery-export', 'food-menu/employee-search',
             'food-menu/group-orders', 'food-menu/groups', 'food-menu/reconciliation',
             'food-menu/invoice-file', 'food-menu/reconciliation-export',
+            'food-menu/reconciliation-remainder',
+            'food-menu/guest-actuals',
             // ۱.۶۳.۴ — نگاشت سازمانی برای «نمایش بر اساس معاونت» در گزارش‌های غذا.
             'food-menu/org-map',
         ];
@@ -2548,6 +2551,15 @@ function food_ticket_print_event(int $id, array $config, int $maxAttempts = 3): 
     if (!$event) {
         throw new RuntimeException('رکورد فیش پیدا نشد.');
     }
+    if (function_exists('food_meal_closed_guard')) {
+        $eventMeal = function_exists('food_order_meal_type')
+            ? food_order_meal_type($event['meal_type'] ?? 'lunch')
+            : ((string) ($event['meal_type'] ?? '') === 'dinner' ? 'dinner' : 'lunch');
+        $eventDate = trim((string) ($event['punch_date'] ?? ''));
+        if ($eventDate !== '') {
+            food_meal_closed_guard($eventDate, $eventMeal, 'چاپ فیش');
+        }
+    }
     $attempts = (int) ($event['print_attempts'] ?? 0);
     if ($attempts >= $maxAttempts && in_array((string) ($event['print_status'] ?? ''), ['print_error', 'printing'], true)) {
         throw new RuntimeException('سقف تلاش چاپ برای این فیش تمام شده است.');
@@ -3411,17 +3423,31 @@ function food_ticket_api_config(array $user = []): array
  * @return list<array{nat:string,pc:string,first:string,last:string,food:string,foodDate:string,status:string}>
  */
 /**
- * گزارش سفارش مهمان: فقط درخواست‌های فعال بازه؛ deputy = 'all' یا شناسهٔ معاونت.
- * فهرست معاونت‌ها هم برای ساخت لیست کشویی برگردانده می‌شود.
+ * گزارش سفارش مهمان: درخواست‌های بازه (فعال/لغوشده)؛ deputy = 'all' یا شناسهٔ سرشاخهٔ ۶ بخشی.
+ * فهرست بخش‌های سازمانی (۶ بخش) هم برای ساخت لیست کشویی برگردانده می‌شود.
+ * در فیلتر «بخش»، داده‌های تاریخیِ منتسب به واحدِ زیرِ سرشاخه هم دیده می‌شوند (زیردرخت کامل).
  */
-function food_ticket_api_guest_requests_report(string $from, string $to, string $deputy): array
+function food_ticket_api_guest_requests_report(string $from, string $to, string $deputy, array $user = []): array
 {
+    // پهنهٔ چارت برای مدیران غیرباربین (مثل فهرست درخواست‌های مهمان): مدیرِ زیردرخت فقط همان بخش خودش را می‌بیند؛
+    // بازبین‌های جهانی همه‌چیز را می‌بینند؛ مدیری که هیج سرشاخهٔ ۶ بخشی زیردستش نیست هیچ ردیفی نمی‌بیند.
+    $scope = 'all';
+    $visibleRoots = null;
+    if ($user !== [] && function_exists('food_guest_request_is_reviewer') && function_exists('food_guest_visible_root_ids')) {
+        if (!food_guest_request_is_reviewer($user)) {
+            $visibleRoots = food_guest_visible_root_ids($user) ?? [];
+            $scope = $visibleRoots === [] ? 'none' : 'subtree';
+        }
+    }
     $deputies = [];
-    if (function_exists('org_deputy_units')) {
+    if (function_exists('org_root_units')) {
         $deputies = array_map(
             static fn (array $u): array => ['id' => (int) $u['id'], 'name' => (string) $u['name']],
-            org_deputy_units()
+            org_root_units()
         );
+        if ($visibleRoots !== null) {
+            $deputies = array_values(array_filter($deputies, static fn (array $d): bool => in_array((int) $d['id'], $visibleRoots, true)));
+        }
     }
     $sql = "SELECT r.id, r.request_date, r.meal_type, r.organization, r.guest_count, r.requester_name,
                    r.status, r.deputy_unit_id, ou.name AS deputy_name, c.food_name
@@ -3430,9 +3456,40 @@ function food_ticket_api_guest_requests_report(string $from, string $to, string 
               LEFT JOIN food_catalog c ON c.id = r.food_id
              WHERE r.created_by IS NOT NULL AND r.request_date BETWEEN ? AND ?";
     $params = [$from, $to];
-    if ($deputy !== 'all') {
-        $sql .= ' AND r.deputy_unit_id = ?';
-        $params[] = (int) $deputy;
+    if ($deputy !== 'all' && $visibleRoots !== null && !in_array((int) $deputy, $visibleRoots, true)) {
+        // سرشاخهٔ خارج از زیردرخت خودت: هیچ ردیفی منطبق نیست (نه خطا، نه دور زدن فیلتر).
+        $sql .= ' AND 1 = 0';
+    } elseif ($deputy !== 'all') {
+        // شناسهٔ انتخابی سرشاخه است؛ ولی دادهٔ تاریخی ممکن است «واحد داخلیِ زیرِ سرشاخه» ذخیره شده باشد.
+        // پس تطبیق را روی خود سرشاخه + همهٔ زیرشاخه‌های فعال می‌کنیم تا ردیفی گم نشود.
+        $rootId = (int) $deputy;
+        $matchIds = [$rootId];
+        try {
+            $descendants = [];
+            $stmtDesc = db()->query('SELECT id, parent_id FROM org_units WHERE is_active = 1');
+            $children = [];
+            foreach ($stmtDesc->fetchAll(PDO::FETCH_ASSOC) as $unit) {
+                $children[(int) ($unit['parent_id'] ?? 0)][] = (int) $unit['id'];
+            }
+            $stack = [$rootId];
+            while ($stack) {
+                $current = array_pop($stack);
+                foreach ($children[$current] ?? [] as $child) {
+                    if (!in_array($child, $descendants, true)) {
+                        $descendants[] = $child;
+                        $stack[] = $child;
+                    }
+                }
+            }
+            $matchIds = array_values(array_unique(array_merge($matchIds, $descendants)));
+        } catch (Throwable $scopeError) {
+            if (function_exists('app_error_log')) {
+                app_error_log('[guest-requests-report] descendant expand failed: ' . $scopeError->getMessage());
+            }
+        }
+        $marks = implode(',', array_fill(0, count($matchIds), '?'));
+        $sql .= ' AND r.deputy_unit_id IN (' . $marks . ')';
+        $params = array_merge($params, $matchIds);
     }
     $sql .= ' ORDER BY ou.name, r.request_date, r.id';
     $stmt = db()->prepare($sql);
@@ -3447,6 +3504,15 @@ function food_ticket_api_guest_requests_report(string $from, string $to, string 
         ],
     ];
     foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $r) {
+        if ($visibleRoots !== null) {
+            // همان قاعدهٔ فهرست درخواست‌های مهمان: انتساب ردیف به نزدیک‌ترین سرشاخهٔ ۶ بخشی باید در زیردرخت مدیریتی باشد.
+            $rowRoot = function_exists('food_guest_stored_root_cached')
+                ? food_guest_stored_root_cached($r['deputy_unit_id'] ?? 0)
+                : 0;
+            if ($rowRoot <= 0 || !in_array($rowRoot, $visibleRoots, true)) {
+                continue;
+            }
+        }
         $status = (string) ($r['status'] ?? 'active');
         if (!in_array($status, ['active', 'cancelled'], true)) {
             continue;
@@ -3473,7 +3539,7 @@ function food_ticket_api_guest_requests_report(string $from, string $to, string 
             'deputy_name' => (string) ($r['deputy_name'] ?? ''),
         ];
     }
-    return ['items' => $items, 'summary' => $summary, 'deputies' => $deputies, 'from' => $from, 'to' => $to, 'deputy_id' => $deputy];
+    return ['items' => $items, 'summary' => $summary, 'deputies' => $deputies, 'from' => $from, 'to' => $to, 'deputy_id' => $deputy, 'scope' => $scope];
 }
 
 /**
@@ -5160,7 +5226,7 @@ function food_ticket_api_handle(string $route, array $user): never
             if ($deputyRaw !== 'all' && !ctype_digit($deputyRaw)) {
                 food_ticket_api_json(['error' => 'فیلتر معاونت معتبر نیست.'], 400);
             }
-            food_ticket_api_json(food_ticket_api_guest_requests_report($from, $to, $deputyRaw));
+            food_ticket_api_json(food_ticket_api_guest_requests_report($from, $to, $deputyRaw, is_array($user) ? $user : []));
         }
         if ($_SERVER['REQUEST_METHOD'] === 'GET' && $route === 'employees') {
             food_ticket_api_json(['items' => food_ticket_api_employees()]);

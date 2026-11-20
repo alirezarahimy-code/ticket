@@ -329,6 +329,10 @@ function food_order_import_apply(array $plan, int $actorId): array
             $iso = (string) $item['iso'];
             $employeeId = (int) $item['employee_id'];
             $itemId = (int) $item['calendar_item_id'];
+            if (function_exists('food_meal_closed_guard')) {
+                // ایمپورت‌ها فقط ناهار هستند (مسیر قدیمی سفارش)؛ روز بسته ⇒ کل تراکنش می‌شکند.
+                food_meal_closed_guard($iso, 'lunch', 'ایمپورت سفارش‌ها');
+            }
             if ($item['action'] === 'create') {
                 $pdo->prepare("INSERT INTO food_orders (employee_id, calendar_item_id, food_date, created_by, status) VALUES (?, ?, ?, ?, 'active')")
                     ->execute([$employeeId, $itemId, $iso, $actorId]);

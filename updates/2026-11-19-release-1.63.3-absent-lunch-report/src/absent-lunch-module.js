@@ -175,18 +175,18 @@ function html(){
  var people=Object.keys(S.rows.reduce(function(m,x){m[x.pc]=1;return m},{})).length,portions=S.rows.length,deps=allDeps().length;
  var range='<form class="card alr-filter" id="alr-filter"><label class="field">از تاریخ (شمسی)<input name="from" value="'+esc2(ri.from)+'"></label><label class="field">تا تاریخ (شمسی)<input name="to" value="'+esc2(ri.to)+'"></label>'+
   '<div class="form-actions"><button class="btn primary">نمایش گزارش</button><button type="button" class="btn ghost" data-action="absent-lunch-today">امروز</button></div>'+
-  '<div class="alr-chips"><span class="alr-chip">مجموع پرس <b>'+fa(portions)+'</b></span><span class="alr-chip">افراد یکتا <b>'+fa(people)+'</b></span><span class="alr-chip">معاونتها <b>'+fa(deps)+'</b></span></div>'+
-  '<button type="button" class="btn" data-action="absent-lunch-export">خروجی XLSX</button><button type="button" class="btn ghost" data-action="absent-lunch-print">چاپ فهرست</button><button type="button" class="btn ghost" data-action="absent-lunch-refresh">بازخوانی</button></form>';
+  '<div class="alr-chips alr-chips-row"><span class="alr-chip">مجموع پرس <b>'+fa(portions)+'</b></span><span class="alr-chip">افراد یکتا <b>'+fa(people)+'</b></span><span class="alr-chip">معاونتها <b>'+fa(deps)+'</b></span></div>'+
+  '<button type="button" class="btn primary" data-action="absent-lunch-export">خروجی XLSX</button><button type="button" class="btn ghost" data-action="absent-lunch-print">چاپ فهرست</button><button type="button" class="btn ghost" data-action="absent-lunch-refresh">بازخوانی</button></form>';
  var fields='<div class="alr-fields"><span class="alr-fields-label">فیلدهای گزارش:</span>'+TAB_FIELDS[S.tab].map(function(k){
   var f=FIELDS.filter(function(x){return x.key===k})[0];
-  return '<label class="alr-field-chip"><input type="checkbox" data-alr-field="'+k+'"'+(S.fieldsByTab[S.tab].has(k)?' checked':'')+'> '+esc2(f.label)+'</label>'}).join('')+'</div>';
- var blocks='<div class="alr-blocks"><span class="alr-fields-label">بلوک در هر ردیف:</span>'+[1,2,3].map(function(n){return '<button type="button" class="alr-block-btn '+(S.blocks===n?'active':'')+'" data-alr-block="'+n+'" aria-pressed="'+(S.blocks===n)+'">'+fa(n)+'</button>'}).join('')+'</div>';
+  return '<label class="alr-field-chip"><input type="checkbox" data-alr-field="'+k+'"'+(S.fieldsByTab[S.tab].has(k)?' checked':'')+'> '+esc2(f.label)+'</label>'}).join('')+
+  '<span class="alr-fields-label alr-blocks-inline">بلوک در هر ردیف:</span>'+[1,2,3].map(function(n){return '<button type="button" class="alr-block-btn '+(S.blocks===n?'active':'')+'" data-alr-block="'+n+'" aria-pressed="'+(S.blocks===n)+'">'+fa(n)+'</button>'}).join('')+'</div>';
  var tabs='<div class="alr-tabs" role="tablist">'+[['flat','فهرست یکجا'],['dept','بر اساس معاونت'],['detail','تفکیک و جزئیات']].map(function(t){return '<button type="button" class="alr-tab '+(S.tab===t[0]?'active':'')+'" data-alr-tab="'+t[0]+'" role="tab" aria-selected="'+(S.tab===t[0])+'">'+t[1]+'</button>'}).join('')+'</div>';
  var tools='<div class="alr-tools"><input type="search" id="alrSearch" placeholder="جستجو: نام / کد پرسنلی / نوع غذا / معاونت" value="'+esc2(S.query)+'"><span class="alr-fields-label">نمودار:</span><span class="alr-seg"><button type="button" data-alr-metric="people" class="'+(S.metric==='people'?'active':'')+'">افراد</button><button type="button" data-alr-metric="portions" class="'+(S.metric==='portions'?'active':'')+'">وعدهها</button></span><button type="button" class="btn ghost" data-action="absent-lunch-chart">'+(S.chart?'پنهان کردن نمودار':'نمایش نمودار')+'</button></div>';
  var chart=S.chart?'<section class="alr-chart"><div class="alr-chart-head"><h3>نمودار معاونتها</h3><span class="alr-range">'+fa(daysForChart().length)+' روز</span></div><div id="alrChart">'+chartHtml()+'</div></section>':'';
  var notice=!serviceMode?'<div class="notice warn">برای گزارش واقعی، پنل باید متصل به سرویس باشد.</div>':S.error?'<div class="notice warn">خطا: '+esc2(S.error)+'؛ بازخوانی کنید.</div>':S.loading?'<div class="notice">در حال دریافت گزارش…</div>':'';
  setTimeout(syncIndeterminate,0);
- return '<section>'+heading('گزارش غایبین ناهار','','')+range+notice+fields+blocks+tabs+tools+chart+
+ return '<section>'+heading('گزارش غایبین ناهار','','')+range+notice+fields+tabs+tools+chart+
   '<div class="alr-food">'+foodSummary()+'</div><div id="alrList">'+viewHtml(true)+'</div>'+
   '<div class="alr-info">بلوک: '+fa(S.blocks)+' · فیلدها: '+fa(activeFields().length)+' · معاونتهای انتخابشده: '+fa(selectedDeps().length)+' از '+fa(deps)+'</div></section>';
 }

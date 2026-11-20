@@ -25,7 +25,7 @@ EXPECTED_XLSX_HEADERS = [
     'تاریخ', 'وعده', 'کل سفارشات پرسنل', 'تقاضای فعال پرسنل', 'لغوشدهٔ پرسنل',
     'درخواست مهمان (نفرات)', 'پرس سفارش/تحویل واقعی پیمانکار', 'توزیع پرسنل',
     'مهمان توزیع‌شده', 'کل توزیع', 'پرس باقیمانده', 'کسری/اضافهٔ سفارش',
-    'غایبین', 'سرنوشت باقیمانده', 'وضعیت', 'یادداشت',
+    'غایبین', 'سرنوشت باقیمانده', 'وضعیت', 'یادداشت', 'مهمان واقعی (به‌تفکیک بخش)',
     'ماه فاکتور', 'تعداد فاکتور ماه', 'پرس طبق فاکتور ماه',
     'جمع تحویل واقعی روزانهٔ ماه', 'اختلاف فاکتور − تحویل ماه', 'وضعیت مقایسهٔ ماهانه',
 ]
@@ -73,30 +73,30 @@ class GuestReconciliationColumnTests(unittest.TestCase):
             self.assertIn(needle, segment)
         self.assertNotIn("cancelled_guest_meals", segment)
 
-    def test_export_headers_exact_22_columns(self) -> None:
+    def test_export_headers_exact_23_columns(self) -> None:
         text = read(RECON_PHP)
         match = re.search(r"\$headers = \[(.*?)\];", text, re.S)
         self.assertIsNotNone(match)
         headers = [h.strip().strip("'") for h in match.group(1).split(",") if h.strip()]
         self.assertEqual(headers, EXPECTED_XLSX_HEADERS)
-        self.assertEqual(len(headers), 22)
+        self.assertEqual(len(headers), 23)
         self.assertNotIn("لغوشدهٔ مهمان", match.group(1))
         self.assertNotRegex(match.group(1), r"'تقاضای فعال'")
 
-    def test_export_monthly_row_indices_fit_22_columns(self) -> None:
+    def test_export_monthly_row_indices_fit_23_columns(self) -> None:
         text = read(RECON_PHP)
         for index in re.findall(r"\$monthlyRow\[(\d+)\]", text):
-            self.assertLess(int(index), 22, f"monthlyRow[{index}] out of range")
+            self.assertLess(int(index), 23, f"monthlyRow[{index}] out of range")
         for needle in (
-            "$monthlyRow[16] = $report['month'];",
-            "$monthlyRow[17] = $monthSummary['invoice_count'];",
-            "$monthlyRow[18] = $monthSummary['invoice_portions'];",
-            "$monthlyRow[19] = $monthSummary['daily_received_portions'];",
-            "$monthlyRow[20] = $monthSummary['invoice_difference'] ?? '—';",
-            "$monthlyRow[21] = $comparisonStatus;",
+            "$monthlyRow[17] = $report['month'];",
+            "$monthlyRow[18] = $monthSummary['invoice_count'];",
+            "$monthlyRow[19] = $monthSummary['invoice_portions'];",
+            "$monthlyRow[20] = $monthSummary['daily_received_portions'];",
+            "$monthlyRow[21] = $monthSummary['invoice_difference'] ?? '—';",
+            "$monthlyRow[22] = $comparisonStatus;",
         ):
             self.assertIn(needle, text)
-        self.assertNotIn("$monthlyRow[22]", text)
+        self.assertNotIn("$monthlyRow[23]", text)
 
     def test_total_employee_orders_exposed_in_report_and_export(self) -> None:
         text = read(RECON_PHP)

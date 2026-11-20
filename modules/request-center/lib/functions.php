@@ -252,7 +252,7 @@ function choose_handling_agent(string $serviceGroup, ?int $departmentId = null, 
         . ' WHERE u.is_active = 1 AND u.role IN ("agent", "manager") AND hu.code = ?'
         // قانون: ادمین اصلی هرگز کارشناس شناخته نمی‌شود، حتی اگر واحدش هم‌نام باشد.
         . ' AND COALESCE(u.is_primary_admin, 0) = 0'
-        // مدیر عادی فقط مسئول همان معاونت/واحدِ ثبت‌شده روی درخواست است؛ از معاونت دیگری انتخاب نشود.
+        // مدیر عادی فقط مسئول همان بخش/واحدِ ثبت‌شده روی درخواست است؛ از بخش دیگری انتخاب نشود.
         . ' AND (u.role <> "manager" OR (? > 0 AND u.department_id = ?))'
         // تصمیم مالک (۲۰۲۶-۱۱-۱۱): مدیران چارت سازمانی از ارجاع خودکار حذف‌اند؛ فقط انتصاب دستی روی یک درخواست ممکن است.
         // شرط فقط وقتی ستون‌های org_* موجود باشند اعمال می‌شود (نصب تازهٔ ۱٫۶۲٫۹۵ ستون‌ها را تنبل می‌سازد)؛ وگرنه کل کوئری با خطای ستون ناموجود می‌شکند.
@@ -449,9 +449,9 @@ function request_center_ticket_number_peek(string $prefix): string
 }
 
 /**
- * Read-only equivalent of org_deputy_units() for the independent Request
- * Center entry. The provider helper calls org_ensure_schema() and therefore
- * is intentionally not used on this path.
+ * Read-only 6-root (۶ بخش) equivalent of org_root_units() for the independent
+ * Request Center entry. The provider helper calls org_ensure_schema() and
+ * therefore is intentionally not used on this path.
  *
  * @return array<int,array<string,mixed>>
  */
@@ -463,15 +463,24 @@ function request_center_org_deputy_units(array $user): array
         return [];
     }
     $companyFilter = $companyAware ? ' AND ou.company_id = ?' : '';
+    $types = function_exists('org_root_types') ? org_root_types() : ['deputy'];
+    $placeholders = implode(',', array_fill(0, count($types), '?'));
     $query = db()->prepare(
-        'SELECT ou.id, ou.name, ou.code, ou.parent_id, m.full_name AS manager_name
+        'SELECT ou.id, ou.name, ou.code, ou.parent_id, ou.unit_type, ou.chart_side, m.full_name AS manager_name
          FROM org_units ou
          LEFT JOIN users m ON m.id = ou.manager_user_id
-         WHERE ou.is_active = 1 AND ou.unit_type = "deputy"' . $companyFilter . '
-         ORDER BY ou.name'
+         WHERE ou.is_active = 1 AND ou.unit_type IN (' . $placeholders . ')' . $companyFilter . '
+         ORDER BY FIELD(ou.unit_type, "ceo","liaison","deputy","management","office","company_manager"), ou.chart_side, ou.name'
     );
-    $query->execute($companyAware ? [$companyId] : []);
-    return $query->fetchAll(PDO::FETCH_ASSOC);
+    $query->execute(array_merge($types, $companyAware ? [$companyId] : []));
+    $rows = $query->fetchAll(PDO::FETCH_ASSOC);
+    if (function_exists('org_root_display_name')) {
+        foreach ($rows as &$row) {
+            $row['name'] = org_root_display_name($row);
+        }
+        unset($row);
+    }
+    return $rows;
 }
 
 /** Request Center status labels, including the module-owned rejected terminal state. */

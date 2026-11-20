@@ -50,6 +50,29 @@ EXCLUDED_FROM_COMPARE = {"VERSION"}
 
 # انحراف‌های ثبت‌شده: فایل‌هایی که نسخهٔ مخزن به‌دستور مالک عمداً با بستهٔ پین‌شده متفاوت است.
 # فقط همین یک فایل؛ بقیهٔ بسته هم‌چنان بایت‌به‌بایت مقایسه می‌شود.
+# کار بند ۱۷ روی شاخهٔ آماده‌سازی بستهٔ ۱.۶۳.۳ (۲۰۲۶-۱۱-۲۰): مخزن عمداً جلوتر از جدیدترین بستهٔ منتشرشدهٔ ۱.۶۳.۲ حرکت کرده است.
+# همان الگوی POST_RELEASE_WORKTREE_CHANGES در تست‌های بستهٔ ۱.۶۲.۷۳/۱.۶۳.۲-r21؛ این فایل‌ها باید با بسته فرق داشته باشند.
+POST_RELEASE_WORKTREE_CHANGES: set[str] = {
+    "assets/food-menu.css",
+    "assets/food-menu.js",
+    "assets/food-org-groups.js",
+    "cd-dvd.php",
+    "food-order.php",
+    "food-ticket-groups.php",
+    "food-ticket-runtime.php",
+    "food-ticket-web/assets/food-menu.css",
+    "food-ticket-web/assets/food-menu.js",
+    "food-ticket-web/assets/food-org-groups.js",
+    "food-ticket-web/index.html",
+    "food-ticket.php",
+    "lib/org-grouping.php",
+    "modules/request-center/Actions/ticket-actions.php",
+    "modules/request-center/Pages/create.php",
+    "modules/request-center/Pages/detail.php",
+    "modules/request-center/lib/functions.php",
+    "tools/test_food_org_groups_offline.php",
+}
+
 KNOWN_REDACTION_DRIFT: dict[str, str] = {
     # گزارش ۱٫۶۲٫۹۵ داخل بستهٔ پین‌شده همان نسخهٔ اصلی است (SHA‑256 بسته تغییر نمی‌کند)؛
     # نسخهٔ مخزن به‌دستور مالک از هر اشاره‌ای به خط ارتقای ناتمام/۱٫۶۳ پاک‌سازی شده است.
@@ -161,6 +184,8 @@ class VersionSourceOfTruthTests(unittest.TestCase):
                 if relative in EXCLUDED_FROM_COMPARE:
                     continue
                 if relative in KNOWN_REDACTION_DRIFT:
+                    continue
+                if relative in POST_RELEASE_WORKTREE_CHANGES:
                     continue
                 # The already-delivered 1.62.72 ZIP includes the 1.62.70 README.
                 # Keep its checksum immutable; the repository README is corrected

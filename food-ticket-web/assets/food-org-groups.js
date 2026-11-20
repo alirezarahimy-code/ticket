@@ -1,14 +1,14 @@
 /**
- * ۱.۶۳.۴ — «نمایش بر اساس معاونت» برای گزارش‌های غذا.
+ * ۱.۶۳.۴ — «نمایش بر اساس معاونت / بخش» برای گزارش‌های غذا.
  *
  * چهار گزارش (گزارش تجمیعی، غذای تحویلی، سفارش‌های امروز، غایبین نهار) هر کدام
  * فهرستی از افراد را نشان می‌دهند. با این ماژول همان فهرست یک‌بار دیگر — این‌بار
  * زیر سرشاخهٔ سازمانی هر نفر — چیده می‌شود:
  *
- *   • سرگروه فقط «معاونت» است (یا مدیریت مستقل / واحد مستقل (نمایندگی) / شرکت دوم).
+ *   • سرگروه یکی از ۶ بخش است: مدیرعامل، واحدهای مستقل، معاونت‌ها، مدیریت مستقل، دفتر مدیرعامل، شرکت همکار.
  *   • مدیر اداره و کارشناس‌های زیر آن معاونت همه در همان گروه فهرست می‌شوند؛
  *     نام ادارهٔ میانی فقط در ستون «واحد» هر ردیف می‌آید، نه به‌عنوان سرگروه.
- *   • MANAGEMENT و LIAISON و COMPANY هر سه صریحاً نام‌گذاری می‌شوند تا هیچ فردی
+ *   • OFFICE و MANAGEMENT و LIAISON و COMPANY همگی صریحاً نام‌گذاری می‌شوند تا هیچ فردی
  *     در گزارش گم نشود.
  *
  * وابستگی بیرونی ندارد؛ دادهٔ نگاشت از endpoint «food-menu/org-map» می‌آید.
@@ -28,21 +28,23 @@
       case 'deputy': return 'معاونت';
       case 'management': return 'مدیریت مستقل';
       case 'liaison': return 'واحد مستقل (نمایندگی)';
-      case 'company': return 'شرکت دوم';
+      case 'office': return 'دفتر مدیرعامل';
+      case 'company': return 'شرکت همکار';
       case 'ceo': return 'مدیرعامل';
-      default: return 'بدون معاونت';
+      default: return 'بدون جایگاه';
     }
   }
 
-  /** ترتیب گروه‌ها: معاونت‌ها، بعد مدیریت مستقل، بعد نمایندگی‌ها، بعد شرکت دوم. */
+  /** ترتیب گروه‌ها: مدیرعامل → مستقل‌ها → معاونت‌ها → مدیریت مستقل → دفتر → شرکت همکار → بدون جایگاه. */
   function typeOrder(type) {
     switch (type) {
-      case 'deputy': return 0;
-      case 'management': return 1;
-      case 'liaison': return 2;
-      case 'company': return 3;
-      case 'ceo': return 4;
-      default: return 5;
+      case 'ceo': return 0;
+      case 'liaison': return 1;
+      case 'deputy': return 2;
+      case 'management': return 3;
+      case 'office': return 4;
+      case 'company': return 5;
+      default: return 6;
     }
   }
 
@@ -120,9 +122,9 @@
       .replace(/^0+(?=\d)/, '');
   }
 
-  /** نگاشت یک ردیف به گروهش؛ اگر پیدا نشد گروه «بدون معاونت سازمانی». */
+  /** نگاشت یک ردیف به گروهش؛ اگر پیدا نشد گروه «بدون جایگاه». */
   function groupOf(map, row) {
-    var none = { group: 'none', label: 'بدون معاونت سازمانی', type: 'none', path: '' };
+    var none = { group: 'none', label: 'بدون جایگاه', type: 'none', path: '' };
     if (!map || !map.people) {
       return none;
     }
@@ -147,14 +149,14 @@
       if (!buckets[key]) {
         buckets[key] = {
           key: key,
-          label: group.label || 'بدون معاونت سازمانی',
+          label: group.label || 'بدون جایگاه',
           type: group.type || 'none',
           rows: [],
         };
       }
       // مسیر (اداره ← معاونت) برای هر فرد جداگانه است، پس روی ردیف نگه می‌داریم.
       row.__orgPath = group.path || '';
-      row.__orgLabel = group.label || 'بدون معاونت سازمانی';
+      row.__orgLabel = group.label || 'بدون جایگاه';
       row.__orgType = group.type || 'none';
       buckets[key].rows.push(row);
     });
@@ -263,7 +265,7 @@
     }
     if (!map || !map.people) {
       return '<div class="fm-alert warn">نگاشت سازمانی در دسترس نیست؛ فهرست بدون گروه‌بندی نمایش داده می‌شود. '
-        + 'برای گروه‌بندی بر اساس معاونت، دسترسی چارت سازمانی را بررسی کنید.</div>'
+        + 'برای گروه‌بندی بر اساس معاونت / بخش، دسترسی چارت سازمانی را بررسی کنید.</div>'
         + table(rows);
     }
     var groups = split(map, rows);

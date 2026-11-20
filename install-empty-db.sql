@@ -1435,6 +1435,23 @@ CREATE TABLE IF NOT EXISTS food_meal_reconciliations (
     INDEX idx_food_meal_reconciliation_month_meal (food_date, meal_type)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+CREATE TABLE IF NOT EXISTS food_guest_actuals (
+    id INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    food_date DATE NOT NULL,
+    meal_type ENUM('lunch','dinner') NOT NULL DEFAULT 'lunch',
+    root_unit_id INT UNSIGNED NOT NULL DEFAULT 0,
+    root_name VARCHAR(190) NOT NULL DEFAULT '',
+    root_type VARCHAR(32) NOT NULL DEFAULT '',
+    requested_count INT UNSIGNED NOT NULL DEFAULT 0,
+    actual_count INT UNSIGNED NOT NULL DEFAULT 0,
+    created_by INT UNSIGNED NULL,
+    updated_by INT UNSIGNED NULL,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
+    UNIQUE KEY uq_food_guest_actuals_day (food_date, meal_type, root_unit_id),
+    KEY idx_food_guest_actuals_root (root_unit_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 CREATE TABLE IF NOT EXISTS food_monthly_invoices (
     id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
     invoice_month DATE NOT NULL,
@@ -1648,5 +1665,8 @@ INSERT IGNORE INTO schema_updates (version, migration) VALUES
     ('1.62.95', '037-food-auto-receipts-delivered.sql'),
     -- ۰۳۵: جدولش را همین فایل در بالا می‌سازد (request_center_appointments)؛
     -- بدون این ردیف، نصب تازه از install-empty-db هشدار کاذب «۰۳۵ اجرا نشده» می‌داد.
-    ('1.63', '035-request-center-appointments.sql');
+    ('1.63', '035-request-center-appointments.sql'),
+    -- ۰۳۸ و ۰۳۹ نیز در این اسکیما اعمال/idempotent هستند؛ بدون این ردیف‌ها نصب تازه هشدار کاذب «اجرا نشده» می‌داد.
+    ('1.63.2', '038-food-guest-actuals.sql'),
+    ('1.63.2', '039-liaison-manager-role-sync.sql');
 

@@ -1,0 +1,3861 @@
+<?php
+declare(strict_types=1);
+
+/**
+ * گروه‌های غذای گروهی — نمایندهٔ گروه با L_UID + غیبت روزانه
+ * =============================================================================
+ * معماری فعلی حفظ شده است و فقط منطق «شناسایی نماینده» و «واجد شرایط بودن اعضا»
+ * توسعه یافته است:
+ *
+ *  - شناسایی نماینده: L_UID دستگاه حضور و غیاب (شناسهٔ اصلی).
+ *        L_UID → GroupID → اعضای گروه → سفارش غذا → غیبت روز → افراد واجد شرایط → فیش
+ *    کارت RFID (C_Card) دیگر مبنای شناسایی نماینده نیست؛ فقط برای گروه‌های
+ *    ۱.۳۴: شمارهٔ کارت (C_CARD) به‌طور کامل از شناسایی نماینده حذف شد؛ فقط L_UID معیار است.
+ *
+ *  - غیبت روزانه: «غیبت» به‌صورت Exception ذخیره می‌شود (نبودِ رکورد = حاضر).
+ *    رکوردها تاریخ‌محور هستند (absence_date) و هیچ Reset/Cron روزانه‌ای لازم نیست.
+ *
+ *  - قفل لیست غیبت: فقط تا قبل از ثبت تردد معتبر نماینده قابل ویرایش است؛
+ *    بعد از آن، اصلاح با دسترسی ویرایش گروه‌های غذا و ثبت Audit انجام می‌شود.
+ *    ⚠️ هیچ قاعده‌ای بر اساس ساعت ۱۲ (یا هر ساعت دیگر) وجود ندارد.
+ *
+ *  - اجرای اول (first): اعضای واجد شرایط (سفارش دارد، غایب نیست، قبلاً فیش نگرفته)
+ *    با همان کنترل‌های فعلی کاربر بررسی و فیش‌شان در صف چاپ فعلی قرار می‌گیرد.
+ *  - اجرای مجدد همان نماینده در همان روز (repeat): فقط یک رکورد خلاصه؛ بدون
+ *    بررسی اعضا، بدون Event کاربر و بدون چاپ (پس فیش تکراری صادر نمی‌شود).
+ *  - گروه غیرفعال (inactive): فقط رکورد خلاصه.
+ *
+ *  چاپ، صف، Retry و Worker بدون تغییر از همان توابع فعلی استفاده می‌کنند.
+ */
+
+/** ثبت Audit برای عملیات حساس غذا (کاربر/اکشن/زمان/موجودیت/مقدار قبل و بعد). */
+function food_ticket_audit(string $code, array $data = []): void
+{
+    if (!function_exists('activity_log')) {
+        return;
+    }
+    $meta = $data['meta'] ?? [];
+    if ($data['reason'] ?? null) {
+        $meta['reason'] = (string) $data['reason'];
+    }
+    if (array_key_exists('old', $data)) {
+        $meta['old'] = $data['old'];
+    }
+    if (array_key_exists('new', $data)) {
+        $meta['new'] = $data['new'];
+    }
+    try {
+        activity_log([
+            'action_code' => $code,
+            'module' => 'food',
+            'target_type' => (string) ($data['target_type'] ?? 'food_group'),
+            'target_id' => (int) ($data['target_id'] ?? 0),
+            'target_label' => (string) ($data['target_label'] ?? ''),
+            'user_id' => $data['user_id'] ?? null,
+            'meta' => $meta,
+        ]);
+    } catch (Throwable $e) {
+        app_error_log('[food-groups] audit failed: ' . $e->getMessage());
+    }
+}
+
+/**
+ * ساخت و مهاجرت جدول‌های گروه (idempotent).
+ * تغییرات ۱.۳۲ (L_UID، نوع ماشه، شمارندهٔ غایب) این‌جا هم به‌صورت محافظت‌شده اعمال می‌شوند
+ * تا بدون اجرای دستی Migration هم سیستم کار کند.
+ */
+function food_ticket_groups_ensure(): bool
+{
+    static $ok = null;
+    if ($ok !== null) {
+        return $ok;
+    }
+    $engine = ' ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci';
+    try {
+        db()->exec('CREATE TABLE IF NOT EXISTS food_ticket_groups (
+            id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+            title VARCHAR(190) NOT NULL,
+            l_uid VARCHAR(80) NULL,
+            rfid_card VARCHAR(120) NULL,
+            description VARCHAR(500) NULL,
+            visit_change_until TIME NULL,
+            status ENUM("active","inactive") NOT NULL DEFAULT "active",
+            created_by INT UNSIGNED NULL,
+            created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+            UNIQUE KEY uq_food_group_uid (l_uid),
+            UNIQUE KEY uq_food_group_card (rfid_card),
+            INDEX idx_food_group_status (status)
+        )' . $engine);
+        $membersBase = 'CREATE TABLE IF NOT EXISTS food_ticket_group_members (
+            id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+            group_id INT UNSIGNED NOT NULL,
+            user_id INT UNSIGNED NOT NULL,
+            created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            UNIQUE KEY uq_food_group_member_user (user_id),
+            INDEX idx_food_group_member_group (group_id)';
+        try {
+            db()->exec($membersBase . ',
+                CONSTRAINT fk_food_group_member_group FOREIGN KEY (group_id) REFERENCES food_ticket_groups(id) ON DELETE CASCADE,
+                CONSTRAINT fk_food_group_member_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+            )' . $engine);
+        } catch (Throwable $fkError) {
+            // اگر کلید خارجی ممکن نبود، جدول بدون FK ساخته می‌شود؛ UNIQUE(user_id) همچنان یک‌گروهی بودن را تضمین می‌کند.
+            app_error_log('[food-groups] members FK unavailable: ' . $fkError->getMessage());
+            db()->exec($membersBase . ')' . $engine);
+        }
+        db()->exec('CREATE TABLE IF NOT EXISTS food_ticket_group_uid_history (
+            id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+            uid VARCHAR(80) NOT NULL,
+            group_id INT UNSIGNED NULL,
+            action ENUM("set","changed","removed") NOT NULL,
+            actor_id INT UNSIGNED NULL,
+            created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            INDEX idx_food_uid_history_uid (uid),
+            INDEX idx_food_uid_history_group (group_id)
+        )' . $engine);
+        db()->exec('CREATE TABLE IF NOT EXISTS food_ticket_group_runs (
+            id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+            group_id INT UNSIGNED NULL,
+            group_title VARCHAR(190) NULL,
+            rfid_card VARCHAR(120) NOT NULL DEFAULT "",
+            trigger_kind ENUM("uid","card","legacy_card") NOT NULL DEFAULT "card",
+            trigger_uid VARCHAR(80) NULL,
+            source_key CHAR(64) NOT NULL,
+            punch_date DATE NOT NULL,
+            punch_time TIME NULL,
+            run_kind ENUM("first","repeat","inactive") NOT NULL,
+            status ENUM("processing","done") NOT NULL DEFAULT "done",
+            members_total INT UNSIGNED NOT NULL DEFAULT 0,
+            printed_count INT UNSIGNED NOT NULL DEFAULT 0,
+            repeat_count INT UNSIGNED NOT NULL DEFAULT 0,
+            no_food_count INT UNSIGNED NOT NULL DEFAULT 0,
+            absent_count INT UNSIGNED NOT NULL DEFAULT 0,
+            skipped_count INT UNSIGNED NOT NULL DEFAULT 0,
+            error_count INT UNSIGNED NOT NULL DEFAULT 0,
+            created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+            UNIQUE KEY uq_food_group_run_source (source_key),
+            INDEX idx_food_group_run_day (group_id, punch_date, run_kind)
+        )' . $engine);
+        db()->exec('CREATE TABLE IF NOT EXISTS food_ticket_day_visits (
+            id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+            user_id INT UNSIGNED NOT NULL,
+            visit_date DATE NOT NULL,
+            group_id INT UNSIGNED NOT NULL,
+            created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            UNIQUE KEY uq_food_day_visit_user_date (user_id, visit_date),
+            INDEX idx_food_day_visit_group_date (group_id, visit_date)
+        )' . $engine);
+        food_ticket_groups_migrate();
+        $ok = true;
+    } catch (Throwable $e) {
+        app_error_log('[food-groups] tables unavailable: ' . $e->getMessage());
+        $ok = false;
+    }
+    return $ok;
+}
+
+/**
+ * اعمال تغییرات ۱.۳۲ روی نصب‌های موجود (هر تغییر جدا و بی‌خطر اجرا می‌شود).
+ * روی نصب‌های تازه، ستون‌ها از قبل وجود دارند و این تابع کاری نمی‌کند.
+ */
+function food_ticket_groups_migrate(): void
+{
+    static $done = false;
+    if ($done) {
+        return;
+    }
+    $done = true;
+    // ۱.۳۷.۶ — db_table_columns() «نقشهٔ کلید=نام ستون» برمی‌گرداند؛ array_map روی *مقدارها*
+    // (که true هستند) اعمال می‌شد و in_array همیشه false می‌داد ⇒ هر درخواست ALTER بی‌فایده و
+    // لاگ پرخطا. این‌جا هر دو شکل (نقشه یا فهرست سادهٔ نام‌ها) به «فهرست نام‌های lowercase» تبدیل می‌شود.
+    $columns = static function (string $table): array {
+        if (!function_exists('db_table_columns')) {
+            return [];
+        }
+        try {
+            $raw = db_table_columns($table);
+        } catch (Throwable) {
+            return [];
+        }
+        $names = [];
+        foreach ((array) $raw as $key => $value) {
+            $name = is_string($value) && $value !== '' ? $value : (is_string($key) ? $key : '');
+            if ($name !== '') {
+                $names[] = strtolower(trim($name));
+            }
+        }
+        return $names;
+    };
+    $step = static function (string $label, string $sql): void {
+        try {
+            db()->exec($sql);
+        } catch (Throwable $e) {
+            // ستون/ایندکس از قبل وجود دارد یا موتور اجازه نمی‌دهد؛ در لاگ ثبت می‌شود.
+            app_error_log('[food-groups] migrate ' . $label . ': ' . $e->getMessage());
+        }
+    };
+
+    $groupCols = $columns('food_ticket_groups');
+    if ($groupCols !== [] && !in_array('l_uid', $groupCols, true)) {
+        $step('groups.l_uid', 'ALTER TABLE food_ticket_groups ADD COLUMN l_uid VARCHAR(80) NULL AFTER title');
+        $step('groups.uid-index', 'ALTER TABLE food_ticket_groups ADD UNIQUE KEY uq_food_group_uid (l_uid)');
+        // کارت دیگر اجباری نیست (گروه‌های L_UID-محور کارت ندارند)
+        $step('groups.card-nullable', 'ALTER TABLE food_ticket_groups MODIFY COLUMN rfid_card VARCHAR(120) NULL');
+    }
+    if ($groupCols === [] || !in_array('visit_change_until', $groupCols, true)) {
+        $step('groups.visit_change_until', 'ALTER TABLE food_ticket_groups ADD COLUMN visit_change_until TIME NULL');
+    }
+
+    $runCols = $columns('food_ticket_group_runs');
+    if ($runCols !== [] && !in_array('trigger_kind', $runCols, true)) {
+        $step('runs.trigger_kind', 'ALTER TABLE food_ticket_group_runs ADD COLUMN trigger_kind ENUM("uid","card","legacy_card") NOT NULL DEFAULT "card" AFTER group_title');
+        $step('runs.trigger_uid', 'ALTER TABLE food_ticket_group_runs ADD COLUMN trigger_uid VARCHAR(80) NULL AFTER trigger_kind');
+    }
+    if ($runCols !== [] && !in_array('absent_count', $runCols, true)) {
+        $step('runs.absent_count', 'ALTER TABLE food_ticket_group_runs ADD COLUMN absent_count INT UNSIGNED NOT NULL DEFAULT 0 AFTER no_food_count');
+    }
+}
+
+// ───────────────────────── غیبت روزانه ─────────────────────────
+
+/** ساخت جدول غیبت روزانه (idempotent). */
+function food_ticket_absence_ensure(): bool
+{
+    static $ok = null;
+    if ($ok !== null) {
+        return $ok;
+    }
+    try {
+        db()->exec('CREATE TABLE IF NOT EXISTS food_ticket_daily_absence (
+            id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+            absence_date DATE NOT NULL,
+            group_id INT UNSIGNED NULL,
+            user_id INT UNSIGNED NOT NULL,
+            reason VARCHAR(300) NULL,
+            created_by INT UNSIGNED NULL,
+            created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+            UNIQUE KEY uq_food_absence_day_user (absence_date, user_id),
+            INDEX idx_food_absence_group_day (group_id, absence_date)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci');
+        $ok = true;
+    } catch (Throwable $e) {
+        app_error_log('[food-absence] table unavailable: ' . $e->getMessage());
+        $ok = false;
+    }
+    return $ok;
+}
+
+/**
+ * Reconcile stored manual attendance records over an inclusive date range.
+ * @return array{delivered:int,absences_cleared:int}
+ */
+/**
+ * عبارتِ حذف‌شرط برای روز/وعدهٔ بسته‌شده — B3: بعد از بستن، هیچ تغییر خودکاری هم نباید
+ * وضعیت تحویل/غیبت آن روز+وعده را لمس کند. اگر جدول تطبیق در دسترس نباشد رشتهٔ خالی
+ * (fail-open نیمه‌مهاجرتی). $eventAlias: نام مستعار جدول رویداد در کوئری، یا '' برای
+ * کوئری بدون مستعار.
+ */
+function food_ticket_closed_meal_not_exists_sql(string $eventAlias = ''): string
+{
+    static $clauses = [];
+    if (isset($clauses[$eventAlias])) {
+        return $clauses[$eventAlias];
+    }
+    $clauses[$eventAlias] = '';
+    try {
+        $probe = db()->prepare("SELECT COUNT(*) FROM information_schema.TABLES WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'food_meal_reconciliations'");
+        $probe->execute();
+        if ((int) $probe->fetchColumn() > 0) {
+            $prefix = $eventAlias === '' ? '' : $eventAlias . '.';
+            $clauses[$eventAlias] = " AND NOT EXISTS (SELECT 1 FROM food_meal_reconciliations r"
+                . " WHERE r.food_date = {$prefix}punch_date"
+                . " AND r.meal_type = COALESCE({$prefix}meal_type, 'lunch')"
+                . " AND r.status = 'closed')";
+        }
+    } catch (Throwable $e) {
+        app_error_log('[food-reconcile] closed-day exclusion unavailable: ' . $e->getMessage());
+    }
+    return $clauses[$eventAlias];
+}
+
+function food_ticket_manual_attendance_reconcile_range(string $fromDate, string $toDate): array
+{
+    static $done = [];
+    foreach ([$fromDate, $toDate] as $date) {
+        if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $date)) {
+            throw new RuntimeException('تاریخ آشتی‌دادن حضور و فیش معتبر نیست.');
+        }
+    }
+    if ($fromDate > $toDate) {
+        throw new RuntimeException('بازهٔ آشتی‌دادن حضور و فیش معتبر نیست.');
+    }
+    $cacheKey = $fromDate . '|' . $toDate;
+    if (isset($done[$cacheKey])) {
+        return $done[$cacheKey];
+    }
+    if (!function_exists('food_ticket_events_ensure_delivery') || !food_ticket_events_ensure_delivery()) {
+        throw new RuntimeException('ستون‌های وضعیت تحویل غذا در دسترس نیستند؛ ثبت حضور و تحویل قابل همگام‌سازی نیست.');
+    }
+    if (!food_ticket_absence_ensure()) {
+        throw new RuntimeException('جدول غیبت روزانه در دسترس نیست؛ ثبت حضور دستی قابل همگام‌سازی نیست.');
+    }
+    try {
+        $tickets = db()->prepare(
+            'UPDATE food_ticket_events SET '
+            // ⚠️ این UPDATE نباید «فیشِ لغوشده» را دوباره تحویل‌شده کند.
+            // پیش‌تر هر ردیف manual-attendance را بی‌قید به delivered می‌برد؛
+            // نتیجه: ادمین فیش را لغو می‌کرد، صفحه را باز می‌کرد (GET!)، و
+            // ردیف دوباره printed/delivered می‌شد — یعنی لغو عملاً باطل
+            // می‌شد و شخص هم از فهرست غایبان بیرون می‌افتاد. دو شرط لازم:
+            //   ۱) ردیف «یتیم» نباشد (لغو/شکست‌خورده) — food_ticket_event_is_orphan_ticket
+            //   ۲) print_status در وضعیت پایانیِ سالم باشد.
+            . 'print_status = CASE WHEN source_uid = "manual-attendance" AND event_type = "printed" '
+            . 'AND COALESCE(print_status, "") NOT IN ("pending", "printing") THEN "printed" ELSE print_status END, '
+            . 'delivered_by = CASE WHEN delivery_status IS NULL OR delivery_status <> "delivered" THEN NULL ELSE delivered_by END, '
+            . 'delivery_status = "delivered", delivered_at = COALESCE(delivered_at, NOW()) '
+            . 'WHERE punch_date BETWEEN ? AND ? AND user_id IS NOT NULL AND '
+            . '((source_uid = "manual-attendance" AND event_type = "printed") '
+            . 'OR (event_type = "printed" AND print_status = "printed")) '
+            . 'AND (delivery_status IS NULL OR delivery_status <> "delivered" '
+            . 'OR (source_uid = "manual-attendance" AND event_type = "printed" '
+            . 'AND COALESCE(print_status, "") NOT IN ("printed", "pending", "printing"))) '
+            // ردیفِ لغوشده (یتیم) از این همگام‌سازی مستثناست.
+            . 'AND COALESCE(print_status, "") NOT IN ("not_printed", "print_error", "failed", "held_absent") '
+            // ⚠️ فیشی که هنوز «در صف چاپ» است تحویل‌شده نیست. پیش‌تر این
+            // همگام‌سازی، ردیفِ pending را delivered می‌کرد؛ بعد Worker با
+            // محافظ «اگر تحویل شده، دوباره چاپ نکن» آن را بی‌صدا printed
+            // می‌کرد و **هیچ کاغذی از چاپگر بیرون نمی‌آمد**. کاربر فیش را
+            // «چاپ‌شده» می‌دید ولی دستش کاغذی نبود. تحویل فقط پس از چاپ
+            // موفق (food_ticket_mark_delivered_on_print در Worker) ثبت می‌شود.
+            . 'AND COALESCE(print_status, "") <> "pending" '
+            . 'AND (COALESCE(ticket_key, "") <> "" OR (source_uid = "manual-attendance" AND event_type = "printed"))'
+            . food_ticket_closed_meal_not_exists_sql()
+            . ' '
+        );
+        $tickets->execute([$fromDate, $toDate]);
+        $delivered = $tickets->rowCount();
+
+        // ── ۱.۶۳.۲: تعمیر خودکار مهمان‌های ثبت‌دستیِ قدیمی ──────────────
+        //
+        // پیش از این اصلاح، مسیر «مهمان» ردیف را با print_status='not_printed'
+        // می‌ساخت، در حالی که هر دو گزارش تحویل شرط print_status='printed'
+        // دارند. نتیجه: مهمان در پایگاه‌داده بود ولی در هیچ گزارشی دیده
+        // نمی‌شد. کد اصلاح شد، اما ردیف‌های قدیمی همان‌طور خراب مانده‌اند.
+        //
+        // این UPDATE آن‌ها را خودکار درست می‌کند تا کاربر مجبور نباشد ابزار
+        // CLI اجرا کند: هر بار که گزارش تحویل باز می‌شود (که همیشه
+        // reconcile_range را صدا می‌زند) ردیف‌های قدیمی هم تعمیر می‌شوند.
+        //
+        // گاردها عیناً همان گاردهای tools/fix_manual_guest_tickets.php است:
+        //   • فقط ثبت دستی (نه کارت‌خوان)
+        //   • فقط مهمان (نه کارمند — مسیر کارمند متفاوت است)
+        //   • فقط هرگز-چاپ‌نشده (print_job_id IS NULL) — ردیفی که در صف چاپ
+        //     است یا چاپش شکست خورده دست نمی‌خورد
+        //   • فقط تحویل‌نشده
+        //   • چاپ فیزیکی درخواست نشده باشد (source_payload.physical_print)
+        $legacyGuests = db()->prepare(
+            'UPDATE food_ticket_events SET print_status = "printed", '
+            . 'delivery_status = "delivered", delivered_at = COALESCE(delivered_at, NOW()) '
+            . 'WHERE punch_date BETWEEN ? AND ? '
+            . 'AND source_uid = "manual-attendance" AND event_type = "guest" '
+            . 'AND print_status = "not_printed" '
+            . 'AND (delivery_status IS NULL OR delivery_status <> "delivered") '
+            . 'AND print_job_id IS NULL '
+            // چاپ فیزیکی: اگر در source_payload ثبت شده باشد، ردیف واقعاً در
+            // صف چاپ بوده و نباید تحویل‌شده علامت بخورد.
+            . 'AND COALESCE(source_payload, "") NOT LIKE "%\"physical_print\":true%" '
+            . food_ticket_closed_meal_not_exists_sql()
+            . ' '
+        );
+        $legacyGuests->execute([$fromDate, $toDate]);
+        $delivered += $legacyGuests->rowCount();
+
+        // فقط «حضور دستی» غیبت را پاک می‌کند — نه هر فیشی.
+        //
+        // پیش‌تر هر فیش printed (حتی چاپِ خودکارِ صبح) رکورد غیبت را حذف
+        // می‌کرد. نتیجه: کسی که واقعاً غایب بود و فیشش صبح چاپ شده بود،
+        // از فهرست غایبان ناپدید می‌شد و در فهرست فیش‌ها «حاضر» دیده
+        // می‌شد — همان ناسازگاری ۲۳ در برابر ۲۷.
+        //
+        // قاعدهٔ درست: چاپ فیش یعنی «غذا داده شد»، نه «حاضر بود». فقط
+        // ثبت دستیِ تردد توسط ادمین، حضور را اثبات می‌کند.
+        // «DELETE ... FROM ... JOIN» مخصوص MySQL است و در SQLite (آزمون
+        // آفلاین tools/test_group_flow_offline.php) خطای نحوی می‌دهد. پس
+        // شناسه‌ها را با SELECT می‌گیریم و با DELETE ... IN حذف می‌کنیم —
+        // همان نتیجه، بدون وابستگی به دیالکت.
+        // ⚠️ «حضور دستی» فقط رکوردی را پاک می‌کند که پیش از آن ثبت شده باشد.
+        // اگر ادمین بعد از ثبت فیش، شخص را عمداً «غایب» بزند (مثلاً غذا را
+        // کس دیگری برداشته)، آن رکورد باید بماند. بدون شرط زمانی، هر بار
+        // بازشدن صفحه، تصمیمِ تازهٔ ادمین را بی‌صدا پاک می‌کرد — همان چیزی
+        // که باعث شد absence-save بگوید «۲ نفر ثبت شد» ولی جدول خالی بماند.
+        $absences = db()->prepare(
+            'SELECT a.id FROM food_ticket_daily_absence a, food_ticket_events e '
+            . 'WHERE a.absence_date BETWEEN ? AND ? '
+            . 'AND e.user_id = a.user_id AND e.punch_date = a.absence_date '
+            . 'AND e.user_id IS NOT NULL '
+            . 'AND e.source_uid = "manual-attendance" AND e.event_type IN ("printed", "no_food") '
+            . 'AND a.created_at < e.created_at'
+            . food_ticket_closed_meal_not_exists_sql('e')
+            . ''
+        );
+        $absences->execute([$fromDate, $toDate]);
+        $manualIds = array_map('intval', $absences->fetchAll(\PDO::FETCH_COLUMN));
+        $clearedByManual = 0;
+        if ($manualIds !== []) {
+            $ph = implode(',', array_fill(0, count($manualIds), '?'));
+            $delManual = db()->prepare('DELETE FROM food_ticket_daily_absence WHERE id IN (' . $ph . ')');
+            $delManual->execute($manualIds);
+            $clearedByManual = $delManual->rowCount();
+        }
+
+        // ── غیبتی که «تردد نماینده» نقض می‌کند ──────────────────────────
+        // کشیدن کارت گروه توسط نماینده یعنی او همان روز در محل حاضر بوده و
+        // برای اعضا غذا گرفته. اگر عضوی که فیش گرفته در فهرست غایبان بماند،
+        // دقیقاً همان «تردد این روز ثبت شده ولی غایب» می‌شود که کاربر دید.
+        //
+        // قاعدهٔ اثبات (سه شرط، هر سه لازم):
+        //   ۱) یک اجرای «first» با وضعیت «done» برای همان گروه و همان تاریخ
+        //      وجود دارد ⇒ نماینده واقعاً تردد ثبت کرده.
+        //   ۲) عضو برای همان تاریخ فیش واقعی دارد (نه no_food/unknown).
+        //   ۳) رکورد غیبت «قبل از» ثبتِ همان اجرا ساخته شده است.
+        // بدون شرط ۱، فیشِ چاپِ خودکارِ صبح هم غیبت را پاک می‌کرد و همان
+        // ناسازگاری «۲۳ غایب در برابر ۲۷ حاضر» برمی‌گشت که پیش‌تر اصلاح شد.
+        // شرط ۳ از حذفِ رکوردی که ادمین «بعد از» تردد عمداً ثبت کرده
+        // جلوگیری می‌کند — وگرنه هر بار بازکردن صفحه، تصمیم دستی را
+        // بی‌صدا برمی‌گرداند.
+        $clearedByGroup = 0;
+        try {
+            // شناسه‌های حذف‌شدنی را با SELECT پیدا می‌کنیم و بعد با DELETE ...
+            // WHERE id IN (...) حذف می‌کنیم. دلیل: «DELETE a FROM ... JOIN»
+            // مخصوص MySQL است و در SQLite (آزمون آفلاین) کار نمی‌کند.
+            $groupProof = db()->prepare(
+                'SELECT a.id FROM food_ticket_daily_absence a, food_ticket_group_runs r, food_ticket_events e '
+                . 'WHERE a.absence_date BETWEEN ? AND ? '
+                . 'AND r.group_id = a.group_id AND r.punch_date = a.absence_date '
+                . 'AND e.user_id = a.user_id AND e.punch_date = a.absence_date '
+                . 'AND r.run_kind = "first" AND r.status = "done" '
+                . 'AND e.event_type IN ("printed", "repeat") '
+                . 'AND a.created_at < r.created_at'
+                . food_ticket_closed_meal_not_exists_sql('e')
+                . ''
+            );
+            $groupProof->execute([$fromDate, $toDate]);
+            $proofIds = array_map('intval', $groupProof->fetchAll(\PDO::FETCH_COLUMN));
+            if ($proofIds !== []) {
+                $ph = implode(',', array_fill(0, count($proofIds), '?'));
+                $delProof = db()->prepare('DELETE FROM food_ticket_daily_absence WHERE id IN (' . $ph . ')');
+                $delProof->execute($proofIds);
+                $clearedByGroup = $delProof->rowCount();
+            }
+        } catch (Throwable $groupEx) {
+            app_error_log('[food-absence] group-run reconcile skipped: ' . $groupEx->getMessage());
+        }
+
+        $result = ['delivered' => $delivered, 'absences_cleared' => $clearedByManual + $clearedByGroup];
+        $done[$cacheKey] = $result;
+        return $result;
+    } catch (Throwable $exception) {
+        app_error_log('[food-manual-attendance] historical reconciliation failed: ' . $exception->getMessage());
+        throw new RuntimeException('همگام‌سازی فیش‌های قبلی و فهرست غیبت انجام نشد؛ جزئیات در لاگ سامانه ثبت شد.', 0, $exception);
+    }
+}
+
+function food_ticket_manual_attendance_reconcile_date(string $date): array
+{
+    return food_ticket_manual_attendance_reconcile_range($date, $date);
+}
+
+/**
+ * رکوردهای غیبت یک تاریخ (اختیاری: محدود به یک گروه).
+ * @return array<int,array<string,mixed>> کلید = user_id
+ */
+function food_ticket_absence_load(string $date, ?int $groupId = null): array
+{
+    if (!food_ticket_absence_ensure()) {
+        return [];
+    }
+    food_ticket_manual_attendance_reconcile_date($date);
+    try {
+        if ($groupId !== null) {
+            $q = db()->prepare('SELECT * FROM food_ticket_daily_absence WHERE absence_date = ? AND (group_id = ? OR group_id IS NULL)');
+            $q->execute([$date, $groupId]);
+        } else {
+            $q = db()->prepare('SELECT * FROM food_ticket_daily_absence WHERE absence_date = ?');
+            $q->execute([$date]);
+        }
+        $out = [];
+        foreach ($q->fetchAll() as $row) {
+            $out[(int) $row['user_id']] = $row;
+        }
+        return $out;
+    } catch (Throwable $e) {
+        app_error_log('[food-absence] load failed: ' . $e->getMessage());
+        return [];
+    }
+}
+
+/**
+ * آیا لیست غیبت این گروه در این تاریخ قفل شده است؟
+ * شرط قفل: ثبت تردد معتبر نماینده = وجود یک اجرای «first» برای همان گروه در همان تاریخ.
+ * ⚠️ هیچ شرط ساعتی (مثلاً ساعت ۱۲) در این تصمیم دخالت ندارد.
+ */
+function food_ticket_group_absence_locked(int $groupId, string $date): bool
+{
+    if ($groupId <= 0 || !food_ticket_groups_ensure()) {
+        return false;
+    }
+    try {
+        $q = db()->prepare('SELECT 1 FROM food_ticket_group_runs WHERE group_id = ? AND punch_date = ? AND run_kind = "first" LIMIT 1');
+        $q->execute([$groupId, $date]);
+        return (bool) $q->fetchColumn();
+    } catch (Throwable $e) {
+        app_error_log('[food-absence] lock check failed: ' . $e->getMessage());
+        return false;
+    }
+}
+
+/**
+ * ثبت/حذف غیبت یک عضو برای یک تاریخ.
+ * قاعده: قبل از قفل، ویرایش با مجوز عادی گروه؛ بعد از قفل فقط با مجوز override.
+ * @param array<string,mixed> $actor کاربر انجام‌دهنده (id/role) برای Audit
+ * @return array<string,mixed> وضعیت نهایی
+ */
+function food_ticket_absence_set(int $groupId, int $userId, string $date, bool $absent, string $reason, array $actor = []): array
+{
+    if (!food_ticket_absence_ensure()) {
+        throw new RuntimeException('جدول غیبت روزانه ساخته نشد.');
+    }
+    if ($groupId <= 0 || $userId <= 0 || !preg_match('/^\d{4}-\d{2}-\d{2}$/', $date)) {
+        throw new RuntimeException('گروه، کاربر یا تاریخ معتبر نیست.');
+    }
+    // عضو باید واقعاً عضو همین گروه باشد (غیبت فقط برای اعضای گروه معنا دارد).
+    $m = db()->prepare('SELECT 1 FROM food_ticket_group_members WHERE group_id = ? AND user_id = ? LIMIT 1');
+    $m->execute([$groupId, $userId]);
+    if (!$m->fetchColumn()) {
+        throw new RuntimeException('این کاربر عضو این گروه نیست.');
+    }
+
+    $locked = food_ticket_group_absence_locked($groupId, $date);
+    $override = false;
+    if ($locked) {
+        $override = food_ticket_can_override_absence($actor);
+        if (!$override) {
+            throw new RuntimeException('لیست غیبت این گروه برای این تاریخ قفل شده است (تردد نماینده ثبت شده). اصلاح فقط با دسترسی سطح بالاتر امکان دارد.');
+        }
+        if (trim($reason) === '') {
+            throw new RuntimeException('برای اصلاح بعد از قفل، ثبت «دلیل اصلاح» الزامی است.');
+        }
+    }
+
+    $current = db()->prepare('SELECT id FROM food_ticket_daily_absence WHERE absence_date = ? AND user_id = ? LIMIT 1');
+    $current->execute([$date, $userId]);
+    $rowId = (int) ($current->fetchColumn() ?: 0);
+    $before = $rowId > 0;
+
+    if ($absent) {
+        if ($before) {
+            db()->prepare('UPDATE food_ticket_daily_absence SET group_id = ?, reason = ?, created_by = ? WHERE id = ?')
+                ->execute([$groupId, $reason !== '' ? mb_substr($reason, 0, 300) : null, (int) ($actor['id'] ?? 0) ?: null, $rowId]);
+        } else {
+            db()->prepare('INSERT INTO food_ticket_daily_absence (absence_date, group_id, user_id, reason, created_by) VALUES (?, ?, ?, ?, ?)')
+                ->execute([$date, $groupId, $userId, $reason !== '' ? mb_substr($reason, 0, 300) : null, (int) ($actor['id'] ?? 0) ?: null]);
+        }
+    } elseif ($before) {
+        db()->prepare('DELETE FROM food_ticket_daily_absence WHERE id = ?')->execute([$rowId]);
+    }
+
+    $code = $locked ? 'food_absence_override' : ($absent ? 'food_absence_set' : 'food_absence_cleared');
+    food_ticket_audit($code, [
+        'user_id' => $actor['id'] ?? null,
+        'target_type' => 'food_absence',
+        'target_id' => $userId,
+        'target_label' => 'گروه ' . $groupId . ' / تاریخ ' . $date,
+        'old' => $before ? 'absent' : 'present',
+        'new' => $absent ? 'absent' : 'present',
+        'reason' => $reason,
+        'meta' => ['group_id' => $groupId, 'date' => $date, 'frozen' => $locked],
+    ]);
+
+    // اثر فوری روی فیش‌های همان روز: غایب → فیش چاپ‌نشده متوقف می‌شود؛ حاضر → فیش متوقف‌شده برمی‌گردد.
+    $ticketAction = '';
+    if (function_exists('food_ticket_hold_ticket_for_absence')) {
+        if ($absent) {
+            $ticketAction = food_ticket_hold_ticket_for_absence($userId, $date, $actor, $reason) ? 'held' : '';
+        } else {
+            $ticketAction = food_ticket_release_held_ticket($userId, $date, $actor, $reason) ? 'released' : '';
+        }
+    }
+    return ['ok' => true, 'group_id' => $groupId, 'user_id' => $userId, 'date' => $date, 'absent' => $absent, 'locked' => $locked, 'override' => $override, 'ticket_action' => $ticketAction];
+}
+
+/** همهٔ اعضای گروه را برای یک تاریخ «حاضر» می‌کند (حذف رکوردهای غیبت همان تاریخ). */
+function food_ticket_absence_clear_group(int $groupId, string $date, string $reason, array $actor = []): int
+{
+    if (!food_ticket_absence_ensure()) {
+        throw new RuntimeException('جدول غیبت روزانه ساخته نشد.');
+    }
+    $locked = food_ticket_group_absence_locked($groupId, $date);
+    if ($locked && !food_ticket_can_override_absence($actor)) {
+        throw new RuntimeException('لیست غیبت قفل شده است؛ حذف گروهی غیبت‌ها مجاز نیست.');
+    }
+    if ($locked && trim($reason) === '') {
+        throw new RuntimeException('برای اصلاح بعد از قفل، ثبت «دلیل اصلاح» الزامی است.');
+    }
+    $beforeIds = [];
+    try {
+        $bq = db()->prepare('SELECT user_id FROM food_ticket_daily_absence WHERE absence_date = ? AND group_id = ?');
+        $bq->execute([$date, $groupId]);
+        $beforeIds = array_map('intval', $bq->fetchAll(PDO::FETCH_COLUMN));
+    } catch (Throwable $e) {
+        app_error_log('[food-absence] clear lookup: ' . $e->getMessage());
+    }
+    $q = db()->prepare('DELETE FROM food_ticket_daily_absence WHERE absence_date = ? AND group_id = ?');
+    $q->execute([$date, $groupId]);
+    $n = $q->rowCount();
+    // فیش‌های متوقف‌شدهٔ همین اعضا به صف چاپ برمی‌گردند (عضو دیگر غایب نیست)
+    $releasedCount = 0;
+    if (function_exists('food_ticket_release_held_ticket')) {
+        foreach ($beforeIds as $uid) {
+            if (food_ticket_release_held_ticket((int) $uid, $date, $actor, $reason)) {
+                $releasedCount++;
+            }
+        }
+    }
+    if ($n > 0) {
+        food_ticket_audit($locked ? 'food_absence_override' : 'food_absence_cleared', [
+            'user_id' => $actor['id'] ?? null,
+            'target_type' => 'food_group',
+            'target_id' => $groupId,
+            'target_label' => 'گروه ' . $groupId . ' / تاریخ ' . $date,
+            'old' => $n . ' غایب',
+            'new' => 'همه حاضر',
+            'reason' => $reason,
+            'meta' => ['group_id' => $groupId, 'date' => $date, 'cleared' => $n, 'frozen' => $locked, 'tickets_released' => $releasedCount],
+        ]);
+    }
+    return $n;
+}
+
+/** تعداد فیش‌های متوقف‌شده (held_absent) اعضای یک گروه در یک تاریخ. */
+function food_ticket_absence_held_count(int $groupId, string $date): int
+{
+    if ($groupId <= 0 || !preg_match('/^\d{4}-\d{2}-\d{2}$/', $date)) {
+        return 0;
+    }
+    if (!function_exists('food_ticket_events_ensure_hold_status') || !food_ticket_events_ensure_hold_status()) {
+        return 0;
+    }
+    try {
+        $members = food_ticket_group_members($groupId);
+        if ($members === []) {
+            return 0;
+        }
+        $ids = array_map('intval', array_column($members, 'id'));
+        $in = implode(',', array_fill(0, count($ids), '?'));
+        $q = db()->prepare('SELECT COUNT(*) FROM food_ticket_events WHERE punch_date = ? AND print_status = "held_absent" AND user_id IN (' . $in . ')');
+        $q->execute(array_merge([$date], $ids));
+        return (int) $q->fetchColumn();
+    } catch (Throwable $e) {
+        app_error_log('[food-absence] held count: ' . $e->getMessage());
+        return 0;
+    }
+}
+
+/** ویرایش و اصلاح غیبت در هر زمان با دسترسی ویرایش گروه‌های غذا انجام می‌شود. */
+function food_ticket_can_override_absence(array $user): bool
+{
+    return function_exists('user_can')
+        ? user_can($user, 'food.groups_edit')
+        : (function_exists('food_ticket_is_primary_admin') && food_ticket_is_primary_admin($user));
+}
+
+// ───────────────────────── گروه‌ها: بارگذاری و شناسایی ─────────────────────────
+
+/**
+ * همهٔ گروه‌ها (فعال و غیرفعال)، با کش ۳۰ ثانیه‌ای.
+ * @return list<array{id:int,title:string,l_uid:string,rfid_card:string,status:string}>
+ */
+function food_ticket_groups_load(bool $refresh = false): array
+{
+    static $groups = null;
+    static $loadedAt = 0;
+    if (!food_ticket_groups_ensure()) {
+        return [];
+    }
+    if ($refresh || $groups === null || (time() - $loadedAt) > 30) {
+        $groups = [];
+        try {
+            foreach (db()->query('SELECT id, title, l_uid, rfid_card, status FROM food_ticket_groups ORDER BY id')->fetchAll() as $row) {
+                $groups[] = [
+                    'id' => (int) $row['id'],
+                    'title' => (string) $row['title'],
+                    'l_uid' => food_ticket_code((string) ($row['l_uid'] ?? '')),
+                    'rfid_card' => (string) ($row['rfid_card'] ?? ''),
+                    'status' => (string) $row['status'],
+                ];
+            }
+        } catch (Throwable $e) {
+            app_error_log('[food-groups] load failed: ' . $e->getMessage());
+        }
+        $loadedAt = time();
+    }
+    return $groups;
+}
+
+/**
+ * گروهی که L_UID نماینده‌اش با این مقدار برابر است (شناسهٔ اصلی شناسایی).
+ * مقایسه با همان نرمال‌سازی کدها (۱۰۰ ≡ 0100 ≡ «۱۰۰»).
+ */
+function food_ticket_group_find_by_uid(string $uid, bool $refresh = false): ?array
+{
+    $uid = food_ticket_code($uid);
+    if ($uid === '' || $uid === '0' || $uid === '-1') {
+        return null;
+    }
+    foreach (food_ticket_groups_load($refresh) as $group) {
+        if ($group['l_uid'] !== '' && $group['l_uid'] === $uid) {
+            return $group;
+        }
+    }
+    return null;
+}
+
+/**
+ * گروهی که کارتش با C_Card برابر است — فقط پل سازگاری برای گروه‌های قدیمی.
+ * گروه‌هایی که L_UID دارند از این مسیر شناسایی نمی‌شوند.
+ */
+function food_ticket_group_find_by_card(string $card, bool $refresh = false): ?array
+{
+    if ($card === '' || $card === '0') {
+        return null;
+    }
+    foreach (food_ticket_groups_load($refresh) as $group) {
+        if ($group['l_uid'] !== '') {
+            continue; // شناسایی این گروه فقط با L_UID است
+        }
+        if (food_ticket_card_equals($card, (string) $group['rfid_card'])) {
+            return $group;
+        }
+    }
+    return null;
+}
+
+/**
+ * شناسایی گروه از یک ردیف SOURCE_TABLE: اول L_UID، بعد (فقط برای گروه‌های بدون L_UID) کارت.
+ * @param array<string,mixed> $item
+ * @return array{group:array<string,mixed>,matched_by:string}|null
+ */
+function food_ticket_group_resolve(array $item): ?array
+{
+    $uid = food_ticket_code($item['uid'] ?? '');
+    if ($uid !== '' && $uid !== '0' && $uid !== '-1') {
+        $byUid = food_ticket_group_find_by_uid($uid);
+        if ($byUid !== null) {
+            return ['group' => $byUid, 'matched_by' => 'uid'];
+        }
+    }
+    // ⚠️ شمارهٔ کارت (C_CARD) از شناسایی نمایندهٔ گروه کاملاً حذف شد (۱.۳۴).
+    // ردیفی که فقط کارت دارد و L_UID ندارد، به هیچ گروهی نسبت داده نمی‌شود و
+    // مسیر عادی موتور (کارت↔پرسنل با نگاشت داخلی) برایش اجرا می‌شود.
+    return null;
+}
+
+/** گروهی که این کارت روی آن ثبت شده، حتی اگر L_UID داشته باشد (فقط برای لاگ). */
+function food_ticket_group_find_by_card_any(string $card): ?array
+{
+    if ($card === '' || $card === '0') {
+        return null;
+    }
+    foreach (food_ticket_groups_load() as $group) {
+        if ((string) $group['rfid_card'] !== '' && food_ticket_card_equals($card, (string) $group['rfid_card'])) {
+            return $group;
+        }
+    }
+    return null;
+}
+
+/** همان بازهٔ مجاز موتور: دیروز تا امروز (به وقت تهران). */
+function food_ticket_group_date_ok(string $date): bool
+{
+    try {
+        $today = (new DateTimeImmutable('now', new DateTimeZone('Asia/Tehran')))->format('Y-m-d');
+    } catch (Throwable) {
+        $today = date('Y-m-d');
+    }
+    $minDate = (new DateTimeImmutable($today))->modify('-1 day')->format('Y-m-d');
+    return $date >= $minDate && $date <= $today;
+}
+
+function food_ticket_group_member_key(string $triggerKey, int $userId): string
+{
+    return hash('sha256', 'food-group-member|' . $triggerKey . '|' . $userId);
+}
+
+/** شناسهٔ رویدادهای ساخته‌شده از یک اجرای گروه را برای ثبت نتیجهٔ حذف SOURCE_TABLE برمی‌گرداند. */
+function food_ticket_group_event_ids_for_run(int $runId): array
+{
+    if ($runId <= 0) {
+        return [];
+    }
+    try {
+        // source_payload هر فیش گروهی شامل "run_id":N است. الگوی دقیقِ ویرگول‌دار
+        // از اشتباه‌گرفتن run id کوتاه با پیشوند run id بلندتر جلوگیری می‌کند.
+        $needle = '%"run_id":' . $runId . ',%';
+        $query = db()->prepare('SELECT id FROM food_ticket_events WHERE source_payload LIKE ? ORDER BY id');
+        $query->execute([$needle]);
+        $ids = array_map('intval', $query->fetchAll(PDO::FETCH_COLUMN));
+        return array_values(array_unique(array_filter($ids, static fn (int $id): bool => $id > 0)));
+    } catch (Throwable $e) {
+        app_error_log('[food-groups] event lookup by run failed: ' . $e->getMessage());
+        return [];
+    }
+}
+
+// ───────────────────────── محاسبهٔ واجد شرایط (هستهٔ منطق، بدون DB) ─────────────────────────
+
+/**
+ * برنامهٔ فیش یک گروه = تابع خالص (بدون DB) تا قابل تست باشد.
+ *
+ * واجد شرایط بودن (با وضعیت‌های واقعی همین سیستم تطبیق داده شده):
+ *   Eligible = فعال بودن کاربر
+ *              AND غایب‌نبودن در غیبت روزانهٔ همان تاریخ
+ *              AND داشتن کد ملی (کلید تطبیق سفارش)
+ *              AND داشتن سفارش غذا برای همان تاریخ (سفارشِ لغوشده/خالی = ندارد)
+ *              AND قبلاً فیش نگرفته/تحویل نگرفته بودن («یک فیش در روز برای هر نفر»)
+ *
+ * ترتیب تصمیم برای هر عضو (اولین موردی که برقرار بود، وضعیت اوست):
+ *   inactive → absent → no_national → no_order → already_ticketed → eligible
+ *
+ * @param list<array<string,mixed>> $members        ردیف‌های users
+ * @param array<int,bool>           $absentUserIds  کاربران غایب همان تاریخ
+ * @param array<string,bool>        $ticketedKeys   کلیدهای فیش صادرشده (food:تاریخ:کدملی)
+ * @param callable(array):?string   $foodFor        تابع «سفارش این کاربر برای این تاریخ»
+ * @param string                    $date           تاریخ میلادی Y-m-d (برای ساخت کلید فیش)
+ * @return array{rows:list<array<string,mixed>>,member_states:array<int,string>,total:int,present:int,absent:int,eligible:int,no_order:int,already_ticketed:int,inactive:int,no_national:int}
+ */
+function food_ticket_group_plan(array $members, array $absentUserIds, array $ticketedKeys, callable $foodFor, string $date = ''): array
+{
+    $rows = [];
+    $counts = [
+        'total' => 0, 'present' => 0, 'absent' => 0, 'eligible' => 0,
+        'no_order' => 0, 'already_ticketed' => 0, 'inactive' => 0, 'no_national' => 0,
+    ];
+    foreach ($members as $member) {
+        $userId = (int) ($member['id'] ?? 0);
+        if ($userId <= 0) {
+            continue;
+        }
+        $counts['total']++;
+        $national = food_ticket_digits($member['national_code'] ?? '');
+        $ticketKey = $national !== '' ? ('food:' . $date . ':' . $national) : '';
+        $food = '';
+        if (!(int) ($member['is_active'] ?? 0)) {
+            $state = 'inactive';
+        } elseif (!empty($absentUserIds[$userId]) && empty($ticketedKeys[$ticketKey])) {
+            // غایب فقط اگر فیش واقعی نداشته باشد. کسی که فیش گرفته قطعاً
+            // غذا گرفته؛ «غایب» بودنش با داده ناسازگار است.
+            $state = 'absent';
+        } elseif ($national === '') {
+            $state = 'no_national';
+        } else {
+            $looked = $foodFor($member);
+            $food = is_string($looked) ? trim($looked) : '';
+            if ($food === '') {
+                $state = 'no_order';
+            } elseif ($ticketKey !== '' && !empty($ticketedKeys[$ticketKey])) {
+                $state = 'already_ticketed';
+            } else {
+                $state = 'eligible';
+            }
+        }
+        $counts[$state]++;
+        if ($state !== 'absent' && $state !== 'inactive') {
+            $counts['present']++;
+        }
+        $rows[] = [
+            'user_id' => $userId,
+            'full_name' => (string) ($member['full_name'] ?? ''),
+            'national_code' => $national,
+            'employee_number' => (string) ($member['employee_number'] ?? ''),
+            'state' => $state,
+            'food' => $food,
+            'ticket_key' => $ticketKey,
+        ];
+    }
+    $states = [];
+    foreach ($rows as $row) {
+        $states[(int) $row['user_id']] = (string) $row['state'];
+    }
+    return ['rows' => $rows, 'member_states' => $states] + $counts;
+}
+
+/**
+ * اعضای گروه از دیتابیس.
+ * @return list<array<string,mixed>>
+ */
+if (!function_exists('food_person_name_split')) {
+    /**
+     * جداسازی «نام» و «نام خانوادگی» برای نمایش دو ستونه؛ رکوردهای قدیمی بدون
+     * first/last_name: کل «نام کامل» در ستون نام خانوادگی می‌نشیند و نام یک «—».
+     * @return array{first:string,last:string}
+     */
+    function food_person_name_split(array $row): array
+    {
+        $first = trim((string) ($row['first_name'] ?? ''));
+        $last = trim((string) ($row['last_name'] ?? ''));
+        if ($first === '' && $last === '') {
+            return ['first' => '', 'last' => trim((string) ($row['full_name'] ?? ''))];
+        }
+        return ['first' => $first, 'last' => $last];
+    }
+}
+
+function food_ticket_group_members(int $groupId, bool $activeOnly = false): array
+{
+    if ($groupId <= 0 || !food_ticket_groups_ensure()) {
+        return [];
+    }
+    $sql = 'SELECT u.id, u.full_name, u.first_name, u.last_name, u.employee_number, u.national_code, u.is_active '
+        . 'FROM food_ticket_group_members m JOIN users u ON u.id = m.user_id WHERE m.group_id = ?';
+    if ($activeOnly) {
+        $sql .= ' AND u.is_active = 1';
+    }
+    $sql .= ' ORDER BY m.id';
+    $q = db()->prepare($sql);
+    $q->execute([$groupId]);
+    return $q->fetchAll() ?: [];
+}
+
+/** آیا کاربر عضو دائم هیچ گروه غذایی است؟ */
+function food_ticket_user_group_id(int $userId): ?int
+{
+    if ($userId <= 0 || !food_ticket_groups_ensure()) {
+        return null;
+    }
+    try {
+        $q = db()->prepare('SELECT group_id FROM food_ticket_group_members WHERE user_id = ? LIMIT 1');
+        $q->execute([$userId]);
+        $id = $q->fetchColumn();
+        return $id ? (int) $id : null;
+    } catch (Throwable $e) {
+        app_error_log('[food-visit] home group lookup failed: ' . $e->getMessage());
+        return null;
+    }
+}
+
+/** مهمانان یک‌روزهٔ یک گروه در یک تاریخ. */
+function food_ticket_day_visit_users(int $groupId, string $date): array
+{
+    if ($groupId <= 0 || !preg_match('/^\d{4}-\d{2}-\d{2}$/', $date) || !food_ticket_groups_ensure()) {
+        return [];
+    }
+    try {
+        $q = db()->prepare(
+            'SELECT u.id, u.full_name, u.first_name, u.last_name, u.employee_number, u.national_code, u.is_active, '
+            . 'm.group_id AS home_group_id, hg.title AS home_group_title '
+            . 'FROM food_ticket_day_visits v JOIN users u ON u.id = v.user_id '
+            . 'LEFT JOIN food_ticket_group_members m ON m.user_id = u.id '
+            . 'LEFT JOIN food_ticket_groups hg ON hg.id = m.group_id '
+            . 'WHERE v.group_id = ? AND v.visit_date = ? ORDER BY v.id'
+        );
+        $q->execute([$groupId, $date]);
+        return $q->fetchAll() ?: [];
+    } catch (Throwable $e) {
+        app_error_log('[food-visit] list failed: ' . $e->getMessage());
+        return [];
+    }
+}
+
+/** اعضای دائم و موقتِ مقصد برای همان تاریخ؛ انتقال روزانه، عضویت دائمیِ گروه مبدأ را جایگزین می‌کند. */
+function food_ticket_group_members_for_date(int $groupId, string $date, bool $activeOnly = false): array
+{
+    $members = food_ticket_group_members($groupId, $activeOnly);
+    if ($groupId <= 0 || !preg_match('/^\\d{4}-\\d{2}-\\d{2}$/', $date)) {
+        return $members;
+    }
+    // اگر عضو دائمی در همان تاریخ به گروه دیگری منتقل شده، نباید در گروه خانه هم فیش بگیرد.
+    try {
+        $visitStmt = db()->prepare('SELECT user_id, group_id FROM food_ticket_day_visits WHERE visit_date = ?');
+        $visitStmt->execute([$date]);
+        $visitGroupByUser = [];
+        foreach ($visitStmt->fetchAll(PDO::FETCH_ASSOC) ?: [] as $row) {
+            $visitGroupByUser[(int) $row['user_id']] = (int) $row['group_id'];
+        }
+    } catch (Throwable $e) {
+        app_error_log('[food-visit] dated membership lookup failed: ' . $e->getMessage());
+        throw new RuntimeException('انتقال‌های موقت روزانه در دسترس نیست؛ پردازش گروه برای جلوگیری از فیش تکراری متوقف شد.', 0, $e);
+    }
+    $members = array_values(array_filter($members, static function (array $member) use ($visitGroupByUser, $groupId): bool {
+        $id = (int) ($member['id'] ?? 0);
+        return !isset($visitGroupByUser[$id]) || $visitGroupByUser[$id] === $groupId;
+    }));
+    $seen = [];
+    foreach ($members as $m) {
+        $seen[(int) ($m['id'] ?? 0)] = true;
+    }
+    foreach (food_ticket_day_visit_users($groupId, $date) as $visitor) {
+        $id = (int) ($visitor['id'] ?? 0);
+        if ($id > 0 && !isset($seen[$id])) {
+            if ($activeOnly && !(int) ($visitor['is_active'] ?? 0)) {
+                continue;
+            }
+            $members[] = $visitor;
+            $seen[$id] = true;
+        }
+    }
+    return $members;
+}
+
+function food_ticket_day_visit_row(int $userId, string $date): ?array
+{
+    if ($userId <= 0 || !preg_match('/^\d{4}-\d{2}-\d{2}$/', $date) || !food_ticket_groups_ensure()) {
+        return null;
+    }
+    try {
+        $q = db()->prepare(
+            'SELECT v.group_id, g.title FROM food_ticket_day_visits v '
+            . 'JOIN food_ticket_groups g ON g.id = v.group_id '
+            . 'WHERE v.user_id = ? AND v.visit_date = ? LIMIT 1'
+        );
+        $q->execute([$userId, $date]);
+        $row = $q->fetch() ?: null;
+        return $row ?: null;
+    } catch (Throwable $e) {
+        app_error_log('[food-visit] get failed: ' . $e->getMessage());
+        return null;
+    }
+}
+
+/** ساعت HH:MM مهلت تغییر سلف؛ خالی یعنی بدون محدودیت. */
+function food_ticket_visit_change_hhmm(mixed $value): string
+{
+    $raw = trim(strtr((string) ($value ?? ''), [
+        '۰' => '0', '۱' => '1', '۲' => '2', '۳' => '3', '۴' => '4',
+        '۵' => '5', '۶' => '6', '۷' => '7', '۸' => '8', '۹' => '9',
+        '٠' => '0', '١' => '1', '٢' => '2', '٣' => '3', '٤' => '4',
+        '٥' => '5', '٦' => '6', '٧' => '7', '٨' => '8', '٩' => '9',
+    ]));
+    if ($raw === '') {
+        return '';
+    }
+    if (preg_match('/^(\d{3,4})$/', $raw, $compact)) {
+        $digits = str_pad($compact[1], 4, '0', STR_PAD_LEFT);
+        $raw = substr($digits, 0, 2) . ':' . substr($digits, 2, 2);
+    }
+    if (!preg_match('/^(\d{1,2}):(\d{2})(?::\d{2})?$/', $raw, $parts)) {
+        return '';
+    }
+    $hour = (int) $parts[1];
+    $minute = (int) $parts[2];
+    if ($hour > 23 || $minute > 59) {
+        return '';
+    }
+    return sprintf('%02d:%02d', $hour, $minute);
+}
+
+function food_ticket_visit_change_now(): DateTimeImmutable
+{
+    if (function_exists('food_order_now')) {
+        return food_order_now();
+    }
+    try {
+        return new DateTimeImmutable('now', new DateTimeZone('Asia/Tehran'));
+    } catch (Throwable) {
+        return new DateTimeImmutable('now');
+    }
+}
+
+/** دقیقهٔ تنظیم‌شده هم مجاز است؛ خالی = بدون محدودیت ساعت. */
+function food_ticket_visit_change_is_open(mixed $until, ?DateTimeImmutable $now = null): bool
+{
+    $hhmm = food_ticket_visit_change_hhmm($until);
+    if ($hhmm === '') {
+        return true;
+    }
+    $now ??= food_ticket_visit_change_now();
+    return $now->format('H:i') <= $hhmm;
+}
+
+function food_ticket_visit_change_guard(mixed $until, string $groupTitle): void
+{
+    $hhmm = food_ticket_visit_change_hhmm($until);
+    if ($hhmm === '' || food_ticket_visit_change_is_open($hhmm)) {
+        return;
+    }
+    $label = function_exists('food_ticket_fa_digits') ? food_ticket_fa_digits($hhmm) : $hhmm;
+    throw new RuntimeException('مهلت تغییر سلف برای «' . $groupTitle . '» تا ساعت ' . $label . ' است و الان گذشته است.');
+}
+
+/** لغو اعلام تغییر سلف بعد از مهلت ساعت: فقط مدیر پشتیبانی یا مدیر اصلی. */
+function food_ticket_can_cancel_day_visit(array $user): bool
+{
+    return function_exists('user_can')
+        ? user_can($user, 'food.groups_edit')
+        : (function_exists('food_ticket_is_primary_admin') && food_ticket_is_primary_admin($user));
+}
+
+/** وضعیت خوداظهاری محل تحویل امروز برای صفحهٔ سفارش غذا. */
+function food_ticket_day_visit_state(array $user, string $date = '', ?array $actor = null): array
+{
+    $date = preg_match('/^\d{4}-\d{2}-\d{2}$/', $date) ? $date : date('Y-m-d');
+    $actor = $actor ?? $user;
+    $userId = (int) ($user['id'] ?? 0);
+    $homeId = food_ticket_user_group_id($userId);
+    $homeTitle = '';
+    $untilById = [];
+    try {
+        foreach (db()->query('SELECT id, visit_change_until FROM food_ticket_groups')->fetchAll() as $row) {
+            $untilById[(int) $row['id']] = food_ticket_visit_change_hhmm($row['visit_change_until'] ?? '');
+        }
+    } catch (Throwable $e) {
+        app_error_log('[food-visit] until map failed: ' . $e->getMessage());
+    }
+    $groups = [];
+    foreach (food_ticket_groups_load() as $g) {
+        if (($g['status'] ?? '') !== 'active') {
+            continue;
+        }
+        $gid = (int) ($g['id'] ?? 0);
+        $title = (string) ($g['title'] ?? '');
+        $until = $untilById[$gid] ?? '';
+        $groups[] = [
+            'id' => $gid,
+            'title' => $title,
+            'visit_change_until' => $until,
+            'change_open' => food_ticket_visit_change_is_open($until),
+        ];
+        if ($homeId !== null && $gid === $homeId) {
+            $homeTitle = $title;
+        }
+    }
+    $current = food_ticket_day_visit_row($userId, $date);
+    $currentOut = null;
+    $locked = false;
+    $currentChangeOpen = true;
+    if ($current) {
+        $gid = (int) $current['group_id'];
+        $until = $untilById[$gid] ?? '';
+        $currentChangeOpen = food_ticket_visit_change_is_open($until);
+        $currentOut = [
+            'group_id' => $gid,
+            'title' => (string) $current['title'],
+            'visit_change_until' => $until,
+            'change_open' => $currentChangeOpen,
+        ];
+        $locked = food_ticket_group_absence_locked($gid, $date);
+    }
+    return [
+        'date' => $date,
+        'allowed' => $homeId === null,
+        'home_group_id' => $homeId,
+        'home_group_title' => $homeTitle,
+        'groups' => $groups,
+        'current' => $currentOut,
+        'locked' => $locked,
+        'change_open' => $currentOut ? $currentChangeOpen : true,
+        'can_override' => food_ticket_can_cancel_day_visit($actor),
+        'person_id' => $userId,
+        'person_name' => trim((string) ($user['full_name'] ?? '')),
+        'reason' => $homeId === null
+            ? ''
+            : ('این شخص عضو دائم گروه «' . ($homeTitle !== '' ? $homeTitle : 'ثبت‌شده') . '» است و محل تحویلش همان گروه است.'),
+    ];
+}
+
+function food_ticket_day_visit_save(array $user, int $groupId, string $date = '', ?array $actor = null, bool $managerOverride = false): array
+{
+    if (!food_ticket_groups_ensure()) {
+        throw new RuntimeException('جدول خوداظهاری غذا در دسترس نیست.');
+    }
+    $actor = $actor ?? $user;
+    if ($managerOverride
+        && !food_ticket_can_cancel_day_visit($actor)
+        && !(function_exists('user_can') && user_can($actor, 'food.menu_edit'))) {
+        throw new RuntimeException('دسترسی عملیات گروهی غذا ندارید.');
+    }
+    $date = preg_match('/^\d{4}-\d{2}-\d{2}$/', $date) ? $date : date('Y-m-d');
+    $today = date('Y-m-d');
+    if ((!$managerOverride && $date !== $today) || ($managerOverride && $date < $today)) {
+        throw new RuntimeException($managerOverride ? 'تغییر سلف برای تاریخ گذشته مجاز نیست.' : 'خوداظهاری فقط برای امروز مجاز است.');
+    }
+    $userId = (int) ($user['id'] ?? 0);
+    if ($userId <= 0 || $groupId <= 0) {
+        throw new RuntimeException('کاربر یا گروه معتبر نیست.');
+    }
+    $homeId = food_ticket_user_group_id($userId);
+    $existing = food_ticket_day_visit_row($userId, $date);
+    if ($homeId !== null && !$managerOverride) {
+        throw new RuntimeException('عضو دائم گروه نمی‌تواند محل تحویل را عوض کند؛ انتقال موقت را مدیر مجاز انجام می‌دهد.');
+    }
+    $g = db()->prepare('SELECT id, title, status, visit_change_until FROM food_ticket_groups WHERE id = ? LIMIT 1');
+    $g->execute([$groupId]);
+    $group = $g->fetch() ?: null;
+    if (!$group || (string) $group['status'] !== 'active') {
+        throw new RuntimeException('این گروه فعال نیست.');
+    }
+    if (!$managerOverride) {
+        food_ticket_visit_change_guard($group['visit_change_until'] ?? '', (string) $group['title']);
+    }
+    if (food_ticket_group_absence_locked($groupId, $date)) {
+        throw new RuntimeException('فیش گروه مقصد برای این تاریخ چاپ شده است؛ تغییر سلف بسته است.');
+    }
+    if ($existing && food_ticket_group_absence_locked((int) $existing['group_id'], $date)) {
+        throw new RuntimeException('فیش سلف فعلی برای این تاریخ چاپ شده است؛ انتقال یا بازگشت ممکن نیست.');
+    }
+    if ($existing && !$managerOverride) {
+        $prevUntil = '';
+        try {
+            $pq = db()->prepare('SELECT visit_change_until FROM food_ticket_groups WHERE id = ? LIMIT 1');
+            $pq->execute([(int) $existing['group_id']]);
+            $prevUntil = (string) ($pq->fetchColumn() ?: '');
+        } catch (Throwable) {
+            $prevUntil = '';
+        }
+        food_ticket_visit_change_guard($prevUntil, (string) $existing['title']);
+    }
+
+    $homeTitle = '';
+    if ($homeId !== null) {
+        $homeStmt = db()->prepare('SELECT title FROM food_ticket_groups WHERE id = ? LIMIT 1');
+        $homeStmt->execute([$homeId]);
+        $homeTitle = (string) ($homeStmt->fetchColumn() ?: 'گروه دائمی');
+        if ($groupId !== $homeId && food_ticket_group_absence_locked($homeId, $date)) {
+            throw new RuntimeException('فیش گروه دائمی مبدأ برای این تاریخ چاپ شده است؛ انتقال موقت دیگر ممکن نیست.');
+        }
+        // انتخاب گروه دائمی، انتقال موقت قبلی را برمی‌گرداند؛ عضویت دائمی هرگز تغییر نمی‌کند.
+        if ($groupId === $homeId) {
+            if (!$existing || (int) $existing['group_id'] === $homeId) {
+                throw new RuntimeException('این کارمند اکنون در گروه دائمی خود است و انتقالی برای بازگرداندن ندارد.');
+            }
+            db()->prepare('DELETE FROM food_ticket_day_visits WHERE user_id = ? AND visit_date = ?')->execute([$userId, $date]);
+            food_ticket_audit('food_day_visit_temporary_transfer_returned', [
+                'target_type' => 'food_group',
+                'target_id' => $homeId,
+                'target_label' => $homeTitle,
+                'user_id' => (int) ($actor['id'] ?? $userId),
+                'old' => (string) $existing['title'],
+                'new' => $homeTitle,
+                'meta' => [
+                    'date' => $date,
+                    'subject_user_id' => $userId,
+                    'home_group_id' => $homeId,
+                    'temporary_group_id' => (int) $existing['group_id'],
+                    'temporary_transfer' => true,
+                ],
+            ]);
+            return food_ticket_day_visit_state($user, $date, $actor) + [
+                'ok' => true,
+                'message' => 'برای ' . food_order_full_name($user) . ' انتقال موقت لغو شد و گروه دائمی «' . $homeTitle . '» برقرار ماند.',
+            ];
+        }
+    }
+
+    if ($existing) {
+        if ((int) $existing['group_id'] === $groupId) {
+            throw new RuntimeException('این فرد از قبل برای همان سلف ثبت شده است.');
+        }
+        db()->prepare('UPDATE food_ticket_day_visits SET group_id = ? WHERE user_id = ? AND visit_date = ?')
+            ->execute([$groupId, $userId, $date]);
+    } else {
+        db()->prepare('INSERT INTO food_ticket_day_visits (user_id, visit_date, group_id) VALUES (?, ?, ?)')
+            ->execute([$userId, $date, $groupId]);
+    }
+    $temporaryTransfer = $managerOverride && $homeId !== null;
+    $auditCode = $temporaryTransfer ? 'food_day_visit_temporary_transfer' : ($managerOverride ? 'food_day_visit_bulk_set' : 'food_day_visit_set');
+    $oldTitle = $existing ? (string) $existing['title'] : ($temporaryTransfer ? $homeTitle : '');
+    food_ticket_audit($auditCode, [
+        'target_type' => 'food_group',
+        'target_id' => $groupId,
+        'target_label' => (string) $group['title'],
+        'user_id' => (int) ($actor['id'] ?? $userId),
+        'old' => $oldTitle,
+        'new' => (string) $group['title'],
+        'meta' => [
+            'date' => $date,
+            'group_id' => $groupId,
+            'subject_user_id' => $userId,
+            'manager_override' => $managerOverride,
+            'home_group_id' => $homeId,
+            'temporary_transfer' => $temporaryTransfer,
+        ],
+    ]);
+    $message = $temporaryTransfer
+        ? 'انتقال موقت ' . food_order_full_name($user) . ' از گروه دائمی «' . $homeTitle . '» به سلف «' . $group['title'] . '» ثبت شد؛ عضویت دائمی تغییر نکرد.'
+        : 'برای ' . food_order_full_name($user) . '، سلف «' . $group['title'] . '» ثبت شد.';
+    return food_ticket_day_visit_state($user, $date, $actor) + ['ok' => true, 'message' => $message];
+}
+
+function food_ticket_day_visit_clear(array $user, string $date = '', ?array $actor = null): array
+{
+    if (!food_ticket_groups_ensure()) {
+        throw new RuntimeException('جدول خوداظهاری غذا در دسترس نیست.');
+    }
+    $date = preg_match('/^\d{4}-\d{2}-\d{2}$/', $date) ? $date : date('Y-m-d');
+    $actor = $actor ?? $user;
+    $userId = (int) ($user['id'] ?? 0);
+    $existing = food_ticket_day_visit_row($userId, $date);
+    if (!$existing) {
+        return food_ticket_day_visit_state($user, $date, $actor) + ['ok' => true, 'message' => 'اعلامی برای امروز ثبت نشده است.'];
+    }
+    $groupId = (int) $existing['group_id'];
+    $homeId = food_ticket_user_group_id($userId);
+    if (food_ticket_group_absence_locked($groupId, $date)) {
+        throw new RuntimeException('فیش این گروه برای امروز چاپ شده است؛ لغو ممکن نیست.');
+    }
+    if ($homeId !== null && $homeId !== $groupId && food_ticket_group_absence_locked($homeId, $date)) {
+        throw new RuntimeException('فیش گروه دائمی مبدأ چاپ شده است؛ بازگشت از انتقال موقت دیگر ممکن نیست.');
+    }
+    $until = '';
+    try {
+        $uq = db()->prepare('SELECT visit_change_until FROM food_ticket_groups WHERE id = ? LIMIT 1');
+        $uq->execute([$groupId]);
+        $until = (string) ($uq->fetchColumn() ?: '');
+    } catch (Throwable) {
+        $until = '';
+    }
+    if (!food_ticket_can_cancel_day_visit($actor)) {
+        food_ticket_visit_change_guard($until, (string) $existing['title']);
+    }
+    db()->prepare('DELETE FROM food_ticket_day_visits WHERE user_id = ? AND visit_date = ?')->execute([$userId, $date]);
+    $temporaryTransfer = $homeId !== null && $homeId !== $groupId;
+    $homeTitle = '';
+    if ($temporaryTransfer) {
+        $homeStmt = db()->prepare('SELECT title FROM food_ticket_groups WHERE id = ? LIMIT 1');
+        $homeStmt->execute([$homeId]);
+        $homeTitle = (string) ($homeStmt->fetchColumn() ?: 'گروه دائمی');
+    }
+    food_ticket_audit($temporaryTransfer ? 'food_day_visit_temporary_transfer_returned' : 'food_day_visit_cleared', [
+        'target_type' => 'food_group',
+        'target_id' => $groupId,
+        'target_label' => (string) $existing['title'],
+        'user_id' => $temporaryTransfer ? (int) ($actor['id'] ?? $userId) : $userId,
+        'old' => (string) $existing['title'],
+        'new' => $temporaryTransfer ? $homeTitle : '',
+        'meta' => [
+            'date' => $date,
+            'group_id' => $groupId,
+            'subject_user_id' => $userId,
+            'cleared_by' => (int) ($actor['id'] ?? 0),
+            'home_group_id' => $homeId,
+            'temporary_transfer' => $temporaryTransfer,
+        ],
+    ]);
+    $message = $temporaryTransfer
+        ? 'انتقال موقت لغو شد؛ عضویت دائمی این فرد در گروه «' . $homeTitle . '» حفظ شده است.'
+        : 'اعلام امروز لغو شد.';
+    return food_ticket_day_visit_state($user, $date, $actor) + ['ok' => true, 'message' => $message];
+}
+
+function food_ticket_api_cancel_day_visit(array $actor, int $subjectUserId): array
+{
+    if (!food_ticket_can_cancel_day_visit($actor)) {
+        throw new RuntimeException('فقط مدیر پشتیبانی و مدیر اصلی می‌توانند اعلام تغییر سلف را لغو کنند.');
+    }
+    $subjectUserId = max(0, $subjectUserId);
+    if ($subjectUserId < 1) {
+        throw new RuntimeException('کاربر معتبر نیست.');
+    }
+    $stmt = db()->prepare('SELECT id, full_name, first_name, last_name, role, is_primary_admin FROM users WHERE id = ? LIMIT 1');
+    $stmt->execute([$subjectUserId]);
+    $subject = $stmt->fetch(PDO::FETCH_ASSOC);
+    if (!$subject) {
+        throw new RuntimeException('کاربر پیدا نشد.');
+    }
+    return food_ticket_day_visit_clear($subject, '', $actor);
+}
+
+/**
+ * کلیدهای فیش صادرشدهٔ امروزِ این اعضا (food:تاریخ:کدملی).
+ * @param list<array<string,mixed>> $members
+ * @return array<string,bool>
+ */
+function food_ticket_group_ticketed_keys(array $members, string $date): array
+{
+    $keys = [];
+    foreach ($members as $m) {
+        $nat = food_ticket_digits($m['national_code'] ?? '');
+        if ($nat !== '') {
+            $keys['food:' . $date . ':' . $nat] = true;
+        }
+    }
+    if ($keys === []) {
+        return [];
+    }
+    $placeholders = implode(',', array_fill(0, count($keys), '?'));
+    $args = array_keys($keys);
+    try {
+        $q = db()->prepare('SELECT ticket_key FROM food_ticket_events WHERE punch_date = ? AND ticket_key IN (' . $placeholders . ')');
+        $q->execute(array_merge([$date], $args));
+        $found = [];
+        foreach ($q->fetchAll(PDO::FETCH_COLUMN) as $key) {
+            $found[(string) $key] = true;
+        }
+        return $found;
+    } catch (Throwable $e) {
+        app_error_log('[food-groups] ticketed lookup failed: ' . $e->getMessage());
+        return [];
+    }
+}
+
+/**
+ * نقشهٔ سفارش یک تاریخ (کش ۳۰ ثانیه‌ای مشترک با موتور). در صورت خطا null برمی‌گرداند.
+ * @return array<string,string>|null
+ */
+function food_ticket_group_order_map(array &$orderMaps, string $date): ?array
+{
+    if (array_key_exists($date, $orderMaps)) {
+        return $orderMaps[$date];
+    }
+    try {
+        $orderMaps[$date] = food_ticket_order_map_lazy(null, 'food_orders', $date);
+        return $orderMaps[$date];
+    } catch (Throwable $e) {
+        app_error_log('[food-groups] order map failed: ' . $e->getMessage());
+        // در مسیر داخلی، خطای MySQL نباید به «بدون سفارش» تبدیل شود.
+        if (function_exists('food_order_mode') && food_order_mode() === 'INTERNAL-DB') {
+            throw $e;
+        }
+        return null;
+    }
+}
+
+/** تابع انتخاب سفارش یک عضو از نقشهٔ سفارش (کد ملی / بدون صفر ابتدایی). */
+function food_ticket_group_food_lookup(?array $orderMap): callable
+{
+    return static function (array $member) use ($orderMap): ?string {
+        if ($orderMap === null) {
+            return null;
+        }
+        $national = food_ticket_digits($member['national_code'] ?? '');
+        if ($national === '') {
+            return null;
+        }
+        $food = $orderMap[$national] ?? $orderMap[ltrim($national, '0') ?: '0'] ?? null;
+        return is_string($food) ? $food : null;
+    };
+}
+
+/**
+ * خلاصهٔ امروزِ یک گروه برای پنل: اعضا، حاضر، غایب، واجد شرایط، وضعیت قفل.
+ * @return array<string,mixed>
+ */
+function food_ticket_group_overview(int $groupId, string $date, bool $withOrders = true): array
+{
+    $members = food_ticket_group_members_for_date($groupId, $date);
+    $absences = food_ticket_absence_load($date, $groupId);
+    $absentIds = [];
+    foreach (array_keys($absences) as $uid) {
+        $absentIds[(int) $uid] = true;
+    }
+    $ticketed = food_ticket_group_ticketed_keys($members, $date);
+    $orderMaps = [];
+    $orderMap = null;
+    $ordersAvailable = false;
+    if ($withOrders) {
+        // Compatibility parameter is null; internal-only map lookup never opens Access orders.
+        $orderMap = food_ticket_group_order_map($orderMaps, $date);
+        $ordersAvailable = $orderMap !== null;
+    }
+    $plan = food_ticket_group_plan($members, $absentIds, $ticketed, food_ticket_group_food_lookup($orderMap), $date);
+    $memberStates = $plan['member_states'] ?? [];
+    return [
+        'date' => $date,
+        'locked' => food_ticket_group_absence_locked($groupId, $date),
+        'orders_available' => $ordersAvailable,
+        'total' => $plan['total'],
+        'present' => $plan['present'],
+        'absent' => $plan['absent'],
+        'eligible' => $ordersAvailable ? $plan['eligible'] : null,
+        'no_order' => $ordersAvailable ? $plan['no_order'] : null,
+        'already_ticketed' => $plan['already_ticketed'],
+        'inactive' => $plan['inactive'],
+        'no_national' => $plan['no_national'],
+        'member_states' => $memberStates,
+        'absent_user_ids' => array_keys($absentIds),
+    ];
+}
+
+// ───────────────────────── پردازش تردد نماینده ─────────────────────────
+
+/**
+ * hook حلقهٔ موتور. اگر ردیف مربوط به گروه نبود null برمی‌گرداند (مسیر فعلی ادامه می‌یابد)؛
+ * وگرنه ['delete' => bool] — آیا ردیف SOURCE_TABLE حذف شود.
+ *
+ * @param array<string,mixed> $item
+ * @param array<string,mixed> $config
+ * @param array<string,mixed> $orderMaps
+ * @param array<string,mixed> $summary
+ * @return array{delete:bool,kind:string,event_ids?:list<int>,delete_note?:string}|null
+ *
+ * نکته: اعضای «غایب» و «غیرفعال» هیچ رویدادی ثبت نمی‌کنند؛ برای بقیهٔ اعضا (واجد شرایط،
+ * بدون سفارش، دارای فیش امروز، بدون کد ملی) تصمیم‌گیری و ثبت رویداد با همان
+ * food_ticket_decide_for_user() موتور انجام می‌شود تا با مسیر تردد عادی یکسان باشد.
+ */
+function food_ticket_group_try_process(array $item, array $config, array &$orderMaps, array &$summary): ?array
+{
+    $resolved = food_ticket_group_resolve($item);
+    if ($resolved === null) {
+        return food_ticket_group_try_unknown($item, $summary);
+    }
+    $group = $resolved['group'];
+    $matchedBy = $resolved['matched_by'];
+
+    $date = food_ticket_parse_date($item['date_raw'] ?? null);
+    $time = food_ticket_parse_time($item['time_raw'] ?? null);
+    if ($date === null || !food_ticket_group_date_ok($date)) {
+        return null; // تاریخ نامعتبر/قدیمی را همان مسیر فعلی (config_error / skipped_old) رسیدگی می‌کند
+    }
+
+    $groupId = (int) $group['id'];
+    $triggerUid = food_ticket_code($item['uid'] ?? '');
+    $triggerCard = (string) ($group['rfid_card'] ?? '');
+    $sourceKey = food_ticket_source_key($item);
+
+    // ۱) همین ردیف SOURCE_TABLE قبلاً دیده شده؟
+    $q = db()->prepare('SELECT id, status, run_kind FROM food_ticket_group_runs WHERE source_key = ? LIMIT 1');
+    $q->execute([$sourceKey]);
+    $run = $q->fetch() ?: null;
+
+    if ($run !== null) {
+        if ((string) $run['status'] === 'done') {
+            return [
+                'delete' => true,
+                'kind' => 'duplicate',
+                'event_ids' => food_ticket_group_event_ids_for_run((int) ($run['id'] ?? 0)),
+            ]; // حذف SOURCE_TABLE دور قبل ناموفق بود؛ وضعیت همهٔ فیش‌های همان اجرا هم به‌روز شود
+        }
+        $runId = (int) $run['id']; // processing: ادامهٔ اجرای ناتمام
+        $kind = 'first';
+    } else {
+        // ۲) همان کشیدن فیزیکی کارت با ردیف دیگری از SOURCE_TABLE (≤ ۴ ثانیه) → بی‌صدا حذف
+        if ($time !== null) {
+            $t = db()->prepare(
+                'SELECT id FROM food_ticket_group_runs WHERE group_id = ? AND punch_date = ? AND punch_time IS NOT NULL '
+                . 'AND ABS(TIME_TO_SEC(punch_time) - TIME_TO_SEC(?)) <= 4 LIMIT 1'
+            );
+            $t->execute([$groupId, $date, $time]);
+            if ($t->fetchColumn()) {
+                return ['delete' => true, 'kind' => 'duplicate'];
+            }
+        }
+        // ۳) نوع اجرا
+        if ($group['status'] !== 'active') {
+            $kind = 'inactive';
+        } else {
+            $f = db()->prepare('SELECT 1 FROM food_ticket_group_runs WHERE group_id = ? AND punch_date = ? AND run_kind = "first" LIMIT 1');
+            $f->execute([$groupId, $date]);
+            $kind = $f->fetchColumn() ? 'repeat' : 'first';
+        }
+        $membersTotal = count(food_ticket_group_members_for_date($groupId, $date));
+        db()->prepare(
+            'INSERT INTO food_ticket_group_runs (group_id, group_title, rfid_card, trigger_kind, trigger_uid, source_key, punch_date, punch_time, run_kind, status, members_total) '
+            . 'VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'
+        )->execute([
+            $groupId, $group['title'], $triggerCard, 'uid',
+            $triggerUid !== '' ? $triggerUid : null, $sourceKey, $date, $time, $kind,
+            $kind === 'first' ? 'processing' : 'done', $membersTotal,
+        ]);
+        $runId = (int) db()->lastInsertId();
+
+        // قفل لیست غیبت با اولین تردد معتبر نماینده (بدون هیچ شرط ساعتی)
+        if ($kind === 'first') {
+            food_ticket_audit('food_group_absence_frozen', [
+                'target_type' => 'food_group',
+                'target_id' => $groupId,
+                'target_label' => (string) $group['title'],
+                'new' => 'frozen',
+                'meta' => ['group_id' => $groupId, 'date' => $date, 'trigger_uid' => $triggerUid, 'matched_by' => $matchedBy],
+            ]);
+        }
+    }
+
+    $summary['group_runs'] = (int) ($summary['group_runs'] ?? 0) + 1;
+    $groupEventIds = [];
+
+    // repeat / inactive: فقط خلاصه؛ اعضا بررسی نمی‌شوند و Event/چاپی ساخته نمی‌شود.
+    if ($kind !== 'first') {
+        $summary['skipped'] = (int) ($summary['skipped'] ?? 0) + 1;
+        return ['delete' => true, 'kind' => $kind];
+    }
+
+    // اجرای اول: محاسبهٔ واجد شرایط‌ها و پردازش فقط همان‌ها
+    $members = food_ticket_group_members_for_date($groupId, $date);
+    $absences = food_ticket_absence_load($date, $groupId);
+    $absentIds = [];
+    foreach (array_keys($absences) as $uid) {
+        $absentIds[(int) $uid] = true;
+    }
+    $ticketed = food_ticket_group_ticketed_keys($members, $date);
+    $orderMap = food_ticket_group_order_map($orderMaps, $date);
+    $plan = food_ticket_group_plan($members, $absentIds, $ticketed, food_ticket_group_food_lookup($orderMap), $date);
+    if (empty($plan['member_states']) && !empty($plan['rows'])) {
+        foreach ($plan['rows'] as $row) {
+            $plan['member_states'][(int) $row['user_id']] = (string) $row['state'];
+        }
+    }
+
+    $absenceClearedFor = [];
+    $counts = ['printed' => 0, 'repeat' => 0, 'no_food' => 0, 'skipped' => 0, 'error' => 0, 'absent' => $plan['absent'], 'absence_cleared' => 0];
+
+    $payloadJson = json_encode(
+        [
+            'group_id' => $groupId,
+            'group_title' => $group['title'],
+            'group_l_uid' => $group['l_uid'],
+            'run_id' => $runId,
+            'matched_by' => $matchedBy,
+            'absent' => $plan['absent'],
+            'eligible' => $plan['eligible'],
+        ],
+        JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES
+    );
+
+    foreach ($members as $user) {
+        $userId = (int) $user['id'];
+        $state = $plan['member_states'][$userId] ?? null;
+
+        // غایب: هیچ غذایی نمی‌گیرد و هیچ رویداد فیشی برایش ثبت نمی‌شود
+        // (سند غیبت، همان جدول غیبت روزانه است).
+        if ($state === 'absent') {
+            $counts['skipped']++;
+            continue;
+        }
+        // اعضای غیرفعال از این مسیر پردازش نمی‌شوند (همان رفتار فعلی موتور برای تردد غیرفعال).
+        if ($state === 'inactive') {
+            $counts['skipped']++;
+            continue;
+        }
+
+        // بقیهٔ اعضا (واجد شرایط / بدون سفارش / دارای فیش امروز / بدون کد ملی) با همان
+        // تابع تصمیم فعلی موتور بررسی می‌شوند تا رفتار (printed/no_food/repeat) و ثبت
+        // رویداد دقیقاً مانند مسیر تردد عادی باشد و «یک فیش در روز برای هر نفر» حفظ شود.
+        try {
+            $memberKey = food_ticket_group_member_key($sourceKey, $userId);
+            $existingGroupEvent = food_ticket_existing_source($memberKey);
+            if ($existingGroupEvent) {
+                $existingId = (int) ($existingGroupEvent['id'] ?? 0);
+                if ($existingId > 0) {
+                    $groupEventIds[] = $existingId;
+                }
+                continue; // در تلاش قبلیِ همین اجرا پردازش شده؛ شناسه برای وضعیت حذف لازم است
+            }
+            $base = [
+                'source_key' => $memberKey,
+                'source_uid' => $triggerUid !== '' ? $triggerUid : null,
+                'source_card' => null,
+                'punch_date' => $date,
+                'punch_time' => $time,
+                'personnel_code' => food_ticket_code($user['employee_number'] ?? ''),
+                'source_payload' => $payloadJson,
+            ];
+            $decision = food_ticket_decide_for_user($user, $date, $base, $config, $orderMaps);
+            try {
+                $eventId = food_ticket_add_event($decision['payload']);
+            } catch (PDOException $pdoEx) {
+                if (str_contains($pdoEx->getMessage(), 'Duplicate') || (int) $pdoEx->getCode() === 23000) {
+                    $counts['repeat']++; // فیش همین کاربر در همین لحظه از مسیر دیگری ثبت شد
+                    continue;
+                }
+                throw $pdoEx;
+            }
+            if ($eventId <= 0) {
+                throw new RuntimeException('ثبت رویداد عضو گروه انجام نشد (user=' . $userId . ').');
+            }
+            $groupEventIds[] = $eventId;
+            if (!empty($decision['print'])) {
+                food_ticket_enqueue_print($eventId, $config);
+                $counts['printed']++;
+            } elseif ($decision['event_type'] === 'repeat') {
+                $counts['repeat']++;
+            } elseif ($decision['event_type'] === 'no_food') {
+                $counts['no_food']++;
+            } else {
+                $counts['skipped']++; // غیرفعال و مانند آن
+            }
+        } catch (Throwable $ex) {
+            $counts['error']++;
+            $summary['last_error'] = $ex->getMessage();
+            app_error_log('[food-groups] member failed run=' . $runId . ' user=' . $userId . ': ' . $ex->getMessage());
+        }
+    }
+
+    // ── تردد نماینده یعنی حضور ─────────────────────────────────────────
+    // نماینده با کشیدن کارت گروه تردد را ثبت می‌کند؛ یعنی در محل حاضر بوده و
+    // برای اعضا غذا گرفته. اگر عضوی که امروز فیش گرفته در فهرست غایبان
+    // بماند، همان «تردد این روز ثبت شده ولی غایب» می‌شود.
+    //
+    // این پاک‌سازی پس از حلقه انجام می‌شود، نه در شاخهٔ چاپ: عضوی که فیشش
+    // از قبل موجود است با state=already_ticketed از شاخهٔ چاپ رد می‌شود و
+    // رکورد غیبتش هرگز پاک نمی‌شد — همان دو نفرِ گروه ۱.
+    //
+    // فقط اعضایی پاک می‌شوند که برای همین روز فیش واقعی دارند (printed یا
+    // repeat). کسی که «no_food» است یا اصلاً فیشی ندارد، غایب واقعی است و
+    // باید در فهرست بماند.
+    if (function_exists('food_ticket_absence_ensure') && food_ticket_absence_ensure()) {
+        try {
+            $ticketHolders = [];
+            foreach ($plan['rows'] as $planRow) {
+                $planState = (string) ($planRow['state'] ?? '');
+                $planUserId = (int) ($planRow['user_id'] ?? 0);
+                if ($planUserId <= 0 || $planState === 'absent' || $planState === 'inactive') {
+                    continue;
+                }
+                $planNat = (string) ($planRow['national_code'] ?? '');
+                if ($planNat === '') {
+                    continue;
+                }
+                $planKey = 'food:' . $date . ':' . $planNat;
+                if (!empty($ticketed[$planKey])) {
+                    $ticketHolders[$planUserId] = true;
+                }
+            }
+            // مهلتِ ثبت غیبت: تردد نماینده، فهرست را قفل می‌کند. رکوردی که
+            // «قبل» از تردد ساخته شده، با تردد باطل می‌شود (همان دو نفر).
+            // رکوردی که ادمین «بعد» از تردد عمداً ثبت کرده معتبر است و نباید
+            // با اجرای مجدد بی‌صدا پاک شود.
+            $runStartedAt = null;
+            try {
+                $runTimeQ = db()->prepare('SELECT created_at FROM food_ticket_group_runs WHERE id = ? LIMIT 1');
+                $runTimeQ->execute([$runId]);
+                $runStartedAt = (string) ($runTimeQ->fetchColumn() ?: '');
+            } catch (Throwable $runTimeEx) {
+                app_error_log('[food-groups] run time lookup failed: ' . $runTimeEx->getMessage());
+            }
+            if ($runStartedAt !== '' && $ticketHolders !== []) {
+                $absTimeQ = db()->prepare('SELECT user_id, created_at FROM food_ticket_daily_absence WHERE absence_date = ? AND user_id = ? LIMIT 1');
+                foreach ($ticketHolders as $holderId => $_) {
+                    $absTimeQ->execute([$date, (int) $holderId]);
+                    $absRow = $absTimeQ->fetch();
+                    // غیبتی که بعد از تردد ثبت شده، تصمیم آگاهانهٔ ادمین است.
+                    if ($absRow && (string) ($absRow['created_at'] ?? '') >= $runStartedAt) {
+                        unset($ticketHolders[$holderId]);
+                    }
+                }
+            }
+            if ($ticketHolders !== []) {
+                $delAbsent = db()->prepare('DELETE FROM food_ticket_daily_absence WHERE absence_date = ? AND user_id = ?');
+                foreach ($ticketHolders as $holderId => $_) {
+                    $delAbsent->execute([$date, (int) $holderId]);
+                    if ($delAbsent->rowCount() > 0) {
+                        $counts['absence_cleared'] = (int) $counts['absence_cleared'] + 1;
+                        food_ticket_audit('food_absence_cleared_by_group_run', [
+                            'target_type' => 'food_absence',
+                            'target_id' => (int) $holderId,
+                            'target_label' => 'کاربر ' . (int) $holderId . ' / ' . $date,
+                            'old' => 'absent',
+                            'new' => 'present',
+                            'reason' => 'تردد نمایندهٔ گروه — عضو برای همین روز فیش دارد.',
+                            'meta' => ['date' => $date, 'user_id' => (int) $holderId, 'group_id' => $groupId, 'run_id' => $runId],
+                        ]);
+                    }
+                }
+            }
+        } catch (Throwable $absEx) {
+            app_error_log('[food-groups] absence clear failed run=' . $runId . ': ' . $absEx->getMessage());
+        }
+    }
+
+    $allOk = $counts['error'] === 0;
+    db()->prepare(
+        'UPDATE food_ticket_group_runs SET printed_count = printed_count + ?, repeat_count = repeat_count + ?, no_food_count = no_food_count + ?, '
+        . 'absent_count = ?, skipped_count = skipped_count + ?, error_count = error_count + ?, status = ? WHERE id = ?'
+    )->execute([$counts['printed'], $counts['repeat'], $counts['no_food'], $counts['absent'], $counts['skipped'], $counts['error'], $allOk ? 'done' : 'processing', $runId]);
+
+    // صف فقط پس از ثبت وضعیت نهایی run تخلیه می‌شود تا چاپ گروه فهرست ناقص اعضا نگیرد.
+    if ($allOk && $counts['printed'] > 0 && empty($config['_group_skip_print'])) {
+        try {
+            $early = food_ticket_process_print_queue_locked($config, max(30, $counts['printed']));
+            $summary['queue_early_printed'] = (int) ($summary['queue_early_printed'] ?? 0) + (int) ($early['printed'] ?? 0);
+            $summary['queue_early_failed'] = (int) ($summary['queue_early_failed'] ?? 0) + (int) ($early['failed'] ?? 0);
+        } catch (Throwable $printEx) {
+            app_error_log('[food-groups] print drain failed: ' . $printEx->getMessage());
+        }
+    }
+
+    food_ticket_audit('food_group_tickets_issued', [
+        'target_type' => 'food_group',
+        'target_id' => $groupId,
+        'target_label' => (string) $group['title'],
+        'new' => (string) $counts['printed'] . ' فیش',
+        'meta' => [
+            'group_id' => $groupId, 'run_id' => $runId, 'date' => $date,
+            'members_total' => $plan['total'], 'present' => $plan['present'], 'absent' => $plan['absent'],
+            'eligible' => $plan['eligible'], 'printed' => $counts['printed'], 'repeat' => $counts['repeat'],
+            'no_order' => $counts['no_food'], 'skipped' => $counts['skipped'], 'error' => $counts['error'],
+            'absence_cleared' => (int) $counts['absence_cleared'],
+            'orders_available' => $orderMap !== null,
+        ],
+    ]);
+
+    $summary['queued'] = (int) ($summary['queued'] ?? 0) + $counts['printed'];
+    $summary['processed'] = (int) ($summary['processed'] ?? 0) + 1;
+    $summary['repeat'] = (int) ($summary['repeat'] ?? 0) + $counts['repeat'];
+    $summary['no_food'] = (int) ($summary['no_food'] ?? 0) + $counts['no_food'];
+    $summary['absent'] = (int) ($summary['absent'] ?? 0) + $counts['absent'];
+    $summary['absence_cleared'] = (int) ($summary['absence_cleared'] ?? 0) + (int) $counts['absence_cleared'];
+    $summary['errors'] = (int) ($summary['errors'] ?? 0) + $counts['error'];
+
+    // اگر عضوی خطا داشت، ردیف SOURCE_TABLE می‌ماند تا دور بعد فقط همان‌ها دوباره پردازش شوند.
+    // در حذف موفق یا ناموفق، موتور باید نتیجه را روی تمام فیش‌های ساخته‌شده از این اجرا ثبت کند.
+    $groupEventIds = array_values(array_unique(array_filter(array_map('intval', $groupEventIds), static fn (int $id): bool => $id > 0)));
+    return [
+        'delete' => $allOk,
+        'kind' => 'first',
+        'event_ids' => $groupEventIds,
+        'delete_note' => $allOk ? '' : 'حذف ردیف منبع تا رفع خطای پردازش عضو گروه به تعویق افتاد.',
+    ];
+}
+
+/**
+ * ── نگه‌داشتن فیشِ چاپ‌نشده به‌خاطر اعلام غیبت ─────────────────────────────────
+ * سناریوی کاری: آمار بازرسی گروه‌های بیرون از ساختمان وارد می‌شود و مدیر همان روز
+ * یک یا چند عضو را «غایب» می‌زند. اگر فیش آن عضو در صف چاپ باشد (هنوز چاپ نشده)،
+ * باید چاپ نشود؛ پس وضعیتش «held_absent» می‌شود:
+ *   • از صف چاپ خارج است (claim query فقط pending/print_error/failed و printing کهنه را می‌گیرد)،
+ *   • در چاپ مجدد خطاها هم نمی‌آید (آن مسیر فقط print_error/failed را می‌گیرد)،
+ *   • فیشِ چاپ‌شده و در حال چاپ دست‌نخورده می‌ماند (لغو نمی‌شود).
+ * اگر عضو بعداً «حاضر» شود، با food_ticket_release_held_ticket دوباره به صف برمی‌گردد.
+ *
+ * @return bool آیا فیشی نگه داشته شد؟
+ */
+function food_ticket_hold_ticket_for_absence(int $userId, string $date, array $actor = [], string $reason = ''): bool
+{
+    if ($userId <= 0 || !preg_match('/^\d{4}-\d{2}-\d{2}$/', $date)) {
+        return false;
+    }
+    if (!food_ticket_events_ensure_hold_status()) {
+        return false;
+    }
+    try {
+        $q = db()->prepare(
+            'SELECT id, ticket_key, print_status FROM food_ticket_events '
+            . 'WHERE user_id = ? AND punch_date = ? AND ticket_key IS NOT NULL AND ticket_key <> "" '
+            . 'AND print_status IN ("not_printed", "pending", "print_error", "failed")'
+        );
+        $q->execute([$userId, $date]);
+        $rows = $q->fetchAll();
+    } catch (Throwable $e) {
+        app_error_log('[food-absence-hold] lookup failed: ' . $e->getMessage());
+        return false;
+    }
+    $held = false;
+    foreach ($rows as $row) {
+        try {
+            try {
+                db()->prepare('UPDATE food_ticket_events SET print_status = "held_absent", next_retry_at = NULL, processed_at = NOW() WHERE id = ?')
+                    ->execute([(int) $row['id']]);
+            } catch (Throwable $colErr) {
+                // نصب‌های قدیمی که ستون next_retry_at را ندارند
+                db()->prepare('UPDATE food_ticket_events SET print_status = "held_absent", processed_at = NOW() WHERE id = ?')
+                    ->execute([(int) $row['id']]);
+            }
+            if (function_exists('food_ticket_print_log')) {
+                food_ticket_print_log((int) $row['id'], null, null, (string) $row['ticket_key'], null, 'held_absent', 0, 'توقف چاپ به‌خاطر اعلام غیبت');
+            }
+            $held = true;
+            if (function_exists('activity_log')) {
+                activity_log([
+                    'action_code' => 'food_ticket_ticket_held',
+                    'module' => 'food',
+                    'target_type' => 'food_ticket_event',
+                    'target_id' => (int) $row['id'],
+                    'target_label' => (string) $row['ticket_key'],
+                    'user_id' => $actor['id'] ?? null,
+                    'meta' => ['old' => (string) $row['print_status'], 'new' => 'held_absent', 'date' => $date, 'user_id' => $userId, 'reason' => $reason],
+                ]);
+            }
+        } catch (Throwable $e) {
+            app_error_log('[food-absence-hold] update failed: ' . $e->getMessage());
+        }
+    }
+    return $held;
+}
+
+/**
+ * آزادکردن فیشِ نگه‌داشته‌شده وقتی عضو دوباره «حاضر» می‌شود (برگشت به صف چاپ).
+ */
+function food_ticket_release_held_ticket(int $userId, string $date, array $actor = [], string $reason = ''): bool
+{
+    if ($userId <= 0 || !preg_match('/^\d{4}-\d{2}-\d{2}$/', $date)) {
+        return false;
+    }
+    if (!food_ticket_events_ensure_hold_status()) {
+        return false;
+    }
+    try {
+        $q = db()->prepare('SELECT id, ticket_key FROM food_ticket_events WHERE user_id = ? AND punch_date = ? AND print_status = "held_absent"');
+        $q->execute([$userId, $date]);
+        $rows = $q->fetchAll();
+    } catch (Throwable $e) {
+        app_error_log('[food-absence-release] lookup failed: ' . $e->getMessage());
+        return false;
+    }
+    $released = false;
+    foreach ($rows as $row) {
+        try {
+            try {
+                db()->prepare('UPDATE food_ticket_events SET print_status = "pending", last_error = NULL, next_retry_at = NULL, processed_at = NOW() WHERE id = ?')
+                    ->execute([(int) $row['id']]);
+            } catch (Throwable $colErr) {
+                db()->prepare('UPDATE food_ticket_events SET print_status = "pending", last_error = NULL, processed_at = NOW() WHERE id = ?')
+                    ->execute([(int) $row['id']]);
+            }
+            if (function_exists('food_ticket_print_log')) {
+                food_ticket_print_log((int) $row['id'], null, null, (string) $row['ticket_key'], null, 'pending', 0, 'بازگشت به صف چاپ — عضو حاضر شد');
+            }
+            $released = true;
+            if (function_exists('activity_log')) {
+                activity_log([
+                    'action_code' => 'food_ticket_ticket_released',
+                    'module' => 'food',
+                    'target_type' => 'food_ticket_event',
+                    'target_id' => (int) $row['id'],
+                    'target_label' => (string) $row['ticket_key'],
+                    'user_id' => $actor['id'] ?? null,
+                    'meta' => ['old' => 'held_absent', 'new' => 'pending', 'date' => $date, 'user_id' => $userId, 'reason' => $reason],
+                ]);
+            }
+        } catch (Throwable $e) {
+            app_error_log('[food-absence-release] update failed: ' . $e->getMessage());
+        }
+    }
+    return $released;
+}
+
+/**
+ * اطمینان از این‌که مقدار «held_absent» در ENUM ستون print_status پذیرفته می‌شود.
+ * (همان Migration ۱.۳۲؛ روی نصب‌های تازه از قبل وجود دارد.)
+ */
+function food_ticket_events_ensure_hold_status(): bool
+{
+    static $ready = null;
+    if ($ready !== null) {
+        return $ready;
+    }
+    $ready = true;
+    try {
+        if (function_exists('db_table_columns')) {
+            db()->prepare('SELECT print_status FROM food_ticket_events LIMIT 1')->execute();
+            try {
+                db()->prepare('SELECT 1 FROM food_ticket_events WHERE print_status = "held_absent" LIMIT 1')->execute();
+                return $ready;
+            } catch (Throwable $probe) {
+                // مقدار در ENUM نیست → گسترش می‌دهیم
+            }
+            db()->exec('ALTER TABLE food_ticket_events MODIFY COLUMN print_status ENUM("not_printed","pending","printing","printed","print_error","failed","held_absent") NOT NULL DEFAULT "not_printed"');
+        }
+    } catch (Throwable $e) {
+        app_error_log('[food-absence-hold] ensure enum failed: ' . $e->getMessage());
+        $ready = false;
+    }
+    return $ready;
+}
+
+// ───────── تاریخچهٔ L_UID نماینده‌ها و تردد با شناسهٔ ناشناخته ─────────
+
+/** ثبت اینکه این L_UID (در گذشته یا حال) نمایندهٔ یک گروه بوده است. */
+function food_ticket_group_uid_history_record(string $uid, ?int $groupId, string $action, int $actorId = 0): void
+{
+    $uid = food_ticket_code($uid);
+    if ($uid === '' || !in_array($action, ['set', 'changed', 'removed'], true) || !food_ticket_groups_ensure()) {
+        return;
+    }
+    try {
+        db()->prepare('INSERT INTO food_ticket_group_uid_history (uid, group_id, action, actor_id) VALUES (?, ?, ?, ?)')
+            ->execute([$uid, $groupId !== null && $groupId > 0 ? $groupId : null, $action, $actorId > 0 ? $actorId : null]);
+    } catch (Throwable $e) {
+        app_error_log('[food-groups] uid history: ' . $e->getMessage());
+    }
+    food_ticket_groups_load(true);
+}
+
+/** آیا این L_UID سابقهٔ نمایندگی دارد؟ (برای تشخیص «تردد با شناسهٔ ناشناخته») */
+function food_ticket_group_uid_history_has(string $uid): bool
+{
+    $uid = food_ticket_code($uid);
+    if ($uid === '' || !food_ticket_groups_ensure()) {
+        return false;
+    }
+    try {
+        $q = db()->prepare('SELECT 1 FROM food_ticket_group_uid_history WHERE uid = ? LIMIT 1');
+        $q->execute([$uid]);
+        return (bool) $q->fetchColumn();
+    } catch (Throwable $e) {
+        app_error_log('[food-groups] uid history lookup: ' . $e->getMessage());
+        return false;
+    }
+}
+
+/**
+ * تردد با L_UID ناشناخته: شناسه‌ای که سابقهٔ «نماینده بودن» دارد ولی به هیچ گروه فعالی
+ * وصل نیست (مثلاً L_UID گروه عوض یا گروه حذف شده). این تردد:
+ *   • به‌عنوان رویداد «ناشناخته» ثبت می‌شود (بدون هیچ فیش گروهی)،
+ *   • در لاگ فعالیت‌ها و لاگ سیستم ثبت می‌شود تا اپراتور ببیند،
+ *   • ردیف SOURCE_TABLE حذف می‌شود تا به‌اشتباه فیش شخصی صادر نشود.
+ * ترددهای عادیِ کارکنانی که هرگز نماینده نبوده‌اند دست‌نخورده به مسیر فعلی می‌روند.
+ */
+function food_ticket_group_try_unknown(array $item, array &$summary): ?array
+{
+    $uid = food_ticket_code($item['uid'] ?? '');
+    if ($uid === '' || $uid === '0' || $uid === '-1') {
+        return null;
+    }
+    if (!food_ticket_group_uid_history_has($uid)) {
+        return null;
+    }
+    $date = food_ticket_parse_date($item['date_raw'] ?? null);
+    $time = food_ticket_parse_time($item['time_raw'] ?? null);
+    if ($date === null || !food_ticket_group_date_ok($date)) {
+        return null;
+    }
+    $ticketKey = 'unknown:' . $date . ':' . $uid;
+    $message = 'تردد با L_UID ناشناخته: ' . $uid . ' به هیچ گروه فعالی وصل نیست.';
+    $counted = (int) ($summary['group_unknown'] ?? 0) + 1;
+    $summary['group_unknown'] = $counted;
+    $summary['group_unknown_uid'] = $uid;
+    $summary['last_error'] = $summary['last_error'] ?? $message;
+    try {
+        $payload = json_encode(['reason' => 'unknown_group_uid', 'uid' => $uid, 'source_key' => food_ticket_source_key($item)], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+        $hasDelivery = function_exists('food_ticket_delivery_supported') && food_ticket_delivery_supported();
+        $cols = 'source_key, source_uid, punch_date, punch_time, event_type, print_status, ticket_key, source_payload, last_error, processed_at';
+        $vals = '?, ?, ?, ?, "unknown", "not_printed", ?, ?, ?, NOW()';
+        $args = [food_ticket_source_key($item), $uid, $date, $time, $ticketKey, $payload, $message];
+        if ($hasDelivery) {
+            $cols .= ', delivery_status';
+            $vals .= ', "pending"';
+        }
+        if (!food_ticket_existing_ticket($ticketKey)) {
+            db()->prepare('INSERT INTO food_ticket_events (' . $cols . ') VALUES (' . $vals . ')')->execute($args);
+        }
+    } catch (Throwable $e) {
+        // اگر ساختار جدول اجازه نداد، حداقل در لاگ سیستم ثبت می‌شود (خطای قابل‌مشاهده برای اپراتور)
+        app_error_log('[food-groups] unknown uid event: ' . $e->getMessage());
+        if (function_exists('system_log')) {
+            try {
+                system_log('error', 'food_group', $message, ['uid' => $uid, 'date' => $date]);
+            } catch (Throwable) {
+            }
+        }
+    }
+    food_ticket_audit('food_group_unknown_uid', [
+        'target_type' => 'food_group',
+        'target_id' => 0,
+        'target_label' => 'L_UID ' . $uid,
+        'new' => 'unknown',
+        'meta' => ['uid' => $uid, 'date' => $date, 'count' => $counted],
+    ]);
+    if (function_exists('system_log')) {
+        try {
+            system_log('warning', 'food_group', $message, ['uid' => $uid, 'date' => $date]);
+        } catch (Throwable) {
+        }
+    }
+    return ['delete' => true, 'kind' => 'unknown_uid'];
+}
+
+// ───────────────────────── API مدیریت گروه‌ها ─────────────────────────
+
+/** @return array<string,mixed> */
+/** تاریخ عملیاتی غذا با منطقهٔ زمانی سامانه. */
+function food_ticket_manual_attendance_today(): string
+{
+    return function_exists('food_order_today') ? food_order_today() : date('Y-m-d');
+}
+
+/**
+ * ۱.۶۲.۹: ثبت دستی دیگر فقط برای امروز نیست؛ هر تاریخ گذشته (تا امروز) پذیرفته می‌شود.
+ * تاریخ آینده مجاز نیست؛ ورودی نامعتبر به امروز برمی‌گردد.
+ */
+function food_ticket_manual_attendance_date(string $date): string
+{
+    $today = food_ticket_manual_attendance_today();
+    if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $date)) {
+        return $today;
+    }
+    [$y, $m, $d] = array_map('intval', explode('-', $date));
+    if (!checkdate($m, $d, $y)) {
+        throw new RuntimeException('تاریخ انتخاب‌شده معتبر نیست.');
+    }
+    if ($date > $today) {
+        throw new RuntimeException('ثبت دستی فیش برای تاریخ آینده مجاز نیست؛ امروز یا روزهای قبل را انتخاب کنید.');
+    }
+    return $date;
+}
+
+/**
+ * آیا این رویداد «فیش یتیم» است — فیشی که در صف چاپ ماند و هرگز چاپ نشد؟
+ *
+ * چرا لازم شد (رخداد ۱۴۰۵/۰۸/۲۵): وقتی پرینتر خراب می‌شود، موتور چاپ رویداد را
+ * با event_type='printed' و print_status='pending' می‌سازد و در صف می‌گذارد.
+ * اگر Worker آن را چاپ نکند، آن ردیف **تا ابد** pending می‌ماند و
+ * delivery_status هم pending می‌ماند. کاربر باید بتواند همان غذا را دستی ثبت کند،
+ * ولی هر سه لایه او را «دارای فیش این روز» می‌دیدند و راهی برای اصلاح نبود.
+ *
+ * تعریف: هنوز چاپ نشده (print_status ≠ printed) و تحویل هم ثبت نشده
+ * (delivery_status ≠ delivered). یعنی هیچ‌کس نگفته این غذا تحویل داده شده.
+ * اگر فیش واقعاً چاپ شده باشد، print_status='printed' است و این تابع false می‌دهد.
+ */
+function food_ticket_event_is_orphan_ticket(?array $event): bool
+{
+    if (!is_array($event) || $event === []) {
+        return false;
+    }
+    $printStatus = strtolower(trim((string) ($event['print_status'] ?? '')));
+    $deliveryStatus = strtolower(trim((string) ($event['delivery_status'] ?? '')));
+    // «بدون فیش» ردیف عمدی است، نه فیشِ گم‌شده؛ فیشی ساخته نشده که در صف بماند.
+    if (strtolower(trim((string) ($event['event_type'] ?? ''))) === 'no_food') {
+        return false;
+    }
+    // چاپ‌شده یا تحویل‌شده ⇒ فیش واقعی است؛ دست نزن.
+    if ($printStatus === 'printed' || $deliveryStatus === 'delivered') {
+        return false;
+    }
+    // وضعیت‌های صف: pending / printing / print_error / failed
+    // held_absent یعنی عمداً متوقف شده (فرد غایب بود) — آن هم قابل جایگزینی است.
+    // not_printed هم باید باشد: مقدار پیش‌فرض ستون است و ردیفی که هیچ‌وقت به صف
+    // نرسید همین را دارد. نبودنش یعنی ردیف‌های قدیمی‌تر «یتیم» شمرده نمی‌شدند —
+    // همان ردیف‌هایی که کاربر می‌خواهد نجاتشان بدهد.
+    return in_array($printStatus, ['not_printed', 'pending', 'printing', 'print_error', 'failed', 'held_absent', ''], true);
+}
+
+/** ردیف مجازی «مهمان» که همیشه اول فهرست ثبت دستی می‌آید؛ چندبار در روز قابل ثبت است. */
+function food_ticket_manual_attendance_guest_row(): array
+{
+    return [
+        'id' => 0,
+        'pc' => '',
+        'name' => 'مهمان',
+        'active' => true,
+        'today_record' => null,
+        'guest' => true,
+    ];
+}
+
+/** فهرست سفارش‌دهندگان واجد شرایط ثبت دستی برای روز انتخاب‌شده؛ کد ملی فقط برای تطبیق داخلی است و به رابط برنمی‌گردد. */
+function food_ticket_api_manual_attendance(string $date = ''): array
+{
+    $date = food_ticket_manual_attendance_date($date);
+    food_ticket_manual_attendance_reconcile_date($date);
+
+    // از همان نقشهٔ سفارش داخلی/فعال ناهار استفاده می‌شود که صدور فیش بررسی می‌کند.
+    // سیاست: سفارش‌ها فهرست را «محدود» می‌کنند، نه «تعریف». اگر سفارش‌ها
+    // بارگذاری نشدند، به‌جای شکستن کل صفحه، فهرست را خالی نگه می‌داریم ولی
+    // ردیف‌های یتیم (فیشی که در صف چاپ ماند) را نشان می‌دهیم — وگرنه همان
+    // چیزی که باید اصلاح شود، پشت یک خطا پنهان می‌ماند و کاربر دکمه‌ای نمی‌بیند.
+    $orderMaps = [];
+    $orderMap = null;
+    $orderMapError = '';
+    try {
+        $orderMap = food_ticket_group_order_map($orderMaps, $date);
+    } catch (Throwable $e) {
+        $orderMapError = $e->getMessage();
+        app_error_log('[food-manual] order map unavailable: ' . $orderMapError);
+    }
+    $hasEligibleOrder = food_ticket_group_food_lookup(is_array($orderMap) ? $orderMap : null);
+
+    // غیبت‌های همین روز: کلاینت باید بتواند «غایب» و «دارای فیش» را از هم
+    // تفکیک کند. بدون این، ردیفی که فیشش صبح چاپ شده بود «حاضر» دیده می‌شد.
+    $absentUsers = [];
+    if (function_exists('food_ticket_absence_ensure') && food_ticket_absence_ensure()) {
+        try {
+            $absq = db()->prepare('SELECT user_id FROM food_ticket_daily_absence WHERE absence_date = ?');
+            $absq->execute([$date]);
+            foreach ($absq->fetchAll() ?: [] as $absRow) {
+                $absentUsers[(int) ($absRow['user_id'] ?? 0)] = true;
+            }
+        } catch (Throwable $e) {
+            app_error_log('[food-manual] absence map failed: ' . $e->getMessage());
+        }
+    }
+
+    $attendanceByUser = [];
+    $attendance = db()->prepare(
+        'SELECT id, user_id, event_type, print_status, delivery_status, source_uid, ticket_key FROM food_ticket_events '
+        . 'WHERE punch_date = ? AND user_id IS NOT NULL AND event_type <> "unknown" ORDER BY id DESC'
+    );
+    $attendance->execute([$date]);
+    // ── کدام ردیف «وضعیت این روزِ» شخص را نشان می‌دهد؟ ────────────────────
+    // یک نفر می‌تواند در یک روز چند ردیف داشته باشد: فیشِ صبحِ خودکار
+    // (auto_printed/printed با ticket_key) و بعد ترددِ نمایندهٔ گروه که
+    // event_type='repeat' می‌سازد. «آخرین ردیف» همیشه مهم‌ترین نیست:
+    // repeat یعنی «فیش از قبل بود، تکراری صادر نشد» — نه اینکه شخص فیش
+    // ندارد. اگر آخرین ردیف را نشان دهیم، پنل «تردد این روز ثبت شده»
+    // (زرد) می‌شود و کاربر فکر می‌کند فیشی برای ثبت دستی هست، در حالی که
+    // فیشِ واقعی همان بالا موجود است و ثبت دستی «تکراری مجاز نیست» می‌دهد.
+    //
+    // قاعده: اگر برای این شخص ردیفی با فیشِ واقعیِ همان روز هست، همان
+    // نمایش داده می‌شود؛ وگرنه آخرین ردیف.
+    $ticketRows = [];
+    $latestRows = [];
+    foreach ($attendance->fetchAll() ?: [] as $row) {
+        $userId = (int) ($row['user_id'] ?? 0);
+        if ($userId <= 0) {
+            continue;
+        }
+        $normalized = [
+            'event_type' => (string) ($row['event_type'] ?? ''),
+            'print_status' => (string) ($row['print_status'] ?? ''),
+            'delivery_status' => (string) ($row['delivery_status'] ?? ''),
+            'source_uid' => (string) ($row['source_uid'] ?? ''),
+        ];
+        if (!isset($latestRows[$userId])) {
+            $latestRows[$userId] = $normalized; // ORDER BY id DESC ⇒ اولین، آخرین است
+        }
+        // ردیفی که فیش واقعی برای همین روز داشت (کلید یکتا دارد) مهم‌تر از repeat است.
+        if (!isset($ticketRows[$userId]) && trim((string) ($row['ticket_key'] ?? '')) !== '') {
+            $ticketRows[$userId] = $normalized;
+        }
+    }
+    foreach ($latestRows as $userId => $row) {
+        $attendanceByUser[$userId] = $ticketRows[$userId] ?? $row;
+    }
+
+    // لیست را از سفارش‌ها محدود می‌کنیم؛ کد ملی برای نگاشت داخلی استفاده می‌شود و حذف می‌شود.
+    $people = db()->query(
+        'SELECT id, employee_number, national_code, full_name, first_name, last_name, username, is_active FROM users '
+        . 'WHERE is_active = 1 ORDER BY last_name, first_name, full_name, employee_number, id'
+    )->fetchAll();
+    // فیلتر سفارش: فقط کسانی که برای این روز سفارش دارند.
+    // استثنا: کسی که فیش یتیم دارد (در صف چاپ ماند) حتماً می‌ماند — وگرنه
+    // همان ردیفی که باید دستی ثبت شود، از فهرست حذف می‌شد و راه اصلاحش می‌بست.
+    $people = array_values(array_filter($people ?: [], static function (array $row) use ($hasEligibleOrder, $attendanceByUser, $orderMap): bool {
+        if ($hasEligibleOrder($row) !== null) {
+            return true;
+        }
+        $uid = (int) ($row['id'] ?? 0);
+        if ($uid <= 0) {
+            return false;
+        }
+        // ردیفی که در این روز رخداد دارد همیشه می‌ماند. دلیل: تصمیم «یتیم
+        // بودن» در food_ticket_event_is_orphan_ticket در دسترس همه نیست و
+        // نبودِ سفارش هم نباید ردیفِ موجود را از چشم بیندازد. کاربر باید
+        // ببیند چه ردیفی دارد تا بداند چرا قابل ثبت است یا نیست.
+        if (isset($attendanceByUser[$uid])) {
+            return true;
+        }
+        // اگر نقشهٔ سفارش در دسترس نیست، فهرست را به هیچ‌کس محدود نمی‌کنیم؛
+        // وگرنه یک خطای گذرای سفارش، کل صفحه را خالی نشان می‌دهد.
+        return $orderMap === null;
+    }));
+    $employees = array_map(static function (array $row) use ($attendanceByUser, $absentUsers): array {
+        $id = (int) ($row['id'] ?? 0);
+        $employeeNumber = trim((string) ($row['employee_number'] ?? ''));
+        $name = trim((string) ($row['full_name'] ?? ''));
+        if ($name === '') {
+            $name = $employeeNumber !== '' ? $employeeNumber : (trim((string) ($row['username'] ?? '')) ?: 'کاربر #' . $id);
+        }
+        $todayRecord = $attendanceByUser[$id] ?? null;
+        // ── آیا ردیفِ فیش، «حضور» را اثبات می‌کند؟ ──────────────────────
+        // فیشِ چاپ‌شده و تحویل‌شده یعنی غذا داده شد ⇒ حضور مسجّل است.
+        // ولی فیشی که چاپ نشده / تحویل نشده (همان ردیفِ «لغو شد» یا «در صف
+        // ماند») اثبات حضور نیست؛ کسی غذا نگرفته. اگر آن را «حاضر» بدانیم،
+        // بلافاصله بعد از لغو، شخص در فهرست غایبان دیده نمی‌شود و کاربر
+        // می‌گوید «به لیست غایبین اضافه نشد» — همان شکایت.
+        $ticketProvesPresence = false;
+        if ($todayRecord !== null) {
+            $recType = strtolower(trim((string) ($todayRecord['event_type'] ?? '')));
+            $recPrint = strtolower(trim((string) ($todayRecord['print_status'] ?? '')));
+            $recDelivery = strtolower(trim((string) ($todayRecord['delivery_status'] ?? '')));
+            $ticketProvesPresence = $recType !== 'no_food' && $recType !== 'unknown'
+                && ($recPrint === 'printed' || $recDelivery === 'delivered');
+        }
+        return [
+            'id' => $id,
+            'pc' => $employeeNumber,
+            'name' => $name,
+            'active' => (bool) ($row['is_active'] ?? false),
+            'is_absent' => isset($absentUsers[$id]) && !$ticketProvesPresence,
+            'absence_recorded' => isset($absentUsers[$id]),
+            'ticket_proves_presence' => $ticketProvesPresence,
+            'today_record' => $todayRecord,
+        ];
+    }, $people ?: []);
+    // ۱.۶۲.۹: «مهمان» همیشه اولین ردیف فهرست است و محدودیت سفارش/تکرار ندارد.
+    array_unshift($employees, food_ticket_manual_attendance_guest_row());
+
+    $q = db()->prepare(
+        'SELECT id, user_id, personnel_code, full_name, food_type, punch_time, event_type, print_status, COALESCE(meal_type, \'lunch\') AS meal_type, source_payload, created_at '
+        . 'FROM food_ticket_events WHERE source_uid = ? AND punch_date = ? ORDER BY id DESC'
+    );
+    $q->execute(['manual-attendance', $date]);
+    $items = [];
+    foreach ($q->fetchAll() ?: [] as $row) {
+        $payload = json_decode((string) ($row['source_payload'] ?? ''), true);
+        $manual = is_array($payload) ? (array) ($payload['manual_attendance'] ?? []) : [];
+        $items[] = [
+            'id' => (int) ($row['id'] ?? 0),
+            'user_id' => (int) ($row['user_id'] ?? 0),
+            'pc' => (string) ($row['personnel_code'] ?? ''),
+            'name' => (string) ($row['full_name'] ?? ''),
+            'food' => (string) ($row['food_type'] ?? ''),
+            'meal_type' => (string) ($row['meal_type'] ?? 'lunch'),
+            'time' => substr((string) ($row['punch_time'] ?? ''), 0, 5),
+            'event_type' => (string) ($row['event_type'] ?? ''),
+            'print_status' => (string) ($row['print_status'] ?? ''),
+            // رویدادهای قدیمی این فیلد را ندارند و همگی صدور فیش محسوب می‌شوند.
+            'ticket_issued' => array_key_exists('with_ticket', $manual) ? (bool) $manual['with_ticket'] : true,
+            'physical_print' => !empty($manual['physical_print']),
+            'created_at' => (string) ($row['created_at'] ?? ''),
+        ];
+    }
+    return ['date' => $date, 'employees' => $employees, 'items' => $items];
+}
+
+/** ثبت دستی تردد یعنی حضور؛ اگر قبلاً غایب ثبت شده، همان روز را حاضر می‌کند. */
+function food_ticket_manual_attendance_clear_absence(int $userId, string $date, array $actor, string $reason): bool
+{
+    if ($userId <= 0 || !function_exists('food_ticket_absence_ensure') || !food_ticket_absence_ensure()) {
+        return false;
+    }
+    try {
+        $query = db()->prepare('SELECT id, group_id FROM food_ticket_daily_absence WHERE absence_date = ? AND user_id = ? LIMIT 1');
+        $query->execute([$date, $userId]);
+        $absence = $query->fetch() ?: null;
+        if ($absence === null) {
+            return false;
+        }
+        $groupId = (int) ($absence['group_id'] ?? 0);
+        if ($groupId > 0 && food_ticket_group_absence_locked($groupId, $date)
+            && !food_ticket_can_override_absence($actor)) {
+            app_error_log('[food-manual-attendance] kept locked absence for user ' . $userId . ' on ' . $date);
+            return false;
+        }
+        $deleted = db()->prepare('DELETE FROM food_ticket_daily_absence WHERE id = ?');
+        $deleted->execute([(int) $absence['id']]);
+        if ($deleted->rowCount() < 1) {
+            return false;
+        }
+        try {
+            food_ticket_audit('food_absence_cleared_by_manual_attendance', [
+                'user_id' => (int) ($actor['id'] ?? 0),
+                'target_type' => 'food_absence',
+                'target_id' => $userId,
+                'target_label' => 'تردد دستی / تاریخ ' . $date,
+                'old' => 'absent',
+                'new' => 'present',
+                'reason' => $reason,
+                'meta' => ['date' => $date, 'group_id' => $groupId ?: null, 'source' => 'manual-attendance'],
+            ]);
+        } catch (Throwable $auditError) {
+            app_error_log('[food-manual-attendance] absence audit: ' . $auditError->getMessage());
+        }
+        if (function_exists('food_ticket_release_held_ticket')) {
+            try {
+                food_ticket_release_held_ticket($userId, $date, $actor, $reason);
+            } catch (Throwable $releaseError) {
+                app_error_log('[food-manual-attendance] release held ticket: ' . $releaseError->getMessage());
+            }
+        }
+        return true;
+    } catch (Throwable $exception) {
+        app_error_log('[food-manual-attendance] clear absence: ' . $exception->getMessage());
+        return false;
+    }
+}
+
+/** ثبت دستی یک تردد برای روز انتخاب‌شده (امروز یا روزهای قبل)؛ صدور فیش و چاپ فیزیکی دو انتخاب مستقل هستند. */
+function food_ticket_api_manual_attendance_save(int $userId, bool $withTicket, bool $physicalPrint, string $reason, array $actor, array &$orderMaps, string $date = '', string $mealType = 'lunch'): array
+{
+    $targetDate = food_ticket_manual_attendance_date($date);
+    // ⚠️ ۱.۶۳.۲ — وعده همین‌جا نرمال می‌شود و در payload هر دو مسیر (کارمند و
+    // مهمان) می‌نشیند. پیش‌تر اصلاً نوشته نمی‌شد و ستون meal_type خالی می‌ماند؛
+    // گزارش‌ها همه را «ناهار» فرض می‌کردند و فیش مهمانِ شام هم در ناهار
+    // شمرده می‌شد.
+    $mealType = function_exists('food_order_meal_type')
+        ? food_order_meal_type($mealType)
+        : (in_array(strtolower(trim($mealType)), ['lunch', 'dinner'], true) ? strtolower(trim($mealType)) : 'lunch');
+    if (function_exists('food_meal_closed_guard')) {
+        food_meal_closed_guard($targetDate, $mealType, 'ثبت دستی حضور/فیش');
+    }
+    $reason = trim($reason);
+    if ($userId < 0) {
+        throw new RuntimeException('یک کارمند را انتخاب کنید.');
+    }
+    if ($reason === '' || (function_exists('mb_strlen') ? mb_strlen($reason, 'UTF-8') : strlen($reason)) > 300) {
+        throw new RuntimeException('علت ثبت دستی را وارد کنید (حداکثر ۳۰۰ نویسه).');
+    }
+    if (!$withTicket) {
+        $physicalPrint = false;
+    }
+    // ۱.۶۲.۹: شناسهٔ صفر یعنی «مهمان»؛ مسیر جداگانه بدون شرط سفارش/تکرار.
+    if ($userId === 0) {
+        return food_ticket_api_manual_attendance_save_guest($withTicket, $physicalPrint, $reason, $actor, $targetDate, $mealType);
+    }
+
+    $q = db()->prepare(
+        'SELECT id, employee_number, national_code, full_name, first_name, last_name, username, is_active FROM users WHERE id = ? LIMIT 1'
+    );
+    $q->execute([$userId]);
+    $person = $q->fetch();
+    if (!$person || !(int) ($person['is_active'] ?? 0)) {
+        throw new RuntimeException('کارمند پیدا نشد یا حساب او غیرفعال است.');
+    }
+    $employeeNumber = trim((string) ($person['employee_number'] ?? ''));
+    $fullName = trim((string) ($person['full_name'] ?? '')) ?: ($employeeNumber !== '' ? $employeeNumber : (string) ($person['username'] ?? 'کاربر #' . $userId));
+    $person['full_name'] = $fullName;
+
+    // پیش از هر نوع ثبت دستی (با فیش یا بدون فیش)، وجود سفارش فعال ناهار را
+    // با همان نقشه‌ای بررسی می‌کنیم که موتور صدور فیش از آن استفاده می‌کند.
+    //
+    // استثنا — «فیش یتیم»: ردیفی که در صف چاپ ماند از قبل با سفارش همان روز
+    // ساخته شده است. سفارشش دیگر لازم نیست؛ فقط باید تحویل ثبت شود. اگر اینجا
+    // هم سفارش اجباری می‌شد، همان روزی که سفارش‌ها در دسترس نیستند، هیچ فیش
+    // یتیمی قابل نجات نبود — و بدترین روز برای از دست دادنشان همان روز است.
+    $existingOrphan = null;
+    // جست‌وجو با user_id، نه کد ملی: ردیف‌های قدیمی ممکن است national_code
+    // نداشته باشند یا کلیدشان با کد پرسنلی ساخته شده باشد. شناسهٔ کاربر
+    // همیشه هست و همان چیزی است که فهرست ثبت دستی نشان می‌دهد.
+    $orphanQuery = db()->prepare(
+        'SELECT id, event_type, print_status, delivery_status, source_uid, source_key, source_payload '
+        . 'FROM food_ticket_events WHERE user_id = ? AND punch_date = ? AND event_type <> "unknown" '
+        . 'ORDER BY id DESC LIMIT 1'
+    );
+    $orphanQuery->execute([$userId, $targetDate]);
+    $orphanCandidate = $orphanQuery->fetch() ?: null;
+    if (food_ticket_event_is_orphan_ticket($orphanCandidate)) {
+        $existingOrphan = $orphanCandidate;
+    }
+    if ($existingOrphan === null) {
+        $orderMap = food_ticket_group_order_map($orderMaps, $targetDate);
+        if (!is_array($orderMap)) {
+            throw new RuntimeException('دریافت سفارش‌های روز انتخاب‌شده ناموفق بود؛ ثبت دستی انجام نشد.');
+        }
+    }
+    // فیش یتیم غذایش را از قبل دارد؛ نبودِ سفارش تازه دلیل رد نیست.
+    $orderFood = $existingOrphan !== null
+        ? (string) ($existingOrphan['food_type'] ?? '')
+        : food_ticket_group_food_lookup($orderMap)($person);
+    if ($existingOrphan === null && (!is_string($orderFood) || trim($orderFood) === '')) {
+        throw new RuntimeException('برای این کارمند سفارش فعال ناهار در روز انتخاب‌شده پیدا نشد؛ ثبت دستی مجاز نیست.');
+    }
+
+    // ── کدام ردیف «مانع ثبت دستی» است؟ ───────────────────────────────────
+    // یک نفر در یک روز می‌تواند چند ردیف داشته باشد. «آخرین ردیف» همیشه
+    // مانع نیست: event_type='repeat' یعنی فیشِ واقعیِ همان روز از قبل صادر
+    // شده و این تردد دوباره فیش نساخت. چنین ردیفی نباید مانع شود، وگرنه
+    // کاربر پیام «قبلاً فیش ثبت شده» می‌گیرد در حالی که فیشش چاپ/تحویل نشده
+    // و همان چیزی است که باید دستی ثبت شود.
+    //
+    // قاعده: ردیفِ دارای فیش واقعی (ticket_key) اولویت دارد؛ در نبود آن،
+    // آخرین ردیفِ غیر-repeat بررسی می‌شود.
+    $duplicate = db()->prepare(
+        'SELECT id, event_type, print_status, delivery_status, source_uid, source_key, source_payload, ticket_key '
+        . 'FROM food_ticket_events WHERE user_id = ? AND punch_date = ? AND event_type <> "unknown" ORDER BY id DESC'
+    );
+    $duplicate->execute([$userId, $targetDate]);
+    $existingToday = null;
+    $fallbackRow = null;
+    foreach ($duplicate->fetchAll() ?: [] as $candidate) {
+        $candidateType = (string) ($candidate['event_type'] ?? '');
+        if ($candidateType === 'repeat') {
+            // repeat مانع ثبت نیست: فیشش جدا و بالاتر بررسی می‌شود.
+            continue;
+        }
+        if ($existingToday === null) {
+            $existingToday = $candidate; // آخرین ردیفِ غیر-repeat
+        }
+        if (trim((string) ($candidate['ticket_key'] ?? '')) !== '') {
+            $existingToday = $candidate; // ردیفِ دارای فیش واقعی، معتبرترین است
+            break;
+        }
+    }
+    $replaceNoFood = $existingToday !== null
+        && (string) ($existingToday['event_type'] ?? '') === 'no_food'
+        && $withTicket
+        && (string) ($existingToday['print_status'] ?? '') !== 'printed';
+    // فیش یتیم: در صف چاپ ماند و هرگز چاپ نشد. کاربر باید بتواند دستی ثبتش کند،
+    // وگرنه غذا نه در گزارش تحویل می‌آید و نه راهی برای اصلاح هست.
+    // ردیف قبلی تبدیل می‌شود (نه ردیف دوم) تا سابقهٔ تردد حفظ شود و تکراری ساخته نشود.
+    // «فیش خودکارِ صبح که چاپ نشده» هم باید قابل تبدیل باشد. کسی که فیشش
+    // صبح خودکار ساخته شد ولی پرینتر آن را نزده و تحویل هم نشده، عملاً
+    // بدون فیش مانده. event_is_orphan_ticket برای auto_printed با
+    // print_status=printed مقدار false می‌دهد، پس این حالت خاص جدا افزوده شد.
+    // ترتیب مهم است: $replaceOrphanTicket باید پیش از این محاسبه شده باشد.
+    // پیش‌تر در همین بلوک استفاده می‌شد ولی هنوز تعریف نشده بود ⇒ null ⇒
+    // شرط «فیش یتیم» همیشه false ⇒ ردیفِ لغوشده با پیام «تکراری» رد می‌شد
+    // و کاربر نمی‌توانست فیشِ لغوشده را دوباره صادر کند.
+    $replaceOrphanTicket = $existingToday !== null
+        && !$replaceNoFood
+        && $withTicket
+        && food_ticket_event_is_orphan_ticket($existingToday);
+    $replaceUndeliveredAuto = $existingToday !== null
+        && !$replaceNoFood
+        && !$replaceOrphanTicket
+        && $withTicket
+        && in_array((string) ($existingToday['event_type'] ?? ''), ['auto_printed', 'auto_guest', 'print'], true)
+        && (string) ($existingToday['delivery_status'] ?? '') !== 'delivered';
+    $replaceOrphanTicket = $replaceOrphanTicket || $replaceUndeliveredAuto;
+
+    // ── «ثبت تردد بدون فیش» با مانعِ فیشِ لغوشده ──────────────────────���─
+    // ردیفی که لغو شده (یتیم: not_printed/pending) فیشی در دست کسی نیست؛
+    // غذا تحویل نشده. اگر همین ردیف جلوی «ثبت دستی بدون فیش» را بگیرد،
+    // کاربر برای کسی که فیشش را لغو کرده و فقط می‌خواهد حضورش ثبت شود،
+    // پیام گمراه‌کنندهٔ «فیش چاپ/تحویل‌شده ثبت شده» می‌گیرد. در این حالت
+    // ردیفِ یتیم تبدیل می‌شود (نه ردیف دوم) تا سابقه حفظ شود.
+    $replaceOrphanNoTicket = $existingToday !== null
+        && !$withTicket
+        && food_ticket_event_is_orphan_ticket($existingToday);
+    // «فقط تردد» روی ردیفی که فیشِ واقعی/تحویل‌شده دارد، همچنان ممنوع است —
+    // ولی پیام باید صادق باشد: غذا داده شده، نه اینکه «ثبت تکراری» است.
+    if ($existingToday !== null && !$replaceOrphanNoTicket && !$replaceNoFood && !$replaceOrphanTicket) {
+        $existingEventType = (string) ($existingToday['event_type'] ?? '');
+        $existingPrint = (string) ($existingToday['print_status'] ?? '');
+        $existingDelivery = (string) ($existingToday['delivery_status'] ?? '');
+        $isRealTicket = in_array($existingEventType, ['auto_printed', 'printed', 'print', 'guest', 'auto_guest'], true)
+            && ($existingPrint === 'printed' || $existingDelivery === 'delivered');
+        if ($isRealTicket) {
+            throw new RuntimeException(
+                'این کارمند فیشِ چاپ‌شده/تحویل‌شدهٔ همین روز را دارد؛ «تردد بدون فیش» برایش معنا ندارد. '
+                . 'اگر فیش اشتباه صادر شده: ردیفش را تیک بزنید، «لغو فیش انتخاب‌شده‌ها» را بزنید و بعد دوباره ثبت کنید. '
+                . 'وضعیت فعلی: ' . $existingPrint . '/' . $existingDelivery . '.'
+            );
+        }
+        $existingLabel = in_array($existingEventType, ['auto_printed', 'printed', 'print'], true) ? 'فیش' : 'تردد';
+        throw new RuntimeException(
+            'برای این کارمند در این روز ' . $existingLabel . ' ثبت شده است (ثبت تکراری مجاز نیست). '
+            . 'برای اصلاح: ردیفش را تیک بزنید و «لغو فیش انتخاب‌شده‌ها» را بزنید، بعد دوباره ثبت کنید. '
+            . 'وضعیت فعلی: ' . $existingEventType . '.'
+        );
+    }
+
+    $now = function_exists('food_order_now') ? food_order_now()->format('H:i:s') : date('H:i:s');
+    $recordedAt = function_exists('food_order_now') ? food_order_now()->format('Y-m-d H:i:s') : date('Y-m-d H:i:s');
+    $config = [];
+
+    if (!$withTicket) {
+        $sourceKey = hash('sha256', 'manual-attendance-no-ticket|' . $targetDate . '|' . $userId);
+        $payload = [
+            'source_key' => $sourceKey,
+            'source_uid' => 'manual-attendance',
+            'source_card' => null,
+            'punch_date' => $targetDate,
+            'punch_time' => $now,
+            'personnel_code' => $employeeNumber !== '' ? food_ticket_code($employeeNumber) : null,
+            'user_id' => $userId,
+            'national_code' => null,
+            'full_name' => $fullName,
+            'food_type' => null,
+            'ticket_key' => null,
+            'event_type' => 'no_food',
+            'print_status' => 'not_printed',
+            'meal_type' => $mealType,
+            'last_error' => 'ثبت دستی تردد بدون صدور فیش؛ علت: ' . $reason,
+            'source_payload' => json_encode([
+                'manual_attendance' => [
+                    'actor_id' => (int) ($actor['id'] ?? 0),
+                    'reason' => $reason,
+                    'with_ticket' => false,
+                    'physical_print' => false,
+                    'recorded_at' => $recordedAt,
+                ],
+            ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES),
+        ];
+    } else {
+        $config = food_ticket_config(true);
+        // کد پرسنلی برای «ساختن» فیش تازه لازم است. فیش یتیم از قبل ساخته
+        // شده و فقط باید تحویل ثبت شود؛ کمبود کد پرسنلی نباید نجاتش را ببندد.
+        if ($employeeNumber === '' && $existingOrphan === null) {
+            throw new RuntimeException('برای این کارمند کد پرسنلی ثبت نشده است؛ صدور فیش ممکن نیست.');
+        }
+        // اگر همین امروز ردیفِ یتیم/تبدیل‌پذیر داریم، جست‌وجوی ticket_key را
+        // انجام نمی‌دهیم. ردیفِ لغوشده ticket_key خود را خالی می‌کند، پس کلید
+        // ممکن است روی ردیف دیگری (مثلاً فیش دیگرِ همان روز) باقی مانده باشد
+        // و ما را بی‌دلیل به بن‌بست «تکراری» ببرد.
+        $ticketKey = 'food:' . $targetDate . ':' . food_ticket_digits($person['national_code'] ?? '');
+        $replacePathAvailable = $existingOrphan !== null || $replaceOrphanTicket;
+        if (!$replacePathAvailable
+            && food_ticket_digits($person['national_code'] ?? '') !== ''
+            && ($existingTicket = food_ticket_existing_ticket($ticketKey))) {
+            // فیشِ خودکارِ صبح که هرگز تحویل نشده، «فیش واقعی» نیست: غذا را
+            // کسی تحویل نگرفته. این حالت هم مثل فیش یتیم باید قابل تبدیل به
+            // ثبت دستی باشد، وگرنه کاربر برای ردیفی که پرینتر نزده به بن‌بست
+            // «قبلاً فیش ثبت شده» می‌رسد — همان شکایت دو نفرِ زردرنگ.
+            $autoUndelivered = in_array((string) ($existingTicket['event_type'] ?? ''), ['auto_printed', 'auto_guest', 'print'], true)
+                && (string) ($existingTicket['delivery_status'] ?? '') !== 'delivered';
+            if ($autoUndelivered) {
+                $existingTicket = null; // مسیر تبدیل، نه رد
+            }
+        }
+        if (($existingTicket ?? null) !== null) {
+            // اگر همان فیش در صف چاپ مانده و هرگز چاپ نشده، جایگزینی‌اش در بلوک
+            // بعدی انجام می‌شود (همان ردیف تبدیل می‌شود، نه ردیف دوم). فقط فیش
+            // واقعاً چاپ‌شده/تحویل‌شده این‌جا جلوی ثبت را می‌گیرد.
+            if (!food_ticket_event_is_orphan_ticket($existingTicket)) {
+                // ── راهنمای واقعی، نه بن‌بست ───────────────────────────────
+                // این پیام پیش‌تر فقط می‌گفت «تکراری مجاز نیست» و کاربر
+                // نمی‌دانست چه کند؛ در حالی که خودِ همین صفحه دکمهٔ «لغو فیش»
+                // را دارد. حالا دقیقاً می‌گوید کدام دکمه.
+                $stateLabel = (string) ($existingTicket['print_status'] ?? '') === 'printed'
+                    || (string) ($existingTicket['delivery_status'] ?? '') === 'delivered'
+                    ? 'چاپ/تحویل شده' : 'در جریان';
+                throw new RuntimeException(
+                    'این کارمند برای همین روز فیشِ ' . $stateLabel . ' دارد (ثبت تکراری مجاز نیست). '
+                    . 'اگر باید فیشش باطل و از نو صادر شود: ردیفش را در همین فهرست تیک بزنید و '
+                    . '«لغو فیش انتخاب‌شده‌ها» را بزنید؛ بعد دوباره «ثبت دستی با فیش» بزنید. '
+                    . 'وضعیت فعلی: ' . (string) ($existingTicket['print_status'] ?? 'نامشخص') . '.'
+                );
+            }
+        }
+
+        // همان استثنای بالا: فیش یتیم سفارش تازه لازم ندارد.
+        if ($existingOrphan === null) {
+            $orderMap = food_ticket_group_order_map($orderMaps, $targetDate);
+            if (!is_array($orderMap)) {
+                throw new RuntimeException('دریافت سفارش‌های روز انتخاب‌شده ناموفق بود؛ ثبت دستی انجام نشد.');
+            }
+        }
+        $base = [
+            'source_key' => hash('sha256', 'manual-food-ticket|' . $targetDate . '|' . $userId),
+            'source_uid' => 'manual-attendance',
+            'source_card' => null,
+            'punch_date' => $targetDate,
+            'punch_time' => $now,
+            'personnel_code' => food_ticket_code($employeeNumber),
+            'source_payload' => '',
+        ];
+        // فیش یتیم از موتور تصمیم نمی‌پرسد: غذایش از قبل مشخص است و فقط
+        // باید تحویل ثبت شود. پرسیدن از موتور اینجا همیشه «بدون سفارش» می‌داد
+        // و همان ردیفی که باید نجات پیدا کند، رد می‌شد.
+        // فیش خودکارِ تحویل‌نشده هم مثل یتیم: غذایش از قبل مشخص است و فقط
+        // باید «تحویل‌شده» ثبت شود. پرسیدن از موتور اینجا همیشه repeat
+        // می‌داد (چون ticket_key همان ردیف هنوز روی جدول است) و همان ردیفی
+        // که کاربر باید نجاتش دهد، با پیام تکراری رد می‌شد.
+        $replaceExistingAuto = $existingToday !== null
+            && in_array((string) ($existingToday['event_type'] ?? ''), ['auto_printed', 'auto_guest', 'print'], true)
+            && (string) ($existingToday['delivery_status'] ?? '') !== 'delivered';
+        if ($existingOrphan !== null || $replaceExistingAuto) {
+            $decision = ['print' => true, 'payload' => $base];
+        } else {
+            $decision = food_ticket_decide_for_user($person, $targetDate, $base, $config, $orderMaps);
+        }
+        if (empty($decision['print'])) {
+            $message = match ((string) ($decision['event_type'] ?? '')) {
+                'no_food' => 'برای این کارمند سفارش غذا یا کد ملی معتبر برای این روز پیدا نشد؛ فیش صادر نشد.',
+                'repeat' => 'برای این کارمند در این روز رویداد فیش وجود دارد؛ ثبت تکراری مجاز نیست.',
+                'inactive' => 'حساب کارمند غیرفعال است؛ فیش صادر نشد.',
+                default => 'کارمند برای دریافت فیش در این روز واجد شرایط نیست؛ فیش صادر نشد.',
+            };
+            throw new RuntimeException($message);
+        }
+        $payload = $decision['payload'];
+        $payload['source_uid'] = 'manual-attendance';
+        $payload['event_type'] = 'printed';
+        $payload['print_status'] = $physicalPrint ? 'pending' : 'printed';
+        $payload['source_payload'] = json_encode([
+            'manual_attendance' => [
+                'actor_id' => (int) ($actor['id'] ?? 0),
+                'reason' => $reason,
+                'with_ticket' => true,
+                'physical_print' => $physicalPrint,
+                'recorded_at' => $recordedAt,
+            ],
+        ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+    }
+
+    if ($replaceNoFood || $replaceOrphanTicket) {
+        $eventId = (int) ($existingToday['id'] ?? 0);
+        $existingSourceKey = trim((string) ($existingToday['source_key'] ?? ''));
+        if ($existingSourceKey !== '') {
+            $payload['source_key'] = $existingSourceKey;
+        }
+        $oldSourcePayload = json_decode((string) ($existingToday['source_payload'] ?? ''), true);
+        if (!is_array($oldSourcePayload)) {
+            $oldRaw = (string) ($existingToday['source_payload'] ?? '');
+            $oldSourcePayload = $oldRaw !== '' ? ['original_source_payload' => $oldRaw] : [];
+        }
+        $previousManual = is_array($oldSourcePayload['manual_attendance'] ?? null)
+            ? $oldSourcePayload['manual_attendance'] : [];
+        $manualMeta = [
+            'actor_id' => (int) ($actor['id'] ?? 0),
+            'reason' => $reason,
+            'with_ticket' => true,
+            'physical_print' => $physicalPrint,
+            'recorded_at' => $recordedAt,
+        ];
+        if ($replaceNoFood) {
+            $manualMeta['converted_from_no_food'] = true;
+        } else {
+            // سابقهٔ صف چاپ حفظ می‌شود تا معلوم بماند چرا دستی ثبت شده.
+            $manualMeta['converted_from_orphan_ticket'] = true;
+            $manualMeta['orphan_previous'] = [
+                'event_type' => (string) ($existingToday['event_type'] ?? ''),
+                'print_status' => (string) ($existingToday['print_status'] ?? ''),
+                'delivery_status' => (string) ($existingToday['delivery_status'] ?? ''),
+                'source_uid' => (string) ($existingToday['source_uid'] ?? ''),
+            ];
+        }
+        if ($previousManual !== []) {
+            $manualMeta['previous_manual_attendance'] = $previousManual;
+        }
+        $oldSourcePayload['manual_attendance'] = $manualMeta;
+        $mergedPayload = json_encode($oldSourcePayload, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_INVALID_UTF8_SUBSTITUTE);
+        if ($eventId <= 0 || $mergedPayload === false) {
+            throw new RuntimeException('رویداد قبلی برای تبدیل به فیش معتبر نیست.');
+        }
+        // شرط WHERE عمداً سخت‌گیرانه است: ردیف «یتیم» فقط اگر هنوز چاپ نشده و
+        // تحویل نشده باشد تبدیل می‌شود. اگر Worker همان لحظه چاپش کرده باشد،
+        // rowCount صفر می‌شود و خطا می‌دهیم — بهتر از بازنویسی فیش چاپ‌شده.
+        if ($replaceOrphanNoTicket) {
+            // تبدیل «ردیفِ لغوشده» به «تردد بدون فیش»: ticket_key و
+            // print_status قبلاً توسط مسیر لغو خالی شده‌اند؛ فقط نوع رویداد
+            // و تحویل‌نشده بودن را صریح نگه می‌داریم.
+            $updated = db()->prepare(
+                'UPDATE food_ticket_events SET source_uid = ?, personnel_code = ?, full_name = ?, national_code = ?, food_type = ?, '
+                . 'event_type = "no_food", print_status = "not_printed", delivery_status = "pending", '
+                . 'last_error = NULL, source_payload = ?, processed_at = NOW(), next_retry_at = NULL '
+                . 'WHERE id = ? AND (delivery_status IS NULL OR delivery_status <> "delivered")'
+            );
+        } elseif ($replaceOrphanTicket) {
+            // ticket_key عمداً بازنویسی نمی‌شود: ردیف یتیم کلید یکتای خودش را
+            // دارد (مثلاً از کد پرسنلی ساخته شده، نه کد ملی). اگر با کلید تازه
+            // و چه‌بسا خالی جایگزین شود، UNIQUE روی '' می‌شکند و ثبت رد می‌شود.
+            //
+            // فیش خودکارِ صبح print_status از قبل 'printed' دارد؛ قید
+            // «print_status <> printed» باعث می‌شد UPDATE صفر ردیف بزند و
+            // پیام «هم‌زمان تغییر کرده» بدهد. برای همین حالت، فقط «تحویل‌نشده
+            // بودن» شرط است (تحویل‌شده هرگز بازنویسی نمی‌شود).
+            if ($replaceExistingAuto ?? false) {
+                $updated = db()->prepare(
+                    'UPDATE food_ticket_events SET source_uid = ?, personnel_code = ?, full_name = ?, national_code = ?, food_type = ?, '
+                    . 'event_type = "printed", print_status = ?, delivery_status = "delivered", delivered_at = COALESCE(delivered_at, NOW()), '
+                    . 'last_error = NULL, source_payload = ?, processed_at = NOW(), next_retry_at = NULL '
+                    . 'WHERE id = ? AND (delivery_status IS NULL OR delivery_status <> "delivered")'
+                );
+            } else {
+                $updated = db()->prepare(
+                    'UPDATE food_ticket_events SET source_uid = ?, personnel_code = ?, full_name = ?, national_code = ?, food_type = ?, '
+                    . 'event_type = "printed", print_status = ?, last_error = NULL, source_payload = ?, processed_at = NOW(), next_retry_at = NULL '
+                    . 'WHERE id = ? AND print_status <> "printed" AND (delivery_status IS NULL OR delivery_status <> "delivered")'
+                );
+            }
+        } else {
+            $updated = db()->prepare(
+                'UPDATE food_ticket_events SET source_uid = ?, personnel_code = ?, full_name = ?, national_code = ?, food_type = ?, ticket_key = ?, '
+                . 'event_type = "printed", print_status = ?, last_error = NULL, source_payload = ?, processed_at = NOW(), next_retry_at = NULL '
+                . 'WHERE id = ? AND event_type = "no_food"'
+            );
+        }
+        $updated->execute($replaceOrphanNoTicket
+            ? [
+                'manual-attendance', food_ticket_code($employeeNumber), $fullName,
+                food_ticket_digits($person['national_code'] ?? ''),
+                (string) (($payload['food_type'] ?? '') ?: ($existingToday['food_type'] ?? '')),
+                $mergedPayload, $eventId,
+            ]
+            : ($replaceOrphanTicket
+            ? [
+                'manual-attendance', food_ticket_code($employeeNumber), $fullName,
+                food_ticket_digits($person['national_code'] ?? ''),
+                (string) (($payload['food_type'] ?? '') ?: ($existingToday['food_type'] ?? '')),
+                $physicalPrint ? 'pending' : 'printed', $mergedPayload, $eventId,
+            ]
+            : [
+                'manual-attendance', food_ticket_code($employeeNumber), $fullName,
+                food_ticket_digits($person['national_code'] ?? ''), (string) ($payload['food_type'] ?? ''),
+                (string) ($payload['ticket_key'] ?? ''), $physicalPrint ? 'pending' : 'printed', $mergedPayload, $eventId,
+            ]));
+        if ($updated->rowCount() !== 1) {
+            throw new RuntimeException('رویداد تردد هم‌زمان تغییر کرده است؛ فهرست را تازه‌سازی و دوباره بررسی کنید.');
+        }
+    } else {
+        try {
+            $eventId = food_ticket_add_event($payload);
+        } catch (PDOException $exception) {
+            if ((int) $exception->getCode() === 23000 || str_contains($exception->getMessage(), 'Duplicate')) {
+                throw new RuntimeException('این تردد هم‌زمان از مسیر دیگری ثبت شده است؛ از ثبت دوباره جلوگیری شد.');
+            }
+            throw $exception;
+        }
+        if ($eventId <= 0) {
+            throw new RuntimeException('ثبت رویداد تردد انجام نشد.');
+        }
+    }
+
+    if ($withTicket && $physicalPrint) {
+        food_ticket_enqueue_print($eventId, $config);
+        $message = 'فیش صادر شد و برای چاپ فیزیکی در صف قرار گرفت؛ تحویل پس از چاپ موفق ثبت می‌شود.';
+        $printStatus = 'pending';
+    } elseif ($withTicket) {
+        if (function_exists('food_ticket_print_log')) {
+            food_ticket_print_log($eventId, '', (string) $payload['source_key'], (string) $payload['ticket_key'], 'ثبت دستی', 'manual_issued', 0, 'فیش صادر شد؛ چاپ فیزیکی انتخاب نشده است.');
+        }
+        $message = 'فیش و تحویل غذا در سامانه «چاپ‌شده/تحویل‌شده» ثبت شد؛ چاپ فیزیکی انجام نشد.';
+        $printStatus = 'printed';
+    } else {
+        $message = 'تردد دستی ثبت شد؛ فیش صادر نشد.';
+        $printStatus = 'not_printed';
+    }
+
+    // طبق سیاست سامانه، صدور دستی بدون چاپ فیزیکی هم به معنی تحویل غذا است.
+    // در حالت چاپ فیزیکی، Worker پس از چاپ موفق همین وضعیت را ثبت می‌کند.
+    if ($withTicket && !$physicalPrint && function_exists('food_ticket_mark_delivered_on_print')) {
+        food_ticket_mark_delivered_on_print($eventId);
+    }
+
+    // ثبت دستی حضور با هر نوع فیش یا بدون فیش، با رکورد غیبت همان روز ناسازگار است.
+    $absenceCleared = food_ticket_manual_attendance_clear_absence($userId, $targetDate, $actor, $reason);
+    if ($absenceCleared) {
+        $message .= ' ثبت حضور در فهرست غایبان نیز اصلاح شد.';
+    }
+
+    food_ticket_audit('food_ticket_manual_attendance', [
+        'target_type' => 'food_ticket_event',
+        'target_id' => $eventId,
+        'target_label' => $fullName,
+        'user_id' => (int) ($actor['id'] ?? 0),
+        'meta' => [
+            'subject_user_id' => $userId,
+            'date' => $targetDate,
+            'with_ticket' => $withTicket,
+            'physical_print' => $physicalPrint,
+            'delivery_status' => ($withTicket && !$physicalPrint) ? 'delivered' : 'pending',
+            'absence_cleared' => $absenceCleared,
+            'ticket_key' => (string) ($payload['ticket_key'] ?? ''),
+            'reason' => $reason,
+        ],
+    ]);
+    return [
+        'ok' => true,
+        'event_id' => $eventId,
+        'user_id' => $userId,
+        'name' => $fullName,
+        'pc' => $employeeNumber,
+        'with_ticket' => $withTicket,
+        'physical_print' => $physicalPrint,
+        'print_status' => $printStatus,
+        'meal_type' => $mealType,
+        'message' => $message,
+    ];
+}
+
+/**
+ * ۱.۶۲.۹: ثبت دستی فیش «مهمان» — بدون شرط سفارش، کد پرسنلی یا منع تکرار؛ هر ثبت یک فیش جدید است.
+ * رویداد با user_id خالی، نام «مهمان» و نوع غذای «مهمان» ذخیره می‌شود تا در گزارش‌ها
+ * کنار فیش‌های مهمانِ کارت‌خوان (event_type = guest) شمرده شود.
+ */
+function food_ticket_api_manual_attendance_save_guest(bool $withTicket, bool $physicalPrint, string $reason, array $actor, string $date, string $mealType = 'lunch'): array
+{
+    if (!$withTicket) {
+        $physicalPrint = false;
+    }
+    // ⚠️ ۱.۶۳.۲ — وعده باید همین‌جا نرمال شود. پیش‌تر معتبرسازی وعده فقط در
+    // مسیر کارمند اجرا می‌شد و مسیر مهمان اصلاً از آن رد نمی‌شد؛ مقدار خام
+    // (یا خالی) به ستون meal_type می‌رفت و در گزارش‌ها «ناهار» فرض می‌شد.
+    $mealType = function_exists('food_order_meal_type') ? food_order_meal_type($mealType) : (in_array(strtolower(trim($mealType)), ['lunch', 'dinner'], true) ? strtolower(trim($mealType)) : 'lunch');
+    $now = function_exists('food_order_now') ? food_order_now()->format('H:i:s') : date('H:i:s');
+    $recordedAt = function_exists('food_order_now') ? food_order_now()->format('Y-m-d H:i:s') : date('Y-m-d H:i:s');
+    $config = $withTicket ? food_ticket_config(true) : [];
+    // هر ثبت مهمان کلید یکتای خودش را دارد تا چند مهمان در یک روز قابل ثبت باشند.
+    $sourceKey = hash('sha256', 'manual-guest|' . $date . '|' . bin2hex(random_bytes(16)));
+    $sourcePayload = json_encode([
+        'manual_attendance' => [
+            'actor_id' => (int) ($actor['id'] ?? 0),
+            'reason' => $reason,
+            'with_ticket' => $withTicket,
+            'physical_print' => $physicalPrint,
+            'guest' => true,
+            'meal_type' => $mealType,
+            'recorded_at' => $recordedAt,
+        ],
+    ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+    $payload = [
+        'source_key' => $sourceKey,
+        'source_uid' => 'manual-attendance',
+        'source_card' => null,
+        'punch_date' => $date,
+        'punch_time' => $now,
+        'personnel_code' => null,
+        'user_id' => null,
+        'national_code' => null,
+        'full_name' => 'مهمان',
+        'food_type' => $withTicket ? 'مهمان' : null,
+        'ticket_key' => null,
+        'event_type' => $withTicket ? 'guest' : 'no_food',
+        // ⚠️ ۱.۶۳.۲ — مقدار پیش‌فرض «not_printed» بود و هر دو گزارش تحویل
+        // (report_printed_delivery و reconciliation_served_counts) شرط
+        // print_status = 'printed' دارند؛ نتیجه: مهمانِ دستی در هیچ گزارشی
+        // دیده نمی‌شد — همان «۶ مهمان، صفر پرس تحویلی».
+        // معنای print_status در این سامانه «فیش در سامانه صادر شد» است، نه
+        // «کاغذ از چاپگر بیرون آمد»؛ مسیر کارمند هم دقیقاً همین کار را می‌کند
+        // (printed + delivered + food_ticket_mark_delivered_on_print).
+        //
+        // ⚠️ اما وقتی چاپ فیزیکی خواسته شده، ردیف باید «not_printed» بماند:
+        // food_ticket_enqueue_print گارد `print_status <> "printed"` دارد و
+        // اگر همین‌جا printed بنویسیم، فیش هیچ‌وقت وارد صف چاپ نمی‌شود.
+        'print_status' => ($withTicket && !$physicalPrint) ? 'printed' : 'not_printed',
+        // وعده از فرم می‌آید؛ پیش‌تر اصلاً فرستاده نمی‌شد و ستون خالی می‌ماند.
+        // ستون NOT NULL است — حتی ردیف «بدون فیش» هم وعدهٔ خودش را دارد.
+        'meal_type' => $mealType,
+        'last_error' => $withTicket ? null : ('ثبت دستی تردد مهمان بدون صدور فیش؛ علت: ' . $reason),
+        'source_payload' => $sourcePayload,
+    ];
+
+    $eventId = food_ticket_add_event($payload);
+    if ($eventId <= 0) {
+        throw new RuntimeException('ثبت فیش مهمان انجام نشد.');
+    }
+
+    if ($withTicket && $physicalPrint) {
+        food_ticket_enqueue_print($eventId, $config);
+        $message = 'فیش مهمان صادر شد و برای چاپ فیزیکی در صف قرار گرفت.';
+        $printStatus = 'pending';
+    } elseif ($withTicket) {
+        if (function_exists('food_ticket_print_log')) {
+            food_ticket_print_log($eventId, '', $sourceKey, '', 'ثبت دستی', 'manual_issued', 0, 'فیش مهمان صادر شد؛ چاپ فیزیکی انتخاب نشده است.');
+        }
+        $message = 'فیش مهمان صادر شد؛ چاپ فیزیکی انجام نشد.';
+        $printStatus = 'printed';
+    } else {
+        $message = 'تردد مهمان ثبت شد؛ فیش صادر نشد.';
+        $printStatus = 'not_printed';
+    }
+
+    // ⚠️ ۱.۶۳.۲ — مهمانِ بدون چاپ فیزیکی هم «تحویل‌شده» است. مسیر کارمند
+    // همین را لحظهٔ ثبت انجام می‌دهد (food_ticket_mark_delivered_on_print)؛
+    // مسیر مهمان آن را نداشت، پس ردیف تا ابد delivery_status=pending ماند و
+    // گزارش تطبیق «۰ پرس مهمان» نشان داد.
+    if ($withTicket && !$physicalPrint && function_exists('food_ticket_mark_delivered_on_print')) {
+        food_ticket_mark_delivered_on_print($eventId);
+    }
+
+    food_ticket_audit('food_ticket_manual_attendance', [
+        'target_type' => 'food_ticket_event',
+        'target_id' => $eventId,
+        'target_label' => 'مهمان',
+        'user_id' => (int) ($actor['id'] ?? 0),
+        'meta' => [
+            'subject_user_id' => 0,
+            'guest' => true,
+            'date' => $date,
+            'with_ticket' => $withTicket,
+            'physical_print' => $physicalPrint,
+            'meal_type' => $mealType,
+            'reason' => $reason,
+        ],
+    ]);
+    return [
+        'ok' => true,
+        'event_id' => $eventId,
+        'user_id' => 0,
+        'name' => 'مهمان',
+        'pc' => '',
+        'with_ticket' => $withTicket,
+        'physical_print' => $physicalPrint,
+        'print_status' => $printStatus,
+        'meal_type' => $mealType,
+        'message' => $message,
+    ];
+}
+
+/** هر نفر جداگانه ثبت می‌شود؛ خطای یک نفر مانع پردازش بقیه نیست. */
+function food_ticket_api_manual_attendance_save_many(array $body, array $actor): array
+{
+    $rawIds = $body['user_ids'] ?? (isset($body['user_id']) ? [$body['user_id']] : []);
+    if (!is_array($rawIds)) {
+        throw new RuntimeException('فهرست کارکنان انتخاب‌شده معتبر نیست.');
+    }
+    $userIds = [];
+    foreach ($rawIds as $rawId) {
+        $userId = filter_var($rawId, FILTER_VALIDATE_INT);
+        // ۱.۶۲.۹: شناسهٔ صفر «مهمان» است و معتبر محسوب می‌شود.
+        if ($userId === false || (int) $userId < 0) {
+            continue;
+        }
+        $userIds[(int) $userId] = (int) $userId;
+    }
+    $userIds = array_values($userIds);
+    if (!$userIds) {
+        throw new RuntimeException('حداقل یک کارمند را انتخاب کنید.');
+    }
+    if (count($userIds) > 100) {
+        throw new RuntimeException('در هر نوبت حداکثر ۱۰۰ کارمند را انتخاب کنید.');
+    }
+    // ۱.۶۲.۹: تاریخ انتخابی (امروز یا روزهای قبل) برای همهٔ ثبت‌های این نوبت اعمال می‌شود.
+    $date = food_ticket_manual_attendance_date((string) ($body['date'] ?? ''));
+    $withTicket = array_key_exists('with_ticket', $body) ? filter_var($body['with_ticket'], FILTER_VALIDATE_BOOLEAN) : true;
+    if (!function_exists('user_can') || !user_can($actor, 'food.manual_attendance_edit')) {
+        throw new RuntimeException('ویرایش ثبت دستی فیش/تردد مجاز نیست.');
+    }
+    // ۱.۶۳.۲: وعده از فرم (ناهار/شام)؛ پیش‌تر فقط برای کارمند خوانده می‌شد
+    // و مسیر مهمان همیشه «ناهار» در گزارش‌ها فرض می‌شد.
+    $manualMealType = function_exists('food_order_meal_type')
+        ? food_order_meal_type($body['meal_type'] ?? 'lunch')
+        : (in_array(strtolower(trim((string) ($body['meal_type'] ?? ''))), ['lunch', 'dinner'], true) ? strtolower(trim((string) $body['meal_type'])) : 'lunch');
+    $physicalPrint = $withTicket && !empty($body['physical_print']);
+    $reason = (string) ($body['reason'] ?? '');
+    $labels = [0 => ['name' => 'مهمان', 'pc' => '']];
+    $lookupIds = array_values(array_filter($userIds, static fn (int $id): bool => $id > 0));
+    try {
+        $placeholders = $lookupIds ? implode(',', array_fill(0, count($lookupIds), '?')) : '';
+        $labelQuery = $placeholders !== '' ? db()->prepare('SELECT id, employee_number, full_name, username FROM users WHERE id IN (' . $placeholders . ')') : null;
+        $labelRows = [];
+        if ($labelQuery !== null) {
+            $labelQuery->execute($lookupIds);
+            $labelRows = $labelQuery->fetchAll() ?: [];
+        }
+        foreach ($labelRows as $person) {
+            $id = (int) ($person['id'] ?? 0);
+            $pc = trim((string) ($person['employee_number'] ?? ''));
+            $name = trim((string) ($person['full_name'] ?? '')) ?: ($pc !== '' ? $pc : (string) ($person['username'] ?? ''));
+            $labels[$id] = ['name' => $name, 'pc' => $pc];
+        }
+    } catch (Throwable) {
+        // ثبت مستقل هر نفر ادامه پیدا کند؛ اگر پایگاه موقتاً در دسترس نیست، خود هر ثبت خطای دقیق می‌دهد.
+    }
+    $results = [];
+    $orderMaps = [];
+    foreach ($userIds as $userId) {
+        try {
+            $results[] = food_ticket_api_manual_attendance_save($userId, $withTicket, $physicalPrint, $reason, $actor, $orderMaps, $date, $manualMealType);
+        } catch (Throwable $exception) {
+            $results[] = [
+                'ok' => false,
+                'user_id' => $userId,
+                'name' => (string) ($labels[$userId]['name'] ?? ''),
+                'pc' => (string) ($labels[$userId]['pc'] ?? ''),
+                'with_ticket' => $withTicket,
+                'physical_print' => $physicalPrint,
+                'message' => $exception->getMessage() !== '' ? $exception->getMessage() : 'ثبت این کارمند ناموفق بود.',
+            ];
+        }
+    }
+    $successCount = count(array_filter($results, static fn (array $item): bool => !empty($item['ok'])));
+    $failureCount = count($results) - $successCount;
+    return [
+        'ok' => $failureCount === 0,
+        'results' => $results,
+        'success_count' => $successCount,
+        'failure_count' => $failureCount,
+        'message' => $successCount . ' نفر موفق' . ($failureCount ? '، ' . $failureCount . ' نفر ناموفق' : '') . ' ثبت شدند.',
+    ];
+}
+
+function food_ticket_api_groups(string $overviewDate = '', ?array $actor = null): array
+{
+    if (!food_ticket_groups_ensure()) {
+        throw new RuntimeException('جدول‌های گروه غذا ساخته نشد؛ upgrade-1.13-food-groups.sql را اجرا کنید.');
+    }
+    food_ticket_absence_ensure();
+    $date = preg_match('/^\d{4}-\d{2}-\d{2}$/', $overviewDate) ? $overviewDate : date('Y-m-d');
+    // غذای سفارشیِ هر نفر برای همین روز؛ کنار نام عضو در «لیست اعضا» نمایش داده می‌شود.
+    // خطای خواندن سفارش نباید خروجی لیست گروه را بشکند؛ در آن صورت فقط غذای سفارشی نمایش داده نمی‌شود.
+    $memberOrderMaps = [];
+    $memberFoodOf = null;
+    try {
+        $memberOrderMaps[$date] = food_ticket_group_order_map($memberOrderMaps, $date);
+        $memberFoodOf = food_ticket_group_food_lookup($memberOrderMaps[$date] ?? null);
+    } catch (Throwable $foodErr) {
+        app_error_log('[food-groups] member food lookup unavailable: ' . $foodErr->getMessage());
+        $memberFoodOf = null;
+    }
+    // اگر سرویس سفارش پاسخ داد، «بدون سفارش» واقعی است؛ وگرنه اصلاً نمایش داده نمی‌شود.
+    $foodMapAvailable = ($memberOrderMaps[$date] ?? null) !== null;
+    $userOut = static function (array $r) use ($memberFoodOf, $foodMapAvailable): array {
+        $split = food_person_name_split($r);
+        return [
+            'id' => (int) $r['id'],
+            'pc' => (string) ($r['employee_number'] ?? ''),
+            'name' => (string) ($r['full_name'] ?? ''),
+            'first_name' => $split['first'],
+            'last_name' => $split['last'],
+            'nat' => (string) ($r['national_code'] ?? ''),
+            'active' => (bool) ($r['is_active'] ?? false),
+            'food' => $memberFoodOf ? $memberFoodOf($r) : null,
+            'food_known' => $foodMapAvailable,
+        ];
+    };
+    $groups = db()->query('SELECT id, title, l_uid, rfid_card, description, visit_change_until, status, created_at FROM food_ticket_groups ORDER BY status ASC, id DESC')->fetchAll();
+    $byGroup = [];
+    $mrows = db()->query(
+        'SELECT m.group_id, u.id, u.employee_number, u.national_code, u.full_name, u.first_name, u.last_name, u.is_active '
+        . 'FROM food_ticket_group_members m JOIN users u ON u.id = m.user_id ORDER BY u.last_name, u.first_name, u.full_name'
+    )->fetchAll();
+    foreach ($mrows as $r) {
+        $byGroup[(int) $r['group_id']][] = $userOut($r);
+    }
+    $visitorsByGroup = [];
+    try {
+        $vq = db()->prepare(
+            'SELECT v.group_id, u.id, u.employee_number, u.national_code, u.full_name, u.first_name, u.last_name, u.is_active, '
+            . 'm.group_id AS home_group_id, hg.title AS home_group_title '
+            . 'FROM food_ticket_day_visits v JOIN users u ON u.id = v.user_id '
+            . 'LEFT JOIN food_ticket_group_members m ON m.user_id = u.id '
+            . 'LEFT JOIN food_ticket_groups hg ON hg.id = m.group_id '
+            . 'WHERE v.visit_date = ? ORDER BY u.last_name, u.first_name, u.full_name'
+        );
+        $vq->execute([$date]);
+        foreach ($vq->fetchAll() ?: [] as $r) {
+            $row = $userOut($r);
+            $row['visitor'] = true;
+            $row['temporary_transfer'] = !empty($r['home_group_id']) && (int) $r['home_group_id'] !== (int) $r['group_id'];
+            $row['home_group_title'] = (string) ($r['home_group_title'] ?? '');
+            $visitorsByGroup[(int) $r['group_id']][] = $row;
+        }
+    } catch (Throwable $e) {
+        app_error_log('[food-visit] groups list visitors failed: ' . $e->getMessage());
+    }
+    $items = [];
+    foreach ($groups as $g) {
+        $gid = (int) $g['id'];
+        $overview = food_ticket_group_overview($gid, $date);
+        $items[] = [
+            'id' => $gid,
+            'title' => (string) $g['title'],
+            'l_uid' => food_ticket_code((string) ($g['l_uid'] ?? '')),
+            // شمارهٔ کارت دیگر در رابط کاربری وجود ندارد؛ فقط برای سازگاری داده‌ای در دیتابیس می‌ماند.
+            'card' => '',
+            'legacy_card' => false,
+            'description' => (string) ($g['description'] ?? ''),
+            'visit_change_until' => food_ticket_visit_change_hhmm($g['visit_change_until'] ?? ''),
+            'active' => (string) $g['status'] === 'active',
+            'created_at' => (string) $g['created_at'],
+            'members' => $byGroup[$gid] ?? [],
+            'today_visitors' => $visitorsByGroup[$gid] ?? [],
+            'today' => $overview,
+        ];
+    }
+    $free = db()->query(
+        'SELECT u.id, u.employee_number, u.national_code, u.full_name, u.first_name, u.last_name, u.is_active FROM users u '
+        . 'LEFT JOIN food_ticket_group_members m ON m.user_id = u.id '
+        . "WHERE m.id IS NULL AND u.employee_number IS NOT NULL AND TRIM(u.employee_number) <> '' "
+        . 'ORDER BY u.is_active DESC, u.full_name'
+    )->fetchAll();
+    $runs = db()->query(
+        'SELECT id, group_id, group_title, rfid_card, trigger_kind, trigger_uid, punch_date, punch_time, run_kind, status, members_total, printed_count, repeat_count, '
+        . 'no_food_count, absent_count, skipped_count, error_count FROM food_ticket_group_runs ORDER BY id DESC LIMIT 30'
+    )->fetchAll();
+    return [
+        'groups' => $items,
+        'free_users' => array_map($userOut, $free),
+        'runs' => $runs,
+        'absence_date' => $date,
+        'can_cancel_visit' => $actor ? food_ticket_can_cancel_day_visit($actor) : false,
+    ];
+}
+
+function food_ticket_api_save_group(array $data, int $actorId): int
+{
+    if (!food_ticket_groups_ensure()) {
+        throw new RuntimeException('جدول‌های گروه غذا ساخته نشد.');
+    }
+    $id = max(0, (int) ($data['id'] ?? 0));
+    $title = trim((string) ($data['title'] ?? ''));
+    if ($title === '') {
+        throw new RuntimeException('نام گروه الزامی است.');
+    }
+    $title = function_exists('mb_substr') ? mb_substr($title, 0, 190) : substr($title, 0, 190);
+    $description = trim((string) ($data['description'] ?? ''));
+    $description = function_exists('mb_substr') ? mb_substr($description, 0, 500) : substr($description, 0, 500);
+    $untilRaw = trim((string) ($data['visit_change_until'] ?? $data['visitChangeUntil'] ?? ''));
+    $visitChangeUntil = null;
+    if ($untilRaw !== '') {
+        $hhmm = food_ticket_visit_change_hhmm($untilRaw);
+        if ($hhmm === '') {
+            throw new RuntimeException('مهلت تغییر سلف باید به‌صورت ساعت ۲۴ باشد؛ مثلاً 09:30. برای بدون محدودیت، فیلد را خالی بگذارید.');
+        }
+        $visitChangeUntil = $hhmm . ':00';
+    }
+
+    // ── شناسهٔ نماینده: L_UID (اصلی) و کارت (فقط سازگاری با گروه‌های قدیمی) ──
+    $lUid = food_ticket_code((string) ($data['l_uid'] ?? $data['lUid'] ?? ''));
+    if ($lUid !== '' && preg_match('/^[0-9A-Za-z_-]{1,80}$/', $lUid) !== 1) {
+        throw new RuntimeException('L_UID نماینده معتبر نیست (حرف/عدد، حداکثر ۸۰ نویسه).');
+    }
+    // ⚠️ ۱.۳۴: شمارهٔ کارت (C_CARD) از فرم گروه غذا حذف شده و از ورودی نادیده گرفته می‌شود.
+    $card = '';
+    if ($lUid === '') {
+        throw new RuntimeException('L_UID نمایندهٔ گروه الزامی است (شمارهٔ کارت دیگر معیار شناسایی نیست).');
+    }
+    if ($card !== '' && preg_match('/^[0-9A-Z]{4,120}$/', $card) !== 1) {
+        throw new RuntimeException('شمارهٔ کارت RFID معتبر نیست (حداقل ۴ نویسهٔ حرف/عدد).');
+    }
+
+    if (array_key_exists('active', $data)) {
+        $status = !empty($data['active']) ? 'active' : 'inactive';
+    } else {
+        $status = ((string) ($data['status'] ?? 'active')) === 'inactive' ? 'inactive' : 'active';
+    }
+
+    // L_UID نباید برای گروه دیگر ثبت شده باشد (قاعده: هر L_UID فقط یک گروه)
+    if ($lUid !== '') {
+        $dupe = db()->prepare("SELECT id, title, l_uid FROM food_ticket_groups WHERE id <> ? AND l_uid IS NOT NULL AND l_uid <> ''");
+        $dupe->execute([$id]);
+        foreach ($dupe->fetchAll() as $o) {
+            if (food_ticket_code((string) $o['l_uid']) === $lUid) {
+                throw new RuntimeException('این L_UID قبلاً برای گروه «' . $o['title'] . '» ثبت شده است.');
+            }
+        }
+        // اگر همین L_UID کد پرسنلی کاربری باشد که عضو این گروه نیست، تردد او به‌عنوان گروه تفسیر می‌شود.
+        $memberIds = [];
+        if ($id > 0) {
+            $mq = db()->prepare('SELECT user_id FROM food_ticket_group_members WHERE group_id = ?');
+            $mq->execute([$id]);
+            $memberIds = array_map('intval', $mq->fetchAll(PDO::FETCH_COLUMN));
+        }
+        $conflict = db()->prepare('SELECT id, full_name, employee_number, username FROM users WHERE is_active = 1');
+        $conflict->execute();
+        foreach ($conflict->fetchAll() as $u) {
+            $uidCandidates = [food_ticket_code((string) ($u['employee_number'] ?? '')), food_ticket_code((string) ($u['username'] ?? ''))];
+            if (in_array($lUid, $uidCandidates, true) && !in_array((int) $u['id'], $memberIds, true)) {
+                throw new RuntimeException('L_UID ' . $lUid . ' متعلق به کاربر «' . $u['full_name'] . '» است که عضو این گروه نیست؛ ابتدا او را عضو کنید یا L_UID دیگری بدهید.');
+            }
+        }
+    }
+
+    // کارت نباید برای گروه دیگر، کارت مهمان یا کاربری ثبت شده باشد
+    if ($card !== '') {
+        $others = db()->prepare('SELECT title, rfid_card FROM food_ticket_groups WHERE id <> ? AND rfid_card IS NOT NULL');
+        $others->execute([$id]);
+        foreach ($others->fetchAll() as $o) {
+            if (food_ticket_card_equals($card, (string) $o['rfid_card'])) {
+                throw new RuntimeException('این کارت قبلاً برای گروه «' . $o['title'] . '» ثبت شده است.');
+            }
+        }
+        try {
+            foreach (db()->query('SELECT card_uid, guest_name FROM food_ticket_guest_cards')->fetchAll() as $g) {
+                if (food_ticket_card_equals($card, (string) $g['card_uid'])) {
+                    throw new RuntimeException('این کارت قبلاً به‌عنوان کارت مهمان ثبت شده است.');
+                }
+            }
+        } catch (PDOException) {
+            // جدول کارت مهمان وجود ندارد: تداخلی نیست
+        }
+        if (function_exists('food_ticket_card_map_load')) {
+            foreach (food_ticket_card_map_load(true) as $key => $mappedUser) {
+                if (food_ticket_card_equals($card, (string) $key)) {
+                    $name = (string) (food_ticket_user_index()['id'][(int) $mappedUser]['full_name'] ?? ('کاربر ' . $mappedUser));
+                    throw new RuntimeException('این کارت قبلاً برای کاربر «' . $name . '» ثبت شده است.');
+                }
+            }
+        }
+    }
+
+    // اعضا
+    $ids = [];
+    foreach ((array) ($data['members'] ?? []) as $v) {
+        $n = (int) $v;
+        if ($n > 0) {
+            $ids[$n] = $n;
+        }
+    }
+    $ids = array_values($ids);
+    if ($ids !== []) {
+        $in = implode(',', array_fill(0, count($ids), '?'));
+        $exist = db()->prepare("SELECT id FROM users WHERE id IN ($in) AND employee_number IS NOT NULL AND TRIM(employee_number) <> ''");
+        $exist->execute($ids);
+        if (count($exist->fetchAll()) !== count($ids)) {
+            throw new RuntimeException('یکی از کاربران انتخاب‌شده در فهرست کارکنان غذا پیدا نشد.');
+        }
+        $conf = db()->prepare(
+            "SELECT u.full_name, g.title FROM food_ticket_group_members m JOIN users u ON u.id = m.user_id JOIN food_ticket_groups g ON g.id = m.group_id WHERE m.user_id IN ($in) AND m.group_id <> ? LIMIT 1"
+        );
+        $conf->execute(array_merge($ids, [$id]));
+        $c = $conf->fetch();
+        if ($c) {
+            throw new RuntimeException('کاربر «' . $c['full_name'] . '» قبلاً عضو گروه «' . $c['title'] . '» است؛ هر کاربر فقط در یک گروه می‌تواند باشد.');
+        }
+    }
+
+    // وضعیت قبلی برای Audit
+    $before = null;
+    if ($id > 0) {
+        $bq = db()->prepare('SELECT title, l_uid, rfid_card, status FROM food_ticket_groups WHERE id = ?');
+        $bq->execute([$id]);
+        $before = $bq->fetch() ?: null;
+        if ($before === null) {
+            throw new RuntimeException('گروه پیدا نشد.');
+        }
+    }
+    $beforeMembers = [];
+    if ($id > 0) {
+        $mq = db()->prepare('SELECT user_id FROM food_ticket_group_members WHERE group_id = ?');
+        $mq->execute([$id]);
+        $beforeMembers = array_map('intval', $mq->fetchAll(PDO::FETCH_COLUMN));
+    }
+
+    $pdo = db();
+    $pdo->beginTransaction();
+    try {
+        if ($id > 0) {
+            // ⚠️ ۱.۳۴: ستون rfid_card عمداً دست‌نخورده می‌ماند (فقط دادهٔ قدیمی؛ دیگر در هیچ فرمی ثبت/ویرایش نمی‌شود)
+            $pdo->prepare('UPDATE food_ticket_groups SET title = ?, l_uid = ?, description = ?, visit_change_until = ?, status = ? WHERE id = ?')
+                ->execute([$title, $lUid !== '' ? $lUid : null, $description !== '' ? $description : null, $visitChangeUntil, $status, $id]);
+        } else {
+            $pdo->prepare('INSERT INTO food_ticket_groups (title, l_uid, rfid_card, description, visit_change_until, status, created_by) VALUES (?, ?, NULL, ?, ?, ?, ?)')
+                ->execute([$title, $lUid !== '' ? $lUid : null, $description !== '' ? $description : null, $visitChangeUntil, $status, $actorId > 0 ? $actorId : null]);
+            $id = (int) $pdo->lastInsertId();
+        }
+        $cur = $pdo->prepare('SELECT user_id FROM food_ticket_group_members WHERE group_id = ?');
+        $cur->execute([$id]);
+        $current = array_map('intval', $cur->fetchAll(PDO::FETCH_COLUMN));
+        foreach (array_diff($current, $ids) as $remove) {
+            $pdo->prepare('DELETE FROM food_ticket_group_members WHERE group_id = ? AND user_id = ?')->execute([$id, $remove]);
+        }
+        foreach (array_diff($ids, $current) as $add) {
+            $pdo->prepare('INSERT INTO food_ticket_group_members (group_id, user_id) VALUES (?, ?)')->execute([$id, $add]);
+        }
+        $pdo->commit();
+    } catch (Throwable $e) {
+        if ($pdo->inTransaction()) {
+            $pdo->rollBack();
+        }
+        if ($e instanceof PDOException && (int) $e->getCode() === 23000) {
+            // پیغام دقیق بر اساس کلید یکتای نقض‌شده (به‌جای پیغام خام پایگاه‌داده)
+            $msg = $e->getMessage();
+            if (str_contains($msg, 'uq_food_group_uid')) {
+                throw new RuntimeException('L_UID «' . $lUid . '» قبلاً برای گروه دیگری ثبت شده است. یک L_UID دیگر انتخاب کنید.');
+            }
+            if (str_contains($msg, 'uq_food_group_card')) {
+                throw new RuntimeException('این شمارهٔ کارت قبلاً برای گروه دیگری ثبت شده است.');
+            }
+            if (str_contains($msg, 'uq_food_group_member_user')) {
+                throw new RuntimeException('یکی از اعضا قبلاً در گروه دیگری است؛ هر کارمند فقط در یک گروه می‌تواند باشد.');
+            }
+            throw new RuntimeException('ذخیره نشد: L_UID یا یکی از اعضا قبلاً ثبت شده است.');
+        }
+        throw $e;
+    }
+    food_ticket_groups_load(true);
+
+    $code = $before === null ? 'food_group_created' : 'food_group_updated';
+    food_ticket_audit($code, [
+        'user_id' => $actorId > 0 ? $actorId : null,
+        'target_type' => 'food_group',
+        'target_id' => $id,
+        'target_label' => $title,
+        'old' => $before ? ['l_uid' => (string) ($before['l_uid'] ?? ''), 'card' => (string) ($before['rfid_card'] ?? ''), 'status' => (string) $before['status'], 'members' => count($beforeMembers)] : null,
+        'new' => ['l_uid' => $lUid, 'card' => $card, 'status' => $status, 'members' => count($ids)],
+        'meta' => ['group_id' => $id],
+    ]);
+    $uidBefore = food_ticket_code((string) ($before['l_uid'] ?? ''));
+    if ($lUid !== '' && $uidBefore !== $lUid) {
+        food_ticket_group_uid_history_record($lUid, $id, $uidBefore === '' ? 'set' : 'changed', $actorId);
+    }
+    if ($uidBefore !== '' && $uidBefore !== $lUid) {
+        food_ticket_group_uid_history_record($uidBefore, $id, 'removed', $actorId);
+    }
+    if ($before !== null && $uidBefore !== $lUid) {
+        food_ticket_audit('food_group_uid_changed', [
+            'user_id' => $actorId > 0 ? $actorId : null,
+            'target_type' => 'food_group',
+            'target_id' => $id,
+            'target_label' => $title,
+            'old' => $uidBefore,
+            'new' => $lUid,
+            'meta' => ['group_id' => $id],
+        ]);
+    }
+    $addedMembers = array_values(array_diff($ids, $beforeMembers));
+    $removedMembers = array_values(array_diff($beforeMembers, $ids));
+    if ($addedMembers !== []) {
+        food_ticket_audit('food_group_member_added', [
+            'user_id' => $actorId > 0 ? $actorId : null,
+            'target_type' => 'food_group', 'target_id' => $id, 'target_label' => $title,
+            'new' => implode(',', $addedMembers), 'meta' => ['group_id' => $id, 'user_ids' => $addedMembers],
+        ]);
+    }
+    if ($removedMembers !== []) {
+        food_ticket_audit('food_group_member_removed', [
+            'user_id' => $actorId > 0 ? $actorId : null,
+            'target_type' => 'food_group', 'target_id' => $id, 'target_label' => $title,
+            'old' => implode(',', $removedMembers), 'meta' => ['group_id' => $id, 'user_ids' => $removedMembers],
+        ]);
+    }
+    return $id;
+}
+
+/**
+ * خواندن وضعیت غیبت یک گروه در یک تاریخ (برای فرم مدیریت گروه/کارکنان).
+ * @return array<string,mixed>
+ */
+/**
+ * برچسب تاریخ شمسی (۱۴۰۵/۰۷/۱۴) از یک تاریخ میلادی Y-m-d — برای نمایش در پنل.
+ * اگر تابع تبدیل سامانه موجود نباشد، همان مقدار میلادی برگردانده می‌شود.
+ */
+function food_ticket_jalali_label(string $isoDate): string
+{
+    if (preg_match('/^(\d{4})-(\d{2})-(\d{2})$/', $isoDate, $m) !== 1) {
+        return $isoDate;
+    }
+    if (!function_exists('gregorian_to_jalali')) {
+        return $isoDate;
+    }
+    try {
+        [$jy, $jm, $jd] = gregorian_to_jalali((int) $m[1], (int) $m[2], (int) $m[3]);
+        return sprintf('%04d/%02d/%02d', $jy, $jm, $jd);
+    } catch (Throwable) {
+        return $isoDate;
+    }
+}
+
+function food_ticket_api_absence_status(int $groupId, string $date, array $actor = []): array
+{
+    // ورودی ممکن است شمسی (۱۴۰۵/۰۷/۱۴) یا میلادی باشد؛ همیشه به Y-m-d میلادی نرمال می‌شود.
+    if (function_exists('food_ticket_iso_date_input')) {
+        $date = (string) (food_ticket_iso_date_input($date) ?? $date);
+    }
+    if (!food_ticket_groups_ensure() || !food_ticket_absence_ensure()) {
+        throw new RuntimeException('جدول‌های غیبت روزانه ساخته نشد.');
+    }
+    if ($groupId <= 0) {
+        throw new RuntimeException('گروه معتبر نیست.');
+    }
+    $date = preg_match('/^\d{4}-\d{2}-\d{2}$/', $date) ? $date : date('Y-m-d');
+    $gq = db()->prepare('SELECT id, title, l_uid, status FROM food_ticket_groups WHERE id = ?');
+    $gq->execute([$groupId]);
+    $group = $gq->fetch();
+    if (!$group) {
+        throw new RuntimeException('گروه پیدا نشد.');
+    }
+    $visitUsers = food_ticket_day_visit_users($groupId, $date);
+    $visitById = [];
+    foreach ($visitUsers as $visitUser) {
+        $visitById[(int) ($visitUser['id'] ?? 0)] = $visitUser;
+    }
+    $members = food_ticket_group_members_for_date($groupId, $date);
+    $absences = food_ticket_absence_load($date, $groupId);
+    $locked = food_ticket_group_absence_locked($groupId, $date);
+    $canOverride = food_ticket_can_override_absence($actor);
+    // فیش‌های همین روز برای اعضا: کسی که فیش دارد غذا گرفته و نباید در
+    // فهرست غایبان دیده شود. این همان علامت زردِ «تردد این روز ثبت شده»
+    // است که کاربر با وجود تردد نماینده می‌دید.
+    $ticketedForAbsence = [];
+    try {
+        $ticketedForAbsence = food_ticket_group_ticketed_keys($members, $date);
+    } catch (Throwable $ticketedEx) {
+        app_error_log('[food-absence] ticketed map failed: ' . $ticketedEx->getMessage());
+    }
+    $membersOut = [];
+    foreach ($members as $m) {
+        $uid = (int) $m['id'];
+        $visit = $visitById[$uid] ?? null;
+        $homeGroupId = (int) ($visit['home_group_id'] ?? 0);
+        $isVisitor = $visit !== null && ($homeGroupId <= 0 || $homeGroupId !== $groupId);
+        $splitAbs = food_person_name_split($m);
+        $memberNat = food_ticket_digits($m['national_code'] ?? '');
+        $hasTicket = $memberNat !== '' && !empty($ticketedForAbsence['food:' . $date . ':' . $memberNat]);
+        $membersOut[] = [
+            'id' => $uid,
+            'pc' => (string) ($m['employee_number'] ?? ''),
+            'name' => (string) ($m['full_name'] ?? ''),
+            'first_name' => $splitAbs['first'],
+            'last_name' => $splitAbs['last'],
+            'national_code' => $memberNat,
+            'active' => (bool) ($m['is_active'] ?? false),
+            // فیش‌دار در فهرست غایبان نمی‌آید (رکورد در دیتابیس دست‌نخورده می‌ماند).
+            'absent' => !$isVisitor && !$hasTicket && isset($absences[$uid]),
+            'absence_recorded' => !$isVisitor && isset($absences[$uid]),
+            'has_ticket' => $hasTicket,
+            'reason' => !$isVisitor ? (string) ($absences[$uid]['reason'] ?? '') : '',
+            'visitor' => $isVisitor,
+            'temporary_transfer' => $isVisitor && $homeGroupId > 0,
+            'home_group_title' => $isVisitor ? (string) ($visit['home_group_title'] ?? '') : '',
+        ];
+    }
+    $absentCount = count(array_filter($membersOut, static fn (array $member): bool => !empty($member['absent'])));
+    return [
+        // group_id هم سطح بالا برمی‌گردد؛ بدون آن، پنل در «ذخیرهٔ غیبت» مقدار گروه را از دست می‌داد.
+        'group_id' => (int) $group['id'],
+        'group' => [
+            'id' => (int) $group['id'],
+            'title' => (string) $group['title'],
+            'l_uid' => food_ticket_code((string) ($group['l_uid'] ?? '')),
+            'active' => (string) $group['status'] === 'active',
+        ],
+        'date' => $date,
+        'date_jalali' => function_exists('food_ticket_jalali_label') ? food_ticket_jalali_label($date) : $date,
+        'held_tickets' => food_ticket_absence_held_count($groupId, $date),
+        'locked' => $locked,
+        'can_edit' => !$locked,
+        'can_override' => $canOverride,
+        'editable' => !$locked || $canOverride,
+        'lock_label' => $locked ? ($canOverride ? '🔒 قفل شده (اصلاح با دسترسی سطح بالاتر)' : '🔒 قفل شده') : 'قابل ویرایش',
+        'members' => $membersOut,
+        'summary' => [
+            'date' => $date,
+            'total' => count($membersOut),
+            'absent' => $absentCount,
+            'present' => max(0, count($membersOut) - $absentCount),
+        ],
+    ];
+}
+
+/**
+ * ثبت تغییرات غیبت یک گروه در یک تاریخ.
+ * ورودی: absent[] = کاربرانی که باید غایب شوند، present[] = کاربرانی که باید حاضر شوند.
+ * @param array<string,mixed> $data
+ * @return array<string,mixed>
+ */
+function food_ticket_api_absence_save(array $data, array $actor = []): array
+{
+    $groupId = (int) ($data['group_id'] ?? $data['groupId'] ?? 0);
+    $date = trim((string) ($data['date'] ?? ''));
+    $reason = trim((string) ($data['reason'] ?? ''));
+    if ($date === '') {
+        $date = date('Y-m-d');
+    }
+    if (function_exists('food_ticket_iso_date_input')) {
+        // تاریخ شمسی (۱۴۰۵/۰۷/۱۴) هم پذیرفته می‌شود؛ خروجی همیشه میلادی Y-m-d است.
+        $parsed = food_ticket_iso_date_input($date);
+        if ($parsed !== null) {
+            $date = $parsed;
+        }
+    }
+    if ($groupId <= 0) {
+        throw new RuntimeException('گروه انتخاب نشده است؛ ابتدا گروه را از فهرست انتخاب کنید.');
+    }
+    if (preg_match('/^\d{4}-\d{2}-\d{2}$/', $date) !== 1) {
+        throw new RuntimeException('تاریخ معتبر نیست؛ نمونهٔ درست: ۱۴۰۵/۰۷/۱۴');
+    }
+    if (function_exists('food_meal_closed_guard')) {
+        food_meal_closed_guard($date, 'lunch', 'ثبت غیبت');
+    }
+    if (food_ticket_groups_ensure()) {
+        $gq = db()->prepare('SELECT id FROM food_ticket_groups WHERE id = ? LIMIT 1');
+        $gq->execute([$groupId]);
+        if (!$gq->fetchColumn()) {
+            throw new RuntimeException('گروه انتخاب‌شده پیدا نشد.');
+        }
+    }
+    $absent = [];
+    foreach ((array) ($data['absent'] ?? []) as $v) {
+        if ((int) $v > 0) {
+            $absent[(int) $v] = true;
+        }
+    }
+    $present = [];
+    foreach ((array) ($data['present'] ?? []) as $v) {
+        if ((int) $v > 0) {
+            $present[(int) $v] = true;
+        }
+    }
+    $changed = 0;
+    $held = 0;
+    $released = 0;
+    foreach (array_keys($absent) as $userId) {
+        $r = food_ticket_absence_set($groupId, (int) $userId, $date, true, $reason, $actor);
+        $changed++;
+        if (($r['ticket_action'] ?? '') === 'held') {
+            $held++;
+        }
+    }
+    foreach (array_keys($present) as $userId) {
+        $r = food_ticket_absence_set($groupId, (int) $userId, $date, false, $reason, $actor);
+        $changed++;
+        if (($r['ticket_action'] ?? '') === 'released') {
+            $released++;
+        }
+    }
+    $status = food_ticket_api_absence_status($groupId, $date, $actor);
+    return ['ok' => true, 'changed' => $changed, 'tickets_held' => $held, 'tickets_released' => $released] + $status;
+}
+
+/** حذف همهٔ غیبت‌های یک گروه در یک تاریخ (همه حاضر). */
+function food_ticket_api_absence_clear(int $groupId, string $date, string $reason, array $actor = []): array
+{
+    if (function_exists('food_ticket_iso_date_input')) {
+        $date = (string) (food_ticket_iso_date_input($date) ?? $date);
+    }
+    if ($groupId <= 0) {
+        throw new RuntimeException('گروه انتخاب نشده است.');
+    }
+    if (preg_match('/^\d{4}-\d{2}-\d{2}$/', $date) !== 1) {
+        throw new RuntimeException('تاریخ معتبر نیست؛ نمونهٔ درست: ۱۴۰۵/۰۷/۱۴');
+    }
+    if (function_exists('food_meal_closed_guard')) {
+        food_meal_closed_guard($date, 'lunch', 'پاک‌سازی غیبت');
+    }
+    $heldBefore = food_ticket_absence_held_count($groupId, $date);
+    $removed = food_ticket_absence_clear_group($groupId, $date, $reason, $actor);
+    $heldAfter = food_ticket_absence_held_count($groupId, $date);
+    return ['ok' => true, 'removed' => $removed, 'tickets_released' => max(0, $heldBefore - $heldAfter)] + food_ticket_api_absence_status($groupId, $date, $actor);
+}
+
+/** وضعیت چاپ/تحویل یک رویداد و تغییر تحویل (تحویل ≠ چاپ). */
+function food_ticket_api_delivery(int $eventId, string $action, string $reason, array $actor = []): array
+{
+    if ($eventId <= 0) {
+        throw new RuntimeException('فیش معتبر نیست.');
+    }
+    if (!food_ticket_events_ensure_delivery()) {
+        throw new RuntimeException('ستون وضعیت تحویل (delivery_status) در جدول food_ticket_events ساخته نشد. '
+            . 'علت: کاربر دیتابیس اجازهٔ ALTER ندارد یا اجرای Migration ناموفق بوده است. '
+            . 'راه‌حل: فایل upgrade-1.32-food-group-representative-absence.sql را با کاربر دارای دسترسی روی دیتابیس اجرا کنید.');
+    }
+    $q = db()->prepare('SELECT id, ticket_key, print_status, delivery_status, punch_date, meal_type FROM food_ticket_events WHERE id = ?');
+    $q->execute([$eventId]);
+    $event = $q->fetch();
+    if (!$event) {
+        throw new RuntimeException('فیش پیدا نشد.');
+    }
+    if (function_exists('food_meal_closed_guard')) {
+        $deliveryMeal = function_exists('food_order_meal_type')
+            ? food_order_meal_type($event['meal_type'] ?? 'lunch')
+            : ((string) ($event['meal_type'] ?? '') === 'dinner' ? 'dinner' : 'lunch');
+        food_meal_closed_guard((string) ($event['punch_date'] ?? ''), $deliveryMeal, $action === 'undeliver' ? 'لغو تحویل' : 'ثبت تحویل');
+    }
+    if ($action === 'undeliver') {
+        if ($reason === '') {
+            throw new RuntimeException('برای لغو تحویل، ثبت دلیل الزامی است.');
+        }
+        $changed = food_ticket_undeliver_event($eventId, $actor, $reason);
+    } else {
+        $changed = food_ticket_deliver_event($eventId, $actor, $reason);
+    }
+    return ['ok' => true, 'changed' => $changed, 'id' => $eventId, 'delivery_status' => $action === 'undeliver' ? 'pending' : 'delivered'];
+}
+
+/**
+ * لغو فیش یک روز و برگرداندن شخص به وضعیت «تردد این روز ثبت نشده».
+ *
+ * ── چرا لازم است؟ ──────────────────────────────────────────────────────
+ * اگر فیشی به‌اشتباه چاپ شده باشد (شخص واقعاً نیامده)، تنها راه اصلاح
+ * این بود که فیش دست‌نخورده بماند و شخص در فهرست «دارای فیش» دیده شود.
+ * نتیجه: او در فهرست غایبان هم نمی‌آمد، چون غیبت ثبت نشده بود.
+ *
+ * ── چه می‌کند؟ ─────────────────────────────────────────────────────────
+ *   ۱) ردیف فیش را به event_type = "no_food" تبدیل می‌کند (فیش لغو شد).
+ *   ۲) delivery_status را pending و print_status را not_printed می‌کند.
+ *   ۳) سابقهٔ فیش قبلی را در source_payload نگه می‌دارد (حذف نمی‌شود).
+ *   ۴) گزینه‌ای (پیش‌فرض روشن) شخص را «غایب» همان روز ثبت می‌کند، پس
+ *      خودکار در فهرست غایبان می‌آید — همان چیزی که کاربر خواست.
+ *
+ * ⚠️ فیشی که سابقهٔ چاپ فیزیکی دارد فقط با دسترسی سطح بالاتر لغو می‌شود،
+ *    تا لغو تصادفیِ فیش واقعی رخ ندهد.
+ *
+ * @return array<string,mixed>
+ */
+function food_ticket_cancel_ticket_for_user(int $userId, string $date, array $actor, string $reason, bool $markAbsent = true): array
+{
+    if ($userId <= 0) {
+        throw new RuntimeException('یک کارمند را انتخاب کنید.');
+    }
+    $reason = trim($reason);
+    if ($reason === '' || mb_strlen($reason, 'UTF-8') > 300) {
+        throw new RuntimeException('برای لغو فیش، ثبت علت الزامی است (حداکثر ۳۰۰ نویسه).');
+    }
+    $date = food_ticket_manual_attendance_date($date);
+
+    if (!function_exists('user_can') || !user_can($actor, 'food.manual_attendance_edit')) {
+        throw new RuntimeException('ویرایش ثبت دستی فیش/تردد مجاز نیست.');
+    }
+
+
+    // ── کدام ردیف را لغو کنیم؟ ────────────────────────────────────────
+    // «آخرین ردیف» همیشه ردیفِ فیش نیست. کسی که صبح فیش خودکار گرفته و
+    // بعد نمایندهٔ گروه ترددش را ثبت کرده، دو ردیف دارد: ردیفِ فیش
+    // (auto_printed/printed + ticket_key) و ردیفِ repeat که فقط می‌گوید
+    // «فیش از قبل بود». اگر آخرین ردیف را برداریم، هیچ فیشی لغو نمی‌شود
+    // و کاربر پیام «قبلاً لغو شده» می‌گیرد — همان چیزی که برای دو نفرِ
+    // دارای تردد و در فهرست غایبین اتفاق افتاد.
+    //
+    // قاعده: اولین ردیفی که «فیشِ واقعی» است (کلید دارد یا نوعش فیش است)
+    // و هنوز لغو نشده؛ اگر هیچ‌کدام، آخرین ردیف غیر-repeat.
+    $q = db()->prepare(
+        'SELECT id, event_type, print_status, delivery_status, source_key, source_uid, source_payload, ticket_key, food_type, meal_type '
+        . 'FROM food_ticket_events WHERE user_id = ? AND punch_date = ? AND event_type <> "unknown" '
+        . 'ORDER BY id DESC'
+    );
+    $q->execute([$userId, $date]);
+    $event = null;
+    $fallbackEvent = null;
+    foreach ($q->fetchAll() ?: [] as $candidate) {
+        $candType = strtolower(trim((string) ($candidate['event_type'] ?? '')));
+        $candKey = trim((string) ($candidate['ticket_key'] ?? ''));
+        $candPrint = strtolower(trim((string) ($candidate['print_status'] ?? '')));
+        if ($candType === 'repeat') {
+            continue; // repeat فیش نیست؛ فقط می‌گوید فیش از قبل بود
+        }
+        if ($fallbackEvent === null) {
+            $fallbackEvent = $candidate;
+        }
+        // فیشِ واقعی = کلید دارد و در وضعیت «مرده» (لغوشده) نیست.
+        if ($candKey !== '' && $candPrint !== 'not_printed') {
+            $event = $candidate;
+            break;
+        }
+    }
+    if ($event === null) {
+        $event = $fallbackEvent;
+    }
+    if ($event === null) {
+        throw new RuntimeException('برای این کارمند در این روز فیشی پیدا نشد.');
+    }
+    $eventId = (int) ($event['id'] ?? 0);
+    if ($eventId <= 0) {
+        throw new RuntimeException('ردیف فیش معتبر نیست.');
+    }
+    if (function_exists('food_meal_closed_guard')) {
+        $cancelMeal = function_exists('food_order_meal_type')
+            ? food_order_meal_type($event['meal_type'] ?? 'lunch')
+            : ((string) ($event['meal_type'] ?? '') === 'dinner' ? 'dinner' : 'lunch');
+        food_meal_closed_guard($date, $cancelMeal, 'لغو فیش');
+    }
+    $printStatus = strtolower(trim((string) ($event['print_status'] ?? '')));
+    $eventType = strtolower(trim((string) ($event['event_type'] ?? '')));
+    // ردیفی که از قبل «بدون فیش» است، چیزی برای لغو ندارد.
+    if ($eventType === 'no_food' && $printStatus === 'not_printed') {
+        throw new RuntimeException('این ردیف از قبل «غذا سفارش داده ولی فیش چاپ نشده» است؛ چیزی برای لغو نیست.');
+    }
+    if ($eventType === 'guest') {
+        throw new RuntimeException('فیش مهمان از این مسیر لغو نمی‌شود.');
+    }
+    // ردیفی که همین حالا لغو شده (یتیم و بدون کلید) دوباره لغو نمی‌شود؛
+    // وگرنه هر بار لغو، یک رکورد غیبت تکراری می‌نویسد و سابقهٔ
+    // cancelled_ticket روی خودش بازنویسی می‌شود. کاربر هم بی‌دلیل پیام
+    // موفقیت می‌گیرد.
+    // فقط ردیفی که «قبلاً فیش بوده و لغو شده» (سابقهٔ cancelled_ticket دارد)
+    // مشمول این محافظ است. تکیه بر «کلید خالی + not_printed» اشتباه بود:
+    // ردیفِ repeat هم همین مشخصات را دارد و کاربر برای فیشِ سالمِ خود
+    // پیام «قبلاً لغو شده» می‌گرفت.
+    $alreadyCancelled = false;
+    $probePayload = json_decode((string) ($event['source_payload'] ?? ''), true);
+    if (is_array($probePayload) && is_array($probePayload['cancelled_ticket'] ?? null)) {
+        $alreadyCancelled = true;
+    }
+    if ($alreadyCancelled
+        && trim((string) ($event['ticket_key'] ?? '')) === ''
+        && in_array($printStatus, ['not_printed'], true)
+        && strtolower(trim((string) ($event['delivery_status'] ?? ''))) !== 'delivered') {
+        throw new RuntimeException('فیش این کارمند از قبل لغو شده است؛ برای صدور مجدد از «ثبت دستی با فیش» استفاده کنید.');
+    }
+    // فیشی که واقعاً چاپ و تحویل شده، لغوش فقط با دسترسی سطح بالاتر.
+    $wasDelivered = strtolower(trim((string) ($event['delivery_status'] ?? ''))) === 'delivered';
+    if ($wasDelivered && !food_ticket_can_override_absence($actor)) {
+        throw new RuntimeException('این فیش تحویل شده است؛ لغو آن دسترسی سطح بالاتر می‌خواهد.');
+    }
+
+    // سابقهٔ فیش قبلی حفظ می‌شود — نه پاک.
+    $oldPayload = json_decode((string) ($event['source_payload'] ?? ''), true);
+    if (!is_array($oldPayload)) {
+        $rawOld = (string) ($event['source_payload'] ?? '');
+        $oldPayload = $rawOld !== '' ? ['original_source_payload' => $rawOld] : [];
+    }
+    $oldPayload['cancelled_ticket'] = [
+        'event_type' => (string) ($event['event_type'] ?? ''),
+        'print_status' => $printStatus,
+        'delivery_status' => (string) ($event['delivery_status'] ?? ''),
+        'food_type' => (string) ($event['food_type'] ?? ''),
+        'ticket_key' => (string) ($event['ticket_key'] ?? ''),
+        'cancelled_at' => date('Y-m-d H:i:s'),
+        'actor_id' => (int) ($actor['id'] ?? 0),
+        'reason' => $reason,
+    ];
+    $payloadJson = json_encode($oldPayload, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_INVALID_UTF8_SUBSTITUTE);
+    if ($payloadJson === false) {
+        throw new RuntimeException('ثبت سابقهٔ لغو انجام نشد.');
+    }
+
+    // event_type عمداً «printed» می‌ماند. چرا؟ کاربر می‌خواهد این افراد در
+    // فهرست «غذا سفارش داده ولی فیش چاپ نشده» بیایند تا بتوان فیششان را
+    // دوباره صادر کرد. اگر event_type را no_food می‌کردیم، ردیف عمدیِ
+    // «تردد بدون فیش» می‌شد و اصلاً فیشی برای صدور نمی‌ماند.
+    //
+    // print_status=not_printed + delivery=pending یعنی: فیش ساخته شده ولی
+    // هرگز چاپ نشده — همان تعریف «فیش یتیم» در food_ticket_event_is_orphan_ticket.
+    // سابقهٔ لغو در source_payload['cancelled_ticket'] می‌ماند.
+    // ticket_key خالی می‌شود تا جای یکتای فیش فعلی را آزاد کند.
+    $upd = db()->prepare(
+        'UPDATE food_ticket_events SET event_type = "printed", print_status = "not_printed", '
+        . 'delivery_status = "pending", delivered_at = NULL, delivered_by = NULL, ticket_key = NULL, '
+        . 'last_error = ?, source_payload = ?, processed_at = NOW(), next_retry_at = NULL WHERE id = ?'
+    );
+    $upd->execute(['فیش لغو شد؛ علت: ' . $reason, $payloadJson, $eventId]);
+    if ($upd->rowCount() !== 1) {
+        throw new RuntimeException('ردیف هم‌زمان تغییر کرده است؛ فهرست را تازه کنید.');
+    }
+
+    $absenceSet = false;
+    if ($markAbsent && function_exists('food_ticket_absence_ensure') && food_ticket_absence_ensure()) {
+        try {
+            // ── group_id الزامی است تا در «فهرست غایبان» دیده شود ────────────
+            // پیش‌تر این رکورد با group_id = NULL ساخته می‌شد. food_ticket_absence_load()
+            // هنگام نمایش غایبانِ یک گروه با شرط (group_id = ? OR group_id IS NULL)
+            // می‌خواند، پس رکورد NULL در پنل گروه دیده می‌شد؛ ولی
+            // food_ticket_api_absence_status() (همان پنل اصلی غایبین) با
+            // group_id = ? فیلتر می‌کند و رکورد NULL را نشان نمی‌داد — نتیجه:
+            // لغو موفق بود، ولی شخص «به فهرست غایبین اضافه نشد».
+            // حالا گروهِ خودِ عضو پیدا و ثبت می‌شود.
+            $absenceGroupId = 0;
+            try {
+                $memberGroupQ = db()->prepare(
+                    'SELECT m.group_id FROM food_ticket_group_members m WHERE m.user_id = ? ORDER BY m.group_id LIMIT 1'
+                );
+                $memberGroupQ->execute([$userId]);
+                $absenceGroupId = (int) ($memberGroupQ->fetchColumn() ?: 0);
+            } catch (Throwable $groupLookupEx) {
+                app_error_log('[food-cancel] member group lookup failed: ' . $groupLookupEx->getMessage());
+            }
+            $ins = db()->prepare(
+                'INSERT INTO food_ticket_daily_absence (absence_date, group_id, user_id, reason, created_by) '
+                . 'VALUES (?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE reason = VALUES(reason), group_id = VALUES(group_id)'
+            );
+            $ins->execute([
+                $date,
+                $absenceGroupId > 0 ? $absenceGroupId : null,
+                $userId,
+                mb_substr('لغو فیش — ' . $reason, 0, 300),
+                (int) ($actor['id'] ?? 0) ?: null,
+            ]);
+            $absenceSet = true;
+        } catch (Throwable $e) {
+            app_error_log('[food-cancel] absence insert failed: ' . $e->getMessage());
+        }
+    }
+
+    if (function_exists('food_ticket_audit')) {
+        food_ticket_audit('food_ticket_cancelled', [
+            'user_id' => $actor['id'] ?? null,
+            'target_type' => 'food_ticket_event',
+            'target_id' => $eventId,
+            'target_label' => 'کاربر ' . $userId . ' / ' . $date,
+            'old' => (string) ($event['event_type'] ?? ''),
+            'new' => 'no_food',
+            'reason' => $reason,
+            'meta' => ['date' => $date, 'user_id' => $userId, 'print_status' => $printStatus, 'delivered' => $wasDelivered],
+        ]);
+    }
+
+    return [
+        'ok' => true,
+        'user_id' => $userId,
+        'date' => $date,
+        'event_id' => $eventId,
+        'absence_set' => $absenceSet,
+        'message' => 'فیش لغو شد' . ($absenceSet ? ' و شخص غایب ثبت شد.' : '.'),
+    ];
+}
+
+function food_ticket_api_delete_group(int $id, int $actorId = 0): void
+{
+    if (!food_ticket_groups_ensure() || $id <= 0) {
+        throw new RuntimeException('گروه پیدا نشد.');
+    }
+    $q = db()->prepare('SELECT title, l_uid FROM food_ticket_groups WHERE id = ?');
+    $q->execute([$id]);
+    $row = $q->fetch() ?: null;
+    if ($row !== null && food_ticket_code((string) ($row['l_uid'] ?? '')) !== '') {
+        food_ticket_group_uid_history_record((string) $row['l_uid'], $id, 'removed', $actorId);
+    }
+    db()->prepare('DELETE FROM food_ticket_group_members WHERE group_id = ?')->execute([$id]);
+    if (food_ticket_absence_ensure()) {
+        db()->prepare('DELETE FROM food_ticket_daily_absence WHERE group_id = ?')->execute([$id]);
+    }
+    $stmt = db()->prepare('DELETE FROM food_ticket_groups WHERE id = ?');
+    $stmt->execute([$id]);
+    if ($stmt->rowCount() < 1) {
+        throw new RuntimeException('گروه پیدا نشد.');
+    }
+    food_ticket_groups_load(true);
+    food_ticket_audit('food_group_deleted', [
+        'user_id' => $actorId > 0 ? $actorId : null,
+        'target_type' => 'food_group',
+        'target_id' => $id,
+        'target_label' => (string) ($row['title'] ?? ''),
+        'old' => (string) ($row['l_uid'] ?? ''),
+        'meta' => ['group_id' => $id],
+    ]);
+}

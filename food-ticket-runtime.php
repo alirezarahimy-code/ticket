@@ -46,6 +46,21 @@ function food_ticket_meal_windows(): array
     return array_replace_recursive($defaults, $saved);
 }
 
+/** کد وعدهٔ یک رویداد فیش: ستون meal_type اگر معتبر بود؛ وگرنه پنجرهٔ زمانیِ همان ساعت؛ وگرنه ناهار. */
+function food_ticket_event_meal_code(array $event): string
+{
+    $meal = strtolower(trim((string) ($event['meal_type'] ?? '')));
+    if (in_array($meal, ['lunch', 'dinner'], true)) {
+        return $meal;
+    }
+    if ($meal === 'breakfast') {
+        return 'breakfast';
+    }
+    $active = food_ticket_active_meal(trim((string) ($event['punch_time'] ?? '')));
+    $code = is_array($active) ? strtolower((string) ($active['code'] ?? '')) : '';
+    return in_array($code, ['lunch', 'dinner'], true) ? $code : 'lunch';
+}
+
 function food_ticket_active_meal(?string $timeHms = null): ?array
 {
     $timeHms = $timeHms ?: date('H:i:s');
@@ -592,6 +607,30 @@ function food_ticket_process_print_queue(?array $config = null, int $limit = 30)
         if ($printerDown || (microtime(true) - $queueStarted) > 20) {
             $summary['skipped']++;
             continue;
+        }
+        // B3 — بعد از بستن وعده، چاپ/تحویل برای آن روز+وعده کاملاً مسدود است.
+        // ردیف‌ها دست نمی‌خورند تا صف برای همیشه معلق بماند بی‌دلیل: علت در last_error نوشته می‌شود.
+        $__evDate = trim((string) ($event['punch_date'] ?? ''));
+        $__evMeal = food_ticket_event_meal_code($event);
+        if ($__evDate !== '' && $__evMeal !== 'breakfast' && function_exists('food_meal_closed_guard')) {
+            try {
+                food_meal_closed_guard($__evDate, $__evMeal, 'چاپ فیش');
+            } catch (Throwable $__closedEx) {
+                static $__closedNoted = [];
+                $__key = $__evDate . '|' . $__evMeal;
+                if (!isset($__closedNoted[$__key])) {
+                    $__closedNoted[$__key] = true;
+                    try {
+                        db()->prepare('UPDATE food_ticket_events SET last_error = ? WHERE punch_date = ? AND COALESCE(meal_type, ?) = ? AND print_status IN ("pending", "print_error", "failed")')
+                            ->execute(['وعده بسته شده است؛ چاپ مسدود است (' . $__evMeal . ').', $__evDate, $__evMeal, $__evMeal]);
+                    } catch (Throwable $__noteErr) {
+                        app_error_log('[food-print] closed-day note failed: ' . $__noteErr->getMessage());
+                    }
+                    app_error_log('[food-print] closed day, print blocked date=' . $__evDate . ' meal=' . $__evMeal);
+                }
+                $summary['skipped']++;
+                continue;
+            }
         }
         $id = (int) $event['id'];
         $sourcePayload = json_decode((string) ($event['source_payload'] ?? ''), true);

@@ -8,29 +8,23 @@
  * — مدیر اداره و کارشناس‌ها — زیر همان سرشاخه فهرست شوند. فقط سرشاخه به‌عنوان
  * «سرگروه» چاپ می‌شود، نه ادارهٔ میانی.
  *
- * چهار نوع سرشاخه وجود دارد و هر چهار نوع باید صریحاً در گزارش نام‌گذاری شوند:
+ * شش بخش سرشاخه وجود دارد و هر شش باید صریحاً در گزارش نام‌گذاری شوند:
+ *   • مدیرعامل          (unit_type = ceo)
+ *   • واحدهای مستقل (نمایندگی)  (unit_type = liaison)
  *   • معاونت            (unit_type = deputy)
  *   • مدیریت مستقل      (unit_type = management، والدش مدیرعامل است)
- *   • واحد مستقل (نمایندگی)  (unit_type = liaison)
- *   • شرکت دوم          (company_id = 2 — شرکت همکار)
+ *   • دفتر مدیرعامل     (unit_type = office، فرزند ریشهٔ شرکت است)
+ *   • شرکت همکار        (company_id = 2 — فقط یک ردیف؛ زیربخش‌هایش تفکیک نمی‌شود)
  *
  * این فایل هیچ نوشتنی در پایگاه‌داده ندارد و فقط می‌خواند؛ اگر جدول‌های چارت
- * سازمانی موجود نباشند همه‌چیز به «بدون معاونت» برمی‌گردد تا گزارش‌ها هرگز
+ * سازمانی موجود نباشند همه‌چیز به «بدون جایگاه» برمی‌گردد تا گزارش‌ها هرگز
  * به‌خاطر چارت خالی نشوند.
  */
-
-if (!function_exists('org_group_root_types')) {
-    /** انواع واحدی که می‌توانند سرشاخهٔ گزارش باشند. */
-    function org_group_root_types(): array
-    {
-        return ['deputy', 'management', 'liaison', 'company_manager', 'ceo'];
-    }
-}
 
 if (!function_exists('org_group_company_roots')) {
     /**
      * سرشاخه‌های سازمان‌های دیگر (غیر شرکت اصلی). کلید = company_id، مقدار = برچسب.
-     * شرکت با company_type = partner «شرکت دوم» نام می‌گیرد.
+     * شرکت با company_type = partner «شرکت همکار» نام می‌گیرد.
      */
     function org_group_company_roots(): array
     {
@@ -108,7 +102,7 @@ if (!function_exists('org_group_for_unit')) {
     {
         $index = $index ?? org_group_unit_index();
         $companyRoots = $companyRoots ?? org_group_company_roots();
-        $fallback = ['key' => 'none', 'label' => 'بدون معاونت سازمانی', 'type' => 'none', 'unit_id' => 0, 'company' => 1, 'path' => ''];
+        $fallback = ['key' => 'none', 'label' => 'بدون جایگاه', 'type' => 'none', 'unit_id' => 0, 'company' => 1, 'path' => ''];
 
         $current = $unitId;
         $chain = [];
@@ -157,6 +151,17 @@ if (!function_exists('org_group_for_unit')) {
                     'path'     => org_group_chain_path($chain),
                 ];
             }
+            // دفتر مدیرعامل دفتر ریشه است نه معاونت؛ خودش سرشاخه می‌شود تا زیر «مدیرعامل» نرم.
+            if ($unit['unit_type'] === 'office') {
+                return [
+                    'key'      => 'unit-' . $unit['id'],
+                    'label'    => $unit['name'],
+                    'type'     => 'office',
+                    'unit_id'  => $unit['id'],
+                    'company'  => $unit['company_id'],
+                    'path'     => org_group_chain_path($chain),
+                ];
+            }
             // رسیدن به ریشهٔ شرکت: اگر شرکت دوم باشد، برچسب همان شرکت را بده.
             if ($unit['parent_id'] <= 0) {
                 if (isset($companyRoots[$unit['company_id']])) {
@@ -177,7 +182,7 @@ if (!function_exists('org_group_for_unit')) {
                 if ($unit['unit_type'] === 'ceo') {
                     return [
                         'key'     => 'ceo',
-                        'label'   => 'مدیرعامل (بدون معاونت)',
+                        'label'   => 'مدیرعامل',
                         'type'    => 'ceo',
                         'unit_id' => $unit['id'],
                         'company' => $unit['company_id'],
@@ -273,10 +278,10 @@ if (!function_exists('org_group_meta_for_users')) {
 }
 
 if (!function_exists('org_group_sort_key')) {
-    /** ترتیب نمایش سرشاخه‌ها: معاونت‌ها → مدیریت مستقل → نمایندگی → شرکت دوم → بدون معاونت. */
+    /** ترتیب نمایش سرشاخه‌ها: مدیرعامل → مستقل‌ها → معاونت‌ها → مدیریت مستقل → دفتر مدیرعامل → شرکت همکار → بدون جایگاه. */
     function org_group_sort_key(array $group): array
     {
-        $order = ['deputy' => 0, 'management' => 1, 'liaison' => 2, 'company' => 3, 'ceo' => 4, 'none' => 5, 'department' => 5];
+        $order = ['ceo' => 0, 'liaison' => 1, 'deputy' => 2, 'management' => 3, 'office' => 4, 'company' => 5, 'none' => 6, 'department' => 6];
         return [$order[$group['type'] ?? 'none'] ?? 9, (string) ($group['label'] ?? '')];
     }
 }
@@ -289,9 +294,10 @@ if (!function_exists('org_group_type_label')) {
             'deputy'     => 'معاونت',
             'management' => 'مدیریت مستقل',
             'liaison'    => 'واحد مستقل (نمایندگی)',
-            'company'    => 'شرکت دوم',
+            'office'     => 'دفتر مدیرعامل',
+            'company'    => 'شرکت همکار',
             'ceo'        => 'مدیرعامل',
-            default      => 'بدون معاونت',
+            default      => 'بدون جایگاه',
         };
     }
 }

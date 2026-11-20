@@ -9,11 +9,11 @@
 | سنجه | مقدار |
 |---|---|
 | فایل‌های کد تولیدی | 695 |
-| خطوط | 175,021 |
-| آدرس‌ها (بلوک) | 8,291 |
+| خطوط | 176,361 |
+| آدرس‌ها (بلوک) | 8,327 |
 | موضوع‌های قابل جست‌وجو | 41 صفحه + 102 مجوز + 85 جدول |
 | بازبینی‌شده | 0 آدرس (0.0%) — 0 خط (0.0%) |
-| باقی‌مانده | 8,291 آدرس |
+| باقی‌مانده | 8,327 آدرس |
 
 ## 🔎 فهرست موضوعی — از اینجا شروع کنید
 
@@ -288,13 +288,13 @@
 
 | ناحیه | معنی | فایل | بلوک | خط |
 |---|---|---|---|---|
-| `TEST` | TEST | 253 | 1,967 | 28,924 |
+| `TEST` | TEST | 253 | 1,967 | 28,977 |
 | `TOOL` | TOOL | 152 | 1,452 | 40,114 |
-| `DB` | DB | 86 | 1,385 | 8,274 |
-| `PAGE` | صفحات (ریشه) | 84 | 1,609 | 57,771 |
-| `ASSET` | دارایی‌های ایستا (assets/) | 33 | 843 | 15,021 |
-| `WEB` | پنل وب غذا (food-ticket-web/) | 29 | 497 | 10,057 |
-| `CORE` | موتور مشترک (lib/) | 24 | 391 | 9,760 |
+| `DB` | DB | 86 | 1,387 | 8,315 |
+| `PAGE` | صفحات (ریشه) | 84 | 1,633 | 58,641 |
+| `ASSET` | دارایی‌های ایستا (assets/) | 33 | 849 | 15,205 |
+| `WEB` | پنل وب غذا (food-ticket-web/) | 29 | 503 | 10,243 |
+| `CORE` | موتور مشترک (lib/) | 24 | 389 | 9,766 |
 | `ACT` | کنش‌ها (actions/) | 17 | 99 | 3,130 |
 | `CRON` | زمان‌بندها (cron/) | 15 | 39 | 1,675 |
 | `API` | رابط برنامه (api/) | 2 | 9 | 295 |
@@ -305,13 +305,13 @@
 
 | نشانه | معنی | بلوک |
 |---|---|---|
-| `write_no_tx` | نوشتن بدون تراکنش | 952 |
+| `write_no_tx` | نوشتن بدون تراکنش | 954 |
 | `error_suppression` | سرکوب @ | 388 |
 | `dangerous_call` | فراخوانی خطرناک | 280 |
-| `sql_concat` | الحاق در SQL | 236 |
+| `sql_concat` | الحاق در SQL | 239 |
 | `raw_input` | ورودی خام | 221 |
-| `long` | >۱۲۰ خط | 175 |
-| `silent_catch` | catch بی‌صدا | 163 |
+| `long` | >۱۲۰ خط | 176 |
+| `silent_catch` | catch بی‌صدا | 164 |
 | `unescaped_echo` | چاپ بدون فرار | 39 |
 | `very_long` | >۳۰۰ خط | 29 |
 
@@ -329,17 +329,17 @@
 | 8 | `TOOL-109.01` | `tools/test_food_group_representative.php:1` | بلوک رویه‌ای 1-517 | 16 | catch بی‌صدا، الحاق در SQL، چاپ بدون فرار، نوشتن بدون تراکنش، >۳۰۰ خط | ⬜ در نوبت |
 | 9 | `ACT-014.09` | `actions/settings-actions.php:319` | مسیر: reset_assets | 15 | catch بی‌صدا، الحاق در SQL، سرکوب @، فراخوانی خطرناک | ⬜ در نوبت |
 | 10 | `TOOL-055.01` | `tools/explain_alarms.php:1` | بلوک رویه‌ای 1-219 | 15 | catch بی‌صدا، چاپ بدون فرار، سرکوب @، فراخوانی خطرناک، نوشتن بدون تراکنش، >۱۲۰ خط | ⬜ در نوبت |
-| 11 | `PAGE-024.29` | `food-ticket-runtime.php:1211` | food_ticket_events_ensure_source_delet | 14 | catch بی‌صدا، الحاق در SQL، فراخوانی خطرناک، نوشتن بدون تراکنش | ⬜ در نوبت |
-| 12 | `PAGE-029.91` | `food-ticket.php:2577` | food_ticket_cleanup_source_rows | 14 | catch بی‌صدا، الحاق در SQL، سرکوب @، نوشتن بدون تراکنش، >۱۲۰ خط | ⬜ در نوبت |
-| 13 | `PAGE-029.136` | `food-ticket.php:4969` | food_ticket_api_upload_access_file | 14 | الحاق در SQL، ورودی خام، سرکوب @، فراخوانی خطرناک | ⬜ در نوبت |
-| 14 | `PAGE-029.137` | `food-ticket.php:5039` | food_ticket_api_handle | 14 | الحاق در SQL، ورودی خام، سرکوب @، نوشتن بدون تراکنش، >۳۰۰ خط | ⬜ در نوبت |
+| 11 | `PAGE-024.30` | `food-ticket-runtime.php:1250` | food_ticket_events_ensure_source_delet | 14 | catch بی‌صدا، الحاق در SQL، فراخوانی خطرناک، نوشتن بدون تراکنش | ⬜ در نوبت |
+| 12 | `PAGE-029.91` | `food-ticket.php:2589` | food_ticket_cleanup_source_rows | 14 | catch بی‌صدا، الحاق در SQL، سرکوب @، نوشتن بدون تراکنش، >۱۲۰ خط | ⬜ در نوبت |
+| 13 | `PAGE-029.136` | `food-ticket.php:5035` | food_ticket_api_upload_access_file | 14 | الحاق در SQL، ورودی خام، سرکوب @، فراخوانی خطرناک | ⬜ در نوبت |
+| 14 | `PAGE-029.137` | `food-ticket.php:5105` | food_ticket_api_handle | 14 | الحاق در SQL، ورودی خام، سرکوب @، نوشتن بدون تراکنش، >۳۰۰ خط | ⬜ در نوبت |
 | 15 | `PAGE-054.03` | `modules/request-center/Pages/detail.php:17` | مسیر: ticket | 14 | الحاق در SQL، ورودی خام، سرکوب @، نوشتن بدون تراکنش، >۳۰۰ خط | ⬜ در نوبت |
 | 16 | `TEST-187.03` | `tests/test_request_center_claim_concurrency_mariadb.php:38` | بلوک رویه‌ای 38-198 | 14 | الحاق در SQL، سرکوب @، فراخوانی خطرناک، نوشتن بدون تراکنش، >۱۲۰ خط | ⬜ در نوبت |
 | 17 | `TOOL-104.10` | `tools/test_employees_import_offline.php:121` | بلوک رویه‌ای 121-276 | 14 | الحاق در SQL، سرکوب @، فراخوانی خطرناک، نوشتن بدون تراکنش، >۱۲۰ خط | ⬜ در نوبت |
-| 18 | `PAGE-024.22` | `food-ticket-runtime.php:833` | food_ticket_send_windows_graphic | 13 | الحاق در SQL، سرکوب @، فراخوانی خطرناک، >۱۲۰ خط | ⬜ در نوبت |
-| 19 | `PAGE-029.41` | `food-ticket.php:821` | food_ticket_access_rows_powershell | 13 | الحاق در SQL، سرکوب @، فراخوانی خطرناک، >۱۲۰ خط | ⬜ در نوبت |
-| 20 | `PAGE-029.43` | `food-ticket.php:1039` | food_ticket_access_delete_powershell_e | 13 | الحاق در SQL، سرکوب @، فراخوانی خطرناک، نوشتن بدون تراکنش | ⬜ در نوبت |
-| 21 | `PAGE-029.92` | `food-ticket.php:2781` | food_ticket_retry_failed | 13 | catch بی‌صدا، الحاق در SQL، سرکوب @، نوشتن بدون تراکنش | ⬜ در نوبت |
+| 18 | `PAGE-024.23` | `food-ticket-runtime.php:872` | food_ticket_send_windows_graphic | 13 | الحاق در SQL، سرکوب @، فراخوانی خطرناک، >۱۲۰ خط | ⬜ در نوبت |
+| 19 | `PAGE-029.41` | `food-ticket.php:824` | food_ticket_access_rows_powershell | 13 | الحاق در SQL، سرکوب @، فراخوانی خطرناک، >۱۲۰ خط | ⬜ در نوبت |
+| 20 | `PAGE-029.43` | `food-ticket.php:1042` | food_ticket_access_delete_powershell_e | 13 | الحاق در SQL، سرکوب @، فراخوانی خطرناک، نوشتن بدون تراکنش | ⬜ در نوبت |
+| 21 | `PAGE-029.92` | `food-ticket.php:2793` | food_ticket_retry_failed | 13 | catch بی‌صدا، الحاق در SQL، سرکوب @، نوشتن بدون تراکنش | ⬜ در نوبت |
 | 22 | `TEST-120.08` | `tests/test_logging_mysql_integration.php:229` | Verify migration 025 changes the live  | 13 | الحاق در SQL، سرکوب @، فراخوانی خطرناک، نوشتن بدون تراکنش | ⬜ در نوبت |
 | 23 | `TOOL-003.07` | `tools/asset_reset.php:169` | ۶) حذف | 13 | catch بی‌صدا، الحاق در SQL، فراخوانی خطرناک | ⬜ در نوبت |
 | 24 | `TOOL-044.10` | `tools/diag_extract.php:265` | اگر مسیر جایگزینی پیدا شد ولی در tools | 13 | الحاق در SQL، سرکوب @، فراخوانی خطرناک، >۱۲۰ خط | ⬜ در نوبت |
@@ -349,7 +349,7 @@
 | 28 | `TEST-198.11` | `tests/test_request_center_t12_preflight.php:210` | بلوک رویه‌ای 210-322 | 12 | catch بی‌صدا، سرکوب @، فراخوانی خطرناک، نوشتن بدون تراکنش | ⬜ در نوبت |
 | 29 | `TOOL-044.11` | `tools/diag_extract.php:406` | آیا Apache با LocalSystem بالا آمده؟ ر | 12 | الحاق در SQL، سرکوب @، فراخوانی خطرناک | ⬜ در نوبت |
 | 30 | `TOOL-050.01` | `tools/diag_source_row_delete.php:1` | بلوک رویه‌ای 1-128 | 12 | الحاق در SQL، ورودی خام، سرکوب @، نوشتن بدون تراکنش، >۱۲۰ خط | ⬜ در نوبت |
-| 31 | `PAGE-024.18` | `food-ticket-runtime.php:552` | food_ticket_process_print_queue | 11 | catch بی‌صدا، الحاق در SQL، نوشتن بدون تراکنش، >۱۲۰ خط | ⬜ در نوبت |
+| 31 | `PAGE-024.19` | `food-ticket-runtime.php:567` | food_ticket_process_print_queue | 11 | catch بی‌صدا، الحاق در SQL، نوشتن بدون تراکنش، >۱۲۰ خط | ⬜ در نوبت |
 | 32 | `WEB-003.01` | `food-ticket-web/assets/food-capitalio-dashboard-4179.js:1` | مقدمهٔ فایل | 11 | catch بی‌صدا، الحاق در SQL، نوشتن بدون تراکنش، >۱۲۰ خط | ⬜ در نوبت |
 | 33 | `WEB-005.01` | `food-ticket-web/assets/food-capitalio-dashboard-r37.js:1` | مقدمهٔ فایل | 11 | catch بی‌صدا، الحاق در SQL، نوشتن بدون تراکنش، >۱۲۰ خط | ⬜ در نوبت |
 | 34 | `WEB-005.04` | `food-ticket-web/assets/food-capitalio-dashboard-r37.js:187` | assert on the output | 11 | الحاق در SQL، فراخوانی خطرناک، نوشتن بدون تراکنش، >۱۲۰ خط | ⬜ در نوبت |
@@ -2898,14 +2898,14 @@
 </details>
 
 <details>
-<summary><b>TEST-172</b> — <code>tests/test_release_1_62_73_package.py</code> (149 خط، 4 آدرس، بازبینی‌شده 0/4)</summary>
+<summary><b>TEST-172</b> — <code>tests/test_release_1_62_73_package.py</code> (151 خط، 4 آدرس، بازبینی‌شده 0/4)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TEST-172.01` | 1–59 | بلوک | `مقدمهٔ فایل` | 1 | ⬜ |
-| `TEST-172.02` | 60–60 | بلوک | `ReleasePackageTest` | 0 | ⬜ |
-| `TEST-172.03` | 61–125 | بلوک | `test_cumulative_manifest_contents_and_immutable_ba` | 0 | ⬜ |
-| `TEST-172.04` | 126–149 | بلوک | `test_dashboard_cleanup_archive_stays_intact` | 1 | ⬜ |
+| `TEST-172.01` | 1–61 | بلوک | `مقدمهٔ فایل` | 1 | ⬜ |
+| `TEST-172.02` | 62–62 | بلوک | `ReleasePackageTest` | 0 | ⬜ |
+| `TEST-172.03` | 63–127 | بلوک | `test_cumulative_manifest_contents_and_immutable_ba` | 0 | ⬜ |
+| `TEST-172.04` | 128–151 | بلوک | `test_dashboard_cleanup_archive_stays_intact` | 1 | ⬜ |
 
 </details>
 
@@ -3027,8 +3027,8 @@
 | `TEST-179.03` | 44–44 | بلوک | `GuestReconciliationColumnTests` | 0 | ⬜ |
 | `TEST-179.04` | 45–53 | بلوک | `test_daily_table_headers_exact` | 0 | ⬜ |
 | `TEST-179.05` | 54–75 | بلوک | `test_daily_table_row_cell_count_matches_headers` | 0 | ⬜ |
-| `TEST-179.06` | 76–85 | بلوک | `test_export_headers_exact_22_columns` | 0 | ⬜ |
-| `TEST-179.07` | 86–100 | بلوک | `test_export_monthly_row_indices_fit_22_columns` | 0 | ⬜ |
+| `TEST-179.06` | 76–85 | بلوک | `test_export_headers_exact_23_columns` | 0 | ⬜ |
+| `TEST-179.07` | 86–100 | بلوک | `test_export_monthly_row_indices_fit_23_columns` | 0 | ⬜ |
 | `TEST-179.08` | 101–105 | بلوک | `test_total_employee_orders_exposed_in_report_and_e` | 0 | ⬜ |
 | `TEST-179.09` | 106–112 | بلوک | `test_gap_basis_text_documents_total_demand` | 0 | ⬜ |
 | `TEST-179.10` | 113–116 | بلوک | `test_js_copies_stay_byte_identical` | 0 | ⬜ |
@@ -3066,12 +3066,12 @@
 </details>
 
 <details>
-<summary><b>TEST-181</b> — <code>tests/test_release_1_63_2_r21_package.py</code> (111 خط، 2 آدرس، بازبینی‌شده 0/2)</summary>
+<summary><b>TEST-181</b> — <code>tests/test_release_1_63_2_r21_package.py</code> (137 خط، 2 آدرس، بازبینی‌شده 0/2)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TEST-181.01` | 1–36 | بلوک | `مقدمهٔ فایل` | 1 | ⬜ |
-| `TEST-181.02` | 37–111 | بلوک | `test_1632_r21_is_a_valid_cumulative_installable_pa` | 0 | ⬜ |
+| `TEST-181.01` | 1–59 | بلوک | `مقدمهٔ فایل` | 1 | ⬜ |
+| `TEST-181.02` | 60–137 | بلوک | `test_1632_r21_is_a_valid_cumulative_installable_pa` | 0 | ⬜ |
 
 </details>
 
@@ -4296,22 +4296,22 @@
 </details>
 
 <details>
-<summary><b>TEST-251</b> — <code>tests/test_version_source_of_truth_static.py</code> (232 خط، 12 آدرس، بازبینی‌شده 0/12)</summary>
+<summary><b>TEST-251</b> — <code>tests/test_version_source_of_truth_static.py</code> (257 خط، 12 آدرس، بازبینی‌شده 0/12)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TEST-251.01` | 1–59 | بلوک | `مقدمهٔ فایل` | 1 | ⬜ |
-| `TEST-251.02` | 60–64 | بلوک | `version_tuple` | 0 | ⬜ |
-| `TEST-251.03` | 65–68 | بلوک | `repo_version` | 0 | ⬜ |
-| `TEST-251.04` | 69–101 | بلوک | `scan_packages` | 0 | ⬜ |
-| `TEST-251.05` | 102–112 | بلوک | `scan_published_packages` | 0 | ⬜ |
-| `TEST-251.06` | 113–127 | بلوک | `resolve_repo_path` | 0 | ⬜ |
-| `TEST-251.07` | 128–132 | بلوک | `newest_package_for` | 0 | ⬜ |
-| `TEST-251.08` | 133–133 | بلوک | `VersionSourceOfTruthTests` | 0 | ⬜ |
-| `TEST-251.09` | 134–148 | بلوک | `test_repo_version_is_not_behind_the_newest_publish` | 0 | ⬜ |
-| `TEST-251.10` | 149–188 | بلوک | `test_repo_matches_the_newest_package_of_the_curren` | 0 | ⬜ |
-| `TEST-251.11` | 189–217 | بلوک | `test_package_manifest_version_matches_its_own_vers` | 0 | ⬜ |
-| `TEST-251.12` | 218–232 | بلوک | `test_docs_do_not_advertise_an_older_version_than_v` | 0 | ⬜ |
+| `TEST-251.01` | 1–82 | بلوک | `مقدمهٔ فایل` | 1 | ⬜ |
+| `TEST-251.02` | 83–87 | بلوک | `version_tuple` | 0 | ⬜ |
+| `TEST-251.03` | 88–91 | بلوک | `repo_version` | 0 | ⬜ |
+| `TEST-251.04` | 92–124 | بلوک | `scan_packages` | 0 | ⬜ |
+| `TEST-251.05` | 125–135 | بلوک | `scan_published_packages` | 0 | ⬜ |
+| `TEST-251.06` | 136–150 | بلوک | `resolve_repo_path` | 0 | ⬜ |
+| `TEST-251.07` | 151–155 | بلوک | `newest_package_for` | 0 | ⬜ |
+| `TEST-251.08` | 156–156 | بلوک | `VersionSourceOfTruthTests` | 0 | ⬜ |
+| `TEST-251.09` | 157–171 | بلوک | `test_repo_version_is_not_behind_the_newest_publish` | 0 | ⬜ |
+| `TEST-251.10` | 172–213 | بلوک | `test_repo_matches_the_newest_package_of_the_curren` | 0 | ⬜ |
+| `TEST-251.11` | 214–242 | بلوک | `test_package_manifest_version_matches_its_own_vers` | 0 | ⬜ |
+| `TEST-251.12` | 243–257 | بلوک | `test_docs_do_not_advertise_an_older_version_than_v` | 0 | ⬜ |
 
 </details>
 
@@ -7050,17 +7050,17 @@
 </details>
 
 <details>
-<summary><b>DB-003</b> — <code>docs/architecture/rebuild-final.sql</code> (98 خط، 2 آدرس، بازبینی‌شده 0/2)</summary>
+<summary><b>DB-003</b> — <code>docs/architecture/rebuild-final.sql</code> (99 خط، 2 آدرس، بازبینی‌شده 0/2)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
 | `DB-003.01` | 1–9 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
-| `DB-003.02` | 10–98 | بلوک | `DROP TABLE IF` | 0 | ⬜ |
+| `DB-003.02` | 10–99 | بلوک | `DROP TABLE IF` | 0 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>DB-004</b> — <code>install-empty-db.sql</code> (1,653 خط، 122 آدرس، بازبینی‌شده 0/122)</summary>
+<summary><b>DB-004</b> — <code>install-empty-db.sql</code> (1,673 خط، 123 آدرس، بازبینی‌شده 0/123)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
@@ -7175,17 +7175,18 @@
 | `DB-004.109` | 1373–1381 | بلوک | `CREATE TABLE system_incidents` | 1 | ⬜ |
 | `DB-004.110` | 1382–1405 | بلوک | `CREATE TABLE food_guest_requests` | 1 | ⬜ |
 | `DB-004.111` | 1406–1437 | بلوک | `CREATE TABLE food_meal_reconciliations` | 1 | ⬜ |
-| `DB-004.112` | 1438–1459 | بلوک | `CREATE TABLE food_monthly_invoices` | 0 | ⬜ |
-| `DB-004.113` | 1460–1473 | بلوک | `CREATE TABLE user_access_groups` | 1 | ⬜ |
-| `DB-004.114` | 1474–1485 | بلوک | `CREATE TABLE user_access_group_members` | 1 | ⬜ |
-| `DB-004.115` | 1486–1501 | بلوک | `CREATE TABLE user_access_group_permissions` | 1 | ⬜ |
-| `DB-004.116` | 1502–1527 | بلوک | `CREATE TABLE log_issues` | 1 | ⬜ |
-| `DB-004.117` | 1528–1537 | بلوک | `CREATE TABLE logging_health_alerts` | 1 | ⬜ |
-| `DB-004.118` | 1538–1553 | بلوک | `CREATE TABLE log_issue_history` | 0 | ⬜ |
-| `DB-004.119` | 1554–1560 | بلوک | `CREATE TABLE log_issue_events` | 0 | ⬜ |
-| `DB-004.120` | 1561–1579 | بلوک | `CREATE TABLE log_issue_notifications` | 1 | ⬜ |
-| `DB-004.121` | 1580–1589 | بلوک | `CREATE TABLE schema_updates` | 0 | ⬜ |
-| `DB-004.122` | 1590–1653 | بلوک | `CREATE TABLE request_center_appointments` | 1 | ⬜ |
+| `DB-004.112` | 1438–1454 | بلوک | `CREATE TABLE food_guest_actuals` | 1 | ⬜ |
+| `DB-004.113` | 1455–1476 | بلوک | `CREATE TABLE food_monthly_invoices` | 0 | ⬜ |
+| `DB-004.114` | 1477–1490 | بلوک | `CREATE TABLE user_access_groups` | 1 | ⬜ |
+| `DB-004.115` | 1491–1502 | بلوک | `CREATE TABLE user_access_group_members` | 1 | ⬜ |
+| `DB-004.116` | 1503–1518 | بلوک | `CREATE TABLE user_access_group_permissions` | 1 | ⬜ |
+| `DB-004.117` | 1519–1544 | بلوک | `CREATE TABLE log_issues` | 1 | ⬜ |
+| `DB-004.118` | 1545–1554 | بلوک | `CREATE TABLE logging_health_alerts` | 1 | ⬜ |
+| `DB-004.119` | 1555–1570 | بلوک | `CREATE TABLE log_issue_history` | 0 | ⬜ |
+| `DB-004.120` | 1571–1577 | بلوک | `CREATE TABLE log_issue_events` | 0 | ⬜ |
+| `DB-004.121` | 1578–1596 | بلوک | `CREATE TABLE log_issue_notifications` | 1 | ⬜ |
+| `DB-004.122` | 1597–1606 | بلوک | `CREATE TABLE schema_updates` | 0 | ⬜ |
+| `DB-004.123` | 1607–1673 | بلوک | `CREATE TABLE request_center_appointments` | 1 | ⬜ |
 
 </details>
 
@@ -8392,7 +8393,7 @@
 </details>
 
 <details>
-<summary><b>DB-044</b> — <code>schema.sql</code> (1,605 خط، 111 آدرس، بازبینی‌شده 0/111)</summary>
+<summary><b>DB-044</b> — <code>schema.sql</code> (1,625 خط، 112 آدرس، بازبینی‌شده 0/112)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
@@ -8496,17 +8497,18 @@
 | `DB-044.98` | 1317–1334 | بلوک | `CREATE TABLE food_order_logs` | 1 | ⬜ |
 | `DB-044.99` | 1335–1356 | بلوک | `CREATE TABLE food_order_cancel_requests` | 1 | ⬜ |
 | `DB-044.100` | 1357–1388 | بلوک | `CREATE TABLE food_meal_reconciliations` | 1 | ⬜ |
-| `DB-044.101` | 1389–1410 | بلوک | `CREATE TABLE food_monthly_invoices` | 0 | ⬜ |
-| `DB-044.102` | 1411–1424 | بلوک | `CREATE TABLE user_access_groups` | 1 | ⬜ |
-| `DB-044.103` | 1425–1436 | بلوک | `CREATE TABLE user_access_group_members` | 1 | ⬜ |
-| `DB-044.104` | 1437–1452 | بلوک | `CREATE TABLE user_access_group_permissions` | 1 | ⬜ |
-| `DB-044.105` | 1453–1478 | بلوک | `CREATE TABLE log_issues` | 1 | ⬜ |
-| `DB-044.106` | 1479–1488 | بلوک | `CREATE TABLE logging_health_alerts` | 1 | ⬜ |
-| `DB-044.107` | 1489–1504 | بلوک | `CREATE TABLE log_issue_history` | 0 | ⬜ |
-| `DB-044.108` | 1505–1511 | بلوک | `CREATE TABLE log_issue_events` | 0 | ⬜ |
-| `DB-044.109` | 1512–1530 | بلوک | `CREATE TABLE log_issue_notifications` | 1 | ⬜ |
-| `DB-044.110` | 1531–1541 | بلوک | `CREATE TABLE schema_updates` | 0 | ⬜ |
-| `DB-044.111` | 1542–1605 | بلوک | `CREATE TABLE request_center_appointments` | 1 | ⬜ |
+| `DB-044.101` | 1389–1405 | بلوک | `CREATE TABLE food_guest_actuals` | 1 | ⬜ |
+| `DB-044.102` | 1406–1427 | بلوک | `CREATE TABLE food_monthly_invoices` | 0 | ⬜ |
+| `DB-044.103` | 1428–1441 | بلوک | `CREATE TABLE user_access_groups` | 1 | ⬜ |
+| `DB-044.104` | 1442–1453 | بلوک | `CREATE TABLE user_access_group_members` | 1 | ⬜ |
+| `DB-044.105` | 1454–1469 | بلوک | `CREATE TABLE user_access_group_permissions` | 1 | ⬜ |
+| `DB-044.106` | 1470–1495 | بلوک | `CREATE TABLE log_issues` | 1 | ⬜ |
+| `DB-044.107` | 1496–1505 | بلوک | `CREATE TABLE logging_health_alerts` | 1 | ⬜ |
+| `DB-044.108` | 1506–1521 | بلوک | `CREATE TABLE log_issue_history` | 0 | ⬜ |
+| `DB-044.109` | 1522–1528 | بلوک | `CREATE TABLE log_issue_events` | 0 | ⬜ |
+| `DB-044.110` | 1529–1547 | بلوک | `CREATE TABLE log_issue_notifications` | 1 | ⬜ |
+| `DB-044.111` | 1548–1558 | بلوک | `CREATE TABLE schema_updates` | 0 | ⬜ |
+| `DB-044.112` | 1559–1625 | بلوک | `CREATE TABLE request_center_appointments` | 1 | ⬜ |
 
 </details>
 
@@ -9254,7 +9256,7 @@
 </details>
 
 <details>
-<summary><b>PAGE-007</b> — <code>cd-dvd.php</code> (898 خط، 44 آدرس، بازبینی‌شده 0/44)</summary>
+<summary><b>PAGE-007</b> — <code>cd-dvd.php</code> (904 خط، 44 آدرس، بازبینی‌شده 0/44)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
@@ -9280,28 +9282,28 @@
 | `PAGE-007.20` | 164–169 | تابع | `cd_dvd_can_manage_record` | 0 | ⬜ |
 | `PAGE-007.21` | 171–174 | تابع | `cd_dvd_types` | 0 | ⬜ |
 | `PAGE-007.22` | 176–179 | تابع | `cd_dvd_active_users` | 0 | ⬜ |
-| `PAGE-007.23` | 181–191 | تابع | `cd_dvd_deputy_options` | 0 | ⬜ |
-| `PAGE-007.24` | 193–202 | تابع | `cd_dvd_routing_department_id` | 0 | ⬜ |
-| `PAGE-007.25` | 204–222 | تابع | `cd_dvd_next_serial` | 0 | ⬜ |
-| `PAGE-007.26` | 224–236 | تابع | `cd_dvd_last_record` | 0 | ⬜ |
-| `PAGE-007.27` | 238–243 | تابع | `cd_dvd_fetch_record` | 0 | ⬜ |
-| `PAGE-007.28` | 245–259 | تابع | `cd_dvd_parse_date` | 0 | ⬜ |
-| `PAGE-007.29` | 261–265 | تابع | `cd_dvd_default_date` | 0 | ⬜ |
-| `PAGE-007.30` | 267–383 | تابع | `cd_dvd_validate_payload` | 0 | ⬜ |
-| `PAGE-007.31` | 385–394 | تابع | `cd_dvd_acquire_write_lock` | 0 | ⬜ |
-| `PAGE-007.32` | 396–404 | تابع | `cd_dvd_release_write_lock` | 4 | ⬜ |
-| `PAGE-007.33` | 406–454 | تابع | `cd_dvd_create_record` | 7 | ⬜ |
-| `PAGE-007.34` | 456–477 | تابع | `cd_dvd_update_record` | 2 | ⬜ |
-| `PAGE-007.35` | 479–497 | تابع | `cd_dvd_delete_record` | 2 | ⬜ |
-| `PAGE-007.36` | 499–534 | تابع | `cd_dvd_query_records` | 0 | ⬜ |
-| `PAGE-007.37` | 536–541 | تابع | `cd_dvd_personal_incoming` | 0 | ⬜ |
-| `PAGE-007.38` | 543–553 | تابع | `cd_dvd_latest_records` | 0 | ⬜ |
-| `PAGE-007.39` | 555–574 | تابع | `cd_dvd_stats` | 5 | ⬜ |
-| `PAGE-007.40` | 576–589 | تابع | `cd_dvd_export` | 0 | ⬜ |
-| `PAGE-007.41` | 591–619 | تابع | `cd_dvd_render_surface` | 2 | ⬜ |
-| `PAGE-007.42` | 621–736 | تابع | `cd_dvd_render_page_legacy` | 2 | ⬜ |
-| `PAGE-007.43` | 738–875 | تابع | `cd_dvd_render_page` | 3 | ⬜ |
-| `PAGE-007.44` | 877–897 | تابع | `cd_dvd_render_history` | 2 | ⬜ |
+| `PAGE-007.23` | 181–197 | تابع | `cd_dvd_deputy_options` | 0 | ⬜ |
+| `PAGE-007.24` | 199–208 | تابع | `cd_dvd_routing_department_id` | 0 | ⬜ |
+| `PAGE-007.25` | 210–228 | تابع | `cd_dvd_next_serial` | 0 | ⬜ |
+| `PAGE-007.26` | 230–242 | تابع | `cd_dvd_last_record` | 0 | ⬜ |
+| `PAGE-007.27` | 244–249 | تابع | `cd_dvd_fetch_record` | 0 | ⬜ |
+| `PAGE-007.28` | 251–265 | تابع | `cd_dvd_parse_date` | 0 | ⬜ |
+| `PAGE-007.29` | 267–271 | تابع | `cd_dvd_default_date` | 0 | ⬜ |
+| `PAGE-007.30` | 273–389 | تابع | `cd_dvd_validate_payload` | 0 | ⬜ |
+| `PAGE-007.31` | 391–400 | تابع | `cd_dvd_acquire_write_lock` | 0 | ⬜ |
+| `PAGE-007.32` | 402–410 | تابع | `cd_dvd_release_write_lock` | 4 | ⬜ |
+| `PAGE-007.33` | 412–460 | تابع | `cd_dvd_create_record` | 7 | ⬜ |
+| `PAGE-007.34` | 462–483 | تابع | `cd_dvd_update_record` | 2 | ⬜ |
+| `PAGE-007.35` | 485–503 | تابع | `cd_dvd_delete_record` | 2 | ⬜ |
+| `PAGE-007.36` | 505–540 | تابع | `cd_dvd_query_records` | 0 | ⬜ |
+| `PAGE-007.37` | 542–547 | تابع | `cd_dvd_personal_incoming` | 0 | ⬜ |
+| `PAGE-007.38` | 549–559 | تابع | `cd_dvd_latest_records` | 0 | ⬜ |
+| `PAGE-007.39` | 561–580 | تابع | `cd_dvd_stats` | 5 | ⬜ |
+| `PAGE-007.40` | 582–595 | تابع | `cd_dvd_export` | 0 | ⬜ |
+| `PAGE-007.41` | 597–625 | تابع | `cd_dvd_render_surface` | 2 | ⬜ |
+| `PAGE-007.42` | 627–742 | تابع | `cd_dvd_render_page_legacy` | 2 | ⬜ |
+| `PAGE-007.43` | 744–881 | تابع | `cd_dvd_render_page` | 3 | ⬜ |
+| `PAGE-007.44` | 883–903 | تابع | `cd_dvd_render_history` | 2 | ⬜ |
 
 </details>
 
@@ -9513,7 +9515,7 @@
 </details>
 
 <details>
-<summary><b>PAGE-012</b> — <code>food-order-import.php</code> (477 خط، 12 آدرس، بازبینی‌شده 0/12)</summary>
+<summary><b>PAGE-012</b> — <code>food-order-import.php</code> (481 خط، 12 آدرس، بازبینی‌شده 0/12)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
@@ -9526,14 +9528,14 @@
 | `PAGE-012.07` | 132–151 | تابع | `food_order_import_time` | 0 | ⬜ |
 | `PAGE-012.08` | 153–159 | تابع | `food_order_import_norm_food` | 0 | ⬜ |
 | `PAGE-012.09` | 161–312 | تابع | `food_order_import_plan` | 6 | ⬜ |
-| `PAGE-012.10` | 314–367 | تابع | `food_order_import_apply` | 0 | ⬜ |
-| `PAGE-012.11` | 369–372 | تابع | `food_order_import_h` | 0 | ⬜ |
-| `PAGE-012.12` | 374–476 | تابع | `food_order_import_handle` | 5 | ⬜ |
+| `PAGE-012.10` | 314–371 | تابع | `food_order_import_apply` | 0 | ⬜ |
+| `PAGE-012.11` | 373–376 | تابع | `food_order_import_h` | 0 | ⬜ |
+| `PAGE-012.12` | 378–480 | تابع | `food_order_import_handle` | 5 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>PAGE-013</b> — <code>food-order.php</code> (3,856 خط، 109 آدرس، بازبینی‌شده 0/109)</summary>
+<summary><b>PAGE-013</b> — <code>food-order.php</code> (4,007 خط، 116 آدرس، بازبینی‌شده 0/116)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
@@ -9591,61 +9593,68 @@
 | `PAGE-013.52` | 1387–1408 | تابع | `food_order_emergency_window_states` | 5 | ⬜ |
 | `PAGE-013.53` | 1410–1463 | تابع | `food_order_emergency_window_grant` | 0 | ⬜ |
 | `PAGE-013.54` | 1465–1500 | تابع | `food_order_emergency_window_revoke` | 0 | ⬜ |
-| `PAGE-013.55` | 1502–1525 | تابع | `food_order_ensure_orderable_day` | 1 | ⬜ |
-| `PAGE-013.56` | 1527–1550 | تابع | `food_order_lock_cancellable_day` | 1 | ⬜ |
-| `PAGE-013.57` | 1552–1567 | تابع | `food_order_verify_employee_national_code` | 1 | ⬜ |
-| `PAGE-013.58` | 1569–1676 | تابع | `food_order_create_or_change` | 0 | ⬜ |
-| `PAGE-013.59` | 1678–1722 | تابع | `food_order_cancel` | 0 | ⬜ |
-| `PAGE-013.60` | 1724–1793 | تابع | `food_order_cancel_proxy` | 0 | ⬜ |
-| `PAGE-013.61` | 1795–1825 | تابع | `food_order_cancel_request_ensure` | 5 | ⬜ |
-| `PAGE-013.62` | 1827–1832 | تابع | `food_order_require_cancel_reviewer` | 0 | ⬜ |
-| `PAGE-013.63` | 1834–1837 | تابع | `food_order_cancel_inbox_url` | 0 | ⬜ |
-| `PAGE-013.64` | 1839–1856 | تابع | `food_order_user_is_cancel_reviewer` | 0 | ⬜ |
-| `PAGE-013.65` | 1858–1873 | تابع | `food_order_cancel_reviewer_ids` | 0 | ⬜ |
-| `PAGE-013.66` | 1875–1907 | تابع | `food_order_notify_cancel_reviewers` | 0 | ⬜ |
-| `PAGE-013.67` | 1909–1912 | تابع | `food_order_notify_support_managers` | 0 | ⬜ |
-| `PAGE-013.68` | 1914–1947 | تابع | `food_order_render_pending_cancels_card` | 0 | ⬜ |
-| `PAGE-013.69` | 1949–1974 | تابع | `food_order_pending_cancel_map` | 0 | ⬜ |
-| `PAGE-013.70` | 1976–2065 | تابع | `food_order_cancel_request_create` | 4 | ⬜ |
-| `PAGE-013.71` | 2067–2106 | تابع | `food_order_cancel_request_list` | 0 | ⬜ |
-| `PAGE-013.72` | 2108–2181 | تابع | `food_order_cancel_request_decide` | 4 | ⬜ |
-| `PAGE-013.73` | 2183–2265 | تابع | `food_order_catalog_save` | 0 | ⬜ |
-| `PAGE-013.74` | 2267–2395 | تابع | `food_order_save_day` | 6 | ⬜ |
-| `PAGE-013.75` | 2397–2417 | تابع | `food_order_status_summary` | 0 | ⬜ |
-| `PAGE-013.76` | 2419–2427 | تابع | `food_order_api_body` | 0 | ⬜ |
-| `PAGE-013.77` | 2429–2438 | تابع | `food_order_send_json` | 0 | ⬜ |
-| `PAGE-013.78` | 2440–2447 | تابع | `food_order_safe_error` | 0 | ⬜ |
-| `PAGE-013.79` | 2449–2457 | تابع | `food_order_export_safe_value` | 0 | ⬜ |
-| `PAGE-013.80` | 2459–2526 | تابع | `food_order_export_manager_orders` | 0 | ⬜ |
-| `PAGE-013.81` | 2528–2549 | تابع | `food_order_send_xlsx` | 0 | ⬜ |
-| `PAGE-013.82` | 2551–2602 | تابع | `food_order_export_statistics_range` | 5 | ⬜ |
-| `PAGE-013.83` | 2604–2608 | تابع | `food_guest_request_roles` | 0 | ⬜ |
-| `PAGE-013.84` | 2610–2619 | تابع | `food_guest_request_is_reviewer` | 0 | ⬜ |
-| `PAGE-013.85` | 2621–2626 | تابع | `food_guest_request_allowed` | 0 | ⬜ |
-| `PAGE-013.86` | 2628–2640 | تابع | `food_guest_request_can_manage` | 0 | ⬜ |
-| `PAGE-013.87` | 2642–2651 | تابع | `food_guest_request_change_window_open` | 0 | ⬜ |
-| `PAGE-013.88` | 2653–2667 | تابع | `food_guest_request_same_day_cutoff` | 0 | ⬜ |
-| `PAGE-013.89` | 2669–2674 | تابع | `food_guest_request_same_day_is_open` | 0 | ⬜ |
-| `PAGE-013.90` | 2676–2694 | تابع | `food_guest_request_date_error` | 0 | ⬜ |
-| `PAGE-013.91` | 2696–2710 | تابع | `food_guest_requested_total` | 0 | ⬜ |
-| `PAGE-013.92` | 2712–2740 | تابع | `food_guest_schema_missing` | 0 | ⬜ |
-| `PAGE-013.93` | 2742–2746 | تابع | `food_guest_schema_ready` | 0 | ⬜ |
-| `PAGE-013.94` | 2748–2754 | تابع | `food_guest_schema_ensure` | 0 | ⬜ |
-| `PAGE-013.95` | 2756–2766 | تابع | `food_guest_deputies` | 0 | ⬜ |
-| `PAGE-013.96` | 2768–2817 | تابع | `food_guest_user_deputy_id` | 4 | ⬜ |
-| `PAGE-013.97` | 2819–2913 | تابع | `food_guest_request_list` | 0 | ⬜ |
-| `PAGE-013.98` | 2915–2963 | تابع | `food_guest_request_create` | 1 | ⬜ |
-| `PAGE-013.99` | 2965–2997 | تابع | `food_guest_request_cancel` | 0 | ⬜ |
-| `PAGE-013.100` | 2999–3062 | تابع | `food_guest_request_update` | 0 | ⬜ |
-| `PAGE-013.101` | 3064–3098 | تابع | `food_guest_request_delete` | 0 | ⬜ |
-| `PAGE-013.102` | 3100–3269 | تابع | `food_order_api_handle` | 4 | ⬜ |
-| `PAGE-013.103` | 3272–3343 | تابع | `food_order_emergency_handle` | 2 | ⬜ |
-| `PAGE-013.104` | 3345–3364 | تابع | `food_order_save_cancel_request_cutoff` | 0 | ⬜ |
-| `PAGE-013.105` | 3366–3480 | تابع | `food_order_bulk_snapshot` | 0 | ⬜ |
-| `PAGE-013.106` | 3482–3567 | تابع | `food_order_bulk_apply` | 0 | ⬜ |
-| `PAGE-013.107` | 3569–3584 | تابع | `food_order_bulk_api_handle` | 2 | ⬜ |
-| `PAGE-013.108` | 3586–3822 | تابع | `food_order_menu_api_handle` | 4 | ⬜ |
-| `PAGE-013.109` | 3824–3855 | تابع | `food_order_render_page` | 0 | ⬜ |
+| `PAGE-013.55` | 1502–1528 | تابع | `food_order_ensure_orderable_day` | 1 | ⬜ |
+| `PAGE-013.56` | 1530–1556 | تابع | `food_order_lock_cancellable_day` | 1 | ⬜ |
+| `PAGE-013.57` | 1558–1573 | تابع | `food_order_verify_employee_national_code` | 1 | ⬜ |
+| `PAGE-013.58` | 1575–1682 | تابع | `food_order_create_or_change` | 0 | ⬜ |
+| `PAGE-013.59` | 1684–1728 | تابع | `food_order_cancel` | 0 | ⬜ |
+| `PAGE-013.60` | 1730–1799 | تابع | `food_order_cancel_proxy` | 0 | ⬜ |
+| `PAGE-013.61` | 1801–1831 | تابع | `food_order_cancel_request_ensure` | 5 | ⬜ |
+| `PAGE-013.62` | 1833–1838 | تابع | `food_order_require_cancel_reviewer` | 0 | ⬜ |
+| `PAGE-013.63` | 1840–1843 | تابع | `food_order_cancel_inbox_url` | 0 | ⬜ |
+| `PAGE-013.64` | 1845–1862 | تابع | `food_order_user_is_cancel_reviewer` | 0 | ⬜ |
+| `PAGE-013.65` | 1864–1879 | تابع | `food_order_cancel_reviewer_ids` | 0 | ⬜ |
+| `PAGE-013.66` | 1881–1913 | تابع | `food_order_notify_cancel_reviewers` | 0 | ⬜ |
+| `PAGE-013.67` | 1915–1918 | تابع | `food_order_notify_support_managers` | 0 | ⬜ |
+| `PAGE-013.68` | 1920–1953 | تابع | `food_order_render_pending_cancels_card` | 0 | ⬜ |
+| `PAGE-013.69` | 1955–1980 | تابع | `food_order_pending_cancel_map` | 0 | ⬜ |
+| `PAGE-013.70` | 1982–2071 | تابع | `food_order_cancel_request_create` | 4 | ⬜ |
+| `PAGE-013.71` | 2073–2112 | تابع | `food_order_cancel_request_list` | 0 | ⬜ |
+| `PAGE-013.72` | 2114–2187 | تابع | `food_order_cancel_request_decide` | 4 | ⬜ |
+| `PAGE-013.73` | 2189–2271 | تابع | `food_order_catalog_save` | 0 | ⬜ |
+| `PAGE-013.74` | 2273–2404 | تابع | `food_order_save_day` | 6 | ⬜ |
+| `PAGE-013.75` | 2406–2426 | تابع | `food_order_status_summary` | 0 | ⬜ |
+| `PAGE-013.76` | 2428–2436 | تابع | `food_order_api_body` | 0 | ⬜ |
+| `PAGE-013.77` | 2438–2447 | تابع | `food_order_send_json` | 0 | ⬜ |
+| `PAGE-013.78` | 2449–2456 | تابع | `food_order_safe_error` | 0 | ⬜ |
+| `PAGE-013.79` | 2458–2466 | تابع | `food_order_export_safe_value` | 0 | ⬜ |
+| `PAGE-013.80` | 2468–2535 | تابع | `food_order_export_manager_orders` | 0 | ⬜ |
+| `PAGE-013.81` | 2537–2558 | تابع | `food_order_send_xlsx` | 0 | ⬜ |
+| `PAGE-013.82` | 2560–2611 | تابع | `food_order_export_statistics_range` | 5 | ⬜ |
+| `PAGE-013.83` | 2613–2617 | تابع | `food_guest_request_roles` | 0 | ⬜ |
+| `PAGE-013.84` | 2619–2628 | تابع | `food_guest_request_is_reviewer` | 0 | ⬜ |
+| `PAGE-013.85` | 2630–2635 | تابع | `food_guest_request_allowed` | 0 | ⬜ |
+| `PAGE-013.86` | 2637–2649 | تابع | `food_guest_request_can_manage` | 0 | ⬜ |
+| `PAGE-013.87` | 2651–2660 | تابع | `food_guest_request_change_window_open` | 0 | ⬜ |
+| `PAGE-013.88` | 2662–2676 | تابع | `food_guest_request_same_day_cutoff` | 0 | ⬜ |
+| `PAGE-013.89` | 2678–2683 | تابع | `food_guest_request_same_day_is_open` | 0 | ⬜ |
+| `PAGE-013.90` | 2685–2703 | تابع | `food_guest_request_date_error` | 0 | ⬜ |
+| `PAGE-013.91` | 2705–2719 | تابع | `food_guest_requested_total` | 0 | ⬜ |
+| `PAGE-013.92` | 2721–2749 | تابع | `food_guest_schema_missing` | 0 | ⬜ |
+| `PAGE-013.93` | 2751–2755 | تابع | `food_guest_schema_ready` | 0 | ⬜ |
+| `PAGE-013.94` | 2757–2763 | تابع | `food_guest_schema_ensure` | 0 | ⬜ |
+| `PAGE-013.95` | 2765–2783 | تابع | `org_root_units_compat` | 0 | ⬜ |
+| `PAGE-013.96` | 2785–2791 | تابع | `food_guest_deputies` | 0 | ⬜ |
+| `PAGE-013.97` | 2793–2799 | تابع | `food_guest_root_types` | 0 | ⬜ |
+| `PAGE-013.98` | 2801–2830 | تابع | `food_guest_nearest_root_id` | 0 | ⬜ |
+| `PAGE-013.99` | 2832–2873 | تابع | `food_guest_user_root_id` | 4 | ⬜ |
+| `PAGE-013.100` | 2874–2878 | ناحیه | `بلوک رویه‌ای 2874-2878` | 0 | ⬜ |
+| `PAGE-013.101` | 2879–2912 | تابع | `food_guest_visible_root_ids` | 0 | ⬜ |
+| `PAGE-013.102` | 2914–2928 | تابع | `food_guest_stored_root_cached` | 0 | ⬜ |
+| `PAGE-013.103` | 2930–2933 | تابع | `food_guest_user_deputy_id` | 0 | ⬜ |
+| `PAGE-013.104` | 2935–3042 | تابع | `food_guest_request_list` | 0 | ⬜ |
+| `PAGE-013.105` | 3044–3096 | تابع | `food_guest_request_create` | 1 | ⬜ |
+| `PAGE-013.106` | 3098–3133 | تابع | `food_guest_request_cancel` | 0 | ⬜ |
+| `PAGE-013.107` | 3135–3208 | تابع | `food_guest_request_update` | 0 | ⬜ |
+| `PAGE-013.108` | 3210–3247 | تابع | `food_guest_request_delete` | 0 | ⬜ |
+| `PAGE-013.109` | 3249–3418 | تابع | `food_order_api_handle` | 4 | ⬜ |
+| `PAGE-013.110` | 3421–3492 | تابع | `food_order_emergency_handle` | 2 | ⬜ |
+| `PAGE-013.111` | 3494–3513 | تابع | `food_order_save_cancel_request_cutoff` | 0 | ⬜ |
+| `PAGE-013.112` | 3515–3629 | تابع | `food_order_bulk_snapshot` | 0 | ⬜ |
+| `PAGE-013.113` | 3631–3716 | تابع | `food_order_bulk_apply` | 0 | ⬜ |
+| `PAGE-013.114` | 3718–3733 | تابع | `food_order_bulk_api_handle` | 2 | ⬜ |
+| `PAGE-013.115` | 3735–3973 | تابع | `food_order_menu_api_handle` | 4 | ⬜ |
+| `PAGE-013.116` | 3975–4006 | تابع | `food_order_render_page` | 0 | ⬜ |
 
 </details>
 
@@ -9685,7 +9694,7 @@
 </details>
 
 <details>
-<summary><b>PAGE-015</b> — <code>food-reconciliation.php</code> (1,022 خط، 25 آدرس، بازبینی‌شده 0/25)</summary>
+<summary><b>PAGE-015</b> — <code>food-reconciliation.php</code> (1,434 خط، 34 آدرس، بازبینی‌شده 0/34)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
@@ -9702,23 +9711,32 @@
 | `PAGE-015.11` | 215–227 | تابع | `food_reconciliation_date_range` | 0 | ⬜ |
 | `PAGE-015.12` | 229–236 | تابع | `food_reconciliation_meal_filter` | 0 | ⬜ |
 | `PAGE-015.13` | 238–259 | تابع | `food_reconciliation_order_counts` | 0 | ⬜ |
-| `PAGE-015.14` | 261–368 | تابع | `food_reconciliation_rows` | 0 | ⬜ |
-| `PAGE-015.15` | 370–392 | تابع | `food_reconciliation_invoice_rows` | 0 | ⬜ |
-| `PAGE-015.16` | 394–477 | تابع | `food_reconciliation_report` | 0 | ⬜ |
-| `PAGE-015.17` | 479–486 | تابع | `food_reconciliation_audit` | 0 | ⬜ |
-| `PAGE-015.18` | 488–524 | تابع | `food_reconciliation_disposition_parse` | 0 | ⬜ |
-| `PAGE-015.19` | 526–698 | تابع | `food_reconciliation_save` | 1 | ⬜ |
-| `PAGE-015.20` | 700–703 | تابع | `food_reconciliation_upload_directory` | 0 | ⬜ |
-| `PAGE-015.21` | 705–783 | تابع | `food_reconciliation_validate_file` | 1 | ⬜ |
-| `PAGE-015.22` | 785–869 | تابع | `food_reconciliation_upload_invoice` | **8** | ⬜ |
-| `PAGE-015.23` | 871–903 | تابع | `food_reconciliation_download_invoice` | 0 | ⬜ |
-| `PAGE-015.24` | 905–989 | تابع | `food_reconciliation_export` | 0 | ⬜ |
-| `PAGE-015.25` | 991–1021 | تابع | `food_reconciliation_api_handle` | 2 | ⬜ |
+| `PAGE-015.14` | 261–385 | تابع | `food_reconciliation_rows` | 1 | ⬜ |
+| `PAGE-015.15` | 387–409 | تابع | `food_reconciliation_invoice_rows` | 0 | ⬜ |
+| `PAGE-015.16` | 411–494 | تابع | `food_reconciliation_report` | 0 | ⬜ |
+| `PAGE-015.17` | 496–503 | تابع | `food_reconciliation_audit` | 0 | ⬜ |
+| `PAGE-015.18` | 505–537 | تابع | `food_meal_closed_guard` | 0 | ⬜ |
+| `PAGE-015.19` | 539–575 | تابع | `food_reconciliation_day_remainder` | 0 | ⬜ |
+| `PAGE-015.20` | 577–613 | تابع | `food_reconciliation_disposition_parse` | 0 | ⬜ |
+| `PAGE-015.21` | 615–788 | تابع | `food_reconciliation_save` | 1 | ⬜ |
+| `PAGE-015.22` | 790–793 | تابع | `food_reconciliation_upload_directory` | 0 | ⬜ |
+| `PAGE-015.23` | 795–873 | تابع | `food_reconciliation_validate_file` | 1 | ⬜ |
+| `PAGE-015.24` | 875–959 | تابع | `food_reconciliation_upload_invoice` | **8** | ⬜ |
+| `PAGE-015.25` | 961–993 | تابع | `food_reconciliation_download_invoice` | 0 | ⬜ |
+| `PAGE-015.26` | 995–1082 | تابع | `food_reconciliation_export` | 0 | ⬜ |
+| `PAGE-015.27` | 1084–1108 | تابع | `food_guest_actuals_schema_ensure` | 0 | ⬜ |
+| `PAGE-015.28` | 1110–1132 | تابع | `food_guest_actuals_requested_map` | 0 | ⬜ |
+| `PAGE-015.29` | 1134–1152 | تابع | `food_guest_actuals_stored_map` | 0 | ⬜ |
+| `PAGE-015.30` | 1154–1177 | تابع | `food_guest_actuals_unit_meta` | 0 | ⬜ |
+| `PAGE-015.31` | 1179–1191 | تابع | `food_guest_actuals_type_order` | 0 | ⬜ |
+| `PAGE-015.32` | 1193–1276 | تابع | `food_guest_actuals_report` | 4 | ⬜ |
+| `PAGE-015.33` | 1278–1372 | تابع | `food_guest_actuals_save` | 5 | ⬜ |
+| `PAGE-015.34` | 1374–1433 | تابع | `food_reconciliation_api_handle` | 2 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>PAGE-016</b> — <code>food-ticket-auto-receipts.php</code> (355 خط، 9 آدرس، بازبینی‌شده 0/9)</summary>
+<summary><b>PAGE-016</b> — <code>food-ticket-auto-receipts.php</code> (377 خط، 9 آدرس، بازبینی‌شده 0/9)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
@@ -9730,7 +9748,7 @@
 | `PAGE-016.06` | 73–86 | تابع | `food_ticket_auto_receipt_columns` | 0 | ⬜ |
 | `PAGE-016.07` | 88–122 | تابع | `food_ticket_auto_receipt_schema_ready` | 0 | ⬜ |
 | `PAGE-016.08` | 124–165 | تابع | `food_ticket_auto_receipt_insert` | 1 | ⬜ |
-| `PAGE-016.09` | 167–354 | تابع | `food_ticket_auto_receipts_run` | 5 | ⬜ |
+| `PAGE-016.09` | 167–376 | تابع | `food_ticket_auto_receipts_run` | 5 | ⬜ |
 
 </details>
 
@@ -9797,7 +9815,7 @@
 </details>
 
 <details>
-<summary><b>PAGE-019</b> — <code>food-ticket-groups.php</code> (3,803 خط، 75 آدرس، بازبینی‌شده 0/75)</summary>
+<summary><b>PAGE-019</b> — <code>food-ticket-groups.php</code> (3,862 خط، 77 آدرس، بازبینی‌شده 0/77)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
@@ -9807,75 +9825,77 @@
 | `PAGE-019.04` | 159–219 | تابع | `food_ticket_groups_migrate` | 4 | ⬜ |
 | `PAGE-019.05` | 221–222 | ناحیه | `غیبت روزانه` | 0 | ⬜ |
 | `PAGE-019.06` | 223–249 | تابع | `food_ticket_absence_ensure` | 5 | ⬜ |
-| `PAGE-019.07` | 251–427 | تابع | `food_ticket_manual_attendance_reconcile_range` | 7 | ⬜ |
-| `PAGE-019.08` | 429–432 | تابع | `food_ticket_manual_attendance_reconcile_date` | 0 | ⬜ |
-| `PAGE-019.09` | 434–461 | تابع | `food_ticket_absence_load` | 0 | ⬜ |
-| `PAGE-019.10` | 463–481 | تابع | `food_ticket_group_absence_locked` | 0 | ⬜ |
-| `PAGE-019.11` | 483–555 | تابع | `food_ticket_absence_set` | 1 | ⬜ |
-| `PAGE-019.12` | 557–603 | تابع | `food_ticket_absence_clear_group` | 1 | ⬜ |
-| `PAGE-019.13` | 605–628 | تابع | `food_ticket_absence_held_count` | 5 | ⬜ |
-| `PAGE-019.14` | 630–636 | تابع | `food_ticket_can_override_absence` | 0 | ⬜ |
-| `PAGE-019.15` | 638–639 | ناحیه | `گروه‌ها: بارگذاری و شناسایی` | 0 | ⬜ |
-| `PAGE-019.16` | 640–669 | تابع | `food_ticket_groups_load` | 0 | ⬜ |
-| `PAGE-019.17` | 671–687 | تابع | `food_ticket_group_find_by_uid` | 0 | ⬜ |
-| `PAGE-019.18` | 689–707 | تابع | `food_ticket_group_find_by_card` | 0 | ⬜ |
-| `PAGE-019.19` | 709–727 | تابع | `food_ticket_group_resolve` | 0 | ⬜ |
-| `PAGE-019.20` | 729–741 | تابع | `food_ticket_group_find_by_card_any` | 0 | ⬜ |
-| `PAGE-019.21` | 743–753 | تابع | `food_ticket_group_date_ok` | 0 | ⬜ |
-| `PAGE-019.22` | 755–758 | تابع | `food_ticket_group_member_key` | 0 | ⬜ |
-| `PAGE-019.23` | 760–778 | تابع | `food_ticket_group_event_ids_for_run` | 0 | ⬜ |
-| `PAGE-019.24` | 780–781 | ناحیه | `محاسبهٔ واجد شرایط (هستهٔ منطق، بدون DB)` | 0 | ⬜ |
-| `PAGE-019.25` | 782–856 | تابع | `food_ticket_group_plan` | 0 | ⬜ |
-| `PAGE-019.26` | 857–862 | ناحیه | `بلوک رویه‌ای 857-862` | 0 | ⬜ |
-| `PAGE-019.27` | 863–876 | تابع | `food_person_name_split` | 0 | ⬜ |
-| `PAGE-019.28` | 877–878 | ناحیه | `بلوک رویه‌ای 877-878` | 0 | ⬜ |
-| `PAGE-019.29` | 879–893 | تابع | `food_ticket_group_members` | 0 | ⬜ |
-| `PAGE-019.30` | 895–910 | تابع | `food_ticket_user_group_id` | 0 | ⬜ |
-| `PAGE-019.31` | 912–933 | تابع | `food_ticket_day_visit_users` | 0 | ⬜ |
-| `PAGE-019.32` | 935–973 | تابع | `food_ticket_group_members_for_date` | 0 | ⬜ |
-| `PAGE-019.33` | 975–993 | تابع | `food_ticket_day_visit_row` | 0 | ⬜ |
-| `PAGE-019.34` | 995–1020 | تابع | `food_ticket_visit_change_hhmm` | 0 | ⬜ |
-| `PAGE-019.35` | 1022–1032 | تابع | `food_ticket_visit_change_now` | 0 | ⬜ |
-| `PAGE-019.36` | 1034–1043 | تابع | `food_ticket_visit_change_is_open` | 0 | ⬜ |
-| `PAGE-019.37` | 1045–1053 | تابع | `food_ticket_visit_change_guard` | 0 | ⬜ |
-| `PAGE-019.38` | 1055–1061 | تابع | `food_ticket_can_cancel_day_visit` | 0 | ⬜ |
-| `PAGE-019.39` | 1063–1129 | تابع | `food_ticket_day_visit_state` | 0 | ⬜ |
-| `PAGE-019.40` | 1131–1252 | تابع | `food_ticket_day_visit_save` | 2 | ⬜ |
-| `PAGE-019.41` | 1254–1313 | تابع | `food_ticket_day_visit_clear` | 1 | ⬜ |
-| `PAGE-019.42` | 1315–1331 | تابع | `food_ticket_api_cancel_day_visit` | 0 | ⬜ |
-| `PAGE-019.43` | 1333–1364 | تابع | `food_ticket_group_ticketed_keys` | 5 | ⬜ |
-| `PAGE-019.44` | 1366–1386 | تابع | `food_ticket_group_order_map` | 0 | ⬜ |
-| `PAGE-019.45` | 1388–1402 | تابع | `food_ticket_group_food_lookup` | 0 | ⬜ |
-| `PAGE-019.46` | 1404–1442 | تابع | `food_ticket_group_overview` | 0 | ⬜ |
-| `PAGE-019.47` | 1444–1445 | ناحیه | `پردازش تردد نماینده` | 0 | ⬜ |
-| `PAGE-019.48` | 1446–1773 | تابع | `food_ticket_group_try_process` | 4 | ⬜ |
-| `PAGE-019.49` | 1775–1838 | تابع | `food_ticket_hold_ticket_for_absence` | 6 | ⬜ |
-| `PAGE-019.50` | 1840–1889 | تابع | `food_ticket_release_held_ticket` | 6 | ⬜ |
-| `PAGE-019.51` | 1891–1918 | تابع | `food_ticket_events_ensure_hold_status` | **8** | ⬜ |
-| `PAGE-019.52` | 1920–1921 | ناحیه | `تاریخچهٔ L_UID نماینده‌ها و تردد با شناسهٔ ناشناخت` | 0 | ⬜ |
-| `PAGE-019.53` | 1922–1936 | تابع | `food_ticket_group_uid_history_record` | 1 | ⬜ |
-| `PAGE-019.54` | 1938–1953 | تابع | `food_ticket_group_uid_history_has` | 0 | ⬜ |
-| `PAGE-019.55` | 1955–2020 | تابع | `food_ticket_group_try_unknown` | **10** | ⬜ |
-| `PAGE-019.56` | 2022–2024 | ناحیه | `API مدیریت گروه‌ها` | 0 | ⬜ |
-| `PAGE-019.57` | 2025–2029 | تابع | `food_ticket_manual_attendance_today` | 0 | ⬜ |
-| `PAGE-019.58` | 2031–2049 | تابع | `food_ticket_manual_attendance_date` | 0 | ⬜ |
-| `PAGE-019.59` | 2051–2085 | تابع | `food_ticket_event_is_orphan_ticket` | 0 | ⬜ |
-| `PAGE-019.60` | 2087–2098 | تابع | `food_ticket_manual_attendance_guest_row` | 0 | ⬜ |
-| `PAGE-019.61` | 2100–2268 | تابع | `food_ticket_api_manual_attendance` | 1 | ⬜ |
-| `PAGE-019.62` | 2270–2320 | تابع | `food_ticket_manual_attendance_clear_absence` | 1 | ⬜ |
-| `PAGE-019.63` | 2322–2792 | تابع | `food_ticket_api_manual_attendance_save` | 4 | ⬜ |
-| `PAGE-019.64` | 2794–2911 | تابع | `food_ticket_api_manual_attendance_save_guest` | 0 | ⬜ |
-| `PAGE-019.65` | 2913–2994 | تابع | `food_ticket_api_manual_attendance_save_many` | **9** | ⬜ |
-| `PAGE-019.66` | 2996–3097 | تابع | `food_ticket_api_groups` | 0 | ⬜ |
-| `PAGE-019.67` | 3099–3328 | تابع | `food_ticket_api_save_group` | 5 | ⬜ |
-| `PAGE-019.68` | 3329–3333 | ناحیه | `بلوک رویه‌ای 3329-3333` | 0 | ⬜ |
-| `PAGE-019.69` | 3334–3352 | تابع | `food_ticket_jalali_label` | 0 | ⬜ |
-| `PAGE-019.70` | 3354–3444 | تابع | `food_ticket_api_absence_status` | 0 | ⬜ |
-| `PAGE-019.71` | 3446–3511 | تابع | `food_ticket_api_absence_save` | 0 | ⬜ |
-| `PAGE-019.72` | 3513–3529 | تابع | `food_ticket_api_absence_clear` | 0 | ⬜ |
-| `PAGE-019.73` | 3531–3557 | تابع | `food_ticket_api_delivery` | 0 | ⬜ |
-| `PAGE-019.74` | 3559–3771 | تابع | `food_ticket_cancel_ticket_for_user` | 7 | ⬜ |
-| `PAGE-019.75` | 3773–3802 | تابع | `food_ticket_api_delete_group` | 1 | ⬜ |
+| `PAGE-019.07` | 250–254 | ناحیه | `بلوک رویه‌ای 250-254` | 0 | ⬜ |
+| `PAGE-019.08` | 255–282 | تابع | `food_ticket_closed_meal_not_exists_sql` | 5 | ⬜ |
+| `PAGE-019.09` | 284–464 | تابع | `food_ticket_manual_attendance_reconcile_range` | 7 | ⬜ |
+| `PAGE-019.10` | 466–469 | تابع | `food_ticket_manual_attendance_reconcile_date` | 0 | ⬜ |
+| `PAGE-019.11` | 471–498 | تابع | `food_ticket_absence_load` | 0 | ⬜ |
+| `PAGE-019.12` | 500–518 | تابع | `food_ticket_group_absence_locked` | 0 | ⬜ |
+| `PAGE-019.13` | 520–592 | تابع | `food_ticket_absence_set` | 1 | ⬜ |
+| `PAGE-019.14` | 594–640 | تابع | `food_ticket_absence_clear_group` | 1 | ⬜ |
+| `PAGE-019.15` | 642–665 | تابع | `food_ticket_absence_held_count` | 5 | ⬜ |
+| `PAGE-019.16` | 667–673 | تابع | `food_ticket_can_override_absence` | 0 | ⬜ |
+| `PAGE-019.17` | 675–676 | ناحیه | `گروه‌ها: بارگذاری و شناسایی` | 0 | ⬜ |
+| `PAGE-019.18` | 677–706 | تابع | `food_ticket_groups_load` | 0 | ⬜ |
+| `PAGE-019.19` | 708–724 | تابع | `food_ticket_group_find_by_uid` | 0 | ⬜ |
+| `PAGE-019.20` | 726–744 | تابع | `food_ticket_group_find_by_card` | 0 | ⬜ |
+| `PAGE-019.21` | 746–764 | تابع | `food_ticket_group_resolve` | 0 | ⬜ |
+| `PAGE-019.22` | 766–778 | تابع | `food_ticket_group_find_by_card_any` | 0 | ⬜ |
+| `PAGE-019.23` | 780–790 | تابع | `food_ticket_group_date_ok` | 0 | ⬜ |
+| `PAGE-019.24` | 792–795 | تابع | `food_ticket_group_member_key` | 0 | ⬜ |
+| `PAGE-019.25` | 797–815 | تابع | `food_ticket_group_event_ids_for_run` | 0 | ⬜ |
+| `PAGE-019.26` | 817–818 | ناحیه | `محاسبهٔ واجد شرایط (هستهٔ منطق، بدون DB)` | 0 | ⬜ |
+| `PAGE-019.27` | 819–893 | تابع | `food_ticket_group_plan` | 0 | ⬜ |
+| `PAGE-019.28` | 894–899 | ناحیه | `بلوک رویه‌ای 894-899` | 0 | ⬜ |
+| `PAGE-019.29` | 900–913 | تابع | `food_person_name_split` | 0 | ⬜ |
+| `PAGE-019.30` | 914–915 | ناحیه | `بلوک رویه‌ای 914-915` | 0 | ⬜ |
+| `PAGE-019.31` | 916–930 | تابع | `food_ticket_group_members` | 0 | ⬜ |
+| `PAGE-019.32` | 932–947 | تابع | `food_ticket_user_group_id` | 0 | ⬜ |
+| `PAGE-019.33` | 949–970 | تابع | `food_ticket_day_visit_users` | 0 | ⬜ |
+| `PAGE-019.34` | 972–1010 | تابع | `food_ticket_group_members_for_date` | 0 | ⬜ |
+| `PAGE-019.35` | 1012–1030 | تابع | `food_ticket_day_visit_row` | 0 | ⬜ |
+| `PAGE-019.36` | 1032–1057 | تابع | `food_ticket_visit_change_hhmm` | 0 | ⬜ |
+| `PAGE-019.37` | 1059–1069 | تابع | `food_ticket_visit_change_now` | 0 | ⬜ |
+| `PAGE-019.38` | 1071–1080 | تابع | `food_ticket_visit_change_is_open` | 0 | ⬜ |
+| `PAGE-019.39` | 1082–1090 | تابع | `food_ticket_visit_change_guard` | 0 | ⬜ |
+| `PAGE-019.40` | 1092–1098 | تابع | `food_ticket_can_cancel_day_visit` | 0 | ⬜ |
+| `PAGE-019.41` | 1100–1166 | تابع | `food_ticket_day_visit_state` | 0 | ⬜ |
+| `PAGE-019.42` | 1168–1289 | تابع | `food_ticket_day_visit_save` | 2 | ⬜ |
+| `PAGE-019.43` | 1291–1350 | تابع | `food_ticket_day_visit_clear` | 1 | ⬜ |
+| `PAGE-019.44` | 1352–1368 | تابع | `food_ticket_api_cancel_day_visit` | 0 | ⬜ |
+| `PAGE-019.45` | 1370–1401 | تابع | `food_ticket_group_ticketed_keys` | 5 | ⬜ |
+| `PAGE-019.46` | 1403–1423 | تابع | `food_ticket_group_order_map` | 0 | ⬜ |
+| `PAGE-019.47` | 1425–1439 | تابع | `food_ticket_group_food_lookup` | 0 | ⬜ |
+| `PAGE-019.48` | 1441–1479 | تابع | `food_ticket_group_overview` | 0 | ⬜ |
+| `PAGE-019.49` | 1481–1482 | ناحیه | `پردازش تردد نماینده` | 0 | ⬜ |
+| `PAGE-019.50` | 1483–1810 | تابع | `food_ticket_group_try_process` | 4 | ⬜ |
+| `PAGE-019.51` | 1812–1875 | تابع | `food_ticket_hold_ticket_for_absence` | 6 | ⬜ |
+| `PAGE-019.52` | 1877–1926 | تابع | `food_ticket_release_held_ticket` | 6 | ⬜ |
+| `PAGE-019.53` | 1928–1955 | تابع | `food_ticket_events_ensure_hold_status` | **8** | ⬜ |
+| `PAGE-019.54` | 1957–1958 | ناحیه | `تاریخچهٔ L_UID نماینده‌ها و تردد با شناسهٔ ناشناخت` | 0 | ⬜ |
+| `PAGE-019.55` | 1959–1973 | تابع | `food_ticket_group_uid_history_record` | 1 | ⬜ |
+| `PAGE-019.56` | 1975–1990 | تابع | `food_ticket_group_uid_history_has` | 0 | ⬜ |
+| `PAGE-019.57` | 1992–2057 | تابع | `food_ticket_group_try_unknown` | **10** | ⬜ |
+| `PAGE-019.58` | 2059–2061 | ناحیه | `API مدیریت گروه‌ها` | 0 | ⬜ |
+| `PAGE-019.59` | 2062–2066 | تابع | `food_ticket_manual_attendance_today` | 0 | ⬜ |
+| `PAGE-019.60` | 2068–2086 | تابع | `food_ticket_manual_attendance_date` | 0 | ⬜ |
+| `PAGE-019.61` | 2088–2122 | تابع | `food_ticket_event_is_orphan_ticket` | 0 | ⬜ |
+| `PAGE-019.62` | 2124–2135 | تابع | `food_ticket_manual_attendance_guest_row` | 0 | ⬜ |
+| `PAGE-019.63` | 2137–2305 | تابع | `food_ticket_api_manual_attendance` | 1 | ⬜ |
+| `PAGE-019.64` | 2307–2357 | تابع | `food_ticket_manual_attendance_clear_absence` | 1 | ⬜ |
+| `PAGE-019.65` | 2359–2832 | تابع | `food_ticket_api_manual_attendance_save` | 4 | ⬜ |
+| `PAGE-019.66` | 2834–2951 | تابع | `food_ticket_api_manual_attendance_save_guest` | 0 | ⬜ |
+| `PAGE-019.67` | 2953–3034 | تابع | `food_ticket_api_manual_attendance_save_many` | **9** | ⬜ |
+| `PAGE-019.68` | 3036–3137 | تابع | `food_ticket_api_groups` | 0 | ⬜ |
+| `PAGE-019.69` | 3139–3368 | تابع | `food_ticket_api_save_group` | 5 | ⬜ |
+| `PAGE-019.70` | 3369–3373 | ناحیه | `بلوک رویه‌ای 3369-3373` | 0 | ⬜ |
+| `PAGE-019.71` | 3374–3392 | تابع | `food_ticket_jalali_label` | 0 | ⬜ |
+| `PAGE-019.72` | 3394–3484 | تابع | `food_ticket_api_absence_status` | 0 | ⬜ |
+| `PAGE-019.73` | 3486–3554 | تابع | `food_ticket_api_absence_save` | 0 | ⬜ |
+| `PAGE-019.74` | 3556–3575 | تابع | `food_ticket_api_absence_clear` | 0 | ⬜ |
+| `PAGE-019.75` | 3577–3609 | تابع | `food_ticket_api_delivery` | 0 | ⬜ |
+| `PAGE-019.76` | 3611–3830 | تابع | `food_ticket_cancel_ticket_for_user` | 7 | ⬜ |
+| `PAGE-019.77` | 3832–3861 | تابع | `food_ticket_api_delete_group` | 1 | ⬜ |
 
 </details>
 
@@ -9971,7 +9991,7 @@
 </details>
 
 <details>
-<summary><b>PAGE-024</b> — <code>food-ticket-runtime.php</code> (1,386 خط، 35 آدرس، بازبینی‌شده 0/35)</summary>
+<summary><b>PAGE-024</b> — <code>food-ticket-runtime.php</code> (1,425 خط، 36 آدرس، بازبینی‌شده 0/36)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
@@ -9979,37 +9999,38 @@
 | `PAGE-024.02` | 4–24 | تابع | `food_ticket_setting` | 0 | ⬜ |
 | `PAGE-024.03` | 26–32 | تابع | `food_ticket_set_setting` | 6 | ⬜ |
 | `PAGE-024.04` | 34–47 | تابع | `food_ticket_meal_windows` | 0 | ⬜ |
-| `PAGE-024.05` | 49–64 | تابع | `food_ticket_active_meal` | 0 | ⬜ |
-| `PAGE-024.06` | 66–94 | تابع | `food_ticket_template_default` | 0 | ⬜ |
-| `PAGE-024.07` | 96–110 | تابع | `food_ticket_template` | 0 | ⬜ |
-| `PAGE-024.08` | 112–124 | تابع | `food_ticket_save_template` | 1 | ⬜ |
-| `PAGE-024.09` | 126–213 | تابع | `food_ticket_render_from_template` | 0 | ⬜ |
-| `PAGE-024.10` | 215–253 | تابع | `food_ticket_print_log` | 1 | ⬜ |
-| `PAGE-024.11` | 255–258 | تابع | `food_ticket_new_job_id` | 0 | ⬜ |
-| `PAGE-024.12` | 260–293 | تابع | `food_ticket_enqueue_print` | 1 | ⬜ |
-| `PAGE-024.13` | 295–298 | تابع | `food_ticket_can_delete_source_after_print` | 0 | ⬜ |
-| `PAGE-024.14` | 300–331 | تابع | `food_ticket_prepare_queued_food` | 0 | ⬜ |
-| `PAGE-024.15` | 333–346 | تابع | `food_ticket_apply_queued_food` | 1 | ⬜ |
-| `PAGE-024.16` | 348–356 | تابع | `food_ticket_verify_queued_food` | 0 | ⬜ |
-| `PAGE-024.17` | 358–550 | تابع | `food_ticket_print_group_run` | 7 | ⬜ |
-| `PAGE-024.18` | 552–711 | تابع | `food_ticket_process_print_queue` | **11** | ⬜ |
-| `PAGE-024.19` | 713–720 | تابع | `food_ticket_fa_digits` | 0 | ⬜ |
-| `PAGE-024.20` | 722–795 | تابع | `food_ticket_graphic_rows` | 0 | ⬜ |
-| `PAGE-024.21` | 797–831 | تابع | `food_ticket_template_logo_base64` | 2 | ⬜ |
-| `PAGE-024.22` | 833–1031 | تابع | `food_ticket_send_windows_graphic` | **13** | ⬜ |
-| `PAGE-024.23` | 1033–1087 | تابع | `food_ticket_send_raw_payload` | 0 | ⬜ |
-| `PAGE-024.24` | 1088–1093 | ناحیه | `بلوک رویه‌ای 1088-1093` | 0 | ⬜ |
-| `PAGE-024.25` | 1094–1146 | تابع | `food_ticket_table_has_column` | 4 | ⬜ |
-| `PAGE-024.26` | 1148–1160 | تابع | `food_ticket_delivery_supported` | 0 | ⬜ |
-| `PAGE-024.27` | 1162–1189 | تابع | `food_ticket_events_ensure_delivery` | 4 | ⬜ |
-| `PAGE-024.28` | 1191–1209 | تابع | `food_ticket_source_delete_supported` | 0 | ⬜ |
-| `PAGE-024.29` | 1211–1243 | تابع | `food_ticket_events_ensure_source_delete` | **14** | ⬜ |
-| `PAGE-024.30` | 1244–1245 | ناحیه | `بلوک رویه‌ای 1244-1245` | 0 | ⬜ |
-| `PAGE-024.31` | 1246–1259 | تابع | `food_ticket_mark_delivered_on_print` | 1 | ⬜ |
-| `PAGE-024.32` | 1261–1297 | تابع | `food_ticket_deliver_event` | 5 | ⬜ |
-| `PAGE-024.33` | 1299–1330 | تابع | `food_ticket_undeliver_event` | 5 | ⬜ |
-| `PAGE-024.34` | 1332–1363 | تابع | `food_ticket_status_counts` | 5 | ⬜ |
-| `PAGE-024.35` | 1365–1385 | تابع | `food_ticket_self_test_logic` | 0 | ⬜ |
+| `PAGE-024.05` | 49–62 | تابع | `food_ticket_event_meal_code` | 0 | ⬜ |
+| `PAGE-024.06` | 64–79 | تابع | `food_ticket_active_meal` | 0 | ⬜ |
+| `PAGE-024.07` | 81–109 | تابع | `food_ticket_template_default` | 0 | ⬜ |
+| `PAGE-024.08` | 111–125 | تابع | `food_ticket_template` | 0 | ⬜ |
+| `PAGE-024.09` | 127–139 | تابع | `food_ticket_save_template` | 1 | ⬜ |
+| `PAGE-024.10` | 141–228 | تابع | `food_ticket_render_from_template` | 0 | ⬜ |
+| `PAGE-024.11` | 230–268 | تابع | `food_ticket_print_log` | 1 | ⬜ |
+| `PAGE-024.12` | 270–273 | تابع | `food_ticket_new_job_id` | 0 | ⬜ |
+| `PAGE-024.13` | 275–308 | تابع | `food_ticket_enqueue_print` | 1 | ⬜ |
+| `PAGE-024.14` | 310–313 | تابع | `food_ticket_can_delete_source_after_print` | 0 | ⬜ |
+| `PAGE-024.15` | 315–346 | تابع | `food_ticket_prepare_queued_food` | 0 | ⬜ |
+| `PAGE-024.16` | 348–361 | تابع | `food_ticket_apply_queued_food` | 1 | ⬜ |
+| `PAGE-024.17` | 363–371 | تابع | `food_ticket_verify_queued_food` | 0 | ⬜ |
+| `PAGE-024.18` | 373–565 | تابع | `food_ticket_print_group_run` | 7 | ⬜ |
+| `PAGE-024.19` | 567–750 | تابع | `food_ticket_process_print_queue` | **11** | ⬜ |
+| `PAGE-024.20` | 752–759 | تابع | `food_ticket_fa_digits` | 0 | ⬜ |
+| `PAGE-024.21` | 761–834 | تابع | `food_ticket_graphic_rows` | 0 | ⬜ |
+| `PAGE-024.22` | 836–870 | تابع | `food_ticket_template_logo_base64` | 2 | ⬜ |
+| `PAGE-024.23` | 872–1070 | تابع | `food_ticket_send_windows_graphic` | **13** | ⬜ |
+| `PAGE-024.24` | 1072–1126 | تابع | `food_ticket_send_raw_payload` | 0 | ⬜ |
+| `PAGE-024.25` | 1127–1132 | ناحیه | `بلوک رویه‌ای 1127-1132` | 0 | ⬜ |
+| `PAGE-024.26` | 1133–1185 | تابع | `food_ticket_table_has_column` | 4 | ⬜ |
+| `PAGE-024.27` | 1187–1199 | تابع | `food_ticket_delivery_supported` | 0 | ⬜ |
+| `PAGE-024.28` | 1201–1228 | تابع | `food_ticket_events_ensure_delivery` | 4 | ⬜ |
+| `PAGE-024.29` | 1230–1248 | تابع | `food_ticket_source_delete_supported` | 0 | ⬜ |
+| `PAGE-024.30` | 1250–1282 | تابع | `food_ticket_events_ensure_source_delete` | **14** | ⬜ |
+| `PAGE-024.31` | 1283–1284 | ناحیه | `بلوک رویه‌ای 1283-1284` | 0 | ⬜ |
+| `PAGE-024.32` | 1285–1298 | تابع | `food_ticket_mark_delivered_on_print` | 1 | ⬜ |
+| `PAGE-024.33` | 1300–1336 | تابع | `food_ticket_deliver_event` | 5 | ⬜ |
+| `PAGE-024.34` | 1338–1369 | تابع | `food_ticket_undeliver_event` | 5 | ⬜ |
+| `PAGE-024.35` | 1371–1402 | تابع | `food_ticket_status_counts` | 5 | ⬜ |
+| `PAGE-024.36` | 1404–1424 | تابع | `food_ticket_self_test_logic` | 0 | ⬜ |
 
 </details>
 
@@ -10140,7 +10161,7 @@
 </details>
 
 <details>
-<summary><b>PAGE-029</b> — <code>food-ticket.php</code> (6,041 خط، 139 آدرس، بازبینی‌شده 0/139)</summary>
+<summary><b>PAGE-029</b> — <code>food-ticket.php</code> (6,107 خط، 139 آدرس، بازبینی‌شده 0/139)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
@@ -10155,134 +10176,134 @@
 | `PAGE-029.09` | 78–84 | تابع | `food_ticket_is_allowed` | 0 | ⬜ |
 | `PAGE-029.10` | 86–129 | تابع | `food_ticket_route_edit_permission` | 1 | ⬜ |
 | `PAGE-029.11` | 131–135 | تابع | `food_ticket_route_edit_always` | 1 | ⬜ |
-| `PAGE-029.12` | 137–292 | تابع | `food_ticket_route_allowed` | 2 | ⬜ |
-| `PAGE-029.13` | 294–302 | تابع | `require_food_ticket_access` | 0 | ⬜ |
-| `PAGE-029.14` | 304–315 | تابع | `food_ticket_web_url` | 0 | ⬜ |
-| `PAGE-029.15` | 317–325 | تابع | `food_ticket_windows_service_base_url` | 0 | ⬜ |
-| `PAGE-029.16` | 327–340 | تابع | `food_ticket_sso_token` | 0 | ⬜ |
-| `PAGE-029.17` | 342–364 | تابع | `food_ticket_sso_consume_jti` | 7 | ⬜ |
-| `PAGE-029.18` | 366–377 | تابع | `food_ticket_main_url` | 0 | ⬜ |
-| `PAGE-029.19` | 379–396 | تابع | `food_ticket_brand_params` | 0 | ⬜ |
-| `PAGE-029.20` | 398–413 | تابع | `food_ticket_resolve_path` | 0 | ⬜ |
-| `PAGE-029.21` | 415–425 | تابع | `food_ticket_attendance_default_path` | 0 | ⬜ |
-| `PAGE-029.22` | 427–430 | تابع | `food_ticket_attendance_factory_password` | 0 | ⬜ |
-| `PAGE-029.23` | 432–491 | تابع | `food_ticket_config` | 5 | ⬜ |
-| `PAGE-029.24` | 494–506 | تابع | `food_ticket_normalize_printer_mode` | 0 | ⬜ |
-| `PAGE-029.25` | 508–525 | تابع | `food_ticket_normalize_printer_host` | 0 | ⬜ |
-| `PAGE-029.26` | 527–537 | تابع | `food_ticket_printer_label` | 0 | ⬜ |
-| `PAGE-029.27` | 539–560 | تابع | `food_ticket_ensure_printer_mode_column` | 4 | ⬜ |
-| `PAGE-029.28` | 562–570 | تابع | `food_ticket_installed` | 0 | ⬜ |
-| `PAGE-029.29` | 572–575 | تابع | `food_ticket_key` | 0 | ⬜ |
-| `PAGE-029.30` | 577–586 | تابع | `food_ticket_encrypt` | 0 | ⬜ |
-| `PAGE-029.31` | 588–599 | تابع | `food_ticket_decrypt` | 0 | ⬜ |
-| `PAGE-029.32` | 601–649 | تابع | `food_ticket_attendance_password` | 4 | ⬜ |
-| `PAGE-029.33` | 651–667 | تابع | `food_ticket_attendance_password_source` | 4 | ⬜ |
-| `PAGE-029.34` | 669–675 | تابع | `food_ticket_ident` | 0 | ⬜ |
-| `PAGE-029.35` | 677–697 | تابع | `food_ticket_odbc_pool` | 0 | ⬜ |
-| `PAGE-029.36` | 699–710 | تابع | `food_ticket_odbc_release` | 1 | ⬜ |
-| `PAGE-029.37` | 712–741 | تابع | `food_ticket_odbc_pool_handle` | 0 | ⬜ |
-| `PAGE-029.38` | 743–799 | تابع | `food_ticket_odbc` | 1 | ⬜ |
-| `PAGE-029.39` | 801–804 | تابع | `food_ticket_is_ps_access` | 0 | ⬜ |
-| `PAGE-029.40` | 806–819 | تابع | `food_ticket_access_close` | 1 | ⬜ |
-| `PAGE-029.41` | 821–1030 | تابع | `food_ticket_access_rows_powershell` | **13** | ⬜ |
-| `PAGE-029.42` | 1033–1037 | تابع | `food_ticket_access_delete_powershell` | 0 | ⬜ |
-| `PAGE-029.43` | 1039–1155 | تابع | `food_ticket_access_delete_powershell_ex` | **13** | ⬜ |
-| `PAGE-029.44` | 1157–1160 | تابع | `food_ticket_normalize_column` | 0 | ⬜ |
-| `PAGE-029.45` | 1162–1171 | تابع | `food_ticket_row_value` | 0 | ⬜ |
-| `PAGE-029.46` | 1174–1233 | تابع | `food_ticket_access_rows` | **8** | ⬜ |
-| `PAGE-029.47` | 1235–1240 | تابع | `food_ticket_normalize_digits` | 0 | ⬜ |
-| `PAGE-029.48` | 1242–1273 | تابع | `food_ticket_iso_date_input` | 0 | ⬜ |
-| `PAGE-029.49` | 1275–1329 | تابع | `food_ticket_jalali_to_gregorian` | 0 | ⬜ |
-| `PAGE-029.50` | 1331–1430 | تابع | `food_ticket_parse_date` | 0 | ⬜ |
-| `PAGE-029.51` | 1432–1481 | تابع | `food_ticket_parse_time` | 0 | ⬜ |
-| `PAGE-029.52` | 1483–1537 | تابع | `food_ticket_source_key` | 0 | ⬜ |
-| `PAGE-029.53` | 1539–1565 | تابع | `food_ticket_code` | 0 | ⬜ |
-| `PAGE-029.54` | 1567–1570 | تابع | `food_ticket_digits` | 0 | ⬜ |
-| `PAGE-029.55` | 1572–1587 | تابع | `food_ticket_find_user` | 0 | ⬜ |
-| `PAGE-029.56` | 1590–1614 | تابع | `food_ticket_guest_cards` | 4 | ⬜ |
-| `PAGE-029.57` | 1616–1627 | تابع | `food_ticket_card_key` | 0 | ⬜ |
-| `PAGE-029.58` | 1629–1646 | تابع | `food_ticket_card_equals` | 0 | ⬜ |
-| `PAGE-029.59` | 1648–1674 | تابع | `food_ticket_guest_card` | 4 | ⬜ |
-| `PAGE-029.60` | 1676–1679 | تابع | `food_ticket_is_guest` | 0 | ⬜ |
-| `PAGE-029.61` | 1681–1686 | تابع | `food_ticket_existing_source` | 0 | ⬜ |
-| `PAGE-029.62` | 1688–1693 | تابع | `food_ticket_existing_ticket` | 0 | ⬜ |
-| `PAGE-029.63` | 1695–1719 | تابع | `food_ticket_normalize_event_type` | 1 | ⬜ |
-| `PAGE-029.64` | 1721–1729 | تابع | `food_ticket_normalize_print_status` | 0 | ⬜ |
-| `PAGE-029.65` | 1731–1748 | تابع | `food_ticket_event_meal_type_supported` | 0 | ⬜ |
-| `PAGE-029.66` | 1750–1779 | تابع | `food_ticket_add_event` | 6 | ⬜ |
-| `PAGE-029.67` | 1781–1790 | تابع | `food_ticket_update_event` | 1 | ⬜ |
-| `PAGE-029.68` | 1792–1891 | تابع | `food_ticket_source_delete_where` | 0 | ⬜ |
-| `PAGE-029.69` | 1893–1933 | تابع | `food_ticket_source_primary_key` | 0 | ⬜ |
-| `PAGE-029.70` | 1935–1957 | تابع | `food_ticket_source_type_kind` | 0 | ⬜ |
-| `PAGE-029.71` | 1959–1974 | تابع | `food_ticket_source_is_temporal` | 0 | ⬜ |
-| `PAGE-029.72` | 1976–2002 | تابع | `food_ticket_source_column_kind` | 0 | ⬜ |
-| `PAGE-029.73` | 2004–2029 | تابع | `food_ticket_source_seconds_of_day` | 0 | ⬜ |
-| `PAGE-029.74` | 2031–2053 | تابع | `food_ticket_source_time_literal_sod` | 0 | ⬜ |
-| `PAGE-029.75` | 2055–2072 | تابع | `food_ticket_source_time_between` | 0 | ⬜ |
-| `PAGE-029.76` | 2074–2103 | تابع | `food_ticket_source_time_where` | 0 | ⬜ |
-| `PAGE-029.77` | 2105–2120 | تابع | `food_ticket_source_time_literal` | 0 | ⬜ |
-| `PAGE-029.78` | 2122–2137 | تابع | `food_ticket_source_sql_literal` | 0 | ⬜ |
-| `PAGE-029.79` | 2139–2154 | تابع | `food_ticket_source_column_sql_literal` | 0 | ⬜ |
-| `PAGE-029.80` | 2156–2185 | تابع | `food_ticket_source_delete_candidates` | 0 | ⬜ |
-| `PAGE-029.81` | 2187–2259 | تابع | `food_ticket_source_minimal_where` | 0 | ⬜ |
-| `PAGE-029.82` | 2261–2355 | تابع | `food_ticket_delete_source` | **9** | ⬜ |
-| `PAGE-029.83` | 2357–2387 | تابع | `food_ticket_mark_source_delete` | 6 | ⬜ |
-| `PAGE-029.84` | 2389–2410 | تابع | `food_ticket_text` | 0 | ⬜ |
-| `PAGE-029.85` | 2411–2416 | ناحیه | `بلوک رویه‌ای 2411-2416` | 0 | ⬜ |
-| `PAGE-029.86` | 2417–2464 | تابع | `food_ticket_list_windows_printers` | 7 | ⬜ |
-| `PAGE-029.87` | 2466–2484 | تابع | `food_ticket_send_to_printer` | 0 | ⬜ |
-| `PAGE-029.88` | 2486–2541 | تابع | `food_ticket_send_windows` | 7 | ⬜ |
-| `PAGE-029.89` | 2543–2566 | تابع | `food_ticket_print_event` | 1 | ⬜ |
-| `PAGE-029.90` | 2568–2575 | تابع | `food_ticket_process_batch` | 0 | ⬜ |
-| `PAGE-029.91` | 2577–2779 | تابع | `food_ticket_cleanup_source_rows` | **14** | ⬜ |
-| `PAGE-029.92` | 2781–2833 | تابع | `food_ticket_retry_failed` | **13** | ⬜ |
-| `PAGE-029.93` | 2835–2850 | تابع | `food_ticket_worker_heartbeat` | 1 | ⬜ |
-| `PAGE-029.94` | 2852–2888 | تابع | `food_ticket_test_connections` | 0 | ⬜ |
-| `PAGE-029.95` | 2890–2957 | تابع | `food_ticket_save_config` | 6 | ⬜ |
-| `PAGE-029.96` | 2959–2982 | تابع | `food_ticket_handle_post` | 0 | ⬜ |
-| `PAGE-029.97` | 2984–2992 | تابع | `food_ticket_label` | 0 | ⬜ |
-| `PAGE-029.98` | 2994–3144 | تابع | `food_ticket_cp1256_to_utf8` | 6 | ⬜ |
-| `PAGE-029.99` | 3146–3192 | تابع | `food_ticket_utf8` | 2 | ⬜ |
-| `PAGE-029.100` | 3194–3215 | تابع | `food_ticket_api_json` | 3 | ⬜ |
-| `PAGE-029.101` | 3217–3225 | تابع | `food_ticket_api_body` | 0 | ⬜ |
-| `PAGE-029.102` | 3227–3254 | تابع | `food_ticket_api_printer_state` | 0 | ⬜ |
-| `PAGE-029.103` | 3256–3302 | تابع | `food_ticket_api_print_diag` | 2 | ⬜ |
-| `PAGE-029.104` | 3304–3406 | تابع | `food_ticket_api_config` | 0 | ⬜ |
-| `PAGE-029.105` | 3407–3412 | ناحیه | `بلوک رویه‌ای 3407-3412` | 0 | ⬜ |
-| `PAGE-029.106` | 3413–3477 | تابع | `food_ticket_api_guest_requests_report` | 0 | ⬜ |
-| `PAGE-029.107` | 3478–3483 | ناحیه | `بلوک رویه‌ای 3478-3483` | 0 | ⬜ |
-| `PAGE-029.108` | 3484–3495 | تابع | `food_ticket_aggregate_last_name` | 0 | ⬜ |
-| `PAGE-029.109` | 3496–3505 | تابع | `food_ticket_aggregate_sort_people` | 0 | ⬜ |
-| `PAGE-029.110` | 3506–3659 | تابع | `food_ticket_aggregate_diagnostics` | 6 | ⬜ |
-| `PAGE-029.111` | 3661–3838 | تابع | `food_ticket_api_aggregate_report` | 6 | ⬜ |
-| `PAGE-029.112` | 3840–3855 | تابع | `food_ticket_aggregate_columns` | 0 | ⬜ |
-| `PAGE-029.113` | 3857–3914 | تابع | `food_ticket_aggregate_export` | 5 | ⬜ |
-| `PAGE-029.114` | 3916–3937 | تابع | `food_ticket_aggregate_row` | 0 | ⬜ |
-| `PAGE-029.115` | 3939–4046 | تابع | `food_ticket_api_absent` | 0 | ⬜ |
-| `PAGE-029.116` | 4048–4157 | تابع | `food_ticket_api_monitoring` | 5 | ⬜ |
-| `PAGE-029.117` | 4160–4172 | تابع | `food_ticket_date_keys_for_iso` | 0 | ⬜ |
-| `PAGE-029.118` | 4175–4201 | تابع | `food_ticket_order_date_key` | 0 | ⬜ |
-| `PAGE-029.119` | 4203–4215 | تابع | `food_ticket_api_orders` | 0 | ⬜ |
-| `PAGE-029.120` | 4217–4321 | تابع | `food_ticket_ensure_employee_local_accounts` | 6 | ⬜ |
-| `PAGE-029.121` | 4323–4344 | تابع | `food_ticket_api_employees` | 0 | ⬜ |
-| `PAGE-029.122` | 4346–4349 | تابع | `food_ticket_normalize_guest_card` | 0 | ⬜ |
-| `PAGE-029.123` | 4351–4370 | تابع | `food_ticket_api_guest_cards` | 1 | ⬜ |
-| `PAGE-029.124` | 4372–4379 | تابع | `food_ticket_sync_guest_card_config` | 1 | ⬜ |
-| `PAGE-029.125` | 4381–4455 | تابع | `food_ticket_api_save_employee` | 1 | ⬜ |
-| `PAGE-029.126` | 4457–4478 | تابع | `food_ticket_api_save_guest_card` | 1 | ⬜ |
-| `PAGE-029.127` | 4480–4503 | تابع | `food_ticket_api_delete_guest_card` | 1 | ⬜ |
-| `PAGE-029.128` | 4505–4515 | تابع | `food_ticket_save_guest_cap_mode` | 0 | ⬜ |
-| `PAGE-029.129` | 4517–4673 | تابع | `food_ticket_api_save_config` | 1 | ⬜ |
-| `PAGE-029.130` | 4674–4680 | ناحیه | `بلوک رویه‌ای 4674-4680` | 0 | ⬜ |
-| `PAGE-029.131` | 4681–4767 | تابع | `food_ticket_browse_list` | 3 | ⬜ |
-| `PAGE-029.132` | 4769–4793 | تابع | `food_ticket_php_native_browse` | 2 | ⬜ |
-| `PAGE-029.133` | 4795–4802 | تابع | `food_ticket_windows_browse` | 0 | ⬜ |
-| `PAGE-029.134` | 4805–4873 | تابع | `food_ticket_api_health` | 0 | ⬜ |
-| `PAGE-029.135` | 4875–4967 | تابع | `food_ticket_api_self_test` | 0 | ⬜ |
-| `PAGE-029.136` | 4969–5037 | تابع | `food_ticket_api_upload_access_file` | **14** | ⬜ |
-| `PAGE-029.137` | 5039–5844 | تابع | `food_ticket_api_handle` | **14** | ⬜ |
-| `PAGE-029.138` | 5846–5860 | تابع | `food_ticket_render_safe_replace` | 0 | ⬜ |
-| `PAGE-029.139` | 5862–6040 | تابع | `food_ticket_render_page` | 6 | ⬜ |
+| `PAGE-029.12` | 137–295 | تابع | `food_ticket_route_allowed` | 2 | ⬜ |
+| `PAGE-029.13` | 297–305 | تابع | `require_food_ticket_access` | 0 | ⬜ |
+| `PAGE-029.14` | 307–318 | تابع | `food_ticket_web_url` | 0 | ⬜ |
+| `PAGE-029.15` | 320–328 | تابع | `food_ticket_windows_service_base_url` | 0 | ⬜ |
+| `PAGE-029.16` | 330–343 | تابع | `food_ticket_sso_token` | 0 | ⬜ |
+| `PAGE-029.17` | 345–367 | تابع | `food_ticket_sso_consume_jti` | 7 | ⬜ |
+| `PAGE-029.18` | 369–380 | تابع | `food_ticket_main_url` | 0 | ⬜ |
+| `PAGE-029.19` | 382–399 | تابع | `food_ticket_brand_params` | 0 | ⬜ |
+| `PAGE-029.20` | 401–416 | تابع | `food_ticket_resolve_path` | 0 | ⬜ |
+| `PAGE-029.21` | 418–428 | تابع | `food_ticket_attendance_default_path` | 0 | ⬜ |
+| `PAGE-029.22` | 430–433 | تابع | `food_ticket_attendance_factory_password` | 0 | ⬜ |
+| `PAGE-029.23` | 435–494 | تابع | `food_ticket_config` | 5 | ⬜ |
+| `PAGE-029.24` | 497–509 | تابع | `food_ticket_normalize_printer_mode` | 0 | ⬜ |
+| `PAGE-029.25` | 511–528 | تابع | `food_ticket_normalize_printer_host` | 0 | ⬜ |
+| `PAGE-029.26` | 530–540 | تابع | `food_ticket_printer_label` | 0 | ⬜ |
+| `PAGE-029.27` | 542–563 | تابع | `food_ticket_ensure_printer_mode_column` | 4 | ⬜ |
+| `PAGE-029.28` | 565–573 | تابع | `food_ticket_installed` | 0 | ⬜ |
+| `PAGE-029.29` | 575–578 | تابع | `food_ticket_key` | 0 | ⬜ |
+| `PAGE-029.30` | 580–589 | تابع | `food_ticket_encrypt` | 0 | ⬜ |
+| `PAGE-029.31` | 591–602 | تابع | `food_ticket_decrypt` | 0 | ⬜ |
+| `PAGE-029.32` | 604–652 | تابع | `food_ticket_attendance_password` | 4 | ⬜ |
+| `PAGE-029.33` | 654–670 | تابع | `food_ticket_attendance_password_source` | 4 | ⬜ |
+| `PAGE-029.34` | 672–678 | تابع | `food_ticket_ident` | 0 | ⬜ |
+| `PAGE-029.35` | 680–700 | تابع | `food_ticket_odbc_pool` | 0 | ⬜ |
+| `PAGE-029.36` | 702–713 | تابع | `food_ticket_odbc_release` | 1 | ⬜ |
+| `PAGE-029.37` | 715–744 | تابع | `food_ticket_odbc_pool_handle` | 0 | ⬜ |
+| `PAGE-029.38` | 746–802 | تابع | `food_ticket_odbc` | 1 | ⬜ |
+| `PAGE-029.39` | 804–807 | تابع | `food_ticket_is_ps_access` | 0 | ⬜ |
+| `PAGE-029.40` | 809–822 | تابع | `food_ticket_access_close` | 1 | ⬜ |
+| `PAGE-029.41` | 824–1033 | تابع | `food_ticket_access_rows_powershell` | **13** | ⬜ |
+| `PAGE-029.42` | 1036–1040 | تابع | `food_ticket_access_delete_powershell` | 0 | ⬜ |
+| `PAGE-029.43` | 1042–1158 | تابع | `food_ticket_access_delete_powershell_ex` | **13** | ⬜ |
+| `PAGE-029.44` | 1160–1163 | تابع | `food_ticket_normalize_column` | 0 | ⬜ |
+| `PAGE-029.45` | 1165–1174 | تابع | `food_ticket_row_value` | 0 | ⬜ |
+| `PAGE-029.46` | 1177–1236 | تابع | `food_ticket_access_rows` | **8** | ⬜ |
+| `PAGE-029.47` | 1238–1243 | تابع | `food_ticket_normalize_digits` | 0 | ⬜ |
+| `PAGE-029.48` | 1245–1276 | تابع | `food_ticket_iso_date_input` | 0 | ⬜ |
+| `PAGE-029.49` | 1278–1332 | تابع | `food_ticket_jalali_to_gregorian` | 0 | ⬜ |
+| `PAGE-029.50` | 1334–1433 | تابع | `food_ticket_parse_date` | 0 | ⬜ |
+| `PAGE-029.51` | 1435–1484 | تابع | `food_ticket_parse_time` | 0 | ⬜ |
+| `PAGE-029.52` | 1486–1540 | تابع | `food_ticket_source_key` | 0 | ⬜ |
+| `PAGE-029.53` | 1542–1568 | تابع | `food_ticket_code` | 0 | ⬜ |
+| `PAGE-029.54` | 1570–1573 | تابع | `food_ticket_digits` | 0 | ⬜ |
+| `PAGE-029.55` | 1575–1590 | تابع | `food_ticket_find_user` | 0 | ⬜ |
+| `PAGE-029.56` | 1593–1617 | تابع | `food_ticket_guest_cards` | 4 | ⬜ |
+| `PAGE-029.57` | 1619–1630 | تابع | `food_ticket_card_key` | 0 | ⬜ |
+| `PAGE-029.58` | 1632–1649 | تابع | `food_ticket_card_equals` | 0 | ⬜ |
+| `PAGE-029.59` | 1651–1677 | تابع | `food_ticket_guest_card` | 4 | ⬜ |
+| `PAGE-029.60` | 1679–1682 | تابع | `food_ticket_is_guest` | 0 | ⬜ |
+| `PAGE-029.61` | 1684–1689 | تابع | `food_ticket_existing_source` | 0 | ⬜ |
+| `PAGE-029.62` | 1691–1696 | تابع | `food_ticket_existing_ticket` | 0 | ⬜ |
+| `PAGE-029.63` | 1698–1722 | تابع | `food_ticket_normalize_event_type` | 1 | ⬜ |
+| `PAGE-029.64` | 1724–1732 | تابع | `food_ticket_normalize_print_status` | 0 | ⬜ |
+| `PAGE-029.65` | 1734–1751 | تابع | `food_ticket_event_meal_type_supported` | 0 | ⬜ |
+| `PAGE-029.66` | 1753–1782 | تابع | `food_ticket_add_event` | 6 | ⬜ |
+| `PAGE-029.67` | 1784–1793 | تابع | `food_ticket_update_event` | 1 | ⬜ |
+| `PAGE-029.68` | 1795–1894 | تابع | `food_ticket_source_delete_where` | 0 | ⬜ |
+| `PAGE-029.69` | 1896–1936 | تابع | `food_ticket_source_primary_key` | 0 | ⬜ |
+| `PAGE-029.70` | 1938–1960 | تابع | `food_ticket_source_type_kind` | 0 | ⬜ |
+| `PAGE-029.71` | 1962–1977 | تابع | `food_ticket_source_is_temporal` | 0 | ⬜ |
+| `PAGE-029.72` | 1979–2005 | تابع | `food_ticket_source_column_kind` | 0 | ⬜ |
+| `PAGE-029.73` | 2007–2032 | تابع | `food_ticket_source_seconds_of_day` | 0 | ⬜ |
+| `PAGE-029.74` | 2034–2056 | تابع | `food_ticket_source_time_literal_sod` | 0 | ⬜ |
+| `PAGE-029.75` | 2058–2075 | تابع | `food_ticket_source_time_between` | 0 | ⬜ |
+| `PAGE-029.76` | 2077–2106 | تابع | `food_ticket_source_time_where` | 0 | ⬜ |
+| `PAGE-029.77` | 2108–2123 | تابع | `food_ticket_source_time_literal` | 0 | ⬜ |
+| `PAGE-029.78` | 2125–2140 | تابع | `food_ticket_source_sql_literal` | 0 | ⬜ |
+| `PAGE-029.79` | 2142–2157 | تابع | `food_ticket_source_column_sql_literal` | 0 | ⬜ |
+| `PAGE-029.80` | 2159–2188 | تابع | `food_ticket_source_delete_candidates` | 0 | ⬜ |
+| `PAGE-029.81` | 2190–2262 | تابع | `food_ticket_source_minimal_where` | 0 | ⬜ |
+| `PAGE-029.82` | 2264–2358 | تابع | `food_ticket_delete_source` | **9** | ⬜ |
+| `PAGE-029.83` | 2360–2390 | تابع | `food_ticket_mark_source_delete` | 6 | ⬜ |
+| `PAGE-029.84` | 2392–2413 | تابع | `food_ticket_text` | 0 | ⬜ |
+| `PAGE-029.85` | 2414–2419 | ناحیه | `بلوک رویه‌ای 2414-2419` | 0 | ⬜ |
+| `PAGE-029.86` | 2420–2467 | تابع | `food_ticket_list_windows_printers` | 7 | ⬜ |
+| `PAGE-029.87` | 2469–2487 | تابع | `food_ticket_send_to_printer` | 0 | ⬜ |
+| `PAGE-029.88` | 2489–2544 | تابع | `food_ticket_send_windows` | 7 | ⬜ |
+| `PAGE-029.89` | 2546–2578 | تابع | `food_ticket_print_event` | 1 | ⬜ |
+| `PAGE-029.90` | 2580–2587 | تابع | `food_ticket_process_batch` | 0 | ⬜ |
+| `PAGE-029.91` | 2589–2791 | تابع | `food_ticket_cleanup_source_rows` | **14** | ⬜ |
+| `PAGE-029.92` | 2793–2845 | تابع | `food_ticket_retry_failed` | **13** | ⬜ |
+| `PAGE-029.93` | 2847–2862 | تابع | `food_ticket_worker_heartbeat` | 1 | ⬜ |
+| `PAGE-029.94` | 2864–2900 | تابع | `food_ticket_test_connections` | 0 | ⬜ |
+| `PAGE-029.95` | 2902–2969 | تابع | `food_ticket_save_config` | 6 | ⬜ |
+| `PAGE-029.96` | 2971–2994 | تابع | `food_ticket_handle_post` | 0 | ⬜ |
+| `PAGE-029.97` | 2996–3004 | تابع | `food_ticket_label` | 0 | ⬜ |
+| `PAGE-029.98` | 3006–3156 | تابع | `food_ticket_cp1256_to_utf8` | 6 | ⬜ |
+| `PAGE-029.99` | 3158–3204 | تابع | `food_ticket_utf8` | 2 | ⬜ |
+| `PAGE-029.100` | 3206–3227 | تابع | `food_ticket_api_json` | 3 | ⬜ |
+| `PAGE-029.101` | 3229–3237 | تابع | `food_ticket_api_body` | 0 | ⬜ |
+| `PAGE-029.102` | 3239–3266 | تابع | `food_ticket_api_printer_state` | 0 | ⬜ |
+| `PAGE-029.103` | 3268–3314 | تابع | `food_ticket_api_print_diag` | 2 | ⬜ |
+| `PAGE-029.104` | 3316–3418 | تابع | `food_ticket_api_config` | 0 | ⬜ |
+| `PAGE-029.105` | 3419–3424 | ناحیه | `بلوک رویه‌ای 3419-3424` | 0 | ⬜ |
+| `PAGE-029.106` | 3425–3543 | تابع | `food_ticket_api_guest_requests_report` | 0 | ⬜ |
+| `PAGE-029.107` | 3544–3549 | ناحیه | `بلوک رویه‌ای 3544-3549` | 0 | ⬜ |
+| `PAGE-029.108` | 3550–3561 | تابع | `food_ticket_aggregate_last_name` | 0 | ⬜ |
+| `PAGE-029.109` | 3562–3571 | تابع | `food_ticket_aggregate_sort_people` | 0 | ⬜ |
+| `PAGE-029.110` | 3572–3725 | تابع | `food_ticket_aggregate_diagnostics` | 6 | ⬜ |
+| `PAGE-029.111` | 3727–3904 | تابع | `food_ticket_api_aggregate_report` | 6 | ⬜ |
+| `PAGE-029.112` | 3906–3921 | تابع | `food_ticket_aggregate_columns` | 0 | ⬜ |
+| `PAGE-029.113` | 3923–3980 | تابع | `food_ticket_aggregate_export` | 5 | ⬜ |
+| `PAGE-029.114` | 3982–4003 | تابع | `food_ticket_aggregate_row` | 0 | ⬜ |
+| `PAGE-029.115` | 4005–4112 | تابع | `food_ticket_api_absent` | 0 | ⬜ |
+| `PAGE-029.116` | 4114–4223 | تابع | `food_ticket_api_monitoring` | 5 | ⬜ |
+| `PAGE-029.117` | 4226–4238 | تابع | `food_ticket_date_keys_for_iso` | 0 | ⬜ |
+| `PAGE-029.118` | 4241–4267 | تابع | `food_ticket_order_date_key` | 0 | ⬜ |
+| `PAGE-029.119` | 4269–4281 | تابع | `food_ticket_api_orders` | 0 | ⬜ |
+| `PAGE-029.120` | 4283–4387 | تابع | `food_ticket_ensure_employee_local_accounts` | 6 | ⬜ |
+| `PAGE-029.121` | 4389–4410 | تابع | `food_ticket_api_employees` | 0 | ⬜ |
+| `PAGE-029.122` | 4412–4415 | تابع | `food_ticket_normalize_guest_card` | 0 | ⬜ |
+| `PAGE-029.123` | 4417–4436 | تابع | `food_ticket_api_guest_cards` | 1 | ⬜ |
+| `PAGE-029.124` | 4438–4445 | تابع | `food_ticket_sync_guest_card_config` | 1 | ⬜ |
+| `PAGE-029.125` | 4447–4521 | تابع | `food_ticket_api_save_employee` | 1 | ⬜ |
+| `PAGE-029.126` | 4523–4544 | تابع | `food_ticket_api_save_guest_card` | 1 | ⬜ |
+| `PAGE-029.127` | 4546–4569 | تابع | `food_ticket_api_delete_guest_card` | 1 | ⬜ |
+| `PAGE-029.128` | 4571–4581 | تابع | `food_ticket_save_guest_cap_mode` | 0 | ⬜ |
+| `PAGE-029.129` | 4583–4739 | تابع | `food_ticket_api_save_config` | 1 | ⬜ |
+| `PAGE-029.130` | 4740–4746 | ناحیه | `بلوک رویه‌ای 4740-4746` | 0 | ⬜ |
+| `PAGE-029.131` | 4747–4833 | تابع | `food_ticket_browse_list` | 3 | ⬜ |
+| `PAGE-029.132` | 4835–4859 | تابع | `food_ticket_php_native_browse` | 2 | ⬜ |
+| `PAGE-029.133` | 4861–4868 | تابع | `food_ticket_windows_browse` | 0 | ⬜ |
+| `PAGE-029.134` | 4871–4939 | تابع | `food_ticket_api_health` | 0 | ⬜ |
+| `PAGE-029.135` | 4941–5033 | تابع | `food_ticket_api_self_test` | 0 | ⬜ |
+| `PAGE-029.136` | 5035–5103 | تابع | `food_ticket_api_upload_access_file` | **14** | ⬜ |
+| `PAGE-029.137` | 5105–5910 | تابع | `food_ticket_api_handle` | **14** | ⬜ |
+| `PAGE-029.138` | 5912–5926 | تابع | `food_ticket_render_safe_replace` | 0 | ⬜ |
+| `PAGE-029.139` | 5928–6106 | تابع | `food_ticket_render_page` | 6 | ⬜ |
 
 </details>
 
@@ -10611,22 +10632,22 @@
 </details>
 
 <details>
-<summary><b>PAGE-046</b> — <code>modules/request-center/Actions/ticket-actions.php</code> (1,420 خط، 12 آدرس، بازبینی‌شده 0/12)</summary>
+<summary><b>PAGE-046</b> — <code>modules/request-center/Actions/ticket-actions.php</code> (1,422 خط، 12 آدرس، بازبینی‌شده 0/12)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
 | `PAGE-046.01` | 1–21 | ناحیه | `بلوک رویه‌ای 1-21` | 0 | ⬜ |
 | `PAGE-046.02` | 22–28 | ناحیه | `محافظ: فایل اکشن فقط در runtime احرازشدهٔ سامانه ب` | 0 | ⬜ |
-| `PAGE-046.03` | 29–261 | ناحیه | `مسیر: create_ticket` | **8** | ⬜ |
-| `PAGE-046.04` | 262–357 | ناحیه | `مسیر: cancel_ticket` | 2 | ⬜ |
-| `PAGE-046.05` | 358–472 | ناحیه | `مسیر: decide_ticket_cancellation` | 2 | ⬜ |
-| `PAGE-046.06` | 473–532 | ناحیه | `مسیر: claim_ticket` | 2 | ⬜ |
-| `PAGE-046.07` | 533–606 | ناحیه | `مسیر: reopen_ticket` | 2 | ⬜ |
-| `PAGE-046.08` | 607–797 | ناحیه | `مسیر: reply` | 3 | ⬜ |
-| `PAGE-046.09` | 798–971 | ناحیه | `مسیر: unit_head_ticket_update` | 3 | ⬜ |
-| `PAGE-046.10` | 972–1205 | ناحیه | `مسیر: update_ticket` | 3 | ⬜ |
-| `PAGE-046.11` | 1206–1304 | ناحیه | `مسیر: update_due_date` | 2 | ⬜ |
-| `PAGE-046.12` | 1305–1420 | ناحیه | `مسیر: agent_transfer_ticket` | 2 | ⬜ |
+| `PAGE-046.03` | 29–263 | ناحیه | `مسیر: create_ticket` | **8** | ⬜ |
+| `PAGE-046.04` | 264–359 | ناحیه | `مسیر: cancel_ticket` | 2 | ⬜ |
+| `PAGE-046.05` | 360–474 | ناحیه | `مسیر: decide_ticket_cancellation` | 2 | ⬜ |
+| `PAGE-046.06` | 475–534 | ناحیه | `مسیر: claim_ticket` | 2 | ⬜ |
+| `PAGE-046.07` | 535–608 | ناحیه | `مسیر: reopen_ticket` | 2 | ⬜ |
+| `PAGE-046.08` | 609–799 | ناحیه | `مسیر: reply` | 3 | ⬜ |
+| `PAGE-046.09` | 800–973 | ناحیه | `مسیر: unit_head_ticket_update` | 3 | ⬜ |
+| `PAGE-046.10` | 974–1207 | ناحیه | `مسیر: update_ticket` | 3 | ⬜ |
+| `PAGE-046.11` | 1208–1306 | ناحیه | `مسیر: update_due_date` | 2 | ⬜ |
+| `PAGE-046.12` | 1307–1422 | ناحیه | `مسیر: agent_transfer_ticket` | 2 | ⬜ |
 
 </details>
 
@@ -10719,13 +10740,13 @@
 </details>
 
 <details>
-<summary><b>PAGE-053</b> — <code>modules/request-center/Pages/create.php</code> (331 خط، 3 آدرس، بازبینی‌شده 0/3)</summary>
+<summary><b>PAGE-053</b> — <code>modules/request-center/Pages/create.php</code> (339 خط، 3 آدرس، بازبینی‌شده 0/3)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
 | `PAGE-053.01` | 1–3 | ناحیه | `بلوک رویه‌ای 1-3` | 0 | ⬜ |
 | `PAGE-053.02` | 4–18 | ناحیه | `محافظ: این فایل فقط از طریق نقاط ورود معتبر (index` | 0 | ⬜ |
-| `PAGE-053.03` | 19–331 | ناحیه | `مسیر: new-ticket` | **11** | ⬜ |
+| `PAGE-053.03` | 19–339 | ناحیه | `مسیر: new-ticket` | **11** | ⬜ |
 
 </details>
 
@@ -10897,7 +10918,7 @@
 </details>
 
 <details>
-<summary><b>PAGE-068</b> — <code>modules/request-center/lib/functions.php</code> (889 خط، 32 آدرس، بازبینی‌شده 0/32)</summary>
+<summary><b>PAGE-068</b> — <code>modules/request-center/lib/functions.php</code> (898 خط، 32 آدرس، بازبینی‌شده 0/32)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
@@ -10919,20 +10940,20 @@
 | `PAGE-068.16` | 318–372 | تابع | `report_query_filters` | 2 | ⬜ |
 | `PAGE-068.17` | 374–429 | تابع | `request_center_assert_create_schema` | 0 | ⬜ |
 | `PAGE-068.18` | 431–449 | تابع | `request_center_ticket_number_peek` | 0 | ⬜ |
-| `PAGE-068.19` | 451–475 | تابع | `request_center_org_deputy_units` | 5 | ⬜ |
-| `PAGE-068.20` | 477–493 | تابع | `request_center_status_label` | 0 | ⬜ |
-| `PAGE-068.21` | 495–535 | تابع | `request_center_ticket_number_next` | 0 | ⬜ |
-| `PAGE-068.22` | 537–570 | تابع | `request_center_notify_user` | 4 | ⬜ |
-| `PAGE-068.23` | 572–616 | تابع | `request_center_notify_ticket_parties` | 4 | ⬜ |
-| `PAGE-068.24` | 618–661 | تابع | `request_center_notify_ticket_staff` | 4 | ⬜ |
-| `PAGE-068.25` | 663–703 | تابع | `request_center_notify_ticket_resolved` | 4 | ⬜ |
-| `PAGE-068.26` | 705–716 | تابع | `request_center_can_supervise_ticket` | 0 | ⬜ |
-| `PAGE-068.27` | 718–778 | تابع | `request_center_ticket_return_url` | 7 | ⬜ |
-| `PAGE-068.28` | 781–795 | تابع | `request_center_unit_head_scope_ids` | 0 | ⬜ |
-| `PAGE-068.29` | 797–809 | تابع | `request_center_is_unit_head` | 0 | ⬜ |
-| `PAGE-068.30` | 811–835 | تابع | `request_center_is_org_unit_head` | 0 | ⬜ |
-| `PAGE-068.31` | 838–865 | تابع | `request_center_manager_ticket_in_subtree` | 5 | ⬜ |
-| `PAGE-068.32` | 867–888 | تابع | `request_center_manager_can_request_cancel` | 0 | ⬜ |
+| `PAGE-068.19` | 451–484 | تابع | `request_center_org_deputy_units` | 5 | ⬜ |
+| `PAGE-068.20` | 486–502 | تابع | `request_center_status_label` | 0 | ⬜ |
+| `PAGE-068.21` | 504–544 | تابع | `request_center_ticket_number_next` | 0 | ⬜ |
+| `PAGE-068.22` | 546–579 | تابع | `request_center_notify_user` | 4 | ⬜ |
+| `PAGE-068.23` | 581–625 | تابع | `request_center_notify_ticket_parties` | 4 | ⬜ |
+| `PAGE-068.24` | 627–670 | تابع | `request_center_notify_ticket_staff` | 4 | ⬜ |
+| `PAGE-068.25` | 672–712 | تابع | `request_center_notify_ticket_resolved` | 4 | ⬜ |
+| `PAGE-068.26` | 714–725 | تابع | `request_center_can_supervise_ticket` | 0 | ⬜ |
+| `PAGE-068.27` | 727–787 | تابع | `request_center_ticket_return_url` | 7 | ⬜ |
+| `PAGE-068.28` | 790–804 | تابع | `request_center_unit_head_scope_ids` | 0 | ⬜ |
+| `PAGE-068.29` | 806–818 | تابع | `request_center_is_unit_head` | 0 | ⬜ |
+| `PAGE-068.30` | 820–844 | تابع | `request_center_is_org_unit_head` | 0 | ⬜ |
+| `PAGE-068.31` | 847–874 | تابع | `request_center_manager_ticket_in_subtree` | 5 | ⬜ |
+| `PAGE-068.32` | 876–897 | تابع | `request_center_manager_can_request_cancel` | 0 | ⬜ |
 
 </details>
 
@@ -11008,7 +11029,7 @@
 </details>
 
 <details>
-<summary><b>PAGE-074</b> — <code>organization.php</code> (797 خط، 52 آدرس، بازبینی‌شده 0/52)</summary>
+<summary><b>PAGE-074</b> — <code>organization.php</code> (889 خط، 57 آدرس، بازبینی‌شده 0/57)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
@@ -11034,36 +11055,41 @@
 | `PAGE-074.20` | 245–254 | تابع | `org_units_all` | 0 | ⬜ |
 | `PAGE-074.21` | 256–272 | تابع | `org_deputy_units` | 5 | ⬜ |
 | `PAGE-074.22` | 274–299 | تابع | `org_liaison_units` | 4 | ⬜ |
-| `PAGE-074.23` | 301–334 | تابع | `org_unit_routing_department_id` | 1 | ⬜ |
-| `PAGE-074.24` | 336–349 | تابع | `org_ceo_unit_id` | 0 | ⬜ |
-| `PAGE-074.25` | 351–359 | تابع | `org_unit_accepts_experts` | 0 | ⬜ |
-| `PAGE-074.26` | 361–367 | تابع | `org_unit_by_id` | 0 | ⬜ |
-| `PAGE-074.27` | 369–375 | تابع | `org_unit_by_company` | 0 | ⬜ |
-| `PAGE-074.28` | 377–381 | تابع | `org_company_redirect_url` | 0 | ⬜ |
-| `PAGE-074.29` | 383–389 | تابع | `org_unit_children` | 5 | ⬜ |
-| `PAGE-074.30` | 391–406 | تابع | `org_unit_subtree_ids` | 0 | ⬜ |
-| `PAGE-074.31` | 408–422 | تابع | `org_unit_path_names` | 0 | ⬜ |
-| `PAGE-074.32` | 424–429 | تابع | `org_unit_manager_ids` | 0 | ⬜ |
-| `PAGE-074.33` | 431–435 | تابع | `org_unit_is_primary_admin` | 0 | ⬜ |
-| `PAGE-074.34` | 437–440 | تابع | `user_org_unit_id` | 0 | ⬜ |
-| `PAGE-074.35` | 442–447 | تابع | `user_is_unit_manager` | 0 | ⬜ |
-| `PAGE-074.36` | 449–465 | تابع | `user_managed_unit_ids` | 0 | ⬜ |
-| `PAGE-074.37` | 467–476 | تابع | `user_org_scope_unit_ids` | 0 | ⬜ |
-| `PAGE-074.38` | 478–484 | تابع | `user_is_org_manager_of` | 0 | ⬜ |
-| `PAGE-074.39` | 486–502 | تابع | `user_can_manage_organization` | 0 | ⬜ |
-| `PAGE-074.40` | 504–527 | تابع | `org_snapshot` | 5 | ⬜ |
-| `PAGE-074.41` | 529–536 | تابع | `org_snapshot_maps` | 0 | ⬜ |
-| `PAGE-074.42` | 538–559 | تابع | `org_snapshot_row_signature` | 0 | ⬜ |
-| `PAGE-074.43` | 561–578 | تابع | `org_snapshot_delta` | 0 | ⬜ |
-| `PAGE-074.44` | 580–593 | تابع | `org_record_undo` | 0 | ⬜ |
-| `PAGE-074.45` | 595–601 | تابع | `org_undo_state` | 0 | ⬜ |
-| `PAGE-074.46` | 603–678 | تابع | `org_restore_snapshot` | 5 | ⬜ |
-| `PAGE-074.47` | 680–689 | تابع | `org_position_unit_types` | 0 | ⬜ |
-| `PAGE-074.48` | 691–694 | تابع | `org_exempt_roles` | 0 | ⬜ |
-| `PAGE-074.49` | 696–714 | تابع | `org_ensure_role_sync_columns` | **8** | ⬜ |
-| `PAGE-074.50` | 716–732 | تابع | `org_position_user_ids` | 4 | ⬜ |
-| `PAGE-074.51` | 734–739 | تابع | `org_expert_user_ids` | 0 | ⬜ |
-| `PAGE-074.52` | 741–796 | تابع | `org_sync_position_roles` | 1 | ⬜ |
+| `PAGE-074.23` | 301–305 | تابع | `org_root_types` | 0 | ⬜ |
+| `PAGE-074.24` | 307–319 | تابع | `org_root_display_name` | 0 | ⬜ |
+| `PAGE-074.25` | 321–351 | تابع | `org_root_units` | 5 | ⬜ |
+| `PAGE-074.26` | 353–380 | تابع | `org_nearest_root_id` | 0 | ⬜ |
+| `PAGE-074.27` | 382–390 | تابع | `org_stored_attribution_root_id` | 0 | ⬜ |
+| `PAGE-074.28` | 392–425 | تابع | `org_unit_routing_department_id` | 1 | ⬜ |
+| `PAGE-074.29` | 427–440 | تابع | `org_ceo_unit_id` | 0 | ⬜ |
+| `PAGE-074.30` | 442–450 | تابع | `org_unit_accepts_experts` | 0 | ⬜ |
+| `PAGE-074.31` | 452–458 | تابع | `org_unit_by_id` | 0 | ⬜ |
+| `PAGE-074.32` | 460–466 | تابع | `org_unit_by_company` | 0 | ⬜ |
+| `PAGE-074.33` | 468–472 | تابع | `org_company_redirect_url` | 0 | ⬜ |
+| `PAGE-074.34` | 474–480 | تابع | `org_unit_children` | 5 | ⬜ |
+| `PAGE-074.35` | 482–497 | تابع | `org_unit_subtree_ids` | 0 | ⬜ |
+| `PAGE-074.36` | 499–513 | تابع | `org_unit_path_names` | 0 | ⬜ |
+| `PAGE-074.37` | 515–520 | تابع | `org_unit_manager_ids` | 0 | ⬜ |
+| `PAGE-074.38` | 522–526 | تابع | `org_unit_is_primary_admin` | 0 | ⬜ |
+| `PAGE-074.39` | 528–531 | تابع | `user_org_unit_id` | 0 | ⬜ |
+| `PAGE-074.40` | 533–538 | تابع | `user_is_unit_manager` | 0 | ⬜ |
+| `PAGE-074.41` | 540–556 | تابع | `user_managed_unit_ids` | 0 | ⬜ |
+| `PAGE-074.42` | 558–567 | تابع | `user_org_scope_unit_ids` | 0 | ⬜ |
+| `PAGE-074.43` | 569–575 | تابع | `user_is_org_manager_of` | 0 | ⬜ |
+| `PAGE-074.44` | 577–593 | تابع | `user_can_manage_organization` | 0 | ⬜ |
+| `PAGE-074.45` | 595–618 | تابع | `org_snapshot` | 5 | ⬜ |
+| `PAGE-074.46` | 620–627 | تابع | `org_snapshot_maps` | 0 | ⬜ |
+| `PAGE-074.47` | 629–650 | تابع | `org_snapshot_row_signature` | 0 | ⬜ |
+| `PAGE-074.48` | 652–669 | تابع | `org_snapshot_delta` | 0 | ⬜ |
+| `PAGE-074.49` | 671–684 | تابع | `org_record_undo` | 0 | ⬜ |
+| `PAGE-074.50` | 686–692 | تابع | `org_undo_state` | 0 | ⬜ |
+| `PAGE-074.51` | 694–769 | تابع | `org_restore_snapshot` | 5 | ⬜ |
+| `PAGE-074.52` | 771–781 | تابع | `org_position_unit_types` | 0 | ⬜ |
+| `PAGE-074.53` | 783–786 | تابع | `org_exempt_roles` | 0 | ⬜ |
+| `PAGE-074.54` | 788–806 | تابع | `org_ensure_role_sync_columns` | **8** | ⬜ |
+| `PAGE-074.55` | 808–824 | تابع | `org_position_user_ids` | 4 | ⬜ |
+| `PAGE-074.56` | 826–831 | تابع | `org_expert_user_ids` | 0 | ⬜ |
+| `PAGE-074.57` | 833–888 | تابع | `org_sync_position_roles` | 1 | ⬜ |
 
 </details>
 
@@ -11607,7 +11633,7 @@
 </details>
 
 <details>
-<summary><b>ASSET-007</b> — <code>assets/food-menu.css</code> (417 خط، 19 آدرس، بازبینی‌شده 0/19)</summary>
+<summary><b>ASSET-007</b> — <code>assets/food-menu.css</code> (430 خط، 19 آدرس، بازبینی‌شده 0/19)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
@@ -11626,201 +11652,207 @@
 | `ASSET-007.13` | 287–328 | بلوک | `ثبت دستی تردد در تنظیمات سیستم` | 1 | ⬜ |
 | `ASSET-007.14` | 329–346 | بلوک | `Selectable employee checklist used by the live, bo` | 1 | ⬜ |
 | `ASSET-007.15` | 347–354 | بلوک | `بلوکبندی ۲/۳ ستونه: همهٔ ستونها دقیقاً همعرض، بدون` | 0 | ⬜ |
-| `ASSET-007.16` | 355–378 | بلوک | `تعیین تکلیف غذای باقیمانده (تطبیق روزانه)` | 1 | ⬜ |
-| `ASSET-007.17` | 379–405 | بلوک | `1.62.93 follow-up: cancel-request cutoff + compact` | 1 | ⬜ |
-| `ASSET-007.18` | 406–413 | بلوک | `تفکیک غذای هم‌گروه: «چلوکباب ۴ · قیمه ۲»` | 0 | ⬜ |
-| `ASSET-007.19` | 414–417 | بلوک | `جدول داخل هر گروه، مثل گروه منو بدون حاشیهٔ اضافه` | 0 | ⬜ |
+| `ASSET-007.16` | 355–391 | بلوک | `تعیین تکلیف غذای باقیمانده (تطبیق روزانه)` | 1 | ⬜ |
+| `ASSET-007.17` | 392–418 | بلوک | `1.62.93 follow-up: cancel-request cutoff + compact` | 1 | ⬜ |
+| `ASSET-007.18` | 419–426 | بلوک | `تفکیک غذای هم‌گروه: «چلوکباب ۴ · قیمه ۲»` | 0 | ⬜ |
+| `ASSET-007.19` | 427–430 | بلوک | `جدول داخل هر گروه، مثل گروه منو بدون حاشیهٔ اضافه` | 0 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>ASSET-008</b> — <code>assets/food-menu.js</code> (2,820 خط، 183 آدرس، بازبینی‌شده 0/183)</summary>
+<summary><b>ASSET-008</b> — <code>assets/food-menu.js</code> (2,991 خط، 189 آدرس، بازبینی‌شده 0/189)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `ASSET-008.01` | 1–107 | بلوک | `مدیر برنامهٔ غذایی در پنل چاپ فیش.` | 0 | ⬜ |
-| `ASSET-008.02` | 108–112 | بلوک | `esc` | 0 | ⬜ |
-| `ASSET-008.03` | 113–113 | بلوک | `faDigits` | 0 | ⬜ |
-| `ASSET-008.04` | 114–118 | بلوک | `asciiDigits` | 0 | ⬜ |
-| `ASSET-008.05` | 119–128 | بلوک | `isoFromJalali` | 0 | ⬜ |
-| `ASSET-008.06` | 129–135 | بلوک | `jalaliFromIso` | 0 | ⬜ |
-| `ASSET-008.07` | 136–142 | بلوک | `normalizeIsoDate` | 0 | ⬜ |
-| `ASSET-008.08` | 143–146 | بلوک | `jalaliMonthFromIso` | 0 | ⬜ |
-| `ASSET-008.09` | 147–150 | بلوک | `localTodayIso` | 0 | ⬜ |
-| `ASSET-008.10` | 151–151 | بلوک | `monthKey` | 0 | ⬜ |
-| `ASSET-008.11` | 152–152 | بلوک | `monthTitle` | 0 | ⬜ |
-| `ASSET-008.12` | 153–153 | بلوک | `getDay` | 0 | ⬜ |
-| `ASSET-008.13` | 154–157 | بلوک | `activeOrderCount` | 0 | ⬜ |
-| `ASSET-008.14` | 158–167 | بلوک | `holiday` | 0 | ⬜ |
-| `ASSET-008.15` | 168–173 | بلوک | `isWeekendIso` | 0 | ⬜ |
-| `ASSET-008.16` | 174–178 | بلوک | `holidayOrWeekend` | 0 | ⬜ |
-| `ASSET-008.17` | 179–184 | بلوک | `buildUrl` | 0 | ⬜ |
-| `ASSET-008.18` | 185–202 | بلوک | `request` | 0 | ⬜ |
-| `ASSET-008.19` | 203–209 | بلوک | `notify` | 0 | ⬜ |
-| `ASSET-008.20` | 210–215 | بلوک | `navTabs` | 0 | ⬜ |
-| `ASSET-008.21` | 216–225 | بلوک | `cancelCount` | 0 | ⬜ |
-| `ASSET-008.22` | 226–258 | بلوک | `renderCalendar` | 0 | ⬜ |
-| `ASSET-008.23` | 259–276 | بلوک | `renderDayEditor` | 0 | ⬜ |
-| `ASSET-008.24` | 277–286 | بلوک | `choiceHtml` | 0 | ⬜ |
-| `ASSET-008.25` | 287–312 | بلوک | `foods` | 0 | ⬜ |
-| `ASSET-008.26` | 313–318 | بلوک | `categoryOptions` | 0 | ⬜ |
-| `ASSET-008.27` | 319–327 | بلوک | `catalogCategoryNames` | 0 | ⬜ |
-| `ASSET-008.28` | 328–337 | بلوک | `foodCardHtml` | 0 | ⬜ |
-| `ASSET-008.29` | 338–380 | بلوک | `renderCatalog` | 0 | ⬜ |
-| `ASSET-008.30` | 381–392 | بلوک | `readSavedOrderReportFields` | 0 | ⬜ |
-| `ASSET-008.31` | 393–398 | بلوک | `saveOrderReportFields` | 4 | ⬜ |
-| `ASSET-008.32` | 399–403 | بلوک | `selectedOrderColumns` | 0 | ⬜ |
-| `ASSET-008.33` | 404–421 | بلوک | `orderFieldValue` | 0 | ⬜ |
-| `ASSET-008.34` | 422–431 | بلوک | `orderSortValue` | 0 | ⬜ |
-| `ASSET-008.35` | 432–447 | بلوک | `sortOrderRows` | 0 | ⬜ |
-| `ASSET-008.36` | 448–485 | بلوک | `orderTableHtml` | 0 | ⬜ |
-| `ASSET-008.37` | 486–522 | بلوک | `orderByMenuHtml` | 0 | ⬜ |
-| `ASSET-008.38` | 523–534 | بلوک | `readDeliveredReportFields` | 0 | ⬜ |
-| `ASSET-008.39` | 535–539 | بلوک | `saveDeliveredReportFields` | 4 | ⬜ |
-| `ASSET-008.40` | 540–554 | بلوک | `deliveredReportFieldValue` | 0 | ⬜ |
-| `ASSET-008.41` | 555–558 | بلوک | `selectedDeliveredReportColumns` | 0 | ⬜ |
-| `ASSET-008.42` | 559–571 | بلوک | `sortDeliveredReportRows` | 0 | ⬜ |
-| `ASSET-008.43` | 572–602 | بلوک | `deliveredReportTableHtml` | 0 | ⬜ |
-| `ASSET-008.44` | 603–605 | بلوک | `deliveredReportByMenuHtml` | 0 | ⬜ |
-| `ASSET-008.45` | 606–631 | بلوک | `key` | 0 | ⬜ |
-| `ASSET-008.46` | 632–645 | بلوک | `deliveredReportByOrgHtml` | 0 | ⬜ |
-| `ASSET-008.47` | 646–654 | بلوک | `requestOrgMap` | 0 | ⬜ |
-| `ASSET-008.48` | 655–659 | بلوک | `deliveredReportOrderedRows` | 0 | ⬜ |
-| `ASSET-008.49` | 660–672 | بلوک | `key` | 0 | ⬜ |
-| `ASSET-008.50` | 673–676 | بلوک | `deliveryDateForReport` | 0 | ⬜ |
-| `ASSET-008.51` | 677–696 | بلوک | `renderPrintedDeliveryReport` | 0 | ⬜ |
-| `ASSET-008.52` | 697–732 | بلوک | `loadPrintedDeliveryReport` | 0 | ⬜ |
-| `ASSET-008.53` | 733–749 | بلوک | `exportPrintedDeliveryReport` | 0 | ⬜ |
-| `ASSET-008.54` | 750–754 | بلوک | `printPrintedDeliveryReport` | 0 | ⬜ |
-| `ASSET-008.55` | 755–760 | بلوک | `summaryHtml` | 0 | ⬜ |
-| `ASSET-008.56` | 761–769 | بلوک | `nameSplit` | 0 | ⬜ |
-| `ASSET-008.57` | 770–777 | بلوک | `personSortValue` | 0 | ⬜ |
-| `ASSET-008.58` | 778–788 | بلوک | `sortByState` | 0 | ⬜ |
-| `ASSET-008.59` | 789–794 | بلوک | `sortStateToggle` | 0 | ⬜ |
-| `ASSET-008.60` | 795–798 | بلوک | `sortStateMark` | 0 | ⬜ |
-| `ASSET-008.61` | 799–802 | بلوک | `rowSummary` | 0 | ⬜ |
-| `ASSET-008.62` | 803–808 | بلوک | `renderOrders` | 0 | ⬜ |
-| `ASSET-008.63` | 809–829 | بلوک | `viewButton` | 0 | ⬜ |
-| `ASSET-008.64` | 830–843 | بلوک | `ordersByOrgHtml` | 0 | ⬜ |
-| `ASSET-008.65` | 844–852 | بلوک | `renderGroupOrders` | 0 | ⬜ |
-| `ASSET-008.66` | 853–877 | بلوک | `tableFor` | 0 | ⬜ |
-| `ASSET-008.67` | 878–885 | بلوک | `renderCancelRequests` | 0 | ⬜ |
-| `ASSET-008.68` | 886–898 | بلوک | `splitRow` | 0 | ⬜ |
-| `ASSET-008.69` | 899–908 | بلوک | `cancelValue` | 0 | ⬜ |
-| `ASSET-008.70` | 909–911 | بلوک | `cmp` | 0 | ⬜ |
-| `ASSET-008.71` | 912–930 | بلوک | `cancelHead` | 0 | ⬜ |
-| `ASSET-008.72` | 931–949 | بلوک | `renderStatistics` | 0 | ⬜ |
-| `ASSET-008.73` | 950–959 | بلوک | `mark` | 0 | ⬜ |
-| `ASSET-008.74` | 960–983 | بلوک | `peopleSortMark` | 0 | ⬜ |
-| `ASSET-008.75` | 984–1009 | بلوک | `foods` | 0 | ⬜ |
-| `ASSET-008.76` | 1010–1018 | بلوک | `normalizeJalaliMonth` | 0 | ⬜ |
-| `ASSET-008.77` | 1019–1028 | بلوک | `reconciliationGapCell` | 0 | ⬜ |
-| `ASSET-008.78` | 1029–1037 | بلوک | `reconciliationRemainingCell` | 0 | ⬜ |
-| `ASSET-008.79` | 1038–1044 | بلوک | `reconciliationLeftoverCell` | 0 | ⬜ |
-| `ASSET-008.80` | 1045–1048 | بلوک | `reconciliationNumber` | 0 | ⬜ |
-| `ASSET-008.81` | 1049–1053 | بلوک | `reconciliationAmount` | 0 | ⬜ |
-| `ASSET-008.82` | 1054–1128 | بلوک | `renderReconciliation` | 0 | ⬜ |
-| `ASSET-008.83` | 1129–1134 | بلوک | `renderLeftoverModal` | 0 | ⬜ |
-| `ASSET-008.84` | 1135–1154 | بلوک | `row` | 0 | ⬜ |
-| `ASSET-008.85` | 1155–1155 | بلوک | `leftoverPreviewFor` | 0 | ⬜ |
-| `ASSET-008.86` | 1156–1171 | بلوک | `items` | 0 | ⬜ |
-| `ASSET-008.87` | 1172–1177 | بلوک | `leftoverInlineError` | 0 | ⬜ |
-| `ASSET-008.88` | 1178–1221 | بلوک | `confirmLeftoverModal` | 0 | ⬜ |
-| `ASSET-008.89` | 1222–1229 | بلوک | `submitReconciliationBody` | 0 | ⬜ |
-| `ASSET-008.90` | 1230–1236 | بلوک | `message` | 0 | ⬜ |
-| `ASSET-008.91` | 1237–1245 | بلوک | `postReconciliation` | 0 | ⬜ |
-| `ASSET-008.92` | 1246–1286 | بلوک | `loadReconciliation` | 0 | ⬜ |
-| `ASSET-008.93` | 1287–1292 | بلوک | `downloadReconciliation` | 0 | ⬜ |
-| `ASSET-008.94` | 1293–1293 | بلوک | `selectReconciliationRow` | 0 | ⬜ |
-| `ASSET-008.95` | 1294–1310 | بلوک | `item` | 0 | ⬜ |
-| `ASSET-008.96` | 1311–1344 | بلوک | `saveReconciliationForm` | 0 | ⬜ |
-| `ASSET-008.97` | 1345–1381 | بلوک | `uploadReconciliationInvoice` | 0 | ⬜ |
-| `ASSET-008.98` | 1382–1385 | بلوک | `bulkOperationTitle` | 0 | ⬜ |
-| `ASSET-008.99` | 1386–1390 | بلوک | `bulkSelectedPeople` | 0 | ⬜ |
-| `ASSET-008.100` | 1391–1394 | بلوک | `bulkTargetValue` | 0 | ⬜ |
-| `ASSET-008.101` | 1395–1401 | بلوک | `bulkCanSelect` | 0 | ⬜ |
-| `ASSET-008.102` | 1402–1412 | بلوک | `group` | 0 | ⬜ |
-| `ASSET-008.103` | 1413–1429 | بلوک | `saveCancelCutoff` | 0 | ⬜ |
-| `ASSET-008.104` | 1430–1458 | بلوک | `loadBulkSnapshot` | 0 | ⬜ |
-| `ASSET-008.105` | 1459–1473 | بلوک | `bulkTargetOptions` | 0 | ⬜ |
-| `ASSET-008.106` | 1474–1489 | بلوک | `bulkPersonStatus` | 0 | ⬜ |
-| `ASSET-008.107` | 1490–1511 | بلوک | `group` | 0 | ⬜ |
-| `ASSET-008.108` | 1512–1517 | بلوک | `renderBulkResults` | 0 | ⬜ |
-| `ASSET-008.109` | 1518–1525 | بلوک | `renderBulkModal` | 0 | ⬜ |
-| `ASSET-008.110` | 1526–1543 | بلوک | `renderBulkOperations` | 0 | ⬜ |
-| `ASSET-008.111` | 1544–1549 | بلوک | `rows` | 0 | ⬜ |
-| `ASSET-008.112` | 1550–1562 | بلوک | `bulkValue` | 0 | ⬜ |
-| `ASSET-008.113` | 1563–1568 | بلوک | `bulkHead` | 0 | ⬜ |
-| `ASSET-008.114` | 1569–1582 | بلوک | `selected` | 0 | ⬜ |
-| `ASSET-008.115` | 1583–1593 | بلوک | `previewDisabled` | 0 | ⬜ |
-| `ASSET-008.116` | 1594–1604 | بلوک | `bulkTogglePerson` | 1 | ⬜ |
-| `ASSET-008.117` | 1605–1606 | بلوک | `bulkSelectEligible` | 0 | ⬜ |
-| `ASSET-008.118` | 1607–1612 | بلوک | `eligible` | 0 | ⬜ |
-| `ASSET-008.119` | 1613–1615 | بلوک | `submitBulkOperation` | 0 | ⬜ |
-| `ASSET-008.120` | 1616–1635 | بلوک | `ids` | 0 | ⬜ |
-| `ASSET-008.121` | 1636–1641 | بلوک | `mealTypeSwitch` | 0 | ⬜ |
-| `ASSET-008.122` | 1642–1649 | بلوک | `embeddedPanel` | 0 | ⬜ |
-| `ASSET-008.123` | 1650–1669 | بلوک | `loadEmbedded` | 0 | ⬜ |
-| `ASSET-008.124` | 1670–1677 | بلوک | `renderFocusKeyOf` | 0 | ⬜ |
-| `ASSET-008.125` | 1678–1689 | بلوک | `captureRenderFocus` | 4 | ⬜ |
-| `ASSET-008.126` | 1690–1702 | بلوک | `restoreRenderFocus` | 4 | ⬜ |
-| `ASSET-008.127` | 1703–1714 | بلوک | `render` | 0 | ⬜ |
-| `ASSET-008.128` | 1715–1721 | بلوک | `notices` | 0 | ⬜ |
-| `ASSET-008.129` | 1722–1733 | بلوک | `loadStatus` | 0 | ⬜ |
-| `ASSET-008.130` | 1734–1740 | بلوک | `loadCatalog` | 0 | ⬜ |
-| `ASSET-008.131` | 1741–1748 | بلوک | `loadMonth` | 0 | ⬜ |
-| `ASSET-008.132` | 1749–1770 | بلوک | `loadOrders` | 0 | ⬜ |
-| `ASSET-008.133` | 1771–1791 | بلوک | `loadFoodGroups` | 0 | ⬜ |
-| `ASSET-008.134` | 1792–1822 | بلوک | `loadGroupOrders` | 0 | ⬜ |
-| `ASSET-008.135` | 1823–1839 | بلوک | `loadCancelRequests` | 0 | ⬜ |
-| `ASSET-008.136` | 1840–1858 | بلوک | `loadGuestRequests` | 0 | ⬜ |
-| `ASSET-008.137` | 1859–1859 | بلوک | `beginGuestEdit` | 0 | ⬜ |
-| `ASSET-008.138` | 1860–1875 | بلوک | `row` | 0 | ⬜ |
-| `ASSET-008.139` | 1876–1881 | بلوک | `cancelGuestEdit` | 0 | ⬜ |
-| `ASSET-008.140` | 1882–1913 | بلوک | `saveGuestEdit` | 1 | ⬜ |
-| `ASSET-008.141` | 1914–1914 | بلوک | `guestRequestAction` | 0 | ⬜ |
-| `ASSET-008.142` | 1915–1937 | بلوک | `row` | 1 | ⬜ |
-| `ASSET-008.143` | 1938–1940 | بلوک | `renderGuestRequestManager` | 0 | ⬜ |
-| `ASSET-008.144` | 1941–1963 | بلوک | `rows` | 1 | ⬜ |
-| `ASSET-008.145` | 1964–1978 | بلوک | `decideCancelRequest` | 0 | ⬜ |
-| `ASSET-008.146` | 1979–1985 | بلوک | `loadStatistics` | 0 | ⬜ |
-| `ASSET-008.147` | 1986–2019 | بلوک | `selectedIds` | 0 | ⬜ |
-| `ASSET-008.148` | 2020–2047 | بلوک | `searchSelectedReportEmployees` | 0 | ⬜ |
-| `ASSET-008.149` | 2048–2074 | بلوک | `refreshAll` | 0 | ⬜ |
-| `ASSET-008.150` | 2075–2119 | بلوک | `saveDay` | 0 | ⬜ |
-| `ASSET-008.151` | 2120–2145 | بلوک | `saveCatalog` | 0 | ⬜ |
-| `ASSET-008.152` | 2146–2165 | بلوک | `orderExportRows` | 0 | ⬜ |
-| `ASSET-008.153` | 2166–2182 | بلوک | `downloadOrdersCsv` | 0 | ⬜ |
-| `ASSET-008.154` | 2183–2187 | بلوک | `downloadOrders` | 0 | ⬜ |
-| `ASSET-008.155` | 2188–2189 | بلوک | `printScopedReport` | 0 | ⬜ |
-| `ASSET-008.156` | 2190–2200 | بلوک | `target` | 0 | ⬜ |
-| `ASSET-008.157` | 2201–2218 | بلوک | `cleanup` | 0 | ⬜ |
-| `ASSET-008.158` | 2219–2223 | بلوک | `printOrders` | 0 | ⬜ |
-| `ASSET-008.159` | 2224–2230 | بلوک | `downloadStatistics` | 0 | ⬜ |
-| `ASSET-008.160` | 2231–2235 | بلوک | `printStatistics` | 0 | ⬜ |
-| `ASSET-008.161` | 2236–2243 | بلوک | `selectDay` | 0 | ⬜ |
-| `ASSET-008.162` | 2244–2249 | بلوک | `changeMonth` | 0 | ⬜ |
-| `ASSET-008.163` | 2250–2286 | بلوک | `switchTab` | 0 | ⬜ |
-| `ASSET-008.164` | 2287–2300 | بلوک | `emergencyEnsurePeople` | 0 | ⬜ |
-| `ASSET-008.165` | 2301–2309 | بلوک | `emergencyPanel` | 0 | ⬜ |
-| `ASSET-008.166` | 2310–2344 | بلوک | `msgs` | 0 | ⬜ |
-| `ASSET-008.167` | 2345–2350 | بلوک | `emergencyLoadOrders` | 0 | ⬜ |
-| `ASSET-008.168` | 2351–2395 | بلوک | `daySearchInput` | 4 | ⬜ |
-| `ASSET-008.169` | 2396–2406 | بلوک | `emergencyClick` | 0 | ⬜ |
-| `ASSET-008.170` | 2407–2435 | بلوک | `person` | 0 | ⬜ |
-| `ASSET-008.171` | 2436–2483 | بلوک | `eventClick` | 0 | ⬜ |
-| `ASSET-008.172` | 2484–2593 | بلوک | `person` | 1 | ⬜ |
-| `ASSET-008.173` | 2594–2602 | بلوک | `dayPickFor` | 0 | ⬜ |
-| `ASSET-008.174` | 2603–2609 | بلوک | `trackDayPick` | 0 | ⬜ |
-| `ASSET-008.175` | 2610–2617 | بلوک | `orderedDayFoodIds` | 0 | ⬜ |
-| `ASSET-008.176` | 2618–2654 | بلوک | `eventChange` | 0 | ⬜ |
-| `ASSET-008.177` | 2655–2688 | بلوک | `person` | 0 | ⬜ |
-| `ASSET-008.178` | 2689–2771 | بلوک | `eventSubmit` | 0 | ⬜ |
-| `ASSET-008.179` | 2772–2777 | بلوک | `spanDays` | 0 | ⬜ |
-| `ASSET-008.180` | 2778–2806 | بلوک | `mount` | 0 | ⬜ |
-| `ASSET-008.181` | 2807–2807 | بلوک | `reportInputFocused` | 0 | ⬜ |
-| `ASSET-008.182` | 2808–2810 | بلوک | `safeReportRender` | 0 | ⬜ |
-| `ASSET-008.183` | 2811–2820 | بلوک | `html` | 0 | ⬜ |
+| `ASSET-008.01` | 1–108 | بلوک | `مدیر برنامهٔ غذایی در پنل چاپ فیش.` | 0 | ⬜ |
+| `ASSET-008.02` | 109–113 | بلوک | `esc` | 0 | ⬜ |
+| `ASSET-008.03` | 114–114 | بلوک | `faDigits` | 0 | ⬜ |
+| `ASSET-008.04` | 115–119 | بلوک | `asciiDigits` | 0 | ⬜ |
+| `ASSET-008.05` | 120–129 | بلوک | `isoFromJalali` | 0 | ⬜ |
+| `ASSET-008.06` | 130–136 | بلوک | `jalaliFromIso` | 0 | ⬜ |
+| `ASSET-008.07` | 137–143 | بلوک | `normalizeIsoDate` | 0 | ⬜ |
+| `ASSET-008.08` | 144–147 | بلوک | `jalaliMonthFromIso` | 0 | ⬜ |
+| `ASSET-008.09` | 148–151 | بلوک | `localTodayIso` | 0 | ⬜ |
+| `ASSET-008.10` | 152–152 | بلوک | `monthKey` | 0 | ⬜ |
+| `ASSET-008.11` | 153–153 | بلوک | `monthTitle` | 0 | ⬜ |
+| `ASSET-008.12` | 154–154 | بلوک | `getDay` | 0 | ⬜ |
+| `ASSET-008.13` | 155–158 | بلوک | `activeOrderCount` | 0 | ⬜ |
+| `ASSET-008.14` | 159–168 | بلوک | `holiday` | 0 | ⬜ |
+| `ASSET-008.15` | 169–174 | بلوک | `isWeekendIso` | 0 | ⬜ |
+| `ASSET-008.16` | 175–179 | بلوک | `holidayOrWeekend` | 0 | ⬜ |
+| `ASSET-008.17` | 180–185 | بلوک | `buildUrl` | 0 | ⬜ |
+| `ASSET-008.18` | 186–203 | بلوک | `request` | 0 | ⬜ |
+| `ASSET-008.19` | 204–210 | بلوک | `notify` | 0 | ⬜ |
+| `ASSET-008.20` | 211–216 | بلوک | `navTabs` | 0 | ⬜ |
+| `ASSET-008.21` | 217–226 | بلوک | `cancelCount` | 0 | ⬜ |
+| `ASSET-008.22` | 227–259 | بلوک | `renderCalendar` | 0 | ⬜ |
+| `ASSET-008.23` | 260–277 | بلوک | `renderDayEditor` | 0 | ⬜ |
+| `ASSET-008.24` | 278–287 | بلوک | `choiceHtml` | 0 | ⬜ |
+| `ASSET-008.25` | 288–313 | بلوک | `foods` | 0 | ⬜ |
+| `ASSET-008.26` | 314–319 | بلوک | `categoryOptions` | 0 | ⬜ |
+| `ASSET-008.27` | 320–328 | بلوک | `catalogCategoryNames` | 0 | ⬜ |
+| `ASSET-008.28` | 329–338 | بلوک | `foodCardHtml` | 0 | ⬜ |
+| `ASSET-008.29` | 339–381 | بلوک | `renderCatalog` | 0 | ⬜ |
+| `ASSET-008.30` | 382–393 | بلوک | `readSavedOrderReportFields` | 0 | ⬜ |
+| `ASSET-008.31` | 394–399 | بلوک | `saveOrderReportFields` | 4 | ⬜ |
+| `ASSET-008.32` | 400–404 | بلوک | `selectedOrderColumns` | 0 | ⬜ |
+| `ASSET-008.33` | 405–422 | بلوک | `orderFieldValue` | 0 | ⬜ |
+| `ASSET-008.34` | 423–432 | بلوک | `orderSortValue` | 0 | ⬜ |
+| `ASSET-008.35` | 433–448 | بلوک | `sortOrderRows` | 0 | ⬜ |
+| `ASSET-008.36` | 449–486 | بلوک | `orderTableHtml` | 0 | ⬜ |
+| `ASSET-008.37` | 487–523 | بلوک | `orderByMenuHtml` | 0 | ⬜ |
+| `ASSET-008.38` | 524–535 | بلوک | `readDeliveredReportFields` | 0 | ⬜ |
+| `ASSET-008.39` | 536–540 | بلوک | `saveDeliveredReportFields` | 4 | ⬜ |
+| `ASSET-008.40` | 541–555 | بلوک | `deliveredReportFieldValue` | 0 | ⬜ |
+| `ASSET-008.41` | 556–559 | بلوک | `selectedDeliveredReportColumns` | 0 | ⬜ |
+| `ASSET-008.42` | 560–572 | بلوک | `sortDeliveredReportRows` | 0 | ⬜ |
+| `ASSET-008.43` | 573–603 | بلوک | `deliveredReportTableHtml` | 0 | ⬜ |
+| `ASSET-008.44` | 604–606 | بلوک | `deliveredReportByMenuHtml` | 0 | ⬜ |
+| `ASSET-008.45` | 607–632 | بلوک | `key` | 0 | ⬜ |
+| `ASSET-008.46` | 633–646 | بلوک | `deliveredReportByOrgHtml` | 0 | ⬜ |
+| `ASSET-008.47` | 647–655 | بلوک | `requestOrgMap` | 0 | ⬜ |
+| `ASSET-008.48` | 656–660 | بلوک | `deliveredReportOrderedRows` | 0 | ⬜ |
+| `ASSET-008.49` | 661–673 | بلوک | `key` | 0 | ⬜ |
+| `ASSET-008.50` | 674–677 | بلوک | `deliveryDateForReport` | 0 | ⬜ |
+| `ASSET-008.51` | 678–697 | بلوک | `renderPrintedDeliveryReport` | 0 | ⬜ |
+| `ASSET-008.52` | 698–733 | بلوک | `loadPrintedDeliveryReport` | 0 | ⬜ |
+| `ASSET-008.53` | 734–750 | بلوک | `exportPrintedDeliveryReport` | 0 | ⬜ |
+| `ASSET-008.54` | 751–755 | بلوک | `printPrintedDeliveryReport` | 0 | ⬜ |
+| `ASSET-008.55` | 756–761 | بلوک | `summaryHtml` | 0 | ⬜ |
+| `ASSET-008.56` | 762–770 | بلوک | `nameSplit` | 0 | ⬜ |
+| `ASSET-008.57` | 771–778 | بلوک | `personSortValue` | 0 | ⬜ |
+| `ASSET-008.58` | 779–789 | بلوک | `sortByState` | 0 | ⬜ |
+| `ASSET-008.59` | 790–795 | بلوک | `sortStateToggle` | 0 | ⬜ |
+| `ASSET-008.60` | 796–799 | بلوک | `sortStateMark` | 0 | ⬜ |
+| `ASSET-008.61` | 800–803 | بلوک | `rowSummary` | 0 | ⬜ |
+| `ASSET-008.62` | 804–809 | بلوک | `renderOrders` | 0 | ⬜ |
+| `ASSET-008.63` | 810–830 | بلوک | `viewButton` | 0 | ⬜ |
+| `ASSET-008.64` | 831–844 | بلوک | `ordersByOrgHtml` | 0 | ⬜ |
+| `ASSET-008.65` | 845–853 | بلوک | `renderGroupOrders` | 0 | ⬜ |
+| `ASSET-008.66` | 854–878 | بلوک | `tableFor` | 0 | ⬜ |
+| `ASSET-008.67` | 879–886 | بلوک | `renderCancelRequests` | 0 | ⬜ |
+| `ASSET-008.68` | 887–899 | بلوک | `splitRow` | 0 | ⬜ |
+| `ASSET-008.69` | 900–909 | بلوک | `cancelValue` | 0 | ⬜ |
+| `ASSET-008.70` | 910–912 | بلوک | `cmp` | 0 | ⬜ |
+| `ASSET-008.71` | 913–931 | بلوک | `cancelHead` | 0 | ⬜ |
+| `ASSET-008.72` | 932–950 | بلوک | `renderStatistics` | 0 | ⬜ |
+| `ASSET-008.73` | 951–960 | بلوک | `mark` | 0 | ⬜ |
+| `ASSET-008.74` | 961–984 | بلوک | `peopleSortMark` | 0 | ⬜ |
+| `ASSET-008.75` | 985–1010 | بلوک | `foods` | 0 | ⬜ |
+| `ASSET-008.76` | 1011–1019 | بلوک | `normalizeJalaliMonth` | 0 | ⬜ |
+| `ASSET-008.77` | 1020–1029 | بلوک | `reconciliationGapCell` | 0 | ⬜ |
+| `ASSET-008.78` | 1030–1038 | بلوک | `reconciliationRemainingCell` | 0 | ⬜ |
+| `ASSET-008.79` | 1039–1045 | بلوک | `reconciliationLeftoverCell` | 0 | ⬜ |
+| `ASSET-008.80` | 1046–1049 | بلوک | `reconciliationNumber` | 0 | ⬜ |
+| `ASSET-008.81` | 1050–1054 | بلوک | `reconciliationAmount` | 0 | ⬜ |
+| `ASSET-008.82` | 1055–1135 | بلوک | `renderReconciliation` | 0 | ⬜ |
+| `ASSET-008.83` | 1136–1141 | بلوک | `renderGuestActualModal` | 0 | ⬜ |
+| `ASSET-008.84` | 1142–1142 | بلوک | `hasNoneRow` | 0 | ⬜ |
+| `ASSET-008.85` | 1143–1169 | بلوک | `rows` | 0 | ⬜ |
+| `ASSET-008.86` | 1170–1175 | بلوک | `guestActualInlineError` | 0 | ⬜ |
+| `ASSET-008.87` | 1176–1187 | بلوک | `guestActualSumFromDom` | 0 | ⬜ |
+| `ASSET-008.88` | 1188–1196 | بلوک | `guestActualLiveSumListener` | 0 | ⬜ |
+| `ASSET-008.89` | 1197–1222 | بلوک | `proceedToLeftover` | 0 | ⬜ |
+| `ASSET-008.90` | 1223–1261 | بلوک | `confirmGuestActualModal` | 0 | ⬜ |
+| `ASSET-008.91` | 1262–1267 | بلوک | `renderLeftoverModal` | 0 | ⬜ |
+| `ASSET-008.92` | 1268–1287 | بلوک | `row` | 0 | ⬜ |
+| `ASSET-008.93` | 1288–1293 | بلوک | `leftoverInlineError` | 0 | ⬜ |
+| `ASSET-008.94` | 1294–1369 | بلوک | `confirmLeftoverModal` | 0 | ⬜ |
+| `ASSET-008.95` | 1370–1377 | بلوک | `submitReconciliationBody` | 0 | ⬜ |
+| `ASSET-008.96` | 1378–1384 | بلوک | `message` | 0 | ⬜ |
+| `ASSET-008.97` | 1385–1393 | بلوک | `postReconciliation` | 0 | ⬜ |
+| `ASSET-008.98` | 1394–1434 | بلوک | `loadReconciliation` | 0 | ⬜ |
+| `ASSET-008.99` | 1435–1440 | بلوک | `downloadReconciliation` | 0 | ⬜ |
+| `ASSET-008.100` | 1441–1441 | بلوک | `selectReconciliationRow` | 0 | ⬜ |
+| `ASSET-008.101` | 1442–1458 | بلوک | `item` | 0 | ⬜ |
+| `ASSET-008.102` | 1459–1512 | بلوک | `saveReconciliationForm` | 0 | ⬜ |
+| `ASSET-008.103` | 1513–1549 | بلوک | `uploadReconciliationInvoice` | 0 | ⬜ |
+| `ASSET-008.104` | 1550–1553 | بلوک | `bulkOperationTitle` | 0 | ⬜ |
+| `ASSET-008.105` | 1554–1558 | بلوک | `bulkSelectedPeople` | 0 | ⬜ |
+| `ASSET-008.106` | 1559–1562 | بلوک | `bulkTargetValue` | 0 | ⬜ |
+| `ASSET-008.107` | 1563–1569 | بلوک | `bulkCanSelect` | 0 | ⬜ |
+| `ASSET-008.108` | 1570–1580 | بلوک | `group` | 0 | ⬜ |
+| `ASSET-008.109` | 1581–1597 | بلوک | `saveCancelCutoff` | 0 | ⬜ |
+| `ASSET-008.110` | 1598–1626 | بلوک | `loadBulkSnapshot` | 0 | ⬜ |
+| `ASSET-008.111` | 1627–1641 | بلوک | `bulkTargetOptions` | 0 | ⬜ |
+| `ASSET-008.112` | 1642–1657 | بلوک | `bulkPersonStatus` | 0 | ⬜ |
+| `ASSET-008.113` | 1658–1679 | بلوک | `group` | 0 | ⬜ |
+| `ASSET-008.114` | 1680–1685 | بلوک | `renderBulkResults` | 0 | ⬜ |
+| `ASSET-008.115` | 1686–1693 | بلوک | `renderBulkModal` | 0 | ⬜ |
+| `ASSET-008.116` | 1694–1711 | بلوک | `renderBulkOperations` | 0 | ⬜ |
+| `ASSET-008.117` | 1712–1717 | بلوک | `rows` | 0 | ⬜ |
+| `ASSET-008.118` | 1718–1730 | بلوک | `bulkValue` | 0 | ⬜ |
+| `ASSET-008.119` | 1731–1736 | بلوک | `bulkHead` | 0 | ⬜ |
+| `ASSET-008.120` | 1737–1750 | بلوک | `selected` | 0 | ⬜ |
+| `ASSET-008.121` | 1751–1761 | بلوک | `previewDisabled` | 0 | ⬜ |
+| `ASSET-008.122` | 1762–1772 | بلوک | `bulkTogglePerson` | 1 | ⬜ |
+| `ASSET-008.123` | 1773–1774 | بلوک | `bulkSelectEligible` | 0 | ⬜ |
+| `ASSET-008.124` | 1775–1780 | بلوک | `eligible` | 0 | ⬜ |
+| `ASSET-008.125` | 1781–1783 | بلوک | `submitBulkOperation` | 0 | ⬜ |
+| `ASSET-008.126` | 1784–1803 | بلوک | `ids` | 0 | ⬜ |
+| `ASSET-008.127` | 1804–1809 | بلوک | `mealTypeSwitch` | 0 | ⬜ |
+| `ASSET-008.128` | 1810–1817 | بلوک | `embeddedPanel` | 0 | ⬜ |
+| `ASSET-008.129` | 1818–1837 | بلوک | `loadEmbedded` | 0 | ⬜ |
+| `ASSET-008.130` | 1838–1845 | بلوک | `renderFocusKeyOf` | 0 | ⬜ |
+| `ASSET-008.131` | 1846–1857 | بلوک | `captureRenderFocus` | 4 | ⬜ |
+| `ASSET-008.132` | 1858–1870 | بلوک | `restoreRenderFocus` | 4 | ⬜ |
+| `ASSET-008.133` | 1871–1882 | بلوک | `render` | 0 | ⬜ |
+| `ASSET-008.134` | 1883–1889 | بلوک | `notices` | 0 | ⬜ |
+| `ASSET-008.135` | 1890–1901 | بلوک | `loadStatus` | 0 | ⬜ |
+| `ASSET-008.136` | 1902–1908 | بلوک | `loadCatalog` | 0 | ⬜ |
+| `ASSET-008.137` | 1909–1916 | بلوک | `loadMonth` | 0 | ⬜ |
+| `ASSET-008.138` | 1917–1938 | بلوک | `loadOrders` | 0 | ⬜ |
+| `ASSET-008.139` | 1939–1959 | بلوک | `loadFoodGroups` | 0 | ⬜ |
+| `ASSET-008.140` | 1960–1990 | بلوک | `loadGroupOrders` | 0 | ⬜ |
+| `ASSET-008.141` | 1991–2007 | بلوک | `loadCancelRequests` | 0 | ⬜ |
+| `ASSET-008.142` | 2008–2026 | بلوک | `loadGuestRequests` | 0 | ⬜ |
+| `ASSET-008.143` | 2027–2027 | بلوک | `beginGuestEdit` | 0 | ⬜ |
+| `ASSET-008.144` | 2028–2043 | بلوک | `row` | 0 | ⬜ |
+| `ASSET-008.145` | 2044–2049 | بلوک | `cancelGuestEdit` | 0 | ⬜ |
+| `ASSET-008.146` | 2050–2081 | بلوک | `saveGuestEdit` | 1 | ⬜ |
+| `ASSET-008.147` | 2082–2082 | بلوک | `guestRequestAction` | 0 | ⬜ |
+| `ASSET-008.148` | 2083–2105 | بلوک | `row` | 1 | ⬜ |
+| `ASSET-008.149` | 2106–2108 | بلوک | `renderGuestRequestManager` | 0 | ⬜ |
+| `ASSET-008.150` | 2109–2131 | بلوک | `rows` | 1 | ⬜ |
+| `ASSET-008.151` | 2132–2146 | بلوک | `decideCancelRequest` | 0 | ⬜ |
+| `ASSET-008.152` | 2147–2153 | بلوک | `loadStatistics` | 0 | ⬜ |
+| `ASSET-008.153` | 2154–2187 | بلوک | `selectedIds` | 0 | ⬜ |
+| `ASSET-008.154` | 2188–2215 | بلوک | `searchSelectedReportEmployees` | 0 | ⬜ |
+| `ASSET-008.155` | 2216–2242 | بلوک | `refreshAll` | 0 | ⬜ |
+| `ASSET-008.156` | 2243–2287 | بلوک | `saveDay` | 0 | ⬜ |
+| `ASSET-008.157` | 2288–2313 | بلوک | `saveCatalog` | 0 | ⬜ |
+| `ASSET-008.158` | 2314–2333 | بلوک | `orderExportRows` | 0 | ⬜ |
+| `ASSET-008.159` | 2334–2350 | بلوک | `downloadOrdersCsv` | 0 | ⬜ |
+| `ASSET-008.160` | 2351–2355 | بلوک | `downloadOrders` | 0 | ⬜ |
+| `ASSET-008.161` | 2356–2357 | بلوک | `printScopedReport` | 0 | ⬜ |
+| `ASSET-008.162` | 2358–2368 | بلوک | `target` | 0 | ⬜ |
+| `ASSET-008.163` | 2369–2386 | بلوک | `cleanup` | 0 | ⬜ |
+| `ASSET-008.164` | 2387–2391 | بلوک | `printOrders` | 0 | ⬜ |
+| `ASSET-008.165` | 2392–2398 | بلوک | `downloadStatistics` | 0 | ⬜ |
+| `ASSET-008.166` | 2399–2403 | بلوک | `printStatistics` | 0 | ⬜ |
+| `ASSET-008.167` | 2404–2411 | بلوک | `selectDay` | 0 | ⬜ |
+| `ASSET-008.168` | 2412–2417 | بلوک | `changeMonth` | 0 | ⬜ |
+| `ASSET-008.169` | 2418–2454 | بلوک | `switchTab` | 0 | ⬜ |
+| `ASSET-008.170` | 2455–2468 | بلوک | `emergencyEnsurePeople` | 0 | ⬜ |
+| `ASSET-008.171` | 2469–2477 | بلوک | `emergencyPanel` | 0 | ⬜ |
+| `ASSET-008.172` | 2478–2512 | بلوک | `msgs` | 0 | ⬜ |
+| `ASSET-008.173` | 2513–2518 | بلوک | `emergencyLoadOrders` | 0 | ⬜ |
+| `ASSET-008.174` | 2519–2563 | بلوک | `daySearchInput` | 4 | ⬜ |
+| `ASSET-008.175` | 2564–2574 | بلوک | `emergencyClick` | 0 | ⬜ |
+| `ASSET-008.176` | 2575–2603 | بلوک | `person` | 0 | ⬜ |
+| `ASSET-008.177` | 2604–2651 | بلوک | `eventClick` | 0 | ⬜ |
+| `ASSET-008.178` | 2652–2763 | بلوک | `person` | 1 | ⬜ |
+| `ASSET-008.179` | 2764–2772 | بلوک | `dayPickFor` | 0 | ⬜ |
+| `ASSET-008.180` | 2773–2779 | بلوک | `trackDayPick` | 0 | ⬜ |
+| `ASSET-008.181` | 2780–2787 | بلوک | `orderedDayFoodIds` | 0 | ⬜ |
+| `ASSET-008.182` | 2788–2824 | بلوک | `eventChange` | 0 | ⬜ |
+| `ASSET-008.183` | 2825–2858 | بلوک | `person` | 0 | ⬜ |
+| `ASSET-008.184` | 2859–2941 | بلوک | `eventSubmit` | 0 | ⬜ |
+| `ASSET-008.185` | 2942–2947 | بلوک | `spanDays` | 0 | ⬜ |
+| `ASSET-008.186` | 2948–2977 | بلوک | `mount` | 0 | ⬜ |
+| `ASSET-008.187` | 2978–2978 | بلوک | `reportInputFocused` | 0 | ⬜ |
+| `ASSET-008.188` | 2979–2981 | بلوک | `safeReportRender` | 0 | ⬜ |
+| `ASSET-008.189` | 2982–2991 | بلوک | `html` | 0 | ⬜ |
 
 </details>
 
@@ -11846,7 +11878,7 @@
 </details>
 
 <details>
-<summary><b>ASSET-010</b> — <code>assets/food-order-guest.js</code> (310 خط، 18 آدرس، بازبینی‌شده 0/18)</summary>
+<summary><b>ASSET-010</b> — <code>assets/food-order-guest.js</code> (308 خط، 18 آدرس، بازبینی‌شده 0/18)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
@@ -11858,16 +11890,16 @@
 | `ASSET-010.06` | 39–53 | بلوک | `request` | 0 | ⬜ |
 | `ASSET-010.07` | 54–64 | بلوک | `toast` | 0 | ⬜ |
 | `ASSET-010.08` | 65–78 | بلوک | `readForm` | 0 | ⬜ |
-| `ASSET-010.09` | 79–85 | بلوک | `render` | 0 | ⬜ |
-| `ASSET-010.10` | 86–153 | بلوک | `mealCount` | 1 | ⬜ |
-| `ASSET-010.11` | 154–179 | بلوک | `ensureDialog` | 1 | ⬜ |
-| `ASSET-010.12` | 180–200 | بلوک | `load` | 0 | ⬜ |
-| `ASSET-010.13` | 201–238 | بلوک | `save` | 1 | ⬜ |
-| `ASSET-010.14` | 239–249 | بلوک | `cancel` | 0 | ⬜ |
-| `ASSET-010.15` | 250–267 | بلوک | `beginEdit` | 0 | ⬜ |
-| `ASSET-010.16` | 268–274 | بلوک | `cancelEdit` | 0 | ⬜ |
-| `ASSET-010.17` | 275–288 | بلوک | `removeRequest` | 1 | ⬜ |
-| `ASSET-010.18` | 289–310 | بلوک | `open` | 0 | ⬜ |
+| `ASSET-010.09` | 79–83 | بلوک | `render` | 0 | ⬜ |
+| `ASSET-010.10` | 84–151 | بلوک | `mealCount` | 1 | ⬜ |
+| `ASSET-010.11` | 152–177 | بلوک | `ensureDialog` | 1 | ⬜ |
+| `ASSET-010.12` | 178–198 | بلوک | `load` | 0 | ⬜ |
+| `ASSET-010.13` | 199–236 | بلوک | `save` | 1 | ⬜ |
+| `ASSET-010.14` | 237–247 | بلوک | `cancel` | 0 | ⬜ |
+| `ASSET-010.15` | 248–265 | بلوک | `beginEdit` | 0 | ⬜ |
+| `ASSET-010.16` | 266–272 | بلوک | `cancelEdit` | 0 | ⬜ |
+| `ASSET-010.17` | 273–286 | بلوک | `removeRequest` | 1 | ⬜ |
+| `ASSET-010.18` | 287–308 | بلوک | `open` | 0 | ⬜ |
 
 </details>
 
@@ -11971,25 +12003,25 @@
 </details>
 
 <details>
-<summary><b>ASSET-013</b> — <code>assets/food-org-groups.js</code> (293 خط، 15 آدرس، بازبینی‌شده 0/15)</summary>
+<summary><b>ASSET-013</b> — <code>assets/food-org-groups.js</code> (295 خط، 15 آدرس، بازبینی‌شده 0/15)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
 | `ASSET-013.01` | 1–25 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
-| `ASSET-013.02` | 26–37 | بلوک | `typeLabel` | 0 | ⬜ |
-| `ASSET-013.03` | 38–52 | بلوک | `typeOrder` | 0 | ⬜ |
-| `ASSET-013.04` | 53–83 | بلوک | `load` | 0 | ⬜ |
-| `ASSET-013.05` | 84–93 | بلوک | `invalidate` | 0 | ⬜ |
-| `ASSET-013.06` | 94–114 | بلوک | `keysForRow` | 0 | ⬜ |
-| `ASSET-013.07` | 115–123 | بلوک | `digits` | 0 | ⬜ |
-| `ASSET-013.08` | 124–141 | بلوک | `groupOf` | 0 | ⬜ |
-| `ASSET-013.09` | 142–181 | بلوک | `split` | 0 | ⬜ |
-| `ASSET-013.10` | 182–198 | بلوک | `groupHeaderHtml` | 0 | ⬜ |
-| `ASSET-013.11` | 199–224 | بلوک | `foodBreakdown` | 0 | ⬜ |
-| `ASSET-013.12` | 225–239 | بلوک | `uniquePeopleCount` | 0 | ⬜ |
-| `ASSET-013.13` | 240–245 | بلوک | `faNum` | 0 | ⬜ |
-| `ASSET-013.14` | 246–258 | بلوک | `escapeHtml` | 0 | ⬜ |
-| `ASSET-013.15` | 259–293 | بلوک | `render` | 0 | ⬜ |
+| `ASSET-013.02` | 26–38 | بلوک | `typeLabel` | 0 | ⬜ |
+| `ASSET-013.03` | 39–54 | بلوک | `typeOrder` | 0 | ⬜ |
+| `ASSET-013.04` | 55–85 | بلوک | `load` | 0 | ⬜ |
+| `ASSET-013.05` | 86–95 | بلوک | `invalidate` | 0 | ⬜ |
+| `ASSET-013.06` | 96–116 | بلوک | `keysForRow` | 0 | ⬜ |
+| `ASSET-013.07` | 117–125 | بلوک | `digits` | 0 | ⬜ |
+| `ASSET-013.08` | 126–143 | بلوک | `groupOf` | 0 | ⬜ |
+| `ASSET-013.09` | 144–183 | بلوک | `split` | 0 | ⬜ |
+| `ASSET-013.10` | 184–200 | بلوک | `groupHeaderHtml` | 0 | ⬜ |
+| `ASSET-013.11` | 201–226 | بلوک | `foodBreakdown` | 0 | ⬜ |
+| `ASSET-013.12` | 227–241 | بلوک | `uniquePeopleCount` | 0 | ⬜ |
+| `ASSET-013.13` | 242–247 | بلوک | `faNum` | 0 | ⬜ |
+| `ASSET-013.14` | 248–260 | بلوک | `escapeHtml` | 0 | ⬜ |
+| `ASSET-013.15` | 261–295 | بلوک | `render` | 0 | ⬜ |
 
 </details>
 
@@ -12839,7 +12871,7 @@
 </details>
 
 <details>
-<summary><b>WEB-019</b> — <code>food-ticket-web/assets/food-menu.css</code> (417 خط، 19 آدرس، بازبینی‌شده 0/19)</summary>
+<summary><b>WEB-019</b> — <code>food-ticket-web/assets/food-menu.css</code> (430 خط، 19 آدرس، بازبینی‌شده 0/19)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
@@ -12858,201 +12890,207 @@
 | `WEB-019.13` | 287–328 | بلوک | `ثبت دستی تردد در تنظیمات سیستم` | 1 | ⬜ |
 | `WEB-019.14` | 329–346 | بلوک | `Selectable employee checklist used by the live, bo` | 1 | ⬜ |
 | `WEB-019.15` | 347–354 | بلوک | `بلوکبندی ۲/۳ ستونه: همهٔ ستونها دقیقاً همعرض، بدون` | 0 | ⬜ |
-| `WEB-019.16` | 355–378 | بلوک | `تعیین تکلیف غذای باقیمانده (تطبیق روزانه)` | 1 | ⬜ |
-| `WEB-019.17` | 379–405 | بلوک | `1.62.93 follow-up: cancel-request cutoff + compact` | 1 | ⬜ |
-| `WEB-019.18` | 406–413 | بلوک | `تفکیک غذای هم‌گروه: «چلوکباب ۴ · قیمه ۲»` | 0 | ⬜ |
-| `WEB-019.19` | 414–417 | بلوک | `جدول داخل هر گروه، مثل گروه منو بدون حاشیهٔ اضافه` | 0 | ⬜ |
+| `WEB-019.16` | 355–391 | بلوک | `تعیین تکلیف غذای باقیمانده (تطبیق روزانه)` | 1 | ⬜ |
+| `WEB-019.17` | 392–418 | بلوک | `1.62.93 follow-up: cancel-request cutoff + compact` | 1 | ⬜ |
+| `WEB-019.18` | 419–426 | بلوک | `تفکیک غذای هم‌گروه: «چلوکباب ۴ · قیمه ۲»` | 0 | ⬜ |
+| `WEB-019.19` | 427–430 | بلوک | `جدول داخل هر گروه، مثل گروه منو بدون حاشیهٔ اضافه` | 0 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>WEB-020</b> — <code>food-ticket-web/assets/food-menu.js</code> (2,820 خط، 183 آدرس، بازبینی‌شده 0/183)</summary>
+<summary><b>WEB-020</b> — <code>food-ticket-web/assets/food-menu.js</code> (2,991 خط، 189 آدرس، بازبینی‌شده 0/189)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `WEB-020.01` | 1–107 | بلوک | `مدیر برنامهٔ غذایی در پنل چاپ فیش.` | 0 | ⬜ |
-| `WEB-020.02` | 108–112 | بلوک | `esc` | 0 | ⬜ |
-| `WEB-020.03` | 113–113 | بلوک | `faDigits` | 0 | ⬜ |
-| `WEB-020.04` | 114–118 | بلوک | `asciiDigits` | 0 | ⬜ |
-| `WEB-020.05` | 119–128 | بلوک | `isoFromJalali` | 0 | ⬜ |
-| `WEB-020.06` | 129–135 | بلوک | `jalaliFromIso` | 0 | ⬜ |
-| `WEB-020.07` | 136–142 | بلوک | `normalizeIsoDate` | 0 | ⬜ |
-| `WEB-020.08` | 143–146 | بلوک | `jalaliMonthFromIso` | 0 | ⬜ |
-| `WEB-020.09` | 147–150 | بلوک | `localTodayIso` | 0 | ⬜ |
-| `WEB-020.10` | 151–151 | بلوک | `monthKey` | 0 | ⬜ |
-| `WEB-020.11` | 152–152 | بلوک | `monthTitle` | 0 | ⬜ |
-| `WEB-020.12` | 153–153 | بلوک | `getDay` | 0 | ⬜ |
-| `WEB-020.13` | 154–157 | بلوک | `activeOrderCount` | 0 | ⬜ |
-| `WEB-020.14` | 158–167 | بلوک | `holiday` | 0 | ⬜ |
-| `WEB-020.15` | 168–173 | بلوک | `isWeekendIso` | 0 | ⬜ |
-| `WEB-020.16` | 174–178 | بلوک | `holidayOrWeekend` | 0 | ⬜ |
-| `WEB-020.17` | 179–184 | بلوک | `buildUrl` | 0 | ⬜ |
-| `WEB-020.18` | 185–202 | بلوک | `request` | 0 | ⬜ |
-| `WEB-020.19` | 203–209 | بلوک | `notify` | 0 | ⬜ |
-| `WEB-020.20` | 210–215 | بلوک | `navTabs` | 0 | ⬜ |
-| `WEB-020.21` | 216–225 | بلوک | `cancelCount` | 0 | ⬜ |
-| `WEB-020.22` | 226–258 | بلوک | `renderCalendar` | 0 | ⬜ |
-| `WEB-020.23` | 259–276 | بلوک | `renderDayEditor` | 0 | ⬜ |
-| `WEB-020.24` | 277–286 | بلوک | `choiceHtml` | 0 | ⬜ |
-| `WEB-020.25` | 287–312 | بلوک | `foods` | 0 | ⬜ |
-| `WEB-020.26` | 313–318 | بلوک | `categoryOptions` | 0 | ⬜ |
-| `WEB-020.27` | 319–327 | بلوک | `catalogCategoryNames` | 0 | ⬜ |
-| `WEB-020.28` | 328–337 | بلوک | `foodCardHtml` | 0 | ⬜ |
-| `WEB-020.29` | 338–380 | بلوک | `renderCatalog` | 0 | ⬜ |
-| `WEB-020.30` | 381–392 | بلوک | `readSavedOrderReportFields` | 0 | ⬜ |
-| `WEB-020.31` | 393–398 | بلوک | `saveOrderReportFields` | 4 | ⬜ |
-| `WEB-020.32` | 399–403 | بلوک | `selectedOrderColumns` | 0 | ⬜ |
-| `WEB-020.33` | 404–421 | بلوک | `orderFieldValue` | 0 | ⬜ |
-| `WEB-020.34` | 422–431 | بلوک | `orderSortValue` | 0 | ⬜ |
-| `WEB-020.35` | 432–447 | بلوک | `sortOrderRows` | 0 | ⬜ |
-| `WEB-020.36` | 448–485 | بلوک | `orderTableHtml` | 0 | ⬜ |
-| `WEB-020.37` | 486–522 | بلوک | `orderByMenuHtml` | 0 | ⬜ |
-| `WEB-020.38` | 523–534 | بلوک | `readDeliveredReportFields` | 0 | ⬜ |
-| `WEB-020.39` | 535–539 | بلوک | `saveDeliveredReportFields` | 4 | ⬜ |
-| `WEB-020.40` | 540–554 | بلوک | `deliveredReportFieldValue` | 0 | ⬜ |
-| `WEB-020.41` | 555–558 | بلوک | `selectedDeliveredReportColumns` | 0 | ⬜ |
-| `WEB-020.42` | 559–571 | بلوک | `sortDeliveredReportRows` | 0 | ⬜ |
-| `WEB-020.43` | 572–602 | بلوک | `deliveredReportTableHtml` | 0 | ⬜ |
-| `WEB-020.44` | 603–605 | بلوک | `deliveredReportByMenuHtml` | 0 | ⬜ |
-| `WEB-020.45` | 606–631 | بلوک | `key` | 0 | ⬜ |
-| `WEB-020.46` | 632–645 | بلوک | `deliveredReportByOrgHtml` | 0 | ⬜ |
-| `WEB-020.47` | 646–654 | بلوک | `requestOrgMap` | 0 | ⬜ |
-| `WEB-020.48` | 655–659 | بلوک | `deliveredReportOrderedRows` | 0 | ⬜ |
-| `WEB-020.49` | 660–672 | بلوک | `key` | 0 | ⬜ |
-| `WEB-020.50` | 673–676 | بلوک | `deliveryDateForReport` | 0 | ⬜ |
-| `WEB-020.51` | 677–696 | بلوک | `renderPrintedDeliveryReport` | 0 | ⬜ |
-| `WEB-020.52` | 697–732 | بلوک | `loadPrintedDeliveryReport` | 0 | ⬜ |
-| `WEB-020.53` | 733–749 | بلوک | `exportPrintedDeliveryReport` | 0 | ⬜ |
-| `WEB-020.54` | 750–754 | بلوک | `printPrintedDeliveryReport` | 0 | ⬜ |
-| `WEB-020.55` | 755–760 | بلوک | `summaryHtml` | 0 | ⬜ |
-| `WEB-020.56` | 761–769 | بلوک | `nameSplit` | 0 | ⬜ |
-| `WEB-020.57` | 770–777 | بلوک | `personSortValue` | 0 | ⬜ |
-| `WEB-020.58` | 778–788 | بلوک | `sortByState` | 0 | ⬜ |
-| `WEB-020.59` | 789–794 | بلوک | `sortStateToggle` | 0 | ⬜ |
-| `WEB-020.60` | 795–798 | بلوک | `sortStateMark` | 0 | ⬜ |
-| `WEB-020.61` | 799–802 | بلوک | `rowSummary` | 0 | ⬜ |
-| `WEB-020.62` | 803–808 | بلوک | `renderOrders` | 0 | ⬜ |
-| `WEB-020.63` | 809–829 | بلوک | `viewButton` | 0 | ⬜ |
-| `WEB-020.64` | 830–843 | بلوک | `ordersByOrgHtml` | 0 | ⬜ |
-| `WEB-020.65` | 844–852 | بلوک | `renderGroupOrders` | 0 | ⬜ |
-| `WEB-020.66` | 853–877 | بلوک | `tableFor` | 0 | ⬜ |
-| `WEB-020.67` | 878–885 | بلوک | `renderCancelRequests` | 0 | ⬜ |
-| `WEB-020.68` | 886–898 | بلوک | `splitRow` | 0 | ⬜ |
-| `WEB-020.69` | 899–908 | بلوک | `cancelValue` | 0 | ⬜ |
-| `WEB-020.70` | 909–911 | بلوک | `cmp` | 0 | ⬜ |
-| `WEB-020.71` | 912–930 | بلوک | `cancelHead` | 0 | ⬜ |
-| `WEB-020.72` | 931–949 | بلوک | `renderStatistics` | 0 | ⬜ |
-| `WEB-020.73` | 950–959 | بلوک | `mark` | 0 | ⬜ |
-| `WEB-020.74` | 960–983 | بلوک | `peopleSortMark` | 0 | ⬜ |
-| `WEB-020.75` | 984–1009 | بلوک | `foods` | 0 | ⬜ |
-| `WEB-020.76` | 1010–1018 | بلوک | `normalizeJalaliMonth` | 0 | ⬜ |
-| `WEB-020.77` | 1019–1028 | بلوک | `reconciliationGapCell` | 0 | ⬜ |
-| `WEB-020.78` | 1029–1037 | بلوک | `reconciliationRemainingCell` | 0 | ⬜ |
-| `WEB-020.79` | 1038–1044 | بلوک | `reconciliationLeftoverCell` | 0 | ⬜ |
-| `WEB-020.80` | 1045–1048 | بلوک | `reconciliationNumber` | 0 | ⬜ |
-| `WEB-020.81` | 1049–1053 | بلوک | `reconciliationAmount` | 0 | ⬜ |
-| `WEB-020.82` | 1054–1128 | بلوک | `renderReconciliation` | 0 | ⬜ |
-| `WEB-020.83` | 1129–1134 | بلوک | `renderLeftoverModal` | 0 | ⬜ |
-| `WEB-020.84` | 1135–1154 | بلوک | `row` | 0 | ⬜ |
-| `WEB-020.85` | 1155–1155 | بلوک | `leftoverPreviewFor` | 0 | ⬜ |
-| `WEB-020.86` | 1156–1171 | بلوک | `items` | 0 | ⬜ |
-| `WEB-020.87` | 1172–1177 | بلوک | `leftoverInlineError` | 0 | ⬜ |
-| `WEB-020.88` | 1178–1221 | بلوک | `confirmLeftoverModal` | 0 | ⬜ |
-| `WEB-020.89` | 1222–1229 | بلوک | `submitReconciliationBody` | 0 | ⬜ |
-| `WEB-020.90` | 1230–1236 | بلوک | `message` | 0 | ⬜ |
-| `WEB-020.91` | 1237–1245 | بلوک | `postReconciliation` | 0 | ⬜ |
-| `WEB-020.92` | 1246–1286 | بلوک | `loadReconciliation` | 0 | ⬜ |
-| `WEB-020.93` | 1287–1292 | بلوک | `downloadReconciliation` | 0 | ⬜ |
-| `WEB-020.94` | 1293–1293 | بلوک | `selectReconciliationRow` | 0 | ⬜ |
-| `WEB-020.95` | 1294–1310 | بلوک | `item` | 0 | ⬜ |
-| `WEB-020.96` | 1311–1344 | بلوک | `saveReconciliationForm` | 0 | ⬜ |
-| `WEB-020.97` | 1345–1381 | بلوک | `uploadReconciliationInvoice` | 0 | ⬜ |
-| `WEB-020.98` | 1382–1385 | بلوک | `bulkOperationTitle` | 0 | ⬜ |
-| `WEB-020.99` | 1386–1390 | بلوک | `bulkSelectedPeople` | 0 | ⬜ |
-| `WEB-020.100` | 1391–1394 | بلوک | `bulkTargetValue` | 0 | ⬜ |
-| `WEB-020.101` | 1395–1401 | بلوک | `bulkCanSelect` | 0 | ⬜ |
-| `WEB-020.102` | 1402–1412 | بلوک | `group` | 0 | ⬜ |
-| `WEB-020.103` | 1413–1429 | بلوک | `saveCancelCutoff` | 0 | ⬜ |
-| `WEB-020.104` | 1430–1458 | بلوک | `loadBulkSnapshot` | 0 | ⬜ |
-| `WEB-020.105` | 1459–1473 | بلوک | `bulkTargetOptions` | 0 | ⬜ |
-| `WEB-020.106` | 1474–1489 | بلوک | `bulkPersonStatus` | 0 | ⬜ |
-| `WEB-020.107` | 1490–1511 | بلوک | `group` | 0 | ⬜ |
-| `WEB-020.108` | 1512–1517 | بلوک | `renderBulkResults` | 0 | ⬜ |
-| `WEB-020.109` | 1518–1525 | بلوک | `renderBulkModal` | 0 | ⬜ |
-| `WEB-020.110` | 1526–1543 | بلوک | `renderBulkOperations` | 0 | ⬜ |
-| `WEB-020.111` | 1544–1549 | بلوک | `rows` | 0 | ⬜ |
-| `WEB-020.112` | 1550–1562 | بلوک | `bulkValue` | 0 | ⬜ |
-| `WEB-020.113` | 1563–1568 | بلوک | `bulkHead` | 0 | ⬜ |
-| `WEB-020.114` | 1569–1582 | بلوک | `selected` | 0 | ⬜ |
-| `WEB-020.115` | 1583–1593 | بلوک | `previewDisabled` | 0 | ⬜ |
-| `WEB-020.116` | 1594–1604 | بلوک | `bulkTogglePerson` | 1 | ⬜ |
-| `WEB-020.117` | 1605–1606 | بلوک | `bulkSelectEligible` | 0 | ⬜ |
-| `WEB-020.118` | 1607–1612 | بلوک | `eligible` | 0 | ⬜ |
-| `WEB-020.119` | 1613–1615 | بلوک | `submitBulkOperation` | 0 | ⬜ |
-| `WEB-020.120` | 1616–1635 | بلوک | `ids` | 0 | ⬜ |
-| `WEB-020.121` | 1636–1641 | بلوک | `mealTypeSwitch` | 0 | ⬜ |
-| `WEB-020.122` | 1642–1649 | بلوک | `embeddedPanel` | 0 | ⬜ |
-| `WEB-020.123` | 1650–1669 | بلوک | `loadEmbedded` | 0 | ⬜ |
-| `WEB-020.124` | 1670–1677 | بلوک | `renderFocusKeyOf` | 0 | ⬜ |
-| `WEB-020.125` | 1678–1689 | بلوک | `captureRenderFocus` | 4 | ⬜ |
-| `WEB-020.126` | 1690–1702 | بلوک | `restoreRenderFocus` | 4 | ⬜ |
-| `WEB-020.127` | 1703–1714 | بلوک | `render` | 0 | ⬜ |
-| `WEB-020.128` | 1715–1721 | بلوک | `notices` | 0 | ⬜ |
-| `WEB-020.129` | 1722–1733 | بلوک | `loadStatus` | 0 | ⬜ |
-| `WEB-020.130` | 1734–1740 | بلوک | `loadCatalog` | 0 | ⬜ |
-| `WEB-020.131` | 1741–1748 | بلوک | `loadMonth` | 0 | ⬜ |
-| `WEB-020.132` | 1749–1770 | بلوک | `loadOrders` | 0 | ⬜ |
-| `WEB-020.133` | 1771–1791 | بلوک | `loadFoodGroups` | 0 | ⬜ |
-| `WEB-020.134` | 1792–1822 | بلوک | `loadGroupOrders` | 0 | ⬜ |
-| `WEB-020.135` | 1823–1839 | بلوک | `loadCancelRequests` | 0 | ⬜ |
-| `WEB-020.136` | 1840–1858 | بلوک | `loadGuestRequests` | 0 | ⬜ |
-| `WEB-020.137` | 1859–1859 | بلوک | `beginGuestEdit` | 0 | ⬜ |
-| `WEB-020.138` | 1860–1875 | بلوک | `row` | 0 | ⬜ |
-| `WEB-020.139` | 1876–1881 | بلوک | `cancelGuestEdit` | 0 | ⬜ |
-| `WEB-020.140` | 1882–1913 | بلوک | `saveGuestEdit` | 1 | ⬜ |
-| `WEB-020.141` | 1914–1914 | بلوک | `guestRequestAction` | 0 | ⬜ |
-| `WEB-020.142` | 1915–1937 | بلوک | `row` | 1 | ⬜ |
-| `WEB-020.143` | 1938–1940 | بلوک | `renderGuestRequestManager` | 0 | ⬜ |
-| `WEB-020.144` | 1941–1963 | بلوک | `rows` | 1 | ⬜ |
-| `WEB-020.145` | 1964–1978 | بلوک | `decideCancelRequest` | 0 | ⬜ |
-| `WEB-020.146` | 1979–1985 | بلوک | `loadStatistics` | 0 | ⬜ |
-| `WEB-020.147` | 1986–2019 | بلوک | `selectedIds` | 0 | ⬜ |
-| `WEB-020.148` | 2020–2047 | بلوک | `searchSelectedReportEmployees` | 0 | ⬜ |
-| `WEB-020.149` | 2048–2074 | بلوک | `refreshAll` | 0 | ⬜ |
-| `WEB-020.150` | 2075–2119 | بلوک | `saveDay` | 0 | ⬜ |
-| `WEB-020.151` | 2120–2145 | بلوک | `saveCatalog` | 0 | ⬜ |
-| `WEB-020.152` | 2146–2165 | بلوک | `orderExportRows` | 0 | ⬜ |
-| `WEB-020.153` | 2166–2182 | بلوک | `downloadOrdersCsv` | 0 | ⬜ |
-| `WEB-020.154` | 2183–2187 | بلوک | `downloadOrders` | 0 | ⬜ |
-| `WEB-020.155` | 2188–2189 | بلوک | `printScopedReport` | 0 | ⬜ |
-| `WEB-020.156` | 2190–2200 | بلوک | `target` | 0 | ⬜ |
-| `WEB-020.157` | 2201–2218 | بلوک | `cleanup` | 0 | ⬜ |
-| `WEB-020.158` | 2219–2223 | بلوک | `printOrders` | 0 | ⬜ |
-| `WEB-020.159` | 2224–2230 | بلوک | `downloadStatistics` | 0 | ⬜ |
-| `WEB-020.160` | 2231–2235 | بلوک | `printStatistics` | 0 | ⬜ |
-| `WEB-020.161` | 2236–2243 | بلوک | `selectDay` | 0 | ⬜ |
-| `WEB-020.162` | 2244–2249 | بلوک | `changeMonth` | 0 | ⬜ |
-| `WEB-020.163` | 2250–2286 | بلوک | `switchTab` | 0 | ⬜ |
-| `WEB-020.164` | 2287–2300 | بلوک | `emergencyEnsurePeople` | 0 | ⬜ |
-| `WEB-020.165` | 2301–2309 | بلوک | `emergencyPanel` | 0 | ⬜ |
-| `WEB-020.166` | 2310–2344 | بلوک | `msgs` | 0 | ⬜ |
-| `WEB-020.167` | 2345–2350 | بلوک | `emergencyLoadOrders` | 0 | ⬜ |
-| `WEB-020.168` | 2351–2395 | بلوک | `daySearchInput` | 4 | ⬜ |
-| `WEB-020.169` | 2396–2406 | بلوک | `emergencyClick` | 0 | ⬜ |
-| `WEB-020.170` | 2407–2435 | بلوک | `person` | 0 | ⬜ |
-| `WEB-020.171` | 2436–2483 | بلوک | `eventClick` | 0 | ⬜ |
-| `WEB-020.172` | 2484–2593 | بلوک | `person` | 1 | ⬜ |
-| `WEB-020.173` | 2594–2602 | بلوک | `dayPickFor` | 0 | ⬜ |
-| `WEB-020.174` | 2603–2609 | بلوک | `trackDayPick` | 0 | ⬜ |
-| `WEB-020.175` | 2610–2617 | بلوک | `orderedDayFoodIds` | 0 | ⬜ |
-| `WEB-020.176` | 2618–2654 | بلوک | `eventChange` | 0 | ⬜ |
-| `WEB-020.177` | 2655–2688 | بلوک | `person` | 0 | ⬜ |
-| `WEB-020.178` | 2689–2771 | بلوک | `eventSubmit` | 0 | ⬜ |
-| `WEB-020.179` | 2772–2777 | بلوک | `spanDays` | 0 | ⬜ |
-| `WEB-020.180` | 2778–2806 | بلوک | `mount` | 0 | ⬜ |
-| `WEB-020.181` | 2807–2807 | بلوک | `reportInputFocused` | 0 | ⬜ |
-| `WEB-020.182` | 2808–2810 | بلوک | `safeReportRender` | 0 | ⬜ |
-| `WEB-020.183` | 2811–2820 | بلوک | `html` | 0 | ⬜ |
+| `WEB-020.01` | 1–108 | بلوک | `مدیر برنامهٔ غذایی در پنل چاپ فیش.` | 0 | ⬜ |
+| `WEB-020.02` | 109–113 | بلوک | `esc` | 0 | ⬜ |
+| `WEB-020.03` | 114–114 | بلوک | `faDigits` | 0 | ⬜ |
+| `WEB-020.04` | 115–119 | بلوک | `asciiDigits` | 0 | ⬜ |
+| `WEB-020.05` | 120–129 | بلوک | `isoFromJalali` | 0 | ⬜ |
+| `WEB-020.06` | 130–136 | بلوک | `jalaliFromIso` | 0 | ⬜ |
+| `WEB-020.07` | 137–143 | بلوک | `normalizeIsoDate` | 0 | ⬜ |
+| `WEB-020.08` | 144–147 | بلوک | `jalaliMonthFromIso` | 0 | ⬜ |
+| `WEB-020.09` | 148–151 | بلوک | `localTodayIso` | 0 | ⬜ |
+| `WEB-020.10` | 152–152 | بلوک | `monthKey` | 0 | ⬜ |
+| `WEB-020.11` | 153–153 | بلوک | `monthTitle` | 0 | ⬜ |
+| `WEB-020.12` | 154–154 | بلوک | `getDay` | 0 | ⬜ |
+| `WEB-020.13` | 155–158 | بلوک | `activeOrderCount` | 0 | ⬜ |
+| `WEB-020.14` | 159–168 | بلوک | `holiday` | 0 | ⬜ |
+| `WEB-020.15` | 169–174 | بلوک | `isWeekendIso` | 0 | ⬜ |
+| `WEB-020.16` | 175–179 | بلوک | `holidayOrWeekend` | 0 | ⬜ |
+| `WEB-020.17` | 180–185 | بلوک | `buildUrl` | 0 | ⬜ |
+| `WEB-020.18` | 186–203 | بلوک | `request` | 0 | ⬜ |
+| `WEB-020.19` | 204–210 | بلوک | `notify` | 0 | ⬜ |
+| `WEB-020.20` | 211–216 | بلوک | `navTabs` | 0 | ⬜ |
+| `WEB-020.21` | 217–226 | بلوک | `cancelCount` | 0 | ⬜ |
+| `WEB-020.22` | 227–259 | بلوک | `renderCalendar` | 0 | ⬜ |
+| `WEB-020.23` | 260–277 | بلوک | `renderDayEditor` | 0 | ⬜ |
+| `WEB-020.24` | 278–287 | بلوک | `choiceHtml` | 0 | ⬜ |
+| `WEB-020.25` | 288–313 | بلوک | `foods` | 0 | ⬜ |
+| `WEB-020.26` | 314–319 | بلوک | `categoryOptions` | 0 | ⬜ |
+| `WEB-020.27` | 320–328 | بلوک | `catalogCategoryNames` | 0 | ⬜ |
+| `WEB-020.28` | 329–338 | بلوک | `foodCardHtml` | 0 | ⬜ |
+| `WEB-020.29` | 339–381 | بلوک | `renderCatalog` | 0 | ⬜ |
+| `WEB-020.30` | 382–393 | بلوک | `readSavedOrderReportFields` | 0 | ⬜ |
+| `WEB-020.31` | 394–399 | بلوک | `saveOrderReportFields` | 4 | ⬜ |
+| `WEB-020.32` | 400–404 | بلوک | `selectedOrderColumns` | 0 | ⬜ |
+| `WEB-020.33` | 405–422 | بلوک | `orderFieldValue` | 0 | ⬜ |
+| `WEB-020.34` | 423–432 | بلوک | `orderSortValue` | 0 | ⬜ |
+| `WEB-020.35` | 433–448 | بلوک | `sortOrderRows` | 0 | ⬜ |
+| `WEB-020.36` | 449–486 | بلوک | `orderTableHtml` | 0 | ⬜ |
+| `WEB-020.37` | 487–523 | بلوک | `orderByMenuHtml` | 0 | ⬜ |
+| `WEB-020.38` | 524–535 | بلوک | `readDeliveredReportFields` | 0 | ⬜ |
+| `WEB-020.39` | 536–540 | بلوک | `saveDeliveredReportFields` | 4 | ⬜ |
+| `WEB-020.40` | 541–555 | بلوک | `deliveredReportFieldValue` | 0 | ⬜ |
+| `WEB-020.41` | 556–559 | بلوک | `selectedDeliveredReportColumns` | 0 | ⬜ |
+| `WEB-020.42` | 560–572 | بلوک | `sortDeliveredReportRows` | 0 | ⬜ |
+| `WEB-020.43` | 573–603 | بلوک | `deliveredReportTableHtml` | 0 | ⬜ |
+| `WEB-020.44` | 604–606 | بلوک | `deliveredReportByMenuHtml` | 0 | ⬜ |
+| `WEB-020.45` | 607–632 | بلوک | `key` | 0 | ⬜ |
+| `WEB-020.46` | 633–646 | بلوک | `deliveredReportByOrgHtml` | 0 | ⬜ |
+| `WEB-020.47` | 647–655 | بلوک | `requestOrgMap` | 0 | ⬜ |
+| `WEB-020.48` | 656–660 | بلوک | `deliveredReportOrderedRows` | 0 | ⬜ |
+| `WEB-020.49` | 661–673 | بلوک | `key` | 0 | ⬜ |
+| `WEB-020.50` | 674–677 | بلوک | `deliveryDateForReport` | 0 | ⬜ |
+| `WEB-020.51` | 678–697 | بلوک | `renderPrintedDeliveryReport` | 0 | ⬜ |
+| `WEB-020.52` | 698–733 | بلوک | `loadPrintedDeliveryReport` | 0 | ⬜ |
+| `WEB-020.53` | 734–750 | بلوک | `exportPrintedDeliveryReport` | 0 | ⬜ |
+| `WEB-020.54` | 751–755 | بلوک | `printPrintedDeliveryReport` | 0 | ⬜ |
+| `WEB-020.55` | 756–761 | بلوک | `summaryHtml` | 0 | ⬜ |
+| `WEB-020.56` | 762–770 | بلوک | `nameSplit` | 0 | ⬜ |
+| `WEB-020.57` | 771–778 | بلوک | `personSortValue` | 0 | ⬜ |
+| `WEB-020.58` | 779–789 | بلوک | `sortByState` | 0 | ⬜ |
+| `WEB-020.59` | 790–795 | بلوک | `sortStateToggle` | 0 | ⬜ |
+| `WEB-020.60` | 796–799 | بلوک | `sortStateMark` | 0 | ⬜ |
+| `WEB-020.61` | 800–803 | بلوک | `rowSummary` | 0 | ⬜ |
+| `WEB-020.62` | 804–809 | بلوک | `renderOrders` | 0 | ⬜ |
+| `WEB-020.63` | 810–830 | بلوک | `viewButton` | 0 | ⬜ |
+| `WEB-020.64` | 831–844 | بلوک | `ordersByOrgHtml` | 0 | ⬜ |
+| `WEB-020.65` | 845–853 | بلوک | `renderGroupOrders` | 0 | ⬜ |
+| `WEB-020.66` | 854–878 | بلوک | `tableFor` | 0 | ⬜ |
+| `WEB-020.67` | 879–886 | بلوک | `renderCancelRequests` | 0 | ⬜ |
+| `WEB-020.68` | 887–899 | بلوک | `splitRow` | 0 | ⬜ |
+| `WEB-020.69` | 900–909 | بلوک | `cancelValue` | 0 | ⬜ |
+| `WEB-020.70` | 910–912 | بلوک | `cmp` | 0 | ⬜ |
+| `WEB-020.71` | 913–931 | بلوک | `cancelHead` | 0 | ⬜ |
+| `WEB-020.72` | 932–950 | بلوک | `renderStatistics` | 0 | ⬜ |
+| `WEB-020.73` | 951–960 | بلوک | `mark` | 0 | ⬜ |
+| `WEB-020.74` | 961–984 | بلوک | `peopleSortMark` | 0 | ⬜ |
+| `WEB-020.75` | 985–1010 | بلوک | `foods` | 0 | ⬜ |
+| `WEB-020.76` | 1011–1019 | بلوک | `normalizeJalaliMonth` | 0 | ⬜ |
+| `WEB-020.77` | 1020–1029 | بلوک | `reconciliationGapCell` | 0 | ⬜ |
+| `WEB-020.78` | 1030–1038 | بلوک | `reconciliationRemainingCell` | 0 | ⬜ |
+| `WEB-020.79` | 1039–1045 | بلوک | `reconciliationLeftoverCell` | 0 | ⬜ |
+| `WEB-020.80` | 1046–1049 | بلوک | `reconciliationNumber` | 0 | ⬜ |
+| `WEB-020.81` | 1050–1054 | بلوک | `reconciliationAmount` | 0 | ⬜ |
+| `WEB-020.82` | 1055–1135 | بلوک | `renderReconciliation` | 0 | ⬜ |
+| `WEB-020.83` | 1136–1141 | بلوک | `renderGuestActualModal` | 0 | ⬜ |
+| `WEB-020.84` | 1142–1142 | بلوک | `hasNoneRow` | 0 | ⬜ |
+| `WEB-020.85` | 1143–1169 | بلوک | `rows` | 0 | ⬜ |
+| `WEB-020.86` | 1170–1175 | بلوک | `guestActualInlineError` | 0 | ⬜ |
+| `WEB-020.87` | 1176–1187 | بلوک | `guestActualSumFromDom` | 0 | ⬜ |
+| `WEB-020.88` | 1188–1196 | بلوک | `guestActualLiveSumListener` | 0 | ⬜ |
+| `WEB-020.89` | 1197–1222 | بلوک | `proceedToLeftover` | 0 | ⬜ |
+| `WEB-020.90` | 1223–1261 | بلوک | `confirmGuestActualModal` | 0 | ⬜ |
+| `WEB-020.91` | 1262–1267 | بلوک | `renderLeftoverModal` | 0 | ⬜ |
+| `WEB-020.92` | 1268–1287 | بلوک | `row` | 0 | ⬜ |
+| `WEB-020.93` | 1288–1293 | بلوک | `leftoverInlineError` | 0 | ⬜ |
+| `WEB-020.94` | 1294–1369 | بلوک | `confirmLeftoverModal` | 0 | ⬜ |
+| `WEB-020.95` | 1370–1377 | بلوک | `submitReconciliationBody` | 0 | ⬜ |
+| `WEB-020.96` | 1378–1384 | بلوک | `message` | 0 | ⬜ |
+| `WEB-020.97` | 1385–1393 | بلوک | `postReconciliation` | 0 | ⬜ |
+| `WEB-020.98` | 1394–1434 | بلوک | `loadReconciliation` | 0 | ⬜ |
+| `WEB-020.99` | 1435–1440 | بلوک | `downloadReconciliation` | 0 | ⬜ |
+| `WEB-020.100` | 1441–1441 | بلوک | `selectReconciliationRow` | 0 | ⬜ |
+| `WEB-020.101` | 1442–1458 | بلوک | `item` | 0 | ⬜ |
+| `WEB-020.102` | 1459–1512 | بلوک | `saveReconciliationForm` | 0 | ⬜ |
+| `WEB-020.103` | 1513–1549 | بلوک | `uploadReconciliationInvoice` | 0 | ⬜ |
+| `WEB-020.104` | 1550–1553 | بلوک | `bulkOperationTitle` | 0 | ⬜ |
+| `WEB-020.105` | 1554–1558 | بلوک | `bulkSelectedPeople` | 0 | ⬜ |
+| `WEB-020.106` | 1559–1562 | بلوک | `bulkTargetValue` | 0 | ⬜ |
+| `WEB-020.107` | 1563–1569 | بلوک | `bulkCanSelect` | 0 | ⬜ |
+| `WEB-020.108` | 1570–1580 | بلوک | `group` | 0 | ⬜ |
+| `WEB-020.109` | 1581–1597 | بلوک | `saveCancelCutoff` | 0 | ⬜ |
+| `WEB-020.110` | 1598–1626 | بلوک | `loadBulkSnapshot` | 0 | ⬜ |
+| `WEB-020.111` | 1627–1641 | بلوک | `bulkTargetOptions` | 0 | ⬜ |
+| `WEB-020.112` | 1642–1657 | بلوک | `bulkPersonStatus` | 0 | ⬜ |
+| `WEB-020.113` | 1658–1679 | بلوک | `group` | 0 | ⬜ |
+| `WEB-020.114` | 1680–1685 | بلوک | `renderBulkResults` | 0 | ⬜ |
+| `WEB-020.115` | 1686–1693 | بلوک | `renderBulkModal` | 0 | ⬜ |
+| `WEB-020.116` | 1694–1711 | بلوک | `renderBulkOperations` | 0 | ⬜ |
+| `WEB-020.117` | 1712–1717 | بلوک | `rows` | 0 | ⬜ |
+| `WEB-020.118` | 1718–1730 | بلوک | `bulkValue` | 0 | ⬜ |
+| `WEB-020.119` | 1731–1736 | بلوک | `bulkHead` | 0 | ⬜ |
+| `WEB-020.120` | 1737–1750 | بلوک | `selected` | 0 | ⬜ |
+| `WEB-020.121` | 1751–1761 | بلوک | `previewDisabled` | 0 | ⬜ |
+| `WEB-020.122` | 1762–1772 | بلوک | `bulkTogglePerson` | 1 | ⬜ |
+| `WEB-020.123` | 1773–1774 | بلوک | `bulkSelectEligible` | 0 | ⬜ |
+| `WEB-020.124` | 1775–1780 | بلوک | `eligible` | 0 | ⬜ |
+| `WEB-020.125` | 1781–1783 | بلوک | `submitBulkOperation` | 0 | ⬜ |
+| `WEB-020.126` | 1784–1803 | بلوک | `ids` | 0 | ⬜ |
+| `WEB-020.127` | 1804–1809 | بلوک | `mealTypeSwitch` | 0 | ⬜ |
+| `WEB-020.128` | 1810–1817 | بلوک | `embeddedPanel` | 0 | ⬜ |
+| `WEB-020.129` | 1818–1837 | بلوک | `loadEmbedded` | 0 | ⬜ |
+| `WEB-020.130` | 1838–1845 | بلوک | `renderFocusKeyOf` | 0 | ⬜ |
+| `WEB-020.131` | 1846–1857 | بلوک | `captureRenderFocus` | 4 | ⬜ |
+| `WEB-020.132` | 1858–1870 | بلوک | `restoreRenderFocus` | 4 | ⬜ |
+| `WEB-020.133` | 1871–1882 | بلوک | `render` | 0 | ⬜ |
+| `WEB-020.134` | 1883–1889 | بلوک | `notices` | 0 | ⬜ |
+| `WEB-020.135` | 1890–1901 | بلوک | `loadStatus` | 0 | ⬜ |
+| `WEB-020.136` | 1902–1908 | بلوک | `loadCatalog` | 0 | ⬜ |
+| `WEB-020.137` | 1909–1916 | بلوک | `loadMonth` | 0 | ⬜ |
+| `WEB-020.138` | 1917–1938 | بلوک | `loadOrders` | 0 | ⬜ |
+| `WEB-020.139` | 1939–1959 | بلوک | `loadFoodGroups` | 0 | ⬜ |
+| `WEB-020.140` | 1960–1990 | بلوک | `loadGroupOrders` | 0 | ⬜ |
+| `WEB-020.141` | 1991–2007 | بلوک | `loadCancelRequests` | 0 | ⬜ |
+| `WEB-020.142` | 2008–2026 | بلوک | `loadGuestRequests` | 0 | ⬜ |
+| `WEB-020.143` | 2027–2027 | بلوک | `beginGuestEdit` | 0 | ⬜ |
+| `WEB-020.144` | 2028–2043 | بلوک | `row` | 0 | ⬜ |
+| `WEB-020.145` | 2044–2049 | بلوک | `cancelGuestEdit` | 0 | ⬜ |
+| `WEB-020.146` | 2050–2081 | بلوک | `saveGuestEdit` | 1 | ⬜ |
+| `WEB-020.147` | 2082–2082 | بلوک | `guestRequestAction` | 0 | ⬜ |
+| `WEB-020.148` | 2083–2105 | بلوک | `row` | 1 | ⬜ |
+| `WEB-020.149` | 2106–2108 | بلوک | `renderGuestRequestManager` | 0 | ⬜ |
+| `WEB-020.150` | 2109–2131 | بلوک | `rows` | 1 | ⬜ |
+| `WEB-020.151` | 2132–2146 | بلوک | `decideCancelRequest` | 0 | ⬜ |
+| `WEB-020.152` | 2147–2153 | بلوک | `loadStatistics` | 0 | ⬜ |
+| `WEB-020.153` | 2154–2187 | بلوک | `selectedIds` | 0 | ⬜ |
+| `WEB-020.154` | 2188–2215 | بلوک | `searchSelectedReportEmployees` | 0 | ⬜ |
+| `WEB-020.155` | 2216–2242 | بلوک | `refreshAll` | 0 | ⬜ |
+| `WEB-020.156` | 2243–2287 | بلوک | `saveDay` | 0 | ⬜ |
+| `WEB-020.157` | 2288–2313 | بلوک | `saveCatalog` | 0 | ⬜ |
+| `WEB-020.158` | 2314–2333 | بلوک | `orderExportRows` | 0 | ⬜ |
+| `WEB-020.159` | 2334–2350 | بلوک | `downloadOrdersCsv` | 0 | ⬜ |
+| `WEB-020.160` | 2351–2355 | بلوک | `downloadOrders` | 0 | ⬜ |
+| `WEB-020.161` | 2356–2357 | بلوک | `printScopedReport` | 0 | ⬜ |
+| `WEB-020.162` | 2358–2368 | بلوک | `target` | 0 | ⬜ |
+| `WEB-020.163` | 2369–2386 | بلوک | `cleanup` | 0 | ⬜ |
+| `WEB-020.164` | 2387–2391 | بلوک | `printOrders` | 0 | ⬜ |
+| `WEB-020.165` | 2392–2398 | بلوک | `downloadStatistics` | 0 | ⬜ |
+| `WEB-020.166` | 2399–2403 | بلوک | `printStatistics` | 0 | ⬜ |
+| `WEB-020.167` | 2404–2411 | بلوک | `selectDay` | 0 | ⬜ |
+| `WEB-020.168` | 2412–2417 | بلوک | `changeMonth` | 0 | ⬜ |
+| `WEB-020.169` | 2418–2454 | بلوک | `switchTab` | 0 | ⬜ |
+| `WEB-020.170` | 2455–2468 | بلوک | `emergencyEnsurePeople` | 0 | ⬜ |
+| `WEB-020.171` | 2469–2477 | بلوک | `emergencyPanel` | 0 | ⬜ |
+| `WEB-020.172` | 2478–2512 | بلوک | `msgs` | 0 | ⬜ |
+| `WEB-020.173` | 2513–2518 | بلوک | `emergencyLoadOrders` | 0 | ⬜ |
+| `WEB-020.174` | 2519–2563 | بلوک | `daySearchInput` | 4 | ⬜ |
+| `WEB-020.175` | 2564–2574 | بلوک | `emergencyClick` | 0 | ⬜ |
+| `WEB-020.176` | 2575–2603 | بلوک | `person` | 0 | ⬜ |
+| `WEB-020.177` | 2604–2651 | بلوک | `eventClick` | 0 | ⬜ |
+| `WEB-020.178` | 2652–2763 | بلوک | `person` | 1 | ⬜ |
+| `WEB-020.179` | 2764–2772 | بلوک | `dayPickFor` | 0 | ⬜ |
+| `WEB-020.180` | 2773–2779 | بلوک | `trackDayPick` | 0 | ⬜ |
+| `WEB-020.181` | 2780–2787 | بلوک | `orderedDayFoodIds` | 0 | ⬜ |
+| `WEB-020.182` | 2788–2824 | بلوک | `eventChange` | 0 | ⬜ |
+| `WEB-020.183` | 2825–2858 | بلوک | `person` | 0 | ⬜ |
+| `WEB-020.184` | 2859–2941 | بلوک | `eventSubmit` | 0 | ⬜ |
+| `WEB-020.185` | 2942–2947 | بلوک | `spanDays` | 0 | ⬜ |
+| `WEB-020.186` | 2948–2977 | بلوک | `mount` | 0 | ⬜ |
+| `WEB-020.187` | 2978–2978 | بلوک | `reportInputFocused` | 0 | ⬜ |
+| `WEB-020.188` | 2979–2981 | بلوک | `safeReportRender` | 0 | ⬜ |
+| `WEB-020.189` | 2982–2991 | بلوک | `html` | 0 | ⬜ |
 
 </details>
 
@@ -13095,25 +13133,25 @@
 </details>
 
 <details>
-<summary><b>WEB-023</b> — <code>food-ticket-web/assets/food-org-groups.js</code> (293 خط، 15 آدرس، بازبینی‌شده 0/15)</summary>
+<summary><b>WEB-023</b> — <code>food-ticket-web/assets/food-org-groups.js</code> (295 خط، 15 آدرس، بازبینی‌شده 0/15)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
 | `WEB-023.01` | 1–25 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
-| `WEB-023.02` | 26–37 | بلوک | `typeLabel` | 0 | ⬜ |
-| `WEB-023.03` | 38–52 | بلوک | `typeOrder` | 0 | ⬜ |
-| `WEB-023.04` | 53–83 | بلوک | `load` | 0 | ⬜ |
-| `WEB-023.05` | 84–93 | بلوک | `invalidate` | 0 | ⬜ |
-| `WEB-023.06` | 94–114 | بلوک | `keysForRow` | 0 | ⬜ |
-| `WEB-023.07` | 115–123 | بلوک | `digits` | 0 | ⬜ |
-| `WEB-023.08` | 124–141 | بلوک | `groupOf` | 0 | ⬜ |
-| `WEB-023.09` | 142–181 | بلوک | `split` | 0 | ⬜ |
-| `WEB-023.10` | 182–198 | بلوک | `groupHeaderHtml` | 0 | ⬜ |
-| `WEB-023.11` | 199–224 | بلوک | `foodBreakdown` | 0 | ⬜ |
-| `WEB-023.12` | 225–239 | بلوک | `uniquePeopleCount` | 0 | ⬜ |
-| `WEB-023.13` | 240–245 | بلوک | `faNum` | 0 | ⬜ |
-| `WEB-023.14` | 246–258 | بلوک | `escapeHtml` | 0 | ⬜ |
-| `WEB-023.15` | 259–293 | بلوک | `render` | 0 | ⬜ |
+| `WEB-023.02` | 26–38 | بلوک | `typeLabel` | 0 | ⬜ |
+| `WEB-023.03` | 39–54 | بلوک | `typeOrder` | 0 | ⬜ |
+| `WEB-023.04` | 55–85 | بلوک | `load` | 0 | ⬜ |
+| `WEB-023.05` | 86–95 | بلوک | `invalidate` | 0 | ⬜ |
+| `WEB-023.06` | 96–116 | بلوک | `keysForRow` | 0 | ⬜ |
+| `WEB-023.07` | 117–125 | بلوک | `digits` | 0 | ⬜ |
+| `WEB-023.08` | 126–143 | بلوک | `groupOf` | 0 | ⬜ |
+| `WEB-023.09` | 144–183 | بلوک | `split` | 0 | ⬜ |
+| `WEB-023.10` | 184–200 | بلوک | `groupHeaderHtml` | 0 | ⬜ |
+| `WEB-023.11` | 201–226 | بلوک | `foodBreakdown` | 0 | ⬜ |
+| `WEB-023.12` | 227–241 | بلوک | `uniquePeopleCount` | 0 | ⬜ |
+| `WEB-023.13` | 242–247 | بلوک | `faNum` | 0 | ⬜ |
+| `WEB-023.14` | 248–260 | بلوک | `escapeHtml` | 0 | ⬜ |
+| `WEB-023.15` | 261–295 | بلوک | `render` | 0 | ⬜ |
 
 </details>
 
@@ -13657,27 +13695,25 @@
 </details>
 
 <details>
-<summary><b>CORE-019</b> — <code>lib/org-grouping.php</code> (298 خط، 17 آدرس، بازبینی‌شده 0/17)</summary>
+<summary><b>CORE-019</b> — <code>lib/org-grouping.php</code> (304 خط، 15 آدرس، بازبینی‌شده 0/15)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `CORE-019.01` | 1–22 | ناحیه | `بلوک رویه‌ای 1-22` | 0 | ⬜ |
-| `CORE-019.02` | 23–27 | تابع | `org_group_root_types` | 0 | ⬜ |
-| `CORE-019.03` | 28–30 | ناحیه | `بلوک رویه‌ای 28-30` | 0 | ⬜ |
-| `CORE-019.04` | 31–55 | تابع | `org_group_company_roots` | 0 | ⬜ |
-| `CORE-019.05` | 56–58 | ناحیه | `بلوک رویه‌ای 56-58` | 0 | ⬜ |
-| `CORE-019.06` | 59–94 | تابع | `org_group_unit_index` | 5 | ⬜ |
-| `CORE-019.07` | 95–97 | ناحیه | `بلوک رویه‌ای 95-97` | 0 | ⬜ |
-| `CORE-019.08` | 98–205 | تابع | `org_group_for_unit` | 0 | ⬜ |
-| `CORE-019.09` | 206–208 | ناحیه | `بلوک رویه‌ای 206-208` | 0 | ⬜ |
-| `CORE-019.10` | 209–221 | تابع | `org_group_chain_path` | 0 | ⬜ |
-| `CORE-019.11` | 222–224 | ناحیه | `بلوک رویه‌ای 222-224` | 0 | ⬜ |
-| `CORE-019.12` | 225–272 | تابع | `org_group_meta_for_users` | 5 | ⬜ |
-| `CORE-019.13` | 273–275 | ناحیه | `بلوک رویه‌ای 273-275` | 0 | ⬜ |
-| `CORE-019.14` | 276–281 | تابع | `org_group_sort_key` | 0 | ⬜ |
-| `CORE-019.15` | 282–284 | ناحیه | `بلوک رویه‌ای 282-284` | 0 | ⬜ |
-| `CORE-019.16` | 285–296 | تابع | `org_group_type_label` | 0 | ⬜ |
-| `CORE-019.17` | 297–298 | ناحیه | `بلوک رویه‌ای 297-298` | 0 | ⬜ |
+| `CORE-019.01` | 1–24 | ناحیه | `بلوک رویه‌ای 1-24` | 0 | ⬜ |
+| `CORE-019.02` | 25–49 | تابع | `org_group_company_roots` | 0 | ⬜ |
+| `CORE-019.03` | 50–52 | ناحیه | `بلوک رویه‌ای 50-52` | 0 | ⬜ |
+| `CORE-019.04` | 53–88 | تابع | `org_group_unit_index` | 5 | ⬜ |
+| `CORE-019.05` | 89–91 | ناحیه | `بلوک رویه‌ای 89-91` | 0 | ⬜ |
+| `CORE-019.06` | 92–210 | تابع | `org_group_for_unit` | 0 | ⬜ |
+| `CORE-019.07` | 211–213 | ناحیه | `بلوک رویه‌ای 211-213` | 0 | ⬜ |
+| `CORE-019.08` | 214–226 | تابع | `org_group_chain_path` | 0 | ⬜ |
+| `CORE-019.09` | 227–229 | ناحیه | `بلوک رویه‌ای 227-229` | 0 | ⬜ |
+| `CORE-019.10` | 230–277 | تابع | `org_group_meta_for_users` | 5 | ⬜ |
+| `CORE-019.11` | 278–280 | ناحیه | `بلوک رویه‌ای 278-280` | 0 | ⬜ |
+| `CORE-019.12` | 281–286 | تابع | `org_group_sort_key` | 0 | ⬜ |
+| `CORE-019.13` | 287–289 | ناحیه | `بلوک رویه‌ای 287-289` | 0 | ⬜ |
+| `CORE-019.14` | 290–302 | تابع | `org_group_type_label` | 0 | ⬜ |
+| `CORE-019.15` | 303–304 | ناحیه | `بلوک رویه‌ای 303-304` | 0 | ⬜ |
 
 </details>
 

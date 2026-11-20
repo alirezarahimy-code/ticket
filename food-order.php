@@ -1011,7 +1011,7 @@ function food_order_org_map(): array
     $index = function_exists('org_group_unit_index') ? org_group_unit_index() : [];
     foreach ($index as $unit) {
         $type = (string) ($unit['unit_type'] ?? '');
-        if (in_array($type, ['deputy', 'management', 'liaison'], true)) {
+        if (in_array($type, ['deputy', 'management', 'liaison', 'office', 'ceo'], true)) {
             $groups['unit-' . (int) $unit['id']] = [
                 'key'   => 'unit-' . (int) $unit['id'],
                 'label' => (string) ($unit['name'] ?? ''),
@@ -1022,7 +1022,7 @@ function food_order_org_map(): array
     foreach (function_exists('org_group_company_roots') ? org_group_company_roots() : [] as $root) {
         $groups[(string) $root['key']] = ['key' => (string) $root['key'], 'label' => (string) $root['label'], 'type' => 'company'];
     }
-    $groups['none'] = ['key' => 'none', 'label' => 'بدون معاونت سازمانی', 'type' => 'none'];
+    $groups['none'] = ['key' => 'none', 'label' => 'بدون جایگاه', 'type' => 'none'];
 
     // فهرست همهٔ کاربران فعال با کد ملی/پرسنلی — یک کوئری، بدون N+1.
     $people = [];
@@ -1508,6 +1508,9 @@ function food_order_ensure_orderable_day(PDO $pdo, string $isoDate, string $meal
     if (!$calendar) {
         throw new RuntimeException('برای این تاریخ هنوز برنامهٔ غذایی ثبت نشده است.');
     }
+    if (function_exists('food_meal_closed_guard')) {
+        food_meal_closed_guard($isoDate, $mealType, 'سفارش/تغییر سفارش');
+    }
     $today = food_order_today();
     $dateObj = new DateTimeImmutable($isoDate, new DateTimeZone('UTC'));
     $todayObj = new DateTimeImmutable($today, new DateTimeZone('UTC'));
@@ -1539,6 +1542,9 @@ function food_order_lock_cancellable_day(PDO $pdo, string $isoDate, string $meal
     $calendar = $stmt->fetch(PDO::FETCH_ASSOC);
     if (!$calendar) {
         throw new RuntimeException('برای این تاریخ برنامهٔ غذایی پیدا نشد.');
+    }
+    if (function_exists('food_meal_closed_guard')) {
+        food_meal_closed_guard($isoDate, $mealType, 'لغو سفارش');
     }
     $dateObj = new DateTimeImmutable($isoDate, new DateTimeZone('UTC'));
     $todayObj = new DateTimeImmutable(food_order_today(), new DateTimeZone('UTC'));
@@ -2273,6 +2279,9 @@ function food_order_save_day(array $body, array $user): array
     if ($iso === null) {
         throw new RuntimeException('تاریخ برنامه معتبر نیست.');
     }
+    if (function_exists('food_meal_closed_guard')) {
+        food_meal_closed_guard($iso, $mealType, 'تغییر برنامهٔ غذا');
+    }
     $foodIds = array_values(array_unique(array_filter(array_map(static fn ($x): int => max(0, (int) $x), (array) ($body['food_ids'] ?? []))))) ;
     if (count($foodIds) > 3) {
         throw new RuntimeException('برای هر روز حداکثر سه گزینهٔ غذا می‌توان ثبت کرد.');
@@ -2753,23 +2762,79 @@ function food_guest_schema_ensure(): void
     }
 }
 
-/** معاونت‌های فعال چارت سازمانی (فهرست انتخاب در فرم و گزارش). */
-function food_guest_deputies(): array
+/** بخش‌های سازمانی فعال (۶ بخش: مدیرعامل، مستقل‌ها، معاونت‌ها، مدیریت مستقل، دفتر، شرکت همکار) — فهرست انتخاب در فرم و گزارش. */
+function org_root_units_compat(): array
 {
-    if (!function_exists('org_deputy_units')) {
+    if (function_exists('org_root_units')) {
+        return org_root_units();
+    }
+    // CLI/توزیع پیش‌نویس بدون organization.php: همان ۶ نوع را مستقیماً از چارت بخوانیم.
+    try {
+        $types = function_exists('org_root_types')
+            ? org_root_types()
+            : ['ceo', 'liaison', 'deputy', 'management', 'office', 'company_manager'];
+        $in = implode(',', array_fill(0, count($types), '?'));
+        $stmt = db()->prepare("SELECT id, name, unit_type FROM org_units WHERE unit_type IN ($in) AND is_active = 1 ORDER BY unit_type, sort_order, name");
+        $stmt->execute($types);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
+    } catch (Throwable $e) {
         return [];
     }
+}
+
+function food_guest_deputies(): array
+{
     return array_map(
         static fn (array $u): array => ['id' => (int) $u['id'], 'name' => (string) $u['name']],
-        org_deputy_units()
+        org_root_units_compat()
     );
 }
 
+/** واحدهای ریشهٔ ۶ بخشی که «انتساب مهمان و مسیر درخواست» را تعریف می‌کنند. */
+function food_guest_root_types(): array
+{
+    return function_exists('org_root_types')
+        ? org_root_types()
+        : ['ceo', 'liaison', 'deputy', 'management', 'office', 'company_manager'];
+}
+
+/** نزدیک‌ترین سرشاخهٔ ۶ بخشی از یک واحد؛ با function_exists روی سازمان تا CLI بدون سازمان هم کار کند. */
+function food_guest_nearest_root_id(int $startUnitId, bool $activeOnly = true): int
+{
+    if ($startUnitId <= 0) {
+        return 0;
+    }
+    if (function_exists('org_nearest_root_id')) {
+        return org_nearest_root_id($startUnitId, $activeOnly);
+    }
+    $types = food_guest_root_types();
+    try {
+        $stmt = db()->prepare('SELECT id, parent_id, unit_type, is_active FROM org_units WHERE id = ? LIMIT 1');
+        $current = $startUnitId;
+        for ($depth = 0; $depth < 12 && $current > 0; $depth++) {
+            $stmt->execute([$current]);
+            $unit = $stmt->fetch(PDO::FETCH_ASSOC);
+            if (!$unit) {
+                return 0;
+            }
+            if (in_array((string) $unit['unit_type'], $types, true)
+                && (!$activeOnly || (int) ($unit['is_active'] ?? 0) === 1)) {
+                return (int) $unit['id'];
+            }
+            $current = (int) ($unit['parent_id'] ?? 0);
+        }
+    } catch (Throwable $e) {
+        return 0;
+    }
+    return 0;
+}
+
 /**
- * معاونتِ کاربر از چارت سازمانی: از واحد خود کاربر (users.org_unit_id) و واحدهایی که مدیرشان است
- * شروع می‌کند و در سلسلهٔ والدها بالا می‌رود تا به واحد نوع deputy برسد. 0 یعنی پیدا نشد.
+ * انتساب سازمانیِ کاربر از چارت: از واحد خود کاربر و واحدهایی که مدیرشان است شروع می‌کند
+ * و در سلسلهٔ والدها بالا می‌رود تا نزدیک‌ترین سرشاخهٔ ۶ بخشی (مدیرعامل، واحد مستقل، معاونت،
+ * مدیریت مستقل، دفتر مدیرعامل، شرکت همکار) پیدا شود. 0 یعنی جایگاه/سرشاخه‌ای ندارد.
  */
-function food_guest_user_deputy_id(array $user, bool $managedOnly = false): int
+function food_guest_user_root_id(array $user, bool $managedOnly = false): int
 {
     $uid = (int) ($user['id'] ?? 0);
     if ($uid <= 0) {
@@ -2798,22 +2863,73 @@ function food_guest_user_deputy_id(array $user, bool $managedOnly = false): int
     } catch (Throwable $e) {
         // جدول‌های چارت سازمانی در دسترس نیستند.
     }
-    $unitStmt = db()->prepare('SELECT id, parent_id, unit_type, is_active FROM org_units WHERE id = ?');
     foreach (array_values(array_unique(array_filter($starts))) as $start) {
-        $current = (int) $start;
-        for ($depth = 0; $depth < 10 && $current > 0; $depth++) {
-            $unitStmt->execute([$current]);
-            $unit = $unitStmt->fetch(PDO::FETCH_ASSOC);
-            if (!$unit) {
-                break;
-            }
-            if ((string) $unit['unit_type'] === 'deputy' && (int) $unit['is_active'] === 1) {
-                return (int) $unit['id'];
-            }
-            $current = (int) ($unit['parent_id'] ?? 0);
+        $root = food_guest_nearest_root_id((int) $start, true);
+        if ($root > 0) {
+            return $root;
         }
     }
     return 0;
+}
+
+/**
+ * سابقهٔ سازگار: انتساب کاربر به نزدیک‌ترین سرشاخهٔ ۶ بخشی (قبلاً فقط «معاونت» بود).
+ * 0 یعنی پیدا نشد.
+ */
+/**
+ * پهنهٔ «دیده‌شدن» درخواست‌های مهمان برای مدیر واحد/سرشاخه:
+ * - مدیران جهانی (ادمین اصلی، ساپورت منیجر و... — همان معیار «بازبین») ← null یعنی همه‌چیز.
+ * - بقیهٔ مدیران چارت ← شناسه‌های سرشاخه‌های ۶ بخشی که در زیردستشان است (مدیرعامل/مدیر شرکت همکار کل زیردرختشان را می‌بینند).
+ * - بدون جایگاه مدیریتی ← آرایهٔ خالی (فقط درخواست‌های خودش، مثل قبل).
+ */
+function food_guest_visible_root_ids(array $user): ?array
+{
+    static $cache = [];
+    if (function_exists('food_guest_request_is_reviewer') && food_guest_request_is_reviewer($user)) {
+        return null;
+    }
+    $uid = (int) ($user['id'] ?? 0);
+    if ($uid <= 0) {
+        return [];
+    }
+    if (isset($cache[$uid])) {
+        return $cache[$uid];
+    }
+    $scope = function_exists('ticket_manager_scope_unit_ids') ? ticket_manager_scope_unit_ids($user) : [];
+    if (!$scope) {
+        return $cache[$uid] = [];
+    }
+    $inScope = array_flip(array_map('intval', $scope));
+    $visible = [];
+    foreach (org_root_units_compat() as $root) {
+        $id = (int) ($root['id'] ?? 0);
+        if ($id > 0 && isset($inScope[$id])) {
+            $visible[] = $id;
+        }
+    }
+    sort($visible);
+    return $cache[$uid] = $visible;
+}
+
+/** نرمال‌سازی (با کش) یک شناسهٔ ذخیره‌شده به سرشاخهٔ ۶ بخشی؛ 0 یعنی بی‌جایگاه. */
+function food_guest_stored_root_cached($storedId): int
+{
+    static $cache = [];
+    $id = (int) ($storedId ?? 0);
+    if ($id <= 0) {
+        return 0;
+    }
+    if (!isset($cache[$id])) {
+        $cache[$id] = function_exists('org_stored_attribution_root_id')
+            ? org_stored_attribution_root_id($id)
+            : food_guest_nearest_root_id($id, false);
+    }
+    return $cache[$id];
+}
+
+function food_guest_user_deputy_id(array $user, bool $managedOnly = false): int
+{
+    return food_guest_user_root_id($user, $managedOnly);
 }
 
 function food_guest_request_list(array $user, bool $includePast = false, bool $allRequests = false): array
@@ -2822,10 +2938,16 @@ function food_guest_request_list(array $user, bool $includePast = false, bool $a
     $now = food_order_now();
     $today = $now->format('Y-m-d');
     $uid = (int) ($user['id'] ?? 0);
-    if ($uid <= 0 || ($allRequests && !food_guest_request_is_reviewer($user))) {
+    if ($uid <= 0) {
+        throw new RuntimeException('دسترسی به فهرست درخواست‌ها مجاز نیست.');
+    }
+    if ($allRequests && !food_guest_request_is_reviewer($user) && food_guest_visible_root_ids($user) === []) {
+        // نه بازبین است نه مدیرِ هیچ زیردرختی از چارت — همان رفتار قبلی (جلوگیری از دسترسی).
         throw new RuntimeException('دسترسی به فهرست درخواست‌ها مجاز نیست.');
     }
     $isReviewer = $allRequests && food_guest_request_is_reviewer($user);
+    $visibleRoots = $allRequests && !$isReviewer ? food_guest_visible_root_ids($user) : null;
+    $isScopedViewer = !$isReviewer && $visibleRoots !== null && $visibleRoots !== [];
     $myDeputyId = food_guest_user_deputy_id($user, true);
     $canCreateRequest = food_guest_request_allowed($user);
     // فیلتر مالک در SQL و پیش از LIMIT اجرا می‌شود، حتی برای ادمین در پنجرهٔ شخصی.
@@ -2858,6 +2980,13 @@ function food_guest_request_list(array $user, bool $includePast = false, bool $a
     $stmt->execute($params);
     $items = [];
     foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $r) {
+        if ($isScopedViewer && !$isReviewer) {
+            $rootId = food_guest_stored_root_cached($r['deputy_unit_id'] ?? 0);
+            if ($rootId <= 0 || !in_array($rootId, $visibleRoots, true)) {
+                // مدیرِ زیردرخت فقط رکوردهای منتسب به سرشاخهٔ زیردرخت خودش را می‌بیند.
+                continue;
+            }
+        }
         $canManage = $isReviewer || ($uid > 0 && (int) ($r['created_by'] ?? 0) === $uid);
         $date = (string) $r['request_date'];
         $active = (string) $r['status'] === 'active';
@@ -2921,6 +3050,9 @@ function food_guest_request_create(array $user, array $body): array
         throw new RuntimeException('تاریخ شمسی معتبر نیست.');
     }
     $mealType = food_order_meal_type($body['meal_type'] ?? 'lunch');
+    if (function_exists('food_meal_closed_guard')) {
+        food_meal_closed_guard($date, $mealType, 'ثبت درخواست مهمان');
+    }
     $dateError = food_guest_request_date_error($date);
     if ($dateError !== null) {
         throw new RuntimeException($dateError);
@@ -2935,13 +3067,14 @@ function food_guest_request_create(array $user, array $body): array
     }
     // نوع غذا حذف شده است؛ غذای مهمان را سلف طبق تشخیص مدیر تعیین می‌کند.
     $foodId = null;
-    // معاونتِ جایگاه مدیریتی فقط برای گزارش اختیاری ثبت می‌شود؛ مقدار ارسالی فرم قابل جعل نیست.
-    // کاربران دارای نقش مجاز بدون وابستگی به چارت هم می‌توانند درخواست مرکزی ثبت کنند.
+    // انتساب فقط از چارت می‌آید؛ بی‌جایگاهان (حتی نقش‌های مجاز ثابت) طبق سیاست «عضو نبودن در چارت = عضو نبودن در سازمان» حق ثبت مهمان ندارند.
     if (!food_guest_request_allowed($user)) {
         throw new RuntimeException('نقش شما مجاز به ثبت درخواست غذای مهمان نیست.');
     }
     $deputyId = food_guest_user_deputy_id($user, true);
-    $deputyId = $deputyId > 0 ? $deputyId : null;
+    if ($deputyId <= 0) {
+        throw new RuntimeException('این حساب هنوز در چارت سازمانی جایگاه فعالی ندارد؛ ثبت درخواست غذای مهمان برای آن ممکن نیست. ابتدا جایگاه حساب خود را در چارت سازمانی مشخص کنید.');
+    }
     $requester = trim((string) preg_replace('/\s+/u', ' ', (string) ($body['requester_name'] ?? '')));
     if (mb_strlen($requester) < 2 || mb_strlen($requester) > 150) {
         throw new RuntimeException('نام درخواست‌دهنده باید بین ۲ تا ۱۵۰ نویسه باشد.');
@@ -2974,6 +3107,9 @@ function food_guest_request_cancel(array $user, int $id, bool $ownerOnly = true)
         if (!$row) {
             throw new RuntimeException('درخواست پیدا نشد.');
         }
+        if (function_exists('food_meal_closed_guard')) {
+            food_meal_closed_guard((string) ($row['request_date'] ?? ''), food_order_meal_type($row['meal_type'] ?? 'lunch'), 'لغو درخواست مهمان');
+        }
         if (!food_guest_request_can_manage($user, $row)
             || (int) ($user['id'] ?? 0) <= 0
             || ($ownerOnly && (int) ($row['created_by'] ?? 0) !== (int) $user['id'])
@@ -3005,6 +3141,9 @@ function food_guest_request_update(array $user, int $id, array $body, bool $owne
         throw new RuntimeException('تاریخ شمسی معتبر نیست.');
     }
     $mealType = food_order_meal_type($body['meal_type'] ?? 'lunch');
+    if (function_exists('food_meal_closed_guard')) {
+        food_meal_closed_guard($date, $mealType, 'ویرایش درخواست مهمان');
+    }
     $dateError = food_guest_request_date_error($date);
     if ($dateError !== null) {
         throw new RuntimeException($dateError);
@@ -3034,11 +3173,18 @@ function food_guest_request_update(array $user, int $id, array $body, bool $owne
         if (!$row) {
             throw new RuntimeException('درخواست پیدا نشد.');
         }
+        if (function_exists('food_meal_closed_guard')) {
+            food_meal_closed_guard((string) ($row['request_date'] ?? ''), food_order_meal_type($row['meal_type'] ?? 'lunch'), 'ویرایش درخواست مهمان');
+        }
         if (!food_guest_request_can_manage($user, $row)
             || (int) ($user['id'] ?? 0) <= 0
             || ($ownerOnly && (int) ($row['created_by'] ?? 0) !== (int) $user['id'])
             || (!$ownerOnly && !food_guest_request_is_reviewer($user))) {
             throw new RuntimeException('فقط مدیر ثبت‌کننده یا مدیر پشتیبانی می‌تواند این درخواست را ویرایش کند.');
+        }
+        // سیاست «عضو نبودن در چارت = عضو نبودن در سازمان»: مالک بدون جایگاه فعال در چارت، حتی ویرایشِ درخواست خودش را نمی‌تواند ثبت کند (مسیر پشتیبانی/ادمین باز می‌ماند تا اصلاح رکورد ممکن باشد).
+        if ($ownerOnly && food_guest_user_deputy_id($user, true) <= 0) {
+            throw new RuntimeException('این حساب هنوز در چارت سازمانی جایگاه فعالی ندارد؛ ویرایش درخواست غذای مهمان برای آن ممکن نیست. ابتدا جایگاه حساب خود را در چارت سازمانی مشخص کنید.');
         }
         if ((string) ($row['status'] ?? '') !== 'active') {
             throw new RuntimeException('درخواست لغوشده قابل ویرایش نیست.');
@@ -3072,6 +3218,9 @@ function food_guest_request_delete(array $user, int $id, bool $ownerOnly = true)
         $row = $stmt->fetch(PDO::FETCH_ASSOC);
         if (!$row) {
             throw new RuntimeException('درخواست پیدا نشد.');
+        }
+        if (function_exists('food_meal_closed_guard')) {
+            food_meal_closed_guard((string) ($row['request_date'] ?? ''), food_order_meal_type($row['meal_type'] ?? 'lunch'), 'حذف درخواست مهمان');
         }
         if (!food_guest_request_can_manage($user, $row)
             || (int) ($user['id'] ?? 0) <= 0
@@ -3603,6 +3752,8 @@ function food_order_menu_api_handle(string $route, array $user): never
     try {
         if (in_array($route, [
             'food-menu/reconciliation', 'food-menu/reconciliation-save',
+            'food-menu/reconciliation-remainder',
+            'food-menu/guest-actuals',
             'food-menu/reconciliation-export', 'food-menu/invoice-upload', 'food-menu/invoice-file',
         ], true)) {
             if (!function_exists('food_reconciliation_api_handle')) {
@@ -3849,7 +4000,7 @@ function food_order_render_page(array $user): never
     if (food_guest_request_allowed($user) && food_guest_schema_ready()) {
         echo '<div hidden id="food-guest-app" data-api="index.php?page=food-order&amp;food_api=" data-csrf="' . e(csrf_token()) . '" data-self-name="' . e(food_order_full_name($profile)) . '"></div>';
     }
-    echo '<script defer src="assets/food-order-calendar.js?v=1"></script><script defer src="assets/food-order.js?v=25"></script><script defer src="assets/food-order-guest.js?v=8"></script>';
+    echo '<script defer src="assets/food-order-calendar.js?v=1"></script><script defer src="assets/food-order.js?v=25"></script><script defer src="assets/food-order-guest.js?v=1.63.3"></script>';
     render_footer();
     exit;
 }

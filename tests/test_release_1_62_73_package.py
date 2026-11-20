@@ -54,6 +54,8 @@ POST_RELEASE_WORKTREE_CHANGES = {
     "food-ticket-web/assets/food-order.css",
     # کار «ساعت ۲۳ پایان‌روز + پنجرهٔ سختگیرانه»: ردیف‌های ثبت خودکار از این پس تحویل‌شده‌اند.
     "food-ticket-auto-receipts.php",
+    # کار بند ۱۷ (۲۰۲۶-۱۱-۲۰): پنجرهٔ مهمان بدون چارت برای حساب‌های auth_source=food و مسدودی چاپ مهمان بی‌جایگاه.
+    "assets/food-order-guest.js",
 }
 
 

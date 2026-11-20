@@ -11,6 +11,29 @@ ROOT = Path(__file__).resolve().parents[1]
 DOWNLOADS = ROOT / "downloads"
 NAME = "ticket-update-1.63-to-1.63.2-r21-assets-tenter-20261106.zip"
 PACKAGE = DOWNLOADS / NAME
+# کار بند ۱۷ روی همین شاخه (بستۀ ۱.۶۳.۳ ساخته‌شده ولی نصب‌نشده)؛ همان‌که ۱.۶۲.۷۳ از
+# POST_RELEASE_WORKTREE_CHANGES استفاده می‌کند. این فایل‌ها عمداً از بستهٔ ۱.۶۳.۲-r21 جدا شدند؛
+# بقیهٔ فایل‌های بسته باید با مخزن بایت‌به‌بایت یکی بمانند.
+POST_RELEASE_WORKTREE_CHANGES = {
+    "assets/food-menu.css",
+    "assets/food-menu.js",
+    "assets/food-org-groups.js",
+    "cd-dvd.php",
+    "food-order.php",
+    "food-ticket-groups.php",
+    "food-ticket-runtime.php",
+    "food-ticket-web/assets/food-menu.css",
+    "food-ticket-web/assets/food-menu.js",
+    "food-ticket-web/assets/food-org-groups.js",
+    "food-ticket-web/index.html",
+    "food-ticket.php",
+    "lib/org-grouping.php",
+    "modules/request-center/Actions/ticket-actions.php",
+    "modules/request-center/Pages/create.php",
+    "modules/request-center/Pages/detail.php",
+    "modules/request-center/lib/functions.php",
+    "tools/test_food_org_groups_offline.php",
+}
 REQUIRED_FILES = {
     "VERSION",
     "food-ticket.php",
@@ -66,7 +89,10 @@ def test_1632_r21_is_a_valid_cumulative_installable_package():
             if not source.is_file():
                 source = DOWNLOADS / Path(relative).name
             assert source.is_file(), relative
-            assert data == source.read_bytes(), f"package drift: {relative}"
+            if relative in POST_RELEASE_WORKTREE_CHANGES:
+                assert data != source.read_bytes(), f"{relative} باید بعد از انتشار ۱.۶۳.۲-r21 تغییر کرده باشد"
+            else:
+                assert data == source.read_bytes(), f"package drift: {relative}"
 
         source_delete = archive.read("files/tools/test_source_delete_offline.php").decode("utf-8")
         source_time = archive.read("files/tools/test_source_time_delete_offline.php").decode("utf-8")

@@ -78,4 +78,8 @@
  #alrPrint tr,#alrPrint .alr-group{break-inside:avoid}
 }
 @media(max-width:720px){.alr-name{flex-basis:110px}.alr-val{flex-basis:76px}}
-.alr-chips,.alr-classic-chips{display:inline-flex;align-items:center;gap:6px;flex-wrap:wrap;margin-inline-start:auto}
+.alr-chips,.alr-classic-chips{display:inline-flex;align-items:center;gap:6px;flex-wrap:wrap}
+.alr-chips-row{flex-basis:100%;margin-top:4px}
+.alr-fields{flex-wrap:nowrap;overflow-x:auto;white-space:nowrap}
+.alr-blocks-inline{margin-inline-start:auto}
+.alr-tools input[type=search]{min-width:120px;max-width:180px}

@@ -264,6 +264,21 @@ function food_reconciliation_rows(string $from, string $to, string $mealFilter =
     food_reconciliation_schema_ensure();
     $servedMap = food_reconciliation_served_counts($from, $to);
     $absentMap = food_reconciliation_absentee_counts($from, $to, $servedMap);
+    $actualSummary = [];
+    try {
+        if (function_exists('food_guest_actuals_schema_ensure')) {
+            $guestActual = db()->prepare("SELECT food_date, meal_type, GROUP_CONCAT(CONCAT(root_name, ' ', actual_count) ORDER BY actual_count DESC SEPARATOR ' · ') AS summary, SUM(actual_count) AS total FROM food_guest_actuals WHERE food_date BETWEEN ? AND ? GROUP BY food_date, meal_type");
+            $guestActual->execute([$from, $to]);
+            foreach ($guestActual->fetchAll(PDO::FETCH_ASSOC) as $actualRow) {
+                $actualSummary[$actualRow['food_date'] . "\0" . $actualRow['meal_type']] = [
+                    'summary' => (string) $actualRow['summary'],
+                    'total' => (int) $actualRow['total'],
+                ];
+            }
+        }
+    } catch (Throwable $actualError) {
+        app_error_log('[food-reconciliation] guest actuals summary unavailable: ' . $actualError->getMessage());
+    }
     $sql = "SELECT k.food_date, k.meal_type,
             COALESCE(o.active_count, 0) AS current_active_employee_orders,
             COALESCE(o.cancelled_count, 0) AS cancelled_employee_orders,
@@ -357,6 +372,8 @@ function food_reconciliation_rows(string $from, string $to, string $mealFilter =
             'leftover_disposition_summary' => food_reconciliation_disposition_summary(
                 $leftoverStaff, $leftoverWaste, $leftoverKeep, $leftoverOther, $leftoverOtherNote
             ),
+            'guest_actuals_summary' => $actualSummary[$key]['summary'] ?? null,
+            'guest_actuals_total' => $actualSummary[$key]['total'] ?? null,
             'status' => $isRegistered ? (string) $row['status'] : 'not_ordered',
             'note' => (string) ($row['note'] ?? ''),
             'snapshot_at' => (string) ($row['snapshot_at'] ?? ''),
@@ -486,9 +503,81 @@ function food_reconciliation_audit(string $action, array $user, int $targetId, m
 }
 
 /**
+ * «قفل سخت» وعده/روز بسته‌شده (تصمیم مالک ۲۰۲۶-۱۱-۲۰):
+ * بعد از بستن، هرگونه تغییر در روز یا وعدهٔ بسته‌شده — سفارش، لغو، تغییر برنامه،
+ * درخواست/ویرایش مهمان، ثبت حضور/تحویل/چاپ — کاملاً مسدود است و هیچ راهی
+ * (حتی دلیل اصلاح) آن را باز نمی‌کند.
+ *
+ * اگر جدول تطبیق یا ستون وضعیت در دسترس نباشد fail-open می‌شود تا نصب‌های نیمه‌ترش
+ * از کار نیفتند؛ اما برای نصب کامل، بستن همیشه مسدودکننده است.
+ */
+function food_meal_closed_guard(string $date, string $mealType, string $action = ''): void
+{
+    static $cache = [];
+    $mealType = $mealType === 'dinner' ? 'dinner' : 'lunch';
+    if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $date)) {
+        return;
+    }
+    $key = $date . "\0" . $mealType;
+    if (!isset($cache[$key])) {
+        $cache[$key] = false;
+        try {
+            $stmt = db()->prepare("SELECT status FROM food_meal_reconciliations WHERE food_date = ? AND meal_type = ? LIMIT 1");
+            $stmt->execute([$date, $mealType]);
+            $cache[$key] = strtolower((string) ($stmt->fetchColumn() ?: '')) === 'closed';
+        } catch (Throwable $e) {
+            app_error_log('[food-reconciliation] closed-day guard check failed: ' . $e->getMessage());
+        }
+    }
+    if ($cache[$key]) {
+        $what = trim($action);
+        $mealLabel = $mealType === 'dinner' ? 'شام' : 'ناهار';
+        throw new RuntimeException('این روز بسته شده است؛ هرگونه تغییر در روز/وعدهٔ بسته‌شده (' . $mealLabel . ') مسدود است' . ($what !== '' ? ' — «' . $what . '»' : '') . '.');
+    }
+}
+
+/**
+ * باقیماندهٔ زندهٔ یک روز+وعده (تک‌منبع حقیقت برای «فرانت تازه‌سازی قبل از تأیید» و پاپ‌آپ‌های بستن).
+ * هر بار لحظه‌ای از پایگاه‌داده محاسبه می‌شود — هیچ کشی بین صفحه و سرور لازم نیست.
+ *
+ * @return array{date:string, meal_type:string, supplier_order_quantity:?int, received_quantity:?int,
+ *               employee_served_quantity:int, guest_served_quantity:int, served_total:int,
+ *               remaining_quantity:?int, status:string}
+ */
+function food_reconciliation_day_remainder(string $date, string $mealType): array
+{
+    food_reconciliation_schema_ensure();
+    $mealType = $mealType === 'dinner' ? 'dinner' : 'lunch';
+    if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $date)) {
+        throw new RuntimeException('تاریخ معتبر نیست.');
+    }
+    $servedMap = food_reconciliation_served_counts($date, $date);
+    $key = $date . "\0" . $mealType;
+    $employeeServed = (int) ($servedMap[$key]['employee'] ?? 0);
+    $guestServed = (int) ($servedMap[$key]['guest'] ?? 0);
+    $servedTotal = $employeeServed + $guestServed;
+    $stmt = db()->prepare('SELECT supplier_order_quantity, received_quantity, status FROM food_meal_reconciliations WHERE food_date = ? AND meal_type = ? LIMIT 1');
+    $stmt->execute([$date, $mealType]);
+    $existing = $stmt->fetch(PDO::FETCH_ASSOC) ?: null;
+    $supplier = $existing !== null && $existing['supplier_order_quantity'] !== null ? (int) $existing['supplier_order_quantity'] : null;
+    $received = $existing !== null && $existing['received_quantity'] !== null ? (int) $existing['received_quantity'] : $supplier;
+    return [
+        'date' => $date,
+        'meal_type' => $mealType,
+        'supplier_order_quantity' => $supplier,
+        'received_quantity' => $received,
+        'employee_served_quantity' => $employeeServed,
+        'guest_served_quantity' => $guestServed,
+        'served_total' => $servedTotal,
+        'remaining_quantity' => $received === null ? null : $received - $servedTotal,
+        'status' => $existing !== null ? (string) $existing['status'] : 'not_ordered',
+    ];
+}
+
+/**
  * اعتبارسنجی «تعیین تکلیف غذای باقیمانده».
  * اگر مانده (پرس سفارش/تحویل واقعی − کل تحویل‌داده‌شده‌ها) کمتر از ۱ باشد، تعیین تکلیف لازم نیست و همه‌چیز null می‌شود.
- * اگر مانده ≥ ۱ باشد: حداقل یک گزینه الزامی است و مجموع تعدادها نباید از مانده بیشتر شود.
+ * اگر مانده ≥ ۱ باشد: حداقل یک گزینه الزامی است و مجموع تعدادها باید **دقیقاً** برابر مانده باشد (تصمیم مالک ۲۰۲۶-۱۱-۲۰).
  *
  * @return array{leftover_staff_quantity: ?int, leftover_waste_quantity: ?int, leftover_keep_quantity: ?int, leftover_other_quantity: ?int, leftover_other_note: ?string}
  */
@@ -508,11 +597,11 @@ function food_reconciliation_disposition_parse(array $body, int $remaining): arr
         $otherNote = substr($otherNote, 0, 500);
     }
     $sum = $staff + $waste + $keep + $other;
-    if ($sum > $remaining) {
-        throw new RuntimeException('مجموع تعیین تکلیف (' . $sum . ' پرس) از ماندهٔ امروز (' . $remaining . ' پرس) بیشتر است.');
-    }
     if ($sum === 0) {
         throw new RuntimeException('برای بستن این روز باید سرنوشت غذای باقیمانده را مشخص کنید؛ حداقل یک گزینه را با تعداد وارد کنید.');
+    }
+    if ($sum !== $remaining) {
+        throw new RuntimeException('مجموع تعیین تکلیف (' . $sum . ' پرس) باید دقیقاً برابر با ماندهٔ امروز (' . $remaining . ' پرس) باشد؛ اختلاف: ' . abs($remaining - $sum) . ' پرس.');
     }
     return [
         'leftover_staff_quantity' => $staff,
@@ -581,8 +670,9 @@ function food_reconciliation_save(array $body, array $user): array
         $existingStmt->execute([$date, $meal]);
         $existing = $existingStmt->fetch(PDO::FETCH_ASSOC) ?: null;
         $wasClosed = $existing !== null && (string) $existing['status'] === 'closed';
-        if ($wasClosed && $reason === '') {
-            throw new RuntimeException('این روز بسته شده است؛ برای اصلاح، دلیل را وارد کنید.');
+        if ($wasClosed) {
+            // تصمیم مالک ۲۰۲۶-۱۱-۲۰: بعد از بستن، هرگونه تغییر — حتی با دلیل اصلاح — کاملاً مسدود است.
+            throw new RuntimeException('این روز بسته شده است؛ هرگونه تغییر در روز/وعدهٔ بسته‌شده مسدود است.');
         }
         $counts = food_reconciliation_order_counts($date, $meal);
         $snapshotEmployee = $existing !== null && $existing['employee_orders_at_order'] !== null
@@ -917,6 +1007,7 @@ function food_reconciliation_export(string $fromRaw, string $toRaw, string $meal
         'پرس سفارش/تحویل واقعی پیمانکار', 'توزیع پرسنل', 'مهمان توزیع‌شده',
         'کل توزیع', 'پرس باقیمانده', 'کسری/اضافهٔ سفارش', 'غایبین', 'سرنوشت باقیمانده',
         'وضعیت', 'یادداشت',
+        'مهمان واقعی (به‌تفکیک بخش)',
         'ماه فاکتور', 'تعداد فاکتور ماه', 'پرس طبق فاکتور ماه', 'جمع تحویل واقعی روزانهٔ ماه',
         'اختلاف فاکتور − تحویل ماه', 'وضعیت مقایسهٔ ماهانه',
     ];
@@ -945,7 +1036,9 @@ function food_reconciliation_export(string $fromRaw, string $toRaw, string $meal
             $gapText($item['order_gap']), $item['absentees'],
             $item['leftover_disposition_summary'] ?? '—',
             $item['status'] === 'closed' ? 'بسته' : ($item['status'] === 'ordered' ? 'سفارش ثبت شد' : 'بدون ثبت خرید'),
-            $item['note'], '', '', '', '', '', '',
+            $item['note'],
+            $item['guest_actuals_summary'] ?? '—',
+            '', '', '', '', '', '',
         ];
     }
     $monthSummary = $report['month_summary'];
@@ -957,12 +1050,12 @@ function food_reconciliation_export(string $fromRaw, string $toRaw, string $meal
     $monthlyRow = array_fill(0, count($headers), '');
     $monthlyRow[0] = 'خلاصهٔ ماهانه';
     $monthlyRow[1] = 'فاکتور و تحویل مستقل‌اند و با هم جمع نمی‌شوند';
-    $monthlyRow[16] = $report['month'];
-    $monthlyRow[17] = $monthSummary['invoice_count'];
-    $monthlyRow[18] = $monthSummary['invoice_portions'];
-    $monthlyRow[19] = $monthSummary['daily_received_portions'];
-    $monthlyRow[20] = $monthSummary['invoice_difference'] ?? '—';
-    $monthlyRow[21] = $comparisonStatus;
+    $monthlyRow[17] = $report['month'];
+    $monthlyRow[18] = $monthSummary['invoice_count'];
+    $monthlyRow[19] = $monthSummary['invoice_portions'];
+    $monthlyRow[20] = $monthSummary['daily_received_portions'];
+    $monthlyRow[21] = $monthSummary['invoice_difference'] ?? '—';
+    $monthlyRow[22] = $comparisonStatus;
     $data[] = $monthlyRow;
     foreach ($data as &$row) {
         foreach ($row as &$value) {
@@ -988,6 +1081,296 @@ function food_reconciliation_export(string $fromRaw, string $toRaw, string $meal
     food_order_send_xlsx('تطبیق-غذا-' . $token . '.xlsx', $title, $headers, $data, $range);
 }
 
+/**
+ * ۱.۶۳.۳ (C1) — پاپ‌آپ انتساب مهمان هنگام بستن روز (بند ۱۲ طرح کاربر).
+ * فهرست ۶ بخش (مدیرعامل، واحدهای مستقل، معاونت‌ها، مدیریت مستقل، دفتر مدیرعامل، شرکت همکار)
+ * + ستون خواندنی «درخواست‌شده» (از درخواست‌های فعال همان روز/وعده، نرمال‌شده به سرشاخهٔ ۶ بخشی)
+ * + ورودی «واقعی»؛ مجموع باید دقیقاً برابر فیش‌های مهمان چاپ‌شده باشد.
+ */
+function food_guest_actuals_schema_ensure(): void
+{
+    static $done = false;
+    if ($done) {
+        return;
+    }
+    $exists = false;
+    try {
+        $stmt = db()->prepare("SELECT COUNT(*) FROM information_schema.TABLES WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'food_guest_actuals'");
+        $stmt->execute();
+        $exists = (int) $stmt->fetchColumn() === 1;
+    } catch (Throwable $e) {
+        $exists = false;
+    }
+    if (!$exists) {
+        throw new RuntimeException('ثبت انتساب مهمان آماده نیست؛ ابتدا مهاجرت ۰۳۸ (food_guest_actuals) را روی پایگاه‌داده اجرا کنید.');
+    }
+    $done = true;
+}
+
+/** درخواست‌های فعال همان روز/وعده را به نزدیک‌ترین سرشاخهٔ ۶ بخشی نرمال می‌کند. خروجی: [map rootId=>qty, noneQty]. */
+function food_guest_actuals_requested_map(string $date, string $mealType): array
+{
+    $map = [];
+    $none = 0;
+    try {
+        $stmt = db()->prepare("SELECT deputy_unit_id, SUM(guest_count) AS qty FROM food_guest_requests WHERE request_date = ? AND meal_type = ? AND status = 'active' GROUP BY deputy_unit_id");
+        $stmt->execute([$date, $mealType]);
+        foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $row) {
+            $stored = $row['deputy_unit_id'] === null ? 0 : (int) $row['deputy_unit_id'];
+            $rootId = function_exists('org_stored_attribution_root_id') ? org_stored_attribution_root_id($stored) : $stored;
+            $qty = (int) $row['qty'];
+            if ($rootId <= 0) {
+                $none += $qty;
+            } else {
+                $map[$rootId] = ($map[$rootId] ?? 0) + $qty;
+            }
+        }
+    } catch (Throwable $e) {
+        app_error_log('[food-guest-actuals] requested map failed: ' . $e->getMessage());
+    }
+    return [$map, $none];
+}
+
+/** بارگذاری ردیف‌های واقعی ثبت‌شدهٔ همان روز/وعده (برای پیش‌پرکردن پاپ‌آپ و شرط ردیف «بدون جایگاه»). */
+function food_guest_actuals_stored_map(string $date, string $mealType): array
+{
+    $map = [];
+    try {
+        $stmt = db()->prepare('SELECT root_unit_id, root_name, root_type, actual_count FROM food_guest_actuals WHERE food_date = ? AND meal_type = ?');
+        $stmt->execute([$date, $mealType]);
+        foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $row) {
+            $map[(int) $row['root_unit_id']] = [
+                'name' => (string) $row['root_name'],
+                'type' => (string) $row['root_type'],
+                'actual' => (int) $row['actual_count'],
+            ];
+        }
+    } catch (Throwable $e) {
+        app_error_log('[food-guest-actuals] stored map failed: ' . $e->getMessage());
+    }
+    return $map;
+}
+
+/** نام و نوع نمایشی یک واحد، حتی اگر دیگر فعال نباشد؛ برای ردیف‌های تاریخی. */
+function food_guest_actuals_unit_meta(array $ids): array
+{
+    $ids = array_values(array_unique(array_filter(array_map('intval', $ids), static fn (int $v): bool => $v > 0)));
+    if ($ids === []) {
+        return [];
+    }
+    $map = [];
+    try {
+        $in = implode(',', array_fill(0, count($ids), '?'));
+        $stmt = db()->prepare("SELECT id, name, unit_type FROM org_units WHERE id IN ($in)");
+        $stmt->execute($ids);
+        foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $row) {
+            $unit = ['name' => (string) $row['name'], 'unit_type' => (string) $row['unit_type']];
+            $map[(int) $row['id']] = [
+                'name' => function_exists('org_root_display_name') ? org_root_display_name($unit) : (string) $row['name'],
+                'type' => (string) $row['unit_type'],
+            ];
+        }
+    } catch (Throwable $e) {
+        app_error_log('[food-guest-actuals] unit meta failed: ' . $e->getMessage());
+    }
+    return $map;
+}
+
+/** ترتیب نمایش سرشاخه‌ها: مدیرعامل، مستقل‌ها، معاونت‌ها، مدیریت مستقل، دفتر، شرکت همکار، بدون جایگاه. */
+function food_guest_actuals_type_order(string $type): int
+{
+    return match ($type) {
+        'ceo' => 0,
+        'liaison' => 1,
+        'deputy' => 2,
+        'management' => 3,
+        'office' => 4,
+        'company_manager' => 5,
+        default => 6,
+    };
+}
+
+function food_guest_actuals_report(string $date, string $mealType): array
+{
+    food_reconciliation_schema_ensure();
+    food_guest_actuals_schema_ensure();
+    $mealType = $mealType === 'dinner' ? 'dinner' : 'lunch';
+    if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $date)) {
+        throw new RuntimeException('تاریخ معتبر نیست.');
+    }
+    $servedMap = food_reconciliation_served_counts($date, $date);
+    $printed = (int) ($servedMap[$date . "\0" . $mealType]['guest'] ?? 0);
+    $status = 'not_ordered';
+    try {
+        $stmt = db()->prepare('SELECT status FROM food_meal_reconciliations WHERE food_date = ? AND meal_type = ? LIMIT 1');
+        $stmt->execute([$date, $mealType]);
+        $status = (string) ($stmt->fetchColumn() ?: 'not_ordered');
+    } catch (Throwable $e) {
+        // fail-open: وضعیت فقط برای نمایش است
+    }
+    [$requested, $noneRequested] = food_guest_actuals_requested_map($date, $mealType);
+    $stored = food_guest_actuals_stored_map($date, $mealType);
+
+    $rows = [];
+    // ۶ بخش فعال (اگر ماژول سازمان در دسترس باشد)
+    if (function_exists('org_root_units')) {
+        foreach (org_root_units() as $section) {
+            $id = (int) $section['id'];
+            $rows[$id] = [
+                'id' => $id,
+                'name' => (string) $section['name'],
+                'unit_type' => (string) $section['unit_type'],
+                'requested' => (int) ($requested[$id] ?? 0),
+                'actual' => (int) ($stored[$id]['actual'] ?? 0),
+            ];
+        }
+    }
+    // سرشاخه‌های غیرفعالی که برای آن‌ها درخواست یا واقعی ثبت شده — ردیفشان نباید گم شود
+    $missingIds = array_merge(array_keys($requested), array_keys($stored));
+    $meta = food_guest_actuals_unit_meta($missingIds);
+    foreach ($meta as $id => $info) {
+        if (!isset($rows[$id])) {
+            $rows[$id] = [
+                'id' => $id,
+                'name' => $info['name'],
+                'unit_type' => $info['type'],
+                'requested' => (int) ($requested[$id] ?? 0),
+                'actual' => (int) ($stored[$id]['actual'] ?? 0),
+            ];
+        }
+    }
+    // ردیف «بدون جایگاه» فقط اگر دادهٔ تاریخی بی‌جایگاه وجود دارد یا واقعیِ 0 ثبت شده (C7)
+    $noneRequestedTotal = (int) $noneRequested;
+    $noneActual = (int) ($stored[0]['actual'] ?? 0);
+    if ($noneRequestedTotal > 0 || $noneActual > 0 || isset($stored[0])) {
+        $rows[0] = [
+            'id' => 0,
+            'name' => 'بدون جایگاه',
+            'unit_type' => 'none',
+            'requested' => $noneRequestedTotal,
+            'actual' => $noneActual,
+        ];
+    }
+    $sections = array_values($rows);
+    usort($sections, static function (array $a, array $b): int {
+        return [food_guest_actuals_type_order((string) $a['unit_type']), (string) $a['name']] <=> [food_guest_actuals_type_order((string) $b['unit_type']), (string) $b['name']];
+    });
+    $totalActual = 0;
+    $totalRequested = 0;
+    foreach ($sections as $row) {
+        $totalActual += (int) $row['actual'];
+        $totalRequested += (int) $row['requested'];
+    }
+    return [
+        'ok' => true,
+        'date' => $date,
+        'meal_type' => $mealType,
+        'printed' => $printed,
+        'sections' => $sections,
+        'none_row' => isset($rows[0]),
+        'total_requested' => $totalRequested,
+        'total_actual' => $totalActual,
+        'saved' => $stored !== [],
+        'status' => $status,
+    ];
+}
+
+/** ذخیرهٔ واقعی‌های مهمان؛ مجموع باید دقیقاً برابر فیش‌های مهمان چاپ‌شده باشد (نه کمتر، نه بیشتر). */
+function food_guest_actuals_save(array $body, array $user): array
+{
+    food_order_require_permission($user, 'food.menu_edit');
+    food_reconciliation_schema_ensure();
+    $date = food_order_iso_date((string) ($body['food_date'] ?? $body['date'] ?? ''));
+    $mealType = strtolower(trim((string) ($body['meal_type'] ?? 'lunch')));
+    if ($date === null || !in_array($mealType, ['lunch', 'dinner'], true)) {
+        throw new RuntimeException('تاریخ و وعدهٔ غذا معتبر نیست.');
+    }
+    food_meal_closed_guard($date, $mealType, 'ثبت انتساب واقعی مهمان');
+    food_guest_actuals_schema_ensure();
+    $servedMap = food_reconciliation_served_counts($date, $date);
+    $printed = (int) ($servedMap[$date . "\0" . $mealType]['guest'] ?? 0);
+    if ($printed <= 0) {
+        throw new RuntimeException('فیش مهمان چاپ‌شده‌ای برای این روز/وعده ثبت نشده است؛ انتسابی لازم نیست.');
+    }
+    [$requested, $noneRequested] = food_guest_actuals_requested_map($date, $mealType);
+
+    $rawActuals = $body['actuals'] ?? null;
+    if (!is_array($rawActuals)) {
+        throw new RuntimeException('فهرست واقعی‌ها ارسال نشد.');
+    }
+    $seen = [];
+    $sum = 0;
+    foreach ($rawActuals as $entry) {
+        if (!is_array($entry)) {
+            throw new RuntimeException('قالب واقعی‌ها نامعتبر است.');
+        }
+        $rootId = (int) ($entry['root_unit_id'] ?? 0);
+        $countRaw = food_order_normalize_digits((string) ($entry['actual_count'] ?? '0'));
+        $count = filter_var($countRaw, FILTER_VALIDATE_INT, ['options' => ['min_range' => 0, 'max_range' => 100000]]);
+        if ($count === false) {
+            throw new RuntimeException('تعداد واقعی هر بخش باید عددی بین ۰ تا ۱۰۰۰۰۰ باشد.');
+        }
+        if (isset($seen[$rootId])) {
+            throw new RuntimeException('یک بخش در فهرست واقعی‌ها تکرار شده است.');
+        }
+        $seen[$rootId] = $count;
+        $sum += $count;
+    }
+    if ($sum !== $printed) {
+        throw new RuntimeException('مجموع واقعی مهمان‌ها (' . $sum . ' پرس) باید دقیقاً برابر فیش‌های مهمان چاپ‌شده (' . $printed . ' پرس) باشد.');
+    }
+    if (isset($seen[0])) {
+        $noneActualExisting = food_guest_actuals_stored_map($date, $mealType);
+        if ($noneRequested <= 0 && !isset($noneActualExisting[0])) {
+            throw new RuntimeException('ردیف «بدون جایگاه» برای این روز/وعده فعال نیست.');
+        }
+    }
+    $nonZero = array_values(array_filter(array_keys($seen), static fn (int $id): bool => $id > 0));
+    $types = function_exists('org_root_types') ? org_root_types() : ['ceo', 'liaison', 'deputy', 'management', 'office', 'company_manager'];
+    $meta = food_guest_actuals_unit_meta($nonZero);
+    if ($nonZero) {
+        $in = implode(',', array_fill(0, count($nonZero), '?'));
+        $tin = implode(',', array_fill(0, count($types), '?'));
+        $stmt = db()->prepare('SELECT id FROM org_units WHERE id IN (' . $in . ') AND unit_type IN (' . $tin . ')');
+        $stmt->execute(array_merge($nonZero, $types));
+        $valid = array_map('intval', $stmt->fetchAll(PDO::FETCH_COLUMN));
+        foreach ($nonZero as $id) {
+            if (!in_array($id, $valid, true)) {
+                throw new RuntimeException('یکی از بخش‌های ارسالی در چارت سازمانی معتبر نیست.');
+            }
+        }
+    }
+    $userId = (int) ($user['id'] ?? 0) ?: null;
+    db()->beginTransaction();
+    try {
+        $del = db()->prepare('DELETE FROM food_guest_actuals WHERE food_date = ? AND meal_type = ?');
+        $del->execute([$date, $mealType]);
+        $ins = db()->prepare('INSERT INTO food_guest_actuals (food_date, meal_type, root_unit_id, root_name, root_type, requested_count, actual_count, created_by, updated_by) VALUES (?,?,?,?,?,?,?,?,?)');
+        foreach ($seen as $rootId => $count) {
+            if ($rootId === 0) {
+                $name = 'بدون جایگاه';
+                $type = 'none';
+            } else {
+                $name = (string) ($meta[$rootId]['name'] ?? ('بخش ' . $rootId));
+                $type = (string) ($meta[$rootId]['type'] ?? '');
+            }
+            $ins->execute([$date, $mealType, $rootId, $name, $type, (int) ($requested[$rootId] ?? 0), $count, $userId, $userId]);
+        }
+        db()->commit();
+    } catch (Throwable $e) {
+        if (db()->inTransaction()) {
+            db()->rollBack();
+        }
+        throw $e;
+    }
+    if (function_exists('food_order_audit')) {
+        food_order_audit('food_guest_actuals_save', $user, 'food_meal_reconciliation', 0, null, [
+            'food_date' => $date, 'meal_type' => $mealType, 'printed' => $printed, 'total_actual' => $sum, 'sections' => count($seen),
+        ]);
+    }
+    return ['ok' => true, 'printed' => $printed, 'total_actual' => $sum, 'saved' => count($seen)];
+}
+
 function food_reconciliation_api_handle(string $route, string $method, array $user): never
 {
     if ($method === 'GET' && $route === 'food-menu/reconciliation') {
@@ -998,6 +1381,35 @@ function food_reconciliation_api_handle(string $route, string $method, array $us
         $meal = (string) ($_GET['meal_type'] ?? 'all');
         $month = (string) ($_GET['month'] ?? '');
         food_order_send_json(food_reconciliation_report($from, $to, $meal, $month));
+    }
+    if ($method === 'GET' && $route === 'food-menu/reconciliation-remainder') {
+        food_order_require_permission($user, 'food.reports');
+        $date = food_order_iso_date((string) ($_GET['date'] ?? ''));
+        $meal = strtolower(trim((string) ($_GET['meal_type'] ?? 'lunch')));
+        if ($date === null || !in_array($meal, ['lunch', 'dinner'], true)) {
+            food_order_send_json(['error' => 'تاریخ و وعده معتبر نیست.'], 400);
+        }
+        food_order_send_json(food_reconciliation_day_remainder($date, $meal));
+    }
+    if ($method === 'GET' && $route === 'food-menu/guest-actuals') {
+        food_order_require_permission($user, 'food.reports');
+        $date = food_order_iso_date((string) ($_GET['date'] ?? ''));
+        $meal = strtolower(trim((string) ($_GET['meal_type'] ?? 'lunch')));
+        if ($date === null || !in_array($meal, ['lunch', 'dinner'], true)) {
+            food_order_send_json(['error' => 'تاریخ و وعده معتبر نیست.'], 400);
+        }
+        try {
+            food_order_send_json(food_guest_actuals_report($date, $meal));
+        } catch (RuntimeException $e) {
+            food_order_send_json(['error' => $e->getMessage()], 503);
+        }
+    }
+    if ($method === 'POST' && $route === 'food-menu/guest-actuals') {
+        try {
+            food_order_send_json(food_guest_actuals_save(food_order_api_body(), $user));
+        } catch (RuntimeException $e) {
+            food_order_send_json(['error' => $e->getMessage()], 422);
+        }
     }
     if ($method === 'POST' && $route === 'food-menu/reconciliation-save') {
         food_order_send_json(food_reconciliation_save(food_order_api_body(), $user));

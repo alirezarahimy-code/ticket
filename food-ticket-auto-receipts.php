@@ -191,6 +191,7 @@ function food_ticket_auto_receipts_run(string $targetDate, bool $allowToday = fa
     try {
         $holiday = food_ticket_auto_receipt_holiday($date);
         $absenceStmt = $pdo->prepare('SELECT user_id FROM food_ticket_daily_absence WHERE absence_date = ?');
+        $closedNoted = [];
         $absenceStmt->execute([$date]);
         $absentUserIds = array_fill_keys(array_map('intval', $absenceStmt->fetchAll(PDO::FETCH_COLUMN)), true);
 
@@ -203,6 +204,7 @@ function food_ticket_auto_receipts_run(string $targetDate, bool $allowToday = fa
             'skipped_real_event' => 0,
             'already_registered' => 0,
             'locked' => false,
+            'skipped_closed' => 0,
         ];
 
         $orders = $pdo->prepare(
@@ -224,6 +226,18 @@ function food_ticket_auto_receipts_run(string $targetDate, bool $allowToday = fa
 
         foreach ($orders->fetchAll(PDO::FETCH_ASSOC) as $order) {
             $mealType = (string) ($order['meal_type'] ?? '');
+            if (function_exists('food_meal_closed_guard') && in_array($mealType, ['lunch', 'dinner'], true)) {
+                try {
+                    food_meal_closed_guard($date, $mealType, 'ثبت خودکار فیش');
+                } catch (Throwable $closedEx) {
+                    if (empty($closedNoted[$mealType])) {
+                        $closedNoted[$mealType] = true;
+                        app_error_log('[food-auto-receipts] closed meal, auto receipt skipped date=' . $date . ' meal=' . $mealType);
+                    }
+                    $result['skipped_closed'] = (int) ($result['skipped_closed'] ?? 0) + 1;
+                    continue;
+                }
+            }
             if ($mealType === 'lunch' && empty($holiday['holiday'])) {
                 continue;
             }
@@ -296,6 +310,14 @@ function food_ticket_auto_receipts_run(string $targetDate, bool $allowToday = fa
         $requests->execute([$date]);
         foreach ($requests->fetchAll(PDO::FETCH_ASSOC) as $request) {
             $mealType = (string) ($request['meal_type'] ?? 'lunch');
+            if (function_exists('food_meal_closed_guard') && in_array($mealType, ['lunch', 'dinner'], true)) {
+                try {
+                    food_meal_closed_guard($date, $mealType, 'ثبت خودکار فیش مهمان');
+                } catch (Throwable $closedGuestEx) {
+                    $result['skipped_closed'] = (int) ($result['skipped_closed'] ?? 0) + 1;
+                    continue;
+                }
+            }
             if ($mealType === 'lunch' && empty($holiday['holiday'])) {
                 continue;
             }

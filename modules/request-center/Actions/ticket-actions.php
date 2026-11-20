@@ -129,17 +129,19 @@ if (!defined('APP_ROOT')) {
             if (!is_global_ticket_role($user['role']) && !is_it_agent($user)) {
                 $departmentId = (int) ($user['department_id'] ?? 0) ?: null;
             }
-            // معاونت سازمانی درخواست‌کننده از چارت سازمانی (org_units) جدا از مسیر رسیدگی
-            // در ستون مستقل ذخیره می‌شود و درخواست به همان معاونت مسیردهی می‌شود.
+            // بخش سازمانی درخواست‌کننده از چارت سازمانی (org_units) جدا از مسیر رسیدگی
+            // در ستون مستقل ذخیره می‌شود و درخواست به همان بخش مسیردهی می‌شود.
             $requestingUnitId = (int) ($_POST['requesting_unit_id'] ?? 0) ?: null;
             if ($requestingUnitId !== null && function_exists('org_unit_by_id')) {
                 $requestingUnit = org_unit_by_id($requestingUnitId);
-                if (!$requestingUnit || (string) ($requestingUnit['unit_type'] ?? '') !== 'deputy' || (int) ($requestingUnit['is_active'] ?? 0) !== 1) {
-                    throw new RuntimeException('معاونت سازمانی انتخاب‌شده معتبر نیست؛ از فهرست معاونت‌ها یک گزینه فعال انتخاب کنید.');
+                $allowedTypes = function_exists('org_root_types') ? org_root_types() : ['deputy'];
+                if (!$requestingUnit || !in_array((string) ($requestingUnit['unit_type'] ?? ''), $allowedTypes, true) || (int) ($requestingUnit['is_active'] ?? 0) !== 1) {
+                    throw new RuntimeException('بخش سازمانی انتخاب‌شده معتبر نیست؛ از فهرست بخش‌های سازمانی یک گزینهٔ فعال انتخاب کنید.');
                 }
             }
-            if ($requestingUnitId === null && function_exists('org_deputy_units') && org_deputy_units() !== []) {
-                throw new RuntimeException('انتخاب «معاونت سازمانی درخواست‌کننده» الزامی است.');
+            $requestCenterRoots = function_exists('org_root_units') ? org_root_units() : [];
+            if ($requestingUnitId === null && ($requestCenterRoots !== [] || (function_exists('org_deputy_units') && org_deputy_units() !== []))) {
+                throw new RuntimeException('انتخاب «بخش سازمانی درخواست‌کننده» الزامی است.');
             }
             if ($requestingUnitId !== null && function_exists('org_unit_routing_department_id')) {
                 $routingDepartmentId = org_unit_routing_department_id($requestingUnitId);
@@ -482,7 +484,7 @@ if (!defined('APP_ROOT')) {
                 throw new RuntimeException('مدیر واحد نمی‌تواند درخواست را به‌عنوان کارشناس برداشت کند؛ درخواست را به کارشناس ارجاع دهید.');
             }
             if (!ticket_assignee_is_eligible($ticket, $claimUser, 'ticket_notification_user_can')) {
-                throw new RuntimeException('برداشتن درخواست فقط برای مسئول فعال و دارای دسترسی رسیدگی در همین حوزه و معاونت مجاز است.');
+                throw new RuntimeException('برداشتن درخواست فقط برای مسئول فعال و دارای دسترسی رسیدگی در همین حوزه و بخش سازمانی مجاز است.');
             }
             $claimTicketGroup = (string) ($ticket['service_group'] ?? '');
             if (($claimUser['role'] ?? '') === 'support_manager' && $claimTicketGroup !== 'support') {

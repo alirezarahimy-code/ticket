@@ -31,8 +31,8 @@ def test_pages_are_separate():
 
 
 def test_panel_versions_match():
-    assert "PANEL_VERSION='1.37.57'" in HTML
-    assert "FOOD_TICKET_PANEL_VERSION = '1.37.57'" in PHP
+    assert "PANEL_VERSION='1.37.58'" in HTML
+    assert "FOOD_TICKET_PANEL_VERSION = '1.37.58'" in PHP
 
 
 def test_three_subviews_and_fields():

@@ -89,14 +89,14 @@ if ($page === 'new-ticket') {
     $userAssets = array_merge($ownAssets, $otherAssets);
     $autoAssetId = $clientAssetId ?: (count($userAssets) === 1 ? (int) $userAssets[0]['id'] : 0);
     $departments = [];
-    // معاونت‌های سازمانی از چارت سازمانی (org_units) خوانده می‌شوند و برای همهٔ نقش‌ها
-    // نمایش داده می‌شوند تا درخواست به معاونت انتخاب‌شده مسیردهی شود.
+    // بخش‌های سازمانی از چارت سازمانی (org_units) خوانده می‌شوند و برای همهٔ نقش‌ها
+    // نمایش داده می‌شوند تا درخواست به بخش انتخاب‌شده مسیردهی شود.
     if (defined('REQUEST_CENTER_INDEPENDENT_ENTRY')) {
         $departments = request_center_org_deputy_units($user);
     } else {
         org_ensure_schema();
         org_ticket_schema_ensure();
-        $departments = org_deputy_units();
+        $departments = function_exists('org_root_units') ? org_root_units() : org_deputy_units();
         ticket_service_ensure_schema();
     }
     $services = db()->query('SELECT id, name, code, service_group, requires_asset, default_priority, default_ticket_type, category_id FROM service_catalog WHERE is_active = 1 ORDER BY service_group, name')->fetchAll();
@@ -179,20 +179,28 @@ if ($page === 'new-ticket') {
     echo '</select><small class="field-help">ابتدا حوزه و سپس خدمت را انتخاب کنید؛ دسته‌بندی، اولویت و مسیر رسیدگی خودکار تنظیم می‌شود.</small></label>';
     if ($departments) {
         $myUnitId = function_exists('user_org_unit_id') ? user_org_unit_id($user) : 0;
-        $myUnitIsDeputy = false;
+        $myRootId = 0;
+        if (function_exists('org_nearest_root_id') && $myUnitId > 0) {
+            $myRootId = org_nearest_root_id($myUnitId, true);
+        }
+        $preselectId = $retryUnitId > 0 ? $retryUnitId : ($myRootId > 0 ? $myRootId : $myUnitId);
+        $mySectionKnown = false;
         foreach ($departments as $department) {
-            if ((int) $department['id'] === $myUnitId) {
-                $myUnitIsDeputy = true;
+            if ((int) $department['id'] === $preselectId) {
+                $mySectionKnown = true;
                 break;
             }
         }
-        echo '<label>معاونت سازمانی درخواست‌کننده<select name="requesting_unit_id" required><option value="">انتخاب کنید…</option>';
-        foreach ($departments as $department) {
-            echo '<option value="' . (int) $department['id'] . '" ' . ((int) $department['id'] === ($retryUnitId > 0 ? $retryUnitId : $myUnitId) ? 'selected' : '') . '>' . e($department['name']) . '</option>';
+        if (!$mySectionKnown && $myRootId > 0) {
+            $preselectId = $myRootId;
         }
-        echo '</select><small class="field-help">' . ($myUnitIsDeputy ? 'معاونت شما به‌صورت پیش‌فرض انتخاب شده است؛ ' : '') . 'درخواست به معاونت انتخاب‌شده ارجاع داده می‌شود.</small></label>';
+        echo '<label>بخش سازمانی درخواست‌کننده<select name="requesting_unit_id" required><option value="">انتخاب کنید…</option>';
+        foreach ($departments as $department) {
+            echo '<option value="' . (int) $department['id'] . '" ' . ((int) $department['id'] === $preselectId ? 'selected' : '') . '>' . e($department['name']) . '</option>';
+        }
+        echo '</select><small class="field-help">' . ($mySectionKnown ? 'بخش سازمانی شما به‌صورت پیش‌فرض انتخاب شده است؛ ' : '') . 'درخواست به بخش انتخاب‌شده ارجاع داده می‌شود.</small></label>';
     } else {
-        echo '<label>معاونت سازمانی درخواست‌کننده<input value="هیچ معاونتی در چارت سازمانی تعریف نشده است" readonly></label>';
+        echo '<label>بخش سازمانی درخواست‌کننده<input value="هیچ بخش سازمانی‌ای در چارت سازمانی تعریف نشده است" readonly></label>';
     }
      echo '<label>اولویت<select name="priority"><option value="">پیش‌فرض خدمت</option><option value="normal"' . ($retryPriority === 'normal' ? ' selected' : '') . '>عادی</option><option value="urgent"' . ($retryPriority === 'urgent' ? ' selected' : '') . '>فوری</option><option value="critical"' . ($retryPriority === 'critical' ? ' selected' : '') . '>حیاتی</option></select></label><label class="ticket-asset-field" data-asset-combo data-asset-required-group="it">سیستم مرتبط <span class="auto-label" data-asset-label>پس از انتخاب خدمت مشخص می‌شود</span><input type="text" id="asset-search" class="asset-search" placeholder="جستجوی سیستم (نام رایانه، شماره اموال یا پلاک)" autocomplete="off" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="asset-results" aria-required="false"><select name="asset_id" id="asset-selector" class="asset-native" tabindex="-1" aria-hidden="true"><option value="">بدون سیستم خاص / انتخاب نشده</option>';
      foreach ($userAssets as $asset) {

@@ -1,0 +1,307 @@
+/* سفارش غذای مهمان (فقط مدیران و بالاتر): از دکمهٔ تقویم در یک پاپ‌آپ باز می‌شود و بعد از ثبت بسته می‌شود. */
+(function () {
+  'use strict';
+
+  var host = document.getElementById('food-guest-app');
+  if (!host) return;
+
+  var apiBase = (host.dataset.api || '').replace(/&amp;/g, '&');
+  var csrf = host.dataset.csrf || '';
+  var selfName = host.dataset.selfName || '';
+  var state = {
+    items: [],
+    myDeputy: null,
+    canCreate: false,
+    canCreateWithoutDeputy: false,
+    todayJalali: '',
+    sameDayCutoff: '09:30',
+    sameDayOpen: null,
+    loading: false,
+    loadError: '',
+    formError: '',
+    saving: false,
+    editingId: 0,
+    form: { request_date: '', meal_type: 'lunch', organization: '', guest_count: '', requester_name: selfName, note: '' }
+  };
+  var dialog = null;
+
+  function esc(value) {
+    return String(value == null ? '' : value).replace(/[&<>"']/g, function (m) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m];
+    });
+  }
+  function faDigits(value) { return String(value).replace(/[0-9]/g, function (d) { return '۰۱۲۳۴۵۶۷۸۹'[Number(d)]; }); }
+  function normDigits(value) {
+    return String(value == null ? '' : value).replace(/[۰-۹]/g, function (d) { return String('۰۱۲۳۴۵۶۷۸۹'.indexOf(d)); })
+      .replace(/[٠-٩]/g, function (d) { return String('٠١٢٣٤٥٦٧٨٩'.indexOf(d)); });
+  }
+
+  async function request(route, params, options) {
+    var query = params ? new URLSearchParams(params).toString() : '';
+    var url = apiBase + encodeURIComponent(route) + (query ? '&' + query : '');
+    var opts = Object.assign({ method: 'GET', credentials: 'same-origin', headers: {} }, options || {});
+    opts.headers = Object.assign({ 'Content-Type': 'application/json' }, opts.headers || {});
+    if (opts.method !== 'GET' && csrf) opts.headers['X-CSRF-Token'] = csrf;
+    var response = await fetch(url, opts);
+    var text = await response.text();
+    var payload;
+    try { payload = text ? JSON.parse(text) : {}; } catch (e) { throw new Error('پاسخ معتبر از سرور دریافت نشد (کد ' + response.status + ').'); }
+    if (!response.ok) throw new Error(payload.error || ('خطای سرویس ' + response.status));
+    return payload || {};
+  }
+
+  /** پیام کوتاه روی صفحه (بیرون از پاپ‌آپ تا بعد از بسته شدن هم دیده شود). */
+  function toast(message, bad) {
+    var node = document.createElement('div');
+    node.className = 'alert ' + (bad ? 'danger' : 'success');
+    node.setAttribute('role', bad ? 'alert' : 'status');
+    node.textContent = message;
+    node.style.cssText = 'position:fixed;bottom:22px;left:50%;transform:translateX(-50%);z-index:10000;min-width:260px;max-width:92vw;box-shadow:0 8px 24px rgba(0,0,0,.2)';
+    document.body.appendChild(node);
+    window.setTimeout(function () { node.remove(); }, 4000);
+  }
+
+  /** مقادیر فعلی فرم را قبل از بازسازی نگه می‌دارد تا با خطا یا تغییر وضعیت پاک نشوند. */
+  function readForm() {
+    var form = dialog && dialog.querySelector('#fg-form');
+    if (!form) return;
+    var fd = new FormData(form);
+    state.form = {
+      request_date: String(fd.get('request_date') || ''),
+      meal_type: String(fd.get('meal_type') || 'lunch'),
+      organization: String(fd.get('organization') || ''),
+      guest_count: String(fd.get('guest_count') || ''),
+      requester_name: String(fd.get('requester_name') || ''),
+      note: String(fd.get('note') || '')
+    };
+  }
+
+  function render() {
+    var f = state.form;
+    var deputyBox = state.myDeputy
+      ? '<div class="alert info" role="status">بخش درخواست‌کننده: <b>' + esc(state.myDeputy.name) + '</b> (از نزدیک‌ترین سرشاخهٔ شما در چارت سازمانی خوانده می‌شود)</div>'
+      : '<div class="alert warning" role="alert">این حساب هنوز در چارت سازمانی جایگاه فعالی ندارد؛ ثبت درخواست غذای مهمان برای آن ممکن نیست. برای رفع این موضوع، جایگاه حساب خود را در چارت سازمانی تعریف کنید یا از مدیر واحد/سازمان بخواهید شما را در بخش خود بچید.</div>';
+    var mealCount = function (meal, status) { return state.items.filter(function (item) { return (item.meal_type === 'dinner' ? 'dinner' : 'lunch') === meal && item.status === status; }).length; };
+    var activeGuestCount = state.items.filter(function (item) { return item.status === 'active'; }).reduce(function (sum, item) { return sum + Number(item.guest_count || 0); }, 0);
+    var cancelledGuestCount = state.items.filter(function (item) { return item.status === 'cancelled'; }).reduce(function (sum, item) { return sum + Number(item.guest_count || 0); }, 0);
+    var summary = state.loading || state.loadError ? '' : '<div class="alert info fg-request-summary" role="status">ناهار: فعال ' + faDigits(mealCount('lunch', 'active')) + '، لغوشده ' + faDigits(mealCount('lunch', 'cancelled')) + '، مجموع ' + faDigits(mealCount('lunch', 'active') + mealCount('lunch', 'cancelled')) + ' · شام: فعال ' + faDigits(mealCount('dinner', 'active')) + '، لغوشده ' + faDigits(mealCount('dinner', 'cancelled')) + '، مجموع ' + faDigits(mealCount('dinner', 'active') + mealCount('dinner', 'cancelled')) + ' · کل: ' + faDigits(state.items.filter(function (item) { return item.status === 'active'; }).length) + ' فعال، ' + faDigits(state.items.filter(function (item) { return item.status === 'cancelled'; }).length) + ' لغوشده، ' + faDigits(state.items.length) + ' ردیف · مهمان‌ها: ' + faDigits(activeGuestCount) + ' فعال و ' + faDigits(cancelledGuestCount) + ' لغوشده</div>' + (state.items.length >= 300 ? '<div class="alert warning fg-request-summary">تعدادها فقط برای حداکثر ۳۰۰ درخواست نخست بارگذاری‌شده است.</div>' : '');
+    var rows = state.items.map(function (r) {
+      var actions = [];
+      var id = Number(r.id);
+      if (r.can_edit) actions.push('<button type="button" class="button secondary" data-fg-action="edit" data-id="' + id + '">ویرایش</button>');
+      if (r.can_cancel) actions.push('<button type="button" class="button secondary" data-fg-action="cancel" data-id="' + id + '">لغو</button>');
+      if (r.can_delete) actions.push('<button type="button" class="button danger" data-fg-action="delete" data-id="' + id + '">حذف</button>');
+      var action = actions.length ? actions.join(' ') : '—';
+      var status = r.status === 'cancelled' ? 'لغو شده' : 'فعال';
+      return '<tr class="fg-request-item">'
+        + '<td>' + esc(faDigits(r.request_jalali)) + '</td>'
+        + '<td>' + (r.meal_type === 'dinner' ? 'شام' : 'ناهار') + '</td>'
+        + '<td>' + esc(r.deputy_name || '—') + '</td>'
+        + '<td>' + esc(r.organization) + '</td>'
+        + '<td>' + esc(faDigits(r.guest_count)) + '</td>'
+        + '<td>' + esc(r.requester_name) + '</td>'
+        + '<td>' + esc(r.created_by_name || '—') + '</td>'
+        + '<td>' + esc(r.note || '—') + '</td>'
+        + '<td>' + status + '</td>'
+        + '<td><div class="fg-request-actions">' + action + '</div></td></tr>';
+    }).join('');
+    var table = state.loading
+      ? '<p class="muted fg-request-empty">در حال دریافت درخواست‌های شما…</p>'
+      : state.loadError
+        ? '<p class="muted fg-request-empty">فهرست درخواست‌ها دریافت نشد.</p>'
+        : state.items.length
+      ? '<div class="fg-request-list" role="region" tabindex="0" aria-label="درخواست‌های مهمان من؛ جدول قابل پیمایش">'
+        + '<table class="fg-request-table"><thead><tr><th scope="col">تاریخ</th><th scope="col">وعده</th><th scope="col">معاونت / بخش</th>'
+        + '<th scope="col">سازمان / شرکت</th><th scope="col">تعداد</th><th scope="col">درخواست‌دهنده</th>'
+        + '<th scope="col">ثبت‌کننده</th><th scope="col">یادداشت</th><th scope="col">وضعیت</th><th scope="col">عملیات</th>'
+        + '</tr></thead><tbody>' + rows + '</tbody></table></div>'
+        + (state.items.length >= 300 ? '<p class="muted fg-request-empty">حداکثر ۳۰۰ درخواست نخست نمایش داده می‌شود.</p>' : '')
+      : '<p class="muted fg-request-empty">درخواستی برای امروز یا روزهای آینده ثبت نکرده‌اید.</p>';
+    var deadlineNotice = state.sameDayOpen === null
+      ? '<div class="alert info" role="status">در حال بررسی مهلت ثبت درخواست مهمان برای امروز…</div>'
+      : state.sameDayOpen
+        ? '<div class="alert info" role="status">درخواست غذای مهمان برای امروز تا پایان دقیقهٔ <b>' + esc(faDigits(state.sameDayCutoff || '09:30')) + '</b> پذیرفته می‌شود؛ پس از آن فقط برای روزهای آینده می‌توان درخواست ثبت کرد.</div>'
+        : '<div class="alert warning" role="status">مهلت ثبت درخواست مهمان برای امروز گذشته است (تا پایان دقیقهٔ <b>' + esc(faDigits(state.sameDayCutoff || '09:30')) + '</b>). از فردا به بعد همچنان می‌توانید درخواست ثبت کنید.</div>';
+    dialog.innerHTML = ''
+      + '<div class="fo-modal-inner">'
+      + '<div class="fo-modal-head"><div><h2 id="fg-title">' + (state.editingId ? 'ویرایش درخواست غذای مهمان' : 'سفارش غذای مهمان') + '</h2>'
+      + '</div>'
+      + '<button type="button" class="button secondary" data-fg-action="close">بستن</button></div>'
+      + (state.loadError ? '<div class="alert danger" role="alert">' + esc(state.loadError) + '</div>' : '')
+      + deputyBox
+      + deadlineNotice
+      + '<div class="alert info" role="status">سفارش مهمانِ ثبت‌شده برای تعطیلات یا وعدهٔ شام، پس از پایان روز به‌صورت فیش خودکار ثبت می‌شود؛ چاپ فیزیکی انجام نمی‌شود.</div>'
+      + (state.formError ? '<div class="alert danger" role="alert">' + esc(state.formError) + '</div>' : '')
+      + '<form id="fg-form" class="form-grid" novalidate>'
+      + '<label>تاریخ مورد نیاز (شمسی)<input type="text" inputmode="numeric" autocomplete="off" data-jalali name="request_date" value="' + esc(f.request_date) + '" required></label>'
+      + '<label>وعدهٔ غذایی<select name="meal_type"><option value="lunch"' + (f.meal_type !== 'dinner' ? ' selected' : '') + '>ناهار</option><option value="dinner"' + (f.meal_type === 'dinner' ? ' selected' : '') + '>شام</option></select></label>'
+      + '<label>سازمان / شرکت مهمان<input type="text" name="organization" maxlength="190" value="' + esc(f.organization) + '" required></label>'
+      + '<label>تعداد مهمان<input type="text" inputmode="numeric" name="guest_count" maxlength="3" value="' + esc(f.guest_count) + '" required></label>'
+      + '<label>نام درخواست‌دهنده<input type="text" name="requester_name" maxlength="150" value="' + esc(f.requester_name) + '" required></label>'
+      + '<label>یادداشت (اختیاری)<input type="text" name="note" maxlength="500" value="' + esc(f.note) + '"></label>'
+      + '<div><button type="submit" class="button primary" data-fg-action="save"' + (state.saving || (!state.editingId && (!state.canCreate || !state.myDeputy)) ? ' disabled' : '') + '>' + (state.editingId ? 'ذخیرهٔ ویرایش' : 'ثبت درخواست مهمان') + '</button>'
+      + (state.editingId ? ' <button type="button" class="button secondary" data-fg-action="edit-cancel">لغو ویرایش</button>' : '') + '</div>'
+      + '</form>'
+      + '<h3 class="fg-request-title">درخواست‌های مهمان من (از امروز به بعد)</h3>'
+      + summary
+      + table
+      + '</div>';
+    if (window.ItsmJalali && typeof window.ItsmJalali.enhanceAll === 'function') window.ItsmJalali.enhanceAll(dialog);
+  }
+
+  function ensureDialog() {
+    if (dialog) return dialog;
+    dialog = document.createElement('dialog');
+    dialog.id = 'fg-dialog';
+    dialog.className = 'fo-modal';
+    dialog.setAttribute('aria-labelledby', 'fg-title');
+    dialog.addEventListener('click', function (event) {
+      if (event.target === dialog) { dialog.close(); return; }
+      var btn = event.target.closest('[data-fg-action]');
+      if (!btn) return;
+      var act = btn.dataset.fgAction;
+      if (act === 'close') dialog.close();
+      if (act === 'cancel') cancel(Number(btn.dataset.id || 0));
+      if (act === 'edit') beginEdit(Number(btn.dataset.id || 0));
+      if (act === 'edit-cancel') cancelEdit();
+      if (act === 'delete') removeRequest(Number(btn.dataset.id || 0));
+    });
+    dialog.addEventListener('submit', function (event) {
+      if (!event.target || event.target.id !== 'fg-form') return;
+      event.preventDefault();
+      save();
+    });
+    document.body.appendChild(dialog);
+    return dialog;
+  }
+
+  async function load() {
+    state.loadError = '';
+    try {
+      var data = await request('guest-requests');
+      state.items = data.items || [];
+      state.myDeputy = data.my_deputy || null;
+      state.canCreate = data.can_create === true || !!state.myDeputy;
+      state.canCreateWithoutDeputy = data.can_create_without_deputy === true;
+      state.todayJalali = data.today_jalali || state.todayJalali;
+      state.sameDayCutoff = data.same_day_cutoff || '09:30';
+      state.sameDayOpen = data.same_day_open !== false;
+    } catch (e) {
+      state.items = [];
+      state.loadError = e.message;
+    }
+    state.loading = false;
+    readForm();
+    if (!state.form.request_date && state.todayJalali && state.sameDayOpen) state.form.request_date = state.todayJalali;
+    render();
+  }
+
+  async function save() {
+    if (state.saving) return;
+    readForm();
+    var f = state.form;
+    var body = {
+      request_date: normDigits(f.request_date).trim(),
+      meal_type: f.meal_type === 'dinner' ? 'dinner' : 'lunch',
+      organization: f.organization.trim(),
+      guest_count: normDigits(f.guest_count).trim(),
+      requester_name: f.requester_name.trim(),
+      note: f.note.trim()
+    };
+    var editingId = Number(state.editingId || 0);
+    if (editingId) body.id = editingId;
+    state.formError = '';
+    if (!body.request_date) { state.formError = 'تاریخ را وارد کنید.'; return render(); }
+    if (!body.organization) { state.formError = 'نام سازمان یا شرکت را وارد کنید.'; return render(); }
+    if (!/^\d{1,3}$/.test(body.guest_count) || Number(body.guest_count) < 1 || Number(body.guest_count) > 500) {
+      state.formError = 'تعداد مهمان باید عددی بین ۱ تا ۵۰۰ باشد.'; return render();
+    }
+    if (!body.requester_name) { state.formError = 'نام درخواست‌دهنده را وارد کنید.'; return render(); }
+    state.saving = true;
+    render();
+    try {
+      var res = await request(editingId ? 'guest-request-update' : 'guest-request', null, { method: 'POST', body: JSON.stringify(body) });
+      state.saving = false;
+      state.editingId = 0;
+      state.form = { request_date: '', meal_type: 'lunch', organization: '', guest_count: '', requester_name: selfName, note: '' };
+      dialog.close();
+      toast(res.message || (editingId ? 'درخواست غذای مهمان ویرایش شد.' : 'درخواست غذای مهمان ثبت شد.'), false);
+      await load();
+    } catch (e) {
+      state.saving = false;
+      state.formError = e.message;
+      render();
+    }
+  }
+
+  async function cancel(id) {
+    if (!window.confirm('این درخواست غذای مهمان لغو شود؟')) return;
+    try {
+      var res = await request('guest-request-cancel', null, { method: 'POST', body: JSON.stringify({ id: id }) });
+      toast(res.message || 'لغو شد.', false);
+      await load();
+    } catch (e) {
+      toast(e.message, true);
+    }
+  }
+
+  function beginEdit(id) {
+    var row = state.items.find(function (item) { return Number(item.id) === Number(id); });
+    if (!row || !row.can_edit) return;
+    state.editingId = Number(row.id);
+    state.formError = '';
+    state.form = {
+      request_date: row.request_jalali || '',
+      meal_type: row.meal_type === 'dinner' ? 'dinner' : 'lunch',
+      organization: row.organization || '',
+      guest_count: String(row.guest_count || ''),
+      requester_name: row.requester_name || '',
+      note: row.note || ''
+    };
+    render();
+    var form = dialog && dialog.querySelector('#fg-form');
+    if (form) form.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  function cancelEdit() {
+    state.editingId = 0;
+    state.formError = '';
+    state.form = { request_date: '', meal_type: 'lunch', organization: '', guest_count: '', requester_name: selfName, note: '' };
+    render();
+  }
+
+  async function removeRequest(id) {
+    var row = state.items.find(function (item) { return Number(item.id) === Number(id); });
+    if (!row || !row.can_delete) return;
+    if (!window.confirm('درخواست مهمان به‌طور کامل حذف شود؟ این کار قابل بازگشت نیست.')) return;
+    try {
+      var res = await request('guest-request-delete', null, { method: 'POST', body: JSON.stringify({ id: Number(id) }) });
+      toast(res.message || 'درخواست حذف شد.', false);
+      await load();
+    } catch (e) {
+      toast(e.message, true);
+    }
+  }
+
+  /** از دکمهٔ «سفارش غذای مهمان» تقویم صدا زده می‌شود. */
+  function open() {
+    ensureDialog();
+    state.editingId = 0;
+    state.items = [];
+    state.loading = true;
+    state.loadError = '';
+    state.sameDayOpen = null;
+    state.canCreate = false;
+    state.canCreateWithoutDeputy = false;
+    state.myDeputy = null;
+    state.formError = '';
+    state.form = { request_date: '', meal_type: 'lunch', organization: '', guest_count: '', requester_name: selfName, note: '' };
+    render();
+    if (!dialog.open) {
+      try { dialog.showModal(); } catch (e) { dialog.setAttribute('open', 'open'); }
+    }
+    load();
+  }
+
+  window.FoodGuest = { open: open };
+})();

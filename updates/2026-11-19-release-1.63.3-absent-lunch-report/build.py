@@ -19,7 +19,7 @@ DOWNLOADS = ROOT / 'downloads'
 ZIP_PATH = DOWNLOADS / 'ticket-update-1.63.2-to-1.63.3-absent-lunch-report-20261119.zip'
 VERSION = '1.63.3'
 REQUIRES = '1.63.2'
-PANEL_VERSION = '1.37.57'
+PANEL_VERSION = '1.37.58'
 DATE = '2026-11-19'
 
 def sha256(b: bytes) -> str:
@@ -68,11 +68,11 @@ render_old = "if(view==='reports'){ensureReportRange();if((state.reportTab||'cla
 render_new = "if(view==='reports'){ensureReportRange();if((state.reportTab||'classic')==='aggregate')loadAggregate(false);else if((state.reportTab||'classic')==='absent-lunch'&&window.AbsentLunchReport)window.AbsentLunchReport.load(false);else if(!FOOD_REPORT_TABS[state.reportTab]&&state.report&&state.report.type==='absent')loadAbsent(false)}"
 html = must_replace(html, render_old, render_new, 'render loader hook')
 
-# گزینهٔ قدیمی «نوع گزارش = غایبین» از هر دو فرم حذف میشود
+# گزینهٔ قدیمی «نوع گزارش = غایبین» از فرم حذف میشود (نسخهٔ زنده مخزن اکنون فقط یک فرم دارد)
 opt_re = re.compile(r'<option value="absent" \$\{r\.type===\'absent\'\?\'selected\':\'\'\}>غایبین[^<]*</option>')
 html, n_opt = opt_re.subn('', html)
-if n_opt != 2:
-    raise SystemExit(f'حذف گزینهٔ absent: انتظار ۲، پیدا شد {n_opt}')
+if n_opt != 1:
+    raise SystemExit(f'حذف گزینهٔ absent: انتظار ۱، پیدا شد {n_opt}')
 
 # پنج چیپ آمار فقط داخل فرم «گزارشگیری» (نه صفحهٔ غایبین)
 classic_decl = "const rows=currentReportRows().rows,"
@@ -101,6 +101,40 @@ chat = must_replace(chat, '    $flow = chatbot_flow_active();', src('chatbot-int
 
 # ---------------------------------------------------------------- 4) نوشتن خروجی
 FILES.mkdir(parents=True, exist_ok=True)
+# ۱٫۶۳٫۳ — کل بند ۱۷ روی همان نسخه: کپی فایل‌های محصولیِ تغییرکرده
+EXTRA_FILES = [
+    'assets/food-menu.css',
+    'assets/food-menu.js',
+    'assets/food-order-guest.js',
+    'assets/food-org-groups.js',
+    'cd-dvd.php',
+    'food-order-import.php',
+    'food-order.php',
+    'food-reconciliation.php',
+    'food-ticket-auto-receipts.php',
+    'food-ticket-groups.php',
+    'food-ticket-runtime.php',
+    'food-ticket-web/assets/food-menu.css',
+    'food-ticket-web/assets/food-menu.js',
+    'food-ticket-web/assets/food-org-groups.js',
+    'lib/org-grouping.php',
+    'organization.php',
+    'modules/request-center/Actions/ticket-actions.php',
+    'modules/request-center/Pages/create.php',
+    'modules/request-center/Pages/detail.php',
+    'modules/request-center/lib/functions.php',
+]
+MIGRATIONS = ['038-food-guest-actuals.sql', '039-liaison-manager-role-sync.sql']
+for rel in EXTRA_FILES:
+    src_path = ROOT / rel
+    if not src_path.is_file():
+        raise SystemExit(f'فایل محصولی پیدا نشد: {rel}')
+    dst = FILES / rel
+    dst.parent.mkdir(parents=True, exist_ok=True)
+    dst.write_bytes(src_path.read_bytes())
+for name in MIGRATIONS:
+    if not (ROOT / 'migrations' / name).is_file():
+        raise SystemExit(f'مهاجرت پیدا نشد: {name}')
 (FILES / 'VERSION').write_text(VERSION + '\n', encoding='utf-8')
 (FILES / 'food-ticket.php').write_text(backend, encoding='utf-8')
 (FILES / 'food-ticket-web/index.html').write_text(html, encoding='utf-8')
@@ -123,22 +157,26 @@ FILES_LIST = [
     'food-ticket-web/index.html', 'food-ticket.php', 'help-guide.php',
     'tests/js/food-absent-lunch-tab.test.js', 'tests/js/food-absent-lunch-runtime.test.js',
     'tests/test_food_absent_lunch_backend_static.py', 'tests/test_food_absent_lunch_tab_static.py',
-]
+] + EXTRA_FILES
 hashes = {rel: sha256((FILES / rel).read_bytes()) for rel in FILES_LIST}
 manifest = {
-    'name': 'food-absent-lunch-report-tab',
+    'name': 'absent-lunch-report-and-guest-day-close',
     'version': VERSION,
     'requires_version': REQUIRES,
     'date': DATE,
-    'title': 'نسخهٔ نهایی تب «غایبین ناهار» داخل صفحهٔ گزارشها (چارت، ۳ زیرنما، تیک چندمعاونتی، چاپ خالص)',
+    'title': 'تب «غایبین ناهار» + اصلاحات نهایی (بند ۱۷): بستن روز، انتساب مهمان به ۶ بخش، یک‌دست‌سازی بخش‌های سازمانی',
     'panel_version': PANEL_VERSION,
-    'migrations': [],
+    'migrations': MIGRATIONS,
     'files': FILES_LIST,
     'sha256': hashes,
-    'description': 'Final 1.63.3: absent-lunch report tab with three subviews, compact chart, per-deputy checkboxes + "all deputies", pure print, XLSX.',
-    'notes': ('پیشنیاز ۱٫۶۳٫۲؛ مهاجرت دیتابیس ندارد. پشتیبان و نصب آزمایشی الزامی. '
-              'بستهٔ نهایی جایگزین بستهٔ اولیهٔ همان ورژن شد؛ SHA تازه است. بکاند فقط ناهار میگیرد و تغییر نکرده. '
-              'نسخهٔ پنل ۱٫۳۷٫۵۷؛ پس از نصب Ctrl+F5 کنید.'),
+    'description': ('Final 1.63.3: absent-lunch report tab (three subviews, per-deputy checkboxes + "all deputies", '
+                    'pure print, XLSX) + full section-17 scope: single-source remainder at day close, exact-equality guest '
+                    'actuals popup (6 org roots + conditional "no anchor" row), chart-less guest registrations blocked, '
+                    '6-section org lists everywhere, partner-company manager and CEO subtree visibility for guest requests.'),
+    'notes': ('پیشنیاز ۱٫۶۳٫۲؛ دارای دو مهاجرتِ idempotent است: 038-food-guest-actuals.sql (جدول food_guest_actuals) '
+              'و 039-liaison-manager-role-sync.sql (ارتقای مدیران واحدهای مستقل به نقش «مدیر»). پشتیبان و نصب آزمایشی الزامی. '
+              'بستهٔ نهایی جایگزین بستهٔ اولیهٔ همان ورژن شد؛ SHA تازه است. '
+              'نسخهٔ پنل ۱٫۳۷٫۵۸؛ پس از نصب Ctrl+F5 کنید. داده‌های تاریخی NULL مهمان هرگز بازنویسی نمی‌شوند.'),
 }
 (PKG / 'manifest.json').write_text(json.dumps(manifest, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
 
@@ -146,10 +184,12 @@ manifest = {
 DOWNLOADS.mkdir(exist_ok=True)
 with zipfile.ZipFile(ZIP_PATH, 'w', zipfile.ZIP_DEFLATED, compresslevel=9) as z:
     z.write(PKG / 'manifest.json', 'manifest.json')
+    for name in MIGRATIONS:
+        z.write(ROOT / 'migrations' / name, 'migrations/' + name)
     for rel in FILES_LIST:
         z.write(FILES / rel, 'files/' + rel)
 zip_bytes = ZIP_PATH.read_bytes()
 (ZIP_PATH.with_suffix(ZIP_PATH.suffix + '.sha256')).write_text(sha256(zip_bytes) + '  ' + ZIP_PATH.name + '\n', encoding='utf-8')
 print('WROTE', ZIP_PATH, len(zip_bytes), 'bytes')
 print('SHA256', sha256(zip_bytes))
-print('files', len(FILES_LIST) + 1)
+print('files', len(FILES_LIST) + 1 + len(MIGRATIONS))

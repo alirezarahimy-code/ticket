@@ -79,10 +79,8 @@
   function render() {
     var f = state.form;
     var deputyBox = state.myDeputy
-      ? '<div class="alert info" role="status">معاونت درخواست‌کننده: <b>' + esc(state.myDeputy.name) + '</b> (از جایگاه مدیریتی شما خوانده می‌شود)</div>'
-      : state.canCreateWithoutDeputy
-        ? '<div class="alert info" role="status">درخواست شما با عنوان «مدیریت مرکزی» ثبت می‌شود و به معاونت خاصی نسبت داده نمی‌شود.</div>'
-        : '<div class="alert info" role="status">برای ثبت درخواست جدید باید مدیر یک معاونت باشید؛ درخواست‌های مجاز را می‌توانید از فهرست پایین ویرایش، لغو یا حذف کنید.</div>';
+      ? '<div class="alert info" role="status">بخش درخواست‌کننده: <b>' + esc(state.myDeputy.name) + '</b> (از نزدیک‌ترین سرشاخهٔ شما در چارت سازمانی خوانده می‌شود)</div>'
+      : '<div class="alert warning" role="alert">این حساب هنوز در چارت سازمانی جایگاه فعالی ندارد؛ ثبت درخواست غذای مهمان برای آن ممکن نیست. برای رفع این موضوع، جایگاه حساب خود را در چارت سازمانی تعریف کنید یا از مدیر واحد/سازمان بخواهید شما را در بخش خود بچید.</div>';
     var mealCount = function (meal, status) { return state.items.filter(function (item) { return (item.meal_type === 'dinner' ? 'dinner' : 'lunch') === meal && item.status === status; }).length; };
     var activeGuestCount = state.items.filter(function (item) { return item.status === 'active'; }).reduce(function (sum, item) { return sum + Number(item.guest_count || 0); }, 0);
     var cancelledGuestCount = state.items.filter(function (item) { return item.status === 'cancelled'; }).reduce(function (sum, item) { return sum + Number(item.guest_count || 0); }, 0);
@@ -113,7 +111,7 @@
         ? '<p class="muted fg-request-empty">فهرست درخواست‌ها دریافت نشد.</p>'
         : state.items.length
       ? '<div class="fg-request-list" role="region" tabindex="0" aria-label="درخواست‌های مهمان من؛ جدول قابل پیمایش">'
-        + '<table class="fg-request-table"><thead><tr><th scope="col">تاریخ</th><th scope="col">وعده</th><th scope="col">معاونت</th>'
+        + '<table class="fg-request-table"><thead><tr><th scope="col">تاریخ</th><th scope="col">وعده</th><th scope="col">معاونت / بخش</th>'
         + '<th scope="col">سازمان / شرکت</th><th scope="col">تعداد</th><th scope="col">درخواست‌دهنده</th>'
         + '<th scope="col">ثبت‌کننده</th><th scope="col">یادداشت</th><th scope="col">وضعیت</th><th scope="col">عملیات</th>'
         + '</tr></thead><tbody>' + rows + '</tbody></table></div>'
@@ -141,7 +139,7 @@
       + '<label>تعداد مهمان<input type="text" inputmode="numeric" name="guest_count" maxlength="3" value="' + esc(f.guest_count) + '" required></label>'
       + '<label>نام درخواست‌دهنده<input type="text" name="requester_name" maxlength="150" value="' + esc(f.requester_name) + '" required></label>'
       + '<label>یادداشت (اختیاری)<input type="text" name="note" maxlength="500" value="' + esc(f.note) + '"></label>'
-      + '<div><button type="submit" class="button primary" data-fg-action="save"' + (state.saving || (!state.editingId && !state.canCreate) ? ' disabled' : '') + '>' + (state.editingId ? 'ذخیرهٔ ویرایش' : 'ثبت درخواست مهمان') + '</button>'
+      + '<div><button type="submit" class="button primary" data-fg-action="save"' + (state.saving || (!state.editingId && (!state.canCreate || !state.myDeputy)) ? ' disabled' : '') + '>' + (state.editingId ? 'ذخیرهٔ ویرایش' : 'ثبت درخواست مهمان') + '</button>'
       + (state.editingId ? ' <button type="button" class="button secondary" data-fg-action="edit-cancel">لغو ویرایش</button>' : '') + '</div>'
       + '</form>'
       + '<h3 class="fg-request-title">درخواست‌های مهمان من (از امروز به بعد)</h3>'

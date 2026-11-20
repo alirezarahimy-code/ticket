@@ -8,6 +8,7 @@
 SET FOREIGN_KEY_CHECKS = 0;
 
 DROP TABLE IF EXISTS
+    food_guest_actuals,
     user_access_group_permissions,
     user_access_group_members,
     user_access_groups,

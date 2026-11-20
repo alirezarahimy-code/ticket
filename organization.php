@@ -298,6 +298,97 @@ function org_liaison_units(?int $companyId = null): array
     return $result;
 }
 
+/** نوع‌های سرشاخهٔ «بخش‌های سازمان» (۶ بخش): مدیرعامل، واحدهای مستقل، معاونت‌ها، مدیریت مستقل، دفتر مدیرعامل، شرکت همکار. */
+function org_root_types(): array
+{
+    return ['ceo', 'liaison', 'deputy', 'management', 'office', 'company_manager'];
+}
+
+/** نام نمایشی سرشاخهٔ ۶ بخشی. */
+function org_root_display_name(array $unit): string
+{
+    $name = trim((string) ($unit['name'] ?? ''));
+    $type = (string) ($unit['unit_type'] ?? '');
+    if ($type === 'liaison') {
+        return ($name === '' ? 'واحد مستقل' : $name) . ' (مستقل)';
+    }
+    if ($type === 'company_manager') {
+        return 'شرکت همکار';
+    }
+    return $name === '' ? 'بخش سازمانی' : $name;
+}
+
+/** فهرست سرشاخه‌های فعال هر دو درخت (۶ بخش) برای فهرست‌های یک‌دست «بخش سازمانی». ترتیب: مدیرعامل، مستقل‌ها، معاونت‌ها، مدیریت مستقل، دفتر، شرکت همکار. */
+function org_root_units(): array
+{
+    static $cache = null;
+    if ($cache !== null) {
+        return $cache;
+    }
+    org_ensure_schema();
+    $types = org_root_types();
+    $in = implode(',', array_fill(0, count($types), '?'));
+    try {
+        $query = db()->prepare('SELECT ou.id, ou.name, ou.unit_type, ou.parent_id, ou.company_id, ou.chart_side FROM org_units ou WHERE ou.is_active = 1 AND ou.unit_type IN (' . $in . ') ORDER BY FIELD(ou.unit_type, "ceo","liaison","deputy","management","office","company_manager"), ou.chart_side, ou.name');
+        $query->execute($types);
+        $rows = [];
+        foreach ($query->fetchAll() as $unit) {
+            $rows[] = [
+                'id' => (int) $unit['id'],
+                'name' => org_root_display_name($unit),
+                'unit_type' => (string) $unit['unit_type'],
+                'company_id' => (int) ($unit['company_id'] ?? 0),
+                'chart_side' => (string) ($unit['chart_side'] ?? ''),
+            ];
+        }
+        return $cache = $rows;
+    } catch (Throwable $e) {
+        if (function_exists('app_error_log')) {
+            app_error_log('[org] root units failed: ' . $e->getMessage());
+        }
+        return $cache = [];
+    }
+}
+
+/** نزدیک‌ترین سرشاخهٔ ۶ بخشی از یک واحد (بالا رفتن سلسلهٔ والدها). 0 یعنی جایگاه یا سرشاخه‌ای ندارد. */
+function org_nearest_root_id(int $startUnitId, bool $activeOnly = true): int
+{
+    if ($startUnitId <= 0) {
+        return 0;
+    }
+    org_ensure_schema();
+    $types = org_root_types();
+    $stmt = db()->prepare('SELECT id, parent_id, unit_type, is_active FROM org_units WHERE id = ? LIMIT 1');
+    $current = $startUnitId;
+    for ($depth = 0; $depth < 12 && $current > 0; $depth++) {
+        try {
+            $stmt->execute([$current]);
+            $unit = $stmt->fetch(PDO::FETCH_ASSOC);
+        } catch (Throwable $e) {
+            return 0;
+        }
+        if (!$unit) {
+            return 0;
+        }
+        if (in_array((string) $unit['unit_type'], $types, true)
+            && (!$activeOnly || (int) ($unit['is_active'] ?? 0) === 1)) {
+            return (int) $unit['id'];
+        }
+        $current = (int) ($unit['parent_id'] ?? 0);
+    }
+    return 0;
+}
+
+/** نرمال‌سازی شناسهٔ ذخیره‌شدهٔ انتساب (هر سطحی از چارت، حتی قدیمی) به نزدیک‌ترین سرشاخهٔ ۶ بخشی؛ برای داده‌های تاریخی بازنویسی نمی‌شود، فقط برای گزارش محاسبه می‌شود. 0 یعنی بی‌جایگاه. */
+function org_stored_attribution_root_id($storedId): int
+{
+    $id = (int) ($storedId ?? 0);
+    if ($id <= 0) {
+        return 0;
+    }
+    return org_nearest_root_id($id, false);
+}
+
 /**
  * تبدیل معاونت سازمانی انتخاب‌شده به معاونتِ مسیر رسیدگی (departments).
  * اگر department هم‌نام وجود داشته باشد همان برگردانده می‌شود، در غیر این صورت ساخته می‌شود.
@@ -308,7 +399,7 @@ function org_unit_routing_department_id(int $unitId): int
         return 0;
     }
     $unit = org_unit_by_id($unitId);
-    if ($unit === null || (string) ($unit['unit_type'] ?? '') !== 'deputy') {
+    if ($unit === null || !in_array((string) ($unit['unit_type'] ?? ''), org_root_types(), true)) {
         return 0;
     }
     $name = trim((string) $unit['name']);
@@ -685,7 +776,8 @@ function org_restore_snapshot(array $target, array $expected, ?int $companyId = 
  */
 function org_position_unit_types(): array
 {
-    return ['ceo', 'company_manager', 'deputy', 'management', 'office', 'department'];
+    // liaison (واحدهای مستقل) هم نقش خودکار manager می‌گیرد تا مدیران آنها بتوانند مهمان درخواست کنند و به باشگاه مدیرعامل/همکار اضافه شوند.
+    return ['ceo', 'company_manager', 'deputy', 'management', 'office', 'department', 'liaison'];
 }
 
 function org_exempt_roles(): array

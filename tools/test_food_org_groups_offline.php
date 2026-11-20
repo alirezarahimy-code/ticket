@@ -1,6 +1,6 @@
 <?php
 /**
- * آزمون آفلاین ۱.۶۳.۴ — «نمایش بر اساس معاونت» در گزارش‌های غذا.
+ * آزمون آفلاین — «نمایش بر اساس معاونت / بخش» در گزارش‌های غذا.
  *
  * خواستهٔ کاربر: در چهار گزارش (تجمیعی، غذای تحویلی، سفارش‌های امروز، غایبین
  * نهار) هر فرد زیر معاونت خودش بیاید. فقط ریشه سرگروه باشد، نه ادارهٔ میانی.
@@ -29,7 +29,7 @@ check('معاونت سرشاخه است', strpos($lib, "=== 'deputy'") !== false
 check('مدیریت مستقل سرشاخه است', strpos($lib, "=== 'management'") !== false);
 check('واحد مستقل (نمایندگی) سرشاخه است', strpos($lib, "=== 'liaison'") !== false);
 check('شرکت دوم جدا می‌شود', strpos($lib, 'org_group_company_roots') !== false && strpos($lib, "company-") !== false);
-check('فرد بی‌واحد گم نمی‌شود', strpos($lib, 'بدون معاونت سازمانی') !== false);
+check('فرد بی‌واحد گم نمی‌شود', strpos($lib, 'بدون جایگاه') !== false);
 
 echo "\n═══ ۲) واژه‌های صریح چهار نوع سرشاخه ═══\n";
 foreach (['معاونت', 'مدیریت مستقل', 'واحد مستقل (نمایندگی)', 'شرکت دوم'] as $label) {
@@ -49,10 +49,10 @@ check('FoodOrgGroups در window', strpos($js, 'global.FoodOrgGroups') !== false
 check('کش یک‌دقیقه‌ای دارد', strpos($js, 'CACHE_MS') !== false);
 check('در خطا گزارش را خالی نمی‌کند', strpos($js, 'فهرست بدون گروه‌بندی نمایش داده می‌شود') !== false);
 // خلاصه/فوتر حذف شد، ولی تضمین «هر ردیف در یک گروه» باید بماند:
-// split() هر ردیف را بی‌قید در یکی از سبدها می‌ریزد و سبد «بدون معاونت» را
+// split() هر ردیف را بی‌قید در یکی از سبدها می‌ریزد و سبد «بدون جایگاه» را
 // خودش می‌سازد؛ پس شمار ردیف‌های گروه‌ها همیشه = شمار ردیف‌های گزارش.
 check('هر ردیف در یک گروه می‌نشیند (split)', strpos($js, 'buckets[key].rows.push(row);') !== false);
-check('سبد «بدون معاونت» ساخته می‌شود', strpos($js, "'بدون معاونت سازمانی'") !== false);
+check('سبد «بدون جایگاه» ساخته می‌شود', strpos($js, "label: 'بدون جایگاه'") !== false);
 check('برچسب نوع از مسیر حذف شده', strpos($js, 'typeLabel(group.type)') === false);
 check('tooltip مسیر سازمانی', strpos($js, '__orgPath') !== false);
 check('ارقام فارسی/عربی در کد ملی', strpos($js, '۰-۹') !== false);
@@ -63,16 +63,16 @@ check('گزارش تجمیعی: هر دو فهرست (فیش و غایب) گرو
     substr_count($html, 'aggOrgList(') >= 2);
 check('غذای تحویلی: دکمهٔ سوم', strpos($menu, "data-delivery-view=\"org\"") !== false);
 check('غذای تحویلی: تابع گروهی', strpos($menu, 'deliveredReportByOrgHtml') !== false);
-check('سفارش‌های امروز: دکمهٔ سوم', (bool) preg_match("/viewButton\('org', 'نمایش بر اساس معاونت'\)/", $menu));
+check('سفارش‌های امروز: دکمهٔ سوم', (bool) preg_match("/viewButton\('org', 'نمایش بر اساس معاونت \/ بخش'\)/", $menu));
 check('سفارش‌های امروز: تابع گروهی', strpos($menu, 'ordersByOrgHtml') !== false);
 check('غایبین نهار: data-absent-org-view', strpos($html, 'data-absent-org-view') !== false);
 check('غایبین نهار: تابع گروهی', strpos($html, 'absentByOrgHtml') !== false);
-check('همهٔ چهار گزارش متن «نمایش بر اساس معاونت» را دارند',
-    substr_count($html, 'نمایش بر اساس معاونت') + substr_count($menu, 'نمایش بر اساس معاونت') >= 4);
+check('همهٔ چهار گزارش متن «نمایش بر اساس معاونت / بخش» را دارند',
+    substr_count($html, 'نمایش بر اساس معاونت / بخش') + substr_count($menu, 'نمایش بر اساس معاونت / بخش') >= 4);
 
 echo "\n═══ ۶) بارگذاری ماژول در صفحه ═══\n";
 check('script food-org-groups.js در index.html', strpos($html, 'food-org-groups.js') !== false);
-check('نسخه در URL', strpos($html, 'food-org-groups.js?v=1.63.4') !== false);
+check('نسخه در URL', strpos($html, 'food-org-groups.js?v=1.63.3') !== false);
 
 echo "\n═══ ۷) CSS گروه‌ها ═══\n";
 $css = file_get_contents($root . '/assets/food-menu.css');
