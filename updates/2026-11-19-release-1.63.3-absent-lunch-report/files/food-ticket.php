@@ -180,11 +180,14 @@ function food_ticket_route_allowed(array $user, string $route): bool
         if ($route === 'food-menu/emergency/lookup') {
             return $method === 'POST' && user_can($user, 'food.menu');
         }
-        if (in_array($route, $reportRoutes, true)) {
-            return $method === 'GET' && user_can($user, 'food.reports');
-        }
+        // نکته: «food-menu/guest-actuals» هم در فهرست خواندنی‌ها (گزارش، GET با food.reports) و هم
+        // نوشتنی‌ها (پاپ‌آپ بستن روز، POST با food.menu_edit) است؛ اول نوشتنی چک می‌شود تا POST
+        // در شاخهٔ گزارش گیر نکند و ۴۰۳ نشود (باگ واقعی سامانهٔ تست، ۲۰۲۶-۱۱-۲۰).
         if (in_array($route, $writeMenu, true) && $method !== 'GET') {
             return user_can($user, 'food.menu_edit');
+        }
+        if (in_array($route, $reportRoutes, true)) {
+            return $method === 'GET' && user_can($user, 'food.reports');
         }
         if (in_array($route, $readMenu, true) && $method === 'GET') {
             return user_can($user, 'food.menu');

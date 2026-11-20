@@ -2616,15 +2616,15 @@ function food_guest_request_roles(): array
     return ['primary_admin', 'supervisor', 'support_manager', 'manager', 'inspector'];
 }
 
-/** فقط کسانی که جایگاه مدیریتی در چارت دارند (مدیر واحدی که زیر یک معاونت است)؛ نقش سامانه ملاک نیست. */
+/**
+ * «بازبین جهانی» مهمان = ادمین اصلی و مدیر پشتیبانی (همان معیار food_order_user_is_cancel_reviewer).
+ * مدیران چارت —حتی پس از ارتقای خودکار نقش به manager— بازبین جهانی نیستند؛ پهنهٔ آن‌ها چترِ معاونت/بخش
+ * است (food_guest_visible_root_ids). تصمیم کاربر (۲۰۲۶-۱۱-۲۰): مدیر ادارهٔ مهمان ثبت‌کننده نباید همهٔ
+ * گزارش‌ها را ببیند؛ مهم این است گزارش «از کدام معاونت» داده شده.
+ */
 function food_guest_request_is_reviewer(array $user): bool
 {
-    if (function_exists('food_order_user_is_cancel_reviewer') && food_order_user_is_cancel_reviewer($user)) {
-        return true;
-    }
-    return (string) ($user['role'] ?? '') === 'manager'
-        && function_exists('user_service_group')
-        && user_service_group($user) === 'support';
+    return function_exists('food_order_user_is_cancel_reviewer') && food_order_user_is_cancel_reviewer($user);
 }
 
 function food_guest_request_allowed(array $user): bool
@@ -2829,6 +2829,97 @@ function food_guest_nearest_root_id(int $startUnitId, bool $activeOnly = true): 
     return 0;
 }
 
+/** نزدیک‌ترین «معاونت» بالای یک واحد (شامل خود واحد)؛ 0 یعنی زیر هیچ معاونتی نیست. */
+function food_guest_nearest_deputy_id(int $startUnitId, bool $activeOnly = true): int
+{
+    if ($startUnitId <= 0) {
+        return 0;
+    }
+    try {
+        $stmt = db()->prepare('SELECT id, parent_id, unit_type, is_active FROM org_units WHERE id = ? LIMIT 1');
+        $current = $startUnitId;
+        for ($depth = 0; $depth < 12 && $current > 0; $depth++) {
+            $stmt->execute([$current]);
+            $unit = $stmt->fetch(PDO::FETCH_ASSOC);
+            if (!$unit) {
+                return 0;
+            }
+            if ((string) $unit['unit_type'] === 'deputy'
+                && (!$activeOnly || (int) ($unit['is_active'] ?? 0) === 1)) {
+                return (int) $unit['id'];
+            }
+            $current = (int) ($unit['parent_id'] ?? 0);
+        }
+    } catch (Throwable $e) {
+        return 0;
+    }
+    return 0;
+}
+
+/**
+ * چترِ «معاونت» برای یک واحد مدیریت‌شده: نزدیک‌ترین معاونت بالادست؛ اگر زیر هیچ معاونتی نیست،
+ * نزدیک‌ترین سرشاخهٔ ۶ بخشی (درخت مدیرعامل / واحد مستقل / شرکت همکار) جایگزین می‌شود.
+ * 0 یعنی هیچ‌کدام پیدا نشد.
+ */
+function food_guest_umbrella_id(int $startUnitId): int
+{
+    $deputy = food_guest_nearest_deputy_id($startUnitId, false);
+    if ($deputy > 0) {
+        return $deputy;
+    }
+    return food_guest_nearest_root_id($startUnitId, false);
+}
+
+/** همهٔ سرشاخه‌های ۶ بخشی داخل یک چتر (شامل خود چتر)؛ نقشهٔ فرزندان در سطح درخواست کش می‌شود. */
+function food_guest_umbrella_root_ids(int $umbrellaId): array
+{
+    static $childrenMap = null;
+    if ($umbrellaId <= 0) {
+        return [];
+    }
+    if ($childrenMap === null) {
+        $childrenMap = [];
+        try {
+            foreach (db()->query('SELECT id, parent_id FROM org_units')->fetchAll(PDO::FETCH_ASSOC) as $row) {
+                $childrenMap[(int) ($row['parent_id'] ?? 0)][] = (int) $row['id'];
+            }
+        } catch (Throwable $e) {
+            $childrenMap = [];
+        }
+    }
+    $rootTypes = array_fill_keys(food_guest_root_types(), true);
+    $typeMap = [];
+    static $unitTypes = null;
+    if ($unitTypes === null) {
+        try {
+            foreach (db()->query('SELECT id, unit_type FROM org_units')->fetchAll(PDO::FETCH_ASSOC) as $row) {
+                $unitTypes[(int) $row['id']] = (string) $row['unit_type'];
+            }
+        } catch (Throwable $e) {
+            $unitTypes = [];
+        }
+    }
+    $found = [];
+    $stack = [$umbrellaId];
+    $seen = [];
+    while ($stack) {
+        $current = array_pop($stack);
+        if (isset($seen[$current])) {
+            continue;
+        }
+        $seen[$current] = true;
+        if (isset($rootTypes[$unitTypes[$current] ?? ''])) {
+            $found[] = $current;
+        }
+        foreach ($childrenMap[$current] ?? [] as $child) {
+            if (!isset($seen[$child])) {
+                $stack[] = $child;
+            }
+        }
+    }
+    return array_values(array_unique($found));
+}
+
 /**
  * انتساب سازمانیِ کاربر از چارت: از واحد خود کاربر و واحدهایی که مدیرشان است شروع می‌کند
  * و در سلسلهٔ والدها بالا می‌رود تا نزدیک‌ترین سرشاخهٔ ۶ بخشی (مدیرعامل، واحد مستقل، معاونت،
@@ -2901,11 +2992,10 @@ function food_guest_managed_unit_ids(array $user): array
 /**
  * پهنهٔ «دیده‌شدن» درخواست‌های مهمان برای مدیر واحد/سرشاخه:
  * - مدیران جهانی (ادمین اصلی، ساپورت منیجر و... — همان معیار «بازبین») ← null یعنی همه‌چیز.
- * - بقیهٔ مدیران چارت ← اجتماعِ دو مجموعه:
- *   ۱) سرشاخه‌های ۶ بخشی که در زیردستشان مدیریت می‌شود (مدیرعامل/مدیر شرکت همکار کل زیردرختشان را می‌بینند)؛
- *   ۲) سرشاخهٔ بخشی که هر واحدِ مدیریت‌شده در آن قرار دارد — مثلاً مدیرِ «ادارهٔ اداری» زیر «معاونت اداری»
- *      همان معاونت را می‌بیند، چون انتساب مهمان در سطح سرشاخه ثبت می‌شود و اداره برای ما موضوعیت ندارد
- *      (تصمیم کاربر، ۲۰۲۶-۱۱-۲۰).
+ * - بقیهٔ مدیران چارت ← برای هر واحدِ مدیریت‌شده، چترِ معاونت (نزدیک‌ترین معاونت بالادست؛ اگر معاونت
+ *   نداشت: نزدیک‌ترین سرشاخهٔ ۶ بخشی) و همهٔ سرشاخه‌های ۶ بخشیِ داخل همان چتر. مثلاً مدیرِ «ادارهٔ
+ *   اداری» زیر «معاونت اداری» کلِ معاونت اداری را می‌بیند، چون انتساب مهمان در سطح سرشاخه ثبت می‌شود
+ *   و اداره برای ما موضوعیت ندارد (تصمیم کاربر، ۲۰۲۶-۱۱-۲۰).
  * - بدون جایگاه مدیریتی ← آرایهٔ خالی (فقط درخواست‌های خودش، مثل قبل).
  */
 function food_guest_visible_root_ids(array $user): ?array
@@ -2925,21 +3015,18 @@ function food_guest_visible_root_ids(array $user): ?array
     if (!$managed) {
         return $cache[$uid] = [];
     }
-    $scope = function_exists('ticket_manager_scope_unit_ids') ? ticket_manager_scope_unit_ids($user) : [];
-    $inScope = array_flip(array_map('intval', $scope));
+    // تصمیم کاربر (۲۰۲۶-۱۱-۲۰): برای مدیر اداره، اداره موضوعیت ندارد؛ این درخواست «از کدام معاونت»
+    // داده شده مهم است. پس چتر = نزدیک‌ترین معاونت بالای هر واحد مدیریت‌شده (اگر زیر هیچ معاونتی نبود:
+    // نزدیک‌ترین سرشاخهٔ ۶ بخشی — درخت مدیرعامل / واحد مستقل / شرکت همکار) و پهنه = خودِ چتر به‌همراه
+    // همهٔ سرشاخه‌های ۶ بخشیِ داخل همان چتر (مثلاً همان معاونت + مدیریت‌ها/ادارات/دفاترش).
     $visible = [];
-    foreach (org_root_units_compat() as $root) {
-        $id = (int) ($root['id'] ?? 0);
-        if ($id > 0 && isset($inScope[$id])) {
-            $visible[] = $id;
-        }
-    }
-    // چترِ بخشِ هر واحد مدیریت‌شده: نزدیک‌ترین سرشاخهٔ ۶ بخشیِ بالای آن واحد (بدون فعال‌بودن سخت‌گیرانه تا
-    // دادهٔ تاریخی گم نشود؛ انتساب جدید در food_guest_user_root_id با واحد فعال انجام می‌شود).
     foreach ($managed as $unit) {
-        $root = food_guest_nearest_root_id((int) $unit, false);
-        if ($root > 0) {
-            $visible[] = $root;
+        $umbrella = food_guest_umbrella_id((int) $unit);
+        if ($umbrella <= 0) {
+            continue;
+        }
+        foreach (food_guest_umbrella_root_ids($umbrella) as $rootId) {
+            $visible[] = $rootId;
         }
     }
     $visible = array_values(array_unique($visible));

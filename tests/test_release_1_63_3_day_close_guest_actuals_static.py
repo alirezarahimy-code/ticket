@@ -164,9 +164,12 @@ class GuestActualsFrontendTests(unittest.TestCase):
         # تصمیم کاربر (۲۰۲۶-۱۱-۲۰): مدیر اداره همان معاونت/بخش بالادستی خود را می‌بیند؛ اداره موضوعیت ندارد.
         order = read(ORDER_PHP)
         self.assertIn("function food_guest_managed_unit_ids(", order)
+        self.assertIn("function food_guest_nearest_deputy_id(", order)
+        self.assertIn("function food_guest_umbrella_id(", order)
+        self.assertIn("function food_guest_umbrella_root_ids(", order)
         section = order[order.index("function food_guest_visible_root_ids("):]
         self.assertIn("food_guest_managed_unit_ids($user)", section[:2500])
-        self.assertIn("food_guest_nearest_root_id((int) $unit, false)", section[:2500])
+        self.assertIn("food_guest_umbrella_id((int) $unit)", section[:2500])
 
     def test_toggle_labels_use_combined_section_wording(self) -> None:
         for source in (JS_PRIMARY, JS_MIRROR):

@@ -58,7 +58,7 @@ if (is_file(__DIR__ . '/food-ticket-import.php')) {
 
 /** نسخهٔ پنل (food-ticket-web/index.html). پنل همان عدد را دارد و اگر مرورگر
  *  نسخهٔ کش‌شدهٔ قدیمی را نشان دهد، خودش هشدار می‌دهد. */
-const FOOD_TICKET_PANEL_VERSION = '1.37.53';
+const FOOD_TICKET_PANEL_VERSION = '1.37.58';
 
 function food_ticket_panel_version(): string
 {
@@ -180,11 +180,14 @@ function food_ticket_route_allowed(array $user, string $route): bool
         if ($route === 'food-menu/emergency/lookup') {
             return $method === 'POST' && user_can($user, 'food.menu');
         }
-        if (in_array($route, $reportRoutes, true)) {
-            return $method === 'GET' && user_can($user, 'food.reports');
-        }
+        // نکته: «food-menu/guest-actuals» هم در فهرست خواندنی‌ها (گزارش، GET با food.reports) و هم
+        // نوشتنی‌ها (پاپ‌آپ بستن روز، POST با food.menu_edit) است؛ اول نوشتنی چک می‌شود تا POST
+        // در شاخهٔ گزارش گیر نکند و ۴۰۳ نشود (باگ واقعی سامانهٔ تست، ۲۰۲۶-۱۱-۲۰).
         if (in_array($route, $writeMenu, true) && $method !== 'GET') {
             return user_can($user, 'food.menu_edit');
+        }
+        if (in_array($route, $reportRoutes, true)) {
+            return $method === 'GET' && user_can($user, 'food.reports');
         }
         if (in_array($route, $readMenu, true) && $method === 'GET') {
             return user_can($user, 'food.menu');
@@ -4019,13 +4022,15 @@ function food_ticket_api_absent(string $fromDate, ?string $toDate = null): array
         $items = food_ticket_api_orders($fromDate, '', $toDate);
         foreach ($items as $it) {
             $nat = food_ticket_digits((string) ($it['nat'] ?? ''));
-            if ($nat === '') {
-                continue;
+            $pc = trim((string) ($it['pc'] ?? ''));
+            if ($nat === '' && $pc === '') {
+                continue; // بدون کد ملی و پرسنلی هیچ تطبیق امنی ممکن نیست.
             }
             $day = (string) ($it['foodDate'] ?? $fromDate);
-            $orders[$day][$nat] = [
+            $identityKey = $nat !== '' ? 'nat:' . $nat : 'pc:' . $pc;
+            $orders[$day][$identityKey] = [
                 'nat' => $nat,
-                'pc' => (string) ($it['pc'] ?? ''),
+                'pc' => $pc,
                 'first' => (string) ($it['first'] ?? ''),
                 'last' => (string) ($it['last'] ?? ''),
                 'food' => (string) ($it['food'] ?? ''),
@@ -4079,16 +4084,20 @@ function food_ticket_api_absent(string $fromDate, ?string $toDate = null): array
         }
     }
     $userIdsByNational = [];
+    $userIdsByPersonnel = [];
     $absent = [];
     foreach ($orders as $day => $dayOrders) {
-        foreach ($dayOrders as $nat => $row) {
+        foreach ($dayOrders as $row) {
+            $nat = food_ticket_digits((string) ($row['nat'] ?? ''));
             $pc = trim((string) ($row['pc'] ?? ''));
-            if (!empty($printed[$day]['nat:' . $nat]) || ($pc !== '' && !empty($printed[$day]['pc:' . $pc]))) {
+            if (($nat !== '' && !empty($printed[$day]['nat:' . $nat]))
+                || ($pc !== '' && !empty($printed[$day]['pc:' . $pc]))) {
                 continue;
             }
             $row['full_name'] = trim(($row['first'] ?? '') . ' ' . ($row['last'] ?? ''));
             $declared = false;
             try {
+                $uid = 0;
                 if ($nat !== '') {
                     if (!isset($userIdsByNational[$nat])) {
                         $uq = db()->prepare('SELECT id FROM users WHERE national_code = ? OR national_code = ? LIMIT 1');
@@ -4096,8 +4105,15 @@ function food_ticket_api_absent(string $fromDate, ?string $toDate = null): array
                         $userIdsByNational[$nat] = (int) ($uq->fetchColumn() ?: 0);
                     }
                     $uid = (int) $userIdsByNational[$nat];
-                    $declared = $uid > 0 && !empty($declaredByDay[(string) $day][$uid]);
+                } elseif ($pc !== '') {
+                    if (!isset($userIdsByPersonnel[$pc])) {
+                        $uq = db()->prepare('SELECT id FROM users WHERE employee_number = ? LIMIT 1');
+                        $uq->execute([$pc]);
+                        $userIdsByPersonnel[$pc] = (int) ($uq->fetchColumn() ?: 0);
+                    }
+                    $uid = (int) $userIdsByPersonnel[$pc];
                 }
+                $declared = $uid > 0 && !empty($declaredByDay[(string) $day][$uid]);
             } catch (Throwable $e) {
                 app_error_log('[absent] user lookup: ' . $e->getMessage());
             }
@@ -4110,6 +4126,13 @@ function food_ticket_api_absent(string $fromDate, ?string $toDate = null): array
     }
     return $absent;
 }
+
+/**
+ * پایش رویدادها.
+ * پیش‌فرض (بدون بازه) = فقط «امروزِ کاری سامانه» (به وقت تهران)؛ اگر امروز رویدادی نباشد،
+ * خروجی خالی است — نه ۲۰۰ رکورد آخرِ همهٔ تاریخ‌ها. بازهٔ گذشته را باید گزارش‌ها بخواهند
+ * (from/to). داده‌های قبلی حذف نمی‌شوند.
+ */
 
 /**
  * پایش رویدادها.

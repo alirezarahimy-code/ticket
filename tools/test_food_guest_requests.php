@@ -57,8 +57,11 @@ $createdIds = [];
 
 check('مدیر واحدِ زیر معاونت مجاز است', food_guest_request_allowed($manager));
 check('کارشناس بدون جایگاه در چارت مجاز نیست', !food_guest_request_allowed($agent));
-check('بازرس بدون جایگاه در چارت مجاز نیست', !food_guest_request_allowed($inspector));
-check('مدیر بدون معاونت در چارت مجاز نیست', !food_guest_request_allowed($orphanManager));
+// نکتهٔ طراحی (مبنای فعلی کد): مجوز ثبت مهمان نقش‌محور است (food_guest_request_roles:
+// primary_admin, supervisor, support_manager, manager, inspector) و چارت شرط مجوز نیست؛
+// چارت فقط «معاونت لازم برای ثبت» را تعیین می‌کند (چک بعدی).
+check('بازرس نقش مجاز مهمان است (مجوز نقش‌محور)', food_guest_request_allowed($inspector));
+check('مدیر بدون معاونت در چارت از جهت نقش مجاز است ولی ثبتش رد می‌شود (چک پایین)', food_guest_request_allowed($orphanManager));
 
 check('معاونت کاربر از واحدِ مدیریتی به معاونت بالا می‌رود (حسابداری ← مالی)', food_guest_user_deputy_id($manager) === $depId);
 check('معاونت مدیر دوم، معاونت دوم است', food_guest_user_deputy_id($manager2) === $depId2);
@@ -120,7 +123,12 @@ check('فهرست، معاونت کاربر را برای نمایش می‌ده
 check('فهرست برای کاربر بی‌واحد معاونت خالی دارد', food_guest_request_list($orphanManager)['my_deputy'] === null);
 
 food_guest_request_cancel($manager, (int) $r1b['id']);
-check('درخواست لغوشده در گزارش نیست', !in_array($r1b['id'], array_map(fn ($i) => $i['id'], food_ticket_api_guest_requests_report($tomorrow, $tomorrow, 'all')['items']), true));
+// گزارش مهمان لغوشده‌ها را نگه می‌دارد (پنل: ردیف «لغوشده» و جمع جدا)؛ باید status و شمارش لغو درست باشد و در «فعال» نیاید.
+$reportAfterCancel = food_ticket_api_guest_requests_report($tomorrow, $tomorrow, 'all');
+$cancelledRows = array_filter($reportAfterCancel['items'], fn ($i) => (int) $i['id'] === (int) $r1b['id']);
+$cancelledRow = array_values($cancelledRows)[0] ?? null;
+$activeAfterCancel = array_filter($reportAfterCancel['items'], fn ($i) => ($i['status'] ?? '') === 'active');
+check('درخواست لغوشده در گزارش با وضعیت لغو است و در «فعال» نیست', $cancelledRow !== null && ($cancelledRow['status'] ?? '') === 'cancelled' && !in_array((int) $r1b['id'], array_map(fn ($i) => (int) $i['id'], $activeAfterCancel), true));
 check('لغو درخواست، جمع را به ۸ می‌رساند', food_guest_requested_total($tomorrow) === 8);
 check('لغو دوباره رد می‌شود', str_contains(expect_error(fn () => food_guest_request_cancel($manager, (int) $r1b['id'])), 'قبلاً'));
 check('درخواست لغوشده در فهرست با وضعیت لغو است', (function () use ($r1b, $manager) {
