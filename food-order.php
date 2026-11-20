@@ -2876,10 +2876,36 @@ function food_guest_user_root_id(array $user, bool $managedOnly = false): int
  * سابقهٔ سازگار: انتساب کاربر به نزدیک‌ترین سرشاخهٔ ۶ بخشی (قبلاً فقط «معاونت» بود).
  * 0 یعنی پیدا نشد.
  */
+/** واحدهایی که خود کاربر مستقیماً مدیریتشان می‌کند (نقاط شروع پهنهٔ مدیریتی؛ بدون فرزندان). */
+function food_guest_managed_unit_ids(array $user): array
+{
+    static $cache = [];
+    $uid = (int) ($user['id'] ?? 0);
+    if ($uid <= 0) {
+        return [];
+    }
+    if (isset($cache[$uid])) {
+        return $cache[$uid];
+    }
+    $ids = [];
+    try {
+        $stmt = db()->prepare('SELECT ou.id FROM org_units ou JOIN org_companies company ON company.id = ou.company_id AND company.is_active = 1 WHERE ou.manager_user_id = ? AND ou.is_active = 1 UNION SELECT m.unit_id FROM org_unit_managers m JOIN org_units ou ON ou.id = m.unit_id JOIN org_companies company ON company.id = ou.company_id AND company.is_active = 1 WHERE m.user_id = ? AND ou.is_active = 1');
+        $stmt->execute([$uid, $uid]);
+        $ids = array_map('intval', $stmt->fetchAll(PDO::FETCH_COLUMN));
+    } catch (Throwable $e) {
+        return $cache[$uid] = [];
+    }
+    return $cache[$uid] = array_values(array_unique(array_filter($ids)));
+}
+
 /**
  * پهنهٔ «دیده‌شدن» درخواست‌های مهمان برای مدیر واحد/سرشاخه:
  * - مدیران جهانی (ادمین اصلی، ساپورت منیجر و... — همان معیار «بازبین») ← null یعنی همه‌چیز.
- * - بقیهٔ مدیران چارت ← شناسه‌های سرشاخه‌های ۶ بخشی که در زیردستشان است (مدیرعامل/مدیر شرکت همکار کل زیردرختشان را می‌بینند).
+ * - بقیهٔ مدیران چارت ← اجتماعِ دو مجموعه:
+ *   ۱) سرشاخه‌های ۶ بخشی که در زیردستشان مدیریت می‌شود (مدیرعامل/مدیر شرکت همکار کل زیردرختشان را می‌بینند)؛
+ *   ۲) سرشاخهٔ بخشی که هر واحدِ مدیریت‌شده در آن قرار دارد — مثلاً مدیرِ «ادارهٔ اداری» زیر «معاونت اداری»
+ *      همان معاونت را می‌بیند، چون انتساب مهمان در سطح سرشاخه ثبت می‌شود و اداره برای ما موضوعیت ندارد
+ *      (تصمیم کاربر، ۲۰۲۶-۱۱-۲۰).
  * - بدون جایگاه مدیریتی ← آرایهٔ خالی (فقط درخواست‌های خودش، مثل قبل).
  */
 function food_guest_visible_root_ids(array $user): ?array
@@ -2895,10 +2921,11 @@ function food_guest_visible_root_ids(array $user): ?array
     if (isset($cache[$uid])) {
         return $cache[$uid];
     }
-    $scope = function_exists('ticket_manager_scope_unit_ids') ? ticket_manager_scope_unit_ids($user) : [];
-    if (!$scope) {
+    $managed = food_guest_managed_unit_ids($user);
+    if (!$managed) {
         return $cache[$uid] = [];
     }
+    $scope = function_exists('ticket_manager_scope_unit_ids') ? ticket_manager_scope_unit_ids($user) : [];
     $inScope = array_flip(array_map('intval', $scope));
     $visible = [];
     foreach (org_root_units_compat() as $root) {
@@ -2907,6 +2934,15 @@ function food_guest_visible_root_ids(array $user): ?array
             $visible[] = $id;
         }
     }
+    // چترِ بخشِ هر واحد مدیریت‌شده: نزدیک‌ترین سرشاخهٔ ۶ بخشیِ بالای آن واحد (بدون فعال‌بودن سخت‌گیرانه تا
+    // دادهٔ تاریخی گم نشود؛ انتساب جدید در food_guest_user_root_id با واحد فعال انجام می‌شود).
+    foreach ($managed as $unit) {
+        $root = food_guest_nearest_root_id((int) $unit, false);
+        if ($root > 0) {
+            $visible[] = $root;
+        }
+    }
+    $visible = array_values(array_unique($visible));
     sort($visible);
     return $cache[$uid] = $visible;
 }
