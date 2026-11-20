@@ -19,7 +19,7 @@ DOWNLOADS = ROOT / 'downloads'
 ZIP_PATH = DOWNLOADS / 'ticket-update-1.63.2-to-1.63.3-absent-lunch-report-20261119.zip'
 VERSION = '1.63.3'
 REQUIRES = '1.63.2'
-PANEL_VERSION = '1.37.60'
+PANEL_VERSION = '1.37.61'
 DATE = '2026-11-20'
 
 def sha256(b: bytes) -> str:
@@ -52,8 +52,8 @@ if "const FOOD_TICKET_PANEL_VERSION = '1.37.53';" in backend:
     backend = must_replace(backend, "const FOOD_TICKET_PANEL_VERSION = '1.37.53';",
                            f"const FOOD_TICKET_PANEL_VERSION = '{PANEL_VERSION}';", 'panel version php')
     print('backend rebuilt from 1.63.2 base')
-elif "const FOOD_TICKET_PANEL_VERSION = '1.37.60';" in backend:
-    print('backend already built (1.37.60) — using as-is')
+elif "const FOOD_TICKET_PANEL_VERSION = '1.37.61';" in backend:
+    print('backend already built (1.37.61) — using as-is')
 else:
     raise SystemExit('نسخهٔ پنل food-ticket.php نه 1.37.53 است نه 1.37.58؛ بازسازی متوقف شد')
 
@@ -62,9 +62,9 @@ html = read('food-ticket-web/index.html')
 if "PANEL_VERSION='1.37.53'" in html:
     _html_rebuild = True
     html = must_replace(html, "PANEL_VERSION='1.37.53'", f"PANEL_VERSION='{PANEL_VERSION}'", 'panel version html')
-elif "PANEL_VERSION='1.37.60'" in html and 'window.AbsentLunchReport' in html:
+elif "PANEL_VERSION='1.37.61'" in html and 'window.AbsentLunchReport' in html:
     _html_rebuild = False
-    print('panel html already built (1.37.60) — using as-is')
+    print('panel html already built (1.37.61) — using as-is')
 else:
     raise SystemExit('panel HTML نه 1.37.53 است نه built 1.37.58؛ بازسازی متوقف شد')
 
@@ -213,7 +213,7 @@ manifest = {
     'version': VERSION,
     'requires_version': REQUIRES,
     'date': DATE,
-    'title': 'تب «غایبین ناهار» + اصلاحات نهایی (بند ۱۷) + چارت/لغو/گزارش یک‌بار (بازسازی دوم) + ترمیم C10 و ۴۰۰ وعده (بازسازی سوم) + اعداد همیشه فارسی (بازسازی چهارم) + اصلاح چینش دکمه‌ها (بازسازی پنجم)',
+    'title': 'تب «غایبین ناهار» + اصلاحات نهایی (بند ۱۷) + چارت/لغو/گزارش یک‌بار (بازسازی دوم) + ترمیم C10 و ۴۰۰ وعده (بازسازی سوم) + اعداد همیشه فارسی (بازسازی چهارم) + اصلاح چینش دکمه‌ها (بازسازی‌های پنجم و ششم)',
     'panel_version': PANEL_VERSION,
     'migrations': MIGRATIONS,
     'files': FILES_LIST,
@@ -230,16 +230,19 @@ manifest = {
                     'xlsx exports write Persian-digit cells (IP/email/hostnames stay Latin per the display contract). Panel 1.37.59. '
                     'Rebuilt fifth time (2026-11-20): pure layout fixes — employees form (fields on one line, active-checkbox + buttons on the next), aggregate report buttons moved into the date row (date fields narrowed), '
                     'delivered report Excel/print buttons moved after the Today button, statistics mode pills moved inline after the print button, absent-lunch action buttons moved after the Today button, '
-                    'and the "asset reset" card in the main settings page now renders only in the General tab. Panel 1.37.60.'),
+                    'and the "asset reset" card in the main settings page now renders only in the General tab. Panel 1.37.60. '
+                    'Rebuilt sixth time (2026-11-20): classic-report filter fields narrowed so date/to/type fit on one line and the XLSX/print buttons moved next to the run button; '
+                    'statistics mode pills renamed to shorter labels (نوع غذا / سفارش نفرات / سفارش پرسنل انتخابی) and pinned to a single line. Panel 1.37.61.'),
     'notes': ('پیشنیاز ۱٫۶۳٫۲؛ دارای سه مهاجرتِ idempotent است: 038-food-guest-actuals.sql (جدول food_guest_actuals)، '
               '039-liaison-manager-role-sync.sql (ارتقای مدیران واحدهای مستقل به نقش «مدیر») و 040-org-routing-departments.sql (نگاشت پایدار ردیف رسیدگی). پشتیبان و نصب آزمایشی الزامی. '
               'بازسازی دوم ۲۰۲۶-۱۱-۲۰ همان نسخهٔ ۱٫۶۳٫۳ است با اصلاحات چارت/لغو و گزارش یک‌بار به‌روزرسانی؛ SHA تازه است. '
               'روی سامانه‌هایی که ۱٫۶۳٫۳ را نصب کرده‌اند نصب مجدد همین بسته ترمیم فایل‌هاست و مهاجرت‌ها تکرار نمی‌شوند. '
-              'نسخهٔ پنل ۱٫۳۷٫۵۹ (پنل محتوا عوض کرد)؛ کش دارایی‌ها style.css=3.4.63 / app.js=3.4.30؛ پس از نصب Ctrl+F5 کنید. داده‌های تاریخی NULL مهمان هرگز بازنویسی نمی‌شوند. '
+              'نسخهٔ پنل ۱٫۳۷٫۶۱ (پنل محتوا عوض کرد)؛ کش دارایی‌ها style.css=3.4.63 / app.js=3.4.30؛ پس از نصب Ctrl+F5 کنید. داده‌های تاریخی NULL مهمان هرگز بازنویسی نمی‌شوند. '
               'گزارش به‌روزرسانی این نسخه فقط یک‌بار روی اولین ورود نمایش داده می‌شود؛ «راهنما ← تغییرات نسخه‌ها» مرجع همیشگی است. '
               'بازسازی سوم ۲۰۲۶-۱۱-۲۰: مدیران چارت غیربازبین با مجوز food.menu پنل مهمان را فقط-خواندنی می‌بینند؛ /api/absent با meal_type غیرناهار، ۴۰۰ می‌دهد. '
               'بازسازی چهارم ۲۰۲۶-۱۱-۲۰: اعداد در تمام سامانه فارسی‌اند (نمایش + تایپ حتی با کیبورد لاتین + خروجی Excel)؛ ذخیره canonical لاتین؛ IP/ایمیل/هاست لاتین؛ پنل ۱٫۳۷٫۵۹. '
-              'بازسازی پنجم ۲۰۲۶-۱۱-۲۰: فقط چینش رابط (کارکنان پنل غذا، دکمه‌های گزارش‌ها، ریست شناسنامه‌ها فقط تب عمومی)؛ نسخهٔ پنل ۱٫۳۷٫۶۰.'),
+              'بازسازی پنجم ۲۰۲۶-۱۱-۲۰: فقط چینش رابط (کارکنان پنل غذا، دکمه‌های گزارش‌ها، ریست شناسنامه‌ها فقط تب عمومی)؛ نسخهٔ پنل ۱٫۳۷٫۶۰. '
+              'بازسازی ششم ۲۰۲۶-۱۱-۲۰: تکمیل چینش گزارش‌گیری (یک خط فیلدها + دکمه‌ها کنار «نمایش گزارش») و آمار سفارشها (pillها تک‌خطی با نام کوتاه)؛ نسخهٔ پنل ۱٫۳۷٫۶۱.'),
 }
 (PKG / 'manifest.json').write_text(json.dumps(manifest, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
 

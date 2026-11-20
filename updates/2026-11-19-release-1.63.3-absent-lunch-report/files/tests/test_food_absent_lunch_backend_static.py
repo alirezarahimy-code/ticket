@@ -22,4 +22,4 @@ def test_backend_identity_and_declared_absence():
 def test_route_and_permission_unchanged():
     assert "$route === 'absent'" in PHP
     assert "'absent' => 'food.reports'" in PHP
-    assert "FOOD_TICKET_PANEL_VERSION = '1.37.60'" in PHP
+    assert "FOOD_TICKET_PANEL_VERSION = '1.37.61'" in PHP

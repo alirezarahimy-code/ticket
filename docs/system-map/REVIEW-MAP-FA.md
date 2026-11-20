@@ -47,7 +47,7 @@
 | **جزئیات درخواست** | `ticket` | — | `PAGE-054.03` <sub>modules/request-center/Pages/detail.php:17</sub><br>`PAGE-077.13` <sub>request-center.php:180</sub><br>`CRON-013.01` <sub>cron/ticket_auto_close.php:1</sub><br>`PAGE-068.28` <sub>modules/request-center/lib/functions.php:788</sub> | 46 |
 | **جست‌وجو** | `search` | — | `PAGE-033.63` <sub>index.php:1220</sub><br>`PAGE-033.62` <sub>index.php:1212</sub><br>`PAGE-030.03` <sub>global-search.php:31</sub><br>`CORE-021.02` <sub>lib/render.php:14</sub> | 51 |
 | **دارایی‌ها** | `assets` | `assets.view` | `ACT-014.09` <sub>actions/settings-actions.php:319</sub><br>`ACT-003.08` <sub>actions/asset-actions.php:200</sub><br>`PAGE-033.70` <sub>index.php:1696</sub><br>`DB-004.36` <sub>install-empty-db.sql:529</sub> | 206 |
-| **داشبورد** | `dashboard` | `dash.view` | `PAGE-033.75` <sub>index.php:2483</sub><br>`CORE-021.02` <sub>lib/render.php:14</sub><br>`CORE-022.16` <sub>lib/settings-effects.php:277</sub><br>`CORE-022.05` <sub>lib/settings-effects.php:57</sub> | 27 |
+| **داشبورد** | `dashboard` | `dash.view` | `PAGE-033.75` <sub>index.php:2482</sub><br>`CORE-021.02` <sub>lib/render.php:14</sub><br>`CORE-022.16` <sub>lib/settings-effects.php:277</sub><br>`CORE-022.05` <sub>lib/settings-effects.php:57</sub> | 27 |
 | **دانش‌نامه** | `knowledge` | `knowledge.view` | `PAGE-057.03` <sub>modules/request-center/Pages/knowledge.php:16</sub><br>`PAGE-077.19` <sub>request-center.php:204</sub><br>`PAGE-057.01` <sub>modules/request-center/Pages/knowledge.php:1</sub><br>`PAGE-057.02` <sub>modules/request-center/Pages/knowledge.php:4</sub> | 14 |
 | **سفارش غذا** | `food-order` | — | `PAGE-033.29` <sub>index.php:495</sub><br>`PAGE-033.46` <sub>index.php:925</sub><br>`PAGE-033.47` <sub>index.php:933</sub><br>`TOOL-062.03` <sub>tools/food_system_router.php:18</sub> | 228 |
 | **شناسنامه دارایی** | `asset` | `asset.view` | `PAGE-033.71` <sub>index.php:1740</sub><br>`PAGE-002.02` <sub>asset-inventory-page.php:4</sub><br>`CORE-022.05` <sub>lib/settings-effects.php:57</sub> | 11 |
@@ -62,7 +62,7 @@
 | **کاتالوگ خدمات** | `services` | `services.view` | `PAGE-061.03` <sub>modules/request-center/Pages/services.php:12</sub><br>`PAGE-077.16` <sub>request-center.php:192</sub><br>`PAGE-061.06` <sub>modules/request-center/Pages/services.php:147</sub><br>`PAGE-061.07` <sub>modules/request-center/Pages/services.php:171</sub> | 26 |
 | **کنترل CD/DVD** | `cd-dvd` | `cddvd.view` | `PAGE-033.48` <sub>index.php:937</sub><br>`PAGE-007.36` <sub>cd-dvd.php:490</sub><br>`PAGE-007.19` <sub>cd-dvd.php:153</sub><br>`PAGE-007.25` <sub>cd-dvd.php:203</sub> | 75 |
 | **کنترل تردد** | `traffic-control` | `traffic.view` | `PAGE-033.30` <sub>index.php:507</sub><br>`PAGE-033.50` <sub>index.php:945</sub><br>`PAGE-081.63` <sub>traffic-control.php:981</sub><br>`PAGE-081.16` <sub>traffic-control.php:119</sub> | 103 |
-| **گزارش خطا** | `logs` | — | `PAGE-033.74` <sub>index.php:2461</sub><br>`PAGE-033.59` <sub>index.php:1024</sub><br>`CORE-021.03` <sub>lib/render.php:171</sub><br>`CORE-022.05` <sub>lib/settings-effects.php:57</sub> | 19 |
+| **گزارش خطا** | `logs` | — | `PAGE-033.74` <sub>index.php:2460</sub><br>`PAGE-033.59` <sub>index.php:1024</sub><br>`CORE-021.03` <sub>lib/render.php:171</sub><br>`CORE-022.05` <sub>lib/settings-effects.php:57</sub> | 19 |
 | **گزارش‌ها** | `reports` | `reports.view` | `PAGE-060.03` <sub>modules/request-center/Pages/reports.php:12</sub><br>`PAGE-077.17` <sub>request-center.php:196</sub><br>`PAGE-060.01` <sub>modules/request-center/Pages/reports.php:1</sub><br>`PAGE-060.02` <sub>modules/request-center/Pages/reports.php:4</sub> | 24 |
 
 ### مجوزها و دسترسی‌ها
@@ -124,7 +124,7 @@
 | گزارش و تحلیل | **گزارش‌ها** | `reports.view` | `PAGE-060.03` <sub>modules/request-center/Pages/reports.php:12</sub><br>`CORE-021.02` <sub>lib/render.php:14</sub> | 11 |
 | گزارش و تحلیل | **چارت‌ها** | `analytics.view` | `PAGE-051.03` <sub>modules/request-center/Pages/analytics.php:12</sub><br>`CORE-021.02` <sub>lib/render.php:14</sub> | 9 |
 | گزارش و تحلیل | **ممیزی** | `audit.view` | `PAGE-033.56` <sub>index.php:1007</sub><br>`CORE-021.02` <sub>lib/render.php:14</sub> | 7 |
-| گزارش و تحلیل | **گزارش خطا** | `logs.view` | `PAGE-033.74` <sub>index.php:2461</sub><br>`PAGE-033.59` <sub>index.php:1024</sub><br>`CORE-021.02` <sub>lib/render.php:14</sub> | 14 |
+| گزارش و تحلیل | **گزارش خطا** | `logs.view` | `PAGE-033.74` <sub>index.php:2460</sub><br>`PAGE-033.59` <sub>index.php:1024</sub><br>`CORE-021.02` <sub>lib/render.php:14</sub> | 14 |
 | گزارش و تحلیل | **سلامت سامانه و خطاهای فنی** | `system.health` | `PAGE-079.28` <sub>system-health.php:947</sub><br>`PAGE-079.30` <sub>system-health.php:1118</sub><br>`CORE-021.02` <sub>lib/render.php:14</sub> | 11 |
 | گزارش و تحلیل | **ویرایش وضعیت و نگهداری لاگ** | `system.health_edit` | `PAGE-079.30` <sub>system-health.php:1118</sub><br>`PAGE-079.25` <sub>system-health.php:787</sub> | 5 |
 | گزارش و تحلیل | **فعالیت کاربران** | `logs.activity` | `PAGE-033.59` <sub>index.php:1024</sub><br>`CORE-021.02` <sub>lib/render.php:14</sub> | 7 |

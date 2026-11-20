@@ -269,7 +269,7 @@ class PackageTests(unittest.TestCase):
             self.assertIn("files/modules/request-center/Pages/detail.php", names)
             manifest = json.loads(zf.read("manifest.json").decode("utf-8"))
             self.assertEqual(manifest["version"], "1.63.3")
-            self.assertEqual(manifest["panel_version"], "1.37.60")
+            self.assertEqual(manifest["panel_version"], "1.37.61")
             self.assertEqual(manifest["migrations"], ["038-food-guest-actuals.sql", "039-liaison-manager-role-sync.sql", "040-org-routing-departments.sql"])
             archived = {n[len("files/"):] for n in names if n.startswith("files/")}
             self.assertEqual(archived, set(manifest["files"]))
@@ -297,19 +297,19 @@ class PackageTests(unittest.TestCase):
         with zipfile.ZipFile(PACKAGE) as zf:
             for rel in verbatim:
                 self.assertEqual(zf.read("files/" + rel), (ROOT / rel).read_bytes(), rel)
-            self.assertIn(b"FOOD_TICKET_PANEL_VERSION = '1.37.60'", zf.read("files/food-ticket.php"))
-            self.assertIn(b"PANEL_VERSION='1.37.60'", zf.read("files/food-ticket-web/index.html"))
+            self.assertIn(b"FOOD_TICKET_PANEL_VERSION = '1.37.61'", zf.read("files/food-ticket.php"))
+            self.assertIn(b"PANEL_VERSION='1.37.61'", zf.read("files/food-ticket-web/index.html"))
             self.assertIn("absent-lunch".encode(), zf.read("files/food-ticket-web/index.html"))
             self.assertIn("food_absent_lunch_report".encode(), zf.read("files/chatbot.php"))
             self.assertIn("غایبین ناهار".encode(), zf.read("files/help-guide.php"))
 
     def test_build_py_panel_version(self) -> None:
-        self.assertIn("PANEL_VERSION = '1.37.60'", read(BUILD_PY))
+        self.assertIn("PANEL_VERSION = '1.37.61'", read(BUILD_PY))
 
     def test_change_report_mentions_migrations(self) -> None:
         report = read(REPORT)
         self.assertIn("038-food-guest-actuals.sql", report)
-        self.assertIn("1.37.60", report)
+        self.assertIn("1.37.61", report)
 
 
 if __name__ == "__main__":

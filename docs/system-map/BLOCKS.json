@@ -5007,7 +5007,7 @@
             "path": "assets\/food-menu.css",
             "area": "ASSET",
             "lines": 438,
-            "file_fingerprint": "b8285d34bb60",
+            "file_fingerprint": "2920ab34433c",
             "blocks": [
                 {
                     "kind": "block",
@@ -5270,7 +5270,7 @@
                     "line_start": 427,
                     "line_end": 438,
                     "lines": 12,
-                    "fingerprint": "f117a0c61e63",
+                    "fingerprint": "eacf9e7b85e1",
                     "risk": {
                         "score": 0,
                         "flags": []
@@ -5284,7 +5284,7 @@
             "path": "assets\/food-menu.js",
             "area": "ASSET",
             "lines": 2992,
-            "file_fingerprint": "5c4a4c986b1a",
+            "file_fingerprint": "4436a6cd9ac0",
             "blocks": [
                 {
                     "kind": "block",
@@ -6258,7 +6258,7 @@
                     "line_start": 986,
                     "line_end": 1011,
                     "lines": 26,
-                    "fingerprint": "c4b1c4c60d09",
+                    "fingerprint": "4111e50ce3a4",
                     "risk": {
                         "score": 0,
                         "flags": []
@@ -28419,7 +28419,7 @@
             "path": "food-ticket-web\/assets\/food-menu.css",
             "area": "WEB",
             "lines": 438,
-            "file_fingerprint": "b8285d34bb60",
+            "file_fingerprint": "2920ab34433c",
             "blocks": [
                 {
                     "kind": "block",
@@ -28682,7 +28682,7 @@
                     "line_start": 427,
                     "line_end": 438,
                     "lines": 12,
-                    "fingerprint": "f117a0c61e63",
+                    "fingerprint": "eacf9e7b85e1",
                     "risk": {
                         "score": 0,
                         "flags": []
@@ -28696,7 +28696,7 @@
             "path": "food-ticket-web\/assets\/food-menu.js",
             "area": "WEB",
             "lines": 2992,
-            "file_fingerprint": "5c4a4c986b1a",
+            "file_fingerprint": "4436a6cd9ac0",
             "blocks": [
                 {
                     "kind": "block",
@@ -29670,7 +29670,7 @@
                     "line_start": 986,
                     "line_end": 1011,
                     "lines": 26,
-                    "fingerprint": "c4b1c4c60d09",
+                    "fingerprint": "4111e50ce3a4",
                     "risk": {
                         "score": 0,
                         "flags": []
@@ -32866,7 +32866,7 @@
             "path": "food-ticket.php",
             "area": "PAGE",
             "lines": 6139,
-            "file_fingerprint": "fb214f510e61",
+            "file_fingerprint": "faf001d48960",
             "blocks": [
                 {
                     "kind": "region",
@@ -32926,7 +32926,7 @@
                     "line_start": 45,
                     "line_end": 62,
                     "lines": 18,
-                    "fingerprint": "c95081776fd1",
+                    "fingerprint": "b8a13c667c22",
                     "risk": {
                         "score": 0,
                         "flags": []
@@ -65285,7 +65285,7 @@
             "path": "tests\/js\/food-absent-lunch-tab.test.js",
             "area": "TEST",
             "lines": 71,
-            "file_fingerprint": "426b21d03a74",
+            "file_fingerprint": "96c136def7c9",
             "blocks": [
                 {
                     "kind": "block",
@@ -65306,7 +65306,7 @@
                     "line_start": 15,
                     "line_end": 71,
                     "lines": 57,
-                    "fingerprint": "9ac69bace15f",
+                    "fingerprint": "bb0886fc04cf",
                     "risk": {
                         "score": 0,
                         "flags": []
@@ -68085,7 +68085,7 @@
             "path": "tests\/test_food_absent_lunch_backend_static.py",
             "area": "TEST",
             "lines": 26,
-            "file_fingerprint": "5722ada5c177",
+            "file_fingerprint": "6bfd988c99a2",
             "blocks": [
                 {
                     "kind": "block",
@@ -68121,7 +68121,7 @@
                     "line_start": 22,
                     "line_end": 26,
                     "lines": 5,
-                    "fingerprint": "72fb1b096ac3",
+                    "fingerprint": "61ba9dac0633",
                     "risk": {
                         "score": 0,
                         "flags": []
@@ -68135,7 +68135,7 @@
             "path": "tests\/test_food_absent_lunch_tab_static.py",
             "area": "TEST",
             "lines": 80,
-            "file_fingerprint": "3b77ff938b88",
+            "file_fingerprint": "5acc0fb95106",
             "blocks": [
                 {
                     "kind": "block",
@@ -68182,7 +68182,7 @@
                     "line_start": 33,
                     "line_end": 37,
                     "lines": 5,
-                    "fingerprint": "3188aa231132",
+                    "fingerprint": "8b4a956a0637",
                     "risk": {
                         "score": 0,
                         "flags": []
@@ -69176,7 +69176,7 @@
             "path": "tests\/test_food_day_visit_static.py",
             "area": "TEST",
             "lines": 105,
-            "file_fingerprint": "753e1bfc935c",
+            "file_fingerprint": "db086f385f5f",
             "blocks": [
                 {
                     "kind": "block",
@@ -69210,7 +69210,7 @@
                     "line_start": 10,
                     "line_end": 105,
                     "lines": 96,
-                    "fingerprint": "ddd9d38d74ff",
+                    "fingerprint": "74233b2ec43c",
                     "risk": {
                         "score": 0,
                         "flags": []
@@ -82010,7 +82010,7 @@
             "path": "tests\/test_release_1_62_4_fixes_static.py",
             "area": "TEST",
             "lines": 73,
-            "file_fingerprint": "e4fb522e1be2",
+            "file_fingerprint": "1481631032a5",
             "blocks": [
                 {
                     "kind": "block",
@@ -82057,7 +82057,7 @@
                     "line_start": 26,
                     "line_end": 36,
                     "lines": 11,
-                    "fingerprint": "46bd2d3f4fb9",
+                    "fingerprint": "6685e8a26772",
                     "risk": {
                         "score": 0,
                         "flags": []
@@ -83800,7 +83800,7 @@
             "path": "tests\/test_release_1_63_3_day_close_guest_actuals_static.py",
             "area": "TEST",
             "lines": 317,
-            "file_fingerprint": "b41f53625516",
+            "file_fingerprint": "6c0a7bec04f7",
             "blocks": [
                 {
                     "kind": "block",
@@ -84384,7 +84384,7 @@
                     "line_start": 259,
                     "line_end": 278,
                     "lines": 20,
-                    "fingerprint": "da7e08e58977",
+                    "fingerprint": "da07d4c6b0c8",
                     "risk": {
                         "score": 0,
                         "flags": []
@@ -84410,7 +84410,7 @@
                     "line_start": 284,
                     "line_end": 305,
                     "lines": 22,
-                    "fingerprint": "5b28658e9508",
+                    "fingerprint": "4779dda4ead3",
                     "risk": {
                         "score": 0,
                         "flags": []
@@ -84423,7 +84423,7 @@
                     "line_start": 306,
                     "line_end": 308,
                     "lines": 3,
-                    "fingerprint": "4d35fd84b726",
+                    "fingerprint": "7fff9f57d83c",
                     "risk": {
                         "score": 0,
                         "flags": []
@@ -84436,7 +84436,7 @@
                     "line_start": 309,
                     "line_end": 317,
                     "lines": 9,
-                    "fingerprint": "a90e50bd87a9",
+                    "fingerprint": "39b7701a85a6",
                     "risk": {
                         "score": 0,
                         "flags": []
