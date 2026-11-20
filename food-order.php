@@ -3899,7 +3899,15 @@ function food_order_menu_api_handle(string $route, array $user): never
         if (in_array($route, ['food-menu/guest-requests', 'food-menu/guest-request-update', 'food-menu/guest-request-cancel', 'food-menu/guest-request-delete'], true)) {
             food_order_require_permission($user, $method === 'GET' ? 'food.menu' : 'food.menu_edit');
             if (!food_guest_request_is_reviewer($user)) {
-                throw new RuntimeException('دسترسی به مدیریت درخواست‌های مهمان مجاز نیست.');
+                // C10 — دیده‌بان‌های زیردرخت: مدیران چارت (غیربازبین) که مجوز food.menu/food.menu_edit
+                // صریحاً به آن‌ها اعطا شده، فقط فهرست «خواندن» زیردرخت خودشان را می‌بینند.
+                // عملیات نوشتن (ویرایش/لغو/حذفِ دیگران) همچنان بازبین‌محور می‌ماند.
+                $scopedRoots = $method === 'GET' && $route === 'food-menu/guest-requests'
+                    ? food_guest_visible_root_ids($user)
+                    : [];
+                if (!is_array($scopedRoots) || $scopedRoots === []) {
+                    throw new RuntimeException('دسترسی به مدیریت درخواست‌های مهمان مجاز نیست.');
+                }
             }
             if ($method === 'GET' && $route === 'food-menu/guest-requests') {
                 food_order_send_json(food_guest_request_list($user, true, true) + ['allowed' => true]);

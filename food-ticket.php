@@ -5230,6 +5230,11 @@ function food_ticket_api_handle(string $route, array $user): never
             food_ticket_aggregate_export($aggFrom, $aggTo, (string) ($_GET['fields'] ?? ''));
         }
         if ($_SERVER['REQUEST_METHOD'] === 'GET' && $route === 'absent') {
+            // این گزارش عمداً فقط ناهار را پوشش می‌دهد؛ درخواست صریح برای وعدهٔ دیگر باید روشن رد شود، نه نادیده.
+            $absentMeal = strtolower(trim((string) ($_GET['meal_type'] ?? '')));
+            if ($absentMeal !== '' && $absentMeal !== 'lunch') {
+                food_ticket_api_json(['error' => 'گزارش غایبین فقط برای ناهار (lunch) پشتیبانی می‌شود.'], 400);
+            }
             $legacyDate = (string) ($_GET['date'] ?? $_GET['food_date'] ?? '');
             $fromRaw = isset($_GET['from']) ? (string) $_GET['from'] : ($legacyDate !== '' ? $legacyDate : date('Y-m-d'));
             $toRaw = isset($_GET['to']) ? (string) $_GET['to'] : ($legacyDate !== '' ? $legacyDate : $fromRaw);

@@ -3,7 +3,7 @@
   "version": "1.63.3",
   "requires_version": "1.63.2",
   "date": "2026-11-20",
-  "title": "تب «غایبین ناهار» + اصلاحات نهایی (بند ۱۷) + چارت/لغو/گزارش یک‌بار (بازسازی دوم)",
+  "title": "تب «غایبین ناهار» + اصلاحات نهایی (بند ۱۷) + چارت/لغو/گزارش یک‌بار (بازسازی دوم) + ترمیم C10 و ۴۰۰ وعدهٔ نامعتبر (بازسازی سوم)",
   "panel_version": "1.37.58",
   "migrations": [
     "038-food-guest-actuals.sql",
@@ -59,9 +59,9 @@
   "sha256": {
     "VERSION": "6cb0846ab460091ee459ce6fe2e6472cbc93093909ea611d827b48768602b74e",
     "chatbot.php": "ca8f9104302d2c5f216cca490bd301ecf07b694d367aff3fef24aabb01d737fa",
-    "downloads/CHANGE-REPORT-FA-1.63.3.md": "7095563283f88c7a80d3b9fe8844290ece12085cf0e71b6c71eaeb9dab22de69",
+    "downloads/CHANGE-REPORT-FA-1.63.3.md": "85798a54d8fdc16afa673df282981f1c329f73af53a6ddf370b37dc792bc02e3",
     "food-ticket-web/index.html": "8eb2b631ac5028a48790637e5e3af82271b35b8e7d105377d509835dee1ca61b",
-    "food-ticket.php": "08f5be83ce80044740cb57ebda04b03f6dc9eadb3b05da0f5e32f153040b082b",
+    "food-ticket.php": "1fca2b960808889d63914f9d6e75ff482e16d7d3c58d9b13f7975662432627ca",
     "help-guide.php": "0f4537d523cbdd82e5cb2019f267262a5f37264fc424fa8e2fbe038eab6dc2af",
     "tests/js/food-absent-lunch-tab.test.js": "79143079ee7490c556dc8bf2055b771990c5321f38d288992749893c501398f1",
     "tests/js/food-absent-lunch-runtime.test.js": "9f6cc4cd6be798f47c94c0076938cb102c1169ac91423ec58f84dff45474261a",
@@ -81,7 +81,7 @@
     "assets/food-org-groups.js": "c1cf7cd1ce994fed55f270050b3adb95b2ec7fd107f8c89b498f9020e1bf7011",
     "cd-dvd.php": "be41c2b0462cceaebd3848eedb59730d3aabc32c960f89b8bd184635e38f35c3",
     "food-order-import.php": "589ce0084c20d02053454f587d650ee45ed36e6b2cdbc1a275926294055a10ab",
-    "food-order.php": "e8f198afc4c0fca11e10ab5e46d628a69c611f75fe9ff0e7499dc68a6fc4bd71",
+    "food-order.php": "4b15f205bee4592cf676cf455125a309762a3632dc8c2571f46193ab096fe462",
     "food-reconciliation.php": "a2860fac052c1304b72f690179b64f3c9bf0644043bb9f54e092b50f7d70938b",
     "food-ticket-auto-receipts.php": "ef166beb19cf397b913774d0f5a561b85a8a721952afbcbddbf41c209ee9a970",
     "food-ticket-groups.php": "da8ab39d5a4a10c4e7aa018cf9034167bbdcbacfc15dee2b843aebeb110a1acc",
@@ -102,6 +102,6 @@
     "lib/render.php": "2a0ff3309bd2a9a2d00e110a72f85466c632f5fa70114822e31639d25f10e116",
     "lib/release-notes.php": "87551d11dee5a35c6a14a74e8b37a6339e4ea532ea4eb1a51b16d850b740e27d"
   },
-  "description": "Final 1.63.3 (rebuilt 2026-11-20): absent-lunch report tab (three subviews, per-deputy checkboxes + \"all deputies\", pure print, XLSX) + full section-17 scope: single-source remainder at day close, exact-equality guest actuals popup (6 org roots + conditional \"no anchor\" row), chart-less guest registrations blocked, 6-section org lists everywhere, partner-company manager and CEO subtree visibility for guest requests + org-chart z-index fix (unit menu above subordinate cards) + cancellation decision requires note for both approve and reject + one-time release-notes popup with 1.63.3 entry + cache-bust 3.4.63/3.4.30.",
-  "notes": "پیشنیاز ۱٫۶۳٫۲؛ دارای سه مهاجرتِ idempotent است: 038-food-guest-actuals.sql (جدول food_guest_actuals)، 039-liaison-manager-role-sync.sql (ارتقای مدیران واحدهای مستقل به نقش «مدیر») و 040-org-routing-departments.sql (نگاشت پایدار ردیف رسیدگی). پشتیبان و نصب آزمایشی الزامی. بازسازی دوم ۲۰۲۶-۱۱-۲۰ همان نسخهٔ ۱٫۶۳٫۳ است با اصلاحات چارت/لغو و گزارش یک‌بار به‌روزرسانی؛ SHA تازه است. روی سامانه‌هایی که ۱٫۶۳٫۳ را نصب کرده‌اند نصب مجدد همین بسته ترمیم فایل‌هاست و مهاجرت‌ها تکرار نمی‌شوند. نسخهٔ پنل ۱٫۳۷٫۵۸؛ کش دارایی‌ها style.css=3.4.63 / app.js=3.4.30؛ پس از نصب Ctrl+F5 کنید. داده‌های تاریخی NULL مهمان هرگز بازنویسی نمی‌شوند. گزارش به‌روزرسانی این نسخه فقط یک‌بار روی اولین ورود نمایش داده می‌شود؛ «راهنما ← تغییرات نسخه‌ها» مرجع همیشگی است."
+  "description": "Final 1.63.3 (rebuilt 2026-11-20): absent-lunch report tab (three subviews, per-deputy checkboxes + \"all deputies\", pure print, XLSX) + full section-17 scope: single-source remainder at day close, exact-equality guest actuals popup (6 org roots + conditional \"no anchor\" row), chart-less guest registrations blocked, 6-section org lists everywhere, partner-company manager and CEO subtree visibility for guest requests + org-chart z-index fix (unit menu above subordinate cards) + cancellation decision requires note for both approve and reject + one-time release-notes popup with 1.63.3 entry + cache-bust 3.4.63/3.4.30. Rebuilt third time (2026-11-20): non-reviewer chart managers with food.menu get read-only subtree view in the guest-request manager panel (writes stay reviewer-only); /api/absent rejects explicit non-lunch meal_type with 400.",
+  "notes": "پیشنیاز ۱٫۶۳٫۲؛ دارای سه مهاجرتِ idempotent است: 038-food-guest-actuals.sql (جدول food_guest_actuals)، 039-liaison-manager-role-sync.sql (ارتقای مدیران واحدهای مستقل به نقش «مدیر») و 040-org-routing-departments.sql (نگاشت پایدار ردیف رسیدگی). پشتیبان و نصب آزمایشی الزامی. بازسازی دوم ۲۰۲۶-۱۱-۲۰ همان نسخهٔ ۱٫۶۳٫۳ است با اصلاحات چارت/لغو و گزارش یک‌بار به‌روزرسانی؛ SHA تازه است. روی سامانه‌هایی که ۱٫۶۳٫۳ را نصب کرده‌اند نصب مجدد همین بسته ترمیم فایل‌هاست و مهاجرت‌ها تکرار نمی‌شوند. نسخهٔ پنل ۱٫۳۷٫۵۸؛ کش دارایی‌ها style.css=3.4.63 / app.js=3.4.30؛ پس از نصب Ctrl+F5 کنید. داده‌های تاریخی NULL مهمان هرگز بازنویسی نمی‌شوند. گزارش به‌روزرسانی این نسخه فقط یک‌بار روی اولین ورود نمایش داده می‌شود؛ «راهنما ← تغییرات نسخه‌ها» مرجع همیشگی است. بازسازی سوم ۲۰۲۶-۱۱-۲۰: مدیران چارت غیربازبین با مجوز food.menu پنل مهمان را فقط-خواندنی می‌بینند؛ /api/absent با meal_type غیرناهار، ۴۰۰ می‌دهد."
 }

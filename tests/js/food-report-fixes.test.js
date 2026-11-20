@@ -21,8 +21,12 @@ assert(fm.includes('data-delivery-view='),'دکمه view از attribute اختص
 // و هندلر پنل یه محافظ داشته باشه
 assert(panel.includes("b.hasAttribute('data-fm-action')"),'هندلر پنل محافظ ماژول ندارد');
 // ۳) دسترسی ثبت دستی فیش
-assert(php.includes("'manual-attendance' => $fpCan('food.manual_ticket')"),'نمایش منو به مجوز food.manual_ticket وصل نیست');
-assert(panel.includes('FOOD_TICKET_CAN_MANUAL_TICKET'),'پنل مجوز سرور را چک نمیکند');
+// یادداشت: مجوز food.manual_ticket بازنشسته شده و به food.manual_attendance(_edit) منتقل شده است
+// (retired list در permissions.php)؛ انتظار قدیمی این تست به‌روز شد.
+assert(php.includes("'manual-attendance' => $fpCan('food.manual_attendance')"),'نمایش منو به مجوز food.manual_attendance وصل نیست');
+assert(php.includes("'manual-attendance' => $fpCan('food.manual_attendance_edit')"),'ویرایش منو به مجوز food.manual_attendance_edit وصل نیست');
+assert(php.includes('FOOD_TICKET_CAN_MANUAL_TICKET'),'پنل مجوز سرور را دریافت نمیکند');
+assert(panel.includes('FOOD_TICKET_CAN_MANUAL_TICKET') || R('food-ticket-web/assets/food-manual-attendance.js').includes('FOOD_TICKET_CAN_MANUAL_TICKET'),'پنل مجوز سرور را چک نمیکند');
 // هردو کپی یکسان
 assert.strictEqual(fm,fm2,'دوتا کپی food-menu.js فرق دارند');
 assert.strictEqual(css,css2,'دوتا کپی food-menu.css فرق دارند');

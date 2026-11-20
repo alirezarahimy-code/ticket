@@ -82,7 +82,9 @@ foreach (['.fm-org-group', '.fm-org-group-head', '.fm-org-group-title', '.fm-org
 // خواستهٔ کاربر: «بینشون دیگه هیچی نباشه» — نه چیپ خلاصه، نه برچسب نوع.
 check('نوار چیپ خلاصه حذف شده', strpos($js, 'fm-org-summary') === false);
 check('برچسب نوع کنار عنوان نیست', strpos($js, 'fm-org-group-badge') === false);
-check('واحد مستقل فقط نام خودش را می‌نویسد', strpos($lib, "'label'    => \$unit['name']") !== false);
+// یادداشت: از مرحلهٔ پنجم، نمایش سرشاخه‌ها از org_group_display_label (هلپر پیشوند «نام شرکت همکار.») می‌گذرد؛
+// انتظار قدیمی «نام خام چارت» برای واحد مستقل به‌روز شد.
+check('واحد مستقل از هلپر نام نمایشی استفاده می‌کند', strpos($lib, "'type'     => 'liaison'") !== false && strpos($lib, 'org_group_display_label') !== false);
 
 echo "\n═══ ۸) تفکیک غذای هر معاونت ═══\n";
 check('تابع foodBreakdown', strpos($js, 'function foodBreakdown(') !== false);

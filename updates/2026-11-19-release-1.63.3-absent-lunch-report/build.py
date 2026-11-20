@@ -204,7 +204,7 @@ manifest = {
     'version': VERSION,
     'requires_version': REQUIRES,
     'date': DATE,
-    'title': 'تب «غایبین ناهار» + اصلاحات نهایی (بند ۱۷) + چارت/لغو/گزارش یک‌بار (بازسازی دوم)',
+    'title': 'تب «غایبین ناهار» + اصلاحات نهایی (بند ۱۷) + چارت/لغو/گزارش یک‌بار (بازسازی دوم) + ترمیم C10 و ۴۰۰ وعدهٔ نامعتبر (بازسازی سوم)',
     'panel_version': PANEL_VERSION,
     'migrations': MIGRATIONS,
     'files': FILES_LIST,
@@ -214,13 +214,14 @@ manifest = {
                     'actuals popup (6 org roots + conditional "no anchor" row), chart-less guest registrations blocked, '
                     '6-section org lists everywhere, partner-company manager and CEO subtree visibility for guest requests '
                     '+ org-chart z-index fix (unit menu above subordinate cards) + cancellation decision requires note for '
-                    'both approve and reject + one-time release-notes popup with 1.63.3 entry + cache-bust 3.4.63/3.4.30.'),
+                    'both approve and reject + one-time release-notes popup with 1.63.3 entry + cache-bust 3.4.63/3.4.30. Rebuilt third time (2026-11-20): non-reviewer chart managers with food.menu get read-only subtree view in the guest-request manager panel (writes stay reviewer-only); /api/absent rejects explicit non-lunch meal_type with 400.'),
     'notes': ('پیشنیاز ۱٫۶۳٫۲؛ دارای سه مهاجرتِ idempotent است: 038-food-guest-actuals.sql (جدول food_guest_actuals)، '
               '039-liaison-manager-role-sync.sql (ارتقای مدیران واحدهای مستقل به نقش «مدیر») و 040-org-routing-departments.sql (نگاشت پایدار ردیف رسیدگی). پشتیبان و نصب آزمایشی الزامی. '
               'بازسازی دوم ۲۰۲۶-۱۱-۲۰ همان نسخهٔ ۱٫۶۳٫۳ است با اصلاحات چارت/لغو و گزارش یک‌بار به‌روزرسانی؛ SHA تازه است. '
               'روی سامانه‌هایی که ۱٫۶۳٫۳ را نصب کرده‌اند نصب مجدد همین بسته ترمیم فایل‌هاست و مهاجرت‌ها تکرار نمی‌شوند. '
               'نسخهٔ پنل ۱٫۳۷٫۵۸؛ کش دارایی‌ها style.css=3.4.63 / app.js=3.4.30؛ پس از نصب Ctrl+F5 کنید. داده‌های تاریخی NULL مهمان هرگز بازنویسی نمی‌شوند. '
-              'گزارش به‌روزرسانی این نسخه فقط یک‌بار روی اولین ورود نمایش داده می‌شود؛ «راهنما ← تغییرات نسخه‌ها» مرجع همیشگی است.'),
+              'گزارش به‌روزرسانی این نسخه فقط یک‌بار روی اولین ورود نمایش داده می‌شود؛ «راهنما ← تغییرات نسخه‌ها» مرجع همیشگی است. '
+              'بازسازی سوم ۲۰۲۶-۱۱-۲۰: مدیران چارت غیربازبین با مجوز food.menu پنل مهمان را فقط-خواندنی می‌بینند؛ /api/absent با meal_type غیرناهار، ۴۰۰ می‌دهد.'),
 }
 (PKG / 'manifest.json').write_text(json.dumps(manifest, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
 
