@@ -1,7 +1,7 @@
 # گزارش تغییرات ۱٫۶۳٫۳ — تب «غایبین ناهار» + اصلاحات نهایی (بند ۱۷)
 
 - نسخه: **1.63.3** · پیشنیاز: **1.63.2** · تاریخ: **2026-11-19** · نسخهٔ پنل: **1.37.58**
-- مهاجرت پایگاه داده: **دو فایل idempotent** — `038-food-guest-actuals.sql` (جدول `food_guest_actuals`) و `039-liaison-manager-role-sync.sql` (ارتقای مدیران واحدهای مستقل به نقش «مدیر»). هیچ جدول/ستونی حذف نمی‌شود؛ داده‌های قبلی بازنویسی نمی‌شوند.
+- مهاجرت پایگاه داده: **سه فایل idempotent** — `038-food-guest-actuals.sql` (جدول `food_guest_actuals`) و `039-liaison-manager-role-sync.sql` (ارتقای مدیران واحدهای مستقل به نقش «مدیر») و `040-org-routing-departments.sql` (نگاشت پایدار ردیف رسیدگی). هیچ جدول/ستونی حذف نمی‌شود؛ داده‌های قبلی بازنویسی نمی‌شوند.
 - بسته: `ticket-update-1.63.2-to-1.63.3-absent-lunch-report-20261119.zip`
 - **این بستهٔ نهایی جایگزین بستهٔ اولیهٔ همان ورژن شد**؛ شمارهٔ نسخه عمداً همان `1.63.3` مانده است، ولی محتوا و SHA256 آن تازه است. بستهٔ اولیه را نصب نکنید.
 
@@ -74,11 +74,12 @@
 |---|---|
 | `038-food-guest-actuals.sql` | `CREATE TABLE IF NOT EXISTS food_guest_actuals` (کلید `food_date, meal_type, root_unit_id`؛ `root_unit_id = 0` یعنی «بدون جایگاه» — فقط دادهٔ تاریخی/استثنا) |
 | `039-liaison-manager-role-sync.sql` | افزودن ستون `org_auto_role`/`org_prev_role` در صورت نبود + ارتقای مدیران واحدهای مستقل از نقش user/agent به manager (idempotent؛ نقش‌های ثابت مانند supervisor/support_manager/inspector/primary_admin تغییر نمی‌کنند؛ `__agent__` حفظ می‌شود) |
+| `040-org-routing-departments.sql` | افزودن ستون `org_root_unit_id` + ایندکس روی `departments` (نگاشت پایدار سرشاخه‌های سازمان به ردیف رسیدگی؛ idempotent؛ بدون بازنویسی داده) |
 
 ## فایلهای بسته
 
 بسته علاوه بر فایل‌های بخش اول (تب «غایبین ناهار») شامل فایل‌های بخش دوم است:
-`food-ticket.php` (مسیرهای تازه + نسخهٔ پنل 1.37.58)، `food-ticket-web/index.html` (تب + کش v=1.63.3 + برچسب‌های یک‌دست)، `help-guide.php`، `chatbot.php`، `food-order.php`، `food-reconciliation.php`، `organization.php`، `cd-dvd.php`، `food-order-import.php`، `food-ticket-auto-receipts.php`، `food-ticket-groups.php`، `food-ticket-runtime.php`، `lib/org-grouping.php`، `modules/request-center/*` (create/detail/ticket-actions/lib-functions/RequestCenterRepository)، `cd-dvd.php`، `organization.php`، `help-guide.php`، `assets/*` و `food-ticket-web/assets/*` (food-menu.js/css, food-org-groups.js, food-order-guest.js)، `migrations/*.sql` ×۲، `VERSION`، `downloads/CHANGE-REPORT-FA-1.63.3.md` و تست‌ها.
+`food-ticket.php` (مسیرهای تازه + نسخهٔ پنل 1.37.58)، `food-ticket-web/index.html` (تب + کش v=1.63.3 + برچسب‌های یک‌دست)، `help-guide.php`، `chatbot.php`، `food-order.php`، `food-reconciliation.php`، `organization.php`، `cd-dvd.php`، `food-order-import.php`، `food-ticket-auto-receipts.php`، `food-ticket-groups.php`، `food-ticket-runtime.php`، `lib/org-grouping.php`، `modules/request-center/*` (create/detail/ticket-actions/lib-functions/RequestCenterRepository)، `cd-dvd.php`، `organization.php`، `help-guide.php`، `migrations/040-org-routing-departments.sql`، `assets/*` و `food-ticket-web/assets/*` (food-menu.js/css, food-org-groups.js, food-order-guest.js)، `migrations/*.sql` ×۲، `VERSION`، `downloads/CHANGE-REPORT-FA-1.63.3.md` و تست‌ها.
 
 ## آزمون‌ها
 
@@ -120,3 +121,15 @@
   - پیش‌انتخاب فرم اصلاح شد (قبلاً شناسهٔ واحدِ خودِ کاربر با شناسهٔ ریشه‌ها مقایسه می‌شد و برای غیرریشه‌ها هرگز نمی‌چسبید؛ اکنون ریشهٔ نزدیک، مثل ثبت درخواست و مهمان).
 - **مهمان غذا** بدون تغییر می‌ماند (از قبل قفل بود)؛ «بدون جایگاه» در تیکت/CD-DVD مسدودکننده نیست.
 - راهنمای کاربری (`help-guide.php`) به‌روز شد؛ تست استاتیک `tests/test_auto_section_attribution_static.py` (۱۲ تست) افزوده شد.
+
+### ح) مرحلهٔ چهارم — نگاشت پایدار «معاونت سازمانی → ردیف رسیدگی» (رفع تداخل هم‌نام + پایداری تغییر نام)
+
+- **مشکل:** ردیف رسیدگی (`departments`) با **هم‌نام بودن** با سرشاخهٔ سازمانی شناسایی و ساخته می‌شد؛ چون `departments.name` یکتا است، «معاونت هم‌نام» در شرکت اصلی و شرکت همکار عملاً **یک ردیف مشترک** می‌شدند و تغییر نام چارت/شرکت ردیف جدید می‌ساخت (OLA/گزارش/دید مدیران برای تیکت‌های جدید از دست می‌رفت).
+- **migration 040** (idempotent، افزایشی): ستون `org_root_unit_id INT UNSIGNED NULL` + ایندکس روی `departments`. هیچ ردیفی حذف/بازنویسی نمی‌شود.
+- **از این به بعد شناسایی با شناسهٔ واحد چارت است** (`org_root_unit_id`): تغییر نام چارت یا تنظیم نام شرکت **دیگر ردیف رسیدگی جدید نمی‌سازد**؛ ردیف موجود و همهٔ ارجاعات (`tickets`, `cd_dvd_records`, OLA، `users.department_id`, `manager_user_id`) چون با id کار می‌کنند دست‌نخورده می‌مانند.
+- **پیشوند شرکت همکار:** نام ردیف رسیدگی سرشاخه‌های شرکت همکار (به‌جز خود سرشاخهٔ شرکت که همان نام پیکربندی‌شدهٔ شرکت است) به‌صورت **«نام شرکت همکار.نام سرشاخه»** ساخته می‌شود — مثل «آریا ۲.معاونت عملیات همکار» یا «آریا ۲.اداری» — تا با معاونتِ هم‌نامِ شرکت اصلی تداخل نکند. شرکت اصلی بدون تغییر (همان نام چارت) باقی می‌ماند.
+- **ادعای ردیف‌های قبلی (claim) در اولین مسیریابی:** ردیف‌های ساخته‌شدهٔ قبلی به‌صورت lazy شناسایی و به واحد مربوطه نگاشت می‌شوند: شرکت اصلی ردیف هم‌نام خود را با همان نام حفظ می‌کند؛ سرشاخهٔ company_manager شرکت همکار ردیف قدیمی «شرکت همکار» را ادعا و با نام پیکربندی‌شدهٔ فعلی («آریا ۲») جایگزین می‌کند؛ بقیهٔ سرشاخه‌های همکار با نام پیشوندی ساخته/ادعا می‌شوند. ارجاعات id-محور همه سالم می‌مانند.
+- اگر نام شرکت همکار در تنظیمات رنگ/نام دیگری بگیرد، ردیف‌های نگاشت‌شده همچنان به همان واحدهای قبلی می‌رسند (شناسایی با id است)؛ نام ردیف در لحظهٔ ادعا/ساخت از نام پیکربندی‌شده خوانده می‌شود.
+- **محدودیت شناخته‌شده (بدون تغییر در این بسته):** همگام‌سازی دامین (LDAP) کاربران با صفت `department` همچنان با **تطبیق دقیق رشتهٔ نام** کار می‌کند؛ اگر LDAP فعال شود، مقادیر صفت `department` باید با نام ردیف رسیدگی (برای همکار: نام پیشوندی) هماهنگ شوند.
+
+فایل‌های افزوده‌شده: `migrations/040-org-routing-departments.sql`، تست استاتیک `tests/test_org_routing_departments_static.py`.

@@ -7,7 +7,8 @@
   "panel_version": "1.37.58",
   "migrations": [
     "038-food-guest-actuals.sql",
-    "039-liaison-manager-role-sync.sql"
+    "039-liaison-manager-role-sync.sql",
+    "040-org-routing-departments.sql"
   ],
   "files": [
     "VERSION",
@@ -21,6 +22,7 @@
     "tests/test_food_absent_lunch_backend_static.py",
     "tests/test_food_absent_lunch_tab_static.py",
     "tests/test_auto_section_attribution_static.py",
+    "tests/test_org_routing_departments_static.py",
     "assets/food-menu.css",
     "assets/food-menu.js",
     "assets/food-order-guest.js",
@@ -47,15 +49,16 @@
   "sha256": {
     "VERSION": "6cb0846ab460091ee459ce6fe2e6472cbc93093909ea611d827b48768602b74e",
     "chatbot.php": "ca8f9104302d2c5f216cca490bd301ecf07b694d367aff3fef24aabb01d737fa",
-    "downloads/CHANGE-REPORT-FA-1.63.3.md": "d7c73dcd6adf0f5e8116c1fb4cce96127b38e9f5a7e8ce00224cc553a5377648",
+    "downloads/CHANGE-REPORT-FA-1.63.3.md": "e7faba7ed9cdfad473388c61ef98b845bf7f6fd6dc5e0f66d4c75788ade09194",
     "food-ticket-web/index.html": "8eb2b631ac5028a48790637e5e3af82271b35b8e7d105377d509835dee1ca61b",
     "food-ticket.php": "08f5be83ce80044740cb57ebda04b03f6dc9eadb3b05da0f5e32f153040b082b",
-    "help-guide.php": "3c93471d2a3f79174d7e262226ed00869dda42cfe49260d7b4185a3bde3a1cdd",
+    "help-guide.php": "01d5a60c541d980496e2045817afc3a671f40f5b09e2afa90fd8ffb62cca330b",
     "tests/js/food-absent-lunch-tab.test.js": "79143079ee7490c556dc8bf2055b771990c5321f38d288992749893c501398f1",
     "tests/js/food-absent-lunch-runtime.test.js": "9f6cc4cd6be798f47c94c0076938cb102c1169ac91423ec58f84dff45474261a",
     "tests/test_food_absent_lunch_backend_static.py": "4636026da52ec18df8207605f518995fb63e126b08fce81bd7520370f5970df2",
     "tests/test_food_absent_lunch_tab_static.py": "808bf5d35404603a1276b77431716c3b19a19b7425311c2eb5629022abb6be46",
     "tests/test_auto_section_attribution_static.py": "5fed748e95f2464d40c46f1b1fedb36a44c7012e442334ca60ad52bf9af2fdf1",
+    "tests/test_org_routing_departments_static.py": "35a1d5bd0577da3b18d11af76357759a64e72150e5c9f5750b679707153d043b",
     "assets/food-menu.css": "308b9ba0b2152dc2210002af215547aa11e5b58c1575ab48ab52467fdf3b28d3",
     "assets/food-menu.js": "22c4a6b6b9b8eeb3060eeff0199772018ab2bfd53a007e9a8beb3add94a92f49",
     "assets/food-order-guest.js": "9176cf75f228a50634cde59d64f0f564aa152c0bd07bcf2a4969165abf98d800",
@@ -71,7 +74,7 @@
     "food-ticket-web/assets/food-menu.js": "22c4a6b6b9b8eeb3060eeff0199772018ab2bfd53a007e9a8beb3add94a92f49",
     "food-ticket-web/assets/food-org-groups.js": "c1cf7cd1ce994fed55f270050b3adb95b2ec7fd107f8c89b498f9020e1bf7011",
     "lib/org-grouping.php": "544e1f0663654256d6abef32f459c175cf47416ba4a12f29169029dec0aed296",
-    "organization.php": "26801d9cef2447c4177e174c041912780b13dce6c8fa1c5d09cd068bff6f1683",
+    "organization.php": "cb8cc518e25af486e8fffa2507ed594713931b2a87fb0bf45b9737046ffe1512",
     "index.php": "b03a014a4567a9dc0df87d4827a60c6ea00c7f3cd7685fa64372f6ac63518c49",
     "modules/request-center/Actions/ticket-actions.php": "04db747765665cdbf594d6f54493d9428a6678bb134f82a954e99e42246e6606",
     "modules/request-center/Pages/create.php": "780494945b0179950836969e5c83297bcd7eaef5b676d0324f1539fb5f0e2dd5",

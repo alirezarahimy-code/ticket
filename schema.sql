@@ -10,7 +10,9 @@ CREATE TABLE IF NOT EXISTS departments (
     manager_user_id INT UNSIGNED NULL,
     is_active TINYINT(1) NOT NULL DEFAULT 1,
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    INDEX idx_departments_manager (manager_user_id)
+    org_root_unit_id INT UNSIGNED NULL,
+    INDEX idx_departments_manager (manager_user_id),
+    INDEX idx_departments_org_root_unit_id (org_root_unit_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS org_companies (
@@ -1620,5 +1622,7 @@ INSERT IGNORE INTO schema_updates (version, migration) VALUES
     ('1.63', '035-request-center-appointments.sql'),
     -- ۰۳۸ و ۰۳۹ نیز در این اسکیما اعمال/idempotent هستند؛ بدون این ردیف‌ها نصب تازه هشدار کاذب «اجرا نشده» می‌داد.
     ('1.63.2', '038-food-guest-actuals.sql'),
-    ('1.63.2', '039-liaison-manager-role-sync.sql');
+    ('1.63.2', '039-liaison-manager-role-sync.sql'),
+    -- ۰۴۰ نیز idempotent است و در این اسکیما اعمال می‌شود (نگاشت پایدار ردیف رسیدگی به واحد چارت).
+    ('1.63.3', '040-org-routing-departments.sql');
 

@@ -455,9 +455,79 @@ function org_stored_attribution_root_id($storedId): int
     return org_nearest_root_id($id, false);
 }
 
+/** نوع شرکتِ یک واحد چارت (own|partner|'') با کش یک‌باره از org_companies. */
+function org_unit_company_type(array $unit): string
+{
+    static $map = null;
+    $companyId = (int) ($unit['company_id'] ?? 0);
+    if ($companyId <= 0) {
+        return '';
+    }
+    if ($map === null) {
+        $map = [];
+        try {
+            foreach (db()->query('SELECT id, company_type FROM org_companies WHERE is_active = 1')->fetchAll(PDO::FETCH_ASSOC) as $row) {
+                $map[(int) $row['id']] = (string) ($row['company_type'] ?? '');
+            }
+        } catch (Throwable $ignored) {
+            $map = [];
+        }
+    }
+    return $map[$companyId] ?? '';
+}
+
+/**
+ * نام ردیف رسیدگی (departments) برای یک سرشاخهٔ سازمانی.
+ * شرکت اصلی: همان نام چارت (بدون تغییر). شرکت همکار: «نام شرکت همکار.نام سرشاخه»
+ * (مثل «آریا ۲.اداری») تا با معاونت هم‌نامِ شرکت اصلی تداخل نکند؛ سرشاخهٔ company_manager
+ * خودِ شرکت است و همان نام پیکربندی‌شده را می‌گیرد. اگر نام شرکت همکار ثبت نشده باشد، نام چارت برگردانده می‌شود.
+ */
+function org_routing_department_name(array $unit): string
+{
+    $display = function_exists('org_root_display_name') ? org_root_display_name($unit) : trim((string) ($unit['name'] ?? ''));
+    if ((string) ($unit['unit_type'] ?? '') === '') {
+        return $display;
+    }
+    if (org_unit_company_type($unit) !== 'partner') {
+        return $display;
+    }
+    $companyId = (int) ($unit['company_id'] ?? 0);
+    $companyName = $companyId > 0 ? org_company_display_name_for_id($companyId) : '';
+    if ($companyName === '') {
+        $companyName = org_partner_company_display_name();
+    }
+    if ($companyName === '') {
+        return $display;
+    }
+    if ((string) ($unit['unit_type'] ?? '') === 'company_manager') {
+        return $companyName;
+    }
+    return $companyName . '.' . $display;
+}
+
+/** آیا ستون نگاشت org_root_unit_id روی جدول departments وجود دارد؟ (idempotent) */
+function org_routing_map_available(): bool
+{
+    static $available = null;
+    if ($available !== null) {
+        return $available;
+    }
+    try {
+        db()->query('SELECT org_root_unit_id FROM departments LIMIT 1');
+        $available = true;
+    } catch (Throwable $ignored) {
+        $available = false;
+    }
+    return $available;
+}
+
 /**
  * تبدیل معاونت سازمانی انتخاب‌شده به معاونتِ مسیر رسیدگی (departments).
- * اگر department هم‌نام وجود داشته باشد همان برگردانده می‌شود، در غیر این صورت ساخته می‌شود.
+ * پایداری: ردیف رسیدگی با شناسهٔ واحد چارت (org_root_unit_id) شناسایی می‌شود؛ تغییر نام چارت یا شرکت
+ * دیگر «ردیف رسیدگی جدید» نمی‌سازد. ردیف‌های قبلی (هم‌نام) در اولین فراخوانی «ادعا» (claim) می‌شوند:
+ * شرکت اصلی → ردیف هم‌نام را نگه می‌دارد؛ شرکت همکار (غیر از سرشاخهٔ شرکت) → ردیف هم‌نام شرکت همکار
+ * به ردیف «نام شرکت.نام سرشاخه» تغییرنام می‌یابد؛ سرشاخهٔ شرکت همکار ردیف قدیمی «شرکت همکار» را ادعا و
+ * با نام پیکربندی‌شدهٔ فعلی جایگزین می‌کند. هیچ ارجاعی (tickets/cd_dvd/OLA/کاربران) چون با id است نمی‌شکند.
  */
 function org_unit_routing_department_id(int $unitId): int
 {
@@ -468,25 +538,83 @@ function org_unit_routing_department_id(int $unitId): int
     if ($unit === null || !in_array((string) ($unit['unit_type'] ?? ''), org_root_types(), true)) {
         return 0;
     }
-    $name = function_exists('org_root_display_name') ? org_root_display_name($unit) : trim((string) $unit['name']);
-    if ($name === '') {
+    $routingName = org_routing_department_name($unit);
+    if ($routingName === '') {
+        $routingName = trim((string) ($unit['name'] ?? ''));
+    }
+    if ($routingName === '') {
         return 0;
     }
-    $find = db()->prepare('SELECT id FROM departments WHERE name = ? LIMIT 1');
-    $find->execute([$name]);
-    $found = $find->fetchColumn();
-    if ($found !== false) {
-        return (int) $found;
+    $mapReady = org_routing_map_available();
+
+    // ۱) شناسایی با نگاشت پایدار — تغییر نام چارت/شرکت دیگر اثر نمی‌گذارد
+    if ($mapReady) {
+        $query = db()->prepare('SELECT id FROM departments WHERE org_root_unit_id = ? LIMIT 1');
+        $query->execute([$unitId]);
+        $hit = (int) ($query->fetchColumn() ?: 0);
+        if ($hit > 0) {
+            return $hit;
+        }
     }
+
+    // ۲) ادعای ردیف‌های موجود (هم‌نام) — تعیین ترتیب کاندیدها بر اساس نوع سرشاخه
+    $isPartner = org_unit_company_type($unit) === 'partner';
+    $isCompanyManager = (string) ($unit['unit_type'] ?? '') === 'company_manager';
+    $candidates = $isPartner
+        ? ($isCompanyManager ? [$routingName, 'شرکت همکار'] : [$routingName])
+        : [$routingName];
+    foreach ($candidates as $candidate) {
+        if ($candidate === '') {
+            continue;
+        }
+        $find = db()->prepare('SELECT id FROM departments WHERE name = ? LIMIT 1');
+        $find->execute([$candidate]);
+        $foundId = (int) ($find->fetchColumn() ?: 0);
+        if ($foundId <= 0) {
+            continue;
+        }
+        if ($mapReady) {
+            $claim = db()->prepare('UPDATE departments SET org_root_unit_id = ? WHERE id = ? AND org_root_unit_id IS NULL');
+            $claim->execute([$unitId, $foundId]);
+            if ($claim->rowCount() === 0) {
+                // ردیف از قبل به واحد دیگری نگاشت شده است؛ این سرشاخه مسیری تازه می‌سازد
+                $owner = db()->prepare('SELECT org_root_unit_id FROM departments WHERE id = ? LIMIT 1');
+                $owner->execute([$foundId]);
+                if ((int) ($owner->fetchColumn() ?: 0) !== $unitId) {
+                    continue;
+                }
+            } elseif ($candidate !== $routingName) {
+                // نمایش یکدست با نام پیکربندی‌شده (مثلاً «شرکت همکار» → «آریا ۲») — بهترین تلاش؛ ناموفق بودن مانع پایداری نمی‌شود
+                try {
+                    $rename = db()->prepare('UPDATE departments SET name = ? WHERE id = ? AND name = ?');
+                    $rename->execute([$routingName, $foundId, $candidate]);
+                } catch (Throwable $ignored) {
+                    // تداخل نام: ردیف با همان نام قبلی و Map درست باقی می‌ماند
+                }
+            }
+        }
+        return $foundId;
+    }
+
+    // ۳) ساخت ردیف تازه
     $code = trim((string) ($unit['code'] ?? ''));
     try {
-        $insert = db()->prepare('INSERT INTO departments (name, code, is_active) VALUES (?, ?, 1)');
-        $insert->execute([$name, $code !== '' ? $code : null]);
+        if ($mapReady) {
+            $insert = db()->prepare('INSERT INTO departments (name, code, is_active, org_root_unit_id) VALUES (?, ?, 1, ?)');
+            $insert->execute([$routingName, $code !== '' ? $code : null, $unitId]);
+        } else {
+            $insert = db()->prepare('INSERT INTO departments (name, code, is_active) VALUES (?, ?, 1)');
+            $insert->execute([$routingName, $code !== '' ? $code : null]);
+        }
         return (int) db()->lastInsertId();
     } catch (Throwable $exception) {
-        $retry = db()->prepare('SELECT id FROM departments WHERE name = ? LIMIT 1');
-        $retry->execute([$name]);
-        return (int) ($retry->fetchColumn() ?: 0);
+        $retry = db()->prepare('SELECT id FROM departments WHERE name = ? AND org_root_unit_id = ? LIMIT 1');
+        $retry->execute([$routingName, $unitId]);
+        $deptId = (int) ($retry->fetchColumn() ?: 0);
+        if ($deptId > 0) {
+            return $deptId;
+        }
+        return 0;
     }
 }
 

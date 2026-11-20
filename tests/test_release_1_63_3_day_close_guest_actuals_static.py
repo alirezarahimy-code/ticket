@@ -14,6 +14,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 MIGRATION_038 = ROOT / "migrations/038-food-guest-actuals.sql"
 MIGRATION_039 = ROOT / "migrations/039-liaison-manager-role-sync.sql"
+MIGRATION_040 = ROOT / "migrations/040-org-routing-departments.sql"
 RECON = ROOT / "food-reconciliation.php"
 ORDER_PHP = ROOT / "food-order.php"
 TICKET_PHP = ROOT / "food-ticket.php"
@@ -262,13 +263,14 @@ class PackageTests(unittest.TestCase):
             self.assertIn("manifest.json", names)
             self.assertIn("migrations/038-food-guest-actuals.sql", names)
             self.assertIn("migrations/039-liaison-manager-role-sync.sql", names)
+            self.assertIn("migrations/040-org-routing-departments.sql", names)
             self.assertIn("files/food-reconciliation.php", names)
             self.assertIn("files/organization.php", names)
             self.assertIn("files/modules/request-center/Pages/detail.php", names)
             manifest = json.loads(zf.read("manifest.json").decode("utf-8"))
             self.assertEqual(manifest["version"], "1.63.3")
             self.assertEqual(manifest["panel_version"], "1.37.58")
-            self.assertEqual(manifest["migrations"], ["038-food-guest-actuals.sql", "039-liaison-manager-role-sync.sql"])
+            self.assertEqual(manifest["migrations"], ["038-food-guest-actuals.sql", "039-liaison-manager-role-sync.sql", "040-org-routing-departments.sql"])
             archived = {n[len("files/"):] for n in names if n.startswith("files/")}
             self.assertEqual(archived, set(manifest["files"]))
             for rel, digest in manifest["sha256"].items():
