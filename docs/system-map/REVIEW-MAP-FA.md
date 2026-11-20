@@ -9,7 +9,7 @@
 | سنجه | مقدار |
 |---|---|
 | فایل‌های کد تولیدی | 708 |
-| خطوط | 178,595 |
+| خطوط | 178,596 |
 | آدرس‌ها (بلوک) | 8,507 |
 | موضوع‌های قابل جست‌وجو | 41 صفحه + 102 مجوز + 86 جدول |
 | بازبینی‌شده | 0 آدرس (0.0%) — 0 خط (0.0%) |
@@ -32,7 +32,7 @@
 | **help** | `help` | — | `PAGE-033.52` <sub>index.php:952</sub><br>`CORE-022.05` <sub>lib/settings-effects.php:57</sub> | 5 |
 | **local accounts** | `local-accounts` | — | `PAGE-033.42` <sub>index.php:895</sub><br>`PAGE-036.03` <sub>local-accounts.php:25</sub><br>`PAGE-036.05` <sub>local-accounts.php:81</sub><br>`PAGE-036.06` <sub>local-accounts.php:138</sub> | 11 |
 | **logging dashboard** | `logging-dashboard` | — | `PAGE-033.57` <sub>index.php:1016</sub><br>`ASSET-018.01` <sub>assets/logging-dashboard.css:1</sub><br>`PAGE-037.04` <sub>logging-dashboard.php:114</sub><br>`PAGE-037.02` <sub>logging-dashboard.php:4</sub> | 11 |
-| **release notes** | `release-notes` | — | `PAGE-033.53` <sub>index.php:971</sub><br>`CORE-020.07` <sub>lib/release-notes.php:194</sub><br>`CORE-020.03` <sub>lib/release-notes.php:129</sub><br>`CORE-020.01` <sub>lib/release-notes.php:1</sub> | 12 |
+| **release notes** | `release-notes` | — | `PAGE-033.53` <sub>index.php:971</sub><br>`CORE-020.07` <sub>lib/release-notes.php:213</sub><br>`CORE-020.03` <sub>lib/release-notes.php:148</sub><br>`CORE-020.01` <sub>lib/release-notes.php:1</sub> | 12 |
 | **system health** | `system-health` | — | `PAGE-033.58` <sub>index.php:1020</sub><br>`PAGE-079.28` <sub>system-health.php:947</sub><br>`PAGE-079.03` <sub>system-health.php:25</sub><br>`PAGE-079.04` <sub>system-health.php:43</sub> | 36 |
 | **اعلان‌ها** | `notifications` | — | `PAGE-033.55` <sub>index.php:989</sub><br>`ACT-010.03` <sub>actions/notification-actions.php:23</sub><br>`PAGE-033.54` <sub>index.php:981</sub><br>`DB-004.30` <sub>install-empty-db.sql:445</sub> | 51 |
 | **به‌روزرسانی و پشتیبان‌گیری** | `backup` | `backup.view` | `PAGE-005.04` <sub>backup.php:32</sub><br>`PAGE-005.02` <sub>backup.php:6</sub><br>`PAGE-005.03` <sub>backup.php:12</sub><br>`PAGE-005.05` <sub>backup.php:78</sub> | 45 |
@@ -76,7 +76,7 @@
 | داشبورد و پایه | **جست‌وجوی سراسری** | `search.global` | `PAGE-033.62` <sub>index.php:1212</sub> | 3 |
 | داشبورد و پایه | **اعلان‌های من** | `notif.view` | `PAGE-033.54` <sub>index.php:981</sub><br>`CORE-021.02` <sub>lib/render.php:14</sub> | 6 |
 | داشبورد و پایه | **ویرایش پروفایل خودم** | `profile.edit` | `PAGE-075.03` <sub>permissions.php:28</sub><br>`PAGE-033.34` <sub>index.php:811</sub><br>`PAGE-075.16` <sub>permissions.php:351</sub> | 3 |
-| داشبورد و پایه | **استفاده از بات پاسخ‌گو** | `chatbot.use` | `PAGE-009.27` <sub>chatbot.php:708</sub><br>`PAGE-009.123` <sub>chatbot.php:3214</sub> | 5 |
+| داشبورد و پایه | **استفاده از بات پاسخ‌گو** | `chatbot.use` | `PAGE-009.27` <sub>chatbot.php:717</sub><br>`PAGE-009.123` <sub>chatbot.php:3223</sub> | 5 |
 | درخواست | **ثبت درخواست جدید** | `ticket.create` | `PAGE-046.03` <sub>modules/request-center/Actions/ticket-actions.php:29</sub><br>`PAGE-046.04` <sub>modules/request-center/Actions/ticket-actions.php:277</sub><br>`PAGE-054.03` <sub>modules/request-center/Pages/detail.php:17</sub> | 20 |
 | درخواست | **مشاهدهٔ درخواست‌های خودم** | `ticket.view_own` | `PAGE-054.03` <sub>modules/request-center/Pages/detail.php:17</sub><br>`CORE-004.14` <sub>lib/auth-scope.php:199</sub><br>`CORE-004.23` <sub>lib/auth-scope.php:593</sub> | 22 |
 | درخواست | **مشاهدهٔ درخواست‌های واحد/زیرمجموعه** | `ticket.view_unit` | `PAGE-054.03` <sub>modules/request-center/Pages/detail.php:17</sub><br>`CORE-004.14` <sub>lib/auth-scope.php:199</sub><br>`CORE-004.23` <sub>lib/auth-scope.php:593</sub> | 25 |
@@ -290,7 +290,7 @@
 | ناحیه | معنی | فایل | بلوک | خط |
 |---|---|---|---|---|
 | `TEST` | TEST | 260 | 2,084 | 29,944 |
-| `TOOL` | TOOL | 153 | 1,464 | 40,274 |
+| `TOOL` | TOOL | 153 | 1,464 | 40,275 |
 | `DB` | DB | 89 | 1,397 | 8,374 |
 | `PAGE` | صفحات (ریشه) | 84 | 1,652 | 59,312 |
 | `ASSET` | دارایی‌های ایستا (assets/) | 34 | 858 | 15,327 |
@@ -5019,7 +5019,7 @@
 </details>
 
 <details>
-<summary><b>TOOL-034</b> — <code>tools/build_full_1_63_3.py</code> (148 خط، 5 آدرس، بازبینی‌شده 0/5)</summary>
+<summary><b>TOOL-034</b> — <code>tools/build_full_1_63_3.py</code> (149 خط، 5 آدرس، بازبینی‌شده 0/5)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
@@ -5027,7 +5027,7 @@
 | `TOOL-034.02` | 48–55 | بلوک | `sha256_file` | 1 | ⬜ |
 | `TOOL-034.03` | 56–59 | بلوک | `git` | 0 | ⬜ |
 | `TOOL-034.04` | 60–65 | بلوک | `excluded` | 0 | ⬜ |
-| `TOOL-034.05` | 66–148 | بلوک | `main` | 1 | ⬜ |
+| `TOOL-034.05` | 66–149 | بلوک | `main` | 1 | ⬜ |
 
 </details>
 

@@ -97938,8 +97938,8 @@
             "id": "TOOL-034",
             "path": "tools\/build_full_1_63_3.py",
             "area": "TOOL",
-            "lines": 148,
-            "file_fingerprint": "3db953848c9f",
+            "lines": 149,
+            "file_fingerprint": "08a533fc2b65",
             "blocks": [
                 {
                     "kind": "block",
@@ -97947,7 +97947,7 @@
                     "line_start": 1,
                     "line_end": 47,
                     "lines": 47,
-                    "fingerprint": "c039bfa43a3a",
+                    "fingerprint": "cb505b1d9c0c",
                     "risk": {
                         "score": 0,
                         "flags": []
@@ -97999,9 +97999,9 @@
                     "kind": "block",
                     "anchor": "main",
                     "line_start": 66,
-                    "line_end": 148,
-                    "lines": 83,
-                    "fingerprint": "6d88be5dddaa",
+                    "line_end": 149,
+                    "lines": 84,
+                    "fingerprint": "2960e2d7dfcb",
                     "risk": {
                         "score": 1,
                         "flags": {

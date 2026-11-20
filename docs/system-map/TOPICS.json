@@ -60439,7 +60439,7 @@
       "line": 66,
       "anchor": "main",
       "risk": 1,
-      "lines": 83
+      "lines": 84
     },
     "TOOL-035.01": {
       "path": "tools/build_manual_guest_package.py",
