@@ -3091,6 +3091,7 @@ function food_guest_request_list(array $user, bool $includePast = false, bool $a
     $stmt = db()->prepare(
         "SELECT r.id, r.request_date, r.meal_type, r.organization, r.guest_count, r.requester_name, r.note, r.status,
                 r.created_by, r.created_at, r.food_id, c.food_name, r.deputy_unit_id, ou.name AS deputy_name,
+                ou.unit_type AS deputy_type, ou.company_id AS deputy_company_id,
                 TRIM(CONCAT(COALESCE(u.first_name,''), ' ', COALESCE(u.last_name,''))) AS created_by_name
            FROM food_guest_requests r
            LEFT JOIN food_catalog c ON c.id = r.food_id
@@ -3131,7 +3132,9 @@ function food_guest_request_list(array $user, bool $includePast = false, bool $a
             'food_id' => $r['food_id'] === null ? null : (int) $r['food_id'],
             'food_name' => $r['food_name'] === null ? '' : (string) $r['food_name'],
             'deputy_unit_id' => $r['deputy_unit_id'] === null ? null : (int) $r['deputy_unit_id'],
-            'deputy_name' => (string) ($r['deputy_name'] ?? ''),
+            'deputy_name' => function_exists('org_unit_display_name')
+                ? org_unit_display_name((string) ($r['deputy_name'] ?? ''), (string) ($r['deputy_type'] ?? ''), (int) ($r['deputy_company_id'] ?? 0))
+                : (string) ($r['deputy_name'] ?? ''),
             'requester_name' => (string) $r['requester_name'],
             'note' => (string) ($r['note'] ?? ''),
             'status' => (string) $r['status'],
@@ -3198,9 +3201,17 @@ function food_guest_request_create(array $user, array $body): array
     if ($deputyId <= 0) {
         throw new RuntimeException('این حساب هنوز در چارت سازمانی جایگاه فعالی ندارد؛ ثبت درخواست غذای مهمان برای آن ممکن نیست. ابتدا جایگاه حساب خود را در چارت سازمانی مشخص کنید.');
     }
-    $requester = trim((string) preg_replace('/\s+/u', ' ', (string) ($body['requester_name'] ?? '')));
+    // نام ثبت‌کننده فقط از حساب نشست خوانده می‌شود (همان نام نمایشی صفحه)؛ مقدار ارسالی کلاینت پذیرفته نمی‌شود.
+    $profileRow = function_exists('food_order_user_row') ? (food_order_user_row((int) ($user['id'] ?? 0)) ?? $user) : $user;
+    $requester = function_exists('food_order_full_name')
+        ? trim(food_order_full_name($profileRow))
+        : trim((string) preg_replace('/\s+/u', ' ', (string) ($profileRow['full_name'] ?? '')));
+    $requester = trim((string) preg_replace('/\s+/u', ' ', $requester));
+    if (mb_strlen($requester) < 2) {
+        $requester = trim((string) ($user['username'] ?? ''));
+    }
     if (mb_strlen($requester) < 2 || mb_strlen($requester) > 150) {
-        throw new RuntimeException('نام درخواست‌دهنده باید بین ۲ تا ۱۵۰ نویسه باشد.');
+        throw new RuntimeException('نام حساب شما در سامانه معتبر نیست؛ با پشتیبانی تماس بگیرید.');
     }
     $note = trim((string) ($body['note'] ?? ''));
     if (mb_strlen($note) > 500) {
@@ -3279,10 +3290,7 @@ function food_guest_request_update(array $user, int $id, array $body, bool $owne
     if ($count === false) {
         throw new RuntimeException('تعداد مهمان باید عددی بین ۱ تا ۵۰۰ باشد.');
     }
-    $requester = trim((string) preg_replace('/\s+/u', ' ', (string) ($body['requester_name'] ?? '')));
-    if (mb_strlen($requester) < 2 || mb_strlen($requester) > 150) {
-        throw new RuntimeException('نام درخواست‌دهنده باید بین ۲ تا ۱۵۰ نویسه باشد.');
-    }
+    // نام ثبت‌کننده از رکورد قبلی حفظ می‌شود؛ مقدار ارسالی کلاینت در ویرایش نادیده گرفته می‌شود.
     $note = trim((string) ($body['note'] ?? ''));
     if (mb_strlen($note) > 500) {
         throw new RuntimeException('یادداشت نباید بیش از ۵۰۰ نویسه باشد.');
@@ -3316,8 +3324,8 @@ function food_guest_request_update(array $user, int $id, array $body, bool $owne
             throw new RuntimeException('مهلت ویرایش این درخواست گذشته است.');
         }
         db()->prepare(
-            'UPDATE food_guest_requests SET request_date = ?, meal_type = ?, organization = ?, guest_count = ?, requester_name = ?, note = ? WHERE id = ?'
-        )->execute([$date, $mealType, $organization, $count, $requester, $note === '' ? null : $note, $id]);
+            'UPDATE food_guest_requests SET request_date = ?, meal_type = ?, organization = ?, guest_count = ?, note = ? WHERE id = ?'
+        )->execute([$date, $mealType, $organization, $count, $note === '' ? null : $note, $id]);
         db()->commit();
     } catch (Throwable $e) {
         if (db()->inTransaction()) {
@@ -3325,7 +3333,7 @@ function food_guest_request_update(array $user, int $id, array $body, bool $owne
         }
         throw $e;
     }
-    $newValue = ['request_date' => $date, 'meal_type' => $mealType, 'organization' => $organization, 'guest_count' => (int) $count, 'requester_name' => $requester, 'note' => $note];
+    $newValue = ['request_date' => $date, 'meal_type' => $mealType, 'organization' => $organization, 'guest_count' => (int) $count, 'requester_name' => (string) ($row['requester_name'] ?? ''), 'note' => $note];
     food_order_audit('food_guest_request_update', $user, 'food_guest_request', $id, $row, $newValue);
     return ['ok' => true, 'message' => 'درخواست غذای مهمان ویرایش شد.'];
 }

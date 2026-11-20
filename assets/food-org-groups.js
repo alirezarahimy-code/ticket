@@ -29,7 +29,7 @@
       case 'management': return 'مدیریت مستقل';
       case 'liaison': return 'واحد مستقل (نمایندگی)';
       case 'office': return 'دفتر مدیرعامل';
-      case 'company': return 'شرکت همکار';
+      case 'company': return 'شرکت';
       case 'ceo': return 'مدیرعامل';
       default: return 'بدون جایگاه';
     }

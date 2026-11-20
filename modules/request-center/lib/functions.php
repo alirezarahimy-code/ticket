@@ -103,9 +103,14 @@ function store_attachment(int $messageId, array $file): void
 
 function fetch_ticket(int $id): ?array
 {
-    $query = db()->prepare('SELECT t.*, c.name AS category_name, sc.name AS service_name, sc.code AS service_code, d.name AS department_name, ou.name AS requesting_unit_name, r.full_name AS requester_name, r.username AS requester_username, a.full_name AS assignee_name, ass.asset_tag, ass.hostname, tr.score AS rating_score, tr.comment AS rating_comment, tr.created_at AS rating_at FROM tickets t LEFT JOIN categories c ON c.id = t.category_id LEFT JOIN service_catalog sc ON sc.id = t.service_id LEFT JOIN departments d ON d.id = t.department_id LEFT JOIN org_units ou ON ou.id = t.requesting_unit_id JOIN users r ON r.id = t.requester_id LEFT JOIN users a ON a.id = t.assigned_to LEFT JOIN assets ass ON ass.id = t.asset_id LEFT JOIN ticket_ratings tr ON tr.ticket_id = t.id WHERE t.id = ? LIMIT 1');
+    $query = db()->prepare('SELECT t.*, c.name AS category_name, sc.name AS service_name, sc.code AS service_code, d.name AS department_name, ou.name AS requesting_unit_name, ou.unit_type AS _requesting_unit_type, ou.company_id AS _requesting_unit_company_id, r.full_name AS requester_name, r.username AS requester_username, a.full_name AS assignee_name, ass.asset_tag, ass.hostname, tr.score AS rating_score, tr.comment AS rating_comment, tr.created_at AS rating_at FROM tickets t LEFT JOIN categories c ON c.id = t.category_id LEFT JOIN service_catalog sc ON sc.id = t.service_id LEFT JOIN departments d ON d.id = t.department_id LEFT JOIN org_units ou ON ou.id = t.requesting_unit_id JOIN users r ON r.id = t.requester_id LEFT JOIN users a ON a.id = t.assigned_to LEFT JOIN assets ass ON ass.id = t.asset_id LEFT JOIN ticket_ratings tr ON tr.ticket_id = t.id WHERE t.id = ? LIMIT 1');
     $query->execute([$id]);
-    return $query->fetch() ?: null;
+    $ticket = $query->fetch() ?: null;
+    if (is_array($ticket)) {
+        $ticket['requesting_unit_name'] = request_center_org_display_name((string) ($ticket['requesting_unit_name'] ?? ''), (string) ($ticket['_requesting_unit_type'] ?? ''), (int) ($ticket['_requesting_unit_company_id'] ?? 0));
+        unset($ticket['_requesting_unit_type'], $ticket['_requesting_unit_company_id']);
+    }
+    return $ticket;
 }
 
 function can_view_ticket(array $ticket, array $user): bool
@@ -449,30 +454,75 @@ function request_center_ticket_number_peek(string $prefix): string
 }
 
 /**
+ * نام نمایشی یک واحد چارت برای چاپ در جزئیات تیکت — نسخهٔ مستقل همان منطق
+ * org_unit_display_name() است (مسیر index.php هم از همان فایل استفاده می‌کند).
+ * سرشاخهٔ company_manager همیشه با نام تنظیماتی شرکت نمایش داده می‌شود؛ liaison
+ * پسوند «(مستقل)» می‌گیرد؛ بقیه همان نام چارت می‌مانند.
+ */
+function request_center_org_display_name(string $name, string $type, int $companyId): string
+{
+    $label = trim($name);
+    $type = trim($type);
+    if ($type === 'liaison') {
+        return ($label === '' ? 'واحد مستقل' : $label) . ' (مستقل)';
+    }
+    if ($type !== 'company_manager') {
+        return $label !== '' ? $label : 'بخش سازمانی';
+    }
+    static $map = null;
+    if ($map === null) {
+        $map = ['byId' => [], 'partner' => ''];
+        try {
+            $rows = db()->query('SELECT id, name, company_type FROM org_companies WHERE is_active = 1 ORDER BY id')->fetchAll(PDO::FETCH_ASSOC);
+            foreach ($rows as $row) {
+                $companyName = trim((string) ($row['name'] ?? ''));
+                if ($companyName === '') {
+                    continue;
+                }
+                $map['byId'][(int) $row['id']] = $companyName;
+                if ((string) ($row['company_type'] ?? '') === 'partner' && $map['partner'] === '') {
+                    $map['partner'] = $companyName;
+                }
+            }
+        } catch (Throwable $ignored) {
+            $map = ['byId' => [], 'partner' => ''];
+        }
+    }
+    $display = $companyId > 0 ? ($map['byId'][$companyId] ?? '') : '';
+    if ($display === '') {
+        $display = $map['partner'];
+    }
+    if ($display !== '') {
+        return $display;
+    }
+    return $label !== '' ? $label : 'شرکت همکار';
+}
+
+/**
  * Read-only 6-root (۶ بخش) equivalent of org_root_units() for the independent
  * Request Center entry. The provider helper calls org_ensure_schema() and
- * therefore is intentionally not used on this path.
+ * therefore is intentionally not used on this path. هر دو درخت (شرکت اصلی و
+ * شرکت همکار) پوشش داده می‌شوند تا شرکت همکار هم در فهرست ثبت درخواست دیده شود.
  *
  * @return array<int,array<string,mixed>>
  */
 function request_center_org_deputy_units(array $user): array
 {
+    // فهرست «بخش سازمانی درخواست‌کننده» باید همهٔ سرشاخه‌های ۶ بخشیِ هر دو درخت
+    // (شرکت اصلی و شرکت همکار) را نشان دهد؛ مثل org_root_units() روی مسیر index.
     $companyAware = function_exists('org_has_company_schema') && org_has_company_schema();
-    $companyId = function_exists('org_current_company_id') ? org_current_company_id() : 0;
-    if ($companyAware && $companyId <= 0) {
-        return [];
-    }
-    $companyFilter = $companyAware ? ' AND ou.company_id = ?' : '';
+    $companyFilter = '';
+    $selectCompany = $companyAware ? ' ou.company_id,' : '';
     $types = function_exists('org_root_types') ? org_root_types() : ['deputy'];
     $placeholders = implode(',', array_fill(0, count($types), '?'));
     $query = db()->prepare(
-        'SELECT ou.id, ou.name, ou.code, ou.parent_id, ou.unit_type, ou.chart_side, m.full_name AS manager_name
+        'SELECT ou.id, ou.name, ou.code, ou.parent_id, ou.unit_type,' . $selectCompany . ' ou.chart_side, m.full_name AS manager_name
          FROM org_units ou
          LEFT JOIN users m ON m.id = ou.manager_user_id
          WHERE ou.is_active = 1 AND ou.unit_type IN (' . $placeholders . ')' . $companyFilter . '
          ORDER BY FIELD(ou.unit_type, "ceo","liaison","deputy","management","office","company_manager"), ou.chart_side, ou.name'
     );
-    $query->execute(array_merge($types, $companyAware ? [$companyId] : []));
+    $query->execute($types);
     $rows = $query->fetchAll(PDO::FETCH_ASSOC);
     if (function_exists('org_root_display_name')) {
         foreach ($rows as &$row) {

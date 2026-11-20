@@ -126,11 +126,69 @@ function org_company_display_name(array $company): string
 
 function org_company_user_label(int $companyId): string
 {
-    return match ($companyId) {
-        1 => 'شرکت اصلی',
-        2 => 'شرکت همکار',
-        default => 'بدون شرکت',
-    };
+    if ($companyId <= 0 || !org_has_company_schema()) {
+        return 'بدون شرکت';
+    }
+    $display = org_company_display_name_for_id($companyId);
+    return $display !== '' ? $display : 'بدون شرکت';
+}
+
+/** نام نمایشی شرکت شریک از جدول org_companies (با کش static). */
+function org_partner_company_display_name(): string
+{
+    static $partner = null;
+    if ($partner === null) {
+        $partner = '';
+        foreach (org_companies_all() as $company) {
+            if ((string) ($company['company_type'] ?? '') === 'partner') {
+                $partner = trim((string) $company['name']);
+                break;
+            }
+        }
+    }
+    return $partner;
+}
+
+/** نام نمایشی یک شرکت بر اساس شناسهٔ آن؛ '' اگر شرکت فعال یافت نشد. */
+function org_company_display_name_for_id(int $companyId): string
+{
+    if ($companyId <= 0) {
+        return '';
+    }
+    static $cache = null;
+    if ($cache === null) {
+        $cache = [];
+        foreach (org_companies_all() as $company) {
+            $cache[(int) $company['id']] = trim((string) $company['name']);
+        }
+    }
+    return $cache[$companyId] ?? '';
+}
+
+/**
+ * نام نمایشی هر واحد چارت برای نمایش در فهرست‌ها/گزارش‌ها:
+ *  - «مدیر شرکت همکار» (company_manager) همیشه با نام تنظیماتی شرکت همکار دیده می‌شود؛
+ *  - «واحد مستقل (نمایندگی)» پسوند «(مستقل)» می‌گیرد؛
+ *  - بقیه همان نام چارت می‌ماند.
+ */
+function org_unit_display_name(string $name, string $type, int $companyId): string
+{
+    $label = trim($name);
+    $type = trim($type);
+    if ($type === 'liaison') {
+        return ($label === '' ? 'واحد مستقل' : $label) . ' (مستقل)';
+    }
+    if ($type === 'company_manager') {
+        $companyName = $companyId > 0 ? org_company_display_name_for_id($companyId) : '';
+        if ($companyName === '') {
+            $companyName = org_partner_company_display_name();
+        }
+        if ($companyName !== '') {
+            return $companyName;
+        }
+        return $label !== '' ? $label : 'شرکت همکار';
+    }
+    return $label !== '' ? $label : 'بخش سازمانی';
 }
 
 function org_company_by_id(int $companyId): ?array
@@ -304,18 +362,10 @@ function org_root_types(): array
     return ['ceo', 'liaison', 'deputy', 'management', 'office', 'company_manager'];
 }
 
-/** نام نمایشی سرشاخهٔ ۶ بخشی. */
+/** نام نمایشی سرشاخهٔ ۶ بخشی (همان منطق org_unit_display_name برای هر دو شرکت). */
 function org_root_display_name(array $unit): string
 {
-    $name = trim((string) ($unit['name'] ?? ''));
-    $type = (string) ($unit['unit_type'] ?? '');
-    if ($type === 'liaison') {
-        return ($name === '' ? 'واحد مستقل' : $name) . ' (مستقل)';
-    }
-    if ($type === 'company_manager') {
-        return 'شرکت همکار';
-    }
-    return $name === '' ? 'بخش سازمانی' : $name;
+    return org_unit_display_name((string) ($unit['name'] ?? ''), (string) ($unit['unit_type'] ?? ''), (int) ($unit['company_id'] ?? 0));
 }
 
 /** فهرست سرشاخه‌های فعال هر دو درخت (۶ بخش) برای فهرست‌های یک‌دست «بخش سازمانی». ترتیب: مدیرعامل، مستقل‌ها، معاونت‌ها، مدیریت مستقل، دفتر، شرکت همکار. */
@@ -402,7 +452,7 @@ function org_unit_routing_department_id(int $unitId): int
     if ($unit === null || !in_array((string) ($unit['unit_type'] ?? ''), org_root_types(), true)) {
         return 0;
     }
-    $name = trim((string) $unit['name']);
+    $name = function_exists('org_root_display_name') ? org_root_display_name($unit) : trim((string) $unit['name']);
     if ($name === '') {
         return 0;
     }

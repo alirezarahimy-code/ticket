@@ -13,7 +13,8 @@ class FoodGuestRequestManagerActionTests(unittest.TestCase):
     def test_owner_and_support_manager_permissions_are_enforced_server_side(self):
         self.assertIn("function food_guest_request_is_reviewer(array $user)", self.order)
         self.assertIn("food_order_user_is_cancel_reviewer($user)", self.order)
-        self.assertIn("user_service_group($user) === 'support'", self.order)
+        # بازبین مهمان = ادمین اصلی و مدیر پشتیبانی (نه گروه خدمتی)؛ مبنای فعلی کد.
+        self.assertIn("$role === 'primary_admin' || $role === 'support_manager'", self.order)
         self.assertIn("(int) ($row['created_by'] ?? 0) === $uid", self.order)
         self.assertIn("food_guest_request_can_manage($user, $row)", self.order)
 
@@ -23,7 +24,8 @@ class FoodGuestRequestManagerActionTests(unittest.TestCase):
         self.assertIn("food_order_audit('food_guest_request_update'", self.order)
         self.assertIn("food_order_audit('food_guest_request_delete'", self.order)
         self.assertIn("food_order_audit('food_guest_request_cancel'", self.order)
-        self.assertIn("UPDATE food_guest_requests SET request_date = ?, meal_type = ?, organization = ?, guest_count = ?, requester_name = ?, note = ?", self.order)
+        self.assertNotIn("guest_count = ?, requester_name = ?, note = ?", self.order)
+        self.assertIn("UPDATE food_guest_requests SET request_date = ?, meal_type = ?, organization = ?, guest_count = ?, note = ?", self.order)
         self.assertIn("DELETE FROM food_guest_requests WHERE id = ?", self.order)
 
     def test_ui_renders_authorized_edit_cancel_delete_actions(self):

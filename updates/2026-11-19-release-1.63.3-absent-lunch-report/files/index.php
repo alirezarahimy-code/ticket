@@ -1,0 +1,2559 @@
+<?php
+declare(strict_types=1);
+
+require __DIR__ . '/bootstrap.php';
+
+// Keep legacy attachment URLs, but execute the read through the RC-owned
+// endpoint before loading unrelated legacy modules or schema setup.
+if (strtoupper((string) ($_SERVER['REQUEST_METHOD'] ?? 'GET')) === 'GET'
+    && (string) ($_GET['action'] ?? '') === 'download_attachment') {
+    $query = $_GET;
+    header('Location: request-center.php?action=download_attachment&id=' . max(0, (int) ($query['id'] ?? 0)), true, 302);
+    exit;
+}
+
+if (strtoupper((string) ($_SERVER['REQUEST_METHOD'] ?? 'GET')) === 'GET'
+    && (string) ($_GET['action'] ?? '') === 'export_report') {
+    $query = $_GET;
+    unset($query['action']);
+    header('Location: request-center.php?action=export_report&' . http_build_query($query), true, 302);
+    exit;
+}
+
+// Early compatibility bridge: serve Request Center lifecycle GETs from its
+// independent entry before loading legacy modules or running their schema setup.
+$legacyRequestCenterPage = is_string($_GET['page'] ?? null) ? (string) $_GET['page'] : '';
+if (strtoupper((string) ($_SERVER['REQUEST_METHOD'] ?? 'GET')) === 'GET'
+    && empty($_GET['action'])
+    && in_array($legacyRequestCenterPage, ['new-ticket', 'ticket', 'queue', 'supervisor', 'services', 'reports', 'analytics', 'knowledge', 'governance', 'ola'], true)) {
+    $requestCenterQuery = $_GET;
+    header('Location: request-center.php?' . http_build_query($requestCenterQuery), true, 302);
+    exit;
+}
+require_once __DIR__ . '/modules/request-center/WorkflowService.php';
+require_once __DIR__ . '/user-access-groups.php';
+require_once __DIR__ . '/xlsx-writer.php';
+if (is_file(__DIR__ . '/admin-layout-design.php')) {
+    require_once __DIR__ . '/admin-layout-design.php';
+}
+require_once __DIR__ . '/inventory.php';
+require_once __DIR__ . '/asset-profile.php';
+require_once __DIR__ . '/domain-scan.php';
+require_once __DIR__ . '/asset-names.php';
+require __DIR__ . '/asset-inventory-page.php';
+require __DIR__ . '/organization.php';
+require __DIR__ . '/global-search.php';
+require __DIR__ . '/backup.php';
+require __DIR__ . '/chatbot.php';
+require __DIR__ . '/system-update.php';
+require __DIR__ . '/cd-dvd.php';
+require __DIR__ . '/food-ticket.php';
+require __DIR__ . '/traffic-control.php';
+require __DIR__ . '/local-accounts.php';
+require __DIR__ . '/system-health.php';
+require_once __DIR__ . '/logging-dashboard.php';
+require_once __DIR__ . '/holiday-board.php';
+
+ticket_number_ensure_schema(); // پیش از هر تراکنش: DDL اینجا بی‌خطر است و داخل تراکنش دیگر اجرا نمی‌شود
+ticket_number_autofill();
+role_permissions_seed();
+// تبدیل رکوردهای قدیمی غذا فقط هنگام بارگذاری فهرست کارکنان پنل غذا انجام می‌شود،
+// نه در هر درخواست و نه قبل از نمایش فرم ورود.
+
+if (isset($_GET['installed'])) {
+    flash('success', 'سامانه با موفقیت نصب شد.');
+}
+
+function csv_cell(mixed $value): string
+{
+    $value = (string) $value;
+    return preg_match('/^[=+\-@]/', ltrim($value)) ? "'" . $value : $value;
+}
+
+function excel_cell(mixed $value): string
+{
+    return htmlspecialchars(csv_cell($value), ENT_XML1 | ENT_QUOTES, 'UTF-8');
+}
+
+function excel_download(string $filename, string $title, array $headers, array $rows, array $dateRange = []): never
+{
+    $from = trim((string) ($dateRange['from'] ?? $dateRange['start'] ?? ''));
+    $to = trim((string) ($dateRange['to'] ?? $dateRange['end'] ?? ''));
+    $singleDate = trim((string) ($dateRange['date'] ?? ''));
+    if ($singleDate !== '') {
+        $from = $singleDate;
+        $to = $singleDate;
+    }
+    if ($from === '' && $to === '') {
+        $from = $to = 'بدون فیلتر تاریخی';
+    } elseif ($from === '') {
+        $from = 'بدون محدودیت شروع';
+    } elseif ($to === '') {
+        $to = 'بدون محدودیت پایان';
+    }
+    $jalaliLabel = static function (string $value): string {
+        $value = trim($value);
+        $digits = strtr($value, [
+            '۰' => '0', '۱' => '1', '۲' => '2', '۳' => '3', '۴' => '4', '۵' => '5', '۶' => '6', '۷' => '7', '۸' => '8', '۹' => '9',
+            '٠' => '0', '١' => '1', '٢' => '2', '٣' => '3', '٤' => '4', '٥' => '5', '٦' => '6', '٧' => '7', '٨' => '8', '٩' => '9',
+        ]);
+        if (preg_match('/^(\d{4})[-\/.](\d{1,2})[-\/.](\d{1,2})$/', $digits, $parts) === 1) {
+            $year = (int) $parts[1];
+            $month = (int) $parts[2];
+            $day = (int) $parts[3];
+            if ($year >= 1300 && $year <= 1600) {
+                return sprintf('%04d/%02d/%02d', $year, $month, $day);
+            }
+            if ($year >= 1900 && $year <= 2200 && function_exists('gregorian_to_jalali')) {
+                try {
+                    [$jy, $jm, $jd] = gregorian_to_jalali($year, $month, $day);
+                    return sprintf('%04d/%02d/%02d', $jy, $jm, $jd);
+                } catch (Throwable) {
+                    // Preserve the original label if the supplied date is invalid.
+                }
+            }
+        }
+        return $value;
+    };
+    $from = $jalaliLabel($from);
+    $to = $jalaliLabel($to);
+    $from = $jalaliLabel($from);
+    $to = $jalaliLabel($to);
+    $columnCount = max(2, count($headers));
+    $sheetRows = [];
+    $sheetRows[] = [['v' => $title, 's' => 'title']];
+    $sheetRows[] = [['v' => 'تاریخ شروع', 's' => 'header'], ['v' => $from, 's' => 'body']];
+    $sheetRows[] = [['v' => 'تاریخ پایان', 's' => 'header'], ['v' => $to, 's' => 'body']];
+    $sheetRows[] = array_map(static fn ($header): array => ['v' => (string) $header, 's' => 'header'], array_values($headers));
+    foreach ($rows as $row) {
+        // همهٔ مقادیر رشته‌ای می‌شوند تا صفرهای ابتدای کدها (مثل کد ملی) حفظ شود
+        $sheetRows[] = array_map(static fn ($value): array => ['v' => is_scalar($value) ? (string) $value : '', 's' => 'body'], array_values((array) $row));
+    }
+    // عرض ستون‌ها خودکار از بلندترین متن هر ستون محاسبه می‌شود (چون همهٔ سلول‌ها
+    // تک‌خطی‌اند، عرض ثابت باعث بریده‌شدن متن‌های بلند مثل مدل CPU یا نام نرم‌افزار می‌شد).
+    $bytes = xlsx_build([[
+        'name' => 'گزارش',
+        'rows' => $sheetRows,
+        'merges' => ['A1:' . xlsx_col_name($columnCount - 1) . '1'],
+    ]]);
+    xlsx_send($filename, $bytes);
+}
+
+/** مرتب‌سازی سمت سرور لاگ‌ها: فقط کلیدهای مجاز از فهرست سفید می‌شوند. */
+function log_sort_order(array $map, string $key, string $dir, string $default): string
+{
+    if ($key === '' || !isset($map[$key])) {
+        return $default;
+    }
+    $direction = strtolower($dir) === 'desc' ? 'DESC' : 'ASC';
+    return ' ORDER BY ' . $map[$key] . ' ' . $direction . ', ' . ($map['__tie'] ?? 'l.id') . ' ' . $direction;
+}
+
+/** سرستون‌های قابل مرتب‌سازی؛ کلیک: صعودی ← نزولی ← بدون مرتب‌سازی. */
+function log_sort_header_row(array $columns, string $sortParam, string $dirParam, array $args, string $activeKey, string $activeDir, string $class = 'table-head'): string
+{
+    $html = '<div class="' . $class . '">';
+    foreach ($columns as [$key, $label]) {
+        if ($key === '') { $html .= '<span>' . e($label) . '</span>'; continue; }
+        $isActive = $key === $activeKey && $activeKey !== '';
+        $nextArgs = $args; unset($nextArgs[$sortParam], $nextArgs[$dirParam]);
+        if ($isActive) {
+            $arrow = strtolower($activeDir) === 'desc' ? ' ▼' : ' ▲';
+            if (strtolower($activeDir) !== 'desc') { $nextArgs[$sortParam] = $key; $nextArgs[$dirParam] = 'desc'; }
+        } else {
+            $arrow = '';
+            $nextArgs[$sortParam] = $key; $nextArgs[$dirParam] = 'asc';
+        }
+        $nextArgs['p'] = 1;
+        $html .= '<span><a class="log-sort" style="color:inherit;text-decoration:none" href="index.php?' . e(http_build_query($nextArgs)) . '" title="مرتب‌سازی بر اساس ' . e($label) . '">' . e($label) . e($arrow) . '</a></span>';
+    }
+    return $html . '</div>';
+}
+
+/** حداکثر بازهٔ گزارش لاگ را به ۳۶۵ روز محدود می‌کند تا جست‌وجوهای بدون کران دیتابیس را تحت فشار نگذارند. */
+function log_bounded_date_range(string $fromText, string $toText, int $maxDays = 365): array
+{
+    $from = $fromText !== '' ? jalali_input_to_gregorian($fromText) : null;
+    $to = $toText !== '' ? jalali_input_to_gregorian($toText, true) : null;
+    $maxDays = max(1, min(365, $maxDays));
+    if ($from === null && $to === null) {
+        $from = date('Y-m-d 00:00:00', time() - (90 * 86400));
+        $to = date('Y-m-d 23:59:59');
+    } elseif ($from !== null && $to === null) {
+        $to = date('Y-m-d 23:59:59');
+        if (strtotime($from) < time() - ($maxDays * 86400)) $from = date('Y-m-d 00:00:00', time() - ($maxDays * 86400));
+    } elseif ($from === null && $to !== null) {
+        $from = date('Y-m-d 00:00:00', strtotime($to) - ($maxDays * 86400));
+    } elseif ($from !== null && $to !== null) {
+        if (strtotime($from) > strtotime($to)) { $swap = $from; $from = $to; $to = $swap; }
+        if ((strtotime($to) - strtotime($from)) > ($maxDays * 86400)) $from = date('Y-m-d 00:00:00', strtotime($to) - ($maxDays * 86400));
+    }
+    return [$from, $to, null];
+}
+
+function activity_log_filters(): array
+{
+    $conditions = [];
+    $params = [];
+    $userId = (int) ($_GET['user_id'] ?? 0);
+    if ($userId > 0) {
+        $conditions[] = 'l.user_id = ?';
+        $params[] = $userId;
+    }
+    $actionCode = trim((string) ($_GET['action_code'] ?? ''));
+    if ($actionCode !== '') {
+        $conditions[] = 'l.action_code = ?';
+        $params[] = $actionCode;
+    }
+    $eventCode = trim((string) ($_GET['event_code'] ?? ''));
+    if ($eventCode !== '' && preg_match('/^[A-Z0-9][A-Z0-9._-]{2,39}$/i', $eventCode)) {
+        $conditions[] = 'l.code = ?';
+        $params[] = strtoupper($eventCode);
+    }
+    $eventCategory = valid_choice((string) ($_GET['event_category'] ?? ''), ['', 'security', 'audit', 'business', 'operation', 'system', 'integration', 'performance'], '');
+    if ($eventCategory !== '') {
+        $conditions[] = 'l.category = ?';
+        $params[] = $eventCategory;
+    }
+    $result = valid_choice((string) ($_GET['result'] ?? ''), ['', 'success', 'failure', 'denied', 'unknown'], '');
+    if ($result !== '') {
+        $conditions[] = 'l.result = ?';
+        $params[] = $result;
+    }
+    $requestId = trim((string) ($_GET['request_id'] ?? ''));
+    if ($requestId !== '' && preg_match('/^[a-f0-9]{8}-[a-f0-9]{4}-4[a-f0-9]{3}-[89ab][a-f0-9]{3}-[a-f0-9]{12}$/i', $requestId)) {
+        $conditions[] = 'l.request_id = ?';
+        $params[] = $requestId;
+    }
+    $module = trim((string) ($_GET['module'] ?? ''));
+    if ($module !== '') {
+        $conditions[] = 'l.module = ?';
+        $params[] = $module;
+    }
+    $ip = trim((string) ($_GET['ip'] ?? ''));
+    if ($ip !== '') {
+        $conditions[] = 'l.ip_address LIKE ?';
+        $params[] = '%' . $ip . '%';
+    }
+    [$boundedFrom, $boundedTo] = log_bounded_date_range(trim((string) ($_GET['from'] ?? '')), trim((string) ($_GET['to'] ?? '')));
+    if ($boundedFrom !== null) { $conditions[] = 'l.created_at >= ?'; $params[] = $boundedFrom; }
+    if ($boundedTo !== null) { $conditions[] = 'l.created_at <= ?'; $params[] = $boundedTo; }
+    $search = trim((string) ($_GET['q'] ?? ''));
+    if ($search !== '') {
+        $conditions[] = '(l.full_name LIKE ? OR l.username LIKE ? OR l.action_label LIKE ? OR l.action_code LIKE ? OR l.computer_name LIKE ? OR l.ip_address LIKE ? OR l.meta_json LIKE ?)';
+        $params = array_merge($params, array_fill(0, 7, '%' . $search . '%'));
+    }
+    $category = valid_choice((string) ($_GET['category'] ?? 'all'), ['all', 'auth', 'admin', 'errors'], 'all');
+    if ($category === 'auth') {
+        $conditions[] = '(l.module = ? OR l.action_code LIKE ? OR l.action_code = ?)';
+        array_push($params, 'auth', 'login_%', 'logout');
+    } elseif ($category === 'admin') {
+        // Historical NULL-module rows must not act as a wildcard that pulls unrelated business events into the admin view.
+        $conditions[] = "(l.category = 'audit' OR l.module IN (?, ?, ?) OR l.action_code LIKE ? OR l.action_code LIKE ?)";
+        array_push($params, 'settings', 'permissions', 'audit', 'settings_%', 'role_%');
+    } elseif ($category === 'errors') {
+        $conditions[] = '(l.action_code LIKE ? OR l.action_code LIKE ? OR l.action_code LIKE ? OR l.module = ?)';
+        array_push($params, '%failed%', '%error%', '%locked%', 'error');
+    }
+    return [$conditions ? ' WHERE ' . implode(' AND ', $conditions) : '', $params];
+}
+
+/** تبدیل جزئیات فنی لاگ به جفت‌های عنوان/مقدار قابل‌خواندن، با حذف رازها. */
+function activity_log_meta_lines(?string $json): array
+{
+    if (!$json) return [];
+    $data = json_decode($json, true);
+    if (!is_array($data)) return [['جزئیات', $json]];
+    $labels = ['before'=>'قبل','after'=>'بعد','old'=>'مقدار قبلی','new'=>'مقدار جدید','old_status'=>'وضعیت قبلی','new_status'=>'وضعیت جدید','status'=>'وضعیت','role'=>'نقش','theme'=>'تم','reason'=>'علت','rows'=>'تعداد ردیف','deleted'=>'حذف‌شده','days'=>'بازه (روز)','ip'=>'آی‌پی','module'=>'بخش','page'=>'صفحه','target'=>'مورد','field'=>'فیلد','value'=>'مقدار','from'=>'از','to'=>'به','ok'=>'نتیجه','file'=>'فایل','line'=>'خط','uri'=>'نشانی درخواست','request_uri'=>'نشانی درخواست','attempts'=>'تعداد تلاش','serial'=>'شماره سریال','media'=>'نوع رسانه','record_id'=>'شناسه رکورد','change_id'=>'شناسه تغییر','change_number'=>'شماره تغییر','problem_id'=>'شناسه مشکل','problem_number'=>'شماره مشکل','holiday_id'=>'شناسه تعطیلی','holiday_date'=>'تاریخ تعطیلی','title'=>'عنوان','count'=>'تعداد','skipped_weekends'=>'تعطیلات آخر هفته نادیده‌گرفته‌شده','is_active'=>'وضعیت فعال','priority'=>'اولویت','assigned_to'=>'شناسه ارجاع‌شونده','service_id'=>'خدمت','ticket_type'=>'نوع درخواست','sla_minutes'=>'زمان SLA (دقیقه)','department_id'=>'شناسه معاونت','decision'=>'تصمیم CAB','risk_level'=>'سطح ریسک','implementation_note'=>'یادداشت اجرا','from_status'=>'وضعیت قبلی','to_status'=>'وضعیت جدید','created'=>'ایجادشده','updated'=>'به‌روزرسانی‌شده','disabled'=>'غیرفعال‌شده','failed'=>'ناموفق'];
+    $lines=[]; $walk=function(array $items,string $prefix='') use (&$walk,&$lines,$labels): void {
+        foreach($items as $key=>$value) {
+            $key=(string)$key; if ((function_exists('logging_sensitive_key') && logging_sensitive_key($key)) || preg_match('/pass(word)?|token|secret|credential|private.?key/i',$key)) {$lines[]=[($labels[$key]??$key),'••••••'];continue;}
+            $label=$labels[$key]??str_replace('_',' ',$key); $label=$prefix!==''?$prefix.' · '.$label:$label;
+            if(is_array($value)){ if($value===[]) {$lines[]=[$label,'—'];} else {$walk($value,$label);} }
+            elseif(is_bool($value)) {$lines[]=[$label,$value?'بله':'خیر'];}
+            elseif($value===null || $value==='') {$lines[]=[$label,'—'];}
+            else {$lines[]=[$label,logging_utf8_substr((string)$value,0,500)];}
+            if(count($lines)>=20) return;
+        }
+    };
+    $walk($data);
+    return $lines;
+}
+
+function imported_calendar_date(string $value): ?string
+{
+    $value = trim(str_replace(['-', '.'], '/', strtr($value, ['۰' => '0', '۱' => '1', '۲' => '2', '۳' => '3', '۴' => '4', '۵' => '5', '۶' => '6', '۷' => '7', '۸' => '8', '۹' => '9'])));
+    if (preg_match('/^(13|14)\d{2}\/\d{1,2}\/\d{1,2}$/', $value)) {
+        return jalali_input_to_gregorian($value);
+    }
+    if (preg_match('/^(\d{4})\/(\d{1,2})\/(\d{1,2})$/', $value, $matches)) {
+        $date = DateTimeImmutable::createFromFormat('!Y/n/j', $matches[1] . '/' . $matches[2] . '/' . $matches[3]);
+        return $date && $date->format('Y/n/j') === $matches[1] . '/' . (int) $matches[2] . '/' . (int) $matches[3] ? $date->format('Y-m-d 00:00:00') : null;
+    }
+    if (preg_match('/^(\d{4})(\d{2})(\d{2})/', $value, $matches)) {
+        return imported_calendar_date($matches[1] . '/' . $matches[2] . '/' . $matches[3]);
+    }
+    return null;
+}
+
+function calendar_unescape(string $value): string
+{
+    return str_replace(['\\n', '\\N', '\\,', '\\;'], ["\n", "\n", ',', ';'], trim($value));
+}
+
+function parse_calendar_import(array $file): array
+{
+    if (($file['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_OK || (int) ($file['size'] ?? 0) > 2 * 1024 * 1024) {
+        throw new RuntimeException('فایل تقویم باید سالم و حداکثر ۲ مگابایت باشد.');
+    }
+    $extension = strtolower(pathinfo((string) ($file['name'] ?? ''), PATHINFO_EXTENSION));
+    if (!in_array($extension, ['csv', 'ics', 'txt'], true)) {
+        throw new RuntimeException('فرمت تقویم باید CSV یا iCalendar با پسوند ICS باشد.');
+    }
+    $content = file_get_contents((string) $file['tmp_name']);
+    if (!is_string($content) || trim($content) === '') {
+        throw new RuntimeException('فایل تقویم خالی است.');
+    }
+    $events = [];
+    if ($extension === 'ics') {
+        $lines = preg_split('/\r\n|\n|\r/', preg_replace('/\r\n[ \t]/', '', $content) ?? $content) ?: [];
+        $event = [];
+        foreach ($lines as $line) {
+            if (trim($line) === 'BEGIN:VEVENT') {
+                $event = [];
+            } elseif (trim($line) === 'END:VEVENT') {
+                $date = imported_calendar_date((string) ($event['DTSTART'] ?? ''));
+                $title = calendar_unescape((string) ($event['SUMMARY'] ?? 'تعطیلی رسمی'));
+                if ($date && $title !== '') {
+                    $events[] = ['date' => $date, 'title' => $title];
+                }
+                $event = [];
+            } elseif (str_contains($line, ':')) {
+                [$key, $value] = explode(':', $line, 2);
+                $key = strtoupper(trim(explode(';', $key, 2)[0]));
+                if (in_array($key, ['DTSTART', 'SUMMARY'], true)) {
+                    $event[$key] = trim($value);
+                }
+            }
+        }
+    } else {
+        $content = preg_replace('/^\xEF\xBB\xBF/', '', $content) ?? $content;
+        $lines = preg_split('/\r\n|\n|\r/', trim($content)) ?: [];
+        $delimiter = str_contains((string) ($lines[0] ?? ''), ';') ? ';' : (str_contains((string) ($lines[0] ?? ''), "\t") ? "\t" : ',');
+        $firstLine = (string) array_shift($lines);
+        $header = array_map(static fn (string $value): string => strtolower(trim($value)), str_getcsv($firstLine, $delimiter));
+        $dateIndex = null;
+        $titleIndex = null;
+        foreach ($header as $index => $name) {
+            if ($dateIndex === null && in_array($name, ['date', 'holiday_date', 'dtstart', 'تاریخ', 'تاریخ تعطیلی'], true)) {
+                $dateIndex = $index;
+            }
+            if ($titleIndex === null && in_array($name, ['title', 'summary', 'name', 'description', 'عنوان', 'مناسبت'], true)) {
+                $titleIndex = $index;
+            }
+        }
+        if ($dateIndex === null && $titleIndex === null) {
+            array_unshift($lines, $firstLine);
+        }
+        foreach ($lines as $line) {
+            if (trim($line) === '') {
+                continue;
+            }
+            $columns = str_getcsv($line, $delimiter);
+            $rawDate = $dateIndex === null ? (string) ($columns[0] ?? '') : (string) ($columns[$dateIndex] ?? '');
+            $rawTitle = $titleIndex === null ? (string) ($columns[1] ?? 'تعطیلی رسمی') : (string) ($columns[$titleIndex] ?? 'تعطیلی رسمی');
+            $date = imported_calendar_date($rawDate);
+            if ($date) {
+                $events[] = ['date' => $date, 'title' => calendar_unescape($rawTitle) ?: 'تعطیلی رسمی'];
+            }
+        }
+    }
+    if (!$events) {
+        throw new RuntimeException('هیچ رویداد قابل استفاده‌ای در فایل پیدا نشد.');
+    }
+    return $events;
+}
+
+require_once __DIR__ . '/modules/request-center/lib/functions.php'; // برش استقلال فاز ۲: توابع دامنهٔ درخواست به ماژول منتقل شدند
+
+function store_profile_photo(array $file): string
+{
+    if (($file['error'] ?? UPLOAD_ERR_NO_FILE) === UPLOAD_ERR_NO_FILE) {
+        return '';
+    }
+    if (($file['error'] ?? 1) !== UPLOAD_ERR_OK || !is_uploaded_file((string) ($file['tmp_name'] ?? '')) || (int) ($file['size'] ?? 0) > 2 * 1024 * 1024) {
+        throw new RuntimeException('عکس پروفایل باید سالم و حداکثر ۲ مگابایت باشد.');
+    }
+    $image = @getimagesize((string) ($file['tmp_name'] ?? ''));
+    $types = [IMAGETYPE_PNG => 'png', IMAGETYPE_JPEG => 'jpg'];
+    $extension = $types[(int) ($image[2] ?? 0)] ?? null;
+    if ($extension === null || (int) ($image[0] ?? 0) > 5000 || (int) ($image[1] ?? 0) > 5000) {
+        throw new RuntimeException('عکس پروفایل باید PNG یا JPG باشد.');
+    }
+    $directory = APP_ROOT . '/storage/profile';
+    if (!is_dir($directory) && !mkdir($directory, 0750, true) && !is_dir($directory)) {
+        throw new RuntimeException('پوشه ذخیره عکس پروفایل قابل ایجاد نیست.');
+    }
+    $stored = 'profile-' . bin2hex(random_bytes(18)) . '.' . $extension;
+    if (!move_uploaded_file((string) $file['tmp_name'], $directory . '/' . $stored)) {
+        throw new RuntimeException('ذخیره عکس پروفایل انجام نشد.');
+    }
+    return $stored;
+}
+
+function valid_iranian_national_code(string $value): bool
+{
+    if (!preg_match('/^\d{10}$/', $value) || preg_match('/^(\d)\1{9}$/', $value)) {
+        return false;
+    }
+    $check = (int) $value[9];
+    $sum = 0;
+    for ($index = 0; $index < 9; $index++) {
+        $sum += (int) $value[$index] * (10 - $index);
+    }
+    $remainder = $sum % 11;
+    return $check === ($remainder < 2 ? $remainder : 11 - $remainder);
+}
+
+require_once __DIR__ . '/lib/render.php'; // برش استقلال فاز ۲: لایهٔ chrome مشترک (هدر/فوتر/پیشنهاد غذا)
+
+
+if (($_GET['action'] ?? '') === 'logout') {
+    redirect('index.php');
+}
+
+
+// ═══ ناحیهٔ ۱: خروج از حساب (قبل از هر چیز) ═══
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'logout') {
+    require_csrf();
+    if (function_exists('activity_log')) {
+        activity_log(['action_code' => 'logout', 'module' => 'auth']);
+    }
+    $_SESSION = [];
+    if (ini_get('session.use_cookies')) {
+        $params = session_get_cookie_params();
+        setcookie(session_name(), '', time() - 42000, $params['path'], $params['domain'], (bool) $params['secure'], (bool) $params['httponly']);
+    }
+    // توکن CSRF و کوکی آن را هم پاک کن تا پس از خروج، توکن قدیمی معتبر نماند.
+    setcookie('itsm_csrf', '', time() - 42000, '/');
+    unset($_COOKIE['itsm_csrf']);
+    session_destroy();
+    redirect('index.php?page=login');
+}
+
+$user = current_user();
+
+// ═══ ناحیهٔ ۲: تعیین صفحهٔ جاری و پیش‌شرط‌های آن ═══
+$page = (string) ($_GET['page'] ?? ($user ? 'dashboard' : 'login'));
+// ۱.۵۰: کاربر محلی/بازرسی به سفارش غذا هدایت می‌شود؛ رمز پیش‌فرض باید در اولین ورود عوض شود.
+if ($user && !isset($_GET['page'])) {
+    if ((int) ($user['must_change_password'] ?? 0) === 1) {
+        $page = 'change-password';
+    } elseif (lac_is_local_role($user)) {
+        $page = 'food-order';
+    }
+}
+if ($user && (int) ($user['must_change_password'] ?? 0) === 1 && !in_array($page, ['change-password'], true)) {
+    redirect('index.php?page=change-password');
+}
+if (isset($_GET['layout_design_api'])) {
+    if (function_exists('admin_layout_design_api_handle')) {
+        admin_layout_design_api_handle($user);
+    }
+    http_response_code(404);
+    header('Content-Type: text/plain; charset=utf-8');
+    exit('ابزار طراحی چیدمان در این نصب فعال نیست.');
+}
+if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST' && in_array($page, ['organization', 'settings'], true)) {
+    register_shutdown_function(static function (): void {
+        try {
+            org_sync_position_roles();
+        } catch (Throwable $exception) {
+            error_log('org_role_sync_failed: ' . $exception->getMessage());
+        }
+    });
+}
+
+if ($user && function_exists('activity_log_view')) {
+    activity_log_view($page);
+}
+
+if ($page === 'food-ticket' && isset($_GET['food_api'])) {
+    // Rate limit جدا برای خواندن و نوشتن: پنل بازخوانی خودکار دارد (پایش، سلامت، سفارش‌ها) و نباید
+    // ذخیرهٔ تنظیمات یا «آزمون کامل» را مسدود کند. خواندن‌ها: ۳۰۰ در دقیقه، نوشتن/آزمون‌ها: ۶۰ در دقیقه.
+    if ($user) {
+        $foodIsWrite = ($_SERVER['REQUEST_METHOD'] ?? 'GET') !== 'GET';
+        check_api_rate_limit(
+            'food_ticket_api_' . ($foodIsWrite ? 'w_' : 'r_') . $user['id'],
+            $foodIsWrite ? 60 : 300,
+            60
+        );
+    }
+    food_ticket_api_handle((string) $_GET['food_api'], $user ?? []);
+}
+
+if ($page === 'food-order' && isset($_GET['food_api'])) {
+    if ($user) {
+        $foodOrderIsWrite = ($_SERVER['REQUEST_METHOD'] ?? 'GET') !== 'GET';
+        check_api_rate_limit(
+            'food_order_api_' . ($foodOrderIsWrite ? 'w_' : 'r_') . (int) $user['id'],
+            $foodOrderIsWrite ? 180 : 300,
+            60
+        );
+    }
+    food_order_api_handle((string) $_GET['food_api'], $user ?? []);
+}
+
+if ($page === 'traffic-control' && isset($_GET['traffic_api'])) {
+    // خواندن‌ها: ۳۰۰ در دقیقه، نوشتن‌ها: ۶۰ در دقیقه (برای هر کاربر)
+    if ($user) {
+        $trafficIsWrite = ($_SERVER['REQUEST_METHOD'] ?? 'GET') !== 'GET';
+        check_api_rate_limit(
+            'traffic_api_' . ($trafficIsWrite ? 'w_' : 'r_') . $user['id'],
+            $trafficIsWrite ? 60 : 300,
+            60
+        );
+    }
+    traffic_api_handle((string) $_GET['traffic_api'], $user ?? []);
+}
+
+if (($_GET['action'] ?? '') === 'profile_photo') {
+    $photoUser = require_login();
+    $stored = basename((string) ($photoUser['profile_photo'] ?? ''));
+    if ($stored === '' || !preg_match('/^profile-[a-f0-9]{36}\.(png|jpg)$/', $stored)) {
+        http_response_code(404);
+        exit('عکس پروفایل پیدا نشد.');
+    }
+    $candidates = [
+        APP_ROOT . '/storage/profile/' . $stored,
+    ];
+    $photoPath = null;
+    foreach ($candidates as $candidate) {
+        if (is_file($candidate)) {
+            $photoPath = $candidate;
+            break;
+        }
+    }
+    if ($photoPath === null) {
+        http_response_code(404);
+        exit('عکس پروفایل روی سرور موجود نیست.');
+    }
+    $mime = (string) (mime_content_type($photoPath) ?: 'application/octet-stream');
+    if (!in_array($mime, ['image/png', 'image/jpeg'], true)) {
+        http_response_code(404);
+        exit('نوع عکس پروفایل مجاز نیست.');
+    }
+    header('Content-Type: ' . $mime);
+    header('Cache-Control: private, max-age=3600');
+    header('X-Content-Type-Options: nosniff');
+    readfile($photoPath);
+    exit;
+}
+
+if (($_GET['action'] ?? '') === 'notification_feed') {
+    if (!$user) {
+        http_response_code(401);
+        header('Content-Type: application/json; charset=utf-8');
+        echo json_encode(['ok' => false, 'items' => []], JSON_UNESCAPED_UNICODE);
+        exit;
+    }
+    // Rate limit: 60 requests per minute per user
+    check_api_rate_limit('notification_feed_' . $user['id'], 60, 60);
+    // این اپیندپوینت هر ۳۰ ثانیه صدا زده می‌شود؛ قفل session را فوراً آزاد می‌کنیم
+    // تا بقیهٔ درخواست‌های کاربر پشت آن بلاک نشوند.
+    if (function_exists('session_write_close') && session_status() === PHP_SESSION_ACTIVE) {
+        @session_write_close();
+    }
+    $afterId = max(0, (int) ($_GET['after'] ?? 0));
+    [$notificationTicketFilter, $notificationTicketParams] = notification_ticket_visibility($user, 'n');
+    $feedQuery = db()->prepare('SELECT n.id, n.ticket_id, n.notification_type, n.title, n.body, n.created_at FROM notifications n WHERE n.user_id = ? AND n.id > ?' . notification_visibility_sql((int) $user['id'], $user, 'n') . $notificationTicketFilter . ' ORDER BY n.id ASC LIMIT 20');
+    $feedQuery->execute(array_merge([(int) $user['id'], $afterId], $notificationTicketParams));
+    $items = array_map(static function (array $item): array {
+        return [
+            'id' => (int) $item['id'],
+            'ticket_id' => $item['ticket_id'] !== null ? (int) $item['ticket_id'] : null,
+            'notification_type' => (string) ($item['notification_type'] ?? ''),
+            'title' => (string) $item['title'],
+            'body' => (string) $item['body'],
+            'href' => notification_target_url($item),
+        ];
+    }, $feedQuery->fetchAll());
+    header('Content-Type: application/json; charset=utf-8');
+    echo json_encode(['ok' => true, 'items' => $items], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+    exit;
+}
+
+if (($_GET['action'] ?? '') === 'download_backup') {
+    require_primary_admin();
+    $filePath = backup_download_path((string) ($_GET['file'] ?? ''));
+    if (!$filePath) {
+        http_response_code(404);
+        exit('فایل پشتیبان پیدا نشد.');
+    }
+    $extension = strtolower(pathinfo($filePath, PATHINFO_EXTENSION));
+    header('Content-Type: ' . ($extension === 'sql' ? 'application/sql' : 'application/octet-stream'));
+    header('Content-Length: ' . (string) filesize($filePath));
+    header("Content-Disposition: attachment; filename*=UTF-8''" . rawurlencode(basename($filePath)));
+    readfile($filePath);
+    exit;
+}
+
+if (($_GET['action'] ?? '') === 'export_activity_logs') {
+    require_permission('logs.activity_export');
+    activity_logs_ensure();
+    [$where, $params] = activity_log_filters();
+    $exportOrder = log_sort_order(['time' => 'l.created_at', 'user' => 'l.full_name', 'event' => 'COALESCE(l.action_label, l.action_code)', 'module' => 'l.module', 'ip' => 'l.ip_address', 'meta' => 'l.meta_json'], (string) ($_GET['sort_a'] ?? ''), (string) ($_GET['dir_a'] ?? ''), ' ORDER BY l.created_at DESC, l.id DESC');
+    $query = db()->prepare('SELECT * FROM activity_logs l' . $where . $exportOrder . ' LIMIT 20000');
+    $query->execute($params);
+    $rows = [];
+    foreach ($query->fetchAll() as $row) {
+        $rows[] = [
+            persian_date($row['created_at']),
+            $row['full_name'] !== '' ? $row['full_name'] : ($row['username'] ?: '-'),
+            $row['username'] ?: '-',
+            permission_roles()[(string) ($row['role'] ?? '')] ?? (string) ($row['role'] ?? '-'),
+            $row['action_label'] ?: $row['action_code'],
+            $row['action_code'],
+            $row['module'] ?: '-',
+            $row['target_type'] ? $row['target_type'] . ($row['target_id'] ? ' #' . $row['target_id'] : '') : '-',
+            $row['ip_address'] ?: '-',
+            $row['computer_name'] ?: '-',
+            $row['meta_json'] ?: '',
+        ];
+    }
+    activity_log(['action_code' => 'activity_logs_exported', 'action_label' => 'خروجی Excel فعالیت کاربران', 'module' => 'activity-log', 'meta' => ['rows' => count($rows)]]);
+    $excelFrom = jalali_input_to_gregorian((string) ($_GET['from'] ?? ''));
+    $excelTo = jalali_input_to_gregorian((string) ($_GET['to'] ?? ''), true);
+    excel_download('activity-log-' . date('Y-m-d') . '.xlsx', 'گزارش فعالیت کاربران', ['زمان', 'کاربر', 'نام کاربری', 'نقش', 'عملیات', 'کد عملیات', 'صفحه', 'هدف', 'آی‌پی', 'نام کامپیوتر', 'جزئیات'], $rows, ['from' => $excelFrom !== null ? substr($excelFrom, 0, 10) : '', 'to' => $excelTo !== null ? substr($excelTo, 0, 10) : '']);
+}
+
+require_once __DIR__ . '/modules/request-center/lib/endpoints.php'; // برش استقلال فاز ۲
+if (($_GET['action'] ?? '') === 'export_report') {
+    request_center_export_report(require_permission('reports.view'));
+}
+
+// خروجی XLSX از نمای مرتب‌شدهٔ لیست در مرورگر (فقط داده‌های همان صفحه؛ ترتیب از کاربر می‌آید)
+if (($_GET['action'] ?? '') === 'export_view_xlsx') {
+    require_login();
+    if (($_SERVER['REQUEST_METHOD'] ?? 'GET') !== 'POST') {
+        http_response_code(405);
+        exit('روش درخواست مجاز نیست.');
+    }
+    require_csrf();
+    $payload = json_decode((string) file_get_contents('php://input', false, null, 0, 2_000_000), true);
+    if (!is_array($payload) || !is_array($payload['headers'] ?? null) || !is_array($payload['rows'] ?? null)) {
+        http_response_code(400);
+        exit('داده‌های خروجی معتبر نیست.');
+    }
+    $clip = static fn ($v, int $max = 2000): string => mb_substr(is_scalar($v) ? (string) $v : '', 0, $max, 'UTF-8');
+    $headers = array_slice(array_map(static fn ($h) => $clip($h, 200), $payload['headers']), 0, 60);
+    $columnCount = max(1, count($headers));
+    $rows = array_slice($payload['rows'], 0, 20000);
+    $sheetRows = [];
+    $title = $clip($payload['title'] ?? 'گزارش', 200);
+    $sheetRows[] = [['v' => $title, 's' => 'title']];
+    $sheetRows[] = array_map(static fn (string $h): array => ['v' => $h, 's' => 'header'], $headers);
+    foreach ($rows as $row) {
+        if (!is_array($row)) {
+            continue;
+        }
+        $line = [];
+        foreach (array_slice(array_values($row), 0, $columnCount) as $value) {
+            $line[] = ['v' => $clip($value), 's' => 'body'];
+        }
+        $sheetRows[] = $line;
+    }
+    $bytes = xlsx_build([[
+        'name' => 'گزارش',
+        'rows' => $sheetRows,
+        'merges' => ['A1:' . xlsx_col_name($columnCount - 1) . '1'],
+        'widths' => array_fill(0, $columnCount, 20),
+    ]]);
+    xlsx_send($clip($payload['filename'] ?? 'report', 120) ?: 'report', $bytes);
+}
+
+if (($_GET['action'] ?? '') === 'export_assets') {
+    $assetUser = require_permission('assets.view');
+    asset_profile_ensure_schema();
+    [$where, $params] = asset_scope($assetUser);
+    $query = db()->prepare('SELECT a.*, d.name AS department_name, u.full_name AS owner_name FROM assets a LEFT JOIN departments d ON d.id = a.department_id LEFT JOIN users u ON u.id = a.owner_user_id ' . $where . ' ORDER BY a.hostname, a.asset_tag');
+    $query->execute($params);
+    $profileColumns = asset_profile_export_columns();
+    $headers = ['شناسه سیستم', 'نام سیستم', 'شماره سریال', 'نوع رایانه', 'معاونت', 'مالک', 'منبع استخراج', 'وضعیت شبکه', 'آخرین برداشت'];
+    foreach ($profileColumns as $column) {
+        $headers[] = $column['label'] . ' (' . $column['section'] . ')';
+    }
+    $rows = [];
+    $assetRows = $query->fetchAll();
+    $profileMap = asset_profile_map(array_column($assetRows, 'id'));
+    foreach ($assetRows as $row) {
+        $profile = asset_profile_fill_from_asset($profileMap[(int) $row['id']] ?? [], $row);
+        $online = (int) ($profile['ad_online'] ?? 0) === 1;
+        $wasScanned = (string) ($profile['ad_scanned_at'] ?? '') !== '';
+        $netStatus = $online ? 'آنلاین' : ($wasScanned ? 'آفلاین' : 'پینگ نشده');
+        $sourceLabels = ['server_inventory' => 'استخراج سرور پنل', 'agent' => 'Agent کلاینت', 'domain' => 'اسکن/دامنه', 'manual' => 'دستی'];
+        $sourceLabel = $sourceLabels[(string) $row['source']] ?? (string) $row['source'];
+        $exportRow = [
+            asset_tag_label((string) $row['asset_tag'], (string) $row['hostname']),
+            asset_name_or((string) $row['hostname']),
+            (string) $row['serial_number'],
+            (string) $row['computer_type'],
+            (string) ($row['department_name'] ?? ''),
+            (string) ($row['owner_name'] ?? ''),
+            $sourceLabel,
+            $netStatus,
+            $row['last_inventory_at'] ? persian_date((string) $row['last_inventory_at']) : '',
+        ];
+        foreach ($profileColumns as $column) {
+            $exportRow[] = asset_profile_export_value($column, $profile[$column['key']] ?? null);
+        }
+        $rows[] = $exportRow;
+    }
+    excel_download('asset-full-inventory-' . date('Y-m-d') . '.xlsx', 'گزارش کامل شناسنامه‌های فنی سیستم‌ها', $headers, $rows, ['from' => 'بدون فیلتر تاریخی', 'to' => 'بدون فیلتر تاریخی']);
+}
+
+if (($_GET['action'] ?? '') === 'export_cd_dvd') {
+    cd_dvd_export(require_permission('cddvd.export'));
+}
+
+if (($_GET['action'] ?? '') === 'export_traffic_report') {
+    require_permission('traffic.view');
+    traffic_export_report();
+}
+
+if (($_GET['action'] ?? '') === 'download_attachment') {
+    request_center_download_attachment(require_login());
+}
+
+if ($page === 'food-personnel-link') {
+    require_once __DIR__ . '/food-personnel-link.php';
+    fpl_render_request();
+}
+
+
+// ═══ ناحیهٔ ۴: پردازش همهٔ اکشن‌های POST (74 اکشن، گروه‌بندی با بانر) ═══
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    require_once __DIR__ . '/lib/http-post.php';
+    post_context_begin();
+    $action = (string) ($_POST['action'] ?? '');
+    try {
+
+        // ───── گروه اکشن: احراز هویت، پروفایل و تم — ۳ اکشن از ۱.۶۲.۱۸ در فایل جدا (شرح فارسی در سرآیند همان فایل) ─────
+        require __DIR__ . '/actions/account-actions.php';
+
+        // ───── گروه اکشن: برند فیش غذا — ۱ اکشن از ۱.۶۲.۱۸ در فایل جدا (شرح فارسی در سرآیند همان فایل) ─────
+        require __DIR__ . '/actions/food-brand-actions.php';
+        food_ticket_handle_post($action, $user);
+        traffic_handle_post($action, $user);
+
+        // ───── گروه اکشن: آرشیو CD/DVD — ۳ اکشن از ۱.۶۲.۱۸ در فایل جدا (شرح فارسی در سرآیند همان فایل) ─────
+        require __DIR__ . '/actions/cd-dvd-actions.php';
+
+        // ───── گروه اکشن: پشتیبان‌گیری و به‌روزرسانی سامانه — ۳ اکشن از ۱.۶۲.۲۰ در فایل جدا (شرح فارسی در سرآیند همان فایل) ─────
+        require __DIR__ . '/actions/backup-actions.php';
+
+        // ───── گروه اکشن: اعلان‌ها — ۲ اکشن از ۱.۶۲.۱۸ در فایل جدا (شرح فارسی در سرآیند همان فایل) ─────
+        require __DIR__ . '/actions/notification-actions.php';
+
+        // ───── گروه اکشن: تصمیم لغو سفارش غذا — خارج از دامنهٔ Request Center ─────
+        require __DIR__ . '/actions/food-order-actions.php';
+
+        // ───── گروه اکشن: تصمیم‌های سرپرست و امتیازدهی — ۴ اکشن درخواست‌ها ─────
+        // Request Center owns its POST action registry; this include is the legacy-context adapter.
+        require __DIR__ . '/modules/request-center/Actions/dispatch.php';
+
+
+        // ───── گروه اکشن: اموال، دارایی‌ها و اسکن دامین — ۱۰ اکشن از ۱.۶۲.۱۳ در فایل جدا (شرح فارسی در سرآیند همان فایل) ─────
+        require __DIR__ . '/actions/asset-actions.php';
+
+
+        // ───── گروه اکشن: چرخهٔ کامل درخواست‌ها — ۷ اکشن از ۱.۶۲.۱۳ در فایل جدا (شرح فارسی در سرآیند همان فایل) ─────
+
+
+
+        // ───── گروه اکشن: خدمات، دسته‌ها و پایگاه دانش — ۷ اکشن از ۱.۶۲.۱۴ در فایل جدا (شرح فارسی در سرآیند همان فایل) ─────
+
+
+        
+
+        // ───── گروه اکشن: تقویم و تعطیلات — ۴ اکشن از ۱.۶۲.۱۷ در فایل جدا (شرح فارسی در سرآیند همان فایل) ─────
+        require __DIR__ . '/actions/holiday-actions.php';
+
+
+        // ───── گروه اکشن: ارتباط دارایی و عملیات گروهی درخواست‌ها — ۲ اکشن از ۱.۶۲.۱۹ در فایل جدا (شرح فارسی در سرآیند همان فایل) ─────
+
+
+
+        // ───── گروه اکشن: ساختارهای پایه و کاربران — ۶ اکشن از ۱.۶۲.۱۹ در فایل جدا (شرح فارسی در سرآیند همان فایل) ─────
+        require __DIR__ . '/actions/user-structure-actions.php';
+
+
+        // ───── گروه اکشن: ساختار سازمانی (چارت) — ۱۳ اکشن از ۱.۶۲.۱۲ در فایل جدا ─────
+        require __DIR__ . '/actions/org-actions.php';
+
+
+        // ───── گروه اکشن: نقش‌های کلیدی و دسترسی‌ها — ۴ اکشن از ۱.۶۲.۱۶ در فایل جدا (شرح فارسی در سرآیند همان فایل) ─────
+        require __DIR__ . '/actions/role-actions.php';
+
+
+        // ───── گروه اکشن: گروه‌های عمومی دسترسی — ۳ اکشن مستقل (ساخت، ذخیره، حذف) ─────
+        require __DIR__ . '/actions/access-group-actions.php';
+
+
+        // ───── گروه اکشن: نگهداری لاگ‌ها/LDAP و تنظیمات عمومی — ۵ اکشن از ۱.۶۲.۱۶ در فایل جدا (شرح فارسی در سرآیند همان فایل) ─────
+        require __DIR__ . '/actions/settings-actions.php';
+    } catch (Throwable $exception) {
+        post_context_on_error($exception, $page);
+    }
+}
+
+if ($page === 'chatbot-api') {
+    chatbot_api_handle(current_user());
+}
+
+if (!$user) {
+    $loginTitle = setting('login_title', 'به سامانه درخواست پشتیبانی خوش آمدید');
+    $loginIntro = setting('login_intro', 'برای ثبت و پیگیری درخواست‌های خود وارد شوید.');
+    $loginNoteTitle = setting('login_note_title', 'ورود یکپارچه سازمانی');
+    $loginNoteText = setting('login_note_text', 'کاربران شبکه با حساب Active Directory خود وارد می‌شوند.');
+    $loginAnnouncement = setting('login_announcement', '');
+    $loginAnnouncementLines = array_values(array_filter(array_map('trim', preg_split('/\r?\n/', (string) setting('login_announcements', '')) ?: [])));
+    if (!$loginAnnouncementLines && trim($loginAnnouncement) !== '') {
+        $loginAnnouncementLines = [trim($loginAnnouncement)];
+    }
+    $loginAnnouncementLines = array_slice($loginAnnouncementLines, 0, 5);
+    $loginAnnouncementSpeed = max(5, min(60, (int) setting('login_announcement_speed', '18')));
+    $loginAnnouncementFontSize = max(11, min(22, (int) setting('login_announcement_font_size', '12')));
+    $loginAnnouncementHtml = $loginAnnouncementLines
+        ? '<div class="login-announcement" data-announcements="' . e((string) json_encode($loginAnnouncementLines, JSON_UNESCAPED_UNICODE)) . '" data-announcement-speed="' . $loginAnnouncementSpeed . '"><span aria-hidden="true">✦</span><div data-announcement-text style="font-size:' . $loginAnnouncementFontSize . 'px;animation-duration:' . $loginAnnouncementSpeed . 's">' . e($loginAnnouncementLines[0]) . '</div></div>'
+        : '';
+    $loginLogo = setting('app_login_logo', setting('app_logo', (string) cfg('app.logo', '')));
+    render_header('ورود به سامانه');
+    echo '<p class="auth-version" style="text-align:center;color:#64748b;font-size:13px;margin:0 0 8px">نسخهٔ سامانه: ' . e(app_version()) . '</p>';
+    echo '<main class="auth-layout"><section class="auth-panel">' . ($loginLogo ? '<div class="login-brand-logo"><img src="' . e($loginLogo) . '" alt="لوگوی سامانه"></div>' : '') . '<div class="auth-kicker">' . e(setting('app_name', (string) cfg('app.name', 'مرکز خدمات سازمان'))) . '</div><h1>' . e($loginTitle) . '</h1><p class="muted">' . e($loginIntro) . '</p>' . $loginAnnouncementHtml . '<form method="post" class="auth-form">' . csrf_field() . '<input type="hidden" name="action" value="login"><label>نام کاربری شبکه یا سامانه<input name="username" required autocomplete="username" autofocus placeholder="نام کاربری شما"></label><label>رمز عبور<input type="password" name="password" required autocomplete="current-password" placeholder="رمز عبور"></label><button class="button wide" type="submit">ورود امن</button></form><div class="login-note"><span>◆</span><div><strong>' . e($loginNoteTitle) . '</strong><small>' . e($loginNoteText) . '</small></div></div></section><aside class="auth-art"><div class="art-orb orb-one"></div><div class="art-orb orb-two"></div><div class="art-card"><span class="art-icon">ت</span><strong>' . e(setting('login_art_title', 'پشتیبانی، ساده و شفاف')) . '</strong><p>' . e(setting('login_art_text', 'هر درخواست یک شماره پیگیری دارد و مسیر رسیدگی آن برای شما روشن است.')) . '</p></div></aside></main>';
+    render_footer();
+    exit;
+}
+
+$pagePermissions = [
+    'profile' => 'profile.edit',
+    'queue' => 'queue.view',
+    'reports' => 'reports.view',
+    'analytics' => 'analytics.view',
+    'supervisor' => 'supervisor.panel',
+    'inventory' => 'inventory.view',
+    'inventory-diagnostics' => 'inventory.diagnostics',
+    'domain-scan' => 'domain.scan',
+    'dashboard' => 'dash.view',
+    'assets' => 'assets.view',
+    'asset' => 'asset.view',
+    'asset-history' => 'asset.history',
+    'cd-dvd' => 'cddvd.view',
+    'cd-dvd-history' => 'cddvd.history',
+    'traffic-control' => 'traffic.view',
+    'traffic-control-print' => 'traffic.view',
+    'knowledge' => 'knowledge.view',
+    'backup' => 'backup.view',
+    'chatbot-admin' => 'chatbot.manage',
+    'organization' => 'org.view',
+    'holidays' => 'holidays.view',
+    'services' => 'services.view',
+    // 'food-ticket' — به‌جای یک کد تکی، با food_ticket_is_allowed() سنجیده می‌شود (پایین‌تر).
+];
+// ۱.۳۷.۷ — دروازهٔ «سامانه مدیریت غذا» با فهرست کدهای food.* یکی شد: پیش‌تر منو با
+// food_ticket_is_allowed() (هر کد food.*) نمایش داده می‌شد ولی صفحه فقط با food.monitor باز
+// می‌شد؛ یعنی نقشی که مثلاً فقط food.orders داشت، لینک را می‌دید و به ۴۰۳ می‌خورد.
+if ($page === 'food-ticket' && !(function_exists('food_ticket_is_allowed') ? food_ticket_is_allowed($user) : user_can($user, 'food.monitor'))) {
+    security_log_access_denied($user, 'food.*', 'food-ticket');
+    http_response_code(403);
+    render_header('عدم دسترسی', $user);
+    echo '<section class="page-heading"><div><span class="eyebrow">عدم دسترسی</span><h1>دسترسی به این بخش مجاز نیست</h1><p>برای دریافت دسترسی با ادمین اصلی سامانه هماهنگ کنید.</p></div><a class="button" href="index.php">بازگشت به داشبورد</a></section>';
+    render_footer();
+    exit;
+}
+if (isset($pagePermissions[$page]) && !user_can($user, $pagePermissions[$page])) {
+    security_log_access_denied($user, (string) $pagePermissions[$page], (string) $page);
+    http_response_code(403);
+    render_header('عدم دسترسی', $user);
+    echo '<section class="page-heading"><div><span class="eyebrow">عدم دسترسی</span><h1>دسترسی به این بخش مجاز نیست</h1><p>برای دریافت دسترسی با ادمین اصلی سامانه هماهنگ کنید.</p></div><a class="button" href="index.php">بازگشت به داشبورد</a></section>';
+    render_footer();
+    exit;
+}
+if ($page === 'settings' && !user_can_any($user, ['settings.general', 'settings.domain', 'settings.users', 'settings.key_roles'])) {
+    security_log_access_denied($user, 'settings.*', 'settings');
+    http_response_code(403);
+    render_header('عدم دسترسی', $user);
+    echo '<section class="page-heading"><div><span class="eyebrow">عدم دسترسی</span><h1>دسترسی به تنظیمات مجاز نیست</h1><p>برای دریافت دسترسی با ادمین اصلی سامانه هماهنگ کنید.</p></div><a class="button" href="index.php">بازگشت به داشبورد</a></section>';
+    render_footer();
+    exit;
+}
+
+if ($page === 'change-password') {
+    lac_change_password_request();
+}
+if ($page === 'local-accounts') {
+    lac_admin_request();
+}
+if ($page === 'profile') {
+    $profileUser = require_login();
+    $profileTheme = valid_choice((string) setting('theme_user_' . (int) $profileUser['id'], 'current'), ['current', 'ruby', 'indigo', 'copper'], 'current');
+    $profileFirst = trim((string) ($profileUser['first_name'] ?? ''));
+    $profileLast = trim((string) ($profileUser['last_name'] ?? ''));
+    if ($profileFirst === '' && $profileLast === '') {
+        $parts = preg_split('/\s+/u', trim((string) ($profileUser['full_name'] ?? '')), 2) ?: [];
+        $profileFirst = (string) ($parts[0] ?? '');
+        $profileLast = (string) ($parts[1] ?? '');
+    }
+    render_header('پروفایل کاربری', $profileUser);
+    $profileInitial = $profileFirst !== '' ? $profileFirst : (string) $profileUser['full_name'];
+    $profileInitial = function_exists('mb_substr') ? mb_substr($profileInitial, 0, 1) : substr($profileInitial, 0, 1);
+    echo '<section class="page-heading"><div><span class="eyebrow">حساب کاربری</span><h1>پروفایل من</h1><p>اطلاعات تکمیلی شما برای شناسایی و خدمات سازمانی در این بخش نگهداری می‌شود.</p></div><a class="button secondary" href="index.php">بازگشت به داشبورد</a></section><section class="card form-card theme-preference" id="appearance"><h2>ظاهر دلخواه سامانه</h2><p class="muted">انتخاب شما فقط برای حساب خودتان ذخیره می‌شود و در ورودهای بعدی هم فعال می‌ماند؛ چیدمان صفحه‌ها تغییر نمی‌کند.</p><form method="post" class="theme-preference-form">' . csrf_field() . '<input type="hidden" name="action" value="save_theme"><label>تم پیش‌فرض من<select name="theme"><option value="current"' . ($profileTheme === 'current' ? ' selected' : '') . '>تم فعلی · سبز و کرم</option><option value="ruby"' . ($profileTheme === 'ruby' ? ' selected' : '') . '>یاقوتی رسمی</option><option value="indigo"' . ($profileTheme === 'indigo' ? ' selected' : '') . '>لاجوردی مدیریتی</option><option value="copper"' . ($profileTheme === 'copper' ? ' selected' : '') . '>آجری روشن و کرم</option></select></label><button class="button" type="submit">ذخیره و اعمال تم</button></form></section><section class="profile-layout"><div class="card profile-card"><div class="profile-avatar">' . (!empty($profileUser['profile_photo']) ? '<img src="index.php?action=profile_photo" alt="عکس پروفایل">' : '<span>' . e($profileInitial) . '</span>') . '</div><h2>' . e($profileUser['full_name']) . '</h2><p class="muted">' . e($profileUser['username']) . '</p><span class="status in_progress">اطلاعات شخصی</span></div><div class="card form-card profile-form-card"><h2>اطلاعات تکمیلی</h2><form method="post" enctype="multipart/form-data">' . csrf_field() . '<input type="hidden" name="action" value="save_profile"><div class="form-grid"><label>نام<input name="first_name" value="' . e($profileFirst) . '" required></label><label>نام خانوادگی<input name="last_name" value="' . e($profileLast) . '" required></label><label>کد ملی<input name="national_code" value="' . e($profileUser['national_code'] ?? '') . '" inputmode="numeric" maxlength="10" pattern="[0-9۰-۹]{10}" placeholder="۱۰ رقم معتبر"></label><label>عکس پروفایل<input type="file" name="profile_photo" accept="image/png,image/jpeg"><small>PNG یا JPG، حداکثر ۲ مگابایت؛ عکس در فضای محافظت‌شده ذخیره می‌شود.</small></label></div><div class="actions"><button class="button" type="submit">ذخیره پروفایل</button></div></form></div></section>';
+    render_footer();
+    exit;
+}
+
+if ($page === 'governance') {
+    redirect('request-center.php?page=governance');
+}
+
+if ($page === 'food-ticket') {
+    food_ticket_render_page($user ?? []);
+    exit;
+}
+
+if ($page === 'food-order' && $user && !user_can($user, 'foodorder.self')) {
+    security_log_access_denied($user, 'foodorder.self', 'food-order');
+    http_response_code(403);
+    render_header('عدم دسترسی', $user);
+    echo '<section class="page-heading"><div><span class="eyebrow">عدم دسترسی</span><h1>دسترسی به این بخش مجاز نیست</h1><p>برای دریافت دسترسی با ادمین اصلی سامانه تماس بگیرید.</p></div></section>';
+    render_footer();
+    exit;
+}
+if ($page === 'food-order') {
+    food_order_render_page($user ?? []);
+}
+
+if ($page === 'cd-dvd') {
+    cd_dvd_render_page($user);
+}
+
+if ($page === 'cd-dvd-history') {
+    cd_dvd_render_history($user);
+}
+
+if ($page === 'traffic-control') {
+    traffic_render_page($user);
+}
+if ($page === 'traffic-control-print') {
+    traffic_render_print($user, (int) ($_GET['id'] ?? 0));
+}
+
+if ($page === 'help') {
+    $helpUser = require_login();
+    // تب‌های راهنما (تصمیم مالک ۲۰۲۶-۱۱-۱۶): «راهنمای کامل» و «تغییرات نسخه‌ها».
+    // تغییرات نسخه‌ها اینجا دائمی است — پاپ‌آپ داشبورد فقط دو بار باز می‌شود.
+    $helpTab = (string) ($_GET['tab'] ?? '');
+    if ($helpTab === 'releases') {
+        render_header('تغییرات نسخه‌ها', $helpUser);
+        echo help_tabs_nav_html('releases');
+        echo release_notes_history_html();
+        render_footer();
+        exit;
+    }
+    render_header('راهنمای سامانه', $helpUser);
+    echo help_tabs_nav_html('guide');
+    require __DIR__ . '/help-guide.php';
+    render_footer();
+    exit;
+}
+
+if ($page === 'release-notes') {
+    // «تغییرات سامانه» — صفحهٔ عمومی برای هر کاربر واردشده (تصمیم مالک ۲۰۲۶-۱۱-۱۴):
+    // بدون هیچ مجوز اضافه؛ محتوا از lib/release-notes.php (source of truth نسخه) می‌خواند.
+    $releaseNotesUser = require_login();
+    render_header('تغییرات سامانه', $releaseNotesUser);
+    echo release_notes_page_html();
+    render_footer();
+    exit;
+}
+
+if ($page === 'notifications' && $user && !user_can($user, 'notif.view')) {
+    security_log_access_denied($user, 'notif.view', 'notifications');
+    http_response_code(403);
+    render_header('عدم دسترسی', $user);
+    echo '<section class="page-heading"><div><span class="eyebrow">عدم دسترسی</span><h1>دسترسی به این بخش مجاز نیست</h1><p>برای دریافت دسترسی با ادمین اصلی سامانه تماس بگیرید.</p></div></section>';
+    render_footer();
+    exit;
+}
+if ($page === 'notifications') {
+    $notificationUser = require_login();
+    [$notificationTicketFilter, $notificationTicketParams] = notification_ticket_visibility($notificationUser, 'n');
+    $notificationQuery = db()->prepare('SELECT n.*, t.subject FROM notifications n LEFT JOIN tickets t ON t.id = n.ticket_id WHERE n.user_id = ?' . notification_visibility_sql((int) $notificationUser['id'], $notificationUser, 'n') . $notificationTicketFilter . ' ORDER BY n.created_at DESC LIMIT 100');
+    $notificationQuery->execute(array_merge([(int) $notificationUser['id']], $notificationTicketParams));
+    render_header('اعلان‌های داخلی', $notificationUser);
+    echo '<section class="page-heading"><div><span class="eyebrow">اعلان داخلی آفلاین</span><h1>اعلان‌های شما</h1><p>تغییرات درخواست‌ها بدون نیاز به ایمیل یا پیامک در همین سامانه اعلام می‌شوند.</p></div><form method="post">' . csrf_field() . '<input type="hidden" name="action" value="mark_all_notifications"><button class="button secondary" type="submit">خوانده‌شدن همه</button></form></section><section class="card notification-list">';
+    foreach ($notificationQuery->fetchAll() as $notification) {
+        $target = notification_target_url($notification);
+        echo '<div class="notification-item ' . ((int) $notification['is_read'] === 0 ? 'unread' : '') . '"><a href="' . $target . '"><strong>' . e($notification['title']) . '</strong><span>' . e($notification['body']) . '</span><small>' . e(jalali_date($notification['created_at'])) . ($notification['subject'] ? ' • ' . e($notification['subject']) : '') . '</small></a>';
+        if ((int) $notification['is_read'] === 0) { echo '<form method="post">' . csrf_field() . '<input type="hidden" name="action" value="mark_notification"><input type="hidden" name="notification_id" value="' . (int) $notification['id'] . '"><button class="mini-button" type="submit">خوانده شد</button></form>'; }
+        echo '</div>';
+    }
+    echo '</section>';
+    render_footer();
+    exit;
+}
+
+if ($page === 'audit') {
+    $legacyAuditUser = require_login();
+    if (!user_can_any($legacyAuditUser, ['logs.activity', 'audit.view', 'logs.view'])) {
+        security_log_access_denied($legacyAuditUser, 'logs.activity|audit.view|logs.view', 'audit');
+        http_response_code(403); exit('دسترسی به لاگ سامانه مجاز نیست.');
+    }
+    redirect('index.php?page=activity-log');
+}
+
+if ($page === 'logging-dashboard') {
+    logging_dashboard_render(require_login());
+}
+
+if ($page === 'system-health') {
+    system_health_render(require_login());
+}
+
+if ($page === 'logs') {
+    $legacyLogUser = require_login();
+    if (!user_can_any($legacyLogUser, ['logs.view', 'logs.activity', 'audit.view'])) { security_log_access_denied($legacyLogUser, 'logs.view|logs.activity|audit.view', 'logs'); http_response_code(403); exit('دسترسی به لاگ سامانه مجاز نیست.'); }
+    redirect(user_can($legacyLogUser, 'system.health') ? 'index.php?page=system-health' : 'index.php?page=activity-log&category=errors');
+}
+
+if ($page === 'activity-log') {
+    $logUser = require_login();
+    $canViewActivityLogs = user_can_any($logUser, ['logs.activity', 'audit.view']);
+    $canViewSystemLogs = user_can($logUser, 'logs.view');
+    if (!$canViewActivityLogs && !$canViewSystemLogs) {
+        security_log_access_denied($logUser, 'logs.activity|audit.view|logs.view', 'activity-log');
+        http_response_code(403); exit('دسترسی به لاگ سامانه مجاز نیست.');
+    }
+    if (!$canViewActivityLogs && $canViewSystemLogs && (string) ($_GET['category'] ?? 'errors') !== 'errors') {
+        redirect('index.php?page=activity-log&category=errors');
+    }
+    if ((string) ($_GET['category'] ?? '') === 'errors' && user_can($logUser, 'system.health')) {
+        redirect('index.php?page=system-health');
+    }
+    activity_logs_ensure();
+    $category = valid_choice((string) ($_GET['category'] ?? 'all'), ['all', 'auth', 'admin', 'errors'], 'all');
+    if ($canViewActivityLogs) {
+        [$logWhere, $logParams] = activity_log_filters();
+    } else {
+        $logWhere = ' WHERE 1 = 0';
+        $logParams = [];
+    }
+    $perPage = (in_array($category, ['all', 'errors'], true) && $canViewSystemLogs) ? 50 : 100;
+    $logPage = max(1, (int) ($_GET['p'] ?? 1));
+    $countQuery = db()->prepare('SELECT COUNT(*) FROM activity_logs l' . $logWhere);
+    $countQuery->execute($logParams);
+    $activityFilteredTotal = (int) $countQuery->fetchColumn();
+    $systemRows = []; $systemFilteredTotal = 0; $systemTotal = 0; $systemWhere = ''; $systemParams = [];
+    if (in_array($category, ['all', 'errors'], true) && user_can($logUser, 'logs.view')) {
+        system_logs_ensure();
+        $systemConditions = [];
+        $systemLevel = valid_choice((string) ($_GET['level'] ?? ''), ['debug', 'info', 'notice', 'warning', 'error', 'critical'], '');
+        if ($systemLevel !== '') { $systemConditions[] = 's.level = ?'; $systemParams[] = $systemLevel; }
+        else { $systemConditions[] = "s.level IN ('critical', 'error', 'warning')"; }
+        $systemCode = trim((string) ($_GET['event_code'] ?? ''));
+        if ($systemCode !== '' && preg_match('/^[A-Z0-9][A-Z0-9._-]{2,39}$/i', $systemCode)) { $systemConditions[] = 's.code = ?'; $systemParams[] = strtoupper($systemCode); }
+        $systemCategory = valid_choice((string) ($_GET['event_category'] ?? ''), ['', 'security', 'audit', 'business', 'operation', 'system', 'integration', 'performance'], '');
+        if ($systemCategory !== '') { $systemConditions[] = 's.category = ?'; $systemParams[] = $systemCategory; }
+        $systemRequestId = trim((string) ($_GET['request_id'] ?? ''));
+        if ($systemRequestId !== '' && preg_match('/^[a-f0-9]{8}-[a-f0-9]{4}-4[a-f0-9]{3}-[89ab][a-f0-9]{3}-[a-f0-9]{12}$/i', $systemRequestId)) { $systemConditions[] = 's.request_id = ?'; $systemParams[] = $systemRequestId; }
+        $systemSearch = trim((string) ($_GET['q'] ?? ''));
+        if ($systemSearch !== '') {
+            $systemConditions[] = '(s.context LIKE ? OR s.message LIKE ? OR s.meta_json LIKE ? OR s.request_uri LIKE ?)';
+            foreach (range(1, 4) as $_) $systemParams[] = '%' . $systemSearch . '%';
+        }
+        $systemUserId = (int) ($_GET['user_id'] ?? 0);
+        if ($systemUserId > 0) { $systemConditions[] = 's.user_id = ?'; $systemParams[] = $systemUserId; }
+        [$systemFrom, $systemTo] = log_bounded_date_range(trim((string) ($_GET['from'] ?? '')), trim((string) ($_GET['to'] ?? '')));
+        if ($systemFrom !== null) { $systemConditions[] = 's.created_at >= ?'; $systemParams[] = $systemFrom; }
+        if ($systemTo !== null) { $systemConditions[] = 's.created_at <= ?'; $systemParams[] = $systemTo; }
+        $systemWhere = $systemConditions ? ' WHERE ' . implode(' AND ', $systemConditions) : '';
+        $systemCount = db()->prepare('SELECT COUNT(*) FROM system_logs s' . $systemWhere);
+        $systemCount->execute($systemParams);
+        $systemFilteredTotal = (int) $systemCount->fetchColumn();
+        $systemTotal = (int) db()->query('SELECT COUNT(*) FROM system_logs')->fetchColumn();
+    }
+    $filteredTotal = $activityFilteredTotal + $systemFilteredTotal;
+    $pages = max(1, (int) ceil(max($activityFilteredTotal, $systemFilteredTotal) / $perPage));
+    $logPage = min($logPage, $pages);
+    $offset = ($logPage - 1) * $perPage;
+    $logSortA = (string) ($_GET['sort_a'] ?? ''); $logDirA = (string) ($_GET['dir_a'] ?? '');
+    $logSortS = (string) ($_GET['sort_s'] ?? ''); $logDirS = (string) ($_GET['dir_s'] ?? '');
+    $activityOrder = log_sort_order(['time' => 'l.created_at', 'user' => 'l.full_name', 'event' => 'COALESCE(l.action_label, l.action_code)', 'module' => 'l.module', 'ip' => 'l.ip_address', 'meta' => 'l.meta_json'], $logSortA, $logDirA, ' ORDER BY l.created_at DESC, l.id DESC');
+    $activityQuery = db()->prepare('SELECT * FROM activity_logs l' . $logWhere . $activityOrder . ' LIMIT ' . $perPage . ' OFFSET ' . $offset);
+    $activityQuery->execute($logParams);
+    $activityRows = $activityQuery->fetchAll();
+    if (in_array($category, ['all', 'errors'], true) && user_can($logUser, 'logs.view')) {
+        $systemQuery = db()->prepare('SELECT s.*, u.username, u.full_name FROM system_logs s LEFT JOIN users u ON u.id = s.user_id' . $systemWhere . log_sort_order(['time' => 's.created_at', 'user' => 'u.full_name', 'level' => "FIELD(s.level, 'debug', 'info', 'notice', 'warning', 'error', 'critical')", 'context' => 's.context', 'request' => 's.request_uri', 'message' => 's.message', 'meta' => 's.meta_json', '__tie' => 's.id'], $logSortS, $logDirS, ' ORDER BY s.created_at DESC, s.id DESC') . ' LIMIT ' . $perPage . ' OFFSET ' . $offset);
+        $systemQuery->execute($systemParams);
+        $systemRows = $systemQuery->fetchAll();
+    }
+    $activityTotal = $canViewActivityLogs ? (int) db()->query('SELECT COUNT(*) FROM activity_logs')->fetchColumn() : 0;
+    $activityUsers = $canViewActivityLogs ? db()->query('SELECT id, full_name, username FROM users ORDER BY full_name')->fetchAll() : [];
+    $activityActions = $canViewActivityLogs ? db()->query('SELECT action_code, MAX(action_label) AS label, COUNT(*) AS total FROM activity_logs GROUP BY action_code ORDER BY total DESC LIMIT 200')->fetchAll() : [];
+    $activityModules = $canViewActivityLogs ? db()->query("SELECT module, COUNT(*) AS total FROM activity_logs WHERE module IS NOT NULL AND module <> '' GROUP BY module ORDER BY total DESC")->fetchAll() : [];
+    $retentionDays = activity_log_retention_days();
+    $activityExported = user_can($logUser, 'logs.activity_export');
+    $queryArgs = $_GET; unset($queryArgs['page'], $queryArgs['p']); $queryArgs['page']='activity-log';
+    $filterUrl = 'index.php?' . http_build_query($queryArgs);
+    $exportArgs = $queryArgs; unset($exportArgs['page']);
+    $tabNames = ['all'=>'همه رویدادها','auth'=>'ورود و خروج','admin'=>'مدیریتی و تنظیمات','errors'=>'خطاها و تلاش‌های ناموفق'];
+    render_header('لاگ سامانه', $logUser);
+    echo '<section class="page-heading"><div><span class="eyebrow">ردیابی و ممیزی یکپارچه</span><h1>لاگ سامانه</h1><p>این صفحه رخدادهای فنی و فعالیت کاربران را کنار هم نشان می‌دهد؛ ' . number_format($filteredTotal) . ' رکورد در این نما؛ ' . number_format($activityTotal + $systemTotal) . ' رویداد و خطای ثبت‌شده در مجموع. برای پشتیبانی، گزارش خوانا و امن را بفرستید؛ خروجی ممیزی ممکن است نام و نشانی کاربر داشته باشد.</p></div><div class="actions">' . ($activityExported ? '<a class="button secondary" href="index.php?action=export_activity_logs' . ($exportArgs ? '&' . e(http_build_query($exportArgs)) : '') . '">خروجی فعالیت کاربران (ممیزی؛ شامل اطلاعات کاربران)</a>' : '') . (user_can($logUser, 'system.health') ? '<a class="button secondary" href="index.php?page=system-health&amp;export=safe">دانلود گزارش خوانا و امن (Excel)</a>' : '') . '<a class="button secondary" href="index.php?page=settings#activity-log-settings">تنظیم نگهداری</a></div></section>';
+    echo '<nav class="log-tabs" aria-label="دسته‌بندی لاگ‌ها">';
+    foreach($tabNames as $tab=>$label){ echo '<a class="' . ($category===$tab?'active':'') . '" href="index.php?page=activity-log&category=' . e($tab) . '">' . e($label) . '</a>'; }
+    echo '</nav><section class="card filter-card"><form method="get"><input type="hidden" name="page" value="activity-log"><input type="hidden" name="category" value="' . e($category) . '"><div class="filter-grid">';
+    if ($canViewSystemLogs && in_array($category, ['all', 'errors'], true)) {
+        $selectedLevel = valid_choice((string) ($_GET['level'] ?? ''), ['debug', 'info', 'notice', 'warning', 'error', 'critical'], '');
+        echo '<label>شدت رخداد<select name="level"><option value="">خطاها و هشدارها (پیشنهادی)</option>';
+        foreach (['critical'=>'بحرانی','error'=>'خطا','warning'=>'هشدار','notice'=>'اعلان','info'=>'اطلاع‌رسانی','debug'=>'جزئیات تخصصی'] as $levelKey=>$levelLabel) {
+            echo '<option value="' . $levelKey . '"' . ($selectedLevel === $levelKey ? ' selected' : '') . '>' . $levelLabel . '</option>';
+        }
+        echo '</select></label>';
+    }
+    if ($canViewActivityLogs) {
+        echo '<label>کاربر<select name="user_id"><option value="">همه کاربران</option>';
+        foreach ($activityUsers as $option) echo '<option value="' . (int) $option['id'] . '"' . ((int) ($_GET['user_id'] ?? 0) === (int) $option['id'] ? ' selected' : '') . '>' . e($option['full_name'] . ' (' . $option['username'] . ')') . '</option>';
+        echo '</select></label><label>نوع عملیات<select name="action_code"><option value="">همه عملیات</option>';
+        foreach ($activityActions as $option) echo '<option value="' . e($option['action_code']) . '"' . ((string) ($_GET['action_code'] ?? '') === (string) $option['action_code'] ? ' selected' : '') . '>' . e($option['label'] ?: $option['action_code']) . ' (' . (int) $option['total'] . ')</option>';
+        echo '</select></label><label>بخش سامانه<select name="module"><option value="">همه بخش‌ها</option>';
+        foreach ($activityModules as $option) echo '<option value="' . e($option['module']) . '"' . ((string) ($_GET['module'] ?? '') === (string) $option['module'] ? ' selected' : '') . '>' . e($option['module']) . ' (' . (int) $option['total'] . ')</option>';
+        echo '</select></label><label>نتیجه<select name="result"><option value="">همه نتایج</option>';
+        foreach (['success'=>'موفق','failure'=>'ناموفق','denied'=>'ردشده','unknown'=>'نامشخص (سوابق قدیمی)'] as $resultKey=>$resultLabel) echo '<option value="' . $resultKey . '"' . ((string) ($_GET['result'] ?? '') === $resultKey ? ' selected' : '') . '>' . $resultLabel . '</option>';
+        echo '</select></label>';
+    }
+    if ($canViewActivityLogs || ($canViewSystemLogs && in_array($category, ['all', 'errors'], true))) {
+        echo '<label>کد رخداد<input name="event_code" dir="ltr" maxlength="40" placeholder="SYS-DB-001" value="' . e($_GET['event_code'] ?? '') . '"></label><label>دستهٔ رخداد<select name="event_category"><option value="">همه دسته‌ها</option>';
+        foreach (['security'=>'امنیت','audit'=>'حسابرسی','system'=>'سیستم','business'=>'کسب‌وکار','operation'=>'عملیات','integration'=>'یکپارچه‌سازی','performance'=>'عملکرد'] as $catKey=>$catLabel) echo '<option value="' . $catKey . '"' . ((string) ($_GET['event_category'] ?? '') === $catKey ? ' selected' : '') . '>' . $catLabel . '</option>';
+        echo '</select></label><label class="full">کد پیگیری درخواست<input name="request_id" dir="ltr" maxlength="36" value="' . e($_GET['request_id'] ?? '') . '"></label>';
+    }
+    echo '<label>از تاریخ<input name="from" placeholder="۱۴۰۵/۰۷/۰۱" value="' . e($_GET['from'] ?? '') . '"></label><label>تا تاریخ<input name="to" placeholder="۱۴۰۵/۰۷/۳۰" value="' . e($_GET['to'] ?? '') . '"></label>' . ($canViewActivityLogs ? '<label>آی‌پی<input name="ip" placeholder="مثلاً 192.168.1." value="' . e($_GET['ip'] ?? '') . '"></label>' : '') . '<label class="full">جست‌وجوی متن<input type="search" name="q" placeholder="کاربر، عملیات، نام رایانه یا جزئیات" value="' . e($_GET['q'] ?? '') . '"></label></div><div class="actions"><button class="button" type="submit">اعمال فیلتر</button><a class="button secondary" href="index.php?page=activity-log&category=' . e($category) . '">پاک‌کردن فیلترها</a></div></form></section>';
+    if (in_array($category, ['all', 'errors'], true) && user_can($logUser, 'logs.view')) {
+        echo '<section class="card ticket-table audit-table unified-log-table system-error-table"><div class="log-section-heading"><h2>خطاها و هشدارهای فنی</h2><span class="muted">' . number_format($systemFilteredTotal) . ' مورد</span></div>' . log_sort_header_row([['time','زمان'],['user','مرتبط با'],['level','اهمیت و بخش'],['request','صفحه'],['message','شرح رخداد'],['meta','جزئیات تخصصی']], 'sort_s', 'dir_s', $queryArgs, $logSortS, $logDirS) . '';
+        if ($systemRows) { foreach ($systemRows as $systemRow) {
+            $systemMeta = json_decode((string) ($systemRow['meta_json'] ?? ''), true);
+            $systemMeta = is_array($systemMeta) ? $systemMeta : [];
+            $humanEvent = system_health_humanize_event(['context' => (string) ($systemRow['context'] ?? ''), 'title' => (string) ($systemRow['message'] ?? ''), 'code' => (string) ($systemRow['code'] ?? ''), 'category' => (string) ($systemRow['category'] ?? 'system'), 'level' => (string) ($systemRow['level'] ?? 'error'), 'technical' => (string) ($systemMeta['technical'] ?? '')]);
+            $humanLevel = system_health_human_level((string) $systemRow['level']);
+            $systemTitle = in_array((string) $systemRow['level'], ['error', 'warning'], true) ? $humanEvent['title'] : 'رویداد اطلاع‌رسانی سامانه';
+            $systemActor = !empty($systemRow['user_id']) ? 'مرتبط با یک حساب کاربری' : 'خود سامانه';
+            $systemDetails = activity_log_meta_lines(isset($systemRow['meta_json']) ? (string) $systemRow['meta_json'] : null);
+            $systemDetailsHtml = $systemDetails ? '<details class="log-details"><summary>جزئیات تخصصی (ممکن است شامل دادهٔ حساس باشد)</summary><dl>' . implode('', array_map(static fn (array $line): string => '<div><dt>' . e((string) $line[0]) . '</dt><dd>' . e((string) $line[1]) . '</dd></div>', $systemDetails)) . '</dl></details>' : '<span class="muted">جزئیات افزوده‌ای ثبت نشده</span>';
+            $humanExplanation = in_array((string) $systemRow['level'], ['error', 'warning'], true)
+                ? '<strong>' . e($systemTitle) . '</strong><br><small><b>معنی:</b> ' . e($humanEvent['cause']) . '</small><br><small><b>پیشنهاد:</b> ' . e($humanEvent['action']) . '</small>'
+                : '<strong>رویداد اطلاع‌رسانی سامانه</strong>';
+            echo '<div class="table-row"><span class="date-cell">' . e(persian_date($systemRow['created_at'])) . '</span><span>' . e($systemActor) . '</span><span><em class="log-level "' . e($systemRow['level']) . '">' . e($humanLevel) . '</em><br><small>' . e($humanEvent['module']) . '</small></span><span>' . e(system_health_request_label((string) ($systemRow['request_uri'] ?? ''))) . '</span><span>' . $humanExplanation . '</span><span>' . $systemDetailsHtml . '</span></div>';
+
+        }} else { echo '<div class="empty-state"><p>خطای فنی با فیلترهای انتخاب‌شده پیدا نشد.</p></div>'; }
+        echo '</section>';
+    }
+    echo '<section class="card ticket-table audit-table unified-log-table"><div class="log-section-heading"><h2>' . ($category === 'errors' ? 'ورودهای ناموفق و تلاش‌های مسدودشده' : 'فعالیت کاربران و ممیزی') . '</h2><span class="muted">' . number_format($activityFilteredTotal) . ' مورد</span></div>' . log_sort_header_row([['time','زمان'],['user','کاربر'],['event','رویداد'],['module','مورد/بخش'],['ip','نشانی کاربر'],['meta','جزئیات قابل‌خواندن']], 'sort_a', 'dir_a', $queryArgs, $logSortA, $logDirA) . '';
+    if($activityRows){ foreach($activityRows as $row){
+        $metaLines=activity_log_meta_lines(isset($row['meta_json'])?(string)$row['meta_json']:null);
+        $details=$metaLines?'<details class="log-details"><summary>جزئیات (' . count($metaLines) . ')</summary><dl>'.implode('',array_map(static fn(array $line):string=>'<div><dt>'.e((string)$line[0]).'</dt><dd>'.e((string)$line[1]).'</dd></div>',$metaLines)).'</dl></details>':'<span class="muted">بدون جزئیات افزوده</span>';
+        $target=$row['target_label']?:($row['target_type']?($row['target_type'].($row['target_id']?' #'.$row['target_id']:'')):'—');
+        $module=(string)($row['module']??'');
+        echo '<div class="table-row"><span class="date-cell">'.e(persian_date($row['created_at'])).'</span><span><strong>'.e($row['full_name']?:$row['username']?:'سامانه/API').'</strong><br><small class="muted">'.e($row['username']?:'کاربر ناشناس').'</small><br><small class="muted">'.e(permission_roles()[(string)($row['role']??'')]??($row['role']?:'—')).'</small></span><span><strong>'.e($row['action_label']?:activity_action_label((string)$row['action_code'])).'</strong><br><small class="muted">'.e($row['action_code']).'</small></span><span>'.e($target).'<br><small class="muted">'.e($module!==''?$module:'—').'</small></span><span class="muted">'.e($row['ip_address']?:'—').'<br>'.e($row['computer_name']?:'نام رایانه نامشخص').'</span><span>'.$details.'</span></div>';
+    }} else { echo '<div class="empty-state"><p>' . ($category === 'errors' && $systemRows ? 'تلاش ناموفق کاربری با این فیلتر ثبت نشده است.' : 'رکوردی با این فیلتر پیدا نشد؛ فیلترها را پاک کنید یا عبارت دیگری را جست‌وجو کنید.') . '</p></div>'; }
+    echo '</section>';
+    if($pages>1){ echo '<nav class="pagination" aria-label="صفحه‌بندی لاگ">'; for($i=max(1,$logPage-3);$i<=min($pages,$logPage+3);$i++){ $args=$queryArgs;$args['p']=$i; echo '<a class="'.($i===$logPage?'active':'').'" href="index.php?'.e(http_build_query($args)).'">'.number_format($i).'</a>'; } echo '</nav>'; }
+    render_footer(); exit;
+}
+
+if ($page === 'backup') {
+    $backupUser = require_permission('backup.view');
+    // ساخت و بازیابی فقط با backup.manage؛ بقیه فهرست نسخه‌ها را می‌بینند.
+    $backupInert = user_can($backupUser, 'backup.manage') ? '' : ' inert';
+    $runs = backup_runs();
+    $databaseName = (string) cfg('database.name', 'persian_ticketing');
+    $dumpAvailable = backup_mysql_binary('mysqldump') !== null;
+    $mysqlAvailable = backup_mysql_binary('mysql') !== null;
+    render_header('به‌روزرسانی و پشتیبان‌گیری', $backupUser);
+    echo '<section class="page-heading"><div><span class="eyebrow">Backup & Restore</span><h1>به‌روزرسانی و پشتیبان‌گیری</h1><p>این بخش فقط برای ادمین اصلی است و از اطلاعات دیتابیس و پیوست‌ها محافظت می‌کند.</p></div><span class="admin-badge">ادمین اصلی</span></section>';
+    if (user_can($backupUser, 'update.view') && user_is_primary_admin($backupUser)) {
+        $updateInert = user_can($backupUser, 'update.apply') ? '' : ' inert';
+        echo '<section class="card form-card" id="system-update"' . $updateInert . '><h2>به‌روزرسانی سامانه</h2>'
+            . '<p class="muted">فایل ZIP پک به‌روزرسانی را انتخاب کنید. قبل از اعمال، نسخهٔ پشتیبان گرفته می‌شود و نسخهٔ جدیدتر نصب می‌شود. نصب مجدد همان نسخه مجاز است. برگشت به نسخهٔ قدیمی‌تر فقط با تیک تأیید انجام می‌شود و فایل‌های نسخهٔ جدیدتر را که در پک قدیمی نیستند حذف نمی‌کند. نسخهٔ فعلی: ' . e(system_update_current_version()) . '</p>'
+            . '<form method="post" enctype="multipart/form-data">' . csrf_field() . '<input type="hidden" name="action" value="system_update">'
+            . '<label class="field">فایل به‌روزرسانی (ZIP)<input type="file" name="update_package" accept=".zip" required></label>'
+            . '<label class="check-label"><input type="checkbox" name="allow_downgrade" value="1"> برگشت به نسخهٔ قدیمی‌تر را تأیید می‌کنم (فقط اگر پک قدیمی‌تر از نسخهٔ فعلی است)</label>'
+            . '<label class="check-label"><input type="checkbox" name="ignore_requires" value="1"> پیش‌نیاز نسخهٔ پک را نادیده بگیر (فقط وقتی مطمئنید فایل‌های نسخه‌های میانی را جداگانه دارید)</label>'
+            . '<button class="button" type="submit">به‌روزرسانی</button></form></section>';
+    }
+    echo '<section class="settings-grid backup-grid"' . $backupInert . '><div class="card form-card"><h2>ساخت نسخه پشتیبان</h2><p class="muted">یک نسخه از دیتابیس و پوشه پیوست‌ها می‌سازد. قبل از هر بازیابی نیز یک نسخه ایمنی خودکار ساخته می‌شود.</p><p class="' . ($dumpAvailable ? 'alert success' : 'alert danger') . '">' . ($dumpAvailable ? 'ابزار mysqldump پیدا شد و پشتیبان‌گیری آماده است.' : 'mysqldump پیدا نشد؛ مسیر ITSM_MYSQLDUMP_PATH یا مسیر XAMPP را تنظیم کنید.') . '</p><form method="post">' . csrf_field() . '<input type="hidden" name="action" value="create_backup"><button class="button" type="submit" ' . ($dumpAvailable ? '' : 'disabled') . '>ساخت نسخه پشتیبان اکنون</button></form><small class="muted">مسیر ذخیره: ' . e(backup_root_path()) . '</small></div>';
+    echo '<div class="card form-card"><h2>بازیابی نسخه پشتیبان</h2><p class="muted">فقط فایل SQL را انتخاب کنید؛ فایل ZIP پیوست‌ها اختیاری است. پیش از بازیابی، سامانه نسخه ایمنی می‌سازد.</p><p class="alert danger">بازیابی می‌تواند اطلاعات فعلی را جایگزین کند. ابتدا روی staging آزمایش کنید.</p><form method="post" enctype="multipart/form-data">' . csrf_field() . '<input type="hidden" name="action" value="restore_backup"><input type="hidden" name="MAX_FILE_SIZE" value="268435456"><label class="file-input">فایل SQL<input type="file" name="sql_dump" accept=".sql,text/plain" required><small>حداکثر ۲۵۶ مگابایت</small></label><label class="file-input">آرشیو پیوست‌ها، اختیاری<input type="file" name="uploads_archive" accept=".zip,application/zip"><small>فقط ZIP ساخته‌شده توسط سامانه</small></label><label class="check-label"><input type="checkbox" name="restore_confirm" value="1" required> خطر جایگزینی اطلاعات فعلی را می‌پذیرم</label><button class="button danger-button" type="submit" ' . ($dumpAvailable && $mysqlAvailable ? '' : 'disabled') . '>بازیابی اطلاعات</button></form></div></section>';
+    echo '<section class="card form-card"><h2>نسخه‌های موجود</h2><p class="muted">دانلود نسخه پشتیبان فقط برای ادمین اصلی فعال است. فایل تنظیمات شامل رمزها عمداً داخل این بسته‌ها قرار نمی‌گیرد.</p><div class="category-list backup-list">';
+    foreach ($runs as $run) {
+        $base = $run['name'] . '/';
+        $sqlFile = backup_download_path($base . $databaseName . '.sql');
+        $zipFile = backup_download_path($base . 'uploads.zip');
+        $sqlAction = $sqlFile ? '<a class="button secondary" href="index.php?action=download_backup&file=' . rawurlencode($base . $databaseName . '.sql') . '">دریافت SQL</a>' : '<span class="muted">SQL ناقص</span>';
+        $zipAction = $zipFile ? '<a class="button secondary" href="index.php?action=download_backup&file=' . rawurlencode($base . 'uploads.zip') . '">دریافت پیوست‌ها</a>' : '<span class="muted">ZIP موجود نیست</span>';
+        echo '<div><span><strong>' . e($run['name']) . '</strong><small>' . e($run['created_at']) . ' • ' . e(number_format((float) $run['size'] / 1048576, 1)) . ' MB</small></span><span class="actions">' . $sqlAction . $zipAction . '</span></div>';
+    }
+    if (!$runs) {
+        echo '<div class="empty-state"><h2>هنوز نسخه‌ای ثبت نشده است.</h2><p>اولین نسخه را از فرم بالا بسازید.</p></div>';
+    }
+    echo '</div></section>';
+    render_footer();
+    exit;
+}
+
+if ($page === 'search' && $user && !user_can($user, 'search.global')) {
+    security_log_access_denied($user, 'search.global', 'search');
+    http_response_code(403);
+    render_header('عدم دسترسی', $user);
+    echo '<section class="page-heading"><div><span class="eyebrow">عدم دسترسی</span><h1>دسترسی به این بخش مجاز نیست</h1><p>برای دریافت دسترسی با ادمین اصلی سامانه تماس بگیرید.</p></div></section>';
+    render_footer();
+    exit;
+}
+if ($page === 'search') {
+    $searchUser = require_login();
+    $searchTerm = trim((string) ($_GET['q'] ?? ''));
+    // ۱.۳۷.۷ — جست‌وجو در «بخش‌ها و صفحه‌های سامانه» هم انجام می‌شود؛ مثلاً نوشتن «تردد» صفحه‌های
+    // مرتبط با تردد را نشان می‌دهد. فقط صفحه‌هایی که کاربر اجازهٔ دیدنشان را دارد فهرست می‌شوند.
+    $searchSections = global_search_sections(
+        global_search_catalog(),
+        $searchTerm,
+        static function (array $section) use ($searchUser): bool {
+            $special = (string) ($section['special'] ?? '');
+            if ($special === 'food') {
+                return function_exists('food_ticket_is_allowed') ? food_ticket_is_allowed($searchUser) : false;
+            }
+            if ($special === 'governance') {
+                return is_staff_role((string) ($searchUser['role'] ?? '')) && user_can($searchUser, 'governance.manage');
+            }
+            $codes = [];
+            if (isset($section['perm']) && (string) $section['perm'] !== '') {
+                $codes[] = (string) $section['perm'];
+            }
+            foreach ((array) ($section['perms'] ?? []) as $code) {
+                $codes[] = (string) $code;
+            }
+            return $codes === [] || user_can_any($searchUser, $codes);
+        }
+    );
+    render_header('جست‌وجوی سراسری', $searchUser);
+    echo '<section class="page-heading"><div><span class="eyebrow">جست‌وجوی سراسری</span><h1>نتایج جست‌وجو</h1><p>در صفحه‌ها، درخواست‌ها، شناسنامه‌ها، تردد، رسانه‌ها و دانش‌نامه جست‌وجو کنید.</p></div></section><form class="card filter-card global-search-page" method="get"><input type="hidden" name="page" value="search"><input name="q" required value="' . e($searchTerm) . '" placeholder="مثلاً درخواست، تردد، فیش غذا، پشتیبان‌گیری ..."><button class="button" type="submit">جست‌وجو</button></form>';
+    if ($searchTerm !== '') {
+        $needles = array_values(array_unique(array_filter([$searchTerm, global_search_normalize($searchTerm)], static fn(string $v): bool => $v !== '')));
+        // نتایج مرکز درخواست‌ها دوباره در جست‌وجوی سراسری دیده می‌شوند (بازگردانی تصمیم مالک ۲۰۲۶-۱۱-۱۰)؛
+        // پیوندها به ماژول مستقل، نه به پل‌های سازگاری.
+        $ticketRows = [];
+        if (function_exists('request_center_global_search')) {
+            try {
+                $ticketRows = request_center_global_search($searchUser, $needles);
+            } catch (Throwable) {
+                $ticketRows = [];
+            }
+        }
+        [$assetSearchScope, $assetSearchParams] = asset_scope($searchUser);
+        $assetProfileColumns = db_table_columns('asset_profiles');
+        $assetProfileJoin = $assetProfileColumns ? ' LEFT JOIN asset_profiles p ON p.asset_id = a.id ' : ' ';
+        $assetSearchFields = ['a.asset_tag','a.hostname','a.serial_number'];
+        if ($assetProfileColumns) {
+            foreach (['record_number','owner_full_name','registrar_name','unit_name','personnel_number','user_login','computer_type'] as $profileField) {
+                if (isset($assetProfileColumns[$profileField])) $assetSearchFields[] = 'p.' . $profileField;
+            }
+        }
+        $assetGroups=[];$assetTerms=[];
+        foreach($needles as $needle){$like='%'.$needle.'%';$assetGroups[]='('.implode(' OR ',array_map(static fn(string $field):string=>$field.' LIKE ?',$assetSearchFields)).')';foreach($assetSearchFields as $_field)$assetTerms[]=$like;}
+        $ownerSelect = isset($assetProfileColumns['owner_full_name']) ? 'p.owner_full_name' : 'NULL';
+        $recordSelect = isset($assetProfileColumns['record_number']) ? 'p.record_number' : 'NULL';
+        $assetSql = 'SELECT a.id, a.asset_tag, a.hostname, a.serial_number, d.name AS department_name, ' . $ownerSelect . ' AS profile_owner, ' . $recordSelect . ' AS profile_record FROM assets a LEFT JOIN departments d ON d.id = a.department_id ' . $assetProfileJoin . ($assetSearchScope ?: 'WHERE 1 = 1') . ' AND (' . implode(' OR ', $assetGroups) . ') ORDER BY a.updated_at DESC LIMIT 30';
+        $assetQuery = db()->prepare($assetSql); $assetQuery->execute(array_merge($assetSearchParams,$assetTerms)); $assetRows=$assetQuery->fetchAll();
+        $articleGroups=[];$articleTerms=[];
+        foreach($needles as $needle){$like='%'.$needle.'%';$articleGroups[]='(title LIKE ? OR body LIKE ? OR category LIKE ?)';array_push($articleTerms,$like,$like,$like);}
+        $articleQuery = db()->prepare('SELECT id, title, category, updated_at FROM knowledge_articles WHERE is_published = 1 AND (' . implode(' OR ', $articleGroups) . ') ORDER BY updated_at DESC LIMIT 30');
+        $articleQuery->execute($articleTerms); $articleRows=$articleQuery->fetchAll();
+        $trafficRows = []; $mediaRows = [];
+        if (user_can($searchUser, 'traffic.view')) {
+            try {
+                $trafficGroups=[]; $trafficTerms=[];
+                foreach($needles as $needle){$like='%'.$needle.'%';$trafficGroups[]='(v.serial_no LIKE ? OR v.full_name LIKE ? OR v.national_code LIKE ? OR v.phone LIKE ? OR v.company LIKE ? OR v.meeting_with LIKE ? OR v.description LIKE ?)';array_push($trafficTerms,$like,$like,$like,$like,$like,$like,$like);}
+                $trafficQuery=db()->prepare('SELECT v.id,v.serial_no,v.visit_date,v.full_name,v.company,v.meeting_with,v.entry_time FROM traffic_visits v WHERE '.implode(' OR ',$trafficGroups).' ORDER BY v.visit_date DESC,v.id DESC LIMIT 20');
+                $trafficQuery->execute($trafficTerms);$trafficRows=$trafficQuery->fetchAll();
+            } catch (Throwable) { $trafficRows=[]; }
+        }
+        if (user_can($searchUser, 'cddvd.view')) {
+            try {
+                [$mediaScope,$mediaScopeParams]=cd_dvd_scope($searchUser,'r');
+                $mediaGroups=[];$mediaTerms=[];
+                foreach($needles as $needle){$like='%'.$needle.'%';$mediaGroups[]='(r.serial LIKE ? OR r.info_type LIKE ? OR r.info_desc LIKE ? OR r.receiver LIKE ? OR r.receiver_unit LIKE ? OR r.brought_by LIKE ? OR r.exit_sheet LIKE ? OR r.note LIKE ?)';array_push($mediaTerms,$like,$like,$like,$like,$like,$like,$like,$like);}
+                $mediaSql='SELECT r.id,r.serial,r.media,r.direction,r.info_type,r.info_desc,r.date_str,r.receiver,r.brought_by FROM cd_dvd_records r '.($mediaScope!==''?' '.$mediaScope:'WHERE 1=1').' AND ('.implode(' OR ',$mediaGroups).') ORDER BY r.sort_key DESC,r.id DESC LIMIT 20';
+                $mediaQuery=db()->prepare($mediaSql);$mediaQuery->execute(array_merge($mediaScopeParams,$mediaTerms));$mediaRows=$mediaQuery->fetchAll();
+            } catch (Throwable) { $mediaRows=[]; }
+        }
+        $foundAny = (bool) ($searchSections || $ticketRows || $assetRows || $articleRows || $trafficRows || $mediaRows);
+        if (!$foundAny) {
+            echo '<section class="card search-not-found"><span class="search-empty-icon">⌕</span><h2>یافت نشد</h2><p>برای «' . e($searchTerm) . '» در صفحه‌ها و اطلاعات قابل‌دسترسی سامانه نتیجه‌ای پیدا نشد.</p><small>املای واژه را بررسی کنید یا عبارت دیگری جست‌وجو کنید.</small></section>';
+        } else {
+            // کارت «بخش‌ها و صفحه‌ها» اکنون فقط هنگام وجود نتیجه نمایش داده می‌شود.
+            echo '<section class="search-results">';
+            if($searchSections){echo '<div class="card"><h2>صفحه‌ها و بخش‌های مرتبط <span class="muted">('.count($searchSections).')</span></h2><div class="category-list">';foreach($searchSections as $result){echo '<a class="search-result" href="'.e((string)$result['url']).'"><strong>'.e((string)$result['title']).'</strong><small class="muted">باز کردن این بخش</small></a>'; }echo '</div></div>';}
+            if($ticketRows){echo '<div class="card"><h2>درخواست‌ها <span class="muted">('.count($ticketRows).')</span></h2><div class="category-list">';foreach($ticketRows as $result){echo '<a class="search-result" href="request-center.php?page=ticket&id='.(int)$result['id'].'"><strong>'.e(ticket_number((int)$result['id'])).' • '.e($result['subject']).'</strong><small>'.e($result['department_name']?:'بدون معاونت').' • '.e(ticket_type_label($result['ticket_type'])).' • '.e(status_label($result['status'])).'</small></a>'; }echo '</div></div>';}
+            if($assetRows){echo '<div class="card"><h2>شناسنامه‌ها و دارایی‌ها <span class="muted">('.count($assetRows).')</span></h2><div class="category-list">';foreach($assetRows as $result){echo '<a class="search-result" href="index.php?page=inventory&id='.(int)$result['id'].'"><strong>'.asset_tag_label($result['asset_tag'],$result['hostname']).' • '.e(asset_name_or($result['hostname'])).'</strong><small>'.e($result['profile_record']?:$result['serial_number']?:'شناسه ثبت نشده').' • '.e($result['profile_owner']?:$result['department_name']?:'بدون مالک ثبت‌شده').'</small></a>'; }echo '</div></div>';}
+            if($articleRows){echo '<div class="card"><h2>دانش‌نامه <span class="muted">('.count($articleRows).')</span></h2><div class="category-list">';foreach($articleRows as $result){echo '<a class="search-result" href="index.php?page=knowledge&id='.(int)$result['id'].'"><strong>'.e($result['title']).'</strong><small>'.e($result['category']?:'راهنما').' • '.e(jalali_date($result['updated_at'],false)).'</small></a>'; }echo '</div></div>';}
+            if($trafficRows){echo '<div class="card"><h2>سوابق تردد <span class="muted">('.count($trafficRows).')</span></h2><div class="category-list">';foreach($trafficRows as $result){echo '<a class="search-result" href="index.php?page=traffic-control&tab=history&search='.rawurlencode($searchTerm).'"><strong>'.e($result['full_name']).' • '.e($result['serial_no']).'</strong><small>'.e($result['visit_date']).' • '.e($result['company']?:'بدون شرکت').' • '.e($result['meeting_with']?:'بدون مقصد').'</small></a>'; }echo '</div></div>';}
+            if($mediaRows){echo '<div class="card"><h2>سوابق CD/DVD <span class="muted">('.count($mediaRows).')</span></h2><div class="category-list">';foreach($mediaRows as $result){echo '<a class="search-result" href="index.php?page=cd-dvd&tab=history&search='.rawurlencode($searchTerm).'"><strong>'.e($result['media']).' • '.e($result['serial']).' • '.e($result['info_type']).'</strong><small>'.e($result['date_str']).' • '.e($result['direction']==='IN'?'ورود':'خروج').' • '.e($result['receiver']?:$result['brought_by']?:'').'</small></a>'; }echo '</div></div>';}
+            echo '</section>';
+        }
+    }
+    render_footer();
+    exit;
+}
+
+if ($page === 'chatbot-admin') {
+    $chatbotAdmin = require_permission('chatbot.manage');
+    if (isset($_GET['lab_wav'])) {
+        $labName = basename((string) $_GET['lab_wav']);
+        if (!preg_match('/^[A-Za-z0-9_.-]+\\.wav$/', $labName)) {
+            http_response_code(400);
+            echo 'نام فایل نامعتبر است.';
+            exit;
+        }
+        $labFile = APP_ROOT . '/storage/tts/_lab/' . $labName;
+        if (!is_file($labFile) || filesize($labFile) < 100) {
+            http_response_code(404);
+            echo 'فایل آزمایشگاه یافت نشد.';
+            exit;
+        }
+        $labAudio = (string) file_get_contents($labFile);
+        header('Content-Type: audio/wav');
+        header('Content-Length: ' . strlen($labAudio));
+        echo $labAudio;
+        exit;
+    }
+    if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
+        require_csrf();
+        try {
+            if (isset($_POST['tts_settings'])) {
+                chatbot_save_tts($_POST, $chatbotAdmin);
+                flash('success', 'تنظیمات گویندگی بات ذخیره شد.');
+            } elseif (isset($_POST['widget_settings'])) {
+                chatbot_save_widget($_POST, $chatbotAdmin);
+                flash('success', 'تنظیمات آریا ذخیره شد.');
+            } elseif (isset($_POST['tts_test'])) {
+                $ttsTest = chatbot_tts_say('سلام، می‌خواهم به شما کمک کنم. درخواست شما ثبت می‌شود.');
+                if ($ttsTest['ok']) {
+                    $ttsActive = chatbot_tts_active();
+                    $ttsTestVoice = ($ttsActive['kind'] === 'piper')
+                        ? ' موتور عصبی Piper فعال است.'
+                        : ' موتور eSpeak فعال است.';
+                    if (chatbot_tts_colloquial_enabled()) {
+                        $ttsTestVoice .= ' خواندن محاوره‌ای روشن است.';
+                    }
+                    flash('success', 'موتور صوتی سرور سالم است و فایل تست ساخته شد.' . $ttsTestVoice);
+                } else {
+                    flash('danger', $ttsTest['error']);
+                }
+            } elseif (isset($_POST['tts_ezafe_pairs'])) {
+                $addedPairs = chatbot_tts_save_mined_pairs($_POST, $chatbotAdmin);
+                flash('success', $addedPairs > 0 ? ('فهرست کسره با ' . $addedPairs . ' مورد به‌روز شد.') : 'موردی انتخاب نشد.');
+            } elseif (isset($_POST['tts_lab'])) {
+                $labText = (string) ($_POST['lab_text'] ?? '');
+                $labVariant = valid_choice((string) ($_POST['lab_variant'] ?? 'all'), ['all', 'a', 'b', 'c', 'd', 'e', 'f', 'g'], 'all');
+                $labWav = !empty($_POST['lab_wav']);
+                $labLines = preg_split('/\R/u', $labText) ?: [];
+                $labRows = [];
+                $labVars = $labVariant === 'all' ? ['a', 'b', 'c', 'd', 'e', 'f', 'g'] : [$labVariant];
+                foreach ($labLines as $labLine) {
+                    $labLine = trim((string) $labLine);
+                    if ($labLine === '') {
+                        continue;
+                    }
+                    foreach ($labVars as $labV) {
+                        $one = chatbot_tts_lab_run($labLine, (string) $labV, $labWav);
+                        $labRows[] = [
+                            'input' => $labLine,
+                            'variant' => $labV,
+                            'stages' => $one['stages'] ?? [],
+                            'ipa' => $one['ipa'] ?? [],
+                            'wav' => $one['wav'] ?? '',
+                            'wav_error' => $one['wav_error'] ?? '',
+                            'final' => $one['final'] ?? '',
+                        ];
+                    }
+                }
+                chatbot_render_admin($chatbotAdmin, [
+                    'text' => $labText,
+                    'variant' => $labVariant,
+                    'wav' => $labWav,
+                    'rows' => $labRows,
+                ]);
+                exit;
+            } elseif (isset($_POST['tts_sample'])) {
+                $ttsSample = chatbot_tts_say('سلام، می‌خواهم به شما کمک کنم. درخواست شما ثبت می‌شود.');
+                if (!$ttsSample['ok']) {
+                    flash('danger', $ttsSample['error']);
+                    redirect('index.php?page=chatbot-admin');
+                }
+                $sampleAudio = (string) file_get_contents($ttsSample['file']);
+                header('Content-Type: audio/wav');
+                header('Content-Length: ' . strlen($sampleAudio));
+                header('Content-Disposition: attachment; filename="aria-test.wav"');
+                echo $sampleAudio;
+                exit;
+            } else {
+                chatbot_save_faq($_POST, $chatbotAdmin);
+                flash('success', 'مدخل بات ذخیره شد.');
+            }
+        } catch (RuntimeException $chatbotError) {
+            flash('danger', $chatbotError->getMessage());
+        }
+        redirect('index.php?page=chatbot-admin');
+    }
+    chatbot_render_admin($chatbotAdmin);
+}
+
+if ($page === 'holidays') {
+    // تابلو در holiday-board.php نگهداری می‌شود و با همان markup زیر تب «تقویم و تعطیلات»
+    // در صفحهٔ تنظیمات هم رندر می‌شود؛ پس این دو نما هیچ‌وقت از هم جدا نمی‌افتند.
+    $holidayAdmin = require_permission('holidays.view');
+    render_header('تقویم SLA', $holidayAdmin);
+    echo '<section class="page-heading"><div><span class="eyebrow">تقویم کاری</span><h1>تعطیلات رسمی و توقف SLA</h1><p>روزهای تعطیل هفتگی و ساعت کاری را در همین صفحه تنظیم کنید؛ سایر تعطیلات را با تقویم شمسی انتخاب کنید.</p></div></section>';
+    holiday_board_render($user);
+    render_footer();
+    exit;
+}
+
+if ($page === 'inventory') {
+    $inventoryUser = require_permission('inventory.view');
+    if (!is_global_ticket_role($inventoryUser['role']) && user_service_group($inventoryUser) !== 'it') {
+        security_log_access_denied($inventoryUser, 'inventory.scope.it', 'inventory');
+        http_response_code(403);
+        exit('شناسنامه فنی سیستم‌ها فقط در حوزه IT قابل دسترسی است.');
+    }
+    [$inventoryScope, $inventoryParams] = asset_scope($inventoryUser);
+    $inventoryId = (int) ($_GET['id'] ?? 0);
+    if ($inventoryId <= 0 && user_can($inventoryUser, 'assets.view')) {
+        redirect('index.php?page=assets');
+    }
+    if ($inventoryId <= 0) {
+        asset_profile_ensure_schema();
+        $inventoryQuery = db()->prepare('SELECT a.id, a.asset_tag, a.hostname, a.operating_system, a.last_inventory_at, d.name AS department_name, p.ad_online, p.ad_scanned_at FROM assets a LEFT JOIN departments d ON d.id = a.department_id LEFT JOIN asset_profiles p ON p.asset_id = a.id ' . $inventoryScope . ' ORDER BY a.updated_at DESC LIMIT 200');
+        $inventoryQuery->execute($inventoryParams);
+        render_header('شناسنامه سیستم‌ها', $inventoryUser);
+          echo '<section class="page-heading"><div><span class="eyebrow">جزئیات سیستم</span><h1>سیستم‌های شناسایی‌شده</h1><p>برای تکمیل اطلاعات دستی یا مشاهده تاریخچه، سیستم موردنظر را انتخاب کنید.</p></div><div class="actions">' . (user_can($inventoryUser, 'domain.import') ? '<form method="post" class="inline-action">' . csrf_field() . '<input type="hidden" name="action" value="import_domain_assets"><button class="button secondary" type="submit">ورود کامپیوترهای دامنه</button></form>' : '') . '<a class="button secondary" href="index.php?page=assets">شناسنامه‌ها</a></div></section><section class="card ticket-table"><div class="table-head"><span>سیستم</span><span>معاونت</span><span>سیستم‌عامل</span><span>آخرین برداشت</span></div>';
+         while ($asset = $inventoryQuery->fetch()) {
+             $isOnline = (int) ($asset['ad_online'] ?? 0) === 1;
+             $wasScanned = (string) ($asset['ad_scanned_at'] ?? '') !== '';
+             if ($isOnline) {
+                 $netBadge = '<small class="net-badge online">آنلاین</small>';
+             } elseif ($wasScanned) {
+                 $netBadge = '<small class="net-badge offline">آفلاین</small>';
+             } else {
+                 $netBadge = '<small class="net-badge unknown">پینگ نشده</small>';
+             }
+             echo '<a class="table-row" href="index.php?page=inventory&id=' . (int) $asset['id'] . '"><span class="ticket-title">' . '<strong' . asset_name_attr($asset['hostname']) . '>' . e(asset_name_or($asset['hostname'])) . '</strong>' . $netBadge . '</span><span>' . e($asset['department_name'] ?: 'بدون معاونت') . '</span><span>' . e($asset['operating_system']) . '</span><span>' . e($asset['last_inventory_at'] ? persian_date($asset['last_inventory_at']) : 'ثبت نشده') . '</span></a>';
+         }
+        echo '</section>';
+        render_footer();
+        exit;
+    }
+    $inventoryQuery = db()->prepare('SELECT a.*, d.name AS department_name, u.full_name AS owner_name FROM assets a LEFT JOIN departments d ON d.id = a.department_id LEFT JOIN users u ON u.id = a.owner_user_id ' . ($inventoryScope ? $inventoryScope . ' AND a.id = ?' : 'WHERE a.id = ?') . ' LIMIT 1');
+    $inventoryQuery->execute(array_merge($inventoryParams, [$inventoryId]));
+    $asset = $inventoryQuery->fetch();
+    if (!$asset) {
+        http_response_code(404);
+        render_header('سیستم پیدا نشد', $inventoryUser);
+        echo '<section class="empty-state"><h2>سیستم پیدا نشد</h2></section>';
+        render_footer();
+        exit;
+    }
+    $profile = asset_profile_fill_from_asset(asset_profile_fetch($inventoryId), $asset);
+    $inventorySourceLabels = ['agent' => 'Agent کلاینت', 'domain' => 'اسکن شبکه‌ای', 'server_inventory' => 'استخراج محلی'];
+    $lastInventoryLabel = !empty($asset['last_inventory_at'])
+        ? persian_date((string) $asset['last_inventory_at']) . ' — ' . ($inventorySourceLabels[(string) ($asset['source'] ?? '')] ?? 'منبع ثبت‌شده')
+        : 'هنوز برداشت دارای دادهٔ سخت‌افزاری ثبت نشده است؛ اطلاعات دامنه ممکن است فقط شامل مشخصات پایه باشد.';
+    $collectionIssues = asset_profile_collection_status_summary($asset);
+    $collectionFailures = array_values(array_filter($collectionIssues, static fn (array $item): bool => ($item['state'] ?? '') === 'failed'));
+    $collectionEmpty = array_values(array_filter($collectionIssues, static fn (array $item): bool => ($item['state'] ?? '') === 'empty'));
+    $collectionNotAttempted = array_values(array_filter($collectionIssues, static fn (array $item): bool => ($item['state'] ?? '') === 'not_attempted'));
+    $collectionStatusHtml = '';
+    if ($collectionFailures !== []) {
+        $failureNames = array_map(static function (array $item): string {
+            $name = (string) ($item['name'] ?? '');
+            $lastSuccess = trim((string) ($item['last_success_at'] ?? ''));
+            $sourceLabels = ['agent' => 'عامل کلاینت', 'domain' => 'اسکن دامنه', 'server_inventory' => 'استخراج محلی'];
+            $source = $sourceLabels[(string) ($item['last_success_source'] ?? '')] ?? '';
+            $detail = $lastSuccess !== '' ? ' (آخرین پاسخ موفق منبع: ' . persian_date($lastSuccess) . '، ساعت ' . date('H:i', strtotime($lastSuccess)) . ($source !== '' ? '، ' . $source : '') . ')' : ' (زمان دریافت موفق قبلی نامشخص است)';
+            return $name . $detail;
+        }, array_slice($collectionFailures, 0, 5));
+        $extra = count($collectionFailures) > 5 ? ' و ' . (count($collectionFailures) - 5) . ' مورد دیگر' : '';
+        $collectionStatusHtml .= '<small class="muted">در برداشت اخیر ' . count($collectionFailures) . ' منبع داده پاسخ نداد؛ مقادیر قبلی این بخش‌ها در صورت وجود حفظ شده‌اند: ' . e(implode('، ', $failureNames) . $extra) . '.</small>';
+    }
+    if ($collectionEmpty !== []) {
+        $collectionStatusHtml .= '<small class="muted">در برداشت اخیر ' . count($collectionEmpty) . ' پرس‌وجوی موفق ردیفی برنگرداند؛ این با خطای دسترسی یکی نیست و دستهٔ متناظر به‌روز شده است.</small>';
+    }
+    if ($collectionNotAttempted !== []) {
+        $collectionStatusHtml .= '<small class="muted">' . count($collectionNotAttempted) . ' دسته در روشِ برداشت اخیر اصلاً پرس‌وجو نشدند؛ آخرین دادهٔ شناخته‌شدهٔ آن‌ها جداگانه حفظ شده است.</small>';
+    }
+    render_header('شناسنامه سیستم', $inventoryUser);
+    $canExtractThisAsset = user_can($inventoryUser, 'domain.scan');
+    $extractPreflight = $canExtractThisAsset ? domain_scan_preflight() : null;
+    $assetActions = '';
+    if ($canExtractThisAsset && $extractPreflight === null) {
+        $assetActions .= '<a class="button secondary" href="#extract-inventory">استخراج شبکه‌ای</a>';
+        if (user_can($inventoryUser, 'settings.domain')) {
+            $assetActions .= '<a class="button secondary" href="index.php?page=settings#domain-scan">تنظیمات اسکن شبکه</a>';
+        }
+    }
+    echo '<section class="page-heading asset-heading"><div><a class="back-link" href="index.php?page=inventory">← بازگشت به سیستم‌ها</a><h1' . asset_name_attr($asset['hostname']) . '>شناسنامه رایانه ' . e(asset_name_or($asset['hostname'])) . '</h1><p>مالک: ' . e($asset['owner_name'] ?: 'بدون مالک') . '</p><p class="muted">آخرین برداشت سخت‌افزاری: ' . e($lastInventoryLabel) . '</p><small class="muted">ثبت این زمان کامل‌بودن همهٔ فیلدها را تضمین نمی‌کند؛ در برداشت ناقص ممکن است مقدار پیشین باقی بماند. برداشت شبکه‌ایِ موفق فیلدهای ماشینی را تازه می‌کند؛ اطلاعات اداری و دستی جداگانه حفظ می‌شوند.</small>' . $collectionStatusHtml . '</div><div class="actions">' . $assetActions . '<a class="button secondary" href="index.php?page=asset-history&id=' . $inventoryId . '">تاریخچه</a></div></section>';
+    if ($canExtractThisAsset) {
+        if ($extractPreflight !== null) {
+            echo '<section id="extract-inventory" class="card form-card inventory-extract-card"><h2>استخراج شبکه‌ای</h2><p class="alert danger">' . e((string) $extractPreflight) . '</p></section>';
+        } else {
+            echo '<section id="extract-inventory" class="card form-card inventory-extract-card"><h2>استخراج شبکه‌ای با حساب مجاز</h2><p class="muted">این حساب باید روی همین کامپیوتر دسترسی Administrators محلی داشته باشد. اعتبارنامه فقط برای این نوبت، رمز‌شده در نشست موقت نگهداری و پس از پایان پاک می‌شود؛ در پایگاه‌داده ذخیره نمی‌شود. استفاده از HTTPS الزامی است. اسکن موفق فیلدهای ماشینی شناسنامه را تازه می‌کند و ممکن است مقدار دستی همان فیلدها را جایگزین کند؛ پلاک، پلمپ و اطلاعات اداری خارج از این نگاشت هستند.</p><form method="post" class="form-grid">' . csrf_field() . '<input type="hidden" name="asset_ids[]" value="' . $inventoryId . '"><input type="hidden" name="action" value="domain_scan_selected"><label>نام کاربری ویندوز (DOMAIN\\user)<input name="scan_username" required autocomplete="off" placeholder="COMPANY\\inventory-scan"></label><label>رمز حساب<input type="password" name="scan_password" required autocomplete="new-password"></label><div class="full"><button class="button" type="submit">استخراج اطلاعات این سیستم</button></div></form></section>';
+        }
+    }
+    echo '<form class="inventory-form" method="post">' . csrf_field() . '<input type="hidden" name="action" value="save_inventory_form"><input type="hidden" name="asset_id" value="' . $inventoryId . '">';
+    echo asset_profile_render_sections($profile);
+    echo '<div class="form-actions-bar"><button class="button" type="submit">ذخیره شناسنامه</button></div></form>';
+    render_footer();
+    exit;
+}
+
+if ($page === 'inventory-diagnostics') {
+    $diagUser = require_permission('inventory.diagnostics');
+    if (!is_global_ticket_role($diagUser['role']) && user_service_group($diagUser) !== 'it') {
+        security_log_access_denied($diagUser, 'inventory.scope.it', 'inventory-diagnostics');
+        http_response_code(403);
+        exit('این بخش فقط در حوزه IT قابل دسترسی است.');
+    }
+    $diagAssetId = (int) ($_GET['id'] ?? 0);
+    $checks = inventory_diagnostics();
+    render_header('تست جمع‌آوری اطلاعات', $diagUser);
+    $selfTest = $_SESSION['asset_selftest'] ?? null;
+    unset($_SESSION['asset_selftest']);
+    echo '<section class="page-heading"><div><a class="back-link" href="' . ($diagAssetId > 0 ? 'index.php?page=inventory&id=' . $diagAssetId : 'index.php?page=assets') . '">← بازگشت</a><h1>تست جمع‌آوری اطلاعات سیستم</h1><p>نتیجه اجرای دستورهای سیستمی از دید همین سرور. اگر ردیفی «ناموفق/صفر» بود، دکمهٔ استخراج هم چیزی پر نمی‌کند.</p></div><div class="actions"><form method="post" class="inline-action">' . csrf_field() . '<input type="hidden" name="action" value="asset_profile_selftest"><input type="hidden" name="asset_id" value="' . $diagAssetId . '"><label class="muted"><input type="checkbox" name="overwrite" value="1"> بازنویسی فیلدهای خودکار موجود</label><button class="button" type="submit">استخراج آزمایشی و نمایش فیلدها</button></form></div></section>';
+    if (is_array($selfTest)) {
+        echo '<section class="card ticket-table"><div class="table-head"><span>فیلد شناسنامه</span><span>مقدار به‌دست‌آمده</span></div>';
+        if ((int) $selfTest['filled'] === 0) {
+            echo '<div class="table-row"><span class="muted">هیچ فیلدی به‌دست نیامد. علت: ' . e((string) ($selfTest['error'] !== '' ? $selfTest['error'] : 'خروجی خالی از PowerShell/WMI')) . '</span></div>';
+        }
+        foreach ((array) $selfTest['keys'] as $row) {
+            echo '<div class="table-row"><span><b dir="ltr">' . e((string) $row[0]) . '</b></span><span>' . e((string) $row[1]) . '</span></div>';
+        }
+        echo '</div><p class="muted" style="margin-top:8px">مجموع: ' . (int) $selfTest['filled'] . ' فیلد پرشدنی، ' . (int) $selfTest['empty'] . ' فیلد خالی (دستی)، امتیاز سخت‌افزار ' . (int) $selfTest['hardware_score'] . (($selfTest['asset_id'] ?? 0) > 0 ? '، شناسنامهٔ سیستم #' . (int) $selfTest['asset_id'] . ' (' . (int) $selfTest['applied'] . ' فیلد ذخیره شد)' : '') . '. زمان: ' . e((string) $selfTest['at']) . ' — سرور: ' . e((string) $selfTest['os']) . '</p></section>';
+    }
+    echo '<section class="card ticket-table"><div class="table-head"><span>بررسی</span><span>نتیجه</span></div>';
+    foreach ($checks as $check) {
+        echo '<div class="table-row"><span class="ticket-title"><b>' . e((string) $check[0]) . '</b></span><span style="word-break:break-all">' . e((string) $check[1]) . '</span></div>';
+    }
+    echo '</section>';
+    render_footer();
+    exit;
+}
+
+if ($page === 'asset-history') {
+    $historyUser = require_permission('asset.history');
+    [$historyScope, $historyParams] = asset_scope($historyUser);
+    $historyId = (int) ($_GET['id'] ?? 0);
+    $assetQuery = db()->prepare('SELECT a.*, d.name AS department_name, u.full_name AS owner_name FROM assets a LEFT JOIN departments d ON d.id = a.department_id LEFT JOIN users u ON u.id = a.owner_user_id ' . ($historyScope ? $historyScope . ' AND a.id = ?' : 'WHERE a.id = ?') . ' LIMIT 1');
+    $assetQuery->execute(array_merge($historyParams, [$historyId]));
+    $asset = $assetQuery->fetch();
+    if (!$asset) { http_response_code(404); exit('سیستم پیدا نشد.'); }
+    $historyQuery = db()->prepare('SELECT h.*, u.full_name, t.subject, t.id AS ticket_id FROM asset_history_events h LEFT JOIN users u ON u.id = h.user_id LEFT JOIN tickets t ON t.id = h.ticket_id WHERE h.asset_id = ? ORDER BY h.created_at DESC');
+    $historyQuery->execute([$historyId]);
+    render_header('تاریخچه سیستم', $historyUser);
+    echo '<section class="page-heading"><div><a class="back-link" href="index.php?page=inventory&id=' . $historyId . '">← بازگشت به شناسنامه</a><h1>تاریخچه کامل ' . e(asset_name_or($asset['hostname'])) . '</h1><p>مالک: ' . e($asset['owner_name'] ?: 'بدون مالک') . '</p></div></section><section class="card event-log system-history"><h3>تمام تغییرات، برداشت‌ها و حل مشکلات</h3><div class="event-list">';
+    foreach ($historyQuery->fetchAll() as $event) { echo '<div class="event-item"><span class="event-dot"></span><div><strong>' . e($event['title']) . '</strong><small>' . e($event['full_name'] ?: 'سامانه') . ' • ' . e(persian_date($event['created_at'])) . ($event['subject'] ? ' • درخواست: ' . e(ticket_number((int) $event['ticket_id'])) : '') . '</small><p>' . e($event['details'] ?: '') . '</p></div></div>'; }
+    echo '</div></section>';
+    render_footer();
+    exit;
+}
+
+if ($page === 'domain-scan') {
+    $scanPageUser = require_permission('domain.scan');
+    domain_scan_ensure_schema();
+    $scanRunId = (int) ($_GET['run'] ?? 0);
+    $scanRun = $scanRunId > 0 ? domain_scan_run($scanRunId) : domain_scan_latest_run();
+    $scanEnabled = domain_scan_preflight() === null;
+    render_header('اسکن دامنه', $scanPageUser);
+    echo '<section class="page-heading"><div><span class="eyebrow">Active Directory</span><h1>اسکن کامپیوترهای دامنه</h1><p>فهرست کامل کامپیوترهای Active Directory وارد صف می‌شود؛ برای هر مقصدِ روشن و قابل‌دسترسی، جزئیات سخت‌افزار، نرم‌افزار، به‌روزرسانی‌ها، دستگاه‌ها، سرویس‌ها و حساب‌های کاربری با WMI/CIM خوانده می‌شود. سیستم خاموش یا غیرقابل‌دسترسی در فهرست می‌ماند اما تا زمان دسترسی، جزئیات زنده ندارد.</p></div><div class="actions"><a class="button secondary" href="index.php?page=settings">تنظیمات</a><a class="button secondary" href="index.php?page=assets">شناسنامه‌ها</a></div></section>';
+    if (!$scanEnabled) {
+        echo '<section class="card form-card"><p class="alert danger">' . e((string) domain_scan_preflight()) . '</p></section>';
+    } else {
+        echo '<section class="card form-card"><div class="form-section-head"><h2>شروع اسکن</h2><span class="muted">حساب اتصال: ' . e(domain_scan_account_label()) . '</span></div><form method="post" class="form-grid">' . csrf_field() . '<input type="hidden" name="action" value="domain_scan_start"><label>حساب مجاز ویندوز (DOMAIN\\user)<input name="scan_username" required autocomplete="off" placeholder="COMPANY\\inventory-scan"></label><label>رمز همان حساب<input type="password" name="scan_password" required autocomplete="new-password"></label><div class="full"><button class="button" type="submit">شروع اسکن دامنه</button><small>اعتبارنامه فقط برای همین نوبت استفاده می‌شود؛ در پایگاه‌داده ذخیره نمی‌شود و پس از پایان اسکن از نشست پاک می‌شود. ارسال آن فقط با HTTPS مجاز است.</small></div></form><p class="muted">هر اسکن همهٔ کامپیوترهای دامنه را در صف می‌گذارد؛ کامپیوترهای خاموش در اسکن بعدی دوباره بررسی می‌شوند. حساب باید روی کلاینت‌ها دسترسی Administrators محلی داشته باشد. این مسیر همهٔ رایانه‌های پیدا‌شده در AD را صف می‌کند و محدودیت انتخاب گروهی ۹۰۰تایی ندارد؛ نتیجهٔ واقعی برای هر میزبان در جدول همین صفحه ثبت می‌شود.</p></section>';
+    }
+    if ($scanRun) {
+        $scanTotal = (int) $scanRun['total'];
+        $scanDone = (int) $scanRun['done'];
+        $scanPercent = $scanTotal > 0 ? min(100, (int) floor($scanDone * 100 / $scanTotal)) : 0;
+        echo '<section class="card form-card"><div class="form-section-head"><h2>پیشرفت اسکن #' . (int) $scanRun['id'] . '</h2><span class="muted">وضعیت: ' . e((string) $scanRun['status']) . '</span></div>';
+        echo '<div style="background:#1b2740;border-radius:10px;overflow:hidden;height:14px;margin:10px 0"><div id="scan-bar" style="height:14px;width:' . $scanPercent . '%;background:#14b8a6;transition:width .3s"></div></div>';
+        echo '<div class="form-grid"><label>کل<input value="' . $scanTotal . '" readonly></label><label>انجام‌شده<input value="' . $scanDone . '" readonly></label><label>آنلاین<input value="' . (int) $scanRun['online'] . '" readonly></label><label>آفلاین<input value="' . (int) $scanRun['offline'] . '" readonly></label><label>خطا<input value="' . (int) $scanRun['failed'] . '" readonly></label></div>';
+        echo '<p id="scan-status" class="muted"></p>';
+        if ((string) $scanRun['status'] !== 'finished') {
+            echo '<form id="scan-next" method="post" hidden>' . csrf_field() . '<input type="hidden" name="action" value="domain_scan_batch"><input type="hidden" name="run_id" value="' . (int) $scanRun['id'] . '"></form>';
+        }
+        echo '</section>';
+        $scanRows = domain_scan_queue_rows((int) $scanRun['id'], 1000, (string) ($_GET['sort_d'] ?? ''), (string) ($_GET['dir_d'] ?? ''));
+        // ۱.۳۷ — شکست‌ها بر اساس علت گروه‌بندی و راه‌حل گام‌به‌گام نشان داده می‌شوند تا
+        // «RPC/WMI در دسترس نیست» و «دسترسی رد شد» بدون گشتن در لاگ‌ها قابل رفع باشند.
+        $scanFailureGroups = domain_scan_failure_summary($scanRows);
+        $scanErrorCount = 0;
+        foreach ($scanRows as $scanRowForCount) {
+            if ((string) ($scanRowForCount['status'] ?? '') === 'error') {
+                $scanErrorCount++;
+            }
+        }
+        if ($scanFailureGroups !== []) {
+            echo '<section class="card form-card scan-failures"><div class="form-section-head"><h2>دلایل شکست استخراج و راه‌حل</h2><span class="muted">' . count($scanFailureGroups) . ' علت در این نوبت</span></div>';
+            if ($scanErrorCount > 0) {
+                $retryPreflight = domain_scan_preflight();
+                if ($retryPreflight === null) {
+                    echo '<form method="post" class="form-grid" style="margin:0 0 14px">' . csrf_field() . '<input type="hidden" name="action" value="domain_scan_retry"><input type="hidden" name="run_id" value="' . (int) $scanRun['id'] . '"><label>حساب مجاز ویندوز (DOMAIN\\user)<input name="scan_username" required autocomplete="off" placeholder="COMPANY\\inventory-scan"></label><label>رمز همان حساب<input type="password" name="scan_password" required autocomplete="new-password"></label><div class="full"><button class="button" type="submit">تلاش دوباره برای ناموفق‌ها (' . $scanErrorCount . ' سیستم)</button></div></form>';
+                } else {
+                    echo '<p class="alert danger">' . e((string) $retryPreflight) . '</p>';
+                }
+            }
+            // آماده‌سازی راه‌دور مقصدها (فعال‌سازی WinRM و قواعد فایروال WMI با اعتبارنامهٔ همین نوبت،
+            // بدون Group Policy) — فقط برای سیستم‌های خطادارِ آنلاین و فقط با مجوز asset.remote_prepare.
+            $prepareHosts = [];
+            foreach ($scanRows as $scanRowForPrepare) {
+                if ((string) ($scanRowForPrepare['status'] ?? '') === 'error' && (int) ($scanRowForPrepare['online'] ?? 0) === 1) {
+                    $prepareHosts[] = (string) $scanRowForPrepare['hostname'];
+                }
+            }
+            $prepareHosts = array_values(array_unique(array_filter($prepareHosts, static fn (string $host): bool => $host !== '' && (bool) preg_match('/^[A-Za-z0-9._-]+$/', $host))));
+            if ($prepareHosts !== [] && user_can($scanPageUser, 'asset.remote_prepare')) {
+                $preparePreflight = domain_scan_prepare_preflight();
+                if ($preparePreflight === null) {
+                    echo '<form id="prepare-form" method="post" class="form-grid" style="margin:0 0 14px">' . csrf_field() . '<input type="hidden" name="action" value="domain_scan_prepare"><label>حساب مجاز ویندوز (DOMAIN\\user)<input name="scan_username" required autocomplete="off" placeholder="COMPANY\\inventory-scan"></label><label>رمز همان حساب<input type="password" name="scan_password" required autocomplete="new-password"></label><div class="full"><button class="button" id="prepare-btn" type="submit">آماده‌سازی سیستم‌های مقصد (فعال‌سازی WinRM) — ' . count($prepareHosts) . ' سیستم</button><small>با همان حساب، WinRM و قواعد فایروال WMI روی مقصدها فعال می‌شود؛ بدون دست‌کاری Group Policy. هر سیستم حدود ۱۵ تا ۳۰ ثانیه طول می‌کشد و نتیجهٔ هر سیستم همین‌جا نمایش داده می‌شود.</small></div></form><div id="prepare-results"></div>';
+                    echo '<script nonce="' . e(csp_nonce()) . '">window.__prepareHosts=' . json_encode($prepareHosts, JSON_UNESCAPED_UNICODE) . ';</script>';
+                    echo '<script nonce="' . e(csp_nonce()) . '">(function(){var f=document.getElementById("prepare-form");if(!f){return;}var hosts=window.__prepareHosts||[];var out=document.getElementById("prepare-results");var btn=document.getElementById("prepare-btn");f.addEventListener("submit",function(ev){ev.preventDefault();if(!hosts.length){return;}btn.disabled=true;out.innerHTML="";var i=0;function add(cls,txt){var p=document.createElement("p");p.className=cls;p.textContent=txt;out.appendChild(p);}function chunk(){if(i>=hosts.length){btn.disabled=false;add("alert success","آماده‌سازی کامل شد؛ حالا «تلاش دوباره برای ناموفق‌ها» را بزنید تا استخراج انجام شود.");return;}var part=hosts.slice(i,i+3);i+=3;var d=new FormData(f);d.set("ajax","1");part.forEach(function(h){d.append("hostnames[]",h);});fetch("index.php",{method:"POST",body:d,credentials:"same-origin"}).then(function(r){return r.json();}).then(function(j){if(!j||!j.ok){add("alert danger",(j&&j.error)?j.error:"خطا در آماده‌سازی.");}else{(j.results||[]).forEach(function(x){add(x.success?"alert success":"alert danger",(x.success?"✓ ":"✗ ")+(x.name||x.hostname)+" — "+x.message);});}chunk();}).catch(function(){add("alert danger","خطای ارتباط با سرور.");chunk();});}chunk();});})();</script>';
+                } else {
+                    echo '<p class="alert danger">' . e((string) $preparePreflight) . '</p>';
+                }
+            }
+            // روش دوم: انتشار خودکار GPO در دامنه از داخل همین پنل (بدون GPMC و بدون کار دستی).
+            // برای سیستم‌هایی که حتی SMB هم روی آن‌ها بسته است کار می‌کند و کل دامنه را پوشش می‌دهد.
+            $gpoHosts = [];
+            foreach ($scanRows as $scanRowForGpo) {
+                if ((string) ($scanRowForGpo['status'] ?? '') === 'error') {
+                    $gpoHosts[] = (string) $scanRowForGpo['hostname'];
+                }
+            }
+            $gpoHosts = array_values(array_unique(array_filter($gpoHosts, static fn (string $host): bool => $host !== '' && (bool) preg_match('/^[A-Za-z0-9._-]+$/', $host))));
+            if ($gpoHosts !== [] && user_can($scanPageUser, 'asset.remote_prepare')) {
+                $gpoPreflight = domain_scan_prepare_preflight();
+                if ($gpoPreflight === null && is_file(domain_scan_prepare_gpo_script_path())) {
+                    echo '<form id="gpo-form" method="post" class="form-grid" style="margin:0 0 14px;border:1px dashed var(--border,#ccc);padding:10px;border-radius:8px">' . csrf_field() . '<input type="hidden" name="action" value="domain_scan_prepare_gpo">';
+                    foreach ($gpoHosts as $gpoHost) {
+                        echo '<input type="hidden" name="hostnames[]" value="' . e($gpoHost) . '">';
+                    }
+                    echo '<label>حساب ادمین دامنه (DOMAIN\\admin)<input name="scan_username" required autocomplete="off" placeholder="COMPANY\\domain-admin"></label><label>رمز همان حساب<input type="password" name="scan_password" required autocomplete="new-password"></label><div class="full"><button class="button" id="gpo-btn" type="submit">روش دوم: ساخت و اعمال خودکار Group Policy در کل دامنه</button><small>پنل خودش روی کنترلر دامنه یک GPO می‌سازد (فعال‌سازی WinRM + قواعد فایروال WMI/RPC/WinRM)، به دامنه لینک می‌کند و همین حالا با gpupdate روی مقصدها اعمال می‌کند. لازم نیست شما در Group Policy Management کاری بکنید. اگر سرور پنل عضو دامنه نباشد، این روش خطای روشن می‌دهد و روش اول (SMB) جایگزین است.</small><label style="display:flex;gap:8px;align-items:center;font-weight:400"><input type="checkbox" name="gpo_unlink" value="1"> لغو لینک GPO از دامنه (سیاست از مقصدها برداشته می‌شود؛ خودِ GPO حذف نمی‌شود)</label></div></form><div id="gpo-results"></div>';
+                    echo '<script nonce="' . e(csp_nonce()) . '">(function(){var f=document.getElementById("gpo-form");if(!f){return;}var out=document.getElementById("gpo-results");var btn=document.getElementById("gpo-btn");f.addEventListener("submit",function(ev){ev.preventDefault();btn.disabled=true;out.innerHTML="";var d=new FormData(f);d.set("ajax","1");var unlink=d.get("gpo_unlink")==="1";if(unlink){d.set("action","domain_scan_prepare_gpo_unlink");}fetch("index.php",{method:"POST",body:d,credentials:"same-origin"}).then(function(r){return r.json();}).then(function(j){var p=document.createElement("p");p.className=(j&&j.ok)?"alert success":"alert danger";if(j&&j.ok){p.textContent="✓ "+j.message;if(j.details&&j.details.actions&&j.details.actions.length){p.textContent+=" | "+j.details.actions.join(" • ");}}else{p.textContent="✗ "+((j&&j.error)?j.error:"خطا در انتشار Group Policy.");}out.appendChild(p);btn.disabled=false;}).catch(function(){var p=document.createElement("p");p.className="alert danger";p.textContent="خطای ارتباط با سرور.";out.appendChild(p);btn.disabled=false;});});})();</script>';
+                } elseif ($gpoPreflight !== null) {
+                    echo '<p class="alert warning">روش Group Policy در این سرور در دسترس نیست: ' . e((string) $gpoPreflight) . ' روش اول (SMB) را استفاده کنید یا پنل را روی سرور عضو دامنه اجرا کنید.</p>';
+                }
+            }
+            echo '<p class="muted">بعد از انجام هر اصلاح روی سرور یا کلاینت‌ها، دکمهٔ «تلاش دوباره» فقط سیستم‌های خطادار را در نوبت تازه‌ای صف می‌کند؛ سیستم‌های موفق دوباره استخراج نمی‌شوند.</p><div class="scan-failure-grid">';
+            foreach ($scanFailureGroups as $scanGroup) {
+                echo '<article class="scan-failure"><h3>' . e((string) $scanGroup['title']) . ' <span class="scan-failure-count">' . (int) $scanGroup['count'] . ' سیستم</span></h3>';
+                if ($scanGroup['hosts'] !== []) {
+                    echo '<p class="scan-failure-hosts">' . e(implode('، ', (array) $scanGroup['hosts'])) . (count($scanGroup['hosts']) < (int) $scanGroup['count'] ? ' و …' : '') . '</p>';
+                }
+                if ($scanGroup['messages'] !== []) {
+                    echo '<p class="muted" style="font-size:11px">پیام سیستم: ' . e(implode(' | ', (array) $scanGroup['messages'])) . '</p>';
+                }
+                echo '<ol>';
+                foreach ((array) $scanGroup['remedy'] as $scanStep) {
+                    echo '<li>' . e((string) $scanStep) . '</li>';
+                }
+                echo '</ol></article>';
+            }
+            echo '</div><p class="muted">ابزارهای کمک: <code>php tools\diag_connection.php --client=IP</code> برای آزمون دسترسی یک سیستم و <code>php tools\diag_connection.php --json</code> برای خلاصهٔ وضعیت. تنظیم حساب و ترتیب پروتکل اتصال: <a href="index.php?page=settings#domain-scan">تنظیمات ← اسکن دامنه</a>.</p></section>';
+        }
+        if ($scanRows !== []) {
+            echo '<section class="card ticket-table" id="scan-rows">' . log_sort_header_row([['name', 'کامپیوتر'], ['status', 'وضعیت'], ['online', 'آنلاین'], ['message', 'پیام']], 'sort_d', 'dir_d', $_GET, (string) ($_GET['sort_d'] ?? ''), (string) ($_GET['dir_d'] ?? '')) . '';
+            foreach ($scanRows as $scanRow) {
+                $statusLabel = ['pending' => 'در انتظار', 'running' => 'در حال اجرا', 'done' => 'انجام شد', 'offline' => 'آفلاین', 'error' => 'خطا'][(string) $scanRow['status']] ?? (string) $scanRow['status'];
+                echo '<div class="table-row"><span class="ticket-title"><b' . asset_name_attr((string) $scanRow['hostname']) . '>' . e(asset_name_or((string) $scanRow['hostname'])) . '</b></span><span>' . e($statusLabel) . '</span><span>' . ((int) $scanRow['online'] === 1 ? 'بله' : 'خیر') . '</span><span style="font-size:11px">' . e((string) ($scanRow['message'] ?? '')) . '</span></div>';
+            }
+            echo '</section>';
+        }
+        if ((string) $scanRun['status'] !== 'finished') {
+            echo '<script nonce="' . e(csp_nonce()) . '">(function(){var f=document.getElementById("scan-next");if(!f){return;}var s=document.getElementById("scan-status");var busy=false;var stalled=0;function step(){if(busy){return;}busy=true;var d=new FormData(f);d.set("limit","4");fetch("index.php",{method:"POST",body:d,credentials:"same-origin"}).then(function(r){return r.json();}).then(function(j){busy=false;if(!j||!j.ok){if(s){s.textContent=j&&j.error?j.error:"خطا در ادامهٔ اسکن.";}return;}if(j.run&&s){s.textContent="پردازش‌شده: "+j.run.done+" از "+j.run.total;}var rc=document.getElementById("scan-rows");if(rc&&j.rows){var lb={pending:"در انتظار",running:"در حال اجرا",done:"انجام شد",offline:"آفلاین",error:"خطا"};while(rc.children.length>1){rc.removeChild(rc.lastChild);}j.rows.forEach(function(x){var r=document.createElement("div");r.className="table-row";var h=document.createElement("span");h.className="ticket-title";var hb=document.createElement("b");hb.textContent=x.name||x.hostname;h.appendChild(hb);r.appendChild(h);[lb[x.status]||x.status,x.online?"بله":"خیر",x.message||""].forEach(function(t,i){var c=document.createElement("span");if(i===2){c.style.fontSize="11px";}c.textContent=t;r.appendChild(c);});rc.appendChild(r);});}var b=document.getElementById("scan-bar");if(b&&j.run&&j.run.total>0){b.style.width=Math.floor(j.run.done*100/j.run.total)+"%";}if(j.pending>0){if(j.processed>0){stalled=0;}else{stalled++;}if(stalled<4){setTimeout(step,350);}else if(s){s.textContent="اسکن متوقف شد؛ برای ادامه دکمهٔ شروع اسکن را دوباره بزنید.";}}else if(s){s.textContent="اسکن کامل شد؛ صفحه را تازه کنید تا نتایج به‌روز شود.";}}).catch(function(){busy=false;if(s){s.textContent="خطای ارتباط با سرور.";}});}setTimeout(step,500);})();</script>';
+        }
+    }
+    render_footer();
+    exit;
+}
+
+if ($page === 'assets') {
+    $assetUser = require_permission('assets.view');
+    if (!is_global_ticket_role($assetUser['role']) && user_service_group($assetUser) !== 'it') {
+        security_log_access_denied($assetUser, 'assets.scope.it', 'assets');
+        http_response_code(403);
+        exit('شناسنامه فنی سیستم‌ها فقط در حوزه IT قابل دسترسی است.');
+    }
+    [$where, $params] = asset_scope($assetUser);
+    asset_profile_ensure_schema();
+    $assetSearch = trim((string) ($_GET['q'] ?? ''));
+    $networkFilter = valid_choice((string) ($_GET['network'] ?? 'all'), ['all', 'online', 'offline', 'unknown'], 'all');
+    if ($assetSearch !== '') {
+        $where .= ($where !== '' ? ' AND ' : 'WHERE ') . '(a.asset_tag LIKE ? OR a.hostname LIKE ? OR a.serial_number LIKE ? OR a.ip_address LIKE ?)';
+        $like = '%' . $assetSearch . '%';
+        array_push($params, $like, $like, $like, $like);
+    }
+    if ($networkFilter === 'online') {
+        $where .= ($where !== '' ? ' AND ' : 'WHERE ') . 'p.ad_online = 1';
+    } elseif ($networkFilter === 'offline') {
+        $where .= ($where !== '' ? ' AND ' : 'WHERE ') . 'p.ad_scanned_at IS NOT NULL AND p.ad_online = 0';
+    } elseif ($networkFilter === 'unknown') {
+        $where .= ($where !== '' ? ' AND ' : 'WHERE ') . 'p.ad_scanned_at IS NULL';
+    }
+    $assetsQuery = db()->prepare('SELECT a.*, d.name AS department_name, p.ad_online, p.ad_last_seen, p.ad_scanned_at FROM assets a LEFT JOIN departments d ON d.id = a.department_id LEFT JOIN asset_profiles p ON p.asset_id = a.id ' . $where . ' ORDER BY a.hostname, a.asset_tag');
+    $assetsQuery->execute($params);
+    $assetRows = $assetsQuery->fetchAll();
+    $canImportAssets = user_can($assetUser, 'domain.import');
+    $canPingAssets = user_can($assetUser, 'asset.ping') && (is_global_ticket_role($assetUser['role']) || user_service_group($assetUser) === 'it');
+    $canExtractAssets = user_can($assetUser, 'domain.scan');
+    $canConfigureNetworkScan = user_can($assetUser, 'settings.domain');
+    $networkScanEnabled = domain_scan_preflight() === null;
+    $canSelectAssets = $canPingAssets || $canExtractAssets;
+    $onlineCount = 0;
+    $collectedCount = 0;
+    foreach ($assetRows as $assetRow) {
+        $onlineCount += (int) ($assetRow['ad_online'] ?? 0) === 1 ? 1 : 0;
+        $collectedCount += !empty($assetRow['last_inventory_at']) ? 1 : 0;
+    }
+    render_header('دارایی‌ها', $assetUser);
+    inventory_render_assets_content($assetRows, $assetSearch, $networkFilter, $canImportAssets, $canPingAssets, $canExtractAssets, $canConfigureNetworkScan, $networkScanEnabled, $canSelectAssets, $onlineCount, $collectedCount);
+    render_footer();
+    exit;
+}
+
+if ($page === 'asset') {
+    $assetUser = require_permission('assets.view');
+    [$scope, $scopeParams] = asset_scope($assetUser);
+    $assetId = (int) ($_GET['id'] ?? 0);
+    redirect('index.php?page=inventory&id=' . $assetId);
+    $assetQuery = db()->prepare('SELECT a.*, d.name AS department_name, u.full_name AS owner_name FROM assets a LEFT JOIN departments d ON d.id = a.department_id LEFT JOIN users u ON u.id = a.owner_user_id ' . ($scope ? $scope . ' AND a.id = ?' : 'WHERE a.id = ?') . ' LIMIT 1');
+    $assetQuery->execute(array_merge($scopeParams, [$assetId]));
+    $asset = $assetQuery->fetch();
+    if (!$asset) {
+        http_response_code(404);
+        render_header('دارایی پیدا نشد', $assetUser);
+        echo '<section class="empty-state"><h2>دارایی پیدا نشد</h2></section>';
+        render_footer();
+        exit;
+    }
+    $hardware = json_decode((string) $asset['hardware_json'], true) ?: [];
+    $software = json_decode((string) $asset['software_json'], true) ?: [];
+    $disks = json_decode((string) $asset['disks_json'], true) ?: [];
+    $peripherals = json_decode((string) $asset['peripherals_json'], true) ?: [];
+    render_header('شناسنامه دارایی', $assetUser);
+    $manualPeripherals = is_array($peripherals['manual_entries'] ?? null) ? $peripherals['manual_entries'] : [];
+    echo '<section class="page-heading"><div><a class="back-link" href="index.php?page=assets">← بازگشت به دارایی‌ها</a><h1' . asset_name_attr($asset['hostname']) . '>' . e(asset_name_or($asset['hostname'])) . '</h1><p>آخرین جمع‌آوری: ' . e($asset['last_inventory_at'] ? persian_date((string) $asset['last_inventory_at']) : 'ثبت نشده') . '</p></div><div class="actions"><a class="button secondary" href="index.php?page=inventory&id=' . $assetId . '">ویرایش شناسنامه</a><a class="button secondary" href="index.php?page=asset-history&id=' . $assetId . '">تاریخچه سیستم</a></div></section>';
+    echo '<section class="asset-facts"><div class="card detail-card"><h3>مشخصات اصلی</h3><dl><dt>شناسه</dt><dd>' . e($asset['asset_tag']) . '</dd><dt>نام کامپیوتر</dt><dd' . asset_name_attr($asset['hostname'], $asset['asset_tag']) . '>' . e(asset_name_or($asset['hostname'])) . '</dd><dt>سریال</dt><dd>' . e($asset['serial_number']) . '</dd><dt>واحد</dt><dd>' . e($asset['department_name'] ?: 'بدون واحد') . '</dd><dt>کاربر دامنه</dt><dd>' . e($asset['domain_username']) . '</dd><dt>سیستم‌عامل</dt><dd>' . e($asset['operating_system']) . '</dd><dt>آنتی‌ویروس</dt><dd>' . e($asset['antivirus']) . '</dd><dt>IP</dt><dd>' . e($asset['ip_address']) . '</dd><dt>MAC</dt><dd>' . e($asset['mac_address']) . '</dd><dt>پردازنده</dt><dd>' . e($asset['cpu']) . '</dd><dt>حافظه</dt><dd>' . e((string) $asset['memory_mb']) . ' MB</dd></dl></div><div class="card detail-card"><h3>سخت‌افزار تکمیلی</h3><pre class="json-view">' . e(json_encode(array_merge($hardware, ['disks' => $disks]), JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES)) . '</pre></div><div class="card detail-card"><h3>تجهیزات و اقلام دستی</h3><pre class="json-view">' . e(json_encode(array_merge($peripherals, ['printer_scanner_monitor_case' => $peripherals['case'] ?? ($manualPeripherals['case'] ?? [])]), JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES)) . '</pre></div><div class="card detail-card"><h3>نرم‌افزارهای نصب‌شده</h3><pre class="json-view">' . e(json_encode($software, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES)) . '</pre></div></section>';
+    render_footer();
+    exit;
+}
+
+if ($page === 'organization') {
+    $organizationUser = require_permission('org.view');
+    if (!org_has_company_schema()) throw new RuntimeException('برای نمایش ساختار چندشرکتی، migration 018-org-company-separation.sql را از مسیر رسمی به‌روزرسانی اجرا کنید.');
+    org_ensure_schema();
+    $companyId = org_company_context_id($organizationUser, (int) ($_GET['company_id'] ?? 0));
+    $currentCompany = org_company_by_id($companyId) ?: throw new RuntimeException('شرکت انتخاب‌شده در دسترس نیست.');
+    $companyRootType = org_company_root_type($companyId);
+    $companyRootTitle = org_company_root_title($companyId);
+    $canManageOrg = user_can_manage_organization($organizationUser);
+    $units = org_units_all(false, $companyId);
+    $usersQuery = db()->prepare("SELECT u.id, u.full_name, u.auth_source, u.is_active, u.org_unit_id, u.manager_user_id, COALESCE(org_membership.company_id, 0) AS company_id FROM users u " . org_user_company_membership_join_sql('u') . " WHERE COALESCE(u.auth_source, '') <> 'food' AND (org_membership.company_id = ? OR org_membership.user_id IS NULL) ORDER BY u.full_name");
+    $usersQuery->execute([$companyId]);
+    $users = $usersQuery->fetchAll();
+    $activeUsers = array_values(array_filter($users, static fn (array $u): bool => (int) $u['is_active'] === 1));
+    if ((string) ($_GET['export'] ?? '') === 'excel') {
+        $activeExportUnits = array_values(array_filter($units, static fn (array $exportUnit): bool => (int) ($exportUnit['is_active'] ?? 0) === 1));
+        foreach ($activeExportUnits as &$activeExportUnit) if ((string) $activeExportUnit['unit_type'] === $companyRootType) $activeExportUnit['name'] = $companyRootTitle;
+        unset($activeExportUnit);
+        $unitById = [];
+        $childrenByParent = [];
+        foreach ($activeExportUnits as $exportUnit) {
+            $exportId = (int) $exportUnit['id'];
+            $unitById[$exportId] = $exportUnit;
+            if ((string) $exportUnit['unit_type'] !== 'liaison' && (int) ($exportUnit['parent_id'] ?? 0) > 0) {
+                $childrenByParent[(int) $exportUnit['parent_id']][] = $exportUnit;
+            }
+        }
+        $sortExportUnits = static function (array &$items): void {
+            usort($items, static fn (array $a, array $b): int => ((int) ($a['sort_order'] ?? 0) <=> (int) ($b['sort_order'] ?? 0)) ?: strnatcasecmp((string) $a['name'], (string) $b['name']) ?: ((int) $a['id'] <=> (int) $b['id']));
+        };
+        foreach ($childrenByParent as &$exportChildren) $sortExportUnits($exportChildren);
+        unset($exportChildren);
+        $orderedExportUnits = [];
+        $visitedExportUnits = [];
+        $appendExportTree = static function (array $exportUnit) use (&$appendExportTree, &$orderedExportUnits, &$visitedExportUnits, $childrenByParent): void {
+            $id = (int) $exportUnit['id'];
+            if (isset($visitedExportUnits[$id])) return;
+            $visitedExportUnits[$id] = true;
+            $orderedExportUnits[] = $exportUnit;
+            foreach ($childrenByParent[$id] ?? [] as $childUnit) $appendExportTree($childUnit);
+        };
+        foreach ($activeExportUnits as $exportUnit) if ((string) $exportUnit['unit_type'] === 'ceo') $appendExportTree($exportUnit);
+        $otherRoots = array_values(array_filter($activeExportUnits, static fn (array $exportUnit): bool => (string) $exportUnit['unit_type'] === 'liaison' || (int) ($exportUnit['parent_id'] ?? 0) === 0));
+        $sortExportUnits($otherRoots);
+        foreach ($otherRoots as $exportUnit) $appendExportTree($exportUnit);
+        foreach ($activeExportUnits as $exportUnit) $appendExportTree($exportUnit);
+        $exportUserById = [];
+        foreach ($users as $exportUser) $exportUserById[(int) $exportUser['id']] = $exportUser;
+        $allManagerIds = [];
+        foreach ($activeExportUnits as $exportUnit) {
+            $unitId = (int) $exportUnit['id'];
+            $managerIds = org_unit_manager_ids($unitId);
+            $directManager = (int) ($exportUnit['manager_user_id'] ?? 0);
+            if ($directManager > 0) $managerIds[] = $directManager;
+            foreach ($managerIds as $managerId) $allManagerIds[(int) $managerId] = true;
+        }
+        $excelRows = [
+            [['v' => 'ساختار کامل سازمان · ' . (string) $currentCompany['name'], 's' => 'title'], '', '', '', '', '', ''],
+            [['v' => 'نوع رکورد', 's' => 'header'], ['v' => 'نام واحد/کارشناس', 's' => 'header'], ['v' => 'شناسه', 's' => 'header'], ['v' => 'واحد والد', 's' => 'header'], ['v' => 'مدیر/مسئول', 's' => 'header'], ['v' => 'کارشناسان این واحد', 's' => 'header'], ['v' => 'جایگاه/توضیح', 's' => 'header']],
+        ];
+        $unitTypeLabels = ['ceo' => 'مدیرعامل', 'company_manager' => 'مدیر شرکت', 'deputy' => 'معاونت', 'management' => 'مدیریت مستقل', 'office' => 'دفتر مدیرعامل', 'department' => 'اداره', 'liaison' => 'واحد مستقل'];
+        foreach ($orderedExportUnits as $exportUnit) {
+            $unitId = (int) $exportUnit['id'];
+            $managerIds = org_unit_manager_ids($unitId);
+            $directManager = (int) ($exportUnit['manager_user_id'] ?? 0);
+            if ($directManager > 0 && !in_array($directManager, $managerIds, true)) array_unshift($managerIds, $directManager);
+            $managerNames = [];
+            foreach ($managerIds as $managerId) if (isset($exportUserById[$managerId])) $managerNames[] = (string) $exportUserById[$managerId]['full_name'];
+            $expertNames = [];
+            foreach ($users as $exportUser) {
+                if ((int) ($exportUser['is_active'] ?? 0) === 1 && (int) ($exportUser['org_unit_id'] ?? 0) === $unitId && !isset($allManagerIds[(int) $exportUser['id']])) $expertNames[] = (string) $exportUser['full_name'];
+            }
+            $parentName = $unitById[(int) ($exportUnit['parent_id'] ?? 0)]['name'] ?? '';
+            $description = (string) $exportUnit['unit_type'] === 'liaison' ? ('واحد مستقل · سمت ' . ((string) ($exportUnit['chart_side'] ?? '') === 'left' ? 'چپ' : 'راست')) : (string) ($exportUnit['code'] ?? '');
+            $excelRows[] = [
+                ['v' => $unitTypeLabels[(string) $exportUnit['unit_type']] ?? (string) $exportUnit['unit_type'], 's' => 'body'],
+                ['v' => (string) $exportUnit['name'], 's' => 'body'],
+                ['v' => $unitId, 's' => 'body'],
+                ['v' => (string) $parentName, 's' => 'body'],
+                ['v' => implode('، ', array_unique($managerNames)), 's' => 'body'],
+                ['v' => implode('، ', $expertNames), 's' => 'body'],
+                ['v' => $description, 's' => 'body'],
+            ];
+        }
+        xlsx_send('organization-tree-company-' . $companyId . '-' . date('Ymd-His'), xlsx_build([['name' => 'ساختار سازمان', 'rows' => $excelRows, 'widths' => [24, 32, 12, 28, 32, 42, 28]]]));
+    }
+    $activeUsers = array_values(array_filter($users, static fn (array $u): bool => (int) $u['is_active'] === 1));
+    $ceoUnit = null;
+    $deputies = [];
+    $departmentsByParent = [];
+    $membersByUnit = [];
+    foreach ($units as $unit) {
+        if ((int) $unit['is_active'] !== 1) {
+            continue;
+        }
+        if ((string) $unit['unit_type'] === $companyRootType) {
+            $ceoUnit = $unit;
+        } elseif ((string) $unit['unit_type'] === 'deputy') {
+            $deputies[] = $unit;
+        } elseif ((string) $unit['unit_type'] === 'liaison') {
+            // واحدهای مستقل (نمایندگی) کنار مدیرعامل؛ زیرمجموعهٔ هیچ واحدی نیستند.
+        } else {
+            $departmentsByParent[(int) ($unit['parent_id'] ?? 0)][] = $unit;
+        }
+    }
+    foreach ($users as $member) {
+        $membersByUnit[(int) ($member['org_unit_id'] ?? 0)][] = $member;
+    }
+    $orgChartUnits = [];
+    foreach ($units as $unit) {
+        if ((int) ($unit['is_active'] ?? 0) !== 1) {
+            continue;
+        }
+        $orgChartUnits[] = [
+            'id' => (int) $unit['id'],
+            'name' => (string) $unit['unit_type'] === $companyRootType ? $companyRootTitle : (string) $unit['name'],
+            'code' => (string) ($unit['code'] ?? ''),
+            'parentId' => (int) ($unit['parent_id'] ?? 0),
+            'type' => (string) $unit['unit_type'],
+            'chartSide' => (string) ($unit['chart_side'] ?? ''),
+            'managerId' => (int) ($unit['manager_user_id'] ?? 0),
+            'managerIds' => org_unit_manager_ids((int) $unit['id']),
+            'managerName' => (string) ($unit['manager_name'] ?? ''),
+            'primaryAdmin' => (int) ($unit['is_primary_admin'] ?? 0) === 1,
+            'sortOrder' => (int) ($unit['sort_order'] ?? 0),
+        ];
+    }
+    $orgChartUsers = [];
+    foreach ($users as $chartUser) {
+        $orgChartUsers[] = [
+            'id' => (int) $chartUser['id'],
+            'name' => (string) $chartUser['full_name'],
+            'active' => (int) $chartUser['is_active'] === 1,
+            'unitId' => (int) ($chartUser['org_unit_id'] ?? 0),
+            'managerId' => (int) ($chartUser['manager_user_id'] ?? 0),
+            'source' => ((string) ($chartUser['auth_source'] ?? '') === 'ldap') ? 'ldap' : 'local',
+        ];
+    }
+    $orgUndo = org_undo_state($companyId);
+    $orgChartData = json_encode([
+        'canManage' => $canManageOrg,
+        'companyId' => $companyId,
+        'companyName' => (string) $currentCompany['name'],
+        'companyType' => (string) $currentCompany['company_type'],
+        'companyRootType' => $companyRootType,
+        'companyRootTitle' => $companyRootTitle,
+        'companies' => user_is_primary_admin($organizationUser) ? org_companies_all() : [],
+        'sortEnabled' => org_has_sort_order(),
+        'undo' => $orgUndo !== null && !empty($orgUndo['can_undo']),
+        'redo' => $orgUndo !== null && !empty($orgUndo['can_redo']),
+        'undoLabel' => (string) ($orgUndo['label'] ?? ''),
+        'currentUser' => ['id' => (int) $organizationUser['id'], 'name' => (string) $organizationUser['full_name']],
+        'units' => $orgChartUnits,
+        'users' => $orgChartUsers,
+    ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT);
+    render_header('مدیریت سازمان', $organizationUser);
+    $orgTemplate = <<<'HTML'
+<div class="organization-workspace" dir="rtl">
+  <header class="org-header">
+    <div class="org-brand"><div class="org-brand-icon" aria-hidden="true">▥</div><div><div class="org-brand-title">ساختار سازمانی</div><div class="org-brand-subtitle">__CURRENT_COMPANY_NAME__</div></div></div>
+     <div class="org-divider"></div>
+     <div class="org-company-context">__ORG_COMPANY_SELECTOR__</div>
+     <div class="org-header-actions"><a class="org-icon-button" href="index.php" title="بازگشت به داشبورد">↩</a><button class="org-icon-button" data-org-tool="undo" disabled title="بازگشت آخرین تغییر ساختاری">↶ <span>بازگشت</span></button><button class="org-icon-button" data-org-tool="redo" disabled title="انجام دوبارهٔ تغییر ساختاری">↷ <span>دوباره</span></button><div class="org-export-wrap"><button type="button" class="org-icon-button" data-org-export-toggle aria-expanded="false" aria-controls="org-export-menu" title="انتخاب قالب خروجی">↓ <span>خروجی</span>⌄</button><div class="org-export-menu" id="org-export-menu" hidden><button type="button" data-org-export="pdf">PDF / پیش‌نمایش چاپ</button><button type="button" data-org-export="png">PNG</button><button type="button" data-org-export="excel">Excel (.xlsx)</button><button type="button" data-org-export="json">JSON</button></div></div><button class="org-icon-button" data-org-tool="print" title="چاپ نمای کلی درخت">▤ <span>چاپ</span></button><button class="org-icon-button" data-org-tool="backup" title="دانلود پشتیبان کامل JSON">⤓ <span>پشتیبان</span></button><button class="org-icon-button" data-org-tool="restore-backup" title="بازیابی از فایل پشتیبان JSON">⤒ <span>بازیابی</span></button><button class="org-icon-button danger" data-org-tool="reset" title="شروع مجدد">↺ <span>ریست</span></button></div>
+  </header>
+  <div class="org-main-layout">
+    <aside class="org-sidebar" id="org-sidebar"></aside>
+    <main class="org-canvas-shell">
+      <div class="org-canvas-toolbar"><input class="org-search" id="org-chart-search" type="search" placeholder="جستجوی واحد یا کاربر..." aria-label="جستجو در چارت سازمانی"><div class="org-zoom-controls"><button type="button" data-org-zoom="out" aria-label="کوچک‌نمایی">−</button><span id="org-zoom-level">100٪</span><button type="button" data-org-zoom="in" aria-label="بزرگ‌نمایی">+</button><button type="button" data-org-zoom="reset" aria-label="نمایش اندازهٔ پیش‌فرض">↺</button><button type="button" data-org-zoom="fit" aria-label="جا دادن کل چارت در صفحه" title="جا دادن کل چارت در صفحه">⛶</button></div><button class="org-focus-toggle" type="button" data-org-view="focus" aria-pressed="false">◫ <span>تمرکز روی نمودار</span></button></div>
+      <div class="org-canvas" id="org-canvas"><div class="org-chart-wrap" id="org-chart-wrap"></div></div>
+    </main>
+    <aside class="org-pool-sidebar" id="org-pool-sidebar"></aside>
+  </div>
+   <div class="org-modal-backdrop" id="org-modal-backdrop"><section class="org-modal" role="dialog" aria-modal="true" aria-labelledby="org-modal-title"><header><div class="org-modal-icon" id="org-modal-icon"></div><div><h2 id="org-modal-title">انتخاب کاربر</h2><p id="org-modal-subtitle">از فهرست زیر انتخاب کنید</p></div><button class="org-modal-close" type="button" data-org-modal="close">×</button></header><div class="org-modal-preview" id="org-modal-preview"></div><div class="org-modal-hint" id="org-modal-hint">روی کاربر موردنظر کلیک کنید تا منصوب شود.</div><div class="org-modal-search"><input id="org-modal-search" type="search" placeholder="جستجو بر اساس نام..."></div><div class="org-modal-body" id="org-modal-body"></div><footer><span id="org-modal-info">موردی انتخاب نشده</span><button class="org-btn org-btn-ghost" type="button" data-org-modal="close">انصراف</button><button class="org-btn org-btn-success" type="button" id="org-modal-confirm" disabled>تأیید</button></footer></section></div>
+   <div class="org-confirm-backdrop" id="org-confirm-backdrop"><section class="org-confirm-modal" role="dialog" aria-modal="true"><div class="org-confirm-icon" id="org-confirm-icon">!</div><h2 id="org-confirm-title">تأیید عملیات</h2><p id="org-confirm-message">آیا مطمئن هستید؟</p><div class="org-confirm-details" id="org-confirm-details"></div><footer><button class="org-btn org-btn-ghost" type="button" data-org-confirm="close">انصراف</button><button class="org-btn org-btn-danger" type="button" id="org-confirm-ok">تأیید</button></footer></section></div>
+   <div class="org-undo-bar" id="org-undo-bar"><span>↶</span><b id="org-undo-text"></b><button type="button" data-org-tool="undo">بازگشت</button><button type="button" data-org-tool="redo">دوباره</button><button type="button" data-org-undo="close">×</button></div>
+  <div class="org-toast" id="org-toast" role="status" aria-live="polite"></div>
+  <input type="file" id="org-backup-file" accept="application/json,.json" hidden><form method="post" action="index.php?page=organization" id="org-action-form" class="org-hidden-form">__CSRF__<input type="hidden" name="company_id" value="__COMPANY_ID__"><input type="hidden" name="action" value=""><input type="hidden" name="unit_id" value=""><input type="hidden" name="unit_name" value=""><input type="hidden" name="unit_code" value=""><input type="hidden" name="node_type" value=""><input type="hidden" name="parent_id" value=""><input type="hidden" name="unit_manager_id" value=""><input type="hidden" name="is_primary_admin" value="0"><input type="hidden" name="ceo_user_id" value=""><input type="hidden" name="member_unit_id" value=""><input type="hidden" name="user_id" value=""><input type="hidden" name="manager_user_id" value=""></form>
+</div>
+HTML;
+    $companySelector = '';
+    if (user_is_primary_admin($organizationUser)) {
+        $companySelector = '<form method="get" class="org-company-picker"><input type="hidden" name="page" value="organization"><label for="org-company-select">شرکت</label><select id="org-company-select" name="company_id">';
+        foreach (org_companies_all() as $companyOption) $companySelector .= '<option value="' . (int) $companyOption['id'] . '"' . ((int) $companyOption['id'] === $companyId ? ' selected' : '') . '>' . e((string) $companyOption['name']) . '</option>';
+        $companySelector .= '</select><a class="org-company-edit-link" href="index.php?page=settings#users" title="ویرایش نام نمایشی شرکت‌ها">ویرایش نام</a></form>';
+    } else { $companySelector = '<span class="org-company-label">' . e((string) $currentCompany['name']) . '</span>'; }
+    echo str_replace(['__CSRF__', '__ORG_COMPANY_SELECTOR__', '__CURRENT_COMPANY_NAME__', '__COMPANY_ID__'], [csrf_field(), $companySelector, e((string) $currentCompany['name']), (string) $companyId], $orgTemplate);
+    echo '<script nonce="' . e(csp_nonce()) . '">window.PERSIAN_ORG_DATA = ' . $orgChartData . ';</script><script src="assets/organization.js?v=23"></script>';
+    render_footer();
+    exit;
+}
+
+if ($page === 'settings') {
+    $user = require_login();
+    $canSettingsGeneral = user_can($user, 'settings.general');
+    $canSettingsDomain = user_can($user, 'settings.domain');
+    $canSettingsUsers = user_can($user, 'settings.users');
+    // تب تقویم تعطیلات: همان تابلوی صفحهٔ holidays، زیر تنظیمات.
+    $canHolidaysView = user_can($user, 'holidays.view');
+    $canSettingsKeyRoles = user_can($user, 'settings.key_roles');
+    // ویرایش هر بخش جدا از دیدن آن است؛ بدون کد ویرایش، فرم‌ها غیرفعال (inert) نمایش داده می‌شوند.
+    $canSettingsGeneralEdit = user_can($user, 'settings.general_edit');
+    $canSettingsDomainEdit = user_can($user, 'settings.domain_edit');
+    $canSettingsUsersEdit = user_can($user, 'settings.users_edit');
+    $canSettingsKeyRolesEdit = user_can($user, 'settings.key_roles_edit');
+    $appName = setting('app_name', (string) cfg('app.name', 'سامانه درخواست پشتیبانی'));
+    $logo = setting('app_logo', (string) cfg('app.logo', ''));
+    $foodBrandName = setting('food_ticket_brand_name', $appName);
+    $foodBrandLogo = setting('food_ticket_brand_logo', $logo);
+    $departments = db()->query('SELECT id, name, code FROM departments WHERE is_active = 1 ORDER BY name')->fetchAll();
+    $canManageSettingsUsers = user_is_primary_admin($user);
+    $settingsCompanyId = user_is_primary_admin($user) ? 1 : org_user_company_id($user);
+    $settingsUserSql = 'SELECT u.id, u.username, u.full_name, u.employee_number, u.national_code, u.role, u.auth_source, u.is_active, u.is_it_agent, u.is_primary_admin, u.department_id, COALESCE(org_membership.company_id, 0) AS company_id, d.name AS department_name FROM users u ' . org_user_company_membership_join_sql('u') . ' LEFT JOIN departments d ON d.id = u.department_id WHERE u.auth_source <> \'food\' AND NOT (u.auth_source = \'local\' AND u.role IN (\'local_user\',\'guard\'))';
+    if (!user_is_primary_admin($user)) $settingsUserSql .= $settingsCompanyId > 0 ? ' AND org_membership.company_id = ' . (int) $settingsCompanyId : ' AND 1 = 0';
+    $users = db()->query($settingsUserSql . ' ORDER BY u.full_name')->fetchAll();
+    $roleSelectableUsers = array_values(array_filter($users, static fn (array $roleUser): bool => (int) ($roleUser['is_active'] ?? 0) === 1));
+    $roleCards = '';
+    foreach ([
+        'supervisor' => ['label' => 'سوپروایز', 'note' => 'دسترسی سوپروایزر: مشاهده و مدیریت درخواست‌ها، تأیید و بستن.'],
+        'inspection' => ['label' => 'بازرسی', 'note' => 'مجوز ثبت ورود رسانه در کنترل CD/DVD.'],
+        'it_expert' => ['label' => 'کارشناس آی تی', 'note' => 'مسئول رسیدگی به درخواست‌های فناوری اطلاعات. فقط از همین فهرست انتخاب می‌شود.'],
+        // تصمیم مالک (۲۰۲۶-۱۱-۱۶): همتای «کارشناس آی تی» برای حوزهٔ پشتیبانی.
+        // مسئول تیکت‌های پشتیبانی فقط از این فهرست خوانده می‌شود.
+        'support_expert' => ['label' => 'کارشناس پشتیبانی', 'note' => 'مسئول رسیدگی به درخواست‌های پشتیبانی. فقط از همین فهرست انتخاب می‌شود.'],
+    ] as $roleKey => $roleMeta) {
+        $roleIds = key_role_user_ids($roleKey);
+        $roleCards .= '<div class="key-role-block"><h3>' . e($roleMeta['label']) . '</h3><p class="muted">' . e($roleMeta['note']) . '</p><div class="form-grid">';
+        for ($slot = 0; $slot < 2; $slot++) {
+            $selectedId = (int) ($roleIds[$slot] ?? 0);
+            $roleSelectDisabled = $roleKey === 'it_expert' && !user_is_primary_admin($user) ? ' disabled' : '';
+            $roleCards .= '<label>کاربر ' . ($slot + 1) . '<select name="' . $roleKey . '_ids[]"' . $roleSelectDisabled . '><option value="0">— انتخاب نشده —</option>';
+            foreach ($roleSelectableUsers as $roleUser) {
+                $roleCards .= '<option value="' . (int) $roleUser['id'] . '" ' . ((int) $roleUser['id'] === $selectedId ? 'selected' : '') . '>' . e($roleUser['full_name'] . ' - ' . $roleUser['username']) . '</option>';
+            }
+            $roleCards .= '</select></label>';
+        }
+        $roleCards .= '</div></div>';
+    }
+    render_header('تنظیمات سامانه', $user);
+    echo '<section class="page-heading"><div><span class="eyebrow">مدیریت سامانه</span><h1>تنظیمات</h1><p>مشخصات ظاهری، اتصال Active Directory و نقش کاربران را مدیریت کنید.</p></div></section>';
+    $tabLinks = '';
+    if ($canSettingsGeneral) {
+        $tabLinks .= '<a class="' . ($canSettingsGeneral ? 'active' : '') . '" href="#general">عمومی</a>';
+    }
+    if ($canSettingsDomain) {
+        $tabLinks .= '<a class="' . (!$canSettingsGeneral && $canSettingsDomain ? 'active' : '') . '" href="#domain">اتصال دامین</a>';
+    }
+    if ($canSettingsGeneral) {
+        $tabLinks .= '<a href="#triangle">افکت نمایشی</a>';
+    }
+    if ($canSettingsUsers) {
+        $tabLinks .= '<a class="' . (!$canSettingsGeneral && !$canSettingsDomain && $canSettingsUsers ? 'active' : '') . '" href="#users">کاربران</a>';
+    }
+    if ($canManageSettingsUsers) {
+        $tabLinks .= '<a href="#roles">نقش‌ها و دسترسی‌ها</a>';
+    }
+    if ($canManageSettingsUsers) {
+        $tabLinks .= '<a href="#access-groups">گروه‌های دسترسی</a>';
+    }
+    if ($canManageSettingsUsers) {
+        $tabLinks .= '<a href="#org-admin-repair">ترمیم نقش‌ها و تشخیص ارجاع</a>';
+    }
+    if ($canHolidaysView) {
+        $tabLinks .= '<a href="#holidays">تقویم و تعطیلات</a>';
+    }
+    echo '<div class="settings-tabs">' . $tabLinks . '</div>';
+    echo '<section class="settings-stack">';
+
+    if ($canSettingsGeneral) {
+    echo '<div class="settings-panel settings-panel-grid" id="general"' . ($canSettingsGeneralEdit ? '' : ' inert') . '>';
+    echo '<div class="card form-card" id="ticket-auto-close"><h2>بستن خودکار درخواست‌های حل‌شده</h2><p class="muted">درخواست «حل‌شده‌ای» که کاربر پس از این مدت امتیاز ثبت نکند، به‌صورت خودکار بسته می‌شود؛ کاربر پس از آن هم می‌تواند امتیاز بدهد. مقدار صفر یعنی غیرفعال.</p><form method="post">' . csrf_field() . '<input type="hidden" name="action" value="save_settings"><input type="hidden" name="settings_section" value="ticket"><input type="hidden" name="app_name" value="' . e($appName) . '"><label>مهلت بستن خودکار (روز)<input type="number" name="ticket_auto_close_days" min="0" max="30" value="' . (int) setting('ticket_auto_close_days', '3') . '"></label><small>پیش‌فرض ۳ روز. درخواست دارای درخواست لغو در انتظار، به‌صورت خودکار بسته نمی‌شود.</small><button class="button" type="submit">ذخیره مهلت بستن خودکار</button></form></div>';
+    if (user_is_primary_admin($user)) {
+        $inspectionAlarmEnabled = setting('inspection_food_absence_alarm_enabled', '1') !== '0';
+        echo '<div class="card form-card inspection-alarm-settings" id="inspection-alarm-settings"><h2>یادآور روزانهٔ بازرسی</h2><p class="muted">هر روز ساعت ۱۱، پیام یادآوری غایبین گروه‌های غذایی فقط برای کاربران بازرسی نمایش داده می‌شود. تغییر این گزینه برای همهٔ کاربران بازرسی اعمال می‌شود.</p><p>وضعیت فعلی: <strong class="' . ($inspectionAlarmEnabled ? 'inspection-alarm-status-on' : 'inspection-alarm-status-off') . '">' . ($inspectionAlarmEnabled ? 'فعال' : 'غیرفعال') . '</strong></p><form method="post">' . csrf_field() . '<input type="hidden" name="action" value="save_settings"><input type="hidden" name="settings_section" value="inspection_alarm"><input type="hidden" name="inspection_food_absence_alarm_enabled" value="' . ($inspectionAlarmEnabled ? '0' : '1') . '"><button class="button ' . ($inspectionAlarmEnabled ? 'danger' : '') . '" type="submit">' . ($inspectionAlarmEnabled ? 'غیرفعال کردن یادآور' : 'فعال کردن یادآور') . '</button></form></div>';
+    }
+    echo '<div class="card form-card"><h2>اطلاعات سامانه</h2><form method="post" enctype="multipart/form-data">' . csrf_field() . '<input type="hidden" name="action" value="save_settings"><input type="hidden" name="settings_section" value="general"><label>نام سامانه<input name="app_name" required value="' . e($appName) . '"></label><label>لوگو<input type="file" name="logo" accept="image/png,image/jpeg,image/svg+xml"><small>لوگوی جدید اختیاری است؛ PNG، JPG یا SVG تا ۲ مگابایت.</small></label><label>ظاهر نام کامپیوترها<select name="asset_hostname_style"><option value="short"' . (setting('asset_hostname_style', 'short') === 'short' ? ' selected' : '') . '>فقط نام، دقیقاً با همان حروف ثبت‌شده (MBA4-01) — پیش‌فرض</option><option value="short_lower"' . (setting('asset_hostname_style', 'short') === 'short_lower' ? ' selected' : '') . '>فقط نام، با حروف کوچک (mba4-01)</option><option value="full"' . (setting('asset_hostname_style', 'short') === 'full' ? ' selected' : '') . '>نام کامل دامنه (MBA4-01.CORP.LOCAL)</option></select><small>روی فهرست شناسنامه‌ها، فهرست اسکن دامنه، فهرست سیستم‌ها و کمبوی «سیستم مرتبط» اثر دارد. نام کامل همیشه به‌صورت راهنما (tooltip) روی نام می‌ماند.<br><b>نام دقیقاً همان چیزی است که در سیستم‌عامل/AD ثبت شده</b> — نه حرف اضافه، نه کم؛ ارقام نام هم فارسی نمی‌شوند (MBA4-01 همان MBA4-01 می‌ماند، نه MBA4-۰۱).<br><b>آدرس IP هرگز در نام نمایش داده نمی‌شود</b> — اگر نام ثبت‌شده چیزی مثل «clint 192.168.1.65» باشد، فقط «clint» دیده می‌شود. برای پاک‌کردن دائمی نام‌های موجود: <code dir="ltr">php tools/normalize_asset_hostnames.php --apply</code></small></label>' . ($logo ? '<div class="current-logo"><img src="' . e($logo) . '" alt="لوگوی فعلی"><span>لوگوی فعلی</span></div>' : '') . '<label style="display:flex;gap:8px;align-items:flex-start"><input type="hidden" name="security_cookie_both_protocols" value="0"><input type="checkbox" name="security_cookie_both_protocols" value="1"' . (in_array(strtolower(trim((string) setting('security_cookie_both_protocols', '0'))), ['1', 'true', 'on', 'yes'], true) ? ' checked' : '') . '><span>کار با هر دو پروتکل <b>http</b> و <b>https</b> با همان ورود<small style="display:block;margin-top:4px">اگر لازم است هم با <code dir="ltr">http://</code> داخلی و هم با <code dir="ltr">https://</code> وارد شوید، این را روشن کنید. مرورگر کوکی نشست را روی هر دو می‌فرستد و دیگر لازم نیست دوباره وارد شوید.<br><b style="color:#a16207">هشدار:</b> روی http، کوکی نشست رمزنگاری نمی‌شود و در شبکه قابل شنود است. این گزینه برای شبکهٔ داخلی مطمئن است، نه دسترسی از اینترنت.</small></span></label><button class="button" type="submit">ذخیره اطلاعات عمومی</button></form></div>';
+    echo '<div class="card form-card login-branding-settings" id="login-branding"><h2>مدیریت صفحه ورود</h2><p class="muted">عنوان‌ها، پیام متحرک و لوگوی مخصوص صفحه ورود را تنظیم کنید. لوگو PNG یا JPG و حداکثر ۲ مگابایت باشد.</p><form method="post" enctype="multipart/form-data">' . csrf_field() . '<input type="hidden" name="action" value="save_settings"><input type="hidden" name="settings_section" value="login_branding"><input type="hidden" name="app_name" value="' . e($appName) . '"><label>عنوان اصلی<input name="login_title" maxlength="120" value="' . e(setting('login_title', 'به سامانه درخواست پشتیبانی خوش آمدید')) . '"></label><label>متن معرفی<textarea name="login_intro" rows="2" maxlength="500">' . e(setting('login_intro', 'برای ثبت و پیگیری درخواست‌های خود وارد شوید.')) . '</textarea></label><label>پیام‌های متحرک ابتدای صفحه (اختیاری؛ هر پیام در یک خط، حداکثر ۵ پیام)<textarea name="login_announcements" rows="3" maxlength="1300" placeholder="مثلاً: اطلاعیه نگهداری سامانه در روز ...">' . e(setting('login_announcements', '') !== '' ? setting('login_announcements', '') : setting('login_announcement', '')) . '</textarea><small class="field-help">پیام‌ها به‌ترتیب و پشت سر هم نمایش داده می‌شوند؛ هر پیام حداکثر ۲۴۰ نویسه. اگر خالی باشد، نوار پیام نمایش داده نمی‌شود.</small></label><div class="form-grid"><label>سرعت حرکت پیام (ثانیه برای هر دور؛ کمتر = سریع‌تر)<input type="number" name="login_announcement_speed" min="5" max="60" value="' . (int) setting('login_announcement_speed', '18') . '"></label><label>اندازه قلم پیام (پیکسل)<input type="number" name="login_announcement_font_size" min="11" max="22" value="' . (int) setting('login_announcement_font_size', '12') . '"></label></div><div class="form-grid"><label>عنوان کارت معرفی<input name="login_art_title" maxlength="100" value="' . e(setting('login_art_title', 'پشتیبانی، ساده و شفاف')) . '"></label><label>متن کارت معرفی<input name="login_art_text" maxlength="300" value="' . e(setting('login_art_text', 'هر درخواست یک شماره پیگیری دارد و مسیر رسیدگی آن برای شما روشن است.')) . '"></label><label>عنوان راهنمای ورود<input name="login_note_title" maxlength="100" value="' . e(setting('login_note_title', 'ورود یکپارچه سازمانی')) . '"></label><label>متن راهنمای ورود<input name="login_note_text" maxlength="300" value="' . e(setting('login_note_text', 'کاربران شبکه با حساب Active Directory خود وارد می‌شوند.')) . '"></label></div><label>لوگوی صفحه ورود<input type="file" name="login_logo" accept="image/png,image/jpeg"></label>' . (setting('app_login_logo', '') ? '<div class="current-logo"><img src="' . e((string) setting('app_login_logo', '')) . '" alt="لوگوی صفحه ورود"><span>لوگوی اختصاصی صفحه ورود</span></div>' : '') . '<button class="button" type="submit">ذخیره تنظیمات صفحه ورود</button></form></div>';
+    echo '<div class="card form-card food-ticket-brand-settings" id="food-ticket-brand"><h2>هویت پنل سامانه مدیریت غذا</h2><p class="muted">این نام و لوگو هنگام ورود از سامانه اصلی به پنل چاپ فیش منتقل می‌شود و با تغییرات بعدی نیز همگام خواهد ماند.</p><form method="post" enctype="multipart/form-data">' . csrf_field() . '<input type="hidden" name="action" value="save_food_ticket_brand"><label>نام سامانه چاپ فیش<input name="food_ticket_brand_name" required value="' . e($foodBrandName) . '"></label><label>لوگوی پنل چاپ فیش<input type="file" name="food_ticket_logo" accept="image/png,image/jpeg"><small>PNG یا JPG، حداکثر ۲ مگابایت.</small></label>' . ($foodBrandLogo ? '<div class="current-logo"><img src="' . e($foodBrandLogo) . '" alt="لوگوی پنل چاپ فیش"><span>لوگوی فعلی پنل فیش</span></div>' : '') . '<button class="button" type="submit">ذخیره هویت پنل چاپ فیش</button></form></div>';
+    if (user_is_primary_admin($user)) {
+        $activityRetention = activity_log_retention_days();
+        $activityCount = 0;
+        try {
+            activity_logs_ensure();
+            $activityCount = (int) db()->query('SELECT COUNT(*) FROM activity_logs')->fetchColumn();
+        } catch (Throwable) {
+            $activityCount = 0;
+        }
+        echo '<div class="card form-card" id="activity-log-settings"><h2>گزارش فعالیت کاربران</h2><p class="muted">تمام عملیات کاربران ثبت می‌شود. رکوردهای قدیمی‌تر از بازهٔ نگهداری به‌صورت خودکار با کران پاک می‌شوند. رکوردهای فعلی: ' . number_format($activityCount) . '</p><form method="post">' . csrf_field() . '<input type="hidden" name="action" value="prune_activity_logs"><label>بازهٔ نگهداری (روز)<input type="number" name="retention_days" min="30" max="3650" value="' . (int) $activityRetention . '"></label><small>حداقل ۳۰ روز برای فعالیت‌های عادی؛ امنیت، حسابرسی و عملیات حساس حداقل ۱۸۳ روز نگهداری می‌شوند.</small><button class="button secondary" type="submit">ذخیره و پاک‌سازی لاگ‌های قدیمی</button></form></div>';
+    }
+    echo '</div>';
+    }
+
+    if ($canSettingsGeneral) {
+        $tmConfig = triangle_effect_config();
+        $tmPages = triangle_effect_enabled_pages();
+        $particleConfig = particle_effect_config();
+        $activeEffect = display_effect_type();
+        $tmRange = static function (string $key, string $label, string $hint, string $step) use ($tmConfig): string {
+            $spec = triangle_effect_config_spec()[$key];
+            return '<label class="tm-field"><span class="tm-field-head"><span>' . e($label) . '</span><output data-tm-out="' . e($key) . '">' . e((string) $tmConfig[$key]) . '</output></span><input type="range" name="tm[' . e($key) . ']" data-tm-key="' . e($key) . '" min="' . e((string) $spec[0]) . '" max="' . e((string) $spec[1]) . '" step="' . e($step) . '" value="' . e((string) $tmConfig[$key]) . '"><small>' . e($hint) . '</small></label>';
+        };
+        $particleRange = static function (string $key, string $label, string $hint, string $step) use ($particleConfig): string {
+            $spec = particle_effect_config_spec()[$key];
+            return '<label class="tm-field"><span class="tm-field-head"><span>' . e($label) . '</span><output data-particle-out="' . e($key) . '">' . e((string) $particleConfig[$key]) . '</output></span><input type="range" name="particle[' . e($key) . ']" data-particle-key="' . e($key) . '" min="' . e((string) $spec[0]) . '" max="' . e((string) $spec[1]) . '" step="' . e($step) . '" value="' . e((string) $particleConfig[$key]) . '"><small>' . e($hint) . '</small></label>';
+        };
+        $tmPagesHtml = '';
+        foreach (triangle_effect_page_catalog() as $tmGroupLabel => $tmGroupPages) {
+            $tmPagesHtml .= '<fieldset class="tm-group"><legend>' . e((string) $tmGroupLabel) . '</legend>';
+            foreach ($tmGroupPages as $tmPageKey => $tmPageLabel) {
+                $tmPagesHtml .= '<label class="tm-page"><input type="checkbox" name="triangle_pages[]" value="' . e((string) $tmPageKey) . '"' . (in_array((string) $tmPageKey, $tmPages, true) ? ' checked' : '') . '><span>' . e((string) $tmPageLabel) . '</span></label>';
+            }
+            $tmPagesHtml .= '</fieldset>';
+        }
+        $triangleActive = $activeEffect === 'triangle';
+        $particleActive = $activeEffect === 'particles';
+        echo '<div class="settings-panel" id="triangle"' . ($canSettingsGeneralEdit ? '' : ' inert') . '>';
+        echo '<form method="post" class="tm-form" id="triangle-form">' . csrf_field() . '<input type="hidden" name="action" value="save_triangle_effect"><input type="hidden" name="effect_type" id="display-effect-type" value="' . e($activeEffect) . '"><div class="tm-layout">';
+        echo '<div class="card form-card tm-pages-card"><h2>صفحه‌ها و فرم‌ها</h2><p class="muted">افکت انتخاب‌شده فقط روی صفحه‌هایی نمایش داده می‌شود که انتخاب و ذخیره کنید. صفحه‌های چاپ مستقل برای حفظ چیدمان چاپ در این فهرست نیستند.</p><div class="tm-bulk"><button type="button" class="button secondary" data-tm-all="1">انتخاب همه</button><button type="button" class="button secondary" data-tm-all="0">پاک‌کردن انتخاب‌ها</button><span class="muted" data-tm-count></span></div><label class="tm-search"><span class="sr-only">جست‌وجوی صفحه</span><input type="search" data-tm-search placeholder="جست‌وجوی صفحه یا فرم…"></label><div class="tm-pages-list">' . $tmPagesHtml . '<p class="tm-no-results" data-tm-no-results hidden>صفحه‌ای با این نام پیدا نشد.</p></div></div>';
+        echo '<div class="card form-card tm-settings-card"><h2>پیش‌نمایش و تنظیمات افکت</h2><div class="tm-effect-tabs" role="tablist" aria-label="نوع افکت نمایشی">';
+        echo '<button type="button" class="tm-effect-tab' . ($triangleActive ? ' active' : '') . '" id="tab-triangle-effect" role="tab" aria-selected="' . ($triangleActive ? 'true' : 'false') . '" aria-controls="triangle-effect-panel" data-effect-tab="triangle"' . ($triangleActive ? '' : ' tabindex="-1"') . '><span class="tm-effect-icon" aria-hidden="true">△</span><span>مثلث واکنش‌گرا</span></button>';
+        echo '<button type="button" class="tm-effect-tab' . ($particleActive ? ' active' : '') . '" id="tab-particle-effect" role="tab" aria-selected="' . ($particleActive ? 'true' : 'false') . '" aria-controls="particle-effect-panel" data-effect-tab="particles"' . ($particleActive ? '' : ' tabindex="-1"') . '><span class="tm-effect-icon" aria-hidden="true">✦</span><span>ذرات معلق</span></button></div>';
+        echo '<p class="tm-effect-note">فهرست صفحه‌ها برای هر دو افکت مشترک است. تب فعال پس از ذخیره، نوع افکتی را که روی صفحه‌های انتخاب‌شده نمایش داده می‌شود مشخص می‌کند.</p>';
+        echo '<section class="tm-effect-panel" id="triangle-effect-panel" data-effect-panel="triangle" role="tabpanel" aria-labelledby="tab-triangle-effect"' . ($triangleActive ? '' : ' hidden') . '><p class="muted">پیش‌نمایش زنده است؛ ماوس را روی آن حرکت دهید یا کلیک کنید. تنظیمات برای همهٔ صفحه‌های انتخاب‌شده یکسان است.</p><div class="tm-preview" id="triangle-preview" data-tm-preview></div><div class="tm-bulk"><button type="button" class="button secondary" data-tm-ripple>ایجاد موج آزمایشی</button><button type="button" class="button secondary" data-tm-preset="default">پیش‌فرض</button><button type="button" class="button secondary" data-tm-preset="ocean">امواج آرام</button><button type="button" class="button secondary" data-tm-preset="magnet">آهنربای قوی</button><button type="button" class="button secondary" data-tm-preset="soft">محو و ملایم</button></div><div class="tm-fields">';
+        echo $tmRange('cellSize', 'اندازهٔ مثلث‌ها', 'کوچک‌تر = مثلث‌های بیشتر و سنگین‌تر', '1');
+        echo $tmRange('opacity', 'شفافیت خطوط', 'کمتر = محوتر و کم‌مزاحمت‌تر', '0.05');
+        echo $tmRange('mouseRadiusMult', 'شعاع اثر ماوس', 'ضریبی از اندازهٔ مثلث', '0.1');
+        echo $tmRange('repulsionMult', 'قدرت دفع ماوس', 'شدت کنار رفتن نقطه‌ها از مسیر ماوس', '0.05');
+        echo $tmRange('springK', 'سفتی فنر', 'سرعت برگشت نقطه‌ها به جای اصلی', '0.005');
+        echo $tmRange('damping', 'میرایی حرکت', 'بیشتر = نرم‌تر و ماندگارتر', '0.01');
+        echo $tmRange('idleAmp', 'لرزش آرام (حالت بیکار)', 'صفر = ثابت و بدون حرکت خودکار', '0.1');
+        echo $tmRange('waveSpeed', 'سرعت موج کلیک', 'پیکسل بر ثانیه', '10');
+        echo $tmRange('waveDuration', 'مدت موج کلیک', 'ثانیه', '0.1');
+        echo $tmRange('waveWidth', 'ضخامت موج کلیک', 'پیکسل', '5');
+        echo $tmRange('waveAmpMult', 'قدرت موج کلیک', 'شدت جابه‌جایی نقطه‌ها', '0.01');
+        echo '</div><div class="tm-colors"><label>رنگ خطوط<input type="color" name="tm[meshColor]" data-tm-key="meshColor" value="' . e($tmConfig['meshColor']) . '"></label><label>رنگ نقطه‌ها<input type="color" name="tm[dotColor]" data-tm-key="dotColor" value="' . e($tmConfig['dotColor']) . '"></label><label class="check-label"><input type="checkbox" name="tm[showDots]" value="1" data-tm-key="showDots"' . ($tmConfig['showDots'] ? ' checked' : '') . '> نمایش نقطه‌ها</label><label class="check-label"><input type="checkbox" name="tm[maskVignette]" value="1" data-tm-key="maskVignette"' . ($tmConfig['maskVignette'] ? ' checked' : '') . '> محو شدن لبه‌ها (وینیت)</label></div><div class="actions"><button class="button" type="submit">ذخیره تنظیمات افکت</button><span class="muted">این گزینه نوع افکت فعال را مشخص می‌کند؛ صفحه‌های انتخاب‌نشده تغییری نمی‌کنند.</span></div></section>';
+        echo '<section class="tm-effect-panel" id="particle-effect-panel" data-effect-panel="particles" role="tabpanel" aria-labelledby="tab-particle-effect"' . ($particleActive ? '' : ' hidden') . '><p class="muted">پیش‌نمایش زندهٔ ذرات معلق است؛ حرکت ماوس و تنظیم‌ها را همین‌جا امتحان کنید.</p><div class="tm-preview particle-preview" id="particle-preview" data-particle-preview><span class="particle-preview-label">ذرات معلق · حرکت ماوس</span><span class="particle-preview-help">شبکهٔ ذرات واکنش‌گرا</span></div><div class="tm-bulk"><button type="button" class="button secondary" data-particle-preset="default">پیش‌فرض</button><button type="button" class="button secondary" data-particle-preset="calm">آرام و خلوت</button><button type="button" class="button secondary" data-particle-preset="dense">شبکهٔ متراکم</button><button type="button" class="button secondary" data-particle-preset="reactive">واکنش قوی</button></div><div class="tm-fields">';
+        echo $particleRange('density', 'تراکم ذرات', 'عدد کمتر = ذرات بیشتر', '100');
+        echo $particleRange('maxParticles', 'سقف تعداد ذرات', 'کنترل جزئیات و بار پردازشی', '10');
+        echo $particleRange('speed', 'سرعت حرکت', 'صفر = ذرات ثابت', '0.05');
+        echo $particleRange('linkDistance', 'فاصلهٔ اتصال ذرات', 'بیشتر = خطوط شبکهٔ بیشتر', '5');
+        echo $particleRange('mouseRadius', 'شعاع واکنش ماوس', 'فاصلهٔ تأثیر نشانگر', '10');
+        echo $particleRange('mouseStrength', 'قدرت واکنش ماوس', 'شدت روشن‌شدن خطوط نزدیک ماوس', '0.1');
+        echo $particleRange('opacity', 'شفافیت شبکه', 'کمتر = محوتر', '0.05');
+        echo $particleRange('dotScale', 'اندازهٔ نقطه‌ها', 'تنظیم اندازهٔ ذرات', '0.1');
+        echo '</div><div class="tm-colors"><label>رنگ شبکه<input type="color" name="particle[color]" data-particle-key="color" value="' . e($particleConfig['color']) . '"></label><label class="check-label"><input type="checkbox" name="particle[showDots]" value="1" data-particle-key="showDots"' . ($particleConfig['showDots'] ? ' checked' : '') . '> نمایش نقطه‌ها</label><label class="check-label"><input type="checkbox" name="particle[showLinks]" value="1" data-particle-key="showLinks"' . ($particleConfig['showLinks'] ? ' checked' : '') . '> اتصال ذرات به یکدیگر</label><label class="check-label"><input type="checkbox" name="particle[connectCursor]" value="1" data-particle-key="connectCursor"' . ($particleConfig['connectCursor'] ? ' checked' : '') . '> اتصال به ماوس</label><label class="check-label"><input type="checkbox" name="particle[autoMove]" value="1" data-particle-key="autoMove"' . ($particleConfig['autoMove'] ? ' checked' : '') . '> حرکت خودکار</label></div><div class="actions"><button class="button" type="submit">ذخیره تنظیمات ذرات</button><span class="muted">با ذخیرهٔ این تب، ذرات روی صفحه‌های انتخاب‌شده فعال می‌شوند؛ ورود و داشبورد بدون انتخاب صریح افکت نخواهند داشت.</span></div></section></div></div></form>';
+        echo '</div>';
+    }
+
+    if ($canSettingsDomain) {
+    echo '<div class="settings-panel settings-panel-grid" id="domain"' . ($canSettingsDomainEdit ? '' : ' inert') . '>';
+    echo '<div class="card form-card settings-panel-tall"><h2>اتصال Active Directory</h2><p class="muted">رمز حساب سرویس در صورت خالی‌گذاشتن تغییر نمی‌کند. ' . (ldap_secret_key() === null ? '<b>توجه:</b> کلید <code>app.key</code> در config.php تنظیم نشده، پس این رمز به‌صورت متن ساده ذخیره می‌شود.' : 'این رمز رمزشده ذخیره می‌شود؛ با عوض‌کردن <code>app.key</code> باید دوباره وارد شود.') . '</p><form method="post">' . csrf_field() . '<input type="hidden" name="action" value="save_settings"><input type="hidden" name="settings_section" value="ldap"><input type="hidden" name="app_name" value="' . e($appName) . '"><label class="switch-row"><input type="checkbox" name="ldap_enabled" value="1" ' . (setting('ldap_enabled', cfg('ldap.enabled') ? '1' : '0') === '1' ? 'checked' : '') . '> ورود کاربران شبکه فعال باشد</label><div class="form-grid"><label>آدرس کنترلر<input name="ldap_host" value="' . e(setting('ldap_host', (string) cfg('ldap.host', ''))) . '"></label><label>پورت<input type="number" name="ldap_port" value="' . e(setting('ldap_port', (string) cfg('ldap.port', '389'))) . '"></label><label class="full">Base DN<input name="ldap_base_dn" value="' . e(setting('ldap_base_dn', (string) cfg('ldap.base_dn', ''))) . '"></label><label class="full">حساب سرویس<input name="ldap_bind_dn" value="' . e(setting('ldap_bind_dn', (string) cfg('ldap.bind_dn', ''))) . '"></label><label class="full">رمز حساب سرویس<input type="password" name="ldap_bind_password" placeholder="بدون تغییر"></label><label>Domain suffix<input name="ldap_domain_suffix" value="' . e(setting('ldap_domain_suffix', (string) cfg('ldap.domain_suffix', ''))) . '"></label></div><label class="switch-row"><input type="checkbox" name="ldap_ssl" value="1" ' . (setting('ldap_ssl', cfg('ldap.ssl') ? '1' : '0') === '1' ? 'checked' : '') . '> استفاده از LDAPS</label><button class="button" type="submit">ذخیره تنظیمات دامین</button></form></div>';
+    echo '<div class="card form-card" id="domain-scan"' . (user_can($user, 'asset.remote_extract') ? '' : ' inert') . '><h2>اسکن دامنه و استخراج از شبکه</h2><p class="muted">همهٔ کامپیوترهای دامنه از Active Directory خوانده می‌شوند، سپس در صورت آنلاین بودن، اطلاعات سخت‌افزاری آن‌ها از راه دور دریافت و در شناسنامه ثبت می‌شود. برای دریافت سخت‌افزار، حساب وارد‌شده باید روی کلاینت‌ها دسترسی ادمین محلی داشته باشد.</p><form method="post">' . csrf_field() . '<input type="hidden" name="action" value="save_settings"><input type="hidden" name="settings_section" value="domain_scan"><input type="hidden" name="app_name" value="' . e($appName) . '"><p class="muted">نام کاربری و رمز ادمین در فرم استخراج هر نوبت وارد می‌شوند؛ رمز در تنظیمات پایگاه‌داده ذخیره نمی‌شود و برای ارسال آن HTTPS لازم است. حساب باید روی کلاینت‌ها عضو Administrators محلی باشد.</p><div class="form-grid"><label>دامنه (NetBIOS)<input name="domain_scan_domain" value="' . e(setting('domain_scan_domain', '')) . '" placeholder="COMPANY"></label><label>زمان انتظار پینگ (میلی‌ثانیه)<input type="number" name="domain_scan_timeout" min="500" max="30000" value="' . e(setting('domain_scan_timeout', '2500')) . '"></label><label>ترتیب پروتکل اتصال (۱.۳۷)<select name="domain_scan_protocols"><option value=""' . (setting('domain_scan_protocols', '') === '' ? ' selected' : '') . '>خودکار (اول DCOM، بعد WinRM)</option><option value="Wsman,Dcom"' . (setting('domain_scan_protocols', '') === 'Wsman,Dcom' ? ' selected' : '') . '>اول WinRM، بعد DCOM (اگر WinRM روی مقصدها فعال است)</option><option value="Dcom"' . (setting('domain_scan_protocols', '') === 'Dcom' ? ' selected' : '') . '>فقط DCOM</option><option value="Wsman"' . (setting('domain_scan_protocols', '') === 'Wsman' ? ' selected' : '') . '>فقط WinRM (نیازمند فعال‌بودن WinRM روی مقصدها)</option></select></label><label class="muted" style="display:flex;gap:.5rem;align-items:flex-start"><input type="hidden" name="domain_scan_smb_fallback" value="0"><input type="checkbox" name="domain_scan_smb_fallback" value="1"' . (setting('domain_scan_smb_fallback', '1') === '0' ? '' : ' checked') . '><span>روش دوم خودکار (SMB): مقصدی که DCOM/WinRM ردش کند، بار دوم با کپی عامل روی C$ و اجرای آن به‌عنوان SYSTEM خوانده شود — همان روش TNI و Administrator Yar. شرطش فقط ادمین محلی بودن حساب روی مقصد و باز بودن TCP 445 است.</span></label></div><p class="muted">خطاهای رایج استخراج («RPC/WMI در دسترس نیست» و «دسترسی رد شد») در صفحهٔ «اسکن دامنه» با راه‌حل گام‌به‌گام نمایش داده می‌شوند؛ پس از هر اصلاح، از همان صفحه «تلاش دوباره برای ناموفق‌ها» را بزنید.</p><button class="button" type="submit">ذخیره تنظیمات اسکن دامنه</button></form></div>';
+    echo '<div class="card form-card" id="ldap-sync"><h2>معرفی کاربران دامین</h2><p class="muted">همه کاربران قابل مشاهده در Base DN را بدون نیاز به اولین ورود به سامانه معرفی می‌کند. حساب‌هایی که دیگر در دامین پیدا نشوند یا غیرفعال باشند، غیرفعال می‌شوند.</p><div class="actions" style="margin-top:0"><form method="post">' . csrf_field() . '<input type="hidden" name="action" value="sync_ldap_users"><button class="button" type="submit">همگام‌سازی همه کاربران دامین</button></form><form method="post">' . csrf_field() . '<input type="hidden" name="action" value="diagnose_ldap"><button class="button secondary" type="submit">تشخیص اتصال دامنه</button></form></div></div>';
+    echo '<div class="card form-card settings-panel-full" id="ldap-role-map"><h2>نقش‌دهی گروه‌های AD</h2><p class="muted">هر خط یک JSON معتبر برای نقش باشد؛ مثال: {"agent":["CN=IT-Helpdesk,OU=Groups,DC=example,DC=local"]}. کاربران جدید دامینی بر اساس عضویت گروه نقش می‌گیرند و نقش کاربران فعلی دستی حفظ می‌شود.</p><form method="post">' . csrf_field() . '<input type="hidden" name="action" value="save_settings"><input type="hidden" name="settings_section" value="ldap"><input type="hidden" name="app_name" value="' . e($appName) . '"><label>تنظیم JSON نگاشت گروه به نقش<textarea name="ldap_group_map" rows="2" class="compact-textarea" placeholder="{&quot;agent&quot;:[&quot;CN=IT-Helpdesk,...&quot;]}">' . e(setting('ldap_group_map', '{}')) . '</textarea></label><button class="button secondary" type="submit">ذخیره نگاشت گروه‌ها</button></form></div>';
+    echo '</div>';
+    }
+    // ۱.۶۳.۱-r19 — کارت «ریست شناسنامه‌ها» (درخواست کاربر).
+    //
+    // فقط مدیر اصلی می‌بیند. کلمهٔ تأیید «ریست» باید عیناً تایپ شود تا یک
+    // کلیک اشتباهی کل شناسنامه‌ها را پاک نکند. متن صریح می‌گوید چه چیزی پاک
+    // می‌شود و چه چیزی می‌ماند، و مسیر بازگردانی را هم نشان می‌دهد.
+    if (user_is_primary_admin($user)) {
+        $assetCountNow = 0;
+        try { $assetCountNow = (int) db()->query('SELECT COUNT(*) FROM assets')->fetchColumn(); } catch (Throwable $ignored) {}
+        $resetBackups = @glob(APP_ROOT . '/storage/asset-reset/*.json') ?: [];
+        usort($resetBackups, static fn(string $a, string $b): int => filemtime($b) <=> filemtime($a));
+        echo '<div class="card form-card asset-reset-card" id="asset-reset"><h2>ریست شناسنامه‌ها</h2>';
+        echo '<p class="muted">این ابزار برای شرایط اضطراری است: همهٔ شناسنامه‌ها را پاک می‌کند تا ثبت از نو شروع شود. مثلاً وقتی شمارِ شناسنامه با تعداد واقعی سیستم‌های شبکه نمی‌خواند.</p>';
+        echo '<p>شناسنامه‌های فعلی: <strong>' . (int) $assetCountNow . '</strong> رکورد</p>';
+        echo '<div class="alert warning" style="margin:12px 0"><strong>چه چیزی پاک می‌شود:</strong> شناسنامه‌ها، پروفایل‌ها، تاریخچهٔ استخراج، ماژول‌های حافظه، دیسک‌ها، کارت گرافیک، لوازم جانبی و نرم‌افزارهای ثبت‌شده.<br><strong>چه چیزی می‌ماند:</strong> کاربران، درخواست‌ها، گروه‌های غذایی، تنظیمات سامانه و بکاپ‌ها.</div>';
+        echo '<div class="alert info" style="margin:12px 0">پیش از حذف، یک بکاپ کامل JSON در <code dir="ltr">storage/asset-reset/</code> ساخته می‌شود. اگر بکاپ نوشته نشود، هیچ رکوردی حذف نمی‌شود.</div>';
+        if ($resetBackups) {
+            echo '<p class="muted">آخرین بکاپ‌ها:</p><ul class="compact-list">';
+            foreach (array_slice($resetBackups, 0, 3) as $bk) {
+                echo '<li><code dir="ltr">' . e(basename($bk)) . '</code> — ' . number_format((int) filesize($bk) / 1024, 1) . ' کیلوبایت</li>';
+            }
+            echo '</ul><p class="muted">بازگردانی از خط فرمان: <code dir="ltr">php tools/asset_reset_restore.php &lt;نام-فایل&gt; --apply</code></p>';
+        }
+        echo '<form method="post" onsubmit="return confirm(\'همهٔ شناسنامه‌ها پاک می‌شوند. بکاپ گرفته می‌شود ولی این کار برگشت‌ناپذیر است. مطمئنید؟\');">' . csrf_field();
+        echo '<input type="hidden" name="action" value="reset_assets">';
+        echo '<label>برای تأیید، عبارت <b>ریست</b> را بنویسید<input name="reset_confirm" required autocomplete="off" placeholder="ریست" dir="auto"></label>';
+        echo '<button class="button danger" type="submit">پاک‌کردن همهٔ شناسنامه‌ها</button></form></div>';
+    }
+
+    if ($canSettingsUsers) {
+    echo '<div class="card form-card settings-panel" id="users"' . ($canSettingsUsersEdit ? '' : ' inert') . '><h2>کاربران</h2>' . (user_is_primary_admin($user) ? '<p><a class="button secondary" href="index.php?page=local-accounts">کاربران محلی (پرسنل غذا) و انتخاب بازرسی</a></p>' : '') . '<p class="muted">شرکت هر کاربر از جایگاه فعال او در درخت سازمانی به دست می‌آید؛ تا پیش از معرفی در یکی از درخت‌ها، وضعیت او «بدون شرکت» است. این تفکیک فقط برای نمایش فهرست کارکنان است و نقش‌ها را تغییر نمی‌دهد.</p>';
+    if (user_is_primary_admin($user)) {
+        $displayCompanies = org_companies_all();
+        echo '<section class="company-settings card"><h3>نام نمایشی شرکت‌ها</h3><p class="muted">این نام در همهٔ بخش‌های برنامه (انتخاب‌گر شرکت، فهرست «بخش‌های سازمانی» در ثبت درخواست/CD-DVD/گزارش‌ها و گزارش غذای مهمان) نمایش داده می‌شود؛ هیچ نقش، مجوز یا عضویت کاربر را تغییر نمی‌دهد.</p><form method="post" class="company-name-form">' . csrf_field() . '<input type="hidden" name="action" value="save_org_company_names">';
+        foreach ($displayCompanies as $displayCompany) echo '<label>' . e((string) $displayCompany['code'] === 'own' ? 'نام نمایشی شرکت اصلی' : 'نام نمایشی شرکت همکار') . '<input name="company_names[' . (int) $displayCompany['id'] . ']" value="' . e((string) $displayCompany['name']) . '" maxlength="190" required></label>';
+        echo '<button class="button" type="submit">ذخیره نام نمایشی</button></form></section>';
+    }
+    echo '<div class="category-list">';
+    foreach ($users as $managedUser) {
+        echo '<div><span><strong>' . e($managedUser['full_name']) . '</strong><small>' . e($managedUser['username']) . ' • ' . ($managedUser['auth_source'] === 'ldap' ? 'دامینی' : 'محلی') . ' • ' . e(org_company_user_label((int) ($managedUser['company_id'] ?? 0))) . ' • ' . ((int) $managedUser['is_active'] === 1 ? 'فعال' : 'غیرفعال') . '</small></span>';
+        if ($canManageSettingsUsers) {
+            $canLinkDomainCode = user_is_primary_admin($user) && (string) $managedUser['auth_source'] === 'ldap';
+            $domainCodeDialogId = 'domain-code-link-dialog-' . (int) $managedUser['id'];
+            $roleOptionsHtml = '';
+            foreach (permission_roles() as $roleCode => $roleLabel) {
+                $roleOptionsHtml .= '<option value="' . e($roleCode) . '" ' . ($managedUser['role'] === $roleCode ? 'selected' : '') . '>' . e($roleLabel) . '</option>';
+            }
+            echo '<form method="post" class="role-form">' . csrf_field() . '<input type="hidden" name="action" value="update_user_role"><input type="hidden" name="return_page" value="settings"><input type="hidden" name="user_id" value="' . (int) $managedUser['id'] . '"><input type="hidden" name="is_it_agent" value="' . ((int) $managedUser['is_it_agent'] === 1 ? '1' : '0') . '"><label>کد پرسنلی<input name="employee_number" value="' . e($managedUser['employee_number'] ?? '') . '" placeholder="کد دستگاه دستگاه حضور و غیاب"></label><label>کد ملی<input name="national_code" inputmode="numeric" value="' . e($managedUser['national_code'] ?? '') . '" placeholder="برای چاپ غذا"></label><select name="role">' . $roleOptionsHtml . '</select><select name="department_id"><option value="">بدون واحد</option>';
+            foreach ($departments as $department) {
+                echo '<option value="' . (int) $department['id'] . '" ' . ((int) $managedUser['department_id'] === (int) $department['id'] ? 'selected' : '') . '>' . e($department['name']) . '</option>';
+            }
+            echo '</select><label class="check-label"><input type="checkbox" name="is_active" value="1" ' . ((int) ($managedUser['is_active'] ?? 0) === 1 ? 'checked' : '') . '> فعال</label><label class="check-label"><input type="checkbox" name="is_primary_admin" value="1" ' . ((int) ($managedUser['is_primary_admin'] ?? 0) === 1 ? 'checked' : '') . '> ادمین اصلی</label><div class="role-form-actions"><button class="button secondary" type="submit">ذخیره</button>' . ($canLinkDomainCode ? '<button class="button domain-code-dialog-open" type="button" data-domain-code-dialog-open="' . e($domainCodeDialogId) . '">بررسی تغییر کد</button>' : '') . '</div></form>';
+            if ($canLinkDomainCode) {
+                echo '<dialog class="domain-code-link-dialog" id="' . e($domainCodeDialogId) . '" aria-labelledby="' . e($domainCodeDialogId) . '-title"><header><div><h3 id="' . e($domainCodeDialogId) . '-title">جستجو و بررسی کد پرسنلی</h3><p>این مرحله فقط رکوردهای واقعی را پیدا و برای بررسی نمایش می‌دهد؛ ادغام جداگانه تأیید می‌شود.</p></div><button class="button secondary" type="button" data-domain-code-dialog-close aria-label="بستن">بستن</button></header><p class="muted">حساب مقصد: ' . e((string) ($managedUser['full_name'] ?? '')) . ' · ' . e((string) ($managedUser['username'] ?? '')) . ' (#' . (int) $managedUser['id'] . ')<br>کد فعلی روی حساب دامین: ' . e((string) ($managedUser['employee_number'] ?? 'ثبت‌نشده')) . '</p><form method="post" class="domain-code-link-dialog-form">' . csrf_field() . '<input type="hidden" name="action" value="link_domain_food_by_code"><input type="hidden" name="user_id" value="' . (int) $managedUser['id'] . '"><label>کد قطعی پرسنل غذا<input name="employee_number" value="" placeholder="کد صحیح؛ مثلاً 335" required></label><label class="check-label"><input type="checkbox" name="confirm_code_link" value="1" required> تأیید می‌کنم رکوردهای محلی/غذاییِ همین کد متعلق به همین کارمند هستند.</label><div class="domain-code-dialog-actions"><button class="button" type="submit">جستجو و نمایش رکوردها</button><button class="button secondary" type="button" data-domain-code-dialog-close>انصراف</button></div><small class="muted">نام دخیل نیست؛ نتیجه‌ها قابل بررسی/انتخاب‌اند. پیش از ادغام پشتیبان ساخته می‌شود و ارجاع‌ها در یک تراکنش منتقل می‌شوند.</small></form></dialog>';
+            }
+        } else {
+            echo '<span class="status admin-readonly">' . (user_is_primary_admin($managedUser) ? 'ادمین اصلی' : e(permission_roles()[$managedUser['role']] ?? $managedUser['role'])) . '</span>';
+        }
+        echo '</div>';
+    }
+    echo '</div>';
+    echo '<div id="key-roles" class="settings-subform"' . ($canSettingsKeyRolesEdit ? '' : ' inert') . '><h3>نقش‌های کلیدی</h3><p class="muted">برای هر نقش حداکثر دو کاربر انتخاب کنید. هیچ‌کدام از این نقش‌ها <strong>نقش اصلی کاربر را عوض نمی‌کند</strong>؛ فقط دسترسی اضافه می‌کند. «کارشناس آی تی» و «کارشناس پشتیبانی» مسئول رسیدگی به درخواست‌های همان حوزه هستند (فقط از همین فهرست خوانده می‌شوند)، «سوپروایز» فضای سوپروایزر و صف تصمیم‌ها را می‌دهد، و «بازرسی» مجوز ثبت ورود رسانه در CD/DVD را.</p><form method="post">' . csrf_field() . '<input type="hidden" name="action" value="save_key_roles">' . $roleCards . (user_is_primary_admin($user) ? '' : '<p class="muted">تعیین یا حذف کارشناس IT فقط توسط ادمین اصلی انجام می‌شود.</p>') . '<button class="button" type="submit">ذخیره نقش‌های کلیدی</button></form></div>';
+    echo '</div>';
+    }
+
+    if ($canManageSettingsUsers) {
+        $roleMeta = [
+            'primary_admin' => ['icon' => 'owner', 'desc' => 'دسترسی کامل و غیرقابل‌تغییر', 'locked' => true],
+            'supervisor' => ['icon' => 'supervisor', 'desc' => 'نظارت و مدیریت درخواست‌ها', 'locked' => false],
+            'support_manager' => ['icon' => 'manager', 'desc' => 'مدیریت تیم پشتیبانی', 'locked' => false],
+            'inspector' => ['icon' => 'inspector', 'desc' => 'بازرسی و کنترل CD/DVD', 'locked' => false],
+            'manager' => ['icon' => 'manager', 'desc' => 'مدیریت واحد و اداره', 'locked' => false],
+            'agent' => ['icon' => 'expert', 'desc' => 'رسیدگی به درخواست‌ها', 'locked' => false],
+            'user' => ['icon' => 'user', 'desc' => 'کاربر عادی سامانه', 'locked' => false],
+            'local_user' => ['icon' => 'user', 'desc' => 'کاربر محلی (پرسنل غذا)', 'locked' => false],
+            'guard' => ['icon' => 'inspector', 'desc' => 'بازرسی', 'locked' => false],
+        ];
+        $allCodes = permission_all_codes();
+        $catalog = permission_catalog();
+        $totalAll = count($allCodes);
+        echo '<div class="card form-card settings-panel roles-shell" id="roles">';
+        echo '<div class="roles-shell-head"><div><h2>نقش‌ها و سطوح دسترسی</h2><p class="muted">یک نقش را انتخاب کنید و منوها/بخش‌هایی که اجازه دارد را تیک بزنید. هر چیزی تیک نخورد، برای آن نقش پنهان می‌ماند. دسترسی‌های «سامانه مدیریت غذا» برای همهٔ نقش‌ها قابل تنظیم است و کاربران دامینی و محلیِ دارای یک نقش، همین مجوزها را می‌گیرند.</p><p class="muted">تا وقتی دسترسی‌های یک نقش را <strong>ذخیره نکنید</strong>، پیش‌فرض‌های داخل کد اعمال می‌شود؛ به‌محض ذخیره، همان مقادیر شما اولویت می‌گیرد (حتی اگر چیزی تیک نخورده باشد) و هر وقت خواستید با «بازگردانی به پیش‌فرض کد» نقش دوباره به پیش‌فرض برمی‌گردد.</p></div></div>';
+        echo '<div class="roles-layout"><aside class="roles-sidebar"><div class="roles-sidebar-head"><strong>نقش‌های سامانه</strong><small>برای ویرایش انتخاب کنید</small></div><div class="roles-list">';
+        foreach (permission_roles() as $roleCode => $roleLabel) {
+            $meta = $roleMeta[$roleCode] ?? ['icon' => 'user', 'desc' => '', 'locked' => false];
+            $roleCount = $roleCode === 'primary_admin' ? $totalAll : count(array_intersect(role_permission_codes($roleCode), $allCodes));
+            $pct = $totalAll > 0 ? (int) round($roleCount / $totalAll * 100) : 0;
+            echo '<button type="button" class="role-item' . ($roleCode === 'primary_admin' ? ' locked' : '') . ($roleCode === 'supervisor' ? ' active' : '') . '" data-role-tab="' . e($roleCode) . '"><span class="role-avatar">' . permission_icon($meta['icon']) . '</span><span class="role-info"><span class="role-name">' . e($roleLabel) . ($meta['locked'] ? '<span class="lock-badge">قفل</span>' : '') . '</span><span class="role-stats"><span class="role-count">' . $roleCount . ' از ' . $totalAll . '</span><span class="mini-bar"><span class="mini-bar-fill" style="width:' . $pct . '%"></span></span></span></span></button>';
+        }
+        echo '</div></aside><section class="roles-content">';
+        $firstRole = true;
+        foreach (permission_roles() as $roleCode => $roleLabel) {
+            $isPrimary = $roleCode === 'primary_admin';
+            $active = $isPrimary ? $allCodes : array_values(array_intersect(role_permission_codes($roleCode), $allCodes));
+            // ۱.۳۷.۷ — وضعیت این نقش: «پیش‌فرض کد» (دست‌نخورده) یا «ویرایش‌شده» (از فرم ذخیره شده).
+            $roleIsCustom = !$isPrimary && role_permissions_custom($roleCode);
+            $roleStateBadge = $isPrimary
+                ? ''
+                : '<span class="status ' . ($roleIsCustom ? 'warning' : 'done') . '" title="' . ($roleIsCustom
+                    ? 'دسترسی‌های این نقش از فرم ذخیره شده و همین‌ها اعمال می‌شود؛ پیش‌فرض‌های کد روی آن اثر ندارند.'
+                    : 'این نقش دست‌نخورده است؛ پیش‌فرض‌های داخل کد اعمال می‌شود و تغییرهای آیندهٔ کد خودکار می‌رسد.') . '">'
+                . ($roleIsCustom ? 'ویرایش‌شده' : 'پیش‌فرض کد') . '</span>';
+            echo '<form method="post" class="role-panel' . ($firstRole ? ' active' : '') . '" data-role-panel="' . e($roleCode) . '">' . csrf_field() . '<input type="hidden" name="action" value="save_role_permissions"><input type="hidden" name="role" value="' . e($roleCode) . '">';
+            echo '<div class="role-panel-head"><div class="role-panel-title"><span class="role-icon-lg">' . permission_icon($roleMeta[$roleCode]['icon'] ?? 'user') . '</span><div><h3>' . e($roleLabel) . '</h3><p class="muted">' . ($isPrimary ? 'این نقش به همهٔ بخش‌ها دسترسی کامل دارد و قابل محدودکردن نیست.' : e($roleMeta[$roleCode]['desc'] ?? '')) . '</p></div>' . $roleStateBadge . '</div><div class="role-active-count"><small>دسترسی‌های فعال</small><strong data-role-count="' . e($roleCode) . '">' . count($active) . '<span>/' . $totalAll . '</span></strong></div></div>';
+            if ($isPrimary) {
+                echo '<div class="perm-locked-note"><span>قفل</span> ادمین اصلی همیشه به همهٔ بخش‌ها دسترسی دارد.</div>';
+            } else {
+                echo '<div class="perm-toolbar"><button type="button" class="toolbar-btn" data-perm-all="1">انتخاب همه</button><button type="button" class="toolbar-btn" data-perm-none="1">حذف همه</button><div class="perm-toolbar-spacer"></div><span class="perm-changes" data-role-changes hidden></span><button type="button" class="toolbar-btn warn" data-perm-reset hidden>بازگشت به حالت اولیه</button></div>';
+                echo '<div class="perm-search"><input type="search" class="perm-search-input" data-perm-search placeholder="جست‌وجوی دسترسی یا گروه..."></div>';
+                echo '<div class="groups-container">';
+                foreach ($catalog as $group) {
+                    // مجوزهای مدیریت غذا برای همهٔ نقش‌ها نمایش داده می‌شوند؛ این نقش مستقل از منبع ورود (دامینی/محلی) است.
+                    $groupCodes = array_map(static fn (array $item): string => $item['code'], $group['items']);
+                    $checkedCount = count(array_intersect($groupCodes, $active));
+                    $isEmpty = $checkedCount === 0;
+                    $isFull = $checkedCount === count($groupCodes);
+                    $countClass = $isFull ? 'full' : ($isEmpty ? 'empty' : 'partial');
+                    $pct = count($groupCodes) > 0 ? (int) round($checkedCount / count($groupCodes) * 100) : 0;
+                    echo '<div class="group-card" data-perm-group-card="' . e($group['key']) . '" data-group-label="' . e($group['label']) . '"><div class="group-header" data-group-toggle="' . e($group['key']) . '"><span class="group-toggle">◀</span><span class="group-icon">' . permission_icon('g-' . $group['key']) . '</span><span class="group-info"><span class="group-name">' . e($group['label']) . '</span></span><span class="group-progress"><span class="group-count ' . $countClass . '" data-group-count>' . $checkedCount . ' از ' . count($groupCodes) . '</span><span class="group-bar"><span class="group-bar-fill" style="width:' . $pct . '%"></span></span></span><button type="button" class="group-select-all" data-group-all="' . e($group['key']) . '">' . ($isFull ? 'حذف همه' : 'انتخاب همه') . '</button></div><div class="group-body">';
+                    // ویرایش (فرزند بخش) زیر والدش با تورفتگی نمایش داده می‌شود و خودش جدا از فهرست اصلی نیست.
+                    $editMap = permission_edit_map();
+                    $editChildCodes = array_values($editMap);
+                    $itemsByCode = [];
+                    foreach ($group['items'] as $gItem) {
+                        $itemsByCode[$gItem['code']] = $gItem;
+                    }
+                    $renderPerm = static function (array $pItem, bool $isChild) use ($active, $group, $roleCode): void {
+                        $lockedCddvdEdit = $pItem['code'] === 'cddvd.edit'
+                            && !in_array($roleCode, permission_cddvd_direct_edit_roles(), true);
+                        $pChecked = !$lockedCddvdEdit && in_array($pItem['code'], $active, true);
+                        echo '<label class="perm-item' . ($isChild ? ' perm-child' : '') . ($pChecked ? ' checked' : '') . ($lockedCddvdEdit ? ' is-disabled' : '') . '" data-perm-item' . ($isChild ? ' data-perm-edit="1"' : '') . ' data-perm-label="' . e($pItem['label']) . '" data-perm-group="' . e($group['key']) . '"><input type="checkbox" name="permissions[]" value="' . e($pItem['code']) . '"' . ($pChecked ? ' checked' : '') . ($lockedCddvdEdit ? ' disabled title="فقط نقش‌های ادمین اصلی، سوپروایزر و بازرسی"' : '') . '><span class="perm-check">✓</span><span class="perm-label">' . e($pItem['label']) . '</span>' . ($lockedCddvdEdit ? '<small class="perm-lock-note">فقط ادمین اصلی، سوپروایزر و بازرسی</small>' : '') . '</label>';
+                    };
+                    foreach ($group['items'] as $item) {
+                        if (in_array($item['code'], $editChildCodes, true)) {
+                            continue;
+                        }
+                        $renderPerm($item, false);
+                        if (isset($editMap[$item['code']], $itemsByCode[$editMap[$item['code']]])) {
+                            $renderPerm($itemsByCode[$editMap[$item['code']]], true);
+                        }
+                    }
+                    echo '</div></div>';
+                }
+                echo '<div class="perm-empty" data-perm-empty hidden>دسترسی‌ای با این عبارت یافت نشد.</div>';
+                echo '</div>';
+                echo '<div class="role-actions"><button class="button" type="submit">ذخیره دسترسی‌های ' . e($roleLabel) . '</button>'
+                    . '<button class="button secondary" type="submit" name="action" value="reset_role_defaults" data-confirm="دسترسی‌های این نقش به پیش‌فرض داخل کد برگردد؟ تنظیم دستی این نقش پاک می‌شود.">بازگردانی به پیش‌فرض کد</button>'
+                    . '</div>';
+            }
+            echo '</form>';
+            $firstRole = false;
+        }
+        echo '</section></div>';
+        echo '<div class="roles-shell-foot"><form method="post" class="inline-action">' . csrf_field() . '<input type="hidden" name="action" value="reset_role_permissions"><button class="button secondary" type="submit">بازگرداندن همهٔ دسترسی‌ها به پیش‌فرض</button></form><button type="button" class="button secondary" data-copy-role>کپی از نقش دیگر</button></div>';
+        echo '</div>';
+
+        echo '<div class="copy-modal" data-copy-modal hidden><div class="copy-modal-card"><div class="copy-modal-head"><h3>کپی دسترسی‌ها</h3><p class="muted">دسترسی‌های کدام نقش روی نقش فعلی کپی شود؟</p></div><div class="copy-modal-body">';
+        foreach (permission_roles() as $srcCode => $srcLabel) {
+            echo '<button type="button" class="copy-option" data-copy-source="' . e($srcCode) . '"><span class="copy-avatar">' . permission_icon($roleMeta[$srcCode]['icon'] ?? 'user') . '</span><span class="copy-info"><strong>' . e($srcLabel) . '</strong><small>' . ($srcCode === 'primary_admin' ? $totalAll : count(array_intersect(role_permission_codes($srcCode), $allCodes))) . ' از ' . $totalAll . ' دسترسی فعال</small></span></button>';
+        }
+        echo '</div><div class="copy-modal-foot"><button type="button" class="button secondary" data-copy-cancel>انصراف</button><button type="button" class="button" data-copy-apply disabled>کپی کن</button></div></div></div>';
+
+        // گروه‌های عمومی دسترسی؛ عضویت و مجوزهای گروه مستقل از نقش ذخیره می‌شوند.
+        $accessGroupsReady = user_access_groups_schema_ready();
+        $accessGroups = $accessGroupsReady ? user_access_groups_all() : [];
+        $accessGroupUsers = $accessGroupsReady ? user_access_groups_admin_users() : [];
+        $selectedAccessGroupId = max(0, (int) ($_GET['access_group_id'] ?? 0));
+        if ($selectedAccessGroupId <= 0 || !array_filter($accessGroups, static fn (array $group): bool => (int) $group['id'] === $selectedAccessGroupId)) {
+            $selectedAccessGroupId = (int) ($accessGroups[0]['id'] ?? 0);
+        }
+
+        echo '<div class="card form-card settings-panel roles-shell access-groups-shell" id="access-groups">';
+        echo '<div class="roles-shell-head"><div><h2>گروه‌های دسترسی</h2><p class="muted">کاربران با نقش‌های متفاوت را در یک یا چند گروه عضو کنید. مجوز مؤثر از جمع مجوزهای نقش و همهٔ گروه‌های کاربر به دست می‌آید؛ گروه هرگز نقش یا دسترسی نقش را جایگزین نمی‌کند. مدیریت گروه‌ها فقط در اختیار ادمین اصلی است.</p><p class="muted">محدودیت‌های ویژهٔ نقش و محدودهٔ داده‌ها همچنان رعایت می‌شوند؛ برای نمونه، مجوزهای دارای محدودیت ذاتی (مثل ویرایش مستقیم CD/DVD) از قاعدهٔ مجاز خود خارج نمی‌شوند. ادمین اصلی همچنان دسترسی کامل دارد.</p></div></div>';
+        if (!$accessGroupsReady) {
+            echo '<div class="perm-locked-note"><span>نیاز به مهاجرت</span> ساختار ذخیره‌سازی گروه‌های دسترسی موجود نیست. پس از اجرای <code>migrations/023-user-access-groups.sql</code> صفحه را تازه کنید؛ تا آن زمان مجوزهای نقش بدون تغییر کار می‌کنند.</div>';
+        } else {
+            echo '<form method="post" class="access-group-create-form">' . csrf_field() . '<input type="hidden" name="action" value="create_access_group"><label>نام گروه جدید<input name="group_name" maxlength="120" required placeholder="مثلاً گزارش‌گیرندگان"></label><label class="access-group-create-description">توضیح کوتاه<input name="group_description" maxlength="500" placeholder="هدف این گروه (اختیاری)"></label><button class="button" type="submit">ساخت گروه</button></form>';
+            if (!$accessGroups) {
+                echo '<div class="perm-empty access-group-empty"><strong>هنوز گروهی ساخته نشده است.</strong><br>از فرم بالا یک گروه بسازید؛ سپس اعضا و دسترسی‌های تکمیلی آن را انتخاب کنید.</div>';
+            } else {
+                $accessGroupMemberSets = user_access_groups_member_sets();
+                $accessGroupPermissionSets = user_access_groups_permission_sets();
+                echo '<div class="roles-layout"><aside class="roles-sidebar"><div class="roles-sidebar-head"><strong>گروه‌های دسترسی</strong><small>برای ویرایش گروه انتخاب کنید</small></div><div class="roles-list">';
+                foreach ($accessGroups as $accessGroup) {
+                    $accessGroupId = (int) $accessGroup['id'];
+                    $memberCount = (int) ($accessGroup['member_count'] ?? 0);
+                    $permissionCount = (int) ($accessGroup['permission_count'] ?? 0);
+                    $permissionPct = $totalAll > 0 ? (int) round($permissionCount / $totalAll * 100) : 0;
+                    $accessTab = 'access-group-' . $accessGroupId;
+                    echo '<button type="button" class="role-item' . ($accessGroupId === $selectedAccessGroupId ? ' active' : '') . '" data-role-tab="' . e($accessTab) . '" aria-controls="' . e($accessTab) . '-panel"><span class="role-avatar">' . permission_icon('g-base') . '</span><span class="role-info"><span class="role-name">' . e((string) $accessGroup['name']) . '</span><span class="role-stats"><span class="role-count">' . $memberCount . ' عضو · ' . $permissionCount . ' مجوز</span><span class="mini-bar"><span class="mini-bar-fill" style="width:' . $permissionPct . '%"></span></span></span></span></button>';
+                }
+                echo '</div></aside><section class="roles-content">';
+                foreach ($accessGroups as $accessGroup) {
+                    $accessGroupId = (int) $accessGroup['id'];
+                    $accessTab = 'access-group-' . $accessGroupId;
+                    $isSelectedAccessGroup = $accessGroupId === $selectedAccessGroupId;
+                    $selectedPermissions = array_keys($accessGroupPermissionSets[$accessGroupId] ?? []);
+                    $selectedMembers = $accessGroupMemberSets[$accessGroupId] ?? [];
+                    $memberSelectedCount = count($selectedMembers);
+                    echo '<section class="role-panel access-group-panel' . ($isSelectedAccessGroup ? ' active' : '') . '" data-role-panel="' . e($accessTab) . '" id="' . e($accessTab) . '-panel">';
+                    echo '<form method="post" class="access-group-save-form">' . csrf_field() . '<input type="hidden" name="action" value="save_access_group"><input type="hidden" name="group_id" value="' . $accessGroupId . '">';
+                    echo '<div class="role-panel-head"><div class="role-panel-title"><span class="role-icon-lg">' . permission_icon('g-base') . '</span><div><h3>' . e((string) $accessGroup['name']) . '</h3><p class="muted">مجوزها به دسترسی نقش اعضا اضافه می‌شوند.</p></div></div><div class="role-active-count"><small>دسترسی‌های گروه</small><strong data-role-count="' . e($accessTab) . '">' . count($selectedPermissions) . '<span>/' . $totalAll . '</span></strong></div></div>';
+                    echo '<div class="access-group-fields"><label>نام گروه<input data-access-group-field="name" name="group_name" maxlength="120" required value="' . e((string) $accessGroup['name']) . '"></label><label>توضیح کوتاه<input data-access-group-field="description" name="group_description" maxlength="500" value="' . e((string) ($accessGroup['description'] ?? '')) . '" placeholder="هدف یا دامنهٔ این گروه"></label></div>';
+                    echo '<section class="access-group-members"><div class="access-group-section-head"><div><strong>اعضای گروه</strong><small>هر کاربر می‌تواند عضو چند گروه باشد؛ نقش فعلی او دست‌نخورده می‌ماند.</small></div><span class="access-group-member-count" data-access-member-count>' . $memberSelectedCount . ' عضو</span></div><div class="access-group-member-toolbar"><input type="search" data-access-member-search placeholder="جست‌وجوی نام، نام کاربری یا نقش..." aria-label="جست‌وجوی اعضا"><button type="button" class="toolbar-btn" data-access-member-select-visible>انتخاب نتایج</button><button type="button" class="toolbar-btn" data-access-member-clear-visible>پاک‌کردن نتایج</button></div><div class="access-group-members-list" data-access-member-list>';
+                    foreach ($accessGroupUsers as $accessGroupUser) {
+                        $memberUserId = (int) $accessGroupUser['id'];
+                        $memberRoleCode = (string) ($accessGroupUser['role'] ?? '');
+                        $memberRoleLabel = user_access_group_role_label($memberRoleCode);
+                        $memberSourceLabel = (string) ($accessGroupUser['auth_source'] ?? '') === 'ldap' ? 'دامینی' : 'محلی';
+                        $memberName = trim((string) ($accessGroupUser['full_name'] ?? ''));
+                        if ($memberName === '') {
+                            $memberName = (string) $accessGroupUser['username'];
+                        }
+                        $memberSearchText = $memberName . ' ' . (string) $accessGroupUser['username'] . ' ' . $memberRoleLabel . ' ' . $memberSourceLabel;
+                        $isGroupMember = isset($selectedMembers[$memberUserId]);
+                        echo '<label class="access-group-member" data-access-member data-member-label="' . e($memberSearchText) . '"><input type="checkbox" name="members[]" value="' . $memberUserId . '"' . ($isGroupMember ? ' checked' : '') . '><span class="access-group-member-info"><strong>' . e($memberName) . '</strong><small>' . e((string) $accessGroupUser['username']) . ' · ' . e($memberSourceLabel) . '</small></span><span class="access-group-role-label">' . e($memberRoleLabel) . '</span></label>';
+                    }
+                    if (!$accessGroupUsers) {
+                        echo '<p class="muted access-group-no-users">کاربر فعالی برای عضویت در گروه پیدا نشد.</p>';
+                    }
+                    echo '<p class="muted access-group-no-users" data-access-member-empty hidden>کاربری با این عبارت پیدا نشد.</p>';
+                    echo '</div></section>';
+                    echo '<div class="perm-toolbar"><button type="button" class="toolbar-btn" data-perm-all="1">انتخاب همهٔ دسترسی‌ها</button><button type="button" class="toolbar-btn" data-perm-none="1">حذف همهٔ دسترسی‌ها</button><div class="perm-toolbar-spacer"></div><span class="perm-changes" data-role-changes hidden></span><button type="button" class="toolbar-btn warn" data-perm-reset hidden>بازگشت به حالت اولیه</button></div>';
+                    echo '<div class="perm-search"><input type="search" class="perm-search-input" data-perm-search placeholder="جست‌وجوی دسترسی یا گروه..."></div><div class="groups-container">' . user_access_group_permission_matrix_markup($selectedPermissions, $catalog) . '</div>';
+                    echo '<div class="perm-locked-note access-group-catalog-note"><span>کاتالوگ مشترک</span> مجوزهای ویرایش، مجوز مشاهدهٔ والد را نیز فعال می‌کنند. مجوز «ویرایش مستقیم CD/DVD» فقط برای نقش‌های مجاز فعلی مؤثر است.</div>';
+                    echo '<div class="role-actions"><button class="button" type="submit">ذخیرهٔ اعضا و دسترسی‌های گروه</button></div></form>';
+                    echo '<form method="post" class="access-group-delete-form">' . csrf_field() . '<input type="hidden" name="action" value="delete_access_group"><input type="hidden" name="group_id" value="' . $accessGroupId . '"><button class="button secondary" type="submit" data-confirm="این گروه و همهٔ عضویت‌ها و مجوزهای وابستهٔ آن حذف شوند؟ نقش‌ها و مجوزهای اصلی کاربران تغییر نمی‌کنند.">حذف گروه</button></form>';
+                    echo '</section>';
+                }
+                echo '</section></div>';
+            }
+        }
+        echo '</div>';
+    }
+
+    if ($canManageSettingsUsers) {
+        echo '<div class="settings-panel" id="org-admin-repair"><h2>ترمیم نقش‌ها و تشخیص ارجاع سازمانی</h2><p class="muted">ابزارهای بازبینی و اصلاح نقش‌های مدیران سازمانی و تشخیص مقصد ارجاع خودکار درخواست‌ها.</p>';
+    if ($canManageSettingsUsers) {
+        $repairRows = db()->query('SELECT DISTINCT u.id, u.username, u.full_name, u.role, ou.name AS unit_name FROM users u JOIN org_units ou ON (ou.manager_user_id = u.id OR EXISTS (SELECT 1 FROM org_unit_managers oum WHERE oum.unit_id = ou.id AND oum.user_id = u.id)) WHERE u.is_active = 1 AND (u.role = "primary_admin" OR (u.role = "admin" AND u.is_primary_admin = 1)) AND ou.is_active = 1 ORDER BY u.full_name, ou.name')->fetchAll();
+        $repairCandidates = [];
+        foreach ($repairRows as $repairRow) {
+            $repairId = (int) $repairRow['id'];
+            if (!isset($repairCandidates[$repairId])) {
+                $repairCandidates[$repairId] = $repairRow;
+                $repairCandidates[$repairId]['unit_names'] = [];
+            }
+            $repairCandidates[$repairId]['unit_names'][] = (string) $repairRow['unit_name'];
+        }
+        echo '<section class="card form-card" id="repair-org-admin-roles"><h2>اصلاح مدیران سازمانی که ادمین اصلی شده‌اند</h2><p class="muted">این فهرست، ادمین‌های اصلیِ منصوب‌شده به معاونت/اداره را نشان می‌دهد. فقط افرادی را تیک بزنید که ادمین اصلی سامانه نیستند و اشتباهاً با انتساب سازمانی ادمین شده‌اند؛ نقش آن‌ها به «مدیر» برمی‌گردد و چارت و ارجاع‌های سازمانی حفظ می‌شود. دست‌کم یک ادمین اصلی واقعی باید باقی بماند.</p>';
+        if ($repairCandidates === []) {
+            echo '<p class="muted">در حال حاضر مدیر سازمانیِ ادمین اصلی پیدا نشد.</p>';
+        } else {
+            echo '<form method="post">' . csrf_field() . '<input type="hidden" name="action" value="repair_org_manager_admin_roles"><div class="table-wrap"><table class="data-table"><thead><tr><th>اصلاح</th><th>کاربر</th><th>واحدهای مدیریتی</th></tr></thead><tbody>';
+            foreach ($repairCandidates as $repairId => $repairCandidate) {
+                $isCurrent = $repairId === (int) $user['id'];
+                echo '<tr><td><input type="checkbox" name="user_ids[]" value="' . $repairId . '"' . ($isCurrent ? ' disabled' : '') . ' aria-label="اصلاح ' . e((string) $repairCandidate['full_name']) . '"></td><td>' . e((string) $repairCandidate['full_name']) . ' <small>#' . $repairId . ' · ' . e((string) $repairCandidate['username']) . '</small>' . ($isCurrent ? '<br><small>حساب جاری قابل تنزل نیست</small>' : '') . '</td><td>' . e(implode('، ', array_unique($repairCandidate['unit_names']))) . '</td></tr>';
+            }
+            echo '</tbody></table></div><button class="button" type="submit">بازگرداندن نقش انتخاب‌شده‌ها به مدیر</button></form>';
+        }
+        echo '</section>';
+
+        // ۱.۶۲.۶ — ترمیم مدیران سازمانی که نقش «مدیر پشتیبانی» دارند (مقصد اشتباه ارجاع خودکار پشتیبانی).
+        $supportRepairRows = db()->query('SELECT DISTINCT u.id, u.username, u.full_name, ou.name AS unit_name FROM users u JOIN org_units ou ON (ou.manager_user_id = u.id OR EXISTS (SELECT 1 FROM org_unit_managers oum WHERE oum.unit_id = ou.id AND oum.user_id = u.id)) WHERE u.is_active = 1 AND u.role = "support_manager" AND ou.is_active = 1 ORDER BY u.full_name, ou.name')->fetchAll();
+        $supportRepairCandidates = [];
+        foreach ($supportRepairRows as $supportRepairRow) {
+            $supportRepairId = (int) $supportRepairRow['id'];
+            if (!isset($supportRepairCandidates[$supportRepairId])) {
+                $supportRepairCandidates[$supportRepairId] = $supportRepairRow;
+                $supportRepairCandidates[$supportRepairId]['unit_names'] = [];
+            }
+            $supportRepairCandidates[$supportRepairId]['unit_names'][] = (string) $supportRepairRow['unit_name'];
+        }
+        echo '<section class="card form-card" id="repair-org-support-roles"><h2>اصلاح مدیران سازمانی که «مدیر پشتیبانی» شده‌اند</h2><p class="muted">درخواست‌های پشتیبانی به‌صورت خودکار به «مدیر پشتیبانی» ارجاع می‌شوند. اگر معاون یا مدیر اداره‌ای به‌اشتباه این نقش را داشته باشد، مسئول درخواست‌های پشتیبانی می‌شود. فقط افرادی را تیک بزنید که واقعاً مدیر واحد پشتیبانی نیستند؛ نقش آن‌ها به «مدیر» برمی‌گردد و چارت سازمانی حفظ می‌شود.</p>';
+        if ($supportRepairCandidates === []) {
+            echo '<p class="muted">در حال حاضر مدیر سازمانیِ دارای نقش «مدیر پشتیبانی» پیدا نشد.</p>';
+        } else {
+            echo '<form method="post">' . csrf_field() . '<input type="hidden" name="action" value="repair_org_manager_support_roles"><div class="table-wrap"><table class="data-table"><thead><tr><th>اصلاح</th><th>کاربر</th><th>واحدهای مدیریتی</th></tr></thead><tbody>';
+            foreach ($supportRepairCandidates as $supportRepairId => $supportRepairCandidate) {
+                echo '<tr><td><input type="checkbox" name="user_ids[]" value="' . $supportRepairId . '" aria-label="اصلاح ' . e((string) $supportRepairCandidate['full_name']) . '"></td><td>' . e((string) $supportRepairCandidate['full_name']) . ' <small>#' . $supportRepairId . ' · ' . e((string) $supportRepairCandidate['username']) . '</small></td><td>' . e(implode('، ', array_unique($supportRepairCandidate['unit_names']))) . '</td></tr>';
+            }
+            echo '</tbody></table></div><button class="button" type="submit">بازگرداندن نقش انتخاب‌شده‌ها به مدیر</button></form>';
+        }
+        echo '</section>';
+
+        // ۱.۶۲.۶ — تشخیص ارجاع خودکار: چه کسی الان مسئول درخواست جدید می‌شود و چرا.
+        $diagOpenLoadSql = '(SELECT COUNT(*) FROM tickets t WHERE t.assigned_to = u.id AND t.status NOT IN ("resolved", "closed", "cancelled"))';
+        $diagOrgManagerSql = 'EXISTS (SELECT 1 FROM org_units ou WHERE ou.is_active = 1 AND (ou.manager_user_id = u.id OR EXISTS (SELECT 1 FROM org_unit_managers oum WHERE oum.unit_id = ou.id AND oum.user_id = u.id)))';
+        $diagRows = db()->query('SELECT u.id, u.full_name, u.username, u.role, u.is_primary_admin, hu.code AS hu_code, ' . $diagOpenLoadSql . ' AS open_load, ' . $diagOrgManagerSql . ' AS is_org_manager FROM users u LEFT JOIN handling_units hu ON hu.id = u.handling_unit_id WHERE u.is_active = 1 AND (u.role = "primary_admin" OR (u.role = "admin" AND u.is_primary_admin = 1) OR u.role = "support_manager" OR (u.role IN ("agent", "manager") AND hu.code IN ("it", "support"))) ORDER BY u.full_name')->fetchAll();
+        $diagPick = ['it' => choose_handling_agent('it'), 'support' => choose_handling_agent('support')];
+        $diagRoleLabel = static fn (array $diagRow): string => ([
+            'primary_admin' => 'ادمین اصلی',
+            'admin' => ((int) $diagRow['is_primary_admin'] === 1 ? 'ادمین (پرچم ادمین اصلی)' : 'ادمین'),
+            'support_manager' => 'مدیر پشتیبانی',
+            'manager' => 'مدیر',
+            'agent' => 'کارشناس',
+        ][(string) $diagRow['role']] ?? (string) $diagRow['role']);
+        echo '<section class="card form-card" id="ticket-auto-assign-diagnostics"><h2>تشخیص ارجاع خودکار درخواست‌ها</h2><p class="muted">مسئول درخواست جدید به‌صورت خودکار تعیین می‌شود: درخواست IT به «ادمین اصلی» و درخواست پشتیبانی به «مدیر پشتیبانی» می‌رسد (در صورت تعدد، کمترین درخواست باز؛ مدیران سازمانی آخرِ صف). اگر نام بی‌ربطی در این فهرست است، نقش او را از «مدیریت کاربران» یا فرم‌های ترمیم بالا اصلاح کنید.</p>';
+        foreach (['it' => 'حوزهٔ IT', 'support' => 'حوزهٔ پشتیبانی'] as $diagGroup => $diagGroupLabel) {
+            $diagCandidates = array_values(array_filter($diagRows, static fn (array $diagRow): bool => $diagGroup === 'it'
+                ? ((string) $diagRow['role'] === 'primary_admin' || ((string) $diagRow['role'] === 'admin' && (int) $diagRow['is_primary_admin'] === 1) || ((string) ($diagRow['hu_code'] ?? '') === 'it' && in_array((string) $diagRow['role'], ['agent', 'manager'], true)))
+                : ((string) $diagRow['role'] === 'support_manager' || ((string) ($diagRow['hu_code'] ?? '') === 'support' && in_array((string) $diagRow['role'], ['agent', 'manager'], true)))));
+            $diagPickId = (int) ($diagPick[$diagGroup] ?? 0);
+            $diagPickName = 'هیچ‌کس (درخواست بدون مسئول در «بررسی مدیر» می‌ماند)';
+            foreach ($diagCandidates as $diagRow) {
+                if ((int) $diagRow['id'] === $diagPickId) {
+                    $diagPickName = (string) $diagRow['full_name'];
+                }
+            }
+            echo '<h3 style="margin:14px 0 6px">' . $diagGroupLabel . '</h3><p class="muted">مقصد فعلی ارجاع خودکار: <b>' . e($diagPickName) . '</b></p>';
+            if ($diagCandidates === []) {
+                echo '<p class="muted">هیچ کاندیدایی برای این حوزه پیدا نشد.</p>';
+                continue;
+            }
+            echo '<div class="table-wrap"><table class="data-table"><thead><tr><th>کاربر</th><th>نقش</th><th>واحد رسیدگی</th><th>درخواست‌های باز</th><th>مدیر سازمانی؟</th></tr></thead><tbody>';
+            foreach ($diagCandidates as $diagRow) {
+                $diagIsPick = (int) $diagRow['id'] === $diagPickId;
+                echo '<tr' . ($diagIsPick ? ' style="font-weight:700"' : '') . '><td>' . e((string) $diagRow['full_name']) . ' <small>#' . (int) $diagRow['id'] . ' · ' . e((string) $diagRow['username']) . '</small>' . ($diagIsPick ? ' <span class="status ok">مقصد فعلی</span>' : '') . '</td><td>' . e($diagRoleLabel($diagRow)) . '</td><td>' . e((string) ($diagRow['hu_code'] === 'it' ? 'IT' : ($diagRow['hu_code'] === 'support' ? 'پشتیبانی' : '—'))) . '</td><td>' . (int) $diagRow['open_load'] . '</td><td>' . ((int) $diagRow['is_org_manager'] === 1 ? '<span class="status warn">بله — آخرِ صف ارجاع خودکار</span>' : 'خیر') . '</td></tr>';
+            }
+            echo '</tbody></table></div>';
+        }
+        echo '</section>';
+    }
+        echo '</div>';
+    }
+
+
+    if ($canHolidaysView) {
+        // همان تابلوی index.php?page=holidays؛ return_to باعث می‌شود پس از ثبت/حذف
+        // به همین تب برگردیم نه به صفحهٔ مستقل تعطیلات.
+        echo '<div class="settings-panel" id="holidays">';
+        echo '<div class="card form-card settings-panel-full"><h2>تقویم تعطیلات و توقف SLA</h2>'
+            . '<p class="muted">روزهای تعطیل هفتگی و ساعت کاری در همین تب قابل تنظیم‌اند. تعطیلات رسمی ثبت‌شده در این تقویم، هم از محاسبهٔ SLA و هم از بازهٔ کاری پردازشگر فیش غذا حذف می‌شوند.</p></div>';
+        holiday_board_render($user, 'settings');
+        echo '</div>';
+    }
+    echo '</section>';
+    render_footer();
+    exit;
+}
+
+if ($page === 'logs') {
+    $logUser = require_permission('logs.view');
+    $levelFilter = valid_choice((string) ($_GET['level'] ?? ''), ['', 'critical', 'error', 'warning', 'notice', 'info', 'debug'], '');
+    $requestFilter = trim((string) ($_GET['request_id'] ?? ''));
+    $requestFilter = preg_match('/^[a-f0-9]{8}-[a-f0-9]{4}-4[a-f0-9]{3}-[89ab][a-f0-9]{3}-[a-f0-9]{12}$/i', $requestFilter) ? $requestFilter : '';
+    $logRows = system_logs_recent(200, $levelFilter, $requestFilter);
+    render_header('گزارش خطا', $logUser);
+    echo '<section class="page-heading"><div><span class="eyebrow">System Logs</span><h1>گزارش خطا و رویدادهای سامانه</h1><p>خطاهای برنامه، استخراج شناسنامه و رویدادهای مهم اینجا ثبت می‌شوند. کد پیگیری درخواست برای ردیابی رخدادها در دسترس است. فایل سازگار: storage/logs/app.log</p></div><div class="actions"><a class="button secondary" href="index.php?page=logs">همه</a><a class="button secondary" href="index.php?page=logs&level=error">فقط خطاها</a><a class="button secondary" href="index.php?page=logs&level=info">اطلاعات</a></div></section>';
+    echo '<section class="card ticket-table audit-table"><div class="table-head"><span>زمان</span><span>سطح</span><span>بخش</span><span>پیام</span><span>آدرس</span></div>';
+    if ($logRows) {
+        foreach ($logRows as $logRow) {
+            $levelClass = in_array($logRow['level'], ['critical', 'error'], true) ? 'critical' : (in_array($logRow['level'], ['warning', 'notice'], true) ? 'urgent' : 'normal');
+            echo '<div class="table-row"><span class="date-cell">' . e(persian_date($logRow['created_at'])) . '</span><span><em class="status ' . $levelClass . '">' . e($logRow['level']) . '</em></span><span>' . e($logRow['context']) . '</span><span class="muted">' . e($logRow['message']) . system_log_meta_html((string) ($logRow['meta_json'] ?? '')) . '</span><span class="muted">' . e($logRow['request_uri']) . '<small class="muted" dir="ltr">' . e((string) ($logRow['request_id'] ?? '')) . '</small></span></div>'; 
+        }
+    } else {
+        echo '<div class="table-row"><span class="muted">گزارشی ثبت نشده است.</span></div>';
+    }
+    echo '</section>';
+    render_footer();
+    exit;
+}
+
+if ($page !== 'dashboard') {
+    redirect('index.php');
+}
+
+    $isStaff = is_staff_role($user['role']);
+// بازگردانی کارت‌ها و فهرست درخواست‌ها در داشبورد (تصمیم مالک ۲۰۲۶-۱۱-۱۰):
+// موج استقلال (2066cb0) این بلوک را حذف کرده بود؛ بازگردانده شد. پیوندها به ماژول مستقل می‌روند.
+$rcCanSee = function_exists('request_center_dashboard_rows')
+    && (user_can_any($user, ['ticket.create', 'ticket.view_own', 'ticket.edit', 'queue.view', 'ticket.view_unit', 'ticket.view_all', 'supervisor.panel']) || user_is_primary_admin($user));
+$rcCounts = null;
+$rcTickets = null;
+if ($rcCanSee) {
+    try {
+        [$rcCounts, $rcTickets] = request_center_dashboard_rows($user);
+    } catch (Throwable $rcDashError) {
+        error_log('[dashboard] rc rows: ' . $rcDashError->getMessage());
+    }
+}
+$activeCount = 0;
+if (is_array($rcCounts)) {
+    $activeCount = (int) ($rcCounts['new'] ?? 0) + (int) ($rcCounts['manager_review'] ?? 0) + (int) ($rcCounts['assigned'] ?? 0)
+        + (int) ($rcCounts['in_progress'] ?? 0) + (int) ($rcCounts['waiting_user'] ?? 0) + (int) ($rcCounts['pending'] ?? 0);
+}
+render_header('داشبورد', $user);
+$cdDvdReady = cd_dvd_available();
+echo release_notes_dashboard_card();
+echo '<section class="dashboard-hero"><div><span class="eyebrow">' . ($isStaff ? 'مرکز کنترل پشتیبانی' : 'فضای درخواست‌های شما') . '</span><h1>سلام ' . e($user['full_name']) . '،<br><strong>چه کمکی از ما می‌خواهید؟</strong></h1><p>درخواست جدید ثبت کنید یا وضعیت درخواست‌های قبلی را دنبال کنید؛ بقیهٔ بخش‌ها در «دسترسی سریع» پایین صفحه است.</p></div><a class="button hero-button" href="request-center.php?page=new-ticket"><span>＋</span> ثبت درخواست جدید</a></section>';
+if (is_array($rcCounts)) {
+    $waiting = (int) ($rcCounts['waiting_user'] ?? 0) + (int) ($rcCounts['pending'] ?? 0);
+    $resolved = (int) ($rcCounts['resolved'] ?? 0) + (int) ($rcCounts['closed'] ?? 0);
+    $cancelled = (int) ($rcCounts['cancelled'] ?? 0);
+    $shown = is_array($rcTickets) ? count($rcTickets) : 0;
+    echo '<section class="stat-grid"><a class="stat-card accent" href="request-center.php?page=reports&amp;status=active" title="نمایش درخواست‌های در حال پیگیری"><span class="stat-icon">◈</span><div><strong>' . (int) $activeCount . '</strong><small>در حال پیگیری</small></div></a><a class="stat-card" href="request-center.php?page=reports&amp;status=waiting_user" title="نمایش درخواست‌های در انتظار پاسخ کاربر"><span class="stat-icon blue">◌</span><div><strong>' . $waiting . '</strong><small>در انتظار پاسخ کاربر</small></div></a><a class="stat-card" href="request-center.php?page=reports&amp;status=resolved" title="نمایش درخواست‌های حل‌شده و بسته‌شده"><span class="stat-icon green">✓</span><div><strong>' . $resolved . '</strong><small>حل‌شده</small></div></a><a class="stat-card" href="request-center.php?page=reports&amp;status=cancelled" title="نمایش درخواست‌های لغوشده"><span class="stat-icon" style="background:#fef3f2;color:#b42318">×</span><div><strong>' . $cancelled . '</strong><small>لغوشده</small></div></a><a class="stat-card" href="request-center.php?page=reports&amp;status=all" title="نمایش همهٔ درخواست‌ها در گزارش‌ها"><span class="stat-icon gray">▣</span><div><strong>' . $shown . '</strong><small>نمایش داده‌شده</small></div></a></section>';
+}
+if ($cdDvdReady) {
+    echo cd_dvd_render_surface($user, 'index.php');
+     echo '<script src="assets/cd-dvd.js?v=3.4.9"></script>';
+}
+if (function_exists('food_order_render_pending_cancels_card')) {
+    echo food_order_render_pending_cancels_card($user);
+}
+if (is_array($rcTickets)) {
+    echo '<section class="list-section"><div class="section-title"><div><h2>' . ($isStaff ? 'آخرین درخواست‌ها' : 'درخواست‌های من') . '</h2><p>آخرین تغییرات در ابتدا نمایش داده می‌شود.</p></div><a href="request-center.php?page=new-ticket">ثبت درخواست ←</a></div>';
+    if ($rcTickets === []) {
+        echo '<div class="card empty-state"><div class="empty-icon">✦</div><h3>هنوز درخواستی ثبت نشده است</h3><p>برای شروع، اولین درخواست خود را ثبت کنید.</p><a class="button" href="request-center.php?page=new-ticket">ثبت اولین درخواست</a></div>';
+    } else {
+        echo '<div class="card ticket-table"><div class="table-head"><span>عنوان درخواست</span><span>ثبت‌کننده</span><span>اولویت</span><span>وضعیت</span><span>آخرین تغییر</span></div>';
+        foreach ($rcTickets as $ticket) {
+            echo '<a class="table-row" href="request-center.php?page=ticket&id=' . (int) $ticket['id'] . '"><span class="ticket-title"><b>' . e(ticket_number((int) $ticket['id'])) . '</b><strong>' . e($ticket['subject']) . '</strong><small>' . e($ticket['category_name'] ?: 'بدون دسته‌بندی') . '</small></span><span>' . e($isStaff ? $ticket['requester_name'] : ($ticket['assignee_name'] ?: 'در انتظار تخصیص')) . '</span><span><i class="priority-dot ' . e($ticket['priority']) . '"></i>' . e(priority_label($ticket['priority'])) . '</span><span><em class="status ' . e($ticket['status']) . '">' . e(status_label($ticket['status'])) . '</em></span><span class="date-cell">' . e(persian_date($ticket['updated_at'])) . ' ←</span></a>';
+        }
+        echo '</div>';
+    }
+    echo '</section>';
+}
+$quickLinks = [];
+if (user_can($user, 'foodorder.self')) {
+    $quickLinks[] = ['index.php?page=food-order', 'سفارش غذا', 'تقویم شمسی برنامهٔ غذایی و ثبت سفارش'];
+}
+if (user_can($user, 'assets.view')) {
+    $quickLinks[] = ['index.php?page=assets', 'شناسنامه‌های فنی', 'شناسنامه و مشخصات فنی سیستم‌ها'];
+}
+if (user_can($user, 'traffic.view')) {
+    $quickLinks[] = ['index.php?page=traffic-control', 'کنترل تردد', 'ثبت و گزارش تردد مهمانان ساختمان'];
+}
+if (user_can($user, 'cddvd.view')) {
+    $quickLinks[] = ['index.php?page=cd-dvd', 'کنترل CD/DVD', 'ثبت و پیگیری جابجایی رسانه‌ها'];
+}
+$quickLinks[] = ['request-center.php?page=knowledge', 'دانش‌نامه', 'مقالات و راهنماهای حل مشکل'];
+if ($isStaff) {
+    $quickLinks[] = ['request-center.php?page=governance', 'مدیریت تغییر و مشکل', 'ثبت و پیگیری تغییر و Problem'];
+}
+$quickLinks[] = ['index.php?page=help', 'راهنمای سامانه', 'آموزش کار با بخش‌های سامانه'];
+echo '<section class="list-section"><div class="section-title"><div><h2>دسترسی سریع</h2><p>بخش‌های اصلی سامانه در یک نگاه.</p></div></div><div class="card category-list">';
+foreach ($quickLinks as [$quickUrl, $quickTitle, $quickDesc]) {
+    echo '<a class="search-result" href="' . e($quickUrl) . '"><strong>' . e($quickTitle) . '</strong><small>' . e($quickDesc) . '</small></a>';
+}
+echo '</div></section>';
+render_footer();

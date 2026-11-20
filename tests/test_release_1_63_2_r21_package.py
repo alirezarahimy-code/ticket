@@ -20,6 +20,7 @@ POST_RELEASE_WORKTREE_CHANGES = {
     "assets/food-org-groups.js",
     "cd-dvd.php",
     "food-order.php",
+    "index.php",
     "food-ticket-groups.php",
     "food-ticket-runtime.php",
     "food-ticket-web/assets/food-menu.css",

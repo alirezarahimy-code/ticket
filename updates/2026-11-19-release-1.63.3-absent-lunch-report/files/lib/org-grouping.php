@@ -290,12 +290,19 @@ if (!function_exists('org_group_type_label')) {
     /** برچسب فارسی نوع سرشاخه — کنار نام معاونت چاپ می‌شود. */
     function org_group_type_label(string $type): string
     {
-        return match ($type) {
+        $company = 'شرکت همکار';
+    if (function_exists('org_partner_company_display_name')) {
+        $configured = trim((string) org_partner_company_display_name());
+        if ($configured !== '') {
+            $company = $configured;
+        }
+    }
+    return match ($type) {
             'deputy'     => 'معاونت',
             'management' => 'مدیریت مستقل',
             'liaison'    => 'واحد مستقل (نمایندگی)',
             'office'     => 'دفتر مدیرعامل',
-            'company'    => 'شرکت همکار',
+            'company'    => $company,
             'ceo'        => 'مدیرعامل',
             default      => 'بدون جایگاه',
         };

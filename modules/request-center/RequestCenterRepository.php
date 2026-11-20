@@ -211,7 +211,8 @@ final class RequestCenterRepository
             'SELECT t.*, r.full_name AS requester_name, a.full_name AS assignee_name,
                     d.name AS department_name, c.name AS category_name,
                     s.name AS service_name, asset.hostname, asset.asset_tag,
-                    ru.name AS requesting_unit_name
+                    ru.name AS requesting_unit_name,
+                    ru.unit_type AS _requesting_unit_type, ru.company_id AS _requesting_unit_company_id
              FROM tickets t
              JOIN users r ON r.id = t.requester_id
              LEFT JOIN users a ON a.id = t.assigned_to
@@ -226,6 +227,10 @@ final class RequestCenterRepository
         $ticket = $query->fetch(PDO::FETCH_ASSOC);
         if (!is_array($ticket) || !ticket_user_can_view($ticket, $user)) {
             return null;
+        }
+        if (function_exists('request_center_org_display_name')) {
+            $ticket['requesting_unit_name'] = request_center_org_display_name((string) ($ticket['requesting_unit_name'] ?? ''), (string) ($ticket['_requesting_unit_type'] ?? ''), (int) ($ticket['_requesting_unit_company_id'] ?? 0));
+            unset($ticket['_requesting_unit_type'], $ticket['_requesting_unit_company_id']);
         }
 
         return $ticket;

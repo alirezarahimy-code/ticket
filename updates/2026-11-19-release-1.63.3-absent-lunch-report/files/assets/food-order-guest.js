@@ -71,16 +71,17 @@
       meal_type: String(fd.get('meal_type') || 'lunch'),
       organization: String(fd.get('organization') || ''),
       guest_count: String(fd.get('guest_count') || ''),
-      requester_name: String(fd.get('requester_name') || ''),
+      requester_name: selfName,
       note: String(fd.get('note') || '')
     };
   }
 
   function render() {
     var f = state.form;
+    var selfInfo = '<div class="alert info" role="status">ثبت‌کننده: <b>' + esc(selfName) + '</b> (از حساب شما خوانده می‌شود)</div>';
     var deputyBox = state.myDeputy
-      ? '<div class="alert info" role="status">بخش درخواست‌کننده: <b>' + esc(state.myDeputy.name) + '</b> (از نزدیک‌ترین سرشاخهٔ شما در چارت سازمانی خوانده می‌شود)</div>'
-      : '<div class="alert warning" role="alert">این حساب هنوز در چارت سازمانی جایگاه فعالی ندارد؛ ثبت درخواست غذای مهمان برای آن ممکن نیست. برای رفع این موضوع، جایگاه حساب خود را در چارت سازمانی تعریف کنید یا از مدیر واحد/سازمان بخواهید شما را در بخش خود بچید.</div>';
+      ? '<div class="alert info" role="status">معاونت / بخش شما: <b>' + esc(state.myDeputy.name) + '</b> (از نزدیک‌ترین سرشاخهٔ شما در چارت سازمانی خوانده می‌شود؛ قابل تغییر نیست)</div>' + selfInfo
+      : '<div class="alert warning" role="alert">این حساب هنوز در چارت سازمانی جایگاه فعالی ندارد؛ ثبت درخواست غذای مهمان برای آن ممکن نیست. برای رفع این موضوع، جایگاه حساب خود را در چارت سازمانی تعریف کنید یا از مدیر واحد/سازمان بخواهید شما را در بخش خود بچید.</div>' + selfInfo;
     var mealCount = function (meal, status) { return state.items.filter(function (item) { return (item.meal_type === 'dinner' ? 'dinner' : 'lunch') === meal && item.status === status; }).length; };
     var activeGuestCount = state.items.filter(function (item) { return item.status === 'active'; }).reduce(function (sum, item) { return sum + Number(item.guest_count || 0); }, 0);
     var cancelledGuestCount = state.items.filter(function (item) { return item.status === 'cancelled'; }).reduce(function (sum, item) { return sum + Number(item.guest_count || 0); }, 0);
@@ -137,7 +138,7 @@
       + '<label>وعدهٔ غذایی<select name="meal_type"><option value="lunch"' + (f.meal_type !== 'dinner' ? ' selected' : '') + '>ناهار</option><option value="dinner"' + (f.meal_type === 'dinner' ? ' selected' : '') + '>شام</option></select></label>'
       + '<label>سازمان / شرکت مهمان<input type="text" name="organization" maxlength="190" value="' + esc(f.organization) + '" required></label>'
       + '<label>تعداد مهمان<input type="text" inputmode="numeric" name="guest_count" maxlength="3" value="' + esc(f.guest_count) + '" required></label>'
-      + '<label>نام درخواست‌دهنده<input type="text" name="requester_name" maxlength="150" value="' + esc(f.requester_name) + '" required></label>'
+      + '<label>نام درخواست‌دهنده <span class="muted">(از حساب شما؛ غیرقابل تغییر)</span><input type="text" name="requester_name" maxlength="150" value="' + esc(selfName) + '" readonly tabindex="-1" aria-readonly="true" style="background:#eef2f5;cursor:default" title="این مقدار از حساب شما خوانده می‌شود و قابل تغییر نیست"></label>'
       + '<label>یادداشت (اختیاری)<input type="text" name="note" maxlength="500" value="' + esc(f.note) + '"></label>'
       + '<div><button type="submit" class="button primary" data-fg-action="save"' + (state.saving || (!state.editingId && (!state.canCreate || !state.myDeputy)) ? ' disabled' : '') + '>' + (state.editingId ? 'ذخیرهٔ ویرایش' : 'ثبت درخواست مهمان') + '</button>'
       + (state.editingId ? ' <button type="button" class="button secondary" data-fg-action="edit-cancel">لغو ویرایش</button>' : '') + '</div>'
@@ -205,7 +206,7 @@
       meal_type: f.meal_type === 'dinner' ? 'dinner' : 'lunch',
       organization: f.organization.trim(),
       guest_count: normDigits(f.guest_count).trim(),
-      requester_name: f.requester_name.trim(),
+      requester_name: selfName,
       note: f.note.trim()
     };
     var editingId = Number(state.editingId || 0);
@@ -255,7 +256,7 @@
       meal_type: row.meal_type === 'dinner' ? 'dinner' : 'lunch',
       organization: row.organization || '',
       guest_count: String(row.guest_count || ''),
-      requester_name: row.requester_name || '',
+      requester_name: selfName,
       note: row.note || ''
     };
     render();

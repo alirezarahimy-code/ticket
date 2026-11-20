@@ -3453,7 +3453,7 @@ function food_ticket_api_guest_requests_report(string $from, string $to, string 
         }
     }
     $sql = "SELECT r.id, r.request_date, r.meal_type, r.organization, r.guest_count, r.requester_name,
-                   r.status, r.deputy_unit_id, ou.name AS deputy_name, c.food_name
+                   r.status, r.deputy_unit_id, ou.name AS deputy_name, ou.unit_type AS deputy_type, ou.company_id AS deputy_company_id, c.food_name
               FROM food_guest_requests r
               LEFT JOIN org_units ou ON ou.id = r.deputy_unit_id
               LEFT JOIN food_catalog c ON c.id = r.food_id
@@ -3539,7 +3539,9 @@ function food_ticket_api_guest_requests_report(string $from, string $to, string 
             'requester_name' => (string) $r['requester_name'],
             'status' => $status,
             'deputy_unit_id' => $r['deputy_unit_id'] === null ? null : (int) $r['deputy_unit_id'],
-            'deputy_name' => (string) ($r['deputy_name'] ?? ''),
+            'deputy_name' => function_exists('org_unit_display_name')
+                ? org_unit_display_name((string) ($r['deputy_name'] ?? ''), (string) ($r['deputy_type'] ?? ''), (int) ($r['deputy_company_id'] ?? 0))
+                : (string) ($r['deputy_name'] ?? ''),
         ];
     }
     return ['items' => $items, 'summary' => $summary, 'deputies' => $deputies, 'from' => $from, 'to' => $to, 'deputy_id' => $deputy, 'scope' => $scope];

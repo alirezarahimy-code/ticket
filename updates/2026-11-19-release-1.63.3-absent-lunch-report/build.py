@@ -39,65 +39,91 @@ def src(name: str) -> str:
 
 # ---------------------------------------------------------------- 1) بکاند (بدون تغییر، فقط ناهار)
 backend = read('food-ticket.php')
-fn_re = re.compile(r'function food_ticket_api_absent\(string \$fromDate.*?\n\}\n', re.S)
-m = fn_re.search(backend)
-if not m:
-    raise SystemExit('تابع food_ticket_api_absent در food-ticket.php پیدا نشد')
-enhanced = src('backend_absent.php').strip() + '\n'
-backend = backend[:m.start()] + enhanced + backend[m.end():]
-backend = must_replace(backend, "const FOOD_TICKET_PANEL_VERSION = '1.37.53';",
-                       f"const FOOD_TICKET_PANEL_VERSION = '{PANEL_VERSION}';", 'panel version php')
+# ۱.۶۳٫۳ — سازنده نسبت به فایل‌های از پیش built شده مقاوم است: یا روی مبنای ۱٫۶۳٫۲
+# بازسازی می‌کند، یا اگر داکروت/شاخه از قبل نسخهٔ نهایی را دارد (بازساخت بستهٔ in-flight)
+# آن را همان‌طور می‌پذیرد.
+if "const FOOD_TICKET_PANEL_VERSION = '1.37.53';" in backend:
+    fn_re = re.compile(r'function food_ticket_api_absent\(string \$fromDate.*?\n\}\n', re.S)
+    m = fn_re.search(backend)
+    if not m:
+        raise SystemExit('تابع food_ticket_api_absent در food-ticket.php پیدا نشد')
+    enhanced = src('backend_absent.php').strip() + '\n'
+    backend = backend[:m.start()] + enhanced + backend[m.end():]
+    backend = must_replace(backend, "const FOOD_TICKET_PANEL_VERSION = '1.37.53';",
+                           f"const FOOD_TICKET_PANEL_VERSION = '{PANEL_VERSION}';", 'panel version php')
+    print('backend rebuilt from 1.63.2 base')
+elif "const FOOD_TICKET_PANEL_VERSION = '1.37.58';" in backend:
+    print('backend already built (1.37.58) — using as-is')
+else:
+    raise SystemExit('نسخهٔ پنل food-ticket.php نه 1.37.53 است نه 1.37.58؛ بازسازی متوقف شد')
 
 # ---------------------------------------------------------------- 2) پنل HTML
 html = read('food-ticket-web/index.html')
-html = must_replace(html, "PANEL_VERSION='1.37.53'", f"PANEL_VERSION='{PANEL_VERSION}'", 'panel version html')
+if "PANEL_VERSION='1.37.53'" in html:
+    _html_rebuild = True
+    html = must_replace(html, "PANEL_VERSION='1.37.53'", f"PANEL_VERSION='{PANEL_VERSION}'", 'panel version html')
+elif "PANEL_VERSION='1.37.58'" in html and 'window.AbsentLunchReport' in html:
+    _html_rebuild = False
+    print('panel html already built (1.37.58) — using as-is')
+else:
+    raise SystemExit('panel HTML نه 1.37.53 است نه built 1.37.58؛ بازسازی متوقف شد')
 
-tabs_old = "const REPORT_TABS=[['classic','گزارشگیری'],['aggregate','گزارش تجمیعی'],['delivered','غذای تحویلی'],['statistics','آمار سفارشها'],['todayorders','سفارشهای امروز'],['reconciliation','تطبیق خرید و توزیع']];"
-tabs_new = tabs_old[:-2] + ",['absent-lunch','غایبین ناهار']];"
-html = must_replace(html, tabs_old, tabs_new, 'REPORT_TABS')
+if _html_rebuild:
+    tabs_old = "const REPORT_TABS=[['classic','گزارشگیری'],['aggregate','گزارش تجمیعی'],['delivered','غذای تحویلی'],['statistics','آمار سفارشها'],['todayorders','سفارشهای امروز'],['reconciliation','تطبیق خرید و توزیع']];"
+    tabs_new = tabs_old[:-2] + ",['absent-lunch','غایبین ناهار']];"
+    html = must_replace(html, tabs_old, tabs_new, 'REPORT_TABS')
 
-html = must_replace(html, ' else body=reportClassicView();',
-    " else if(tab==='absent-lunch')body=window.AbsentLunchReport?window.AbsentLunchReport.html():'<section class=\"card\"><p>در حال بارگذاری تب غایبین ناهار…</p></section>';else body=reportClassicView();",
-    'reportView dispatch')
+    html = must_replace(html, ' else body=reportClassicView();',
+        " else if(tab==='absent-lunch')body=window.AbsentLunchReport?window.AbsentLunchReport.html():'<section class=\"card\"><p>در حال بارگذاری تب غایبین ناهار…</p></section>';else body=reportClassicView();",
+        'reportView dispatch')
 
-html = must_replace(html, 'function render(){const pages={',
-    "function render(){if(state.report&&state.report.type==='absent'){state.report.type='attendance';state.reportTab='absent-lunch';persist()}const pages={",
-    'render normalization')
+    html = must_replace(html, 'function render(){const pages={',
+        "function render(){if(state.report&&state.report.type==='absent'){state.report.type='attendance';state.reportTab='absent-lunch';persist()}const pages={",
+        'render normalization')
 
-render_old = "if(view==='reports'){ensureReportRange();if((state.reportTab||'classic')==='aggregate')loadAggregate(false);else if(!FOOD_REPORT_TABS[state.reportTab]&&state.report&&state.report.type==='absent')loadAbsent(false)}"
-render_new = "if(view==='reports'){ensureReportRange();if((state.reportTab||'classic')==='aggregate')loadAggregate(false);else if((state.reportTab||'classic')==='absent-lunch'&&window.AbsentLunchReport)window.AbsentLunchReport.load(false);else if(!FOOD_REPORT_TABS[state.reportTab]&&state.report&&state.report.type==='absent')loadAbsent(false)}"
-html = must_replace(html, render_old, render_new, 'render loader hook')
+    render_old = "if(view==='reports'){ensureReportRange();if((state.reportTab||'classic')==='aggregate')loadAggregate(false);else if(!FOOD_REPORT_TABS[state.reportTab]&&state.report&&state.report.type==='absent')loadAbsent(false)}"
+    render_new = "if(view==='reports'){ensureReportRange();if((state.reportTab||'classic')==='aggregate')loadAggregate(false);else if((state.reportTab||'classic')==='absent-lunch'&&window.AbsentLunchReport)window.AbsentLunchReport.load(false);else if(!FOOD_REPORT_TABS[state.reportTab]&&state.report&&state.report.type==='absent')loadAbsent(false)}"
+    html = must_replace(html, render_old, render_new, 'render loader hook')
 
-# گزینهٔ قدیمی «نوع گزارش = غایبین» از فرم حذف میشود (نسخهٔ زنده مخزن اکنون فقط یک فرم دارد)
-opt_re = re.compile(r'<option value="absent" \$\{r\.type===\'absent\'\?\'selected\':\'\'\}>غایبین[^<]*</option>')
-html, n_opt = opt_re.subn('', html)
-if n_opt != 1:
-    raise SystemExit(f'حذف گزینهٔ absent: انتظار ۱، پیدا شد {n_opt}')
+    # گزینهٔ قدیمی «نوع گزارش = غایبین» از فرم حذف میشود (نسخهٔ زنده مخزن اکنون فقط یک فرم دارد)
+    opt_re = re.compile(r'<option value="absent" \$\{r\.type===\'absent\'\?\'selected\':\'\'\}>غایبین[^<]*</option>')
+    html, n_opt = opt_re.subn('', html)
+    if n_opt != 1:
+        raise SystemExit(f'حذف گزینهٔ absent: انتظار ۱، پیدا شد {n_opt}')
 
-# پنج چیپ آمار فقط داخل فرم «گزارشگیری» (نه صفحهٔ غایبین)
-classic_decl = "const rows=currentReportRows().rows,"
-classic_chips = ("const rows=currentReportRows().rows,classicChips=`<div class=\"alr-classic-chips\">"
-    "<span class=\"alr-chip\" data-classic-chip=\"records\">تعداد رکورد <b>${toFaDigits(rows.length)}</b></span>"
-    "<span class=\"alr-chip\" data-classic-chip=\"printed\">چاپشده <b>${toFaDigits(rows.filter(x=>x.status==='printed'||String(x.result||'').includes('چاپ')).length)}</b></span>"
-    "<span class=\"alr-chip\" data-classic-chip=\"auto\">چاپ خودکار <b>${toFaDigits(rows.filter(x=>String(x.result||'').includes('خودکار')).length)}</b></span>"
-    "<span class=\"alr-chip\" data-classic-chip=\"nofood\">بدون غذا <b>${toFaDigits(rows.filter(x=>!x.food).length)}</b></span>"
-    "<span class=\"alr-chip\" data-classic-chip=\"errors\">خطا <b>${toFaDigits(rows.filter(x=>x.status==='error'||String(x.result||'').includes('خطا')).length)}</b></span>"
-    "</div>`,")
-html = must_replace(html, classic_decl, classic_chips, 'classic chips declaration')
-form_pat = re.compile(r'(<form class="card form-grid" id="report-filter">.*?<div class="form-actions"><button class="btn primary">نمایش گزارش</button></div>)(</form>)', re.S)
-html, n_form = form_pat.subn(lambda m: m.group(1) + '${classicChips}' + m.group(2), html, count=1)
-if n_form != 1:
-    raise SystemExit(f'جایگذاری چیپها در فرم گزارشگیری: انتظار ۱، پیدا شد {n_form}')
+    # پنج چیپ آمار فقط داخل فرم «گزارشگیری» (نه صفحهٔ غایبین)
+    classic_decl = "const rows=currentReportRows().rows,"
+    classic_chips = ("const rows=currentReportRows().rows,classicChips=`<div class=\"alr-classic-chips\">"
+        "<span class=\"alr-chip\" data-classic-chip=\"records\">تعداد رکورد <b>${toFaDigits(rows.length)}</b></span>"
+        "<span class=\"alr-chip\" data-classic-chip=\"printed\">چاپشده <b>${toFaDigits(rows.filter(x=>x.status==='printed'||String(x.result||'').includes('چاپ')).length)}</b></span>"
+        "<span class=\"alr-chip\" data-classic-chip=\"auto\">چاپ خودکار <b>${toFaDigits(rows.filter(x=>String(x.result||'').includes('خودکار')).length)}</b></span>"
+        "<span class=\"alr-chip\" data-classic-chip=\"nofood\">بدون غذا <b>${toFaDigits(rows.filter(x=>!x.food).length)}</b></span>"
+        "<span class=\"alr-chip\" data-classic-chip=\"errors\">خطا <b>${toFaDigits(rows.filter(x=>x.status==='error'||String(x.result||'').includes('خطا')).length)}</b></span>"
+        "</div>`,")
+    html = must_replace(html, classic_decl, classic_chips, 'classic chips declaration')
+    form_pat = re.compile(r'(<form class="card form-grid" id="report-filter">.*?<div class="form-actions"><button class="btn primary">نمایش گزارش</button></div>)(</form>)', re.S)
+    html, n_form = form_pat.subn(lambda m: m.group(1) + '${classicChips}' + m.group(2), html, count=1)
+    if n_form != 1:
+        raise SystemExit(f'جایگذاری چیپها در فرم گزارشگیری: انتظار ۱، پیدا شد {n_form}')
 
-# استایل و ماژول نهایی inline (بدون asset تازه ⇒ نیازی به پین کش نیست)
-html = must_replace(html, '</head>', '<style>\n' + src('absent-lunch.css') + '</style>\n</head>', 'inject css')
-html = must_replace(html, '</body></html>', '<script>\n' + src('absent-lunch-module.js') + '\n</script>\n</body></html>', 'inject js')
+    # استایل و ماژول نهایی inline (بدون asset تازه ⇒ نیازی به پین کش نیست)
+    html = must_replace(html, '</head>', '<style>\n' + src('absent-lunch.css') + '</style>\n</head>', 'inject css')
+    html = must_replace(html, '</body></html>', '<script>\n' + src('absent-lunch-module.js') + '\n</script>\n</body></html>', 'inject js')
+
+else:
+    print('html transformations skipped (already built)')
 
 # ---------------------------------------------------------------- 3) راهنما و چتبات
 guide = read('help-guide.php')
-guide = must_replace(guide, '<h2 id="support">', src('help-guide-section.html') + '\n<h2 id="support">', 'help guide')
+if src('help-guide-section.html') in guide:
+    print('help-guide.php already built — using as-is')
+else:
+    guide = must_replace(guide, '<h2 id="support">', src('help-guide-section.html') + '\n<h2 id="support">', 'help guide')
 chat = read('chatbot.php')
-chat = must_replace(chat, '    $flow = chatbot_flow_active();', src('chatbot-intent.php') + '    $flow = chatbot_flow_active();', 'chatbot intent')
+if 'food_absent_lunch_report' in chat:
+    print('chatbot.php already built — using as-is')
+else:
+    chat = must_replace(chat, '    $flow = chatbot_flow_active();', src('chatbot-intent.php') + '    $flow = chatbot_flow_active();', 'chatbot intent')
 
 # ---------------------------------------------------------------- 4) نوشتن خروجی
 FILES.mkdir(parents=True, exist_ok=True)
@@ -119,9 +145,11 @@ EXTRA_FILES = [
     'food-ticket-web/assets/food-org-groups.js',
     'lib/org-grouping.php',
     'organization.php',
+    'index.php',
     'modules/request-center/Actions/ticket-actions.php',
     'modules/request-center/Pages/create.php',
     'modules/request-center/Pages/detail.php',
+    'modules/request-center/RequestCenterRepository.php',
     'modules/request-center/lib/functions.php',
 ]
 MIGRATIONS = ['038-food-guest-actuals.sql', '039-liaison-manager-role-sync.sql']
