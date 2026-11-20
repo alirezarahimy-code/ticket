@@ -5006,8 +5006,8 @@
             "id": "ASSET-008",
             "path": "assets\/food-menu.css",
             "area": "ASSET",
-            "lines": 430,
-            "file_fingerprint": "012214aa0a67",
+            "lines": 438,
+            "file_fingerprint": "b8285d34bb60",
             "blocks": [
                 {
                     "kind": "block",
@@ -5268,9 +5268,9 @@
                     "kind": "block",
                     "anchor": "جدول داخل هر گروه، مثل گروه منو بدون حاشیهٔ اضافه",
                     "line_start": 427,
-                    "line_end": 430,
-                    "lines": 4,
-                    "fingerprint": "727ae969a5e2",
+                    "line_end": 438,
+                    "lines": 12,
+                    "fingerprint": "f117a0c61e63",
                     "risk": {
                         "score": 0,
                         "flags": []
@@ -5283,8 +5283,8 @@
             "id": "ASSET-009",
             "path": "assets\/food-menu.js",
             "area": "ASSET",
-            "lines": 2991,
-            "file_fingerprint": "1d5a99422ef8",
+            "lines": 2992,
+            "file_fingerprint": "5c4a4c986b1a",
             "blocks": [
                 {
                     "kind": "block",
@@ -5944,9 +5944,9 @@
                     "kind": "block",
                     "anchor": "renderPrintedDeliveryReport",
                     "line_start": 678,
-                    "line_end": 697,
-                    "lines": 20,
-                    "fingerprint": "b4d5f7e549f7",
+                    "line_end": 698,
+                    "lines": 21,
+                    "fingerprint": "4568ebe29beb",
                     "risk": {
                         "score": 0,
                         "flags": []
@@ -5956,8 +5956,8 @@
                 {
                     "kind": "block",
                     "anchor": "loadPrintedDeliveryReport",
-                    "line_start": 698,
-                    "line_end": 733,
+                    "line_start": 699,
+                    "line_end": 734,
                     "lines": 36,
                     "fingerprint": "6ad7a3832c58",
                     "risk": {
@@ -5969,8 +5969,8 @@
                 {
                     "kind": "block",
                     "anchor": "exportPrintedDeliveryReport",
-                    "line_start": 734,
-                    "line_end": 750,
+                    "line_start": 735,
+                    "line_end": 751,
                     "lines": 17,
                     "fingerprint": "26a7f5218bc5",
                     "risk": {
@@ -5982,8 +5982,8 @@
                 {
                     "kind": "block",
                     "anchor": "printPrintedDeliveryReport",
-                    "line_start": 751,
-                    "line_end": 755,
+                    "line_start": 752,
+                    "line_end": 756,
                     "lines": 5,
                     "fingerprint": "cd09beec30d5",
                     "risk": {
@@ -5995,8 +5995,8 @@
                 {
                     "kind": "block",
                     "anchor": "summaryHtml",
-                    "line_start": 756,
-                    "line_end": 761,
+                    "line_start": 757,
+                    "line_end": 762,
                     "lines": 6,
                     "fingerprint": "1313c4eab65e",
                     "risk": {
@@ -6008,8 +6008,8 @@
                 {
                     "kind": "block",
                     "anchor": "nameSplit",
-                    "line_start": 762,
-                    "line_end": 770,
+                    "line_start": 763,
+                    "line_end": 771,
                     "lines": 9,
                     "fingerprint": "1fd4ef7a3513",
                     "risk": {
@@ -6021,8 +6021,8 @@
                 {
                     "kind": "block",
                     "anchor": "personSortValue",
-                    "line_start": 771,
-                    "line_end": 778,
+                    "line_start": 772,
+                    "line_end": 779,
                     "lines": 8,
                     "fingerprint": "c55dcf755ae3",
                     "risk": {
@@ -6034,8 +6034,8 @@
                 {
                     "kind": "block",
                     "anchor": "sortByState",
-                    "line_start": 779,
-                    "line_end": 789,
+                    "line_start": 780,
+                    "line_end": 790,
                     "lines": 11,
                     "fingerprint": "ad1183298909",
                     "risk": {
@@ -6047,8 +6047,8 @@
                 {
                     "kind": "block",
                     "anchor": "sortStateToggle",
-                    "line_start": 790,
-                    "line_end": 795,
+                    "line_start": 791,
+                    "line_end": 796,
                     "lines": 6,
                     "fingerprint": "c6c0a4355bbb",
                     "risk": {
@@ -6060,8 +6060,8 @@
                 {
                     "kind": "block",
                     "anchor": "sortStateMark",
-                    "line_start": 796,
-                    "line_end": 799,
+                    "line_start": 797,
+                    "line_end": 800,
                     "lines": 4,
                     "fingerprint": "054df10887a6",
                     "risk": {
@@ -6073,8 +6073,8 @@
                 {
                     "kind": "block",
                     "anchor": "rowSummary",
-                    "line_start": 800,
-                    "line_end": 803,
+                    "line_start": 801,
+                    "line_end": 804,
                     "lines": 4,
                     "fingerprint": "e0349d12588c",
                     "risk": {
@@ -6086,8 +6086,8 @@
                 {
                     "kind": "block",
                     "anchor": "renderOrders",
-                    "line_start": 804,
-                    "line_end": 809,
+                    "line_start": 805,
+                    "line_end": 810,
                     "lines": 6,
                     "fingerprint": "8630e589cb4d",
                     "risk": {
@@ -6099,8 +6099,8 @@
                 {
                     "kind": "block",
                     "anchor": "viewButton",
-                    "line_start": 810,
-                    "line_end": 830,
+                    "line_start": 811,
+                    "line_end": 831,
                     "lines": 21,
                     "fingerprint": "340d888c0d94",
                     "risk": {
@@ -6112,8 +6112,8 @@
                 {
                     "kind": "block",
                     "anchor": "ordersByOrgHtml",
-                    "line_start": 831,
-                    "line_end": 844,
+                    "line_start": 832,
+                    "line_end": 845,
                     "lines": 14,
                     "fingerprint": "c7cc515ed659",
                     "risk": {
@@ -6125,8 +6125,8 @@
                 {
                     "kind": "block",
                     "anchor": "renderGroupOrders",
-                    "line_start": 845,
-                    "line_end": 853,
+                    "line_start": 846,
+                    "line_end": 854,
                     "lines": 9,
                     "fingerprint": "4e173338ef94",
                     "risk": {
@@ -6138,8 +6138,8 @@
                 {
                     "kind": "block",
                     "anchor": "tableFor",
-                    "line_start": 854,
-                    "line_end": 878,
+                    "line_start": 855,
+                    "line_end": 879,
                     "lines": 25,
                     "fingerprint": "a6387d0adf2f",
                     "risk": {
@@ -6151,8 +6151,8 @@
                 {
                     "kind": "block",
                     "anchor": "renderCancelRequests",
-                    "line_start": 879,
-                    "line_end": 886,
+                    "line_start": 880,
+                    "line_end": 887,
                     "lines": 8,
                     "fingerprint": "9737d923cebd",
                     "risk": {
@@ -6164,8 +6164,8 @@
                 {
                     "kind": "block",
                     "anchor": "splitRow",
-                    "line_start": 887,
-                    "line_end": 899,
+                    "line_start": 888,
+                    "line_end": 900,
                     "lines": 13,
                     "fingerprint": "fcb9486479dd",
                     "risk": {
@@ -6177,8 +6177,8 @@
                 {
                     "kind": "block",
                     "anchor": "cancelValue",
-                    "line_start": 900,
-                    "line_end": 909,
+                    "line_start": 901,
+                    "line_end": 910,
                     "lines": 10,
                     "fingerprint": "f587a0fc97f9",
                     "risk": {
@@ -6190,8 +6190,8 @@
                 {
                     "kind": "block",
                     "anchor": "cmp",
-                    "line_start": 910,
-                    "line_end": 912,
+                    "line_start": 911,
+                    "line_end": 913,
                     "lines": 3,
                     "fingerprint": "03fd74fcbe2d",
                     "risk": {
@@ -6203,8 +6203,8 @@
                 {
                     "kind": "block",
                     "anchor": "cancelHead",
-                    "line_start": 913,
-                    "line_end": 931,
+                    "line_start": 914,
+                    "line_end": 932,
                     "lines": 19,
                     "fingerprint": "8e73108abdb0",
                     "risk": {
@@ -6216,8 +6216,8 @@
                 {
                     "kind": "block",
                     "anchor": "renderStatistics",
-                    "line_start": 932,
-                    "line_end": 950,
+                    "line_start": 933,
+                    "line_end": 951,
                     "lines": 19,
                     "fingerprint": "7a13bcf7cb0c",
                     "risk": {
@@ -6229,8 +6229,8 @@
                 {
                     "kind": "block",
                     "anchor": "mark",
-                    "line_start": 951,
-                    "line_end": 960,
+                    "line_start": 952,
+                    "line_end": 961,
                     "lines": 10,
                     "fingerprint": "d3db72132a3d",
                     "risk": {
@@ -6242,8 +6242,8 @@
                 {
                     "kind": "block",
                     "anchor": "peopleSortMark",
-                    "line_start": 961,
-                    "line_end": 984,
+                    "line_start": 962,
+                    "line_end": 985,
                     "lines": 24,
                     "fingerprint": "24072ca1f470",
                     "risk": {
@@ -6255,10 +6255,10 @@
                 {
                     "kind": "block",
                     "anchor": "foods",
-                    "line_start": 985,
-                    "line_end": 1010,
+                    "line_start": 986,
+                    "line_end": 1011,
                     "lines": 26,
-                    "fingerprint": "96f4e16ba2cb",
+                    "fingerprint": "c4b1c4c60d09",
                     "risk": {
                         "score": 0,
                         "flags": []
@@ -6268,8 +6268,8 @@
                 {
                     "kind": "block",
                     "anchor": "normalizeJalaliMonth",
-                    "line_start": 1011,
-                    "line_end": 1019,
+                    "line_start": 1012,
+                    "line_end": 1020,
                     "lines": 9,
                     "fingerprint": "2506820fa551",
                     "risk": {
@@ -6281,8 +6281,8 @@
                 {
                     "kind": "block",
                     "anchor": "reconciliationGapCell",
-                    "line_start": 1020,
-                    "line_end": 1029,
+                    "line_start": 1021,
+                    "line_end": 1030,
                     "lines": 10,
                     "fingerprint": "f75e899134f6",
                     "risk": {
@@ -6294,8 +6294,8 @@
                 {
                     "kind": "block",
                     "anchor": "reconciliationRemainingCell",
-                    "line_start": 1030,
-                    "line_end": 1038,
+                    "line_start": 1031,
+                    "line_end": 1039,
                     "lines": 9,
                     "fingerprint": "2d5b0b692b77",
                     "risk": {
@@ -6307,8 +6307,8 @@
                 {
                     "kind": "block",
                     "anchor": "reconciliationLeftoverCell",
-                    "line_start": 1039,
-                    "line_end": 1045,
+                    "line_start": 1040,
+                    "line_end": 1046,
                     "lines": 7,
                     "fingerprint": "bbb86b18b933",
                     "risk": {
@@ -6320,8 +6320,8 @@
                 {
                     "kind": "block",
                     "anchor": "reconciliationNumber",
-                    "line_start": 1046,
-                    "line_end": 1049,
+                    "line_start": 1047,
+                    "line_end": 1050,
                     "lines": 4,
                     "fingerprint": "d7de6854423f",
                     "risk": {
@@ -6333,8 +6333,8 @@
                 {
                     "kind": "block",
                     "anchor": "reconciliationAmount",
-                    "line_start": 1050,
-                    "line_end": 1054,
+                    "line_start": 1051,
+                    "line_end": 1055,
                     "lines": 5,
                     "fingerprint": "f2cf1c6cf31b",
                     "risk": {
@@ -6346,8 +6346,8 @@
                 {
                     "kind": "block",
                     "anchor": "renderReconciliation",
-                    "line_start": 1055,
-                    "line_end": 1135,
+                    "line_start": 1056,
+                    "line_end": 1136,
                     "lines": 81,
                     "fingerprint": "3945e5619a32",
                     "risk": {
@@ -6359,8 +6359,8 @@
                 {
                     "kind": "block",
                     "anchor": "renderGuestActualModal",
-                    "line_start": 1136,
-                    "line_end": 1141,
+                    "line_start": 1137,
+                    "line_end": 1142,
                     "lines": 6,
                     "fingerprint": "c8ed92c770d5",
                     "risk": {
@@ -6372,8 +6372,8 @@
                 {
                     "kind": "block",
                     "anchor": "hasNoneRow",
-                    "line_start": 1142,
-                    "line_end": 1142,
+                    "line_start": 1143,
+                    "line_end": 1143,
                     "lines": 1,
                     "fingerprint": "984c2b2c2724",
                     "risk": {
@@ -6385,8 +6385,8 @@
                 {
                     "kind": "block",
                     "anchor": "rows",
-                    "line_start": 1143,
-                    "line_end": 1169,
+                    "line_start": 1144,
+                    "line_end": 1170,
                     "lines": 27,
                     "fingerprint": "35af548d5290",
                     "risk": {
@@ -6398,8 +6398,8 @@
                 {
                     "kind": "block",
                     "anchor": "guestActualInlineError",
-                    "line_start": 1170,
-                    "line_end": 1175,
+                    "line_start": 1171,
+                    "line_end": 1176,
                     "lines": 6,
                     "fingerprint": "fb34b10cbeed",
                     "risk": {
@@ -6411,8 +6411,8 @@
                 {
                     "kind": "block",
                     "anchor": "guestActualSumFromDom",
-                    "line_start": 1176,
-                    "line_end": 1187,
+                    "line_start": 1177,
+                    "line_end": 1188,
                     "lines": 12,
                     "fingerprint": "77ef733417df",
                     "risk": {
@@ -6424,8 +6424,8 @@
                 {
                     "kind": "block",
                     "anchor": "guestActualLiveSumListener",
-                    "line_start": 1188,
-                    "line_end": 1196,
+                    "line_start": 1189,
+                    "line_end": 1197,
                     "lines": 9,
                     "fingerprint": "8b40211b756b",
                     "risk": {
@@ -6437,8 +6437,8 @@
                 {
                     "kind": "block",
                     "anchor": "proceedToLeftover",
-                    "line_start": 1197,
-                    "line_end": 1222,
+                    "line_start": 1198,
+                    "line_end": 1223,
                     "lines": 26,
                     "fingerprint": "30bae613921b",
                     "risk": {
@@ -6450,8 +6450,8 @@
                 {
                     "kind": "block",
                     "anchor": "confirmGuestActualModal",
-                    "line_start": 1223,
-                    "line_end": 1261,
+                    "line_start": 1224,
+                    "line_end": 1262,
                     "lines": 39,
                     "fingerprint": "9f07b4dceca2",
                     "risk": {
@@ -6463,8 +6463,8 @@
                 {
                     "kind": "block",
                     "anchor": "renderLeftoverModal",
-                    "line_start": 1262,
-                    "line_end": 1267,
+                    "line_start": 1263,
+                    "line_end": 1268,
                     "lines": 6,
                     "fingerprint": "0ccdda52f129",
                     "risk": {
@@ -6476,8 +6476,8 @@
                 {
                     "kind": "block",
                     "anchor": "row",
-                    "line_start": 1268,
-                    "line_end": 1287,
+                    "line_start": 1269,
+                    "line_end": 1288,
                     "lines": 20,
                     "fingerprint": "5bec341aeca7",
                     "risk": {
@@ -6489,8 +6489,8 @@
                 {
                     "kind": "block",
                     "anchor": "leftoverInlineError",
-                    "line_start": 1288,
-                    "line_end": 1293,
+                    "line_start": 1289,
+                    "line_end": 1294,
                     "lines": 6,
                     "fingerprint": "096e6d5f0023",
                     "risk": {
@@ -6502,8 +6502,8 @@
                 {
                     "kind": "block",
                     "anchor": "confirmLeftoverModal",
-                    "line_start": 1294,
-                    "line_end": 1369,
+                    "line_start": 1295,
+                    "line_end": 1370,
                     "lines": 76,
                     "fingerprint": "4225c6a978a4",
                     "risk": {
@@ -6515,8 +6515,8 @@
                 {
                     "kind": "block",
                     "anchor": "submitReconciliationBody",
-                    "line_start": 1370,
-                    "line_end": 1377,
+                    "line_start": 1371,
+                    "line_end": 1378,
                     "lines": 8,
                     "fingerprint": "351756b94d3d",
                     "risk": {
@@ -6528,8 +6528,8 @@
                 {
                     "kind": "block",
                     "anchor": "message",
-                    "line_start": 1378,
-                    "line_end": 1384,
+                    "line_start": 1379,
+                    "line_end": 1385,
                     "lines": 7,
                     "fingerprint": "3e55da827e6e",
                     "risk": {
@@ -6541,8 +6541,8 @@
                 {
                     "kind": "block",
                     "anchor": "postReconciliation",
-                    "line_start": 1385,
-                    "line_end": 1393,
+                    "line_start": 1386,
+                    "line_end": 1394,
                     "lines": 9,
                     "fingerprint": "2189129b216e",
                     "risk": {
@@ -6554,8 +6554,8 @@
                 {
                     "kind": "block",
                     "anchor": "loadReconciliation",
-                    "line_start": 1394,
-                    "line_end": 1434,
+                    "line_start": 1395,
+                    "line_end": 1435,
                     "lines": 41,
                     "fingerprint": "168932d0af2c",
                     "risk": {
@@ -6567,8 +6567,8 @@
                 {
                     "kind": "block",
                     "anchor": "downloadReconciliation",
-                    "line_start": 1435,
-                    "line_end": 1440,
+                    "line_start": 1436,
+                    "line_end": 1441,
                     "lines": 6,
                     "fingerprint": "505d55d40625",
                     "risk": {
@@ -6580,8 +6580,8 @@
                 {
                     "kind": "block",
                     "anchor": "selectReconciliationRow",
-                    "line_start": 1441,
-                    "line_end": 1441,
+                    "line_start": 1442,
+                    "line_end": 1442,
                     "lines": 1,
                     "fingerprint": "7a1f4f452a72",
                     "risk": {
@@ -6593,8 +6593,8 @@
                 {
                     "kind": "block",
                     "anchor": "item",
-                    "line_start": 1442,
-                    "line_end": 1458,
+                    "line_start": 1443,
+                    "line_end": 1459,
                     "lines": 17,
                     "fingerprint": "01623771e372",
                     "risk": {
@@ -6606,8 +6606,8 @@
                 {
                     "kind": "block",
                     "anchor": "saveReconciliationForm",
-                    "line_start": 1459,
-                    "line_end": 1512,
+                    "line_start": 1460,
+                    "line_end": 1513,
                     "lines": 54,
                     "fingerprint": "5399482892f5",
                     "risk": {
@@ -6619,8 +6619,8 @@
                 {
                     "kind": "block",
                     "anchor": "uploadReconciliationInvoice",
-                    "line_start": 1513,
-                    "line_end": 1549,
+                    "line_start": 1514,
+                    "line_end": 1550,
                     "lines": 37,
                     "fingerprint": "37764a32feb5",
                     "risk": {
@@ -6632,8 +6632,8 @@
                 {
                     "kind": "block",
                     "anchor": "bulkOperationTitle",
-                    "line_start": 1550,
-                    "line_end": 1553,
+                    "line_start": 1551,
+                    "line_end": 1554,
                     "lines": 4,
                     "fingerprint": "b6606d3dc4b2",
                     "risk": {
@@ -6645,8 +6645,8 @@
                 {
                     "kind": "block",
                     "anchor": "bulkSelectedPeople",
-                    "line_start": 1554,
-                    "line_end": 1558,
+                    "line_start": 1555,
+                    "line_end": 1559,
                     "lines": 5,
                     "fingerprint": "a7ca88f8c111",
                     "risk": {
@@ -6658,8 +6658,8 @@
                 {
                     "kind": "block",
                     "anchor": "bulkTargetValue",
-                    "line_start": 1559,
-                    "line_end": 1562,
+                    "line_start": 1560,
+                    "line_end": 1563,
                     "lines": 4,
                     "fingerprint": "7ede09495022",
                     "risk": {
@@ -6671,8 +6671,8 @@
                 {
                     "kind": "block",
                     "anchor": "bulkCanSelect",
-                    "line_start": 1563,
-                    "line_end": 1569,
+                    "line_start": 1564,
+                    "line_end": 1570,
                     "lines": 7,
                     "fingerprint": "aca5943bff23",
                     "risk": {
@@ -6684,8 +6684,8 @@
                 {
                     "kind": "block",
                     "anchor": "group",
-                    "line_start": 1570,
-                    "line_end": 1580,
+                    "line_start": 1571,
+                    "line_end": 1581,
                     "lines": 11,
                     "fingerprint": "575e5d831833",
                     "risk": {
@@ -6697,8 +6697,8 @@
                 {
                     "kind": "block",
                     "anchor": "saveCancelCutoff",
-                    "line_start": 1581,
-                    "line_end": 1597,
+                    "line_start": 1582,
+                    "line_end": 1598,
                     "lines": 17,
                     "fingerprint": "818f6cebf31d",
                     "risk": {
@@ -6710,8 +6710,8 @@
                 {
                     "kind": "block",
                     "anchor": "loadBulkSnapshot",
-                    "line_start": 1598,
-                    "line_end": 1626,
+                    "line_start": 1599,
+                    "line_end": 1627,
                     "lines": 29,
                     "fingerprint": "1a67e3dc0859",
                     "risk": {
@@ -6723,8 +6723,8 @@
                 {
                     "kind": "block",
                     "anchor": "bulkTargetOptions",
-                    "line_start": 1627,
-                    "line_end": 1641,
+                    "line_start": 1628,
+                    "line_end": 1642,
                     "lines": 15,
                     "fingerprint": "05e40a51d172",
                     "risk": {
@@ -6736,8 +6736,8 @@
                 {
                     "kind": "block",
                     "anchor": "bulkPersonStatus",
-                    "line_start": 1642,
-                    "line_end": 1657,
+                    "line_start": 1643,
+                    "line_end": 1658,
                     "lines": 16,
                     "fingerprint": "f807845cafb3",
                     "risk": {
@@ -6749,8 +6749,8 @@
                 {
                     "kind": "block",
                     "anchor": "group",
-                    "line_start": 1658,
-                    "line_end": 1679,
+                    "line_start": 1659,
+                    "line_end": 1680,
                     "lines": 22,
                     "fingerprint": "5984cd982f0d",
                     "risk": {
@@ -6762,8 +6762,8 @@
                 {
                     "kind": "block",
                     "anchor": "renderBulkResults",
-                    "line_start": 1680,
-                    "line_end": 1685,
+                    "line_start": 1681,
+                    "line_end": 1686,
                     "lines": 6,
                     "fingerprint": "d966628ed284",
                     "risk": {
@@ -6775,8 +6775,8 @@
                 {
                     "kind": "block",
                     "anchor": "renderBulkModal",
-                    "line_start": 1686,
-                    "line_end": 1693,
+                    "line_start": 1687,
+                    "line_end": 1694,
                     "lines": 8,
                     "fingerprint": "5a3c21c1c0e7",
                     "risk": {
@@ -6788,8 +6788,8 @@
                 {
                     "kind": "block",
                     "anchor": "renderBulkOperations",
-                    "line_start": 1694,
-                    "line_end": 1711,
+                    "line_start": 1695,
+                    "line_end": 1712,
                     "lines": 18,
                     "fingerprint": "77f3f837c487",
                     "risk": {
@@ -6801,8 +6801,8 @@
                 {
                     "kind": "block",
                     "anchor": "rows",
-                    "line_start": 1712,
-                    "line_end": 1717,
+                    "line_start": 1713,
+                    "line_end": 1718,
                     "lines": 6,
                     "fingerprint": "94114a53de79",
                     "risk": {
@@ -6814,8 +6814,8 @@
                 {
                     "kind": "block",
                     "anchor": "bulkValue",
-                    "line_start": 1718,
-                    "line_end": 1730,
+                    "line_start": 1719,
+                    "line_end": 1731,
                     "lines": 13,
                     "fingerprint": "f26a9e5af1dc",
                     "risk": {
@@ -6827,8 +6827,8 @@
                 {
                     "kind": "block",
                     "anchor": "bulkHead",
-                    "line_start": 1731,
-                    "line_end": 1736,
+                    "line_start": 1732,
+                    "line_end": 1737,
                     "lines": 6,
                     "fingerprint": "3dc0ab25ae38",
                     "risk": {
@@ -6840,8 +6840,8 @@
                 {
                     "kind": "block",
                     "anchor": "selected",
-                    "line_start": 1737,
-                    "line_end": 1750,
+                    "line_start": 1738,
+                    "line_end": 1751,
                     "lines": 14,
                     "fingerprint": "903cae6b343d",
                     "risk": {
@@ -6853,8 +6853,8 @@
                 {
                     "kind": "block",
                     "anchor": "previewDisabled",
-                    "line_start": 1751,
-                    "line_end": 1761,
+                    "line_start": 1752,
+                    "line_end": 1762,
                     "lines": 11,
                     "fingerprint": "edf0ebeca087",
                     "risk": {
@@ -6866,8 +6866,8 @@
                 {
                     "kind": "block",
                     "anchor": "bulkTogglePerson",
-                    "line_start": 1762,
-                    "line_end": 1772,
+                    "line_start": 1763,
+                    "line_end": 1773,
                     "lines": 11,
                     "fingerprint": "9a2cec156103",
                     "risk": {
@@ -6881,8 +6881,8 @@
                 {
                     "kind": "block",
                     "anchor": "bulkSelectEligible",
-                    "line_start": 1773,
-                    "line_end": 1774,
+                    "line_start": 1774,
+                    "line_end": 1775,
                     "lines": 2,
                     "fingerprint": "89bf2295bead",
                     "risk": {
@@ -6894,8 +6894,8 @@
                 {
                     "kind": "block",
                     "anchor": "eligible",
-                    "line_start": 1775,
-                    "line_end": 1780,
+                    "line_start": 1776,
+                    "line_end": 1781,
                     "lines": 6,
                     "fingerprint": "a9a93fbc2be1",
                     "risk": {
@@ -6907,8 +6907,8 @@
                 {
                     "kind": "block",
                     "anchor": "submitBulkOperation",
-                    "line_start": 1781,
-                    "line_end": 1783,
+                    "line_start": 1782,
+                    "line_end": 1784,
                     "lines": 3,
                     "fingerprint": "743afb9d05e7",
                     "risk": {
@@ -6920,8 +6920,8 @@
                 {
                     "kind": "block",
                     "anchor": "ids",
-                    "line_start": 1784,
-                    "line_end": 1803,
+                    "line_start": 1785,
+                    "line_end": 1804,
                     "lines": 20,
                     "fingerprint": "e7431d36c98c",
                     "risk": {
@@ -6933,8 +6933,8 @@
                 {
                     "kind": "block",
                     "anchor": "mealTypeSwitch",
-                    "line_start": 1804,
-                    "line_end": 1809,
+                    "line_start": 1805,
+                    "line_end": 1810,
                     "lines": 6,
                     "fingerprint": "32b52008144e",
                     "risk": {
@@ -6946,8 +6946,8 @@
                 {
                     "kind": "block",
                     "anchor": "embeddedPanel",
-                    "line_start": 1810,
-                    "line_end": 1817,
+                    "line_start": 1811,
+                    "line_end": 1818,
                     "lines": 8,
                     "fingerprint": "998cc162c3bf",
                     "risk": {
@@ -6959,8 +6959,8 @@
                 {
                     "kind": "block",
                     "anchor": "loadEmbedded",
-                    "line_start": 1818,
-                    "line_end": 1837,
+                    "line_start": 1819,
+                    "line_end": 1838,
                     "lines": 20,
                     "fingerprint": "bf4fdadf61e4",
                     "risk": {
@@ -6972,8 +6972,8 @@
                 {
                     "kind": "block",
                     "anchor": "renderFocusKeyOf",
-                    "line_start": 1838,
-                    "line_end": 1845,
+                    "line_start": 1839,
+                    "line_end": 1846,
                     "lines": 8,
                     "fingerprint": "12e83fbdb9ec",
                     "risk": {
@@ -6985,8 +6985,8 @@
                 {
                     "kind": "block",
                     "anchor": "captureRenderFocus",
-                    "line_start": 1846,
-                    "line_end": 1857,
+                    "line_start": 1847,
+                    "line_end": 1858,
                     "lines": 12,
                     "fingerprint": "7361375807c9",
                     "risk": {
@@ -7000,8 +7000,8 @@
                 {
                     "kind": "block",
                     "anchor": "restoreRenderFocus",
-                    "line_start": 1858,
-                    "line_end": 1870,
+                    "line_start": 1859,
+                    "line_end": 1871,
                     "lines": 13,
                     "fingerprint": "6223b6bbcebb",
                     "risk": {
@@ -7015,8 +7015,8 @@
                 {
                     "kind": "block",
                     "anchor": "render",
-                    "line_start": 1871,
-                    "line_end": 1882,
+                    "line_start": 1872,
+                    "line_end": 1883,
                     "lines": 12,
                     "fingerprint": "bb370331bef6",
                     "risk": {
@@ -7028,8 +7028,8 @@
                 {
                     "kind": "block",
                     "anchor": "notices",
-                    "line_start": 1883,
-                    "line_end": 1889,
+                    "line_start": 1884,
+                    "line_end": 1890,
                     "lines": 7,
                     "fingerprint": "a0e95e02c6f6",
                     "risk": {
@@ -7041,8 +7041,8 @@
                 {
                     "kind": "block",
                     "anchor": "loadStatus",
-                    "line_start": 1890,
-                    "line_end": 1901,
+                    "line_start": 1891,
+                    "line_end": 1902,
                     "lines": 12,
                     "fingerprint": "bb7d8bfedb49",
                     "risk": {
@@ -7054,8 +7054,8 @@
                 {
                     "kind": "block",
                     "anchor": "loadCatalog",
-                    "line_start": 1902,
-                    "line_end": 1908,
+                    "line_start": 1903,
+                    "line_end": 1909,
                     "lines": 7,
                     "fingerprint": "e8bef8b6a96f",
                     "risk": {
@@ -7067,8 +7067,8 @@
                 {
                     "kind": "block",
                     "anchor": "loadMonth",
-                    "line_start": 1909,
-                    "line_end": 1916,
+                    "line_start": 1910,
+                    "line_end": 1917,
                     "lines": 8,
                     "fingerprint": "578acf569044",
                     "risk": {
@@ -7080,8 +7080,8 @@
                 {
                     "kind": "block",
                     "anchor": "loadOrders",
-                    "line_start": 1917,
-                    "line_end": 1938,
+                    "line_start": 1918,
+                    "line_end": 1939,
                     "lines": 22,
                     "fingerprint": "bdce53f182de",
                     "risk": {
@@ -7093,8 +7093,8 @@
                 {
                     "kind": "block",
                     "anchor": "loadFoodGroups",
-                    "line_start": 1939,
-                    "line_end": 1959,
+                    "line_start": 1940,
+                    "line_end": 1960,
                     "lines": 21,
                     "fingerprint": "3966f07b96ca",
                     "risk": {
@@ -7106,8 +7106,8 @@
                 {
                     "kind": "block",
                     "anchor": "loadGroupOrders",
-                    "line_start": 1960,
-                    "line_end": 1990,
+                    "line_start": 1961,
+                    "line_end": 1991,
                     "lines": 31,
                     "fingerprint": "68a13c558754",
                     "risk": {
@@ -7119,8 +7119,8 @@
                 {
                     "kind": "block",
                     "anchor": "loadCancelRequests",
-                    "line_start": 1991,
-                    "line_end": 2007,
+                    "line_start": 1992,
+                    "line_end": 2008,
                     "lines": 17,
                     "fingerprint": "47440c866102",
                     "risk": {
@@ -7132,8 +7132,8 @@
                 {
                     "kind": "block",
                     "anchor": "loadGuestRequests",
-                    "line_start": 2008,
-                    "line_end": 2026,
+                    "line_start": 2009,
+                    "line_end": 2027,
                     "lines": 19,
                     "fingerprint": "643f6c5bbdb1",
                     "risk": {
@@ -7145,8 +7145,8 @@
                 {
                     "kind": "block",
                     "anchor": "beginGuestEdit",
-                    "line_start": 2027,
-                    "line_end": 2027,
+                    "line_start": 2028,
+                    "line_end": 2028,
                     "lines": 1,
                     "fingerprint": "0328bf9e4b08",
                     "risk": {
@@ -7158,8 +7158,8 @@
                 {
                     "kind": "block",
                     "anchor": "row",
-                    "line_start": 2028,
-                    "line_end": 2043,
+                    "line_start": 2029,
+                    "line_end": 2044,
                     "lines": 16,
                     "fingerprint": "3059ed3275f1",
                     "risk": {
@@ -7171,8 +7171,8 @@
                 {
                     "kind": "block",
                     "anchor": "cancelGuestEdit",
-                    "line_start": 2044,
-                    "line_end": 2049,
+                    "line_start": 2045,
+                    "line_end": 2050,
                     "lines": 6,
                     "fingerprint": "78a280fd03a3",
                     "risk": {
@@ -7184,8 +7184,8 @@
                 {
                     "kind": "block",
                     "anchor": "saveGuestEdit",
-                    "line_start": 2050,
-                    "line_end": 2081,
+                    "line_start": 2051,
+                    "line_end": 2082,
                     "lines": 32,
                     "fingerprint": "bd41542a9631",
                     "risk": {
@@ -7199,8 +7199,8 @@
                 {
                     "kind": "block",
                     "anchor": "guestRequestAction",
-                    "line_start": 2082,
-                    "line_end": 2082,
+                    "line_start": 2083,
+                    "line_end": 2083,
                     "lines": 1,
                     "fingerprint": "fcb378411e22",
                     "risk": {
@@ -7212,8 +7212,8 @@
                 {
                     "kind": "block",
                     "anchor": "row",
-                    "line_start": 2083,
-                    "line_end": 2105,
+                    "line_start": 2084,
+                    "line_end": 2106,
                     "lines": 23,
                     "fingerprint": "75fb9d78ef55",
                     "risk": {
@@ -7227,8 +7227,8 @@
                 {
                     "kind": "block",
                     "anchor": "renderGuestRequestManager",
-                    "line_start": 2106,
-                    "line_end": 2108,
+                    "line_start": 2107,
+                    "line_end": 2109,
                     "lines": 3,
                     "fingerprint": "2b8f13071069",
                     "risk": {
@@ -7240,8 +7240,8 @@
                 {
                     "kind": "block",
                     "anchor": "rows",
-                    "line_start": 2109,
-                    "line_end": 2131,
+                    "line_start": 2110,
+                    "line_end": 2132,
                     "lines": 23,
                     "fingerprint": "58444bf90ac4",
                     "risk": {
@@ -7255,8 +7255,8 @@
                 {
                     "kind": "block",
                     "anchor": "decideCancelRequest",
-                    "line_start": 2132,
-                    "line_end": 2146,
+                    "line_start": 2133,
+                    "line_end": 2147,
                     "lines": 15,
                     "fingerprint": "e83394965371",
                     "risk": {
@@ -7268,8 +7268,8 @@
                 {
                     "kind": "block",
                     "anchor": "loadStatistics",
-                    "line_start": 2147,
-                    "line_end": 2153,
+                    "line_start": 2148,
+                    "line_end": 2154,
                     "lines": 7,
                     "fingerprint": "8af6868f131d",
                     "risk": {
@@ -7281,8 +7281,8 @@
                 {
                     "kind": "block",
                     "anchor": "selectedIds",
-                    "line_start": 2154,
-                    "line_end": 2187,
+                    "line_start": 2155,
+                    "line_end": 2188,
                     "lines": 34,
                     "fingerprint": "07685c4fab95",
                     "risk": {
@@ -7294,8 +7294,8 @@
                 {
                     "kind": "block",
                     "anchor": "searchSelectedReportEmployees",
-                    "line_start": 2188,
-                    "line_end": 2215,
+                    "line_start": 2189,
+                    "line_end": 2216,
                     "lines": 28,
                     "fingerprint": "be10a8b03ecf",
                     "risk": {
@@ -7307,8 +7307,8 @@
                 {
                     "kind": "block",
                     "anchor": "refreshAll",
-                    "line_start": 2216,
-                    "line_end": 2242,
+                    "line_start": 2217,
+                    "line_end": 2243,
                     "lines": 27,
                     "fingerprint": "d10853410c24",
                     "risk": {
@@ -7320,8 +7320,8 @@
                 {
                     "kind": "block",
                     "anchor": "saveDay",
-                    "line_start": 2243,
-                    "line_end": 2287,
+                    "line_start": 2244,
+                    "line_end": 2288,
                     "lines": 45,
                     "fingerprint": "b1e168127365",
                     "risk": {
@@ -7333,8 +7333,8 @@
                 {
                     "kind": "block",
                     "anchor": "saveCatalog",
-                    "line_start": 2288,
-                    "line_end": 2313,
+                    "line_start": 2289,
+                    "line_end": 2314,
                     "lines": 26,
                     "fingerprint": "da9227beba4d",
                     "risk": {
@@ -7346,8 +7346,8 @@
                 {
                     "kind": "block",
                     "anchor": "orderExportRows",
-                    "line_start": 2314,
-                    "line_end": 2333,
+                    "line_start": 2315,
+                    "line_end": 2334,
                     "lines": 20,
                     "fingerprint": "8244eed4237d",
                     "risk": {
@@ -7359,8 +7359,8 @@
                 {
                     "kind": "block",
                     "anchor": "downloadOrdersCsv",
-                    "line_start": 2334,
-                    "line_end": 2350,
+                    "line_start": 2335,
+                    "line_end": 2351,
                     "lines": 17,
                     "fingerprint": "b6b03adf37bd",
                     "risk": {
@@ -7372,8 +7372,8 @@
                 {
                     "kind": "block",
                     "anchor": "downloadOrders",
-                    "line_start": 2351,
-                    "line_end": 2355,
+                    "line_start": 2352,
+                    "line_end": 2356,
                     "lines": 5,
                     "fingerprint": "e2a6cd98bb47",
                     "risk": {
@@ -7385,8 +7385,8 @@
                 {
                     "kind": "block",
                     "anchor": "printScopedReport",
-                    "line_start": 2356,
-                    "line_end": 2357,
+                    "line_start": 2357,
+                    "line_end": 2358,
                     "lines": 2,
                     "fingerprint": "fc230ad9d03b",
                     "risk": {
@@ -7398,8 +7398,8 @@
                 {
                     "kind": "block",
                     "anchor": "target",
-                    "line_start": 2358,
-                    "line_end": 2368,
+                    "line_start": 2359,
+                    "line_end": 2369,
                     "lines": 11,
                     "fingerprint": "43917729c805",
                     "risk": {
@@ -7411,8 +7411,8 @@
                 {
                     "kind": "block",
                     "anchor": "cleanup",
-                    "line_start": 2369,
-                    "line_end": 2386,
+                    "line_start": 2370,
+                    "line_end": 2387,
                     "lines": 18,
                     "fingerprint": "a5da49d03cf0",
                     "risk": {
@@ -7424,8 +7424,8 @@
                 {
                     "kind": "block",
                     "anchor": "printOrders",
-                    "line_start": 2387,
-                    "line_end": 2391,
+                    "line_start": 2388,
+                    "line_end": 2392,
                     "lines": 5,
                     "fingerprint": "393150104fa4",
                     "risk": {
@@ -7437,8 +7437,8 @@
                 {
                     "kind": "block",
                     "anchor": "downloadStatistics",
-                    "line_start": 2392,
-                    "line_end": 2398,
+                    "line_start": 2393,
+                    "line_end": 2399,
                     "lines": 7,
                     "fingerprint": "9a1dc36b2ec2",
                     "risk": {
@@ -7450,8 +7450,8 @@
                 {
                     "kind": "block",
                     "anchor": "printStatistics",
-                    "line_start": 2399,
-                    "line_end": 2403,
+                    "line_start": 2400,
+                    "line_end": 2404,
                     "lines": 5,
                     "fingerprint": "805526e739e3",
                     "risk": {
@@ -7463,8 +7463,8 @@
                 {
                     "kind": "block",
                     "anchor": "selectDay",
-                    "line_start": 2404,
-                    "line_end": 2411,
+                    "line_start": 2405,
+                    "line_end": 2412,
                     "lines": 8,
                     "fingerprint": "03854c0aa92d",
                     "risk": {
@@ -7476,8 +7476,8 @@
                 {
                     "kind": "block",
                     "anchor": "changeMonth",
-                    "line_start": 2412,
-                    "line_end": 2417,
+                    "line_start": 2413,
+                    "line_end": 2418,
                     "lines": 6,
                     "fingerprint": "4cd82e7594c2",
                     "risk": {
@@ -7489,8 +7489,8 @@
                 {
                     "kind": "block",
                     "anchor": "switchTab",
-                    "line_start": 2418,
-                    "line_end": 2454,
+                    "line_start": 2419,
+                    "line_end": 2455,
                     "lines": 37,
                     "fingerprint": "6ff87d675afc",
                     "risk": {
@@ -7502,8 +7502,8 @@
                 {
                     "kind": "block",
                     "anchor": "emergencyEnsurePeople",
-                    "line_start": 2455,
-                    "line_end": 2468,
+                    "line_start": 2456,
+                    "line_end": 2469,
                     "lines": 14,
                     "fingerprint": "165571aa6d52",
                     "risk": {
@@ -7515,8 +7515,8 @@
                 {
                     "kind": "block",
                     "anchor": "emergencyPanel",
-                    "line_start": 2469,
-                    "line_end": 2477,
+                    "line_start": 2470,
+                    "line_end": 2478,
                     "lines": 9,
                     "fingerprint": "a2c4197948d3",
                     "risk": {
@@ -7528,8 +7528,8 @@
                 {
                     "kind": "block",
                     "anchor": "msgs",
-                    "line_start": 2478,
-                    "line_end": 2512,
+                    "line_start": 2479,
+                    "line_end": 2513,
                     "lines": 35,
                     "fingerprint": "2fdc69c26fdb",
                     "risk": {
@@ -7541,8 +7541,8 @@
                 {
                     "kind": "block",
                     "anchor": "emergencyLoadOrders",
-                    "line_start": 2513,
-                    "line_end": 2518,
+                    "line_start": 2514,
+                    "line_end": 2519,
                     "lines": 6,
                     "fingerprint": "63e285d03701",
                     "risk": {
@@ -7554,8 +7554,8 @@
                 {
                     "kind": "block",
                     "anchor": "daySearchInput",
-                    "line_start": 2519,
-                    "line_end": 2563,
+                    "line_start": 2520,
+                    "line_end": 2564,
                     "lines": 45,
                     "fingerprint": "04c38842f2e9",
                     "risk": {
@@ -7569,8 +7569,8 @@
                 {
                     "kind": "block",
                     "anchor": "emergencyClick",
-                    "line_start": 2564,
-                    "line_end": 2574,
+                    "line_start": 2565,
+                    "line_end": 2575,
                     "lines": 11,
                     "fingerprint": "5bdd1552597d",
                     "risk": {
@@ -7582,8 +7582,8 @@
                 {
                     "kind": "block",
                     "anchor": "person",
-                    "line_start": 2575,
-                    "line_end": 2603,
+                    "line_start": 2576,
+                    "line_end": 2604,
                     "lines": 29,
                     "fingerprint": "f9813006af7b",
                     "risk": {
@@ -7595,8 +7595,8 @@
                 {
                     "kind": "block",
                     "anchor": "eventClick",
-                    "line_start": 2604,
-                    "line_end": 2651,
+                    "line_start": 2605,
+                    "line_end": 2652,
                     "lines": 48,
                     "fingerprint": "043ceb77f316",
                     "risk": {
@@ -7608,8 +7608,8 @@
                 {
                     "kind": "block",
                     "anchor": "person",
-                    "line_start": 2652,
-                    "line_end": 2763,
+                    "line_start": 2653,
+                    "line_end": 2764,
                     "lines": 112,
                     "fingerprint": "1e636068b73d",
                     "risk": {
@@ -7623,8 +7623,8 @@
                 {
                     "kind": "block",
                     "anchor": "dayPickFor",
-                    "line_start": 2764,
-                    "line_end": 2772,
+                    "line_start": 2765,
+                    "line_end": 2773,
                     "lines": 9,
                     "fingerprint": "873438028099",
                     "risk": {
@@ -7636,8 +7636,8 @@
                 {
                     "kind": "block",
                     "anchor": "trackDayPick",
-                    "line_start": 2773,
-                    "line_end": 2779,
+                    "line_start": 2774,
+                    "line_end": 2780,
                     "lines": 7,
                     "fingerprint": "dc8b081747dd",
                     "risk": {
@@ -7649,8 +7649,8 @@
                 {
                     "kind": "block",
                     "anchor": "orderedDayFoodIds",
-                    "line_start": 2780,
-                    "line_end": 2787,
+                    "line_start": 2781,
+                    "line_end": 2788,
                     "lines": 8,
                     "fingerprint": "143f57378bd5",
                     "risk": {
@@ -7662,8 +7662,8 @@
                 {
                     "kind": "block",
                     "anchor": "eventChange",
-                    "line_start": 2788,
-                    "line_end": 2824,
+                    "line_start": 2789,
+                    "line_end": 2825,
                     "lines": 37,
                     "fingerprint": "90d29d9d6269",
                     "risk": {
@@ -7675,8 +7675,8 @@
                 {
                     "kind": "block",
                     "anchor": "person",
-                    "line_start": 2825,
-                    "line_end": 2858,
+                    "line_start": 2826,
+                    "line_end": 2859,
                     "lines": 34,
                     "fingerprint": "b39ca6de3fbb",
                     "risk": {
@@ -7688,8 +7688,8 @@
                 {
                     "kind": "block",
                     "anchor": "eventSubmit",
-                    "line_start": 2859,
-                    "line_end": 2941,
+                    "line_start": 2860,
+                    "line_end": 2942,
                     "lines": 83,
                     "fingerprint": "7017a0a9aabd",
                     "risk": {
@@ -7701,8 +7701,8 @@
                 {
                     "kind": "block",
                     "anchor": "spanDays",
-                    "line_start": 2942,
-                    "line_end": 2947,
+                    "line_start": 2943,
+                    "line_end": 2948,
                     "lines": 6,
                     "fingerprint": "2320e6a08925",
                     "risk": {
@@ -7714,8 +7714,8 @@
                 {
                     "kind": "block",
                     "anchor": "mount",
-                    "line_start": 2948,
-                    "line_end": 2977,
+                    "line_start": 2949,
+                    "line_end": 2978,
                     "lines": 30,
                     "fingerprint": "7eeaca92073d",
                     "risk": {
@@ -7727,8 +7727,8 @@
                 {
                     "kind": "block",
                     "anchor": "reportInputFocused",
-                    "line_start": 2978,
-                    "line_end": 2978,
+                    "line_start": 2979,
+                    "line_end": 2979,
                     "lines": 1,
                     "fingerprint": "67b04d1c8e53",
                     "risk": {
@@ -7740,8 +7740,8 @@
                 {
                     "kind": "block",
                     "anchor": "safeReportRender",
-                    "line_start": 2979,
-                    "line_end": 2981,
+                    "line_start": 2980,
+                    "line_end": 2982,
                     "lines": 3,
                     "fingerprint": "675f32151fe6",
                     "risk": {
@@ -7753,8 +7753,8 @@
                 {
                     "kind": "block",
                     "anchor": "html",
-                    "line_start": 2982,
-                    "line_end": 2991,
+                    "line_start": 2983,
+                    "line_end": 2992,
                     "lines": 10,
                     "fingerprint": "6aa0a1f9cc21",
                     "risk": {
@@ -28418,8 +28418,8 @@
             "id": "WEB-020",
             "path": "food-ticket-web\/assets\/food-menu.css",
             "area": "WEB",
-            "lines": 430,
-            "file_fingerprint": "012214aa0a67",
+            "lines": 438,
+            "file_fingerprint": "b8285d34bb60",
             "blocks": [
                 {
                     "kind": "block",
@@ -28680,9 +28680,9 @@
                     "kind": "block",
                     "anchor": "جدول داخل هر گروه، مثل گروه منو بدون حاشیهٔ اضافه",
                     "line_start": 427,
-                    "line_end": 430,
-                    "lines": 4,
-                    "fingerprint": "727ae969a5e2",
+                    "line_end": 438,
+                    "lines": 12,
+                    "fingerprint": "f117a0c61e63",
                     "risk": {
                         "score": 0,
                         "flags": []
@@ -28695,8 +28695,8 @@
             "id": "WEB-021",
             "path": "food-ticket-web\/assets\/food-menu.js",
             "area": "WEB",
-            "lines": 2991,
-            "file_fingerprint": "1d5a99422ef8",
+            "lines": 2992,
+            "file_fingerprint": "5c4a4c986b1a",
             "blocks": [
                 {
                     "kind": "block",
@@ -29356,9 +29356,9 @@
                     "kind": "block",
                     "anchor": "renderPrintedDeliveryReport",
                     "line_start": 678,
-                    "line_end": 697,
-                    "lines": 20,
-                    "fingerprint": "b4d5f7e549f7",
+                    "line_end": 698,
+                    "lines": 21,
+                    "fingerprint": "4568ebe29beb",
                     "risk": {
                         "score": 0,
                         "flags": []
@@ -29368,8 +29368,8 @@
                 {
                     "kind": "block",
                     "anchor": "loadPrintedDeliveryReport",
-                    "line_start": 698,
-                    "line_end": 733,
+                    "line_start": 699,
+                    "line_end": 734,
                     "lines": 36,
                     "fingerprint": "6ad7a3832c58",
                     "risk": {
@@ -29381,8 +29381,8 @@
                 {
                     "kind": "block",
                     "anchor": "exportPrintedDeliveryReport",
-                    "line_start": 734,
-                    "line_end": 750,
+                    "line_start": 735,
+                    "line_end": 751,
                     "lines": 17,
                     "fingerprint": "26a7f5218bc5",
                     "risk": {
@@ -29394,8 +29394,8 @@
                 {
                     "kind": "block",
                     "anchor": "printPrintedDeliveryReport",
-                    "line_start": 751,
-                    "line_end": 755,
+                    "line_start": 752,
+                    "line_end": 756,
                     "lines": 5,
                     "fingerprint": "cd09beec30d5",
                     "risk": {
@@ -29407,8 +29407,8 @@
                 {
                     "kind": "block",
                     "anchor": "summaryHtml",
-                    "line_start": 756,
-                    "line_end": 761,
+                    "line_start": 757,
+                    "line_end": 762,
                     "lines": 6,
                     "fingerprint": "1313c4eab65e",
                     "risk": {
@@ -29420,8 +29420,8 @@
                 {
                     "kind": "block",
                     "anchor": "nameSplit",
-                    "line_start": 762,
-                    "line_end": 770,
+                    "line_start": 763,
+                    "line_end": 771,
                     "lines": 9,
                     "fingerprint": "1fd4ef7a3513",
                     "risk": {
@@ -29433,8 +29433,8 @@
                 {
                     "kind": "block",
                     "anchor": "personSortValue",
-                    "line_start": 771,
-                    "line_end": 778,
+                    "line_start": 772,
+                    "line_end": 779,
                     "lines": 8,
                     "fingerprint": "c55dcf755ae3",
                     "risk": {
@@ -29446,8 +29446,8 @@
                 {
                     "kind": "block",
                     "anchor": "sortByState",
-                    "line_start": 779,
-                    "line_end": 789,
+                    "line_start": 780,
+                    "line_end": 790,
                     "lines": 11,
                     "fingerprint": "ad1183298909",
                     "risk": {
@@ -29459,8 +29459,8 @@
                 {
                     "kind": "block",
                     "anchor": "sortStateToggle",
-                    "line_start": 790,
-                    "line_end": 795,
+                    "line_start": 791,
+                    "line_end": 796,
                     "lines": 6,
                     "fingerprint": "c6c0a4355bbb",
                     "risk": {
@@ -29472,8 +29472,8 @@
                 {
                     "kind": "block",
                     "anchor": "sortStateMark",
-                    "line_start": 796,
-                    "line_end": 799,
+                    "line_start": 797,
+                    "line_end": 800,
                     "lines": 4,
                     "fingerprint": "054df10887a6",
                     "risk": {
@@ -29485,8 +29485,8 @@
                 {
                     "kind": "block",
                     "anchor": "rowSummary",
-                    "line_start": 800,
-                    "line_end": 803,
+                    "line_start": 801,
+                    "line_end": 804,
                     "lines": 4,
                     "fingerprint": "e0349d12588c",
                     "risk": {
@@ -29498,8 +29498,8 @@
                 {
                     "kind": "block",
                     "anchor": "renderOrders",
-                    "line_start": 804,
-                    "line_end": 809,
+                    "line_start": 805,
+                    "line_end": 810,
                     "lines": 6,
                     "fingerprint": "8630e589cb4d",
                     "risk": {
@@ -29511,8 +29511,8 @@
                 {
                     "kind": "block",
                     "anchor": "viewButton",
-                    "line_start": 810,
-                    "line_end": 830,
+                    "line_start": 811,
+                    "line_end": 831,
                     "lines": 21,
                     "fingerprint": "340d888c0d94",
                     "risk": {
@@ -29524,8 +29524,8 @@
                 {
                     "kind": "block",
                     "anchor": "ordersByOrgHtml",
-                    "line_start": 831,
-                    "line_end": 844,
+                    "line_start": 832,
+                    "line_end": 845,
                     "lines": 14,
                     "fingerprint": "c7cc515ed659",
                     "risk": {
@@ -29537,8 +29537,8 @@
                 {
                     "kind": "block",
                     "anchor": "renderGroupOrders",
-                    "line_start": 845,
-                    "line_end": 853,
+                    "line_start": 846,
+                    "line_end": 854,
                     "lines": 9,
                     "fingerprint": "4e173338ef94",
                     "risk": {
@@ -29550,8 +29550,8 @@
                 {
                     "kind": "block",
                     "anchor": "tableFor",
-                    "line_start": 854,
-                    "line_end": 878,
+                    "line_start": 855,
+                    "line_end": 879,
                     "lines": 25,
                     "fingerprint": "a6387d0adf2f",
                     "risk": {
@@ -29563,8 +29563,8 @@
                 {
                     "kind": "block",
                     "anchor": "renderCancelRequests",
-                    "line_start": 879,
-                    "line_end": 886,
+                    "line_start": 880,
+                    "line_end": 887,
                     "lines": 8,
                     "fingerprint": "9737d923cebd",
                     "risk": {
@@ -29576,8 +29576,8 @@
                 {
                     "kind": "block",
                     "anchor": "splitRow",
-                    "line_start": 887,
-                    "line_end": 899,
+                    "line_start": 888,
+                    "line_end": 900,
                     "lines": 13,
                     "fingerprint": "fcb9486479dd",
                     "risk": {
@@ -29589,8 +29589,8 @@
                 {
                     "kind": "block",
                     "anchor": "cancelValue",
-                    "line_start": 900,
-                    "line_end": 909,
+                    "line_start": 901,
+                    "line_end": 910,
                     "lines": 10,
                     "fingerprint": "f587a0fc97f9",
                     "risk": {
@@ -29602,8 +29602,8 @@
                 {
                     "kind": "block",
                     "anchor": "cmp",
-                    "line_start": 910,
-                    "line_end": 912,
+                    "line_start": 911,
+                    "line_end": 913,
                     "lines": 3,
                     "fingerprint": "03fd74fcbe2d",
                     "risk": {
@@ -29615,8 +29615,8 @@
                 {
                     "kind": "block",
                     "anchor": "cancelHead",
-                    "line_start": 913,
-                    "line_end": 931,
+                    "line_start": 914,
+                    "line_end": 932,
                     "lines": 19,
                     "fingerprint": "8e73108abdb0",
                     "risk": {
@@ -29628,8 +29628,8 @@
                 {
                     "kind": "block",
                     "anchor": "renderStatistics",
-                    "line_start": 932,
-                    "line_end": 950,
+                    "line_start": 933,
+                    "line_end": 951,
                     "lines": 19,
                     "fingerprint": "7a13bcf7cb0c",
                     "risk": {
@@ -29641,8 +29641,8 @@
                 {
                     "kind": "block",
                     "anchor": "mark",
-                    "line_start": 951,
-                    "line_end": 960,
+                    "line_start": 952,
+                    "line_end": 961,
                     "lines": 10,
                     "fingerprint": "d3db72132a3d",
                     "risk": {
@@ -29654,8 +29654,8 @@
                 {
                     "kind": "block",
                     "anchor": "peopleSortMark",
-                    "line_start": 961,
-                    "line_end": 984,
+                    "line_start": 962,
+                    "line_end": 985,
                     "lines": 24,
                     "fingerprint": "24072ca1f470",
                     "risk": {
@@ -29667,10 +29667,10 @@
                 {
                     "kind": "block",
                     "anchor": "foods",
-                    "line_start": 985,
-                    "line_end": 1010,
+                    "line_start": 986,
+                    "line_end": 1011,
                     "lines": 26,
-                    "fingerprint": "96f4e16ba2cb",
+                    "fingerprint": "c4b1c4c60d09",
                     "risk": {
                         "score": 0,
                         "flags": []
@@ -29680,8 +29680,8 @@
                 {
                     "kind": "block",
                     "anchor": "normalizeJalaliMonth",
-                    "line_start": 1011,
-                    "line_end": 1019,
+                    "line_start": 1012,
+                    "line_end": 1020,
                     "lines": 9,
                     "fingerprint": "2506820fa551",
                     "risk": {
@@ -29693,8 +29693,8 @@
                 {
                     "kind": "block",
                     "anchor": "reconciliationGapCell",
-                    "line_start": 1020,
-                    "line_end": 1029,
+                    "line_start": 1021,
+                    "line_end": 1030,
                     "lines": 10,
                     "fingerprint": "f75e899134f6",
                     "risk": {
@@ -29706,8 +29706,8 @@
                 {
                     "kind": "block",
                     "anchor": "reconciliationRemainingCell",
-                    "line_start": 1030,
-                    "line_end": 1038,
+                    "line_start": 1031,
+                    "line_end": 1039,
                     "lines": 9,
                     "fingerprint": "2d5b0b692b77",
                     "risk": {
@@ -29719,8 +29719,8 @@
                 {
                     "kind": "block",
                     "anchor": "reconciliationLeftoverCell",
-                    "line_start": 1039,
-                    "line_end": 1045,
+                    "line_start": 1040,
+                    "line_end": 1046,
                     "lines": 7,
                     "fingerprint": "bbb86b18b933",
                     "risk": {
@@ -29732,8 +29732,8 @@
                 {
                     "kind": "block",
                     "anchor": "reconciliationNumber",
-                    "line_start": 1046,
-                    "line_end": 1049,
+                    "line_start": 1047,
+                    "line_end": 1050,
                     "lines": 4,
                     "fingerprint": "d7de6854423f",
                     "risk": {
@@ -29745,8 +29745,8 @@
                 {
                     "kind": "block",
                     "anchor": "reconciliationAmount",
-                    "line_start": 1050,
-                    "line_end": 1054,
+                    "line_start": 1051,
+                    "line_end": 1055,
                     "lines": 5,
                     "fingerprint": "f2cf1c6cf31b",
                     "risk": {
@@ -29758,8 +29758,8 @@
                 {
                     "kind": "block",
                     "anchor": "renderReconciliation",
-                    "line_start": 1055,
-                    "line_end": 1135,
+                    "line_start": 1056,
+                    "line_end": 1136,
                     "lines": 81,
                     "fingerprint": "3945e5619a32",
                     "risk": {
@@ -29771,8 +29771,8 @@
                 {
                     "kind": "block",
                     "anchor": "renderGuestActualModal",
-                    "line_start": 1136,
-                    "line_end": 1141,
+                    "line_start": 1137,
+                    "line_end": 1142,
                     "lines": 6,
                     "fingerprint": "c8ed92c770d5",
                     "risk": {
@@ -29784,8 +29784,8 @@
                 {
                     "kind": "block",
                     "anchor": "hasNoneRow",
-                    "line_start": 1142,
-                    "line_end": 1142,
+                    "line_start": 1143,
+                    "line_end": 1143,
                     "lines": 1,
                     "fingerprint": "984c2b2c2724",
                     "risk": {
@@ -29797,8 +29797,8 @@
                 {
                     "kind": "block",
                     "anchor": "rows",
-                    "line_start": 1143,
-                    "line_end": 1169,
+                    "line_start": 1144,
+                    "line_end": 1170,
                     "lines": 27,
                     "fingerprint": "35af548d5290",
                     "risk": {
@@ -29810,8 +29810,8 @@
                 {
                     "kind": "block",
                     "anchor": "guestActualInlineError",
-                    "line_start": 1170,
-                    "line_end": 1175,
+                    "line_start": 1171,
+                    "line_end": 1176,
                     "lines": 6,
                     "fingerprint": "fb34b10cbeed",
                     "risk": {
@@ -29823,8 +29823,8 @@
                 {
                     "kind": "block",
                     "anchor": "guestActualSumFromDom",
-                    "line_start": 1176,
-                    "line_end": 1187,
+                    "line_start": 1177,
+                    "line_end": 1188,
                     "lines": 12,
                     "fingerprint": "77ef733417df",
                     "risk": {
@@ -29836,8 +29836,8 @@
                 {
                     "kind": "block",
                     "anchor": "guestActualLiveSumListener",
-                    "line_start": 1188,
-                    "line_end": 1196,
+                    "line_start": 1189,
+                    "line_end": 1197,
                     "lines": 9,
                     "fingerprint": "8b40211b756b",
                     "risk": {
@@ -29849,8 +29849,8 @@
                 {
                     "kind": "block",
                     "anchor": "proceedToLeftover",
-                    "line_start": 1197,
-                    "line_end": 1222,
+                    "line_start": 1198,
+                    "line_end": 1223,
                     "lines": 26,
                     "fingerprint": "30bae613921b",
                     "risk": {
@@ -29862,8 +29862,8 @@
                 {
                     "kind": "block",
                     "anchor": "confirmGuestActualModal",
-                    "line_start": 1223,
-                    "line_end": 1261,
+                    "line_start": 1224,
+                    "line_end": 1262,
                     "lines": 39,
                     "fingerprint": "9f07b4dceca2",
                     "risk": {
@@ -29875,8 +29875,8 @@
                 {
                     "kind": "block",
                     "anchor": "renderLeftoverModal",
-                    "line_start": 1262,
-                    "line_end": 1267,
+                    "line_start": 1263,
+                    "line_end": 1268,
                     "lines": 6,
                     "fingerprint": "0ccdda52f129",
                     "risk": {
@@ -29888,8 +29888,8 @@
                 {
                     "kind": "block",
                     "anchor": "row",
-                    "line_start": 1268,
-                    "line_end": 1287,
+                    "line_start": 1269,
+                    "line_end": 1288,
                     "lines": 20,
                     "fingerprint": "5bec341aeca7",
                     "risk": {
@@ -29901,8 +29901,8 @@
                 {
                     "kind": "block",
                     "anchor": "leftoverInlineError",
-                    "line_start": 1288,
-                    "line_end": 1293,
+                    "line_start": 1289,
+                    "line_end": 1294,
                     "lines": 6,
                     "fingerprint": "096e6d5f0023",
                     "risk": {
@@ -29914,8 +29914,8 @@
                 {
                     "kind": "block",
                     "anchor": "confirmLeftoverModal",
-                    "line_start": 1294,
-                    "line_end": 1369,
+                    "line_start": 1295,
+                    "line_end": 1370,
                     "lines": 76,
                     "fingerprint": "4225c6a978a4",
                     "risk": {
@@ -29927,8 +29927,8 @@
                 {
                     "kind": "block",
                     "anchor": "submitReconciliationBody",
-                    "line_start": 1370,
-                    "line_end": 1377,
+                    "line_start": 1371,
+                    "line_end": 1378,
                     "lines": 8,
                     "fingerprint": "351756b94d3d",
                     "risk": {
@@ -29940,8 +29940,8 @@
                 {
                     "kind": "block",
                     "anchor": "message",
-                    "line_start": 1378,
-                    "line_end": 1384,
+                    "line_start": 1379,
+                    "line_end": 1385,
                     "lines": 7,
                     "fingerprint": "3e55da827e6e",
                     "risk": {
@@ -29953,8 +29953,8 @@
                 {
                     "kind": "block",
                     "anchor": "postReconciliation",
-                    "line_start": 1385,
-                    "line_end": 1393,
+                    "line_start": 1386,
+                    "line_end": 1394,
                     "lines": 9,
                     "fingerprint": "2189129b216e",
                     "risk": {
@@ -29966,8 +29966,8 @@
                 {
                     "kind": "block",
                     "anchor": "loadReconciliation",
-                    "line_start": 1394,
-                    "line_end": 1434,
+                    "line_start": 1395,
+                    "line_end": 1435,
                     "lines": 41,
                     "fingerprint": "168932d0af2c",
                     "risk": {
@@ -29979,8 +29979,8 @@
                 {
                     "kind": "block",
                     "anchor": "downloadReconciliation",
-                    "line_start": 1435,
-                    "line_end": 1440,
+                    "line_start": 1436,
+                    "line_end": 1441,
                     "lines": 6,
                     "fingerprint": "505d55d40625",
                     "risk": {
@@ -29992,8 +29992,8 @@
                 {
                     "kind": "block",
                     "anchor": "selectReconciliationRow",
-                    "line_start": 1441,
-                    "line_end": 1441,
+                    "line_start": 1442,
+                    "line_end": 1442,
                     "lines": 1,
                     "fingerprint": "7a1f4f452a72",
                     "risk": {
@@ -30005,8 +30005,8 @@
                 {
                     "kind": "block",
                     "anchor": "item",
-                    "line_start": 1442,
-                    "line_end": 1458,
+                    "line_start": 1443,
+                    "line_end": 1459,
                     "lines": 17,
                     "fingerprint": "01623771e372",
                     "risk": {
@@ -30018,8 +30018,8 @@
                 {
                     "kind": "block",
                     "anchor": "saveReconciliationForm",
-                    "line_start": 1459,
-                    "line_end": 1512,
+                    "line_start": 1460,
+                    "line_end": 1513,
                     "lines": 54,
                     "fingerprint": "5399482892f5",
                     "risk": {
@@ -30031,8 +30031,8 @@
                 {
                     "kind": "block",
                     "anchor": "uploadReconciliationInvoice",
-                    "line_start": 1513,
-                    "line_end": 1549,
+                    "line_start": 1514,
+                    "line_end": 1550,
                     "lines": 37,
                     "fingerprint": "37764a32feb5",
                     "risk": {
@@ -30044,8 +30044,8 @@
                 {
                     "kind": "block",
                     "anchor": "bulkOperationTitle",
-                    "line_start": 1550,
-                    "line_end": 1553,
+                    "line_start": 1551,
+                    "line_end": 1554,
                     "lines": 4,
                     "fingerprint": "b6606d3dc4b2",
                     "risk": {
@@ -30057,8 +30057,8 @@
                 {
                     "kind": "block",
                     "anchor": "bulkSelectedPeople",
-                    "line_start": 1554,
-                    "line_end": 1558,
+                    "line_start": 1555,
+                    "line_end": 1559,
                     "lines": 5,
                     "fingerprint": "a7ca88f8c111",
                     "risk": {
@@ -30070,8 +30070,8 @@
                 {
                     "kind": "block",
                     "anchor": "bulkTargetValue",
-                    "line_start": 1559,
-                    "line_end": 1562,
+                    "line_start": 1560,
+                    "line_end": 1563,
                     "lines": 4,
                     "fingerprint": "7ede09495022",
                     "risk": {
@@ -30083,8 +30083,8 @@
                 {
                     "kind": "block",
                     "anchor": "bulkCanSelect",
-                    "line_start": 1563,
-                    "line_end": 1569,
+                    "line_start": 1564,
+                    "line_end": 1570,
                     "lines": 7,
                     "fingerprint": "aca5943bff23",
                     "risk": {
@@ -30096,8 +30096,8 @@
                 {
                     "kind": "block",
                     "anchor": "group",
-                    "line_start": 1570,
-                    "line_end": 1580,
+                    "line_start": 1571,
+                    "line_end": 1581,
                     "lines": 11,
                     "fingerprint": "575e5d831833",
                     "risk": {
@@ -30109,8 +30109,8 @@
                 {
                     "kind": "block",
                     "anchor": "saveCancelCutoff",
-                    "line_start": 1581,
-                    "line_end": 1597,
+                    "line_start": 1582,
+                    "line_end": 1598,
                     "lines": 17,
                     "fingerprint": "818f6cebf31d",
                     "risk": {
@@ -30122,8 +30122,8 @@
                 {
                     "kind": "block",
                     "anchor": "loadBulkSnapshot",
-                    "line_start": 1598,
-                    "line_end": 1626,
+                    "line_start": 1599,
+                    "line_end": 1627,
                     "lines": 29,
                     "fingerprint": "1a67e3dc0859",
                     "risk": {
@@ -30135,8 +30135,8 @@
                 {
                     "kind": "block",
                     "anchor": "bulkTargetOptions",
-                    "line_start": 1627,
-                    "line_end": 1641,
+                    "line_start": 1628,
+                    "line_end": 1642,
                     "lines": 15,
                     "fingerprint": "05e40a51d172",
                     "risk": {
@@ -30148,8 +30148,8 @@
                 {
                     "kind": "block",
                     "anchor": "bulkPersonStatus",
-                    "line_start": 1642,
-                    "line_end": 1657,
+                    "line_start": 1643,
+                    "line_end": 1658,
                     "lines": 16,
                     "fingerprint": "f807845cafb3",
                     "risk": {
@@ -30161,8 +30161,8 @@
                 {
                     "kind": "block",
                     "anchor": "group",
-                    "line_start": 1658,
-                    "line_end": 1679,
+                    "line_start": 1659,
+                    "line_end": 1680,
                     "lines": 22,
                     "fingerprint": "5984cd982f0d",
                     "risk": {
@@ -30174,8 +30174,8 @@
                 {
                     "kind": "block",
                     "anchor": "renderBulkResults",
-                    "line_start": 1680,
-                    "line_end": 1685,
+                    "line_start": 1681,
+                    "line_end": 1686,
                     "lines": 6,
                     "fingerprint": "d966628ed284",
                     "risk": {
@@ -30187,8 +30187,8 @@
                 {
                     "kind": "block",
                     "anchor": "renderBulkModal",
-                    "line_start": 1686,
-                    "line_end": 1693,
+                    "line_start": 1687,
+                    "line_end": 1694,
                     "lines": 8,
                     "fingerprint": "5a3c21c1c0e7",
                     "risk": {
@@ -30200,8 +30200,8 @@
                 {
                     "kind": "block",
                     "anchor": "renderBulkOperations",
-                    "line_start": 1694,
-                    "line_end": 1711,
+                    "line_start": 1695,
+                    "line_end": 1712,
                     "lines": 18,
                     "fingerprint": "77f3f837c487",
                     "risk": {
@@ -30213,8 +30213,8 @@
                 {
                     "kind": "block",
                     "anchor": "rows",
-                    "line_start": 1712,
-                    "line_end": 1717,
+                    "line_start": 1713,
+                    "line_end": 1718,
                     "lines": 6,
                     "fingerprint": "94114a53de79",
                     "risk": {
@@ -30226,8 +30226,8 @@
                 {
                     "kind": "block",
                     "anchor": "bulkValue",
-                    "line_start": 1718,
-                    "line_end": 1730,
+                    "line_start": 1719,
+                    "line_end": 1731,
                     "lines": 13,
                     "fingerprint": "f26a9e5af1dc",
                     "risk": {
@@ -30239,8 +30239,8 @@
                 {
                     "kind": "block",
                     "anchor": "bulkHead",
-                    "line_start": 1731,
-                    "line_end": 1736,
+                    "line_start": 1732,
+                    "line_end": 1737,
                     "lines": 6,
                     "fingerprint": "3dc0ab25ae38",
                     "risk": {
@@ -30252,8 +30252,8 @@
                 {
                     "kind": "block",
                     "anchor": "selected",
-                    "line_start": 1737,
-                    "line_end": 1750,
+                    "line_start": 1738,
+                    "line_end": 1751,
                     "lines": 14,
                     "fingerprint": "903cae6b343d",
                     "risk": {
@@ -30265,8 +30265,8 @@
                 {
                     "kind": "block",
                     "anchor": "previewDisabled",
-                    "line_start": 1751,
-                    "line_end": 1761,
+                    "line_start": 1752,
+                    "line_end": 1762,
                     "lines": 11,
                     "fingerprint": "edf0ebeca087",
                     "risk": {
@@ -30278,8 +30278,8 @@
                 {
                     "kind": "block",
                     "anchor": "bulkTogglePerson",
-                    "line_start": 1762,
-                    "line_end": 1772,
+                    "line_start": 1763,
+                    "line_end": 1773,
                     "lines": 11,
                     "fingerprint": "9a2cec156103",
                     "risk": {
@@ -30293,8 +30293,8 @@
                 {
                     "kind": "block",
                     "anchor": "bulkSelectEligible",
-                    "line_start": 1773,
-                    "line_end": 1774,
+                    "line_start": 1774,
+                    "line_end": 1775,
                     "lines": 2,
                     "fingerprint": "89bf2295bead",
                     "risk": {
@@ -30306,8 +30306,8 @@
                 {
                     "kind": "block",
                     "anchor": "eligible",
-                    "line_start": 1775,
-                    "line_end": 1780,
+                    "line_start": 1776,
+                    "line_end": 1781,
                     "lines": 6,
                     "fingerprint": "a9a93fbc2be1",
                     "risk": {
@@ -30319,8 +30319,8 @@
                 {
                     "kind": "block",
                     "anchor": "submitBulkOperation",
-                    "line_start": 1781,
-                    "line_end": 1783,
+                    "line_start": 1782,
+                    "line_end": 1784,
                     "lines": 3,
                     "fingerprint": "743afb9d05e7",
                     "risk": {
@@ -30332,8 +30332,8 @@
                 {
                     "kind": "block",
                     "anchor": "ids",
-                    "line_start": 1784,
-                    "line_end": 1803,
+                    "line_start": 1785,
+                    "line_end": 1804,
                     "lines": 20,
                     "fingerprint": "e7431d36c98c",
                     "risk": {
@@ -30345,8 +30345,8 @@
                 {
                     "kind": "block",
                     "anchor": "mealTypeSwitch",
-                    "line_start": 1804,
-                    "line_end": 1809,
+                    "line_start": 1805,
+                    "line_end": 1810,
                     "lines": 6,
                     "fingerprint": "32b52008144e",
                     "risk": {
@@ -30358,8 +30358,8 @@
                 {
                     "kind": "block",
                     "anchor": "embeddedPanel",
-                    "line_start": 1810,
-                    "line_end": 1817,
+                    "line_start": 1811,
+                    "line_end": 1818,
                     "lines": 8,
                     "fingerprint": "998cc162c3bf",
                     "risk": {
@@ -30371,8 +30371,8 @@
                 {
                     "kind": "block",
                     "anchor": "loadEmbedded",
-                    "line_start": 1818,
-                    "line_end": 1837,
+                    "line_start": 1819,
+                    "line_end": 1838,
                     "lines": 20,
                     "fingerprint": "bf4fdadf61e4",
                     "risk": {
@@ -30384,8 +30384,8 @@
                 {
                     "kind": "block",
                     "anchor": "renderFocusKeyOf",
-                    "line_start": 1838,
-                    "line_end": 1845,
+                    "line_start": 1839,
+                    "line_end": 1846,
                     "lines": 8,
                     "fingerprint": "12e83fbdb9ec",
                     "risk": {
@@ -30397,8 +30397,8 @@
                 {
                     "kind": "block",
                     "anchor": "captureRenderFocus",
-                    "line_start": 1846,
-                    "line_end": 1857,
+                    "line_start": 1847,
+                    "line_end": 1858,
                     "lines": 12,
                     "fingerprint": "7361375807c9",
                     "risk": {
@@ -30412,8 +30412,8 @@
                 {
                     "kind": "block",
                     "anchor": "restoreRenderFocus",
-                    "line_start": 1858,
-                    "line_end": 1870,
+                    "line_start": 1859,
+                    "line_end": 1871,
                     "lines": 13,
                     "fingerprint": "6223b6bbcebb",
                     "risk": {
@@ -30427,8 +30427,8 @@
                 {
                     "kind": "block",
                     "anchor": "render",
-                    "line_start": 1871,
-                    "line_end": 1882,
+                    "line_start": 1872,
+                    "line_end": 1883,
                     "lines": 12,
                     "fingerprint": "bb370331bef6",
                     "risk": {
@@ -30440,8 +30440,8 @@
                 {
                     "kind": "block",
                     "anchor": "notices",
-                    "line_start": 1883,
-                    "line_end": 1889,
+                    "line_start": 1884,
+                    "line_end": 1890,
                     "lines": 7,
                     "fingerprint": "a0e95e02c6f6",
                     "risk": {
@@ -30453,8 +30453,8 @@
                 {
                     "kind": "block",
                     "anchor": "loadStatus",
-                    "line_start": 1890,
-                    "line_end": 1901,
+                    "line_start": 1891,
+                    "line_end": 1902,
                     "lines": 12,
                     "fingerprint": "bb7d8bfedb49",
                     "risk": {
@@ -30466,8 +30466,8 @@
                 {
                     "kind": "block",
                     "anchor": "loadCatalog",
-                    "line_start": 1902,
-                    "line_end": 1908,
+                    "line_start": 1903,
+                    "line_end": 1909,
                     "lines": 7,
                     "fingerprint": "e8bef8b6a96f",
                     "risk": {
@@ -30479,8 +30479,8 @@
                 {
                     "kind": "block",
                     "anchor": "loadMonth",
-                    "line_start": 1909,
-                    "line_end": 1916,
+                    "line_start": 1910,
+                    "line_end": 1917,
                     "lines": 8,
                     "fingerprint": "578acf569044",
                     "risk": {
@@ -30492,8 +30492,8 @@
                 {
                     "kind": "block",
                     "anchor": "loadOrders",
-                    "line_start": 1917,
-                    "line_end": 1938,
+                    "line_start": 1918,
+                    "line_end": 1939,
                     "lines": 22,
                     "fingerprint": "bdce53f182de",
                     "risk": {
@@ -30505,8 +30505,8 @@
                 {
                     "kind": "block",
                     "anchor": "loadFoodGroups",
-                    "line_start": 1939,
-                    "line_end": 1959,
+                    "line_start": 1940,
+                    "line_end": 1960,
                     "lines": 21,
                     "fingerprint": "3966f07b96ca",
                     "risk": {
@@ -30518,8 +30518,8 @@
                 {
                     "kind": "block",
                     "anchor": "loadGroupOrders",
-                    "line_start": 1960,
-                    "line_end": 1990,
+                    "line_start": 1961,
+                    "line_end": 1991,
                     "lines": 31,
                     "fingerprint": "68a13c558754",
                     "risk": {
@@ -30531,8 +30531,8 @@
                 {
                     "kind": "block",
                     "anchor": "loadCancelRequests",
-                    "line_start": 1991,
-                    "line_end": 2007,
+                    "line_start": 1992,
+                    "line_end": 2008,
                     "lines": 17,
                     "fingerprint": "47440c866102",
                     "risk": {
@@ -30544,8 +30544,8 @@
                 {
                     "kind": "block",
                     "anchor": "loadGuestRequests",
-                    "line_start": 2008,
-                    "line_end": 2026,
+                    "line_start": 2009,
+                    "line_end": 2027,
                     "lines": 19,
                     "fingerprint": "643f6c5bbdb1",
                     "risk": {
@@ -30557,8 +30557,8 @@
                 {
                     "kind": "block",
                     "anchor": "beginGuestEdit",
-                    "line_start": 2027,
-                    "line_end": 2027,
+                    "line_start": 2028,
+                    "line_end": 2028,
                     "lines": 1,
                     "fingerprint": "0328bf9e4b08",
                     "risk": {
@@ -30570,8 +30570,8 @@
                 {
                     "kind": "block",
                     "anchor": "row",
-                    "line_start": 2028,
-                    "line_end": 2043,
+                    "line_start": 2029,
+                    "line_end": 2044,
                     "lines": 16,
                     "fingerprint": "3059ed3275f1",
                     "risk": {
@@ -30583,8 +30583,8 @@
                 {
                     "kind": "block",
                     "anchor": "cancelGuestEdit",
-                    "line_start": 2044,
-                    "line_end": 2049,
+                    "line_start": 2045,
+                    "line_end": 2050,
                     "lines": 6,
                     "fingerprint": "78a280fd03a3",
                     "risk": {
@@ -30596,8 +30596,8 @@
                 {
                     "kind": "block",
                     "anchor": "saveGuestEdit",
-                    "line_start": 2050,
-                    "line_end": 2081,
+                    "line_start": 2051,
+                    "line_end": 2082,
                     "lines": 32,
                     "fingerprint": "bd41542a9631",
                     "risk": {
@@ -30611,8 +30611,8 @@
                 {
                     "kind": "block",
                     "anchor": "guestRequestAction",
-                    "line_start": 2082,
-                    "line_end": 2082,
+                    "line_start": 2083,
+                    "line_end": 2083,
                     "lines": 1,
                     "fingerprint": "fcb378411e22",
                     "risk": {
@@ -30624,8 +30624,8 @@
                 {
                     "kind": "block",
                     "anchor": "row",
-                    "line_start": 2083,
-                    "line_end": 2105,
+                    "line_start": 2084,
+                    "line_end": 2106,
                     "lines": 23,
                     "fingerprint": "75fb9d78ef55",
                     "risk": {
@@ -30639,8 +30639,8 @@
                 {
                     "kind": "block",
                     "anchor": "renderGuestRequestManager",
-                    "line_start": 2106,
-                    "line_end": 2108,
+                    "line_start": 2107,
+                    "line_end": 2109,
                     "lines": 3,
                     "fingerprint": "2b8f13071069",
                     "risk": {
@@ -30652,8 +30652,8 @@
                 {
                     "kind": "block",
                     "anchor": "rows",
-                    "line_start": 2109,
-                    "line_end": 2131,
+                    "line_start": 2110,
+                    "line_end": 2132,
                     "lines": 23,
                     "fingerprint": "58444bf90ac4",
                     "risk": {
@@ -30667,8 +30667,8 @@
                 {
                     "kind": "block",
                     "anchor": "decideCancelRequest",
-                    "line_start": 2132,
-                    "line_end": 2146,
+                    "line_start": 2133,
+                    "line_end": 2147,
                     "lines": 15,
                     "fingerprint": "e83394965371",
                     "risk": {
@@ -30680,8 +30680,8 @@
                 {
                     "kind": "block",
                     "anchor": "loadStatistics",
-                    "line_start": 2147,
-                    "line_end": 2153,
+                    "line_start": 2148,
+                    "line_end": 2154,
                     "lines": 7,
                     "fingerprint": "8af6868f131d",
                     "risk": {
@@ -30693,8 +30693,8 @@
                 {
                     "kind": "block",
                     "anchor": "selectedIds",
-                    "line_start": 2154,
-                    "line_end": 2187,
+                    "line_start": 2155,
+                    "line_end": 2188,
                     "lines": 34,
                     "fingerprint": "07685c4fab95",
                     "risk": {
@@ -30706,8 +30706,8 @@
                 {
                     "kind": "block",
                     "anchor": "searchSelectedReportEmployees",
-                    "line_start": 2188,
-                    "line_end": 2215,
+                    "line_start": 2189,
+                    "line_end": 2216,
                     "lines": 28,
                     "fingerprint": "be10a8b03ecf",
                     "risk": {
@@ -30719,8 +30719,8 @@
                 {
                     "kind": "block",
                     "anchor": "refreshAll",
-                    "line_start": 2216,
-                    "line_end": 2242,
+                    "line_start": 2217,
+                    "line_end": 2243,
                     "lines": 27,
                     "fingerprint": "d10853410c24",
                     "risk": {
@@ -30732,8 +30732,8 @@
                 {
                     "kind": "block",
                     "anchor": "saveDay",
-                    "line_start": 2243,
-                    "line_end": 2287,
+                    "line_start": 2244,
+                    "line_end": 2288,
                     "lines": 45,
                     "fingerprint": "b1e168127365",
                     "risk": {
@@ -30745,8 +30745,8 @@
                 {
                     "kind": "block",
                     "anchor": "saveCatalog",
-                    "line_start": 2288,
-                    "line_end": 2313,
+                    "line_start": 2289,
+                    "line_end": 2314,
                     "lines": 26,
                     "fingerprint": "da9227beba4d",
                     "risk": {
@@ -30758,8 +30758,8 @@
                 {
                     "kind": "block",
                     "anchor": "orderExportRows",
-                    "line_start": 2314,
-                    "line_end": 2333,
+                    "line_start": 2315,
+                    "line_end": 2334,
                     "lines": 20,
                     "fingerprint": "8244eed4237d",
                     "risk": {
@@ -30771,8 +30771,8 @@
                 {
                     "kind": "block",
                     "anchor": "downloadOrdersCsv",
-                    "line_start": 2334,
-                    "line_end": 2350,
+                    "line_start": 2335,
+                    "line_end": 2351,
                     "lines": 17,
                     "fingerprint": "b6b03adf37bd",
                     "risk": {
@@ -30784,8 +30784,8 @@
                 {
                     "kind": "block",
                     "anchor": "downloadOrders",
-                    "line_start": 2351,
-                    "line_end": 2355,
+                    "line_start": 2352,
+                    "line_end": 2356,
                     "lines": 5,
                     "fingerprint": "e2a6cd98bb47",
                     "risk": {
@@ -30797,8 +30797,8 @@
                 {
                     "kind": "block",
                     "anchor": "printScopedReport",
-                    "line_start": 2356,
-                    "line_end": 2357,
+                    "line_start": 2357,
+                    "line_end": 2358,
                     "lines": 2,
                     "fingerprint": "fc230ad9d03b",
                     "risk": {
@@ -30810,8 +30810,8 @@
                 {
                     "kind": "block",
                     "anchor": "target",
-                    "line_start": 2358,
-                    "line_end": 2368,
+                    "line_start": 2359,
+                    "line_end": 2369,
                     "lines": 11,
                     "fingerprint": "43917729c805",
                     "risk": {
@@ -30823,8 +30823,8 @@
                 {
                     "kind": "block",
                     "anchor": "cleanup",
-                    "line_start": 2369,
-                    "line_end": 2386,
+                    "line_start": 2370,
+                    "line_end": 2387,
                     "lines": 18,
                     "fingerprint": "a5da49d03cf0",
                     "risk": {
@@ -30836,8 +30836,8 @@
                 {
                     "kind": "block",
                     "anchor": "printOrders",
-                    "line_start": 2387,
-                    "line_end": 2391,
+                    "line_start": 2388,
+                    "line_end": 2392,
                     "lines": 5,
                     "fingerprint": "393150104fa4",
                     "risk": {
@@ -30849,8 +30849,8 @@
                 {
                     "kind": "block",
                     "anchor": "downloadStatistics",
-                    "line_start": 2392,
-                    "line_end": 2398,
+                    "line_start": 2393,
+                    "line_end": 2399,
                     "lines": 7,
                     "fingerprint": "9a1dc36b2ec2",
                     "risk": {
@@ -30862,8 +30862,8 @@
                 {
                     "kind": "block",
                     "anchor": "printStatistics",
-                    "line_start": 2399,
-                    "line_end": 2403,
+                    "line_start": 2400,
+                    "line_end": 2404,
                     "lines": 5,
                     "fingerprint": "805526e739e3",
                     "risk": {
@@ -30875,8 +30875,8 @@
                 {
                     "kind": "block",
                     "anchor": "selectDay",
-                    "line_start": 2404,
-                    "line_end": 2411,
+                    "line_start": 2405,
+                    "line_end": 2412,
                     "lines": 8,
                     "fingerprint": "03854c0aa92d",
                     "risk": {
@@ -30888,8 +30888,8 @@
                 {
                     "kind": "block",
                     "anchor": "changeMonth",
-                    "line_start": 2412,
-                    "line_end": 2417,
+                    "line_start": 2413,
+                    "line_end": 2418,
                     "lines": 6,
                     "fingerprint": "4cd82e7594c2",
                     "risk": {
@@ -30901,8 +30901,8 @@
                 {
                     "kind": "block",
                     "anchor": "switchTab",
-                    "line_start": 2418,
-                    "line_end": 2454,
+                    "line_start": 2419,
+                    "line_end": 2455,
                     "lines": 37,
                     "fingerprint": "6ff87d675afc",
                     "risk": {
@@ -30914,8 +30914,8 @@
                 {
                     "kind": "block",
                     "anchor": "emergencyEnsurePeople",
-                    "line_start": 2455,
-                    "line_end": 2468,
+                    "line_start": 2456,
+                    "line_end": 2469,
                     "lines": 14,
                     "fingerprint": "165571aa6d52",
                     "risk": {
@@ -30927,8 +30927,8 @@
                 {
                     "kind": "block",
                     "anchor": "emergencyPanel",
-                    "line_start": 2469,
-                    "line_end": 2477,
+                    "line_start": 2470,
+                    "line_end": 2478,
                     "lines": 9,
                     "fingerprint": "a2c4197948d3",
                     "risk": {
@@ -30940,8 +30940,8 @@
                 {
                     "kind": "block",
                     "anchor": "msgs",
-                    "line_start": 2478,
-                    "line_end": 2512,
+                    "line_start": 2479,
+                    "line_end": 2513,
                     "lines": 35,
                     "fingerprint": "2fdc69c26fdb",
                     "risk": {
@@ -30953,8 +30953,8 @@
                 {
                     "kind": "block",
                     "anchor": "emergencyLoadOrders",
-                    "line_start": 2513,
-                    "line_end": 2518,
+                    "line_start": 2514,
+                    "line_end": 2519,
                     "lines": 6,
                     "fingerprint": "63e285d03701",
                     "risk": {
@@ -30966,8 +30966,8 @@
                 {
                     "kind": "block",
                     "anchor": "daySearchInput",
-                    "line_start": 2519,
-                    "line_end": 2563,
+                    "line_start": 2520,
+                    "line_end": 2564,
                     "lines": 45,
                     "fingerprint": "04c38842f2e9",
                     "risk": {
@@ -30981,8 +30981,8 @@
                 {
                     "kind": "block",
                     "anchor": "emergencyClick",
-                    "line_start": 2564,
-                    "line_end": 2574,
+                    "line_start": 2565,
+                    "line_end": 2575,
                     "lines": 11,
                     "fingerprint": "5bdd1552597d",
                     "risk": {
@@ -30994,8 +30994,8 @@
                 {
                     "kind": "block",
                     "anchor": "person",
-                    "line_start": 2575,
-                    "line_end": 2603,
+                    "line_start": 2576,
+                    "line_end": 2604,
                     "lines": 29,
                     "fingerprint": "f9813006af7b",
                     "risk": {
@@ -31007,8 +31007,8 @@
                 {
                     "kind": "block",
                     "anchor": "eventClick",
-                    "line_start": 2604,
-                    "line_end": 2651,
+                    "line_start": 2605,
+                    "line_end": 2652,
                     "lines": 48,
                     "fingerprint": "043ceb77f316",
                     "risk": {
@@ -31020,8 +31020,8 @@
                 {
                     "kind": "block",
                     "anchor": "person",
-                    "line_start": 2652,
-                    "line_end": 2763,
+                    "line_start": 2653,
+                    "line_end": 2764,
                     "lines": 112,
                     "fingerprint": "1e636068b73d",
                     "risk": {
@@ -31035,8 +31035,8 @@
                 {
                     "kind": "block",
                     "anchor": "dayPickFor",
-                    "line_start": 2764,
-                    "line_end": 2772,
+                    "line_start": 2765,
+                    "line_end": 2773,
                     "lines": 9,
                     "fingerprint": "873438028099",
                     "risk": {
@@ -31048,8 +31048,8 @@
                 {
                     "kind": "block",
                     "anchor": "trackDayPick",
-                    "line_start": 2773,
-                    "line_end": 2779,
+                    "line_start": 2774,
+                    "line_end": 2780,
                     "lines": 7,
                     "fingerprint": "dc8b081747dd",
                     "risk": {
@@ -31061,8 +31061,8 @@
                 {
                     "kind": "block",
                     "anchor": "orderedDayFoodIds",
-                    "line_start": 2780,
-                    "line_end": 2787,
+                    "line_start": 2781,
+                    "line_end": 2788,
                     "lines": 8,
                     "fingerprint": "143f57378bd5",
                     "risk": {
@@ -31074,8 +31074,8 @@
                 {
                     "kind": "block",
                     "anchor": "eventChange",
-                    "line_start": 2788,
-                    "line_end": 2824,
+                    "line_start": 2789,
+                    "line_end": 2825,
                     "lines": 37,
                     "fingerprint": "90d29d9d6269",
                     "risk": {
@@ -31087,8 +31087,8 @@
                 {
                     "kind": "block",
                     "anchor": "person",
-                    "line_start": 2825,
-                    "line_end": 2858,
+                    "line_start": 2826,
+                    "line_end": 2859,
                     "lines": 34,
                     "fingerprint": "b39ca6de3fbb",
                     "risk": {
@@ -31100,8 +31100,8 @@
                 {
                     "kind": "block",
                     "anchor": "eventSubmit",
-                    "line_start": 2859,
-                    "line_end": 2941,
+                    "line_start": 2860,
+                    "line_end": 2942,
                     "lines": 83,
                     "fingerprint": "7017a0a9aabd",
                     "risk": {
@@ -31113,8 +31113,8 @@
                 {
                     "kind": "block",
                     "anchor": "spanDays",
-                    "line_start": 2942,
-                    "line_end": 2947,
+                    "line_start": 2943,
+                    "line_end": 2948,
                     "lines": 6,
                     "fingerprint": "2320e6a08925",
                     "risk": {
@@ -31126,8 +31126,8 @@
                 {
                     "kind": "block",
                     "anchor": "mount",
-                    "line_start": 2948,
-                    "line_end": 2977,
+                    "line_start": 2949,
+                    "line_end": 2978,
                     "lines": 30,
                     "fingerprint": "7eeaca92073d",
                     "risk": {
@@ -31139,8 +31139,8 @@
                 {
                     "kind": "block",
                     "anchor": "reportInputFocused",
-                    "line_start": 2978,
-                    "line_end": 2978,
+                    "line_start": 2979,
+                    "line_end": 2979,
                     "lines": 1,
                     "fingerprint": "67b04d1c8e53",
                     "risk": {
@@ -31152,8 +31152,8 @@
                 {
                     "kind": "block",
                     "anchor": "safeReportRender",
-                    "line_start": 2979,
-                    "line_end": 2981,
+                    "line_start": 2980,
+                    "line_end": 2982,
                     "lines": 3,
                     "fingerprint": "675f32151fe6",
                     "risk": {
@@ -31165,8 +31165,8 @@
                 {
                     "kind": "block",
                     "anchor": "html",
-                    "line_start": 2982,
-                    "line_end": 2991,
+                    "line_start": 2983,
+                    "line_end": 2992,
                     "lines": 10,
                     "fingerprint": "6aa0a1f9cc21",
                     "risk": {
@@ -32866,7 +32866,7 @@
             "path": "food-ticket.php",
             "area": "PAGE",
             "lines": 6139,
-            "file_fingerprint": "f77920d6bce7",
+            "file_fingerprint": "fb214f510e61",
             "blocks": [
                 {
                     "kind": "region",
@@ -32926,7 +32926,7 @@
                     "line_start": 45,
                     "line_end": 62,
                     "lines": 18,
-                    "fingerprint": "68917f3d2dec",
+                    "fingerprint": "c95081776fd1",
                     "risk": {
                         "score": 0,
                         "flags": []
@@ -34967,8 +34967,8 @@
             "id": "PAGE-033",
             "path": "index.php",
             "area": "PAGE",
-            "lines": 2561,
-            "file_fingerprint": "42a65bf3bf69",
+            "lines": 2560,
+            "file_fingerprint": "c8f8fc8d43ac",
             "blocks": [
                 {
                     "kind": "region",
@@ -35985,9 +35985,9 @@
                     "kind": "region",
                     "anchor": "مسیر: settings",
                     "line_start": 1958,
-                    "line_end": 2460,
-                    "lines": 503,
-                    "fingerprint": "2cf4328bcddb",
+                    "line_end": 2459,
+                    "lines": 502,
+                    "fingerprint": "cc7f83543045",
                     "risk": {
                         "score": 16,
                         "flags": {
@@ -36004,8 +36004,8 @@
                 {
                     "kind": "region",
                     "anchor": "مسیر: logs",
-                    "line_start": 2461,
-                    "line_end": 2482,
+                    "line_start": 2460,
+                    "line_end": 2481,
                     "lines": 22,
                     "fingerprint": "ead8507b92ee",
                     "risk": {
@@ -36019,8 +36019,8 @@
                 {
                     "kind": "region",
                     "anchor": "مسیر: dashboard",
-                    "line_start": 2483,
-                    "line_end": 2487,
+                    "line_start": 2482,
+                    "line_end": 2486,
                     "lines": 5,
                     "fingerprint": "4641c731ee3e",
                     "risk": {
@@ -36032,8 +36032,8 @@
                 {
                     "kind": "region",
                     "anchor": "بازگردانی کارت‌ها و فهرست درخواست‌ها در داشبورد (تصمیم مالک ",
-                    "line_start": 2488,
-                    "line_end": 2488,
+                    "line_start": 2487,
+                    "line_end": 2487,
                     "lines": 1,
                     "fingerprint": "f8a26b152d5c",
                     "risk": {
@@ -36045,8 +36045,8 @@
                 {
                     "kind": "region",
                     "anchor": "موج استقلال (2066cb0) این بلوک را حذف کرده بود؛ بازگردانده ش",
-                    "line_start": 2489,
-                    "line_end": 2561,
+                    "line_start": 2488,
+                    "line_end": 2560,
                     "lines": 73,
                     "fingerprint": "492d062d6d7c",
                     "risk": {
@@ -65285,7 +65285,7 @@
             "path": "tests\/js\/food-absent-lunch-tab.test.js",
             "area": "TEST",
             "lines": 71,
-            "file_fingerprint": "3c3a4cbae4e8",
+            "file_fingerprint": "426b21d03a74",
             "blocks": [
                 {
                     "kind": "block",
@@ -65306,7 +65306,7 @@
                     "line_start": 15,
                     "line_end": 71,
                     "lines": 57,
-                    "fingerprint": "4e3d227956af",
+                    "fingerprint": "9ac69bace15f",
                     "risk": {
                         "score": 0,
                         "flags": []
@@ -68085,7 +68085,7 @@
             "path": "tests\/test_food_absent_lunch_backend_static.py",
             "area": "TEST",
             "lines": 26,
-            "file_fingerprint": "4a40e4bbe271",
+            "file_fingerprint": "5722ada5c177",
             "blocks": [
                 {
                     "kind": "block",
@@ -68121,7 +68121,7 @@
                     "line_start": 22,
                     "line_end": 26,
                     "lines": 5,
-                    "fingerprint": "d1bf449bda88",
+                    "fingerprint": "72fb1b096ac3",
                     "risk": {
                         "score": 0,
                         "flags": []
@@ -68135,7 +68135,7 @@
             "path": "tests\/test_food_absent_lunch_tab_static.py",
             "area": "TEST",
             "lines": 80,
-            "file_fingerprint": "1f01074c51c4",
+            "file_fingerprint": "3b77ff938b88",
             "blocks": [
                 {
                     "kind": "block",
@@ -68182,7 +68182,7 @@
                     "line_start": 33,
                     "line_end": 37,
                     "lines": 5,
-                    "fingerprint": "8361d10c3040",
+                    "fingerprint": "3188aa231132",
                     "risk": {
                         "score": 0,
                         "flags": []
@@ -69176,7 +69176,7 @@
             "path": "tests\/test_food_day_visit_static.py",
             "area": "TEST",
             "lines": 105,
-            "file_fingerprint": "ad4a95a33cb3",
+            "file_fingerprint": "753e1bfc935c",
             "blocks": [
                 {
                     "kind": "block",
@@ -69210,7 +69210,7 @@
                     "line_start": 10,
                     "line_end": 105,
                     "lines": 96,
-                    "fingerprint": "041cecb29355",
+                    "fingerprint": "ddd9d38d74ff",
                     "risk": {
                         "score": 0,
                         "flags": []
@@ -82010,7 +82010,7 @@
             "path": "tests\/test_release_1_62_4_fixes_static.py",
             "area": "TEST",
             "lines": 73,
-            "file_fingerprint": "c6e5887884e0",
+            "file_fingerprint": "e4fb522e1be2",
             "blocks": [
                 {
                     "kind": "block",
@@ -82057,7 +82057,7 @@
                     "line_start": 26,
                     "line_end": 36,
                     "lines": 11,
-                    "fingerprint": "d34415c44457",
+                    "fingerprint": "46bd2d3f4fb9",
                     "risk": {
                         "score": 0,
                         "flags": []
@@ -83800,7 +83800,7 @@
             "path": "tests\/test_release_1_63_3_day_close_guest_actuals_static.py",
             "area": "TEST",
             "lines": 317,
-            "file_fingerprint": "397396a7b182",
+            "file_fingerprint": "b41f53625516",
             "blocks": [
                 {
                     "kind": "block",
@@ -84384,7 +84384,7 @@
                     "line_start": 259,
                     "line_end": 278,
                     "lines": 20,
-                    "fingerprint": "41d7735910af",
+                    "fingerprint": "da7e08e58977",
                     "risk": {
                         "score": 0,
                         "flags": []
@@ -84410,7 +84410,7 @@
                     "line_start": 284,
                     "line_end": 305,
                     "lines": 22,
-                    "fingerprint": "f00c1bede994",
+                    "fingerprint": "5b28658e9508",
                     "risk": {
                         "score": 0,
                         "flags": []
@@ -84423,7 +84423,7 @@
                     "line_start": 306,
                     "line_end": 308,
                     "lines": 3,
-                    "fingerprint": "b8e776887f4b",
+                    "fingerprint": "4d35fd84b726",
                     "risk": {
                         "score": 0,
                         "flags": []
@@ -84436,7 +84436,7 @@
                     "line_start": 309,
                     "line_end": 317,
                     "lines": 9,
-                    "fingerprint": "59586d750da3",
+                    "fingerprint": "a90e50bd87a9",
                     "risk": {
                         "score": 0,
                         "flags": []

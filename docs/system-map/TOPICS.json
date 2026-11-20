@@ -8199,7 +8199,7 @@
       "line": 427,
       "anchor": "جدول داخل هر گروه، مثل گروه منو بدون حاشیهٔ اضافه",
       "risk": 0,
-      "lines": 4
+      "lines": 12
     },
     "ASSET-009.01": {
       "path": "assets/food-menu.js",
@@ -8607,12 +8607,12 @@
       "line": 678,
       "anchor": "renderPrintedDeliveryReport",
       "risk": 0,
-      "lines": 20
+      "lines": 21
     },
     "ASSET-009.52": {
       "path": "assets/food-menu.js",
       "area": "ASSET",
-      "line": 698,
+      "line": 699,
       "anchor": "loadPrintedDeliveryReport",
       "risk": 0,
       "lines": 36
@@ -8620,7 +8620,7 @@
     "ASSET-009.53": {
       "path": "assets/food-menu.js",
       "area": "ASSET",
-      "line": 734,
+      "line": 735,
       "anchor": "exportPrintedDeliveryReport",
       "risk": 0,
       "lines": 17
@@ -8628,7 +8628,7 @@
     "ASSET-009.54": {
       "path": "assets/food-menu.js",
       "area": "ASSET",
-      "line": 751,
+      "line": 752,
       "anchor": "printPrintedDeliveryReport",
       "risk": 0,
       "lines": 5
@@ -8636,7 +8636,7 @@
     "ASSET-009.55": {
       "path": "assets/food-menu.js",
       "area": "ASSET",
-      "line": 756,
+      "line": 757,
       "anchor": "summaryHtml",
       "risk": 0,
       "lines": 6
@@ -8644,7 +8644,7 @@
     "ASSET-009.56": {
       "path": "assets/food-menu.js",
       "area": "ASSET",
-      "line": 762,
+      "line": 763,
       "anchor": "nameSplit",
       "risk": 0,
       "lines": 9
@@ -8652,7 +8652,7 @@
     "ASSET-009.57": {
       "path": "assets/food-menu.js",
       "area": "ASSET",
-      "line": 771,
+      "line": 772,
       "anchor": "personSortValue",
       "risk": 0,
       "lines": 8
@@ -8660,7 +8660,7 @@
     "ASSET-009.58": {
       "path": "assets/food-menu.js",
       "area": "ASSET",
-      "line": 779,
+      "line": 780,
       "anchor": "sortByState",
       "risk": 0,
       "lines": 11
@@ -8668,7 +8668,7 @@
     "ASSET-009.59": {
       "path": "assets/food-menu.js",
       "area": "ASSET",
-      "line": 790,
+      "line": 791,
       "anchor": "sortStateToggle",
       "risk": 0,
       "lines": 6
@@ -8676,7 +8676,7 @@
     "ASSET-009.60": {
       "path": "assets/food-menu.js",
       "area": "ASSET",
-      "line": 796,
+      "line": 797,
       "anchor": "sortStateMark",
       "risk": 0,
       "lines": 4
@@ -8684,7 +8684,7 @@
     "ASSET-009.61": {
       "path": "assets/food-menu.js",
       "area": "ASSET",
-      "line": 800,
+      "line": 801,
       "anchor": "rowSummary",
       "risk": 0,
       "lines": 4
@@ -8692,7 +8692,7 @@
     "ASSET-009.62": {
       "path": "assets/food-menu.js",
       "area": "ASSET",
-      "line": 804,
+      "line": 805,
       "anchor": "renderOrders",
       "risk": 0,
       "lines": 6
@@ -8700,7 +8700,7 @@
     "ASSET-009.63": {
       "path": "assets/food-menu.js",
       "area": "ASSET",
-      "line": 810,
+      "line": 811,
       "anchor": "viewButton",
       "risk": 0,
       "lines": 21
@@ -8708,7 +8708,7 @@
     "ASSET-009.64": {
       "path": "assets/food-menu.js",
       "area": "ASSET",
-      "line": 831,
+      "line": 832,
       "anchor": "ordersByOrgHtml",
       "risk": 0,
       "lines": 14
@@ -8716,7 +8716,7 @@
     "ASSET-009.65": {
       "path": "assets/food-menu.js",
       "area": "ASSET",
-      "line": 845,
+      "line": 846,
       "anchor": "renderGroupOrders",
       "risk": 0,
       "lines": 9
@@ -8724,7 +8724,7 @@
     "ASSET-009.66": {
       "path": "assets/food-menu.js",
       "area": "ASSET",
-      "line": 854,
+      "line": 855,
       "anchor": "tableFor",
       "risk": 0,
       "lines": 25
@@ -8732,7 +8732,7 @@
     "ASSET-009.67": {
       "path": "assets/food-menu.js",
       "area": "ASSET",
-      "line": 879,
+      "line": 880,
       "anchor": "renderCancelRequests",
       "risk": 0,
       "lines": 8
@@ -8740,7 +8740,7 @@
     "ASSET-009.68": {
       "path": "assets/food-menu.js",
       "area": "ASSET",
-      "line": 887,
+      "line": 888,
       "anchor": "splitRow",
       "risk": 0,
       "lines": 13
@@ -8748,7 +8748,7 @@
     "ASSET-009.69": {
       "path": "assets/food-menu.js",
       "area": "ASSET",
-      "line": 900,
+      "line": 901,
       "anchor": "cancelValue",
       "risk": 0,
       "lines": 10
@@ -8756,7 +8756,7 @@
     "ASSET-009.70": {
       "path": "assets/food-menu.js",
       "area": "ASSET",
-      "line": 910,
+      "line": 911,
       "anchor": "cmp",
       "risk": 0,
       "lines": 3
@@ -8764,7 +8764,7 @@
     "ASSET-009.71": {
       "path": "assets/food-menu.js",
       "area": "ASSET",
-      "line": 913,
+      "line": 914,
       "anchor": "cancelHead",
       "risk": 0,
       "lines": 19
@@ -8772,7 +8772,7 @@
     "ASSET-009.72": {
       "path": "assets/food-menu.js",
       "area": "ASSET",
-      "line": 932,
+      "line": 933,
       "anchor": "renderStatistics",
       "risk": 0,
       "lines": 19
@@ -8780,7 +8780,7 @@
     "ASSET-009.73": {
       "path": "assets/food-menu.js",
       "area": "ASSET",
-      "line": 951,
+      "line": 952,
       "anchor": "mark",
       "risk": 0,
       "lines": 10
@@ -8788,7 +8788,7 @@
     "ASSET-009.74": {
       "path": "assets/food-menu.js",
       "area": "ASSET",
-      "line": 961,
+      "line": 962,
       "anchor": "peopleSortMark",
       "risk": 0,
       "lines": 24
@@ -8796,7 +8796,7 @@
     "ASSET-009.75": {
       "path": "assets/food-menu.js",
       "area": "ASSET",
-      "line": 985,
+      "line": 986,
       "anchor": "foods",
       "risk": 0,
       "lines": 26
@@ -8804,7 +8804,7 @@
     "ASSET-009.76": {
       "path": "assets/food-menu.js",
       "area": "ASSET",
-      "line": 1011,
+      "line": 1012,
       "anchor": "normalizeJalaliMonth",
       "risk": 0,
       "lines": 9
@@ -8812,7 +8812,7 @@
     "ASSET-009.77": {
       "path": "assets/food-menu.js",
       "area": "ASSET",
-      "line": 1020,
+      "line": 1021,
       "anchor": "reconciliationGapCell",
       "risk": 0,
       "lines": 10
@@ -8820,7 +8820,7 @@
     "ASSET-009.78": {
       "path": "assets/food-menu.js",
       "area": "ASSET",
-      "line": 1030,
+      "line": 1031,
       "anchor": "reconciliationRemainingCell",
       "risk": 0,
       "lines": 9
@@ -8828,7 +8828,7 @@
     "ASSET-009.79": {
       "path": "assets/food-menu.js",
       "area": "ASSET",
-      "line": 1039,
+      "line": 1040,
       "anchor": "reconciliationLeftoverCell",
       "risk": 0,
       "lines": 7
@@ -8836,7 +8836,7 @@
     "ASSET-009.80": {
       "path": "assets/food-menu.js",
       "area": "ASSET",
-      "line": 1046,
+      "line": 1047,
       "anchor": "reconciliationNumber",
       "risk": 0,
       "lines": 4
@@ -8844,7 +8844,7 @@
     "ASSET-009.81": {
       "path": "assets/food-menu.js",
       "area": "ASSET",
-      "line": 1050,
+      "line": 1051,
       "anchor": "reconciliationAmount",
       "risk": 0,
       "lines": 5
@@ -8852,7 +8852,7 @@
     "ASSET-009.82": {
       "path": "assets/food-menu.js",
       "area": "ASSET",
-      "line": 1055,
+      "line": 1056,
       "anchor": "renderReconciliation",
       "risk": 0,
       "lines": 81
@@ -8860,7 +8860,7 @@
     "ASSET-009.83": {
       "path": "assets/food-menu.js",
       "area": "ASSET",
-      "line": 1136,
+      "line": 1137,
       "anchor": "renderGuestActualModal",
       "risk": 0,
       "lines": 6
@@ -8868,7 +8868,7 @@
     "ASSET-009.84": {
       "path": "assets/food-menu.js",
       "area": "ASSET",
-      "line": 1142,
+      "line": 1143,
       "anchor": "hasNoneRow",
       "risk": 0,
       "lines": 1
@@ -8876,7 +8876,7 @@
     "ASSET-009.85": {
       "path": "assets/food-menu.js",
       "area": "ASSET",
-      "line": 1143,
+      "line": 1144,
       "anchor": "rows",
       "risk": 0,
       "lines": 27
@@ -8884,7 +8884,7 @@
     "ASSET-009.86": {
       "path": "assets/food-menu.js",
       "area": "ASSET",
-      "line": 1170,
+      "line": 1171,
       "anchor": "guestActualInlineError",
       "risk": 0,
       "lines": 6
@@ -8892,7 +8892,7 @@
     "ASSET-009.87": {
       "path": "assets/food-menu.js",
       "area": "ASSET",
-      "line": 1176,
+      "line": 1177,
       "anchor": "guestActualSumFromDom",
       "risk": 0,
       "lines": 12
@@ -8900,7 +8900,7 @@
     "ASSET-009.88": {
       "path": "assets/food-menu.js",
       "area": "ASSET",
-      "line": 1188,
+      "line": 1189,
       "anchor": "guestActualLiveSumListener",
       "risk": 0,
       "lines": 9
@@ -8908,7 +8908,7 @@
     "ASSET-009.89": {
       "path": "assets/food-menu.js",
       "area": "ASSET",
-      "line": 1197,
+      "line": 1198,
       "anchor": "proceedToLeftover",
       "risk": 0,
       "lines": 26
@@ -8916,7 +8916,7 @@
     "ASSET-009.90": {
       "path": "assets/food-menu.js",
       "area": "ASSET",
-      "line": 1223,
+      "line": 1224,
       "anchor": "confirmGuestActualModal",
       "risk": 0,
       "lines": 39
@@ -8924,7 +8924,7 @@
     "ASSET-009.91": {
       "path": "assets/food-menu.js",
       "area": "ASSET",
-      "line": 1262,
+      "line": 1263,
       "anchor": "renderLeftoverModal",
       "risk": 0,
       "lines": 6
@@ -8932,7 +8932,7 @@
     "ASSET-009.92": {
       "path": "assets/food-menu.js",
       "area": "ASSET",
-      "line": 1268,
+      "line": 1269,
       "anchor": "row",
       "risk": 0,
       "lines": 20
@@ -8940,7 +8940,7 @@
     "ASSET-009.93": {
       "path": "assets/food-menu.js",
       "area": "ASSET",
-      "line": 1288,
+      "line": 1289,
       "anchor": "leftoverInlineError",
       "risk": 0,
       "lines": 6
@@ -8948,7 +8948,7 @@
     "ASSET-009.94": {
       "path": "assets/food-menu.js",
       "area": "ASSET",
-      "line": 1294,
+      "line": 1295,
       "anchor": "confirmLeftoverModal",
       "risk": 0,
       "lines": 76
@@ -8956,7 +8956,7 @@
     "ASSET-009.95": {
       "path": "assets/food-menu.js",
       "area": "ASSET",
-      "line": 1370,
+      "line": 1371,
       "anchor": "submitReconciliationBody",
       "risk": 0,
       "lines": 8
@@ -8964,7 +8964,7 @@
     "ASSET-009.96": {
       "path": "assets/food-menu.js",
       "area": "ASSET",
-      "line": 1378,
+      "line": 1379,
       "anchor": "message",
       "risk": 0,
       "lines": 7
@@ -8972,7 +8972,7 @@
     "ASSET-009.97": {
       "path": "assets/food-menu.js",
       "area": "ASSET",
-      "line": 1385,
+      "line": 1386,
       "anchor": "postReconciliation",
       "risk": 0,
       "lines": 9
@@ -8980,7 +8980,7 @@
     "ASSET-009.98": {
       "path": "assets/food-menu.js",
       "area": "ASSET",
-      "line": 1394,
+      "line": 1395,
       "anchor": "loadReconciliation",
       "risk": 0,
       "lines": 41
@@ -8988,7 +8988,7 @@
     "ASSET-009.99": {
       "path": "assets/food-menu.js",
       "area": "ASSET",
-      "line": 1435,
+      "line": 1436,
       "anchor": "downloadReconciliation",
       "risk": 0,
       "lines": 6
@@ -8996,7 +8996,7 @@
     "ASSET-009.100": {
       "path": "assets/food-menu.js",
       "area": "ASSET",
-      "line": 1441,
+      "line": 1442,
       "anchor": "selectReconciliationRow",
       "risk": 0,
       "lines": 1
@@ -9004,7 +9004,7 @@
     "ASSET-009.101": {
       "path": "assets/food-menu.js",
       "area": "ASSET",
-      "line": 1442,
+      "line": 1443,
       "anchor": "item",
       "risk": 0,
       "lines": 17
@@ -9012,7 +9012,7 @@
     "ASSET-009.102": {
       "path": "assets/food-menu.js",
       "area": "ASSET",
-      "line": 1459,
+      "line": 1460,
       "anchor": "saveReconciliationForm",
       "risk": 0,
       "lines": 54
@@ -9020,7 +9020,7 @@
     "ASSET-009.103": {
       "path": "assets/food-menu.js",
       "area": "ASSET",
-      "line": 1513,
+      "line": 1514,
       "anchor": "uploadReconciliationInvoice",
       "risk": 0,
       "lines": 37
@@ -9028,7 +9028,7 @@
     "ASSET-009.104": {
       "path": "assets/food-menu.js",
       "area": "ASSET",
-      "line": 1550,
+      "line": 1551,
       "anchor": "bulkOperationTitle",
       "risk": 0,
       "lines": 4
@@ -9036,7 +9036,7 @@
     "ASSET-009.105": {
       "path": "assets/food-menu.js",
       "area": "ASSET",
-      "line": 1554,
+      "line": 1555,
       "anchor": "bulkSelectedPeople",
       "risk": 0,
       "lines": 5
@@ -9044,7 +9044,7 @@
     "ASSET-009.106": {
       "path": "assets/food-menu.js",
       "area": "ASSET",
-      "line": 1559,
+      "line": 1560,
       "anchor": "bulkTargetValue",
       "risk": 0,
       "lines": 4
@@ -9052,7 +9052,7 @@
     "ASSET-009.107": {
       "path": "assets/food-menu.js",
       "area": "ASSET",
-      "line": 1563,
+      "line": 1564,
       "anchor": "bulkCanSelect",
       "risk": 0,
       "lines": 7
@@ -9060,7 +9060,7 @@
     "ASSET-009.108": {
       "path": "assets/food-menu.js",
       "area": "ASSET",
-      "line": 1570,
+      "line": 1571,
       "anchor": "group",
       "risk": 0,
       "lines": 11
@@ -9068,7 +9068,7 @@
     "ASSET-009.109": {
       "path": "assets/food-menu.js",
       "area": "ASSET",
-      "line": 1581,
+      "line": 1582,
       "anchor": "saveCancelCutoff",
       "risk": 0,
       "lines": 17
@@ -9076,7 +9076,7 @@
     "ASSET-009.110": {
       "path": "assets/food-menu.js",
       "area": "ASSET",
-      "line": 1598,
+      "line": 1599,
       "anchor": "loadBulkSnapshot",
       "risk": 0,
       "lines": 29
@@ -9084,7 +9084,7 @@
     "ASSET-009.111": {
       "path": "assets/food-menu.js",
       "area": "ASSET",
-      "line": 1627,
+      "line": 1628,
       "anchor": "bulkTargetOptions",
       "risk": 0,
       "lines": 15
@@ -9092,7 +9092,7 @@
     "ASSET-009.112": {
       "path": "assets/food-menu.js",
       "area": "ASSET",
-      "line": 1642,
+      "line": 1643,
       "anchor": "bulkPersonStatus",
       "risk": 0,
       "lines": 16
@@ -9100,7 +9100,7 @@
     "ASSET-009.113": {
       "path": "assets/food-menu.js",
       "area": "ASSET",
-      "line": 1658,
+      "line": 1659,
       "anchor": "group",
       "risk": 0,
       "lines": 22
@@ -9108,7 +9108,7 @@
     "ASSET-009.114": {
       "path": "assets/food-menu.js",
       "area": "ASSET",
-      "line": 1680,
+      "line": 1681,
       "anchor": "renderBulkResults",
       "risk": 0,
       "lines": 6
@@ -9116,7 +9116,7 @@
     "ASSET-009.115": {
       "path": "assets/food-menu.js",
       "area": "ASSET",
-      "line": 1686,
+      "line": 1687,
       "anchor": "renderBulkModal",
       "risk": 0,
       "lines": 8
@@ -9124,7 +9124,7 @@
     "ASSET-009.116": {
       "path": "assets/food-menu.js",
       "area": "ASSET",
-      "line": 1694,
+      "line": 1695,
       "anchor": "renderBulkOperations",
       "risk": 0,
       "lines": 18
@@ -9132,7 +9132,7 @@
     "ASSET-009.117": {
       "path": "assets/food-menu.js",
       "area": "ASSET",
-      "line": 1712,
+      "line": 1713,
       "anchor": "rows",
       "risk": 0,
       "lines": 6
@@ -9140,7 +9140,7 @@
     "ASSET-009.118": {
       "path": "assets/food-menu.js",
       "area": "ASSET",
-      "line": 1718,
+      "line": 1719,
       "anchor": "bulkValue",
       "risk": 0,
       "lines": 13
@@ -9148,7 +9148,7 @@
     "ASSET-009.119": {
       "path": "assets/food-menu.js",
       "area": "ASSET",
-      "line": 1731,
+      "line": 1732,
       "anchor": "bulkHead",
       "risk": 0,
       "lines": 6
@@ -9156,7 +9156,7 @@
     "ASSET-009.120": {
       "path": "assets/food-menu.js",
       "area": "ASSET",
-      "line": 1737,
+      "line": 1738,
       "anchor": "selected",
       "risk": 0,
       "lines": 14
@@ -9164,7 +9164,7 @@
     "ASSET-009.121": {
       "path": "assets/food-menu.js",
       "area": "ASSET",
-      "line": 1751,
+      "line": 1752,
       "anchor": "previewDisabled",
       "risk": 0,
       "lines": 11
@@ -9172,7 +9172,7 @@
     "ASSET-009.122": {
       "path": "assets/food-menu.js",
       "area": "ASSET",
-      "line": 1762,
+      "line": 1763,
       "anchor": "bulkTogglePerson",
       "risk": 1,
       "lines": 11
@@ -9180,7 +9180,7 @@
     "ASSET-009.123": {
       "path": "assets/food-menu.js",
       "area": "ASSET",
-      "line": 1773,
+      "line": 1774,
       "anchor": "bulkSelectEligible",
       "risk": 0,
       "lines": 2
@@ -9188,7 +9188,7 @@
     "ASSET-009.124": {
       "path": "assets/food-menu.js",
       "area": "ASSET",
-      "line": 1775,
+      "line": 1776,
       "anchor": "eligible",
       "risk": 0,
       "lines": 6
@@ -9196,7 +9196,7 @@
     "ASSET-009.125": {
       "path": "assets/food-menu.js",
       "area": "ASSET",
-      "line": 1781,
+      "line": 1782,
       "anchor": "submitBulkOperation",
       "risk": 0,
       "lines": 3
@@ -9204,7 +9204,7 @@
     "ASSET-009.126": {
       "path": "assets/food-menu.js",
       "area": "ASSET",
-      "line": 1784,
+      "line": 1785,
       "anchor": "ids",
       "risk": 0,
       "lines": 20
@@ -9212,7 +9212,7 @@
     "ASSET-009.127": {
       "path": "assets/food-menu.js",
       "area": "ASSET",
-      "line": 1804,
+      "line": 1805,
       "anchor": "mealTypeSwitch",
       "risk": 0,
       "lines": 6
@@ -9220,7 +9220,7 @@
     "ASSET-009.128": {
       "path": "assets/food-menu.js",
       "area": "ASSET",
-      "line": 1810,
+      "line": 1811,
       "anchor": "embeddedPanel",
       "risk": 0,
       "lines": 8
@@ -9228,7 +9228,7 @@
     "ASSET-009.129": {
       "path": "assets/food-menu.js",
       "area": "ASSET",
-      "line": 1818,
+      "line": 1819,
       "anchor": "loadEmbedded",
       "risk": 0,
       "lines": 20
@@ -9236,7 +9236,7 @@
     "ASSET-009.130": {
       "path": "assets/food-menu.js",
       "area": "ASSET",
-      "line": 1838,
+      "line": 1839,
       "anchor": "renderFocusKeyOf",
       "risk": 0,
       "lines": 8
@@ -9244,7 +9244,7 @@
     "ASSET-009.131": {
       "path": "assets/food-menu.js",
       "area": "ASSET",
-      "line": 1846,
+      "line": 1847,
       "anchor": "captureRenderFocus",
       "risk": 4,
       "lines": 12
@@ -9252,7 +9252,7 @@
     "ASSET-009.132": {
       "path": "assets/food-menu.js",
       "area": "ASSET",
-      "line": 1858,
+      "line": 1859,
       "anchor": "restoreRenderFocus",
       "risk": 4,
       "lines": 13
@@ -9260,7 +9260,7 @@
     "ASSET-009.133": {
       "path": "assets/food-menu.js",
       "area": "ASSET",
-      "line": 1871,
+      "line": 1872,
       "anchor": "render",
       "risk": 0,
       "lines": 12
@@ -9268,7 +9268,7 @@
     "ASSET-009.134": {
       "path": "assets/food-menu.js",
       "area": "ASSET",
-      "line": 1883,
+      "line": 1884,
       "anchor": "notices",
       "risk": 0,
       "lines": 7
@@ -9276,7 +9276,7 @@
     "ASSET-009.135": {
       "path": "assets/food-menu.js",
       "area": "ASSET",
-      "line": 1890,
+      "line": 1891,
       "anchor": "loadStatus",
       "risk": 0,
       "lines": 12
@@ -9284,7 +9284,7 @@
     "ASSET-009.136": {
       "path": "assets/food-menu.js",
       "area": "ASSET",
-      "line": 1902,
+      "line": 1903,
       "anchor": "loadCatalog",
       "risk": 0,
       "lines": 7
@@ -9292,7 +9292,7 @@
     "ASSET-009.137": {
       "path": "assets/food-menu.js",
       "area": "ASSET",
-      "line": 1909,
+      "line": 1910,
       "anchor": "loadMonth",
       "risk": 0,
       "lines": 8
@@ -9300,7 +9300,7 @@
     "ASSET-009.138": {
       "path": "assets/food-menu.js",
       "area": "ASSET",
-      "line": 1917,
+      "line": 1918,
       "anchor": "loadOrders",
       "risk": 0,
       "lines": 22
@@ -9308,7 +9308,7 @@
     "ASSET-009.139": {
       "path": "assets/food-menu.js",
       "area": "ASSET",
-      "line": 1939,
+      "line": 1940,
       "anchor": "loadFoodGroups",
       "risk": 0,
       "lines": 21
@@ -9316,7 +9316,7 @@
     "ASSET-009.140": {
       "path": "assets/food-menu.js",
       "area": "ASSET",
-      "line": 1960,
+      "line": 1961,
       "anchor": "loadGroupOrders",
       "risk": 0,
       "lines": 31
@@ -9324,7 +9324,7 @@
     "ASSET-009.141": {
       "path": "assets/food-menu.js",
       "area": "ASSET",
-      "line": 1991,
+      "line": 1992,
       "anchor": "loadCancelRequests",
       "risk": 0,
       "lines": 17
@@ -9332,7 +9332,7 @@
     "ASSET-009.142": {
       "path": "assets/food-menu.js",
       "area": "ASSET",
-      "line": 2008,
+      "line": 2009,
       "anchor": "loadGuestRequests",
       "risk": 0,
       "lines": 19
@@ -9340,7 +9340,7 @@
     "ASSET-009.143": {
       "path": "assets/food-menu.js",
       "area": "ASSET",
-      "line": 2027,
+      "line": 2028,
       "anchor": "beginGuestEdit",
       "risk": 0,
       "lines": 1
@@ -9348,7 +9348,7 @@
     "ASSET-009.144": {
       "path": "assets/food-menu.js",
       "area": "ASSET",
-      "line": 2028,
+      "line": 2029,
       "anchor": "row",
       "risk": 0,
       "lines": 16
@@ -9356,7 +9356,7 @@
     "ASSET-009.145": {
       "path": "assets/food-menu.js",
       "area": "ASSET",
-      "line": 2044,
+      "line": 2045,
       "anchor": "cancelGuestEdit",
       "risk": 0,
       "lines": 6
@@ -9364,7 +9364,7 @@
     "ASSET-009.146": {
       "path": "assets/food-menu.js",
       "area": "ASSET",
-      "line": 2050,
+      "line": 2051,
       "anchor": "saveGuestEdit",
       "risk": 1,
       "lines": 32
@@ -9372,7 +9372,7 @@
     "ASSET-009.147": {
       "path": "assets/food-menu.js",
       "area": "ASSET",
-      "line": 2082,
+      "line": 2083,
       "anchor": "guestRequestAction",
       "risk": 0,
       "lines": 1
@@ -9380,7 +9380,7 @@
     "ASSET-009.148": {
       "path": "assets/food-menu.js",
       "area": "ASSET",
-      "line": 2083,
+      "line": 2084,
       "anchor": "row",
       "risk": 1,
       "lines": 23
@@ -9388,7 +9388,7 @@
     "ASSET-009.149": {
       "path": "assets/food-menu.js",
       "area": "ASSET",
-      "line": 2106,
+      "line": 2107,
       "anchor": "renderGuestRequestManager",
       "risk": 0,
       "lines": 3
@@ -9396,7 +9396,7 @@
     "ASSET-009.150": {
       "path": "assets/food-menu.js",
       "area": "ASSET",
-      "line": 2109,
+      "line": 2110,
       "anchor": "rows",
       "risk": 1,
       "lines": 23
@@ -9404,7 +9404,7 @@
     "ASSET-009.151": {
       "path": "assets/food-menu.js",
       "area": "ASSET",
-      "line": 2132,
+      "line": 2133,
       "anchor": "decideCancelRequest",
       "risk": 0,
       "lines": 15
@@ -9412,7 +9412,7 @@
     "ASSET-009.152": {
       "path": "assets/food-menu.js",
       "area": "ASSET",
-      "line": 2147,
+      "line": 2148,
       "anchor": "loadStatistics",
       "risk": 0,
       "lines": 7
@@ -9420,7 +9420,7 @@
     "ASSET-009.153": {
       "path": "assets/food-menu.js",
       "area": "ASSET",
-      "line": 2154,
+      "line": 2155,
       "anchor": "selectedIds",
       "risk": 0,
       "lines": 34
@@ -9428,7 +9428,7 @@
     "ASSET-009.154": {
       "path": "assets/food-menu.js",
       "area": "ASSET",
-      "line": 2188,
+      "line": 2189,
       "anchor": "searchSelectedReportEmployees",
       "risk": 0,
       "lines": 28
@@ -9436,7 +9436,7 @@
     "ASSET-009.155": {
       "path": "assets/food-menu.js",
       "area": "ASSET",
-      "line": 2216,
+      "line": 2217,
       "anchor": "refreshAll",
       "risk": 0,
       "lines": 27
@@ -9444,7 +9444,7 @@
     "ASSET-009.156": {
       "path": "assets/food-menu.js",
       "area": "ASSET",
-      "line": 2243,
+      "line": 2244,
       "anchor": "saveDay",
       "risk": 0,
       "lines": 45
@@ -9452,7 +9452,7 @@
     "ASSET-009.157": {
       "path": "assets/food-menu.js",
       "area": "ASSET",
-      "line": 2288,
+      "line": 2289,
       "anchor": "saveCatalog",
       "risk": 0,
       "lines": 26
@@ -9460,7 +9460,7 @@
     "ASSET-009.158": {
       "path": "assets/food-menu.js",
       "area": "ASSET",
-      "line": 2314,
+      "line": 2315,
       "anchor": "orderExportRows",
       "risk": 0,
       "lines": 20
@@ -9468,7 +9468,7 @@
     "ASSET-009.159": {
       "path": "assets/food-menu.js",
       "area": "ASSET",
-      "line": 2334,
+      "line": 2335,
       "anchor": "downloadOrdersCsv",
       "risk": 0,
       "lines": 17
@@ -9476,7 +9476,7 @@
     "ASSET-009.160": {
       "path": "assets/food-menu.js",
       "area": "ASSET",
-      "line": 2351,
+      "line": 2352,
       "anchor": "downloadOrders",
       "risk": 0,
       "lines": 5
@@ -9484,7 +9484,7 @@
     "ASSET-009.161": {
       "path": "assets/food-menu.js",
       "area": "ASSET",
-      "line": 2356,
+      "line": 2357,
       "anchor": "printScopedReport",
       "risk": 0,
       "lines": 2
@@ -9492,7 +9492,7 @@
     "ASSET-009.162": {
       "path": "assets/food-menu.js",
       "area": "ASSET",
-      "line": 2358,
+      "line": 2359,
       "anchor": "target",
       "risk": 0,
       "lines": 11
@@ -9500,7 +9500,7 @@
     "ASSET-009.163": {
       "path": "assets/food-menu.js",
       "area": "ASSET",
-      "line": 2369,
+      "line": 2370,
       "anchor": "cleanup",
       "risk": 0,
       "lines": 18
@@ -9508,7 +9508,7 @@
     "ASSET-009.164": {
       "path": "assets/food-menu.js",
       "area": "ASSET",
-      "line": 2387,
+      "line": 2388,
       "anchor": "printOrders",
       "risk": 0,
       "lines": 5
@@ -9516,7 +9516,7 @@
     "ASSET-009.165": {
       "path": "assets/food-menu.js",
       "area": "ASSET",
-      "line": 2392,
+      "line": 2393,
       "anchor": "downloadStatistics",
       "risk": 0,
       "lines": 7
@@ -9524,7 +9524,7 @@
     "ASSET-009.166": {
       "path": "assets/food-menu.js",
       "area": "ASSET",
-      "line": 2399,
+      "line": 2400,
       "anchor": "printStatistics",
       "risk": 0,
       "lines": 5
@@ -9532,7 +9532,7 @@
     "ASSET-009.167": {
       "path": "assets/food-menu.js",
       "area": "ASSET",
-      "line": 2404,
+      "line": 2405,
       "anchor": "selectDay",
       "risk": 0,
       "lines": 8
@@ -9540,7 +9540,7 @@
     "ASSET-009.168": {
       "path": "assets/food-menu.js",
       "area": "ASSET",
-      "line": 2412,
+      "line": 2413,
       "anchor": "changeMonth",
       "risk": 0,
       "lines": 6
@@ -9548,7 +9548,7 @@
     "ASSET-009.169": {
       "path": "assets/food-menu.js",
       "area": "ASSET",
-      "line": 2418,
+      "line": 2419,
       "anchor": "switchTab",
       "risk": 0,
       "lines": 37
@@ -9556,7 +9556,7 @@
     "ASSET-009.170": {
       "path": "assets/food-menu.js",
       "area": "ASSET",
-      "line": 2455,
+      "line": 2456,
       "anchor": "emergencyEnsurePeople",
       "risk": 0,
       "lines": 14
@@ -9564,7 +9564,7 @@
     "ASSET-009.171": {
       "path": "assets/food-menu.js",
       "area": "ASSET",
-      "line": 2469,
+      "line": 2470,
       "anchor": "emergencyPanel",
       "risk": 0,
       "lines": 9
@@ -9572,7 +9572,7 @@
     "ASSET-009.172": {
       "path": "assets/food-menu.js",
       "area": "ASSET",
-      "line": 2478,
+      "line": 2479,
       "anchor": "msgs",
       "risk": 0,
       "lines": 35
@@ -9580,7 +9580,7 @@
     "ASSET-009.173": {
       "path": "assets/food-menu.js",
       "area": "ASSET",
-      "line": 2513,
+      "line": 2514,
       "anchor": "emergencyLoadOrders",
       "risk": 0,
       "lines": 6
@@ -9588,7 +9588,7 @@
     "ASSET-009.174": {
       "path": "assets/food-menu.js",
       "area": "ASSET",
-      "line": 2519,
+      "line": 2520,
       "anchor": "daySearchInput",
       "risk": 4,
       "lines": 45
@@ -9596,7 +9596,7 @@
     "ASSET-009.175": {
       "path": "assets/food-menu.js",
       "area": "ASSET",
-      "line": 2564,
+      "line": 2565,
       "anchor": "emergencyClick",
       "risk": 0,
       "lines": 11
@@ -9604,7 +9604,7 @@
     "ASSET-009.176": {
       "path": "assets/food-menu.js",
       "area": "ASSET",
-      "line": 2575,
+      "line": 2576,
       "anchor": "person",
       "risk": 0,
       "lines": 29
@@ -9612,7 +9612,7 @@
     "ASSET-009.177": {
       "path": "assets/food-menu.js",
       "area": "ASSET",
-      "line": 2604,
+      "line": 2605,
       "anchor": "eventClick",
       "risk": 0,
       "lines": 48
@@ -9620,7 +9620,7 @@
     "ASSET-009.178": {
       "path": "assets/food-menu.js",
       "area": "ASSET",
-      "line": 2652,
+      "line": 2653,
       "anchor": "person",
       "risk": 1,
       "lines": 112
@@ -9628,7 +9628,7 @@
     "ASSET-009.179": {
       "path": "assets/food-menu.js",
       "area": "ASSET",
-      "line": 2764,
+      "line": 2765,
       "anchor": "dayPickFor",
       "risk": 0,
       "lines": 9
@@ -9636,7 +9636,7 @@
     "ASSET-009.180": {
       "path": "assets/food-menu.js",
       "area": "ASSET",
-      "line": 2773,
+      "line": 2774,
       "anchor": "trackDayPick",
       "risk": 0,
       "lines": 7
@@ -9644,7 +9644,7 @@
     "ASSET-009.181": {
       "path": "assets/food-menu.js",
       "area": "ASSET",
-      "line": 2780,
+      "line": 2781,
       "anchor": "orderedDayFoodIds",
       "risk": 0,
       "lines": 8
@@ -9652,7 +9652,7 @@
     "ASSET-009.182": {
       "path": "assets/food-menu.js",
       "area": "ASSET",
-      "line": 2788,
+      "line": 2789,
       "anchor": "eventChange",
       "risk": 0,
       "lines": 37
@@ -9660,7 +9660,7 @@
     "ASSET-009.183": {
       "path": "assets/food-menu.js",
       "area": "ASSET",
-      "line": 2825,
+      "line": 2826,
       "anchor": "person",
       "risk": 0,
       "lines": 34
@@ -9668,7 +9668,7 @@
     "ASSET-009.184": {
       "path": "assets/food-menu.js",
       "area": "ASSET",
-      "line": 2859,
+      "line": 2860,
       "anchor": "eventSubmit",
       "risk": 0,
       "lines": 83
@@ -9676,7 +9676,7 @@
     "ASSET-009.185": {
       "path": "assets/food-menu.js",
       "area": "ASSET",
-      "line": 2942,
+      "line": 2943,
       "anchor": "spanDays",
       "risk": 0,
       "lines": 6
@@ -9684,7 +9684,7 @@
     "ASSET-009.186": {
       "path": "assets/food-menu.js",
       "area": "ASSET",
-      "line": 2948,
+      "line": 2949,
       "anchor": "mount",
       "risk": 0,
       "lines": 30
@@ -9692,7 +9692,7 @@
     "ASSET-009.187": {
       "path": "assets/food-menu.js",
       "area": "ASSET",
-      "line": 2978,
+      "line": 2979,
       "anchor": "reportInputFocused",
       "risk": 0,
       "lines": 1
@@ -9700,7 +9700,7 @@
     "ASSET-009.188": {
       "path": "assets/food-menu.js",
       "area": "ASSET",
-      "line": 2979,
+      "line": 2980,
       "anchor": "safeReportRender",
       "risk": 0,
       "lines": 3
@@ -9708,7 +9708,7 @@
     "ASSET-009.189": {
       "path": "assets/food-menu.js",
       "area": "ASSET",
-      "line": 2982,
+      "line": 2983,
       "anchor": "html",
       "risk": 0,
       "lines": 10
@@ -21623,7 +21623,7 @@
       "line": 427,
       "anchor": "جدول داخل هر گروه، مثل گروه منو بدون حاشیهٔ اضافه",
       "risk": 0,
-      "lines": 4
+      "lines": 12
     },
     "WEB-021.01": {
       "path": "food-ticket-web/assets/food-menu.js",
@@ -22031,12 +22031,12 @@
       "line": 678,
       "anchor": "renderPrintedDeliveryReport",
       "risk": 0,
-      "lines": 20
+      "lines": 21
     },
     "WEB-021.52": {
       "path": "food-ticket-web/assets/food-menu.js",
       "area": "WEB",
-      "line": 698,
+      "line": 699,
       "anchor": "loadPrintedDeliveryReport",
       "risk": 0,
       "lines": 36
@@ -22044,7 +22044,7 @@
     "WEB-021.53": {
       "path": "food-ticket-web/assets/food-menu.js",
       "area": "WEB",
-      "line": 734,
+      "line": 735,
       "anchor": "exportPrintedDeliveryReport",
       "risk": 0,
       "lines": 17
@@ -22052,7 +22052,7 @@
     "WEB-021.54": {
       "path": "food-ticket-web/assets/food-menu.js",
       "area": "WEB",
-      "line": 751,
+      "line": 752,
       "anchor": "printPrintedDeliveryReport",
       "risk": 0,
       "lines": 5
@@ -22060,7 +22060,7 @@
     "WEB-021.55": {
       "path": "food-ticket-web/assets/food-menu.js",
       "area": "WEB",
-      "line": 756,
+      "line": 757,
       "anchor": "summaryHtml",
       "risk": 0,
       "lines": 6
@@ -22068,7 +22068,7 @@
     "WEB-021.56": {
       "path": "food-ticket-web/assets/food-menu.js",
       "area": "WEB",
-      "line": 762,
+      "line": 763,
       "anchor": "nameSplit",
       "risk": 0,
       "lines": 9
@@ -22076,7 +22076,7 @@
     "WEB-021.57": {
       "path": "food-ticket-web/assets/food-menu.js",
       "area": "WEB",
-      "line": 771,
+      "line": 772,
       "anchor": "personSortValue",
       "risk": 0,
       "lines": 8
@@ -22084,7 +22084,7 @@
     "WEB-021.58": {
       "path": "food-ticket-web/assets/food-menu.js",
       "area": "WEB",
-      "line": 779,
+      "line": 780,
       "anchor": "sortByState",
       "risk": 0,
       "lines": 11
@@ -22092,7 +22092,7 @@
     "WEB-021.59": {
       "path": "food-ticket-web/assets/food-menu.js",
       "area": "WEB",
-      "line": 790,
+      "line": 791,
       "anchor": "sortStateToggle",
       "risk": 0,
       "lines": 6
@@ -22100,7 +22100,7 @@
     "WEB-021.60": {
       "path": "food-ticket-web/assets/food-menu.js",
       "area": "WEB",
-      "line": 796,
+      "line": 797,
       "anchor": "sortStateMark",
       "risk": 0,
       "lines": 4
@@ -22108,7 +22108,7 @@
     "WEB-021.61": {
       "path": "food-ticket-web/assets/food-menu.js",
       "area": "WEB",
-      "line": 800,
+      "line": 801,
       "anchor": "rowSummary",
       "risk": 0,
       "lines": 4
@@ -22116,7 +22116,7 @@
     "WEB-021.62": {
       "path": "food-ticket-web/assets/food-menu.js",
       "area": "WEB",
-      "line": 804,
+      "line": 805,
       "anchor": "renderOrders",
       "risk": 0,
       "lines": 6
@@ -22124,7 +22124,7 @@
     "WEB-021.63": {
       "path": "food-ticket-web/assets/food-menu.js",
       "area": "WEB",
-      "line": 810,
+      "line": 811,
       "anchor": "viewButton",
       "risk": 0,
       "lines": 21
@@ -22132,7 +22132,7 @@
     "WEB-021.64": {
       "path": "food-ticket-web/assets/food-menu.js",
       "area": "WEB",
-      "line": 831,
+      "line": 832,
       "anchor": "ordersByOrgHtml",
       "risk": 0,
       "lines": 14
@@ -22140,7 +22140,7 @@
     "WEB-021.65": {
       "path": "food-ticket-web/assets/food-menu.js",
       "area": "WEB",
-      "line": 845,
+      "line": 846,
       "anchor": "renderGroupOrders",
       "risk": 0,
       "lines": 9
@@ -22148,7 +22148,7 @@
     "WEB-021.66": {
       "path": "food-ticket-web/assets/food-menu.js",
       "area": "WEB",
-      "line": 854,
+      "line": 855,
       "anchor": "tableFor",
       "risk": 0,
       "lines": 25
@@ -22156,7 +22156,7 @@
     "WEB-021.67": {
       "path": "food-ticket-web/assets/food-menu.js",
       "area": "WEB",
-      "line": 879,
+      "line": 880,
       "anchor": "renderCancelRequests",
       "risk": 0,
       "lines": 8
@@ -22164,7 +22164,7 @@
     "WEB-021.68": {
       "path": "food-ticket-web/assets/food-menu.js",
       "area": "WEB",
-      "line": 887,
+      "line": 888,
       "anchor": "splitRow",
       "risk": 0,
       "lines": 13
@@ -22172,7 +22172,7 @@
     "WEB-021.69": {
       "path": "food-ticket-web/assets/food-menu.js",
       "area": "WEB",
-      "line": 900,
+      "line": 901,
       "anchor": "cancelValue",
       "risk": 0,
       "lines": 10
@@ -22180,7 +22180,7 @@
     "WEB-021.70": {
       "path": "food-ticket-web/assets/food-menu.js",
       "area": "WEB",
-      "line": 910,
+      "line": 911,
       "anchor": "cmp",
       "risk": 0,
       "lines": 3
@@ -22188,7 +22188,7 @@
     "WEB-021.71": {
       "path": "food-ticket-web/assets/food-menu.js",
       "area": "WEB",
-      "line": 913,
+      "line": 914,
       "anchor": "cancelHead",
       "risk": 0,
       "lines": 19
@@ -22196,7 +22196,7 @@
     "WEB-021.72": {
       "path": "food-ticket-web/assets/food-menu.js",
       "area": "WEB",
-      "line": 932,
+      "line": 933,
       "anchor": "renderStatistics",
       "risk": 0,
       "lines": 19
@@ -22204,7 +22204,7 @@
     "WEB-021.73": {
       "path": "food-ticket-web/assets/food-menu.js",
       "area": "WEB",
-      "line": 951,
+      "line": 952,
       "anchor": "mark",
       "risk": 0,
       "lines": 10
@@ -22212,7 +22212,7 @@
     "WEB-021.74": {
       "path": "food-ticket-web/assets/food-menu.js",
       "area": "WEB",
-      "line": 961,
+      "line": 962,
       "anchor": "peopleSortMark",
       "risk": 0,
       "lines": 24
@@ -22220,7 +22220,7 @@
     "WEB-021.75": {
       "path": "food-ticket-web/assets/food-menu.js",
       "area": "WEB",
-      "line": 985,
+      "line": 986,
       "anchor": "foods",
       "risk": 0,
       "lines": 26
@@ -22228,7 +22228,7 @@
     "WEB-021.76": {
       "path": "food-ticket-web/assets/food-menu.js",
       "area": "WEB",
-      "line": 1011,
+      "line": 1012,
       "anchor": "normalizeJalaliMonth",
       "risk": 0,
       "lines": 9
@@ -22236,7 +22236,7 @@
     "WEB-021.77": {
       "path": "food-ticket-web/assets/food-menu.js",
       "area": "WEB",
-      "line": 1020,
+      "line": 1021,
       "anchor": "reconciliationGapCell",
       "risk": 0,
       "lines": 10
@@ -22244,7 +22244,7 @@
     "WEB-021.78": {
       "path": "food-ticket-web/assets/food-menu.js",
       "area": "WEB",
-      "line": 1030,
+      "line": 1031,
       "anchor": "reconciliationRemainingCell",
       "risk": 0,
       "lines": 9
@@ -22252,7 +22252,7 @@
     "WEB-021.79": {
       "path": "food-ticket-web/assets/food-menu.js",
       "area": "WEB",
-      "line": 1039,
+      "line": 1040,
       "anchor": "reconciliationLeftoverCell",
       "risk": 0,
       "lines": 7
@@ -22260,7 +22260,7 @@
     "WEB-021.80": {
       "path": "food-ticket-web/assets/food-menu.js",
       "area": "WEB",
-      "line": 1046,
+      "line": 1047,
       "anchor": "reconciliationNumber",
       "risk": 0,
       "lines": 4
@@ -22268,7 +22268,7 @@
     "WEB-021.81": {
       "path": "food-ticket-web/assets/food-menu.js",
       "area": "WEB",
-      "line": 1050,
+      "line": 1051,
       "anchor": "reconciliationAmount",
       "risk": 0,
       "lines": 5
@@ -22276,7 +22276,7 @@
     "WEB-021.82": {
       "path": "food-ticket-web/assets/food-menu.js",
       "area": "WEB",
-      "line": 1055,
+      "line": 1056,
       "anchor": "renderReconciliation",
       "risk": 0,
       "lines": 81
@@ -22284,7 +22284,7 @@
     "WEB-021.83": {
       "path": "food-ticket-web/assets/food-menu.js",
       "area": "WEB",
-      "line": 1136,
+      "line": 1137,
       "anchor": "renderGuestActualModal",
       "risk": 0,
       "lines": 6
@@ -22292,7 +22292,7 @@
     "WEB-021.84": {
       "path": "food-ticket-web/assets/food-menu.js",
       "area": "WEB",
-      "line": 1142,
+      "line": 1143,
       "anchor": "hasNoneRow",
       "risk": 0,
       "lines": 1
@@ -22300,7 +22300,7 @@
     "WEB-021.85": {
       "path": "food-ticket-web/assets/food-menu.js",
       "area": "WEB",
-      "line": 1143,
+      "line": 1144,
       "anchor": "rows",
       "risk": 0,
       "lines": 27
@@ -22308,7 +22308,7 @@
     "WEB-021.86": {
       "path": "food-ticket-web/assets/food-menu.js",
       "area": "WEB",
-      "line": 1170,
+      "line": 1171,
       "anchor": "guestActualInlineError",
       "risk": 0,
       "lines": 6
@@ -22316,7 +22316,7 @@
     "WEB-021.87": {
       "path": "food-ticket-web/assets/food-menu.js",
       "area": "WEB",
-      "line": 1176,
+      "line": 1177,
       "anchor": "guestActualSumFromDom",
       "risk": 0,
       "lines": 12
@@ -22324,7 +22324,7 @@
     "WEB-021.88": {
       "path": "food-ticket-web/assets/food-menu.js",
       "area": "WEB",
-      "line": 1188,
+      "line": 1189,
       "anchor": "guestActualLiveSumListener",
       "risk": 0,
       "lines": 9
@@ -22332,7 +22332,7 @@
     "WEB-021.89": {
       "path": "food-ticket-web/assets/food-menu.js",
       "area": "WEB",
-      "line": 1197,
+      "line": 1198,
       "anchor": "proceedToLeftover",
       "risk": 0,
       "lines": 26
@@ -22340,7 +22340,7 @@
     "WEB-021.90": {
       "path": "food-ticket-web/assets/food-menu.js",
       "area": "WEB",
-      "line": 1223,
+      "line": 1224,
       "anchor": "confirmGuestActualModal",
       "risk": 0,
       "lines": 39
@@ -22348,7 +22348,7 @@
     "WEB-021.91": {
       "path": "food-ticket-web/assets/food-menu.js",
       "area": "WEB",
-      "line": 1262,
+      "line": 1263,
       "anchor": "renderLeftoverModal",
       "risk": 0,
       "lines": 6
@@ -22356,7 +22356,7 @@
     "WEB-021.92": {
       "path": "food-ticket-web/assets/food-menu.js",
       "area": "WEB",
-      "line": 1268,
+      "line": 1269,
       "anchor": "row",
       "risk": 0,
       "lines": 20
@@ -22364,7 +22364,7 @@
     "WEB-021.93": {
       "path": "food-ticket-web/assets/food-menu.js",
       "area": "WEB",
-      "line": 1288,
+      "line": 1289,
       "anchor": "leftoverInlineError",
       "risk": 0,
       "lines": 6
@@ -22372,7 +22372,7 @@
     "WEB-021.94": {
       "path": "food-ticket-web/assets/food-menu.js",
       "area": "WEB",
-      "line": 1294,
+      "line": 1295,
       "anchor": "confirmLeftoverModal",
       "risk": 0,
       "lines": 76
@@ -22380,7 +22380,7 @@
     "WEB-021.95": {
       "path": "food-ticket-web/assets/food-menu.js",
       "area": "WEB",
-      "line": 1370,
+      "line": 1371,
       "anchor": "submitReconciliationBody",
       "risk": 0,
       "lines": 8
@@ -22388,7 +22388,7 @@
     "WEB-021.96": {
       "path": "food-ticket-web/assets/food-menu.js",
       "area": "WEB",
-      "line": 1378,
+      "line": 1379,
       "anchor": "message",
       "risk": 0,
       "lines": 7
@@ -22396,7 +22396,7 @@
     "WEB-021.97": {
       "path": "food-ticket-web/assets/food-menu.js",
       "area": "WEB",
-      "line": 1385,
+      "line": 1386,
       "anchor": "postReconciliation",
       "risk": 0,
       "lines": 9
@@ -22404,7 +22404,7 @@
     "WEB-021.98": {
       "path": "food-ticket-web/assets/food-menu.js",
       "area": "WEB",
-      "line": 1394,
+      "line": 1395,
       "anchor": "loadReconciliation",
       "risk": 0,
       "lines": 41
@@ -22412,7 +22412,7 @@
     "WEB-021.99": {
       "path": "food-ticket-web/assets/food-menu.js",
       "area": "WEB",
-      "line": 1435,
+      "line": 1436,
       "anchor": "downloadReconciliation",
       "risk": 0,
       "lines": 6
@@ -22420,7 +22420,7 @@
     "WEB-021.100": {
       "path": "food-ticket-web/assets/food-menu.js",
       "area": "WEB",
-      "line": 1441,
+      "line": 1442,
       "anchor": "selectReconciliationRow",
       "risk": 0,
       "lines": 1
@@ -22428,7 +22428,7 @@
     "WEB-021.101": {
       "path": "food-ticket-web/assets/food-menu.js",
       "area": "WEB",
-      "line": 1442,
+      "line": 1443,
       "anchor": "item",
       "risk": 0,
       "lines": 17
@@ -22436,7 +22436,7 @@
     "WEB-021.102": {
       "path": "food-ticket-web/assets/food-menu.js",
       "area": "WEB",
-      "line": 1459,
+      "line": 1460,
       "anchor": "saveReconciliationForm",
       "risk": 0,
       "lines": 54
@@ -22444,7 +22444,7 @@
     "WEB-021.103": {
       "path": "food-ticket-web/assets/food-menu.js",
       "area": "WEB",
-      "line": 1513,
+      "line": 1514,
       "anchor": "uploadReconciliationInvoice",
       "risk": 0,
       "lines": 37
@@ -22452,7 +22452,7 @@
     "WEB-021.104": {
       "path": "food-ticket-web/assets/food-menu.js",
       "area": "WEB",
-      "line": 1550,
+      "line": 1551,
       "anchor": "bulkOperationTitle",
       "risk": 0,
       "lines": 4
@@ -22460,7 +22460,7 @@
     "WEB-021.105": {
       "path": "food-ticket-web/assets/food-menu.js",
       "area": "WEB",
-      "line": 1554,
+      "line": 1555,
       "anchor": "bulkSelectedPeople",
       "risk": 0,
       "lines": 5
@@ -22468,7 +22468,7 @@
     "WEB-021.106": {
       "path": "food-ticket-web/assets/food-menu.js",
       "area": "WEB",
-      "line": 1559,
+      "line": 1560,
       "anchor": "bulkTargetValue",
       "risk": 0,
       "lines": 4
@@ -22476,7 +22476,7 @@
     "WEB-021.107": {
       "path": "food-ticket-web/assets/food-menu.js",
       "area": "WEB",
-      "line": 1563,
+      "line": 1564,
       "anchor": "bulkCanSelect",
       "risk": 0,
       "lines": 7
@@ -22484,7 +22484,7 @@
     "WEB-021.108": {
       "path": "food-ticket-web/assets/food-menu.js",
       "area": "WEB",
-      "line": 1570,
+      "line": 1571,
       "anchor": "group",
       "risk": 0,
       "lines": 11
@@ -22492,7 +22492,7 @@
     "WEB-021.109": {
       "path": "food-ticket-web/assets/food-menu.js",
       "area": "WEB",
-      "line": 1581,
+      "line": 1582,
       "anchor": "saveCancelCutoff",
       "risk": 0,
       "lines": 17
@@ -22500,7 +22500,7 @@
     "WEB-021.110": {
       "path": "food-ticket-web/assets/food-menu.js",
       "area": "WEB",
-      "line": 1598,
+      "line": 1599,
       "anchor": "loadBulkSnapshot",
       "risk": 0,
       "lines": 29
@@ -22508,7 +22508,7 @@
     "WEB-021.111": {
       "path": "food-ticket-web/assets/food-menu.js",
       "area": "WEB",
-      "line": 1627,
+      "line": 1628,
       "anchor": "bulkTargetOptions",
       "risk": 0,
       "lines": 15
@@ -22516,7 +22516,7 @@
     "WEB-021.112": {
       "path": "food-ticket-web/assets/food-menu.js",
       "area": "WEB",
-      "line": 1642,
+      "line": 1643,
       "anchor": "bulkPersonStatus",
       "risk": 0,
       "lines": 16
@@ -22524,7 +22524,7 @@
     "WEB-021.113": {
       "path": "food-ticket-web/assets/food-menu.js",
       "area": "WEB",
-      "line": 1658,
+      "line": 1659,
       "anchor": "group",
       "risk": 0,
       "lines": 22
@@ -22532,7 +22532,7 @@
     "WEB-021.114": {
       "path": "food-ticket-web/assets/food-menu.js",
       "area": "WEB",
-      "line": 1680,
+      "line": 1681,
       "anchor": "renderBulkResults",
       "risk": 0,
       "lines": 6
@@ -22540,7 +22540,7 @@
     "WEB-021.115": {
       "path": "food-ticket-web/assets/food-menu.js",
       "area": "WEB",
-      "line": 1686,
+      "line": 1687,
       "anchor": "renderBulkModal",
       "risk": 0,
       "lines": 8
@@ -22548,7 +22548,7 @@
     "WEB-021.116": {
       "path": "food-ticket-web/assets/food-menu.js",
       "area": "WEB",
-      "line": 1694,
+      "line": 1695,
       "anchor": "renderBulkOperations",
       "risk": 0,
       "lines": 18
@@ -22556,7 +22556,7 @@
     "WEB-021.117": {
       "path": "food-ticket-web/assets/food-menu.js",
       "area": "WEB",
-      "line": 1712,
+      "line": 1713,
       "anchor": "rows",
       "risk": 0,
       "lines": 6
@@ -22564,7 +22564,7 @@
     "WEB-021.118": {
       "path": "food-ticket-web/assets/food-menu.js",
       "area": "WEB",
-      "line": 1718,
+      "line": 1719,
       "anchor": "bulkValue",
       "risk": 0,
       "lines": 13
@@ -22572,7 +22572,7 @@
     "WEB-021.119": {
       "path": "food-ticket-web/assets/food-menu.js",
       "area": "WEB",
-      "line": 1731,
+      "line": 1732,
       "anchor": "bulkHead",
       "risk": 0,
       "lines": 6
@@ -22580,7 +22580,7 @@
     "WEB-021.120": {
       "path": "food-ticket-web/assets/food-menu.js",
       "area": "WEB",
-      "line": 1737,
+      "line": 1738,
       "anchor": "selected",
       "risk": 0,
       "lines": 14
@@ -22588,7 +22588,7 @@
     "WEB-021.121": {
       "path": "food-ticket-web/assets/food-menu.js",
       "area": "WEB",
-      "line": 1751,
+      "line": 1752,
       "anchor": "previewDisabled",
       "risk": 0,
       "lines": 11
@@ -22596,7 +22596,7 @@
     "WEB-021.122": {
       "path": "food-ticket-web/assets/food-menu.js",
       "area": "WEB",
-      "line": 1762,
+      "line": 1763,
       "anchor": "bulkTogglePerson",
       "risk": 1,
       "lines": 11
@@ -22604,7 +22604,7 @@
     "WEB-021.123": {
       "path": "food-ticket-web/assets/food-menu.js",
       "area": "WEB",
-      "line": 1773,
+      "line": 1774,
       "anchor": "bulkSelectEligible",
       "risk": 0,
       "lines": 2
@@ -22612,7 +22612,7 @@
     "WEB-021.124": {
       "path": "food-ticket-web/assets/food-menu.js",
       "area": "WEB",
-      "line": 1775,
+      "line": 1776,
       "anchor": "eligible",
       "risk": 0,
       "lines": 6
@@ -22620,7 +22620,7 @@
     "WEB-021.125": {
       "path": "food-ticket-web/assets/food-menu.js",
       "area": "WEB",
-      "line": 1781,
+      "line": 1782,
       "anchor": "submitBulkOperation",
       "risk": 0,
       "lines": 3
@@ -22628,7 +22628,7 @@
     "WEB-021.126": {
       "path": "food-ticket-web/assets/food-menu.js",
       "area": "WEB",
-      "line": 1784,
+      "line": 1785,
       "anchor": "ids",
       "risk": 0,
       "lines": 20
@@ -22636,7 +22636,7 @@
     "WEB-021.127": {
       "path": "food-ticket-web/assets/food-menu.js",
       "area": "WEB",
-      "line": 1804,
+      "line": 1805,
       "anchor": "mealTypeSwitch",
       "risk": 0,
       "lines": 6
@@ -22644,7 +22644,7 @@
     "WEB-021.128": {
       "path": "food-ticket-web/assets/food-menu.js",
       "area": "WEB",
-      "line": 1810,
+      "line": 1811,
       "anchor": "embeddedPanel",
       "risk": 0,
       "lines": 8
@@ -22652,7 +22652,7 @@
     "WEB-021.129": {
       "path": "food-ticket-web/assets/food-menu.js",
       "area": "WEB",
-      "line": 1818,
+      "line": 1819,
       "anchor": "loadEmbedded",
       "risk": 0,
       "lines": 20
@@ -22660,7 +22660,7 @@
     "WEB-021.130": {
       "path": "food-ticket-web/assets/food-menu.js",
       "area": "WEB",
-      "line": 1838,
+      "line": 1839,
       "anchor": "renderFocusKeyOf",
       "risk": 0,
       "lines": 8
@@ -22668,7 +22668,7 @@
     "WEB-021.131": {
       "path": "food-ticket-web/assets/food-menu.js",
       "area": "WEB",
-      "line": 1846,
+      "line": 1847,
       "anchor": "captureRenderFocus",
       "risk": 4,
       "lines": 12
@@ -22676,7 +22676,7 @@
     "WEB-021.132": {
       "path": "food-ticket-web/assets/food-menu.js",
       "area": "WEB",
-      "line": 1858,
+      "line": 1859,
       "anchor": "restoreRenderFocus",
       "risk": 4,
       "lines": 13
@@ -22684,7 +22684,7 @@
     "WEB-021.133": {
       "path": "food-ticket-web/assets/food-menu.js",
       "area": "WEB",
-      "line": 1871,
+      "line": 1872,
       "anchor": "render",
       "risk": 0,
       "lines": 12
@@ -22692,7 +22692,7 @@
     "WEB-021.134": {
       "path": "food-ticket-web/assets/food-menu.js",
       "area": "WEB",
-      "line": 1883,
+      "line": 1884,
       "anchor": "notices",
       "risk": 0,
       "lines": 7
@@ -22700,7 +22700,7 @@
     "WEB-021.135": {
       "path": "food-ticket-web/assets/food-menu.js",
       "area": "WEB",
-      "line": 1890,
+      "line": 1891,
       "anchor": "loadStatus",
       "risk": 0,
       "lines": 12
@@ -22708,7 +22708,7 @@
     "WEB-021.136": {
       "path": "food-ticket-web/assets/food-menu.js",
       "area": "WEB",
-      "line": 1902,
+      "line": 1903,
       "anchor": "loadCatalog",
       "risk": 0,
       "lines": 7
@@ -22716,7 +22716,7 @@
     "WEB-021.137": {
       "path": "food-ticket-web/assets/food-menu.js",
       "area": "WEB",
-      "line": 1909,
+      "line": 1910,
       "anchor": "loadMonth",
       "risk": 0,
       "lines": 8
@@ -22724,7 +22724,7 @@
     "WEB-021.138": {
       "path": "food-ticket-web/assets/food-menu.js",
       "area": "WEB",
-      "line": 1917,
+      "line": 1918,
       "anchor": "loadOrders",
       "risk": 0,
       "lines": 22
@@ -22732,7 +22732,7 @@
     "WEB-021.139": {
       "path": "food-ticket-web/assets/food-menu.js",
       "area": "WEB",
-      "line": 1939,
+      "line": 1940,
       "anchor": "loadFoodGroups",
       "risk": 0,
       "lines": 21
@@ -22740,7 +22740,7 @@
     "WEB-021.140": {
       "path": "food-ticket-web/assets/food-menu.js",
       "area": "WEB",
-      "line": 1960,
+      "line": 1961,
       "anchor": "loadGroupOrders",
       "risk": 0,
       "lines": 31
@@ -22748,7 +22748,7 @@
     "WEB-021.141": {
       "path": "food-ticket-web/assets/food-menu.js",
       "area": "WEB",
-      "line": 1991,
+      "line": 1992,
       "anchor": "loadCancelRequests",
       "risk": 0,
       "lines": 17
@@ -22756,7 +22756,7 @@
     "WEB-021.142": {
       "path": "food-ticket-web/assets/food-menu.js",
       "area": "WEB",
-      "line": 2008,
+      "line": 2009,
       "anchor": "loadGuestRequests",
       "risk": 0,
       "lines": 19
@@ -22764,7 +22764,7 @@
     "WEB-021.143": {
       "path": "food-ticket-web/assets/food-menu.js",
       "area": "WEB",
-      "line": 2027,
+      "line": 2028,
       "anchor": "beginGuestEdit",
       "risk": 0,
       "lines": 1
@@ -22772,7 +22772,7 @@
     "WEB-021.144": {
       "path": "food-ticket-web/assets/food-menu.js",
       "area": "WEB",
-      "line": 2028,
+      "line": 2029,
       "anchor": "row",
       "risk": 0,
       "lines": 16
@@ -22780,7 +22780,7 @@
     "WEB-021.145": {
       "path": "food-ticket-web/assets/food-menu.js",
       "area": "WEB",
-      "line": 2044,
+      "line": 2045,
       "anchor": "cancelGuestEdit",
       "risk": 0,
       "lines": 6
@@ -22788,7 +22788,7 @@
     "WEB-021.146": {
       "path": "food-ticket-web/assets/food-menu.js",
       "area": "WEB",
-      "line": 2050,
+      "line": 2051,
       "anchor": "saveGuestEdit",
       "risk": 1,
       "lines": 32
@@ -22796,7 +22796,7 @@
     "WEB-021.147": {
       "path": "food-ticket-web/assets/food-menu.js",
       "area": "WEB",
-      "line": 2082,
+      "line": 2083,
       "anchor": "guestRequestAction",
       "risk": 0,
       "lines": 1
@@ -22804,7 +22804,7 @@
     "WEB-021.148": {
       "path": "food-ticket-web/assets/food-menu.js",
       "area": "WEB",
-      "line": 2083,
+      "line": 2084,
       "anchor": "row",
       "risk": 1,
       "lines": 23
@@ -22812,7 +22812,7 @@
     "WEB-021.149": {
       "path": "food-ticket-web/assets/food-menu.js",
       "area": "WEB",
-      "line": 2106,
+      "line": 2107,
       "anchor": "renderGuestRequestManager",
       "risk": 0,
       "lines": 3
@@ -22820,7 +22820,7 @@
     "WEB-021.150": {
       "path": "food-ticket-web/assets/food-menu.js",
       "area": "WEB",
-      "line": 2109,
+      "line": 2110,
       "anchor": "rows",
       "risk": 1,
       "lines": 23
@@ -22828,7 +22828,7 @@
     "WEB-021.151": {
       "path": "food-ticket-web/assets/food-menu.js",
       "area": "WEB",
-      "line": 2132,
+      "line": 2133,
       "anchor": "decideCancelRequest",
       "risk": 0,
       "lines": 15
@@ -22836,7 +22836,7 @@
     "WEB-021.152": {
       "path": "food-ticket-web/assets/food-menu.js",
       "area": "WEB",
-      "line": 2147,
+      "line": 2148,
       "anchor": "loadStatistics",
       "risk": 0,
       "lines": 7
@@ -22844,7 +22844,7 @@
     "WEB-021.153": {
       "path": "food-ticket-web/assets/food-menu.js",
       "area": "WEB",
-      "line": 2154,
+      "line": 2155,
       "anchor": "selectedIds",
       "risk": 0,
       "lines": 34
@@ -22852,7 +22852,7 @@
     "WEB-021.154": {
       "path": "food-ticket-web/assets/food-menu.js",
       "area": "WEB",
-      "line": 2188,
+      "line": 2189,
       "anchor": "searchSelectedReportEmployees",
       "risk": 0,
       "lines": 28
@@ -22860,7 +22860,7 @@
     "WEB-021.155": {
       "path": "food-ticket-web/assets/food-menu.js",
       "area": "WEB",
-      "line": 2216,
+      "line": 2217,
       "anchor": "refreshAll",
       "risk": 0,
       "lines": 27
@@ -22868,7 +22868,7 @@
     "WEB-021.156": {
       "path": "food-ticket-web/assets/food-menu.js",
       "area": "WEB",
-      "line": 2243,
+      "line": 2244,
       "anchor": "saveDay",
       "risk": 0,
       "lines": 45
@@ -22876,7 +22876,7 @@
     "WEB-021.157": {
       "path": "food-ticket-web/assets/food-menu.js",
       "area": "WEB",
-      "line": 2288,
+      "line": 2289,
       "anchor": "saveCatalog",
       "risk": 0,
       "lines": 26
@@ -22884,7 +22884,7 @@
     "WEB-021.158": {
       "path": "food-ticket-web/assets/food-menu.js",
       "area": "WEB",
-      "line": 2314,
+      "line": 2315,
       "anchor": "orderExportRows",
       "risk": 0,
       "lines": 20
@@ -22892,7 +22892,7 @@
     "WEB-021.159": {
       "path": "food-ticket-web/assets/food-menu.js",
       "area": "WEB",
-      "line": 2334,
+      "line": 2335,
       "anchor": "downloadOrdersCsv",
       "risk": 0,
       "lines": 17
@@ -22900,7 +22900,7 @@
     "WEB-021.160": {
       "path": "food-ticket-web/assets/food-menu.js",
       "area": "WEB",
-      "line": 2351,
+      "line": 2352,
       "anchor": "downloadOrders",
       "risk": 0,
       "lines": 5
@@ -22908,7 +22908,7 @@
     "WEB-021.161": {
       "path": "food-ticket-web/assets/food-menu.js",
       "area": "WEB",
-      "line": 2356,
+      "line": 2357,
       "anchor": "printScopedReport",
       "risk": 0,
       "lines": 2
@@ -22916,7 +22916,7 @@
     "WEB-021.162": {
       "path": "food-ticket-web/assets/food-menu.js",
       "area": "WEB",
-      "line": 2358,
+      "line": 2359,
       "anchor": "target",
       "risk": 0,
       "lines": 11
@@ -22924,7 +22924,7 @@
     "WEB-021.163": {
       "path": "food-ticket-web/assets/food-menu.js",
       "area": "WEB",
-      "line": 2369,
+      "line": 2370,
       "anchor": "cleanup",
       "risk": 0,
       "lines": 18
@@ -22932,7 +22932,7 @@
     "WEB-021.164": {
       "path": "food-ticket-web/assets/food-menu.js",
       "area": "WEB",
-      "line": 2387,
+      "line": 2388,
       "anchor": "printOrders",
       "risk": 0,
       "lines": 5
@@ -22940,7 +22940,7 @@
     "WEB-021.165": {
       "path": "food-ticket-web/assets/food-menu.js",
       "area": "WEB",
-      "line": 2392,
+      "line": 2393,
       "anchor": "downloadStatistics",
       "risk": 0,
       "lines": 7
@@ -22948,7 +22948,7 @@
     "WEB-021.166": {
       "path": "food-ticket-web/assets/food-menu.js",
       "area": "WEB",
-      "line": 2399,
+      "line": 2400,
       "anchor": "printStatistics",
       "risk": 0,
       "lines": 5
@@ -22956,7 +22956,7 @@
     "WEB-021.167": {
       "path": "food-ticket-web/assets/food-menu.js",
       "area": "WEB",
-      "line": 2404,
+      "line": 2405,
       "anchor": "selectDay",
       "risk": 0,
       "lines": 8
@@ -22964,7 +22964,7 @@
     "WEB-021.168": {
       "path": "food-ticket-web/assets/food-menu.js",
       "area": "WEB",
-      "line": 2412,
+      "line": 2413,
       "anchor": "changeMonth",
       "risk": 0,
       "lines": 6
@@ -22972,7 +22972,7 @@
     "WEB-021.169": {
       "path": "food-ticket-web/assets/food-menu.js",
       "area": "WEB",
-      "line": 2418,
+      "line": 2419,
       "anchor": "switchTab",
       "risk": 0,
       "lines": 37
@@ -22980,7 +22980,7 @@
     "WEB-021.170": {
       "path": "food-ticket-web/assets/food-menu.js",
       "area": "WEB",
-      "line": 2455,
+      "line": 2456,
       "anchor": "emergencyEnsurePeople",
       "risk": 0,
       "lines": 14
@@ -22988,7 +22988,7 @@
     "WEB-021.171": {
       "path": "food-ticket-web/assets/food-menu.js",
       "area": "WEB",
-      "line": 2469,
+      "line": 2470,
       "anchor": "emergencyPanel",
       "risk": 0,
       "lines": 9
@@ -22996,7 +22996,7 @@
     "WEB-021.172": {
       "path": "food-ticket-web/assets/food-menu.js",
       "area": "WEB",
-      "line": 2478,
+      "line": 2479,
       "anchor": "msgs",
       "risk": 0,
       "lines": 35
@@ -23004,7 +23004,7 @@
     "WEB-021.173": {
       "path": "food-ticket-web/assets/food-menu.js",
       "area": "WEB",
-      "line": 2513,
+      "line": 2514,
       "anchor": "emergencyLoadOrders",
       "risk": 0,
       "lines": 6
@@ -23012,7 +23012,7 @@
     "WEB-021.174": {
       "path": "food-ticket-web/assets/food-menu.js",
       "area": "WEB",
-      "line": 2519,
+      "line": 2520,
       "anchor": "daySearchInput",
       "risk": 4,
       "lines": 45
@@ -23020,7 +23020,7 @@
     "WEB-021.175": {
       "path": "food-ticket-web/assets/food-menu.js",
       "area": "WEB",
-      "line": 2564,
+      "line": 2565,
       "anchor": "emergencyClick",
       "risk": 0,
       "lines": 11
@@ -23028,7 +23028,7 @@
     "WEB-021.176": {
       "path": "food-ticket-web/assets/food-menu.js",
       "area": "WEB",
-      "line": 2575,
+      "line": 2576,
       "anchor": "person",
       "risk": 0,
       "lines": 29
@@ -23036,7 +23036,7 @@
     "WEB-021.177": {
       "path": "food-ticket-web/assets/food-menu.js",
       "area": "WEB",
-      "line": 2604,
+      "line": 2605,
       "anchor": "eventClick",
       "risk": 0,
       "lines": 48
@@ -23044,7 +23044,7 @@
     "WEB-021.178": {
       "path": "food-ticket-web/assets/food-menu.js",
       "area": "WEB",
-      "line": 2652,
+      "line": 2653,
       "anchor": "person",
       "risk": 1,
       "lines": 112
@@ -23052,7 +23052,7 @@
     "WEB-021.179": {
       "path": "food-ticket-web/assets/food-menu.js",
       "area": "WEB",
-      "line": 2764,
+      "line": 2765,
       "anchor": "dayPickFor",
       "risk": 0,
       "lines": 9
@@ -23060,7 +23060,7 @@
     "WEB-021.180": {
       "path": "food-ticket-web/assets/food-menu.js",
       "area": "WEB",
-      "line": 2773,
+      "line": 2774,
       "anchor": "trackDayPick",
       "risk": 0,
       "lines": 7
@@ -23068,7 +23068,7 @@
     "WEB-021.181": {
       "path": "food-ticket-web/assets/food-menu.js",
       "area": "WEB",
-      "line": 2780,
+      "line": 2781,
       "anchor": "orderedDayFoodIds",
       "risk": 0,
       "lines": 8
@@ -23076,7 +23076,7 @@
     "WEB-021.182": {
       "path": "food-ticket-web/assets/food-menu.js",
       "area": "WEB",
-      "line": 2788,
+      "line": 2789,
       "anchor": "eventChange",
       "risk": 0,
       "lines": 37
@@ -23084,7 +23084,7 @@
     "WEB-021.183": {
       "path": "food-ticket-web/assets/food-menu.js",
       "area": "WEB",
-      "line": 2825,
+      "line": 2826,
       "anchor": "person",
       "risk": 0,
       "lines": 34
@@ -23092,7 +23092,7 @@
     "WEB-021.184": {
       "path": "food-ticket-web/assets/food-menu.js",
       "area": "WEB",
-      "line": 2859,
+      "line": 2860,
       "anchor": "eventSubmit",
       "risk": 0,
       "lines": 83
@@ -23100,7 +23100,7 @@
     "WEB-021.185": {
       "path": "food-ticket-web/assets/food-menu.js",
       "area": "WEB",
-      "line": 2942,
+      "line": 2943,
       "anchor": "spanDays",
       "risk": 0,
       "lines": 6
@@ -23108,7 +23108,7 @@
     "WEB-021.186": {
       "path": "food-ticket-web/assets/food-menu.js",
       "area": "WEB",
-      "line": 2948,
+      "line": 2949,
       "anchor": "mount",
       "risk": 0,
       "lines": 30
@@ -23116,7 +23116,7 @@
     "WEB-021.187": {
       "path": "food-ticket-web/assets/food-menu.js",
       "area": "WEB",
-      "line": 2978,
+      "line": 2979,
       "anchor": "reportInputFocused",
       "risk": 0,
       "lines": 1
@@ -23124,7 +23124,7 @@
     "WEB-021.188": {
       "path": "food-ticket-web/assets/food-menu.js",
       "area": "WEB",
-      "line": 2979,
+      "line": 2980,
       "anchor": "safeReportRender",
       "risk": 0,
       "lines": 3
@@ -23132,7 +23132,7 @@
     "WEB-021.189": {
       "path": "food-ticket-web/assets/food-menu.js",
       "area": "WEB",
-      "line": 2982,
+      "line": 2983,
       "anchor": "html",
       "risk": 0,
       "lines": 10
@@ -25871,12 +25871,12 @@
       "line": 1958,
       "anchor": "مسیر: settings",
       "risk": 16,
-      "lines": 503
+      "lines": 502
     },
     "PAGE-033.74": {
       "path": "index.php",
       "area": "PAGE",
-      "line": 2461,
+      "line": 2460,
       "anchor": "مسیر: logs",
       "risk": 2,
       "lines": 22
@@ -25884,7 +25884,7 @@
     "PAGE-033.75": {
       "path": "index.php",
       "area": "PAGE",
-      "line": 2483,
+      "line": 2482,
       "anchor": "مسیر: dashboard",
       "risk": 0,
       "lines": 5
@@ -25892,7 +25892,7 @@
     "PAGE-033.76": {
       "path": "index.php",
       "area": "PAGE",
-      "line": 2488,
+      "line": 2487,
       "anchor": "بازگردانی کارت‌ها و فهرست درخواست‌ها در داشبورد (تصمیم مالک ",
       "risk": 0,
       "lines": 1
@@ -25900,7 +25900,7 @@
     "PAGE-033.77": {
       "path": "index.php",
       "area": "PAGE",
-      "line": 2489,
+      "line": 2488,
       "anchor": "موج استقلال (2066cb0) این بلوک را حذف کرده بود؛ بازگردانده ش",
       "risk": 0,
       "lines": 73

@@ -30,8 +30,8 @@ def test_theme_css_cache_versions_are_bumped():
     assert "food-ticket-global-theme-r42.css?v=45" in panel
     assert re.search(r"food-ticket-theme\.css\?v=\d+", panel)
     assert re.search(r"food-manual-attendance\.js\?v=\d+", panel)
-    assert "const PANEL_VERSION='1.37.59'" in panel
-    assert "const FOOD_TICKET_PANEL_VERSION = '1.37.59';" in read("food-ticket.php")
+    assert "const PANEL_VERSION='1.37.60'" in panel
+    assert "const FOOD_TICKET_PANEL_VERSION = '1.37.60';" in read("food-ticket.php")
 
 
 def test_traffic_edit_history_lists_only_real_updates():

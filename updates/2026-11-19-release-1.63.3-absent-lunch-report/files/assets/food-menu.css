@@ -427,3 +427,11 @@
 /* جدول داخل هر گروه، مثل گروه منو بدون حاشیهٔ اضافه */
 .fm-org-group .fm-table-wrap,
 .fm-org-group .fm-order-report-table { margin: 0; }
+
+/* ۱٫۶۳٫۳ (بازسازی پنجم) — اصلاح چینش: گزینه‌های آمار (آمار نوع غذا / آمار سفارش نفرات / جزئیات سفارش پرسنل انتخابی)
+   در همان خطِ دکمهٔ «پرینت» و تفکیک‌شده */
+.fm-stats-modes-inline { display:flex; gap:8px; align-items:center; flex-wrap:wrap; border-inline-start:1px solid var(--line); padding-inline-start:12px; margin-inline-start:2px; }
+.fm-stats-mode { display:inline-flex; align-items:center; gap:6px; border:1px solid var(--line); background:#fff; border-radius:999px; padding:6px 13px; cursor:pointer; font-size:12px; color:#3d4f5a; user-select:none; }
+.fm-stats-mode:hover { background:#f3f7f6; }
+.fm-stats-mode input { margin:0; accent-color:var(--teal,#087f78); }
+.fm-stats-mode:has(input:checked) { background:var(--teal2,#d9f3ef); border-color:var(--teal,#087f78); color:var(--teal,#087f78); font-weight:700; }

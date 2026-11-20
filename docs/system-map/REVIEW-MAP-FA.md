@@ -9,7 +9,7 @@
 | سنجه | مقدار |
 |---|---|
 | فایل‌های کد تولیدی | 707 |
-| خطوط | 178,346 |
+| خطوط | 178,363 |
 | آدرس‌ها (بلوک) | 8,501 |
 | موضوع‌های قابل جست‌وجو | 41 صفحه + 102 مجوز + 86 جدول |
 | بازبینی‌شده | 0 آدرس (0.0%) — 0 خط (0.0%) |
@@ -23,46 +23,46 @@
 
 | بخش | نام فنی | مجوز لازم | آدرس‌های اصلی | کل |
 |---|---|---|---|---|
-| **audit** | `audit` | — | `PAGE-033.56` <sub>index.php:1006</sub><br>`CORE-011.33` <sub>lib/logging-audit.php:508</sub><br>`CORE-001.14` <sub>lib/activity-audit.php:457</sub><br>`CORE-017.03` <sub>lib/logging-replay.php:45</sub> | 28 |
-| **chatbot api** | `chatbot-api` | — | `PAGE-033.34` <sub>index.php:810</sub> | 3 |
-| **domain scan** | `domain-scan` | `domain.scan` | `PAGE-033.69` <sub>index.php:1576</sub><br>`PAGE-011.47` <sub>domain-scan.php:1810</sub><br>`PAGE-011.20` <sub>domain-scan.php:425</sub><br>`PAGE-011.17` <sub>domain-scan.php:346</sub> | 59 |
-| **food personnel link** | `food-personnel-link` | — | `PAGE-033.32` <sub>index.php:728</sub><br>`PAGE-014.09` <sub>food-personnel-link.php:205</sub><br>`PAGE-014.04` <sub>food-personnel-link.php:39</sub><br>`PAGE-014.10` <sub>food-personnel-link.php:317</sub> | 31 |
-| **food ticket** | `food-ticket` | — | `PAGE-033.28` <sub>index.php:481</sub><br>`PAGE-033.38` <sub>index.php:866</sub><br>`PAGE-033.45` <sub>index.php:919</sub><br>`TOOL-062.04` <sub>tools/food_system_router.php:21</sub> | 156 |
-| **governance** | `governance` | — | `PAGE-055.03` <sub>modules/request-center/Pages/governance.php:17</sub><br>`PAGE-033.44` <sub>index.php:915</sub><br>`PAGE-077.20` <sub>request-center.php:208</sub><br>`PAGE-069.11` <sub>modules/request-center/lib/governance.php:65</sub> | 35 |
-| **help** | `help` | — | `PAGE-033.52` <sub>index.php:951</sub><br>`CORE-022.05` <sub>lib/settings-effects.php:57</sub> | 5 |
-| **local accounts** | `local-accounts` | — | `PAGE-033.42` <sub>index.php:894</sub><br>`PAGE-036.03` <sub>local-accounts.php:25</sub><br>`PAGE-036.05` <sub>local-accounts.php:81</sub><br>`PAGE-036.06` <sub>local-accounts.php:138</sub> | 11 |
-| **logging dashboard** | `logging-dashboard` | — | `PAGE-033.57` <sub>index.php:1015</sub><br>`ASSET-017.01` <sub>assets/logging-dashboard.css:1</sub><br>`PAGE-037.04` <sub>logging-dashboard.php:114</sub><br>`PAGE-037.02` <sub>logging-dashboard.php:4</sub> | 11 |
-| **release notes** | `release-notes` | — | `PAGE-033.53` <sub>index.php:970</sub><br>`CORE-020.07` <sub>lib/release-notes.php:193</sub><br>`CORE-020.03` <sub>lib/release-notes.php:128</sub><br>`CORE-020.01` <sub>lib/release-notes.php:1</sub> | 12 |
-| **system health** | `system-health` | — | `PAGE-033.58` <sub>index.php:1019</sub><br>`PAGE-079.28` <sub>system-health.php:947</sub><br>`PAGE-079.03` <sub>system-health.php:25</sub><br>`PAGE-079.04` <sub>system-health.php:43</sub> | 36 |
-| **اعلان‌ها** | `notifications` | — | `PAGE-033.55` <sub>index.php:988</sub><br>`ACT-010.03` <sub>actions/notification-actions.php:23</sub><br>`PAGE-033.54` <sub>index.php:980</sub><br>`DB-004.30` <sub>install-empty-db.sql:445</sub> | 51 |
+| **audit** | `audit` | — | `PAGE-033.56` <sub>index.php:1007</sub><br>`CORE-011.33` <sub>lib/logging-audit.php:508</sub><br>`CORE-001.14` <sub>lib/activity-audit.php:457</sub><br>`CORE-017.03` <sub>lib/logging-replay.php:45</sub> | 28 |
+| **chatbot api** | `chatbot-api` | — | `PAGE-033.34` <sub>index.php:811</sub> | 3 |
+| **domain scan** | `domain-scan` | `domain.scan` | `PAGE-033.69` <sub>index.php:1577</sub><br>`PAGE-011.47` <sub>domain-scan.php:1810</sub><br>`PAGE-011.20` <sub>domain-scan.php:425</sub><br>`PAGE-011.17` <sub>domain-scan.php:346</sub> | 59 |
+| **food personnel link** | `food-personnel-link` | — | `PAGE-033.32` <sub>index.php:729</sub><br>`PAGE-014.09` <sub>food-personnel-link.php:205</sub><br>`PAGE-014.04` <sub>food-personnel-link.php:39</sub><br>`PAGE-014.10` <sub>food-personnel-link.php:317</sub> | 31 |
+| **food ticket** | `food-ticket` | — | `PAGE-033.28` <sub>index.php:481</sub><br>`PAGE-033.38` <sub>index.php:867</sub><br>`PAGE-033.45` <sub>index.php:920</sub><br>`TOOL-062.04` <sub>tools/food_system_router.php:21</sub> | 156 |
+| **governance** | `governance` | — | `PAGE-055.03` <sub>modules/request-center/Pages/governance.php:17</sub><br>`PAGE-033.44` <sub>index.php:916</sub><br>`PAGE-077.20` <sub>request-center.php:208</sub><br>`PAGE-069.11` <sub>modules/request-center/lib/governance.php:65</sub> | 35 |
+| **help** | `help` | — | `PAGE-033.52` <sub>index.php:952</sub><br>`CORE-022.05` <sub>lib/settings-effects.php:57</sub> | 5 |
+| **local accounts** | `local-accounts` | — | `PAGE-033.42` <sub>index.php:895</sub><br>`PAGE-036.03` <sub>local-accounts.php:25</sub><br>`PAGE-036.05` <sub>local-accounts.php:81</sub><br>`PAGE-036.06` <sub>local-accounts.php:138</sub> | 11 |
+| **logging dashboard** | `logging-dashboard` | — | `PAGE-033.57` <sub>index.php:1016</sub><br>`ASSET-018.01` <sub>assets/logging-dashboard.css:1</sub><br>`PAGE-037.04` <sub>logging-dashboard.php:114</sub><br>`PAGE-037.02` <sub>logging-dashboard.php:4</sub> | 11 |
+| **release notes** | `release-notes` | — | `PAGE-033.53` <sub>index.php:971</sub><br>`CORE-020.07` <sub>lib/release-notes.php:194</sub><br>`CORE-020.03` <sub>lib/release-notes.php:129</sub><br>`CORE-020.01` <sub>lib/release-notes.php:1</sub> | 12 |
+| **system health** | `system-health` | — | `PAGE-033.58` <sub>index.php:1020</sub><br>`PAGE-079.28` <sub>system-health.php:947</sub><br>`PAGE-079.03` <sub>system-health.php:25</sub><br>`PAGE-079.04` <sub>system-health.php:43</sub> | 36 |
+| **اعلان‌ها** | `notifications` | — | `PAGE-033.55` <sub>index.php:989</sub><br>`ACT-010.03` <sub>actions/notification-actions.php:23</sub><br>`PAGE-033.54` <sub>index.php:981</sub><br>`DB-004.30` <sub>install-empty-db.sql:445</sub> | 51 |
 | **به‌روزرسانی و پشتیبان‌گیری** | `backup` | `backup.view` | `PAGE-005.04` <sub>backup.php:32</sub><br>`PAGE-005.02` <sub>backup.php:6</sub><br>`PAGE-005.03` <sub>backup.php:12</sub><br>`PAGE-005.05` <sub>backup.php:78</sub> | 45 |
-| **تاریخچه CD/DVD** | `cd-dvd-history` | `cddvd.history` | `PAGE-033.49` <sub>index.php:940</sub><br>`CORE-022.05` <sub>lib/settings-effects.php:57</sub> | 12 |
-| **تاریخچه دارایی** | `asset-history` | `asset.history` | `PAGE-033.68` <sub>index.php:1558</sub><br>`CORE-022.05` <sub>lib/settings-effects.php:57</sub> | 5 |
+| **تاریخچه CD/DVD** | `cd-dvd-history` | `cddvd.history` | `PAGE-033.49` <sub>index.php:941</sub><br>`CORE-022.05` <sub>lib/settings-effects.php:57</sub> | 12 |
+| **تاریخچه دارایی** | `asset-history` | `asset.history` | `PAGE-033.68` <sub>index.php:1559</sub><br>`CORE-022.05` <sub>lib/settings-effects.php:57</sub> | 5 |
 | **تحلیل و چارت‌ها** | `analytics` | `analytics.view` | `PAGE-051.03` <sub>modules/request-center/Pages/analytics.php:12</sub><br>`PAGE-077.18` <sub>request-center.php:200</sub><br>`PAGE-051.01` <sub>modules/request-center/Pages/analytics.php:1</sub><br>`PAGE-051.02` <sub>modules/request-center/Pages/analytics.php:4</sub> | 15 |
-| **تست جمع‌آوری اطلاعات** | `inventory-diagnostics` | `inventory.diagnostics` | `PAGE-033.67` <sub>index.php:1526</sub><br>`CORE-022.05` <sub>lib/settings-effects.php:57</sub> | 8 |
-| **تغییر رمز عبور** | `change-password` | — | `PAGE-033.26` <sub>index.php:456</sub><br>`PAGE-033.41` <sub>index.php:891</sub><br>`CORE-022.05` <sub>lib/settings-effects.php:57</sub> | 8 |
-| **تقویم SLA** | `holidays` | `holidays.view` | `ACT-009.07` <sub>actions/holiday-actions.php:102</sub><br>`PAGE-033.65` <sub>index.php:1418</sub><br>`DB-004.35` <sub>install-empty-db.sql:519</sub><br>`DB-007.26` <sub>migrations/003-sync-schema-151.sql:386</sub> | 46 |
-| **تنظیمات سامانه** | `settings` | — | `PAGE-033.73` <sub>index.php:1957</sub><br>`PAGE-033.40` <sub>index.php:882</sub><br>`DB-004.04` <sub>install-empty-db.sql:22</sub><br>`DB-007.02` <sub>migrations/003-sync-schema-151.sql:5</sub> | 73 |
+| **تست جمع‌آوری اطلاعات** | `inventory-diagnostics` | `inventory.diagnostics` | `PAGE-033.67` <sub>index.php:1527</sub><br>`CORE-022.05` <sub>lib/settings-effects.php:57</sub> | 8 |
+| **تغییر رمز عبور** | `change-password` | — | `PAGE-033.26` <sub>index.php:456</sub><br>`PAGE-033.41` <sub>index.php:892</sub><br>`CORE-022.05` <sub>lib/settings-effects.php:57</sub> | 8 |
+| **تقویم SLA** | `holidays` | `holidays.view` | `ACT-009.07` <sub>actions/holiday-actions.php:102</sub><br>`PAGE-033.65` <sub>index.php:1419</sub><br>`DB-004.35` <sub>install-empty-db.sql:519</sub><br>`DB-007.26` <sub>migrations/003-sync-schema-151.sql:386</sub> | 46 |
+| **تنظیمات سامانه** | `settings` | — | `PAGE-033.73` <sub>index.php:1958</sub><br>`PAGE-033.40` <sub>index.php:883</sub><br>`DB-004.04` <sub>install-empty-db.sql:22</sub><br>`DB-007.02` <sub>migrations/003-sync-schema-151.sql:5</sub> | 73 |
 | **ثبت درخواست** | `new-ticket` | — | `PAGE-053.03` <sub>modules/request-center/Pages/create.php:19</sub><br>`PAGE-077.12` <sub>request-center.php:176</sub><br>`CORE-022.05` <sub>lib/settings-effects.php:57</sub> | 16 |
 | **جزئیات درخواست** | `ticket` | — | `PAGE-054.03` <sub>modules/request-center/Pages/detail.php:17</sub><br>`PAGE-077.13` <sub>request-center.php:180</sub><br>`CRON-013.01` <sub>cron/ticket_auto_close.php:1</sub><br>`PAGE-068.28` <sub>modules/request-center/lib/functions.php:788</sub> | 46 |
-| **جست‌وجو** | `search` | — | `PAGE-033.63` <sub>index.php:1219</sub><br>`PAGE-033.62` <sub>index.php:1211</sub><br>`PAGE-030.03` <sub>global-search.php:31</sub><br>`CORE-021.02` <sub>lib/render.php:14</sub> | 49 |
-| **دارایی‌ها** | `assets` | `assets.view` | `ACT-014.09` <sub>actions/settings-actions.php:319</sub><br>`ACT-003.08` <sub>actions/asset-actions.php:200</sub><br>`PAGE-033.70` <sub>index.php:1695</sub><br>`DB-004.36` <sub>install-empty-db.sql:529</sub> | 205 |
-| **داشبورد** | `dashboard` | `dash.view` | `PAGE-033.75` <sub>index.php:2482</sub><br>`CORE-021.02` <sub>lib/render.php:14</sub><br>`CORE-022.16` <sub>lib/settings-effects.php:277</sub><br>`CORE-022.05` <sub>lib/settings-effects.php:57</sub> | 27 |
+| **جست‌وجو** | `search` | — | `PAGE-033.63` <sub>index.php:1220</sub><br>`PAGE-033.62` <sub>index.php:1212</sub><br>`PAGE-030.03` <sub>global-search.php:31</sub><br>`CORE-021.02` <sub>lib/render.php:14</sub> | 51 |
+| **دارایی‌ها** | `assets` | `assets.view` | `ACT-014.09` <sub>actions/settings-actions.php:319</sub><br>`ACT-003.08` <sub>actions/asset-actions.php:200</sub><br>`PAGE-033.70` <sub>index.php:1696</sub><br>`DB-004.36` <sub>install-empty-db.sql:529</sub> | 206 |
+| **داشبورد** | `dashboard` | `dash.view` | `PAGE-033.75` <sub>index.php:2483</sub><br>`CORE-021.02` <sub>lib/render.php:14</sub><br>`CORE-022.16` <sub>lib/settings-effects.php:277</sub><br>`CORE-022.05` <sub>lib/settings-effects.php:57</sub> | 27 |
 | **دانش‌نامه** | `knowledge` | `knowledge.view` | `PAGE-057.03` <sub>modules/request-center/Pages/knowledge.php:16</sub><br>`PAGE-077.19` <sub>request-center.php:204</sub><br>`PAGE-057.01` <sub>modules/request-center/Pages/knowledge.php:1</sub><br>`PAGE-057.02` <sub>modules/request-center/Pages/knowledge.php:4</sub> | 14 |
-| **سفارش غذا** | `food-order` | — | `PAGE-033.29` <sub>index.php:495</sub><br>`PAGE-033.46` <sub>index.php:924</sub><br>`PAGE-033.47` <sub>index.php:932</sub><br>`TOOL-062.03` <sub>tools/food_system_router.php:18</sub> | 228 |
-| **شناسنامه دارایی** | `asset` | `asset.view` | `PAGE-033.71` <sub>index.php:1739</sub><br>`PAGE-002.02` <sub>asset-inventory-page.php:4</sub><br>`CORE-022.05` <sub>lib/settings-effects.php:57</sub> | 11 |
+| **سفارش غذا** | `food-order` | — | `PAGE-033.29` <sub>index.php:495</sub><br>`PAGE-033.46` <sub>index.php:925</sub><br>`PAGE-033.47` <sub>index.php:933</sub><br>`TOOL-062.03` <sub>tools/food_system_router.php:18</sub> | 228 |
+| **شناسنامه دارایی** | `asset` | `asset.view` | `PAGE-033.71` <sub>index.php:1740</sub><br>`PAGE-002.02` <sub>asset-inventory-page.php:4</sub><br>`CORE-022.05` <sub>lib/settings-effects.php:57</sub> | 11 |
 | **شناسنامه سیستم‌ها** | `inventory` | `inventory.view` | `PAGE-035.32` <sub>inventory.php:770</sub><br>`PAGE-035.30` <sub>inventory.php:680</sub><br>`PAGE-035.02` <sub>inventory.php:7</sub><br>`PAGE-035.17` <sub>inventory.php:265</sub> | 62 |
 | **صف کاری** | `queue` | `queue.view` | `PAGE-059.03` <sub>modules/request-center/Pages/queue.php:12</sub><br>`PAGE-077.14` <sub>request-center.php:184</sub><br>`PAGE-059.01` <sub>modules/request-center/Pages/queue.php:1</sub><br>`PAGE-059.02` <sub>modules/request-center/Pages/queue.php:4</sub> | 40 |
-| **لاگ سامانه** | `activity-log` | — | `PAGE-033.60` <sub>index.php:1029</sub><br>`CORE-021.03` <sub>lib/render.php:171</sub><br>`CORE-022.05` <sub>lib/settings-effects.php:57</sub> | 13 |
-| **مدیریت بات** | `chatbot-admin` | `chatbot.manage` | `PAGE-033.64` <sub>index.php:1315</sub><br>`CORE-022.05` <sub>lib/settings-effects.php:57</sub> | 8 |
-| **مدیریت سازمان** | `organization` | `org.view` | `PAGE-074.53` <sub>organization.php:794</sub><br>`PAGE-033.72` <sub>index.php:1766</sub><br>`PAGE-033.27` <sub>index.php:467</sub><br>`PAGE-074.02` <sub>organization.php:4</sub> | 208 |
-| **پروفایل کاربری** | `profile` | `profile.edit` | `PAGE-033.43` <sub>index.php:897</sub><br>`PAGE-004.16` <sub>asset-profile.php:509</sub><br>`CORE-022.05` <sub>lib/settings-effects.php:57</sub> | 13 |
+| **لاگ سامانه** | `activity-log` | — | `PAGE-033.60` <sub>index.php:1030</sub><br>`CORE-021.03` <sub>lib/render.php:171</sub><br>`CORE-022.05` <sub>lib/settings-effects.php:57</sub> | 13 |
+| **مدیریت بات** | `chatbot-admin` | `chatbot.manage` | `PAGE-033.64` <sub>index.php:1316</sub><br>`CORE-022.05` <sub>lib/settings-effects.php:57</sub> | 8 |
+| **مدیریت سازمان** | `organization` | `org.view` | `PAGE-074.53` <sub>organization.php:794</sub><br>`PAGE-033.72` <sub>index.php:1767</sub><br>`PAGE-033.27` <sub>index.php:467</sub><br>`PAGE-074.02` <sub>organization.php:4</sub> | 208 |
+| **پروفایل کاربری** | `profile` | `profile.edit` | `PAGE-033.43` <sub>index.php:898</sub><br>`PAGE-004.16` <sub>asset-profile.php:509</sub><br>`CORE-022.05` <sub>lib/settings-effects.php:57</sub> | 13 |
 | **پنل سوپروایزر** | `supervisor` | `supervisor.panel` | `PAGE-063.03` <sub>modules/request-center/Pages/supervisor.php:16</sub><br>`PAGE-045.03` <sub>modules/request-center/Actions/supervisor-actions.php:26</sub><br>`PAGE-077.15` <sub>request-center.php:188</sub><br>`PAGE-063.01` <sub>modules/request-center/Pages/supervisor.php:1</sub> | 113 |
-| **چاپ کنترل تردد** | `traffic-control-print` | `traffic.view` | `PAGE-033.51` <sub>index.php:947</sub> | 7 |
+| **چاپ کنترل تردد** | `traffic-control-print` | `traffic.view` | `PAGE-033.51` <sub>index.php:948</sub> | 7 |
 | **کاتالوگ خدمات** | `services` | `services.view` | `PAGE-061.03` <sub>modules/request-center/Pages/services.php:12</sub><br>`PAGE-077.16` <sub>request-center.php:192</sub><br>`PAGE-061.06` <sub>modules/request-center/Pages/services.php:147</sub><br>`PAGE-061.07` <sub>modules/request-center/Pages/services.php:171</sub> | 26 |
-| **کنترل CD/DVD** | `cd-dvd` | `cddvd.view` | `PAGE-033.48` <sub>index.php:936</sub><br>`PAGE-007.36` <sub>cd-dvd.php:490</sub><br>`PAGE-007.19` <sub>cd-dvd.php:153</sub><br>`PAGE-007.25` <sub>cd-dvd.php:203</sub> | 75 |
-| **کنترل تردد** | `traffic-control` | `traffic.view` | `PAGE-033.30` <sub>index.php:507</sub><br>`PAGE-033.50` <sub>index.php:944</sub><br>`PAGE-081.63` <sub>traffic-control.php:981</sub><br>`PAGE-081.16` <sub>traffic-control.php:119</sub> | 103 |
-| **گزارش خطا** | `logs` | — | `PAGE-033.74` <sub>index.php:2460</sub><br>`PAGE-033.59` <sub>index.php:1023</sub><br>`CORE-021.03` <sub>lib/render.php:171</sub><br>`CORE-022.05` <sub>lib/settings-effects.php:57</sub> | 19 |
+| **کنترل CD/DVD** | `cd-dvd` | `cddvd.view` | `PAGE-033.48` <sub>index.php:937</sub><br>`PAGE-007.36` <sub>cd-dvd.php:490</sub><br>`PAGE-007.19` <sub>cd-dvd.php:153</sub><br>`PAGE-007.25` <sub>cd-dvd.php:203</sub> | 75 |
+| **کنترل تردد** | `traffic-control` | `traffic.view` | `PAGE-033.30` <sub>index.php:507</sub><br>`PAGE-033.50` <sub>index.php:945</sub><br>`PAGE-081.63` <sub>traffic-control.php:981</sub><br>`PAGE-081.16` <sub>traffic-control.php:119</sub> | 103 |
+| **گزارش خطا** | `logs` | — | `PAGE-033.74` <sub>index.php:2461</sub><br>`PAGE-033.59` <sub>index.php:1024</sub><br>`CORE-021.03` <sub>lib/render.php:171</sub><br>`CORE-022.05` <sub>lib/settings-effects.php:57</sub> | 19 |
 | **گزارش‌ها** | `reports` | `reports.view` | `PAGE-060.03` <sub>modules/request-center/Pages/reports.php:12</sub><br>`PAGE-077.17` <sub>request-center.php:196</sub><br>`PAGE-060.01` <sub>modules/request-center/Pages/reports.php:1</sub><br>`PAGE-060.02` <sub>modules/request-center/Pages/reports.php:4</sub> | 24 |
 
 ### مجوزها و دسترسی‌ها
@@ -73,9 +73,9 @@
 | گروه | مجوز | کد | آدرس‌های اصلی | کل |
 |---|---|---|---|---|
 | داشبورد و پایه | **مشاهدهٔ داشبورد** | `dash.view` | `PAGE-075.26` <sub>permissions.php:488</sub><br>`PAGE-075.03` <sub>permissions.php:28</sub><br>`TOOL-087.12` <sub>tools/test_access_coverage_offline.php:108</sub> | 10 |
-| داشبورد و پایه | **جست‌وجوی سراسری** | `search.global` | `PAGE-033.62` <sub>index.php:1211</sub> | 3 |
-| داشبورد و پایه | **اعلان‌های من** | `notif.view` | `PAGE-033.54` <sub>index.php:980</sub><br>`CORE-021.02` <sub>lib/render.php:14</sub> | 6 |
-| داشبورد و پایه | **ویرایش پروفایل خودم** | `profile.edit` | `PAGE-075.03` <sub>permissions.php:28</sub><br>`PAGE-033.34` <sub>index.php:810</sub><br>`PAGE-075.16` <sub>permissions.php:351</sub> | 3 |
+| داشبورد و پایه | **جست‌وجوی سراسری** | `search.global` | `PAGE-033.62` <sub>index.php:1212</sub> | 3 |
+| داشبورد و پایه | **اعلان‌های من** | `notif.view` | `PAGE-033.54` <sub>index.php:981</sub><br>`CORE-021.02` <sub>lib/render.php:14</sub> | 6 |
+| داشبورد و پایه | **ویرایش پروفایل خودم** | `profile.edit` | `PAGE-075.03` <sub>permissions.php:28</sub><br>`PAGE-033.34` <sub>index.php:811</sub><br>`PAGE-075.16` <sub>permissions.php:351</sub> | 3 |
 | داشبورد و پایه | **استفاده از بات پاسخ‌گو** | `chatbot.use` | `PAGE-009.27` <sub>chatbot.php:708</sub><br>`PAGE-009.123` <sub>chatbot.php:3214</sub> | 5 |
 | درخواست | **ثبت درخواست جدید** | `ticket.create` | `PAGE-046.03` <sub>modules/request-center/Actions/ticket-actions.php:29</sub><br>`PAGE-046.04` <sub>modules/request-center/Actions/ticket-actions.php:277</sub><br>`PAGE-054.03` <sub>modules/request-center/Pages/detail.php:17</sub> | 20 |
 | درخواست | **مشاهدهٔ درخواست‌های خودم** | `ticket.view_own` | `PAGE-054.03` <sub>modules/request-center/Pages/detail.php:17</sub><br>`CORE-004.14` <sub>lib/auth-scope.php:199</sub><br>`CORE-004.23` <sub>lib/auth-scope.php:593</sub> | 22 |
@@ -91,88 +91,88 @@
 | درخواست | **پنل سوپروایزر** | `supervisor.panel` | `PAGE-063.03` <sub>modules/request-center/Pages/supervisor.php:16</sub><br>`PAGE-045.03` <sub>modules/request-center/Actions/supervisor-actions.php:26</sub><br>`PAGE-045.04` <sub>modules/request-center/Actions/supervisor-actions.php:175</sub> | 34 |
 | درخواست | **ویرایش** | `supervisor.decide` | `PAGE-063.03` <sub>modules/request-center/Pages/supervisor.php:16</sub><br>`PAGE-045.04` <sub>modules/request-center/Actions/supervisor-actions.php:175</sub><br>`TOOL-123.07` <sub>tools/test_key_roles_composition_offline.php:59</sub> | 15 |
 | درخواست | **بازگشایی/برگشت درخواست** | `supervisor.reopen` | `PAGE-063.03` <sub>modules/request-center/Pages/supervisor.php:16</sub><br>`PAGE-045.05` <sub>modules/request-center/Actions/supervisor-actions.php:406</sub><br>`TOOL-123.07` <sub>tools/test_key_roles_composition_offline.php:59</sub> | 9 |
-| خدمات و دسته‌بندی | **مشاهدهٔ خدمات** | `services.view` | `PAGE-075.03` <sub>permissions.php:28</sub><br>`PAGE-030.03` <sub>global-search.php:31</sub><br>`PAGE-033.34` <sub>index.php:810</sub> | 5 |
+| خدمات و دسته‌بندی | **مشاهدهٔ خدمات** | `services.view` | `PAGE-075.03` <sub>permissions.php:28</sub><br>`PAGE-030.03` <sub>global-search.php:31</sub><br>`PAGE-033.34` <sub>index.php:811</sub> | 5 |
 | خدمات و دسته‌بندی | **ویرایش** | `services.manage` | `PAGE-044.03` <sub>modules/request-center/Actions/service-actions.php:29</sub><br>`PAGE-044.07` <sub>modules/request-center/Actions/service-actions.php:155</sub><br>`PAGE-075.03` <sub>permissions.php:28</sub> | 8 |
 | خدمات و دسته‌بندی | **مدیریت دسته‌بندی خدمات** | `service_cat.manage` | `PAGE-075.03` <sub>permissions.php:28</sub><br>`ACT-017.03` <sub>actions/user-structure-actions.php:29</sub><br>`PAGE-075.16` <sub>permissions.php:351</sub> | 3 |
 | خدمات و دسته‌بندی | **مدیریت فیلدهای خدمت** | `service_field.manage` | `PAGE-044.04` <sub>modules/request-center/Actions/service-actions.php:69</sub> | 3 |
-| دانش‌نامه | **مشاهدهٔ دانش‌نامه** | `knowledge.view` | `PAGE-075.03` <sub>permissions.php:28</sub><br>`PAGE-030.03` <sub>global-search.php:31</sub><br>`PAGE-033.34` <sub>index.php:810</sub> | 5 |
+| دانش‌نامه | **مشاهدهٔ دانش‌نامه** | `knowledge.view` | `PAGE-075.03` <sub>permissions.php:28</sub><br>`PAGE-030.03` <sub>global-search.php:31</sub><br>`PAGE-033.34` <sub>index.php:811</sub> | 5 |
 | دانش‌نامه | **ویرایش** | `knowledge.manage` | `PAGE-044.09` <sub>modules/request-center/Actions/service-actions.php:206</sub> | 4 |
 | کنترل CD/DVD | **مشاهدهٔ فرم کنترل CD/DVD** | `cddvd.view` | `CORE-021.02` <sub>lib/render.php:14</sub> | 11 |
 | کنترل CD/DVD | **ثبت خروج رسانه** | `cddvd.submit_out` | `PAGE-075.03` <sub>permissions.php:28</sub><br>`PAGE-007.17` <sub>cd-dvd.php:128</sub><br>`PAGE-075.15` <sub>permissions.php:345</sub> | 4 |
 | کنترل CD/DVD | **ثبت ورود رسانه (بازرسی)** | `cddvd.submit_in` | `PAGE-075.03` <sub>permissions.php:28</sub><br>`TEST-157.05` <sub>tests/test_permissions_followup_static.py:30</sub><br>`PAGE-007.16` <sub>cd-dvd.php:120</sub> | 4 |
-| کنترل CD/DVD | **ویرایش** | `cddvd.edit` | `PAGE-033.73` <sub>index.php:1957</sub><br>`PAGE-075.26` <sub>permissions.php:488</sub><br>`PAGE-075.03` <sub>permissions.php:28</sub> | 9 |
+| کنترل CD/DVD | **ویرایش** | `cddvd.edit` | `PAGE-033.73` <sub>index.php:1958</sub><br>`PAGE-075.26` <sub>permissions.php:488</sub><br>`PAGE-075.03` <sub>permissions.php:28</sub> | 9 |
 | کنترل CD/DVD | **مشاهدهٔ همهٔ ثبت‌ها (نه فقط واحد خود)** | `cddvd.view_all` | `PAGE-075.03` <sub>permissions.php:28</sub><br>`PAGE-007.11` <sub>cd-dvd.php:65</sub><br>`PAGE-075.16` <sub>permissions.php:351</sub> | 3 |
-| کنترل CD/DVD | **تاریخچهٔ سریال** | `cddvd.history` | `PAGE-075.03` <sub>permissions.php:28</sub><br>`PAGE-030.03` <sub>global-search.php:31</sub><br>`PAGE-033.34` <sub>index.php:810</sub> | 4 |
+| کنترل CD/DVD | **تاریخچهٔ سریال** | `cddvd.history` | `PAGE-075.03` <sub>permissions.php:28</sub><br>`PAGE-030.03` <sub>global-search.php:31</sub><br>`PAGE-033.34` <sub>index.php:811</sub> | 4 |
 | کنترل CD/DVD | **خروجی Excel/CSV** | `cddvd.export` | `PAGE-033.31` <sub>index.php:635</sub><br>`PAGE-075.03` <sub>permissions.php:28</sub><br>`PAGE-007.13` <sub>cd-dvd.php:87</sub> | 4 |
 | کنترل تردد مراجعین | **مشاهدهٔ کنترل تردد** | `traffic.view` | `PAGE-081.63` <sub>traffic-control.php:981</sub><br>`PAGE-081.59` <sub>traffic-control.php:888</sub><br>`PAGE-082.23` <sub>traffic-import.php:853</sub> | 19 |
 | کنترل تردد مراجعین | **ثبت، ویرایش و ورود گروهی سوابق** | `traffic.manage` | `PAGE-081.63` <sub>traffic-control.php:981</sub><br>`PAGE-081.54` <sub>traffic-control.php:786</sub><br>`PAGE-082.23` <sub>traffic-import.php:853</sub> | 10 |
 | کنترل تردد مراجعین | **مقصدهای ملاقات** | `traffic.destinations` | `PAGE-081.63` <sub>traffic-control.php:981</sub><br>`PAGE-081.05` <sub>traffic-control.php:16</sub><br>`TEST-157.04` <sub>tests/test_permissions_followup_static.py:12</sub> | 6 |
 | کنترل تردد مراجعین | **ویرایش** | `traffic.destinations_edit` | `PAGE-081.06` <sub>traffic-control.php:21</sub><br>`TEST-157.04` <sub>tests/test_permissions_followup_static.py:12</sub> | 4 |
-| دارایی و شناسنامه فنی | **فهرست شناسنامه‌ها** | `assets.view` | `PAGE-033.70` <sub>index.php:1695</sub><br>`CORE-021.02` <sub>lib/render.php:14</sub> | 10 |
+| دارایی و شناسنامه فنی | **فهرست شناسنامه‌ها** | `assets.view` | `PAGE-033.70` <sub>index.php:1696</sub><br>`CORE-021.02` <sub>lib/render.php:14</sub> | 10 |
 | دارایی و شناسنامه فنی | **فقط دارایی‌های واحد خودم** | `assets.own_unit` | `CORE-004.26` <sub>lib/auth-scope.php:665</sub> | 4 |
-| دارایی و شناسنامه فنی | **مشاهدهٔ شناسنامهٔ دارایی** | `asset.view` | `PAGE-075.03` <sub>permissions.php:28</sub><br>`PAGE-033.34` <sub>index.php:810</sub><br>`PAGE-075.08` <sub>permissions.php:247</sub> | 4 |
+| دارایی و شناسنامه فنی | **مشاهدهٔ شناسنامهٔ دارایی** | `asset.view` | `PAGE-075.03` <sub>permissions.php:28</sub><br>`PAGE-033.34` <sub>index.php:811</sub><br>`PAGE-075.08` <sub>permissions.php:247</sub> | 4 |
 | دارایی و شناسنامه فنی | **ویرایش** | `asset.edit` | `ACT-003.14` <sub>actions/asset-actions.php:512</sub> | 4 |
 | دارایی و شناسنامه فنی | **استخراج سخت‌افزار (همین سرور)** | `asset.extract` | `ACT-003.03` <sub>actions/asset-actions.php:36</sub> | 3 |
 | دارایی و شناسنامه فنی | **ویرایش** | `asset.remote_extract` | `ACT-003.12` <sub>actions/asset-actions.php:436</sub><br>`ACT-003.06` <sub>actions/asset-actions.php:141</sub><br>`ACT-003.07` <sub>actions/asset-actions.php:158</sub> | 10 |
 | دارایی و شناسنامه فنی | **آماده‌سازی سیستم‌های مقصد (فعال‌سازی WinRM)** | `asset.remote_prepare` | `ACT-003.11` <sub>actions/asset-actions.php:371</sub><br>`ACT-003.10` <sub>actions/asset-actions.php:295</sub> | 7 |
-| دارایی و شناسنامه فنی | **تاریخچهٔ دارایی** | `asset.history` | `PAGE-033.68` <sub>index.php:1558</sub> | 4 |
-| دارایی و شناسنامه فنی | **پینگ سیستم‌های انتخابی** | `asset.ping` | `ACT-003.08` <sub>actions/asset-actions.php:200</sub><br>`PAGE-033.70` <sub>index.php:1695</sub> | 4 |
-| دارایی و شناسنامه فنی | **فهرست موجودی** | `inventory.view` | `ACT-003.14` <sub>actions/asset-actions.php:512</sub><br>`PAGE-033.66` <sub>index.php:1429</sub> | 6 |
-| دارایی و شناسنامه فنی | **تشخیص موجودی** | `inventory.diagnostics` | `PAGE-033.67` <sub>index.php:1526</sub> | 6 |
+| دارایی و شناسنامه فنی | **تاریخچهٔ دارایی** | `asset.history` | `PAGE-033.68` <sub>index.php:1559</sub> | 4 |
+| دارایی و شناسنامه فنی | **پینگ سیستم‌های انتخابی** | `asset.ping` | `ACT-003.08` <sub>actions/asset-actions.php:200</sub><br>`PAGE-033.70` <sub>index.php:1696</sub> | 4 |
+| دارایی و شناسنامه فنی | **فهرست موجودی** | `inventory.view` | `ACT-003.14` <sub>actions/asset-actions.php:512</sub><br>`PAGE-033.66` <sub>index.php:1430</sub> | 6 |
+| دارایی و شناسنامه فنی | **تشخیص موجودی** | `inventory.diagnostics` | `PAGE-033.67` <sub>index.php:1527</sub> | 6 |
 | دارایی و شناسنامه فنی | **ورود کامپیوترهای دامنه** | `domain.import` | `ACT-003.05` <sub>actions/asset-actions.php:133</sub> | 6 |
-| دارایی و شناسنامه فنی | **اسکن دامنه** | `domain.scan` | `PAGE-033.69` <sub>index.php:1576</sub> | 10 |
+| دارایی و شناسنامه فنی | **اسکن دامنه** | `domain.scan` | `PAGE-033.69` <sub>index.php:1577</sub> | 10 |
 | گزارش و تحلیل | **گزارش‌ها** | `reports.view` | `PAGE-060.03` <sub>modules/request-center/Pages/reports.php:12</sub><br>`CORE-021.02` <sub>lib/render.php:14</sub> | 11 |
 | گزارش و تحلیل | **چارت‌ها** | `analytics.view` | `PAGE-051.03` <sub>modules/request-center/Pages/analytics.php:12</sub><br>`CORE-021.02` <sub>lib/render.php:14</sub> | 9 |
-| گزارش و تحلیل | **ممیزی** | `audit.view` | `PAGE-033.56` <sub>index.php:1006</sub><br>`CORE-021.02` <sub>lib/render.php:14</sub> | 7 |
-| گزارش و تحلیل | **گزارش خطا** | `logs.view` | `PAGE-033.74` <sub>index.php:2460</sub><br>`PAGE-033.59` <sub>index.php:1023</sub><br>`CORE-021.02` <sub>lib/render.php:14</sub> | 14 |
+| گزارش و تحلیل | **ممیزی** | `audit.view` | `PAGE-033.56` <sub>index.php:1007</sub><br>`CORE-021.02` <sub>lib/render.php:14</sub> | 7 |
+| گزارش و تحلیل | **گزارش خطا** | `logs.view` | `PAGE-033.74` <sub>index.php:2461</sub><br>`PAGE-033.59` <sub>index.php:1024</sub><br>`CORE-021.02` <sub>lib/render.php:14</sub> | 14 |
 | گزارش و تحلیل | **سلامت سامانه و خطاهای فنی** | `system.health` | `PAGE-079.28` <sub>system-health.php:947</sub><br>`PAGE-079.30` <sub>system-health.php:1118</sub><br>`CORE-021.02` <sub>lib/render.php:14</sub> | 11 |
 | گزارش و تحلیل | **ویرایش وضعیت و نگهداری لاگ** | `system.health_edit` | `PAGE-079.30` <sub>system-health.php:1118</sub><br>`PAGE-079.25` <sub>system-health.php:787</sub> | 5 |
-| گزارش و تحلیل | **فعالیت کاربران** | `logs.activity` | `PAGE-033.59` <sub>index.php:1023</sub><br>`CORE-021.02` <sub>lib/render.php:14</sub> | 7 |
-| گزارش و تحلیل | **خروجی فعالیت کاربران** | `logs.activity_export` | `PAGE-033.30` <sub>index.php:507</sub><br>`PAGE-033.60` <sub>index.php:1029</sub><br>`PAGE-075.03` <sub>permissions.php:28</sub> | 5 |
-| سامانه مدیریت غذا | **داشبورد** | `food.dashboard` | `PAGE-029.140` <sub>food-ticket.php:5958</sub><br>`PAGE-029.12` <sub>food-ticket.php:137</sub><br>`PAGE-029.09` <sub>food-ticket.php:78</sub> | 9 |
-| سامانه مدیریت غذا | **پایش لحظه‌ای** | `food.monitor` | `PAGE-033.38` <sub>index.php:866</sub><br>`PAGE-029.140` <sub>food-ticket.php:5958</sub><br>`PAGE-029.12` <sub>food-ticket.php:137</sub> | 11 |
-| سامانه مدیریت غذا | **کارکنان** | `food.employees` | `PAGE-029.140` <sub>food-ticket.php:5958</sub><br>`PAGE-029.12` <sub>food-ticket.php:137</sub><br>`PAGE-029.09` <sub>food-ticket.php:78</sub> | 8 |
-| سامانه مدیریت غذا | **ویرایش** | `food.employees_edit` | `PAGE-029.140` <sub>food-ticket.php:5958</sub><br>`PAGE-029.10` <sub>food-ticket.php:86</sub> | 5 |
-| سامانه مدیریت غذا | **برنامه غذایی** | `food.menu` | `PAGE-029.140` <sub>food-ticket.php:5958</sub><br>`PAGE-013.119` <sub>food-order.php:3870</sub><br>`PAGE-013.114` <sub>food-order.php:3556</sub> | 16 |
-| سامانه مدیریت غذا | **ویرایش** | `food.menu_edit` | `PAGE-015.24` <sub>food-reconciliation.php:875</sub><br>`PAGE-013.74` <sub>food-order.php:2277</sub><br>`PAGE-029.140` <sub>food-ticket.php:5958</sub> | 26 |
-| سامانه مدیریت غذا | **گروه‌های غذا** | `food.groups` | `PAGE-029.140` <sub>food-ticket.php:5958</sub><br>`PAGE-029.12` <sub>food-ticket.php:137</sub><br>`PAGE-029.09` <sub>food-ticket.php:78</sub> | 12 |
-| سامانه مدیریت غذا | **ویرایش** | `food.groups_edit` | `PAGE-029.140` <sub>food-ticket.php:5958</sub><br>`PAGE-029.10` <sub>food-ticket.php:86</sub><br>`PAGE-019.16` <sub>food-ticket-groups.php:667</sub> | 10 |
-| سامانه مدیریت غذا | **گزارش‌ها** | `food.reports` | `PAGE-029.140` <sub>food-ticket.php:5958</sub><br>`PAGE-013.119` <sub>food-order.php:3870</sub><br>`PAGE-015.34` <sub>food-reconciliation.php:1374</sub> | 24 |
-| تنظیمات سیستم مدیریت غذا | **اتصال پایگاه‌ها و تردد** | `food.db` | `PAGE-025.02` <sub>food-ticket-selftest.php:20</sub><br>`PAGE-029.140` <sub>food-ticket.php:5958</sub><br>`PAGE-029.12` <sub>food-ticket.php:137</sub> | 12 |
-| تنظیمات سیستم مدیریت غذا | **ویرایش** | `food.db_edit` | `PAGE-029.140` <sub>food-ticket.php:5958</sub><br>`PAGE-029.12` <sub>food-ticket.php:137</sub><br>`PAGE-029.10` <sub>food-ticket.php:86</sub> | 9 |
-| تنظیمات سیستم مدیریت غذا | **چاپگر سیستم** | `food.printer` | `PAGE-029.140` <sub>food-ticket.php:5958</sub><br>`PAGE-029.12` <sub>food-ticket.php:137</sub><br>`PAGE-029.09` <sub>food-ticket.php:78</sub> | 10 |
-| تنظیمات سیستم مدیریت غذا | **ویرایش** | `food.printer_edit` | `PAGE-029.140` <sub>food-ticket.php:5958</sub><br>`PAGE-029.12` <sub>food-ticket.php:137</sub><br>`PAGE-029.10` <sub>food-ticket.php:86</sub> | 6 |
-| تنظیمات سیستم مدیریت غذا | **کارت مهمان** | `food.guest` | `PAGE-029.140` <sub>food-ticket.php:5958</sub><br>`PAGE-029.12` <sub>food-ticket.php:137</sub><br>`PAGE-029.09` <sub>food-ticket.php:78</sub> | 10 |
-| تنظیمات سیستم مدیریت غذا | **ویرایش** | `food.guest_edit` | `PAGE-029.140` <sub>food-ticket.php:5958</sub><br>`PAGE-029.12` <sub>food-ticket.php:137</sub><br>`PAGE-029.10` <sub>food-ticket.php:86</sub> | 7 |
-| تنظیمات سیستم مدیریت غذا | **طراحی فیش** | `food.design` | `PAGE-029.140` <sub>food-ticket.php:5958</sub><br>`PAGE-029.12` <sub>food-ticket.php:137</sub><br>`PAGE-029.09` <sub>food-ticket.php:78</sub> | 7 |
-| تنظیمات سیستم مدیریت غذا | **ویرایش** | `food.design_edit` | `PAGE-029.140` <sub>food-ticket.php:5958</sub><br>`PAGE-029.12` <sub>food-ticket.php:137</sub><br>`PAGE-029.10` <sub>food-ticket.php:86</sub> | 6 |
-| تنظیمات سیستم مدیریت غذا | **سلامت سیستم** | `food.health` | `PAGE-029.140` <sub>food-ticket.php:5958</sub><br>`PAGE-029.12` <sub>food-ticket.php:137</sub><br>`PAGE-029.09` <sub>food-ticket.php:78</sub> | 6 |
-| تنظیمات سیستم مدیریت غذا | **ویرایش** | `food.health_edit` | `PAGE-029.140` <sub>food-ticket.php:5958</sub><br>`PAGE-029.12` <sub>food-ticket.php:137</sub><br>`PAGE-029.10` <sub>food-ticket.php:86</sub> | 5 |
-| تنظیمات سیستم مدیریت غذا | **ثبت دستی فیش/تردد** | `food.manual_attendance` | `PAGE-029.140` <sub>food-ticket.php:5958</sub><br>`PAGE-029.12` <sub>food-ticket.php:137</sub><br>`PAGE-029.09` <sub>food-ticket.php:78</sub> | 9 |
-| تنظیمات سیستم مدیریت غذا | **ویرایش** | `food.manual_attendance_edit` | `PAGE-019.67` <sub>food-ticket-groups.php:2953</sub><br>`PAGE-019.76` <sub>food-ticket-groups.php:3611</sub><br>`PAGE-029.140` <sub>food-ticket.php:5958</sub> | 10 |
-| تنظیمات سیستم مدیریت غذا | **مدیریت مهلت اضطراری سفارش غذا** | `food.emergency_window` | `PAGE-029.140` <sub>food-ticket.php:5958</sub><br>`PAGE-013.119` <sub>food-order.php:3870</sub><br>`PAGE-029.12` <sub>food-ticket.php:137</sub> | 8 |
-| تنظیمات سیستم مدیریت غذا | **ویرایش** | `food.emergency_window_edit` | `PAGE-029.140` <sub>food-ticket.php:5958</sub><br>`PAGE-029.12` <sub>food-ticket.php:137</sub><br>`PAGE-013.53` <sub>food-order.php:1414</sub> | 9 |
-| سفارش غذای کارکنان | **ثبت و مشاهدهٔ سفارش خود** | `foodorder.self` | `PAGE-033.46` <sub>index.php:924</sub><br>`CORE-021.02` <sub>lib/render.php:14</sub> | 12 |
-| سازمان | **مشاهدهٔ چارت سازمانی** | `org.view` | `PAGE-033.72` <sub>index.php:1766</sub><br>`CORE-021.02` <sub>lib/render.php:14</sub> | 7 |
+| گزارش و تحلیل | **فعالیت کاربران** | `logs.activity` | `PAGE-033.59` <sub>index.php:1024</sub><br>`CORE-021.02` <sub>lib/render.php:14</sub> | 7 |
+| گزارش و تحلیل | **خروجی فعالیت کاربران** | `logs.activity_export` | `PAGE-033.30` <sub>index.php:507</sub><br>`PAGE-033.60` <sub>index.php:1030</sub><br>`PAGE-075.03` <sub>permissions.php:28</sub> | 5 |
+| سامانه مدیریت غذا | **داشبورد** | `food.dashboard` | `PAGE-029.140` <sub>food-ticket.php:5960</sub><br>`PAGE-029.12` <sub>food-ticket.php:137</sub><br>`PAGE-029.09` <sub>food-ticket.php:78</sub> | 9 |
+| سامانه مدیریت غذا | **پایش لحظه‌ای** | `food.monitor` | `PAGE-033.38` <sub>index.php:867</sub><br>`PAGE-029.140` <sub>food-ticket.php:5960</sub><br>`PAGE-029.12` <sub>food-ticket.php:137</sub> | 11 |
+| سامانه مدیریت غذا | **کارکنان** | `food.employees` | `PAGE-029.140` <sub>food-ticket.php:5960</sub><br>`PAGE-029.12` <sub>food-ticket.php:137</sub><br>`PAGE-029.09` <sub>food-ticket.php:78</sub> | 8 |
+| سامانه مدیریت غذا | **ویرایش** | `food.employees_edit` | `PAGE-029.140` <sub>food-ticket.php:5960</sub><br>`PAGE-029.10` <sub>food-ticket.php:86</sub> | 5 |
+| سامانه مدیریت غذا | **برنامه غذایی** | `food.menu` | `PAGE-029.140` <sub>food-ticket.php:5960</sub><br>`PAGE-013.119` <sub>food-order.php:3871</sub><br>`PAGE-013.114` <sub>food-order.php:3557</sub> | 16 |
+| سامانه مدیریت غذا | **ویرایش** | `food.menu_edit` | `PAGE-015.24` <sub>food-reconciliation.php:875</sub><br>`PAGE-013.74` <sub>food-order.php:2277</sub><br>`PAGE-029.140` <sub>food-ticket.php:5960</sub> | 26 |
+| سامانه مدیریت غذا | **گروه‌های غذا** | `food.groups` | `PAGE-029.140` <sub>food-ticket.php:5960</sub><br>`PAGE-029.12` <sub>food-ticket.php:137</sub><br>`PAGE-029.09` <sub>food-ticket.php:78</sub> | 12 |
+| سامانه مدیریت غذا | **ویرایش** | `food.groups_edit` | `PAGE-029.140` <sub>food-ticket.php:5960</sub><br>`PAGE-029.10` <sub>food-ticket.php:86</sub><br>`PAGE-019.16` <sub>food-ticket-groups.php:667</sub> | 10 |
+| سامانه مدیریت غذا | **گزارش‌ها** | `food.reports` | `PAGE-029.140` <sub>food-ticket.php:5960</sub><br>`PAGE-013.119` <sub>food-order.php:3871</sub><br>`PAGE-015.34` <sub>food-reconciliation.php:1374</sub> | 24 |
+| تنظیمات سیستم مدیریت غذا | **اتصال پایگاه‌ها و تردد** | `food.db` | `PAGE-025.02` <sub>food-ticket-selftest.php:20</sub><br>`PAGE-029.140` <sub>food-ticket.php:5960</sub><br>`PAGE-029.12` <sub>food-ticket.php:137</sub> | 12 |
+| تنظیمات سیستم مدیریت غذا | **ویرایش** | `food.db_edit` | `PAGE-029.140` <sub>food-ticket.php:5960</sub><br>`PAGE-029.12` <sub>food-ticket.php:137</sub><br>`PAGE-029.10` <sub>food-ticket.php:86</sub> | 9 |
+| تنظیمات سیستم مدیریت غذا | **چاپگر سیستم** | `food.printer` | `PAGE-029.140` <sub>food-ticket.php:5960</sub><br>`PAGE-029.12` <sub>food-ticket.php:137</sub><br>`PAGE-029.09` <sub>food-ticket.php:78</sub> | 10 |
+| تنظیمات سیستم مدیریت غذا | **ویرایش** | `food.printer_edit` | `PAGE-029.140` <sub>food-ticket.php:5960</sub><br>`PAGE-029.12` <sub>food-ticket.php:137</sub><br>`PAGE-029.10` <sub>food-ticket.php:86</sub> | 6 |
+| تنظیمات سیستم مدیریت غذا | **کارت مهمان** | `food.guest` | `PAGE-029.140` <sub>food-ticket.php:5960</sub><br>`PAGE-029.12` <sub>food-ticket.php:137</sub><br>`PAGE-029.09` <sub>food-ticket.php:78</sub> | 10 |
+| تنظیمات سیستم مدیریت غذا | **ویرایش** | `food.guest_edit` | `PAGE-029.140` <sub>food-ticket.php:5960</sub><br>`PAGE-029.12` <sub>food-ticket.php:137</sub><br>`PAGE-029.10` <sub>food-ticket.php:86</sub> | 7 |
+| تنظیمات سیستم مدیریت غذا | **طراحی فیش** | `food.design` | `PAGE-029.140` <sub>food-ticket.php:5960</sub><br>`PAGE-029.12` <sub>food-ticket.php:137</sub><br>`PAGE-029.09` <sub>food-ticket.php:78</sub> | 7 |
+| تنظیمات سیستم مدیریت غذا | **ویرایش** | `food.design_edit` | `PAGE-029.140` <sub>food-ticket.php:5960</sub><br>`PAGE-029.12` <sub>food-ticket.php:137</sub><br>`PAGE-029.10` <sub>food-ticket.php:86</sub> | 6 |
+| تنظیمات سیستم مدیریت غذا | **سلامت سیستم** | `food.health` | `PAGE-029.140` <sub>food-ticket.php:5960</sub><br>`PAGE-029.12` <sub>food-ticket.php:137</sub><br>`PAGE-029.09` <sub>food-ticket.php:78</sub> | 6 |
+| تنظیمات سیستم مدیریت غذا | **ویرایش** | `food.health_edit` | `PAGE-029.140` <sub>food-ticket.php:5960</sub><br>`PAGE-029.12` <sub>food-ticket.php:137</sub><br>`PAGE-029.10` <sub>food-ticket.php:86</sub> | 5 |
+| تنظیمات سیستم مدیریت غذا | **ثبت دستی فیش/تردد** | `food.manual_attendance` | `PAGE-029.140` <sub>food-ticket.php:5960</sub><br>`PAGE-029.12` <sub>food-ticket.php:137</sub><br>`PAGE-029.09` <sub>food-ticket.php:78</sub> | 9 |
+| تنظیمات سیستم مدیریت غذا | **ویرایش** | `food.manual_attendance_edit` | `PAGE-019.67` <sub>food-ticket-groups.php:2953</sub><br>`PAGE-019.76` <sub>food-ticket-groups.php:3611</sub><br>`PAGE-029.140` <sub>food-ticket.php:5960</sub> | 10 |
+| تنظیمات سیستم مدیریت غذا | **مدیریت مهلت اضطراری سفارش غذا** | `food.emergency_window` | `PAGE-029.140` <sub>food-ticket.php:5960</sub><br>`PAGE-013.119` <sub>food-order.php:3871</sub><br>`PAGE-029.12` <sub>food-ticket.php:137</sub> | 8 |
+| تنظیمات سیستم مدیریت غذا | **ویرایش** | `food.emergency_window_edit` | `PAGE-029.140` <sub>food-ticket.php:5960</sub><br>`PAGE-029.12` <sub>food-ticket.php:137</sub><br>`PAGE-013.53` <sub>food-order.php:1414</sub> | 9 |
+| سفارش غذای کارکنان | **ثبت و مشاهدهٔ سفارش خود** | `foodorder.self` | `PAGE-033.46` <sub>index.php:925</sub><br>`CORE-021.02` <sub>lib/render.php:14</sub> | 12 |
+| سازمان | **مشاهدهٔ چارت سازمانی** | `org.view` | `PAGE-033.72` <sub>index.php:1767</sub><br>`CORE-021.02` <sub>lib/render.php:14</sub> | 7 |
 | سازمان | **ویرایش** | `org.manage` | `ACT-011.13` <sub>actions/org-actions.php:382</sub><br>`ACT-011.18` <sub>actions/org-actions.php:617</sub><br>`ACT-011.14` <sub>actions/org-actions.php:409</sub> | 20 |
-| تنظیمات و سیستم | **تنظیمات عمومی و افکت نمایشی** | `settings.general` | `PAGE-033.73` <sub>index.php:1957</sub><br>`PAGE-033.40` <sub>index.php:882</sub><br>`CORE-022.17` <sub>lib/settings-effects.php:291</sub> | 13 |
-| تنظیمات و سیستم | **ویرایش تنظیمات عمومی و افکت نمایشی** | `settings.general_edit` | `ACT-014.08` <sub>actions/settings-actions.php:165</sub><br>`PAGE-033.73` <sub>index.php:1957</sub><br>`ACT-014.07` <sub>actions/settings-actions.php:91</sub> | 6 |
-| تنظیمات و سیستم | **اتصال دامین و اسکن دامنه** | `settings.domain` | `PAGE-033.73` <sub>index.php:1957</sub><br>`PAGE-033.40` <sub>index.php:882</sub><br>`CORE-021.02` <sub>lib/render.php:14</sub> | 10 |
-| تنظیمات و سیستم | **ویرایش** | `settings.domain_edit` | `ACT-014.08` <sub>actions/settings-actions.php:165</sub><br>`PAGE-033.73` <sub>index.php:1957</sub><br>`ACT-014.06` <sub>actions/settings-actions.php:77</sub> | 5 |
-| تنظیمات و سیستم | **مدیریت کاربران و دسترسی‌ها** | `settings.users` | `PAGE-033.73` <sub>index.php:1957</sub><br>`PAGE-033.40` <sub>index.php:882</sub><br>`CORE-021.02` <sub>lib/render.php:14</sub> | 8 |
-| تنظیمات و سیستم | **ویرایش** | `settings.users_edit` | `PAGE-033.73` <sub>index.php:1957</sub><br>`ACT-017.08` <sub>actions/user-structure-actions.php:358</sub><br>`ACT-014.05` <sub>actions/settings-actions.php:69</sub> | 6 |
-| تنظیمات و سیستم | **نقش‌های کلیدی** | `settings.key_roles` | `PAGE-033.73` <sub>index.php:1957</sub><br>`PAGE-033.40` <sub>index.php:882</sub> | 5 |
-| تنظیمات و سیستم | **ویرایش** | `settings.key_roles_edit` | `PAGE-033.73` <sub>index.php:1957</sub> | 4 |
-| تنظیمات و سیستم | **پشتیبان‌گیری/بازگردانی** | `backup.view` | `PAGE-033.61` <sub>index.php:1172</sub><br>`CORE-021.02` <sub>lib/render.php:14</sub> | 5 |
-| تنظیمات و سیستم | **ویرایش** | `backup.manage` | `ACT-004.02` <sub>actions/backup-actions.php:18</sub><br>`ACT-004.03` <sub>actions/backup-actions.php:25</sub><br>`PAGE-033.61` <sub>index.php:1172</sub> | 7 |
-| تنظیمات و سیستم | **مشاهدهٔ به‌روزرسانی سامانه** | `update.view` | `PAGE-033.61` <sub>index.php:1172</sub><br>`PAGE-075.03` <sub>permissions.php:28</sub> | 2 |
+| تنظیمات و سیستم | **تنظیمات عمومی و افکت نمایشی** | `settings.general` | `PAGE-033.73` <sub>index.php:1958</sub><br>`PAGE-033.40` <sub>index.php:883</sub><br>`CORE-022.17` <sub>lib/settings-effects.php:291</sub> | 13 |
+| تنظیمات و سیستم | **ویرایش تنظیمات عمومی و افکت نمایشی** | `settings.general_edit` | `ACT-014.08` <sub>actions/settings-actions.php:165</sub><br>`PAGE-033.73` <sub>index.php:1958</sub><br>`ACT-014.07` <sub>actions/settings-actions.php:91</sub> | 6 |
+| تنظیمات و سیستم | **اتصال دامین و اسکن دامنه** | `settings.domain` | `PAGE-033.73` <sub>index.php:1958</sub><br>`PAGE-033.40` <sub>index.php:883</sub><br>`CORE-021.02` <sub>lib/render.php:14</sub> | 10 |
+| تنظیمات و سیستم | **ویرایش** | `settings.domain_edit` | `ACT-014.08` <sub>actions/settings-actions.php:165</sub><br>`PAGE-033.73` <sub>index.php:1958</sub><br>`ACT-014.06` <sub>actions/settings-actions.php:77</sub> | 5 |
+| تنظیمات و سیستم | **مدیریت کاربران و دسترسی‌ها** | `settings.users` | `PAGE-033.73` <sub>index.php:1958</sub><br>`PAGE-033.40` <sub>index.php:883</sub><br>`CORE-021.02` <sub>lib/render.php:14</sub> | 8 |
+| تنظیمات و سیستم | **ویرایش** | `settings.users_edit` | `PAGE-033.73` <sub>index.php:1958</sub><br>`ACT-017.08` <sub>actions/user-structure-actions.php:358</sub><br>`ACT-014.05` <sub>actions/settings-actions.php:69</sub> | 6 |
+| تنظیمات و سیستم | **نقش‌های کلیدی** | `settings.key_roles` | `PAGE-033.73` <sub>index.php:1958</sub><br>`PAGE-033.40` <sub>index.php:883</sub> | 5 |
+| تنظیمات و سیستم | **ویرایش** | `settings.key_roles_edit` | `PAGE-033.73` <sub>index.php:1958</sub> | 4 |
+| تنظیمات و سیستم | **پشتیبان‌گیری/بازگردانی** | `backup.view` | `PAGE-033.61` <sub>index.php:1173</sub><br>`CORE-021.02` <sub>lib/render.php:14</sub> | 5 |
+| تنظیمات و سیستم | **ویرایش** | `backup.manage` | `ACT-004.02` <sub>actions/backup-actions.php:18</sub><br>`ACT-004.03` <sub>actions/backup-actions.php:25</sub><br>`PAGE-033.61` <sub>index.php:1173</sub> | 7 |
+| تنظیمات و سیستم | **مشاهدهٔ به‌روزرسانی سامانه** | `update.view` | `PAGE-033.61` <sub>index.php:1173</sub><br>`PAGE-075.03` <sub>permissions.php:28</sub> | 2 |
 | تنظیمات و سیستم | **اجرای به‌روزرسانی سامانه** | `update.apply` | `ACT-004.04` <sub>actions/backup-actions.php:41</sub> | 3 |
-| تنظیمات و سیستم | **مدیریت پرسش‌ها و پاسخ‌های بات** | `chatbot.manage` | `PAGE-033.64` <sub>index.php:1315</sub><br>`PAGE-033.34` <sub>index.php:810</sub><br>`CORE-021.02` <sub>lib/render.php:14</sub> | 4 |
+| تنظیمات و سیستم | **مدیریت پرسش‌ها و پاسخ‌های بات** | `chatbot.manage` | `PAGE-033.64` <sub>index.php:1316</sub><br>`PAGE-033.34` <sub>index.php:811</sub><br>`CORE-021.02` <sub>lib/render.php:14</sub> | 4 |
 | تنظیمات و سیستم | **تنظیمات OLA/SLA** | `ola.view` | `PAGE-058.03` <sub>modules/request-center/Pages/ola.php:17</sub> | 5 |
 | تنظیمات و سیستم | **ویرایش** | `ola.manage` | `PAGE-043.03` <sub>modules/request-center/Actions/ola-actions.php:17</sub> | 5 |
 | تنظیمات و سیستم | **تغییر و مشکل** | `governance.view` | `PAGE-055.03` <sub>modules/request-center/Pages/governance.php:17</sub> | 7 |
 | تنظیمات و سیستم | **ویرایش** | `governance.manage` | `PAGE-042.04` <sub>modules/request-center/Actions/governance-actions.php:23</sub> | 8 |
-| تنظیمات و سیستم | **مدیریت تعطیلات** | `holidays.view` | `PAGE-033.65` <sub>index.php:1418</sub><br>`TEST-095.33` <sub>tests/test_food_worker_window_static.py:318</sub> | 6 |
+| تنظیمات و سیستم | **مدیریت تعطیلات** | `holidays.view` | `PAGE-033.65` <sub>index.php:1419</sub><br>`TEST-095.33` <sub>tests/test_food_worker_window_static.py:318</sub> | 6 |
 | تنظیمات و سیستم | **ویرایش** | `holidays.manage` | `ACT-009.07` <sub>actions/holiday-actions.php:102</sub> | 13 |
 
 </details>
@@ -195,7 +195,7 @@
 | `asset_profiles` | `DB-004.45` <sub>install-empty-db.sql:691</sub><br>`DB-007.35` <sub>migrations/003-sync-schema-151.sql:543</sub><br>`DB-047.42` <sub>schema.sql:670</sub> | 103 |
 | `asset_relations` | `DB-004.44` <sub>install-empty-db.sql:678</sub><br>`DB-007.34` <sub>migrations/003-sync-schema-151.sql:531</sub><br>`DB-047.41` <sub>schema.sql:657</sub> | 14 |
 | `asset_storage_devices` | `DB-004.39` <sub>install-empty-db.sql:602</sub><br>`DB-007.29` <sub>migrations/003-sync-schema-151.sql:460</sub><br>`DB-047.36` <sub>schema.sql:581</sub> | 23 |
-| `assets` | `ACT-014.09` <sub>actions/settings-actions.php:319</sub><br>`ACT-003.08` <sub>actions/asset-actions.php:200</sub><br>`PAGE-033.70` <sub>index.php:1695</sub> | 205 |
+| `assets` | `ACT-014.09` <sub>actions/settings-actions.php:319</sub><br>`ACT-003.08` <sub>actions/asset-actions.php:200</sub><br>`PAGE-033.70` <sub>index.php:1696</sub> | 206 |
 | `categories` | `DB-004.21` <sub>install-empty-db.sql:246</sub><br>`DB-007.12` <sub>migrations/003-sync-schema-151.sql:153</sub><br>`DB-047.18` <sub>schema.sql:225</sub> | 39 |
 | `cd_dvd_records` | `DB-004.16` <sub>install-empty-db.sql:146</sub><br>`DB-007.09` <sub>migrations/003-sync-schema-151.sql:87</sub><br>`DB-047.13` <sub>schema.sql:125</sub> | 40 |
 | `cd_dvd_types` | `DB-004.15` <sub>install-empty-db.sql:138</sub><br>`DB-047.12` <sub>schema.sql:117</sub><br>`DB-082.02` <sub>upgrade-1.8-cd-dvd.sql:2</sub> | 8 |
@@ -231,7 +231,7 @@
 | `food_ticket_templates` | `DB-004.90` <sub>install-empty-db.sql:1209</sub><br>`DB-007.62` <sub>migrations/003-sync-schema-151.sql:989</sub><br>`DB-047.90` <sub>schema.sql:1222</sub> | 21 |
 | `food_ticket_worker_status` | `DB-004.56` <sub>install-empty-db.sql:960</sub><br>`DB-007.45` <sub>migrations/003-sync-schema-151.sql:787</sub><br>`DB-047.53` <sub>schema.sql:939</sub> | 21 |
 | `handling_units` | `DB-004.13` <sub>install-empty-db.sql:125</sub><br>`DB-007.07` <sub>migrations/003-sync-schema-151.sql:72</sub><br>`DB-047.10` <sub>schema.sql:104</sub> | 49 |
-| `holidays` | `ACT-009.07` <sub>actions/holiday-actions.php:102</sub><br>`PAGE-033.65` <sub>index.php:1418</sub><br>`DB-004.35` <sub>install-empty-db.sql:519</sub> | 46 |
+| `holidays` | `ACT-009.07` <sub>actions/holiday-actions.php:102</sub><br>`PAGE-033.65` <sub>index.php:1419</sub><br>`DB-004.35` <sub>install-empty-db.sql:519</sub> | 46 |
 | `knowledge_articles` | `DB-004.34` <sub>install-empty-db.sql:505</sub><br>`DB-007.25` <sub>migrations/003-sync-schema-151.sql:373</sub><br>`DB-047.31` <sub>schema.sql:484</sub> | 17 |
 | `log_issue_events` | `DB-031.05` <sub>migrations/026-logging-legacy-result-unknown.sql:38</sub><br>`DB-004.120` <sub>install-empty-db.sql:1573</sub><br>`DB-047.109` <sub>schema.sql:1524</sub> | 15 |
 | `log_issue_history` | `DB-004.119` <sub>install-empty-db.sql:1557</sub><br>`DB-031.04` <sub>migrations/026-logging-legacy-result-unknown.sql:20</sub><br>`DB-047.108` <sub>schema.sql:1508</sub> | 12 |
@@ -239,7 +239,7 @@
 | `log_issues` | `DB-004.117` <sub>install-empty-db.sql:1521</sub><br>`DB-030.02` <sub>migrations/025-logging-issues-alerts.sql:4</sub><br>`DB-047.106` <sub>schema.sql:1472</sub> | 33 |
 | `logging_health_alerts` | `DB-004.118` <sub>install-empty-db.sql:1547</sub><br>`DB-030.03` <sub>migrations/025-logging-issues-alerts.sql:29</sub><br>`DB-047.107` <sub>schema.sql:1498</sub> | 14 |
 | `login_attempts` | `DB-004.31` <sub>install-empty-db.sql:463</sub><br>`DB-007.22` <sub>migrations/003-sync-schema-151.sql:343</sub><br>`DB-047.28` <sub>schema.sql:442</sub> | 14 |
-| `notifications` | `PAGE-033.55` <sub>index.php:988</sub><br>`ACT-010.03` <sub>actions/notification-actions.php:23</sub><br>`PAGE-033.54` <sub>index.php:980</sub> | 51 |
+| `notifications` | `PAGE-033.55` <sub>index.php:989</sub><br>`ACT-010.03` <sub>actions/notification-actions.php:23</sub><br>`PAGE-033.54` <sub>index.php:981</sub> | 51 |
 | `ola_policies` | `DB-004.46` <sub>install-empty-db.sql:773</sub><br>`DB-007.36` <sub>migrations/003-sync-schema-151.sql:624</sub><br>`DB-047.43` <sub>schema.sql:752</sub> | 28 |
 | `org_companies` | `DB-004.06` <sub>install-empty-db.sql:39</sub><br>`DB-023.02` <sub>migrations/018-org-company-separation.sql:3</sub><br>`DB-047.03` <sub>schema.sql:18</sub> | 16 |
 | `org_unit_managers` | `DB-004.10` <sub>install-empty-db.sql:79</sub><br>`DB-007.05` <sub>migrations/003-sync-schema-151.sql:32</sub><br>`DB-047.07` <sub>schema.sql:58</sub> | 40 |
@@ -251,7 +251,7 @@
 | `schema_updates` | `DB-004.122` <sub>install-empty-db.sql:1599</sub><br>`DB-047.111` <sub>schema.sql:1550</sub><br>`CORE-023.22` <sub>lib/system-alarms.php:603</sub> | 35 |
 | `service_catalog` | `DB-004.22` <sub>install-empty-db.sql:255</sub><br>`DB-007.13` <sub>migrations/003-sync-schema-151.sql:161</sub><br>`DB-047.19` <sub>schema.sql:234</sub> | 64 |
 | `service_catalog_fields` | `DB-004.23` <sub>install-empty-db.sql:281</sub><br>`DB-007.14` <sub>migrations/003-sync-schema-151.sql:186</sub><br>`DB-047.20` <sub>schema.sql:260</sub> | 18 |
-| `settings` | `PAGE-033.73` <sub>index.php:1957</sub><br>`PAGE-033.40` <sub>index.php:882</sub><br>`DB-004.04` <sub>install-empty-db.sql:22</sub> | 73 |
+| `settings` | `PAGE-033.73` <sub>index.php:1958</sub><br>`PAGE-033.40` <sub>index.php:883</sub><br>`DB-004.04` <sub>install-empty-db.sql:22</sub> | 73 |
 | `system_incidents` | `DB-004.109` <sub>install-empty-db.sql:1375</sub><br>`DB-007.56` <sub>migrations/003-sync-schema-151.sql:937</sub><br>`DB-047.65` <sub>schema.sql:1140</sub> | 9 |
 | `system_logs` | `DB-004.65` <sub>install-empty-db.sql:1104</sub><br>`DB-007.53` <sub>migrations/003-sync-schema-151.sql:902</sub><br>`DB-047.62` <sub>schema.sql:1083</sub> | 67 |
 | `ticket_attachments` | `DB-004.27` <sub>install-empty-db.sql:388</sub><br>`DB-007.18` <sub>migrations/003-sync-schema-151.sql:288</sub><br>`DB-047.24` <sub>schema.sql:367</sub> | 19 |
@@ -292,9 +292,9 @@
 | `TEST` | TEST | 260 | 2,083 | 29,939 |
 | `TOOL` | TOOL | 152 | 1,459 | 40,126 |
 | `DB` | DB | 89 | 1,397 | 8,374 |
-| `PAGE` | صفحات (ریشه) | 84 | 1,652 | 59,261 |
-| `ASSET` | دارایی‌های ایستا (assets/) | 34 | 858 | 15,318 |
-| `WEB` | پنل وب غذا (food-ticket-web/) | 30 | 511 | 10,351 |
+| `PAGE` | صفحات (ریشه) | 84 | 1,652 | 59,260 |
+| `ASSET` | دارایی‌های ایستا (assets/) | 34 | 858 | 15,327 |
+| `WEB` | پنل وب غذا (food-ticket-web/) | 30 | 511 | 10,360 |
 | `CORE` | موتور مشترک (lib/) | 24 | 394 | 9,875 |
 | `ACT` | کنش‌ها (actions/) | 17 | 99 | 3,130 |
 | `CRON` | زمان‌بندها (cron/) | 15 | 39 | 1,675 |
@@ -10562,7 +10562,7 @@
 </details>
 
 <details>
-<summary><b>PAGE-033</b> — <code>index.php</code> (2,561 خط، 77 آدرس، بازبینی‌شده 0/77)</summary>
+<summary><b>PAGE-033</b> — <code>index.php</code> (2,560 خط، 77 آدرس، بازبینی‌شده 0/77)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
@@ -10638,11 +10638,11 @@
 | `PAGE-033.70` | 1696–1739 | ناحیه | `مسیر: assets` | 7 | ⬜ |
 | `PAGE-033.71` | 1740–1766 | ناحیه | `مسیر: asset` | 7 | ⬜ |
 | `PAGE-033.72` | 1767–1957 | ناحیه | `مسیر: organization` | 3 | ⬜ |
-| `PAGE-033.73` | 1958–2460 | ناحیه | `مسیر: settings` | **16** | ⬜ |
-| `PAGE-033.74` | 2461–2482 | ناحیه | `مسیر: logs` | 2 | ⬜ |
-| `PAGE-033.75` | 2483–2487 | ناحیه | `مسیر: dashboard` | 0 | ⬜ |
-| `PAGE-033.76` | 2488–2488 | ناحیه | `بازگردانی کارت‌ها و فهرست درخواست‌ها در داشبورد (ت` | 0 | ⬜ |
-| `PAGE-033.77` | 2489–2561 | ناحیه | `موج استقلال (2066cb0) این بلوک را حذف کرده بود؛ با` | 0 | ⬜ |
+| `PAGE-033.73` | 1958–2459 | ناحیه | `مسیر: settings` | **16** | ⬜ |
+| `PAGE-033.74` | 2460–2481 | ناحیه | `مسیر: logs` | 2 | ⬜ |
+| `PAGE-033.75` | 2482–2486 | ناحیه | `مسیر: dashboard` | 0 | ⬜ |
+| `PAGE-033.76` | 2487–2487 | ناحیه | `بازگردانی کارت‌ها و فهرست درخواست‌ها در داشبورد (ت` | 0 | ⬜ |
+| `PAGE-033.77` | 2488–2560 | ناحیه | `موج استقلال (2066cb0) این بلوک را حذف کرده بود؛ با` | 0 | ⬜ |
 
 </details>
 
@@ -11882,7 +11882,7 @@
 </details>
 
 <details>
-<summary><b>ASSET-008</b> — <code>assets/food-menu.css</code> (430 خط، 19 آدرس، بازبینی‌شده 0/19)</summary>
+<summary><b>ASSET-008</b> — <code>assets/food-menu.css</code> (438 خط، 19 آدرس، بازبینی‌شده 0/19)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
@@ -11904,12 +11904,12 @@
 | `ASSET-008.16` | 355–391 | بلوک | `تعیین تکلیف غذای باقیمانده (تطبیق روزانه)` | 1 | ⬜ |
 | `ASSET-008.17` | 392–418 | بلوک | `1.62.93 follow-up: cancel-request cutoff + compact` | 1 | ⬜ |
 | `ASSET-008.18` | 419–426 | بلوک | `تفکیک غذای هم‌گروه: «چلوکباب ۴ · قیمه ۲»` | 0 | ⬜ |
-| `ASSET-008.19` | 427–430 | بلوک | `جدول داخل هر گروه، مثل گروه منو بدون حاشیهٔ اضافه` | 0 | ⬜ |
+| `ASSET-008.19` | 427–438 | بلوک | `جدول داخل هر گروه، مثل گروه منو بدون حاشیهٔ اضافه` | 0 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>ASSET-009</b> — <code>assets/food-menu.js</code> (2,991 خط، 189 آدرس، بازبینی‌شده 0/189)</summary>
+<summary><b>ASSET-009</b> — <code>assets/food-menu.js</code> (2,992 خط، 189 آدرس، بازبینی‌شده 0/189)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
@@ -11963,145 +11963,145 @@
 | `ASSET-009.48` | 656–660 | بلوک | `deliveredReportOrderedRows` | 0 | ⬜ |
 | `ASSET-009.49` | 661–673 | بلوک | `key` | 0 | ⬜ |
 | `ASSET-009.50` | 674–677 | بلوک | `deliveryDateForReport` | 0 | ⬜ |
-| `ASSET-009.51` | 678–697 | بلوک | `renderPrintedDeliveryReport` | 0 | ⬜ |
-| `ASSET-009.52` | 698–733 | بلوک | `loadPrintedDeliveryReport` | 0 | ⬜ |
-| `ASSET-009.53` | 734–750 | بلوک | `exportPrintedDeliveryReport` | 0 | ⬜ |
-| `ASSET-009.54` | 751–755 | بلوک | `printPrintedDeliveryReport` | 0 | ⬜ |
-| `ASSET-009.55` | 756–761 | بلوک | `summaryHtml` | 0 | ⬜ |
-| `ASSET-009.56` | 762–770 | بلوک | `nameSplit` | 0 | ⬜ |
-| `ASSET-009.57` | 771–778 | بلوک | `personSortValue` | 0 | ⬜ |
-| `ASSET-009.58` | 779–789 | بلوک | `sortByState` | 0 | ⬜ |
-| `ASSET-009.59` | 790–795 | بلوک | `sortStateToggle` | 0 | ⬜ |
-| `ASSET-009.60` | 796–799 | بلوک | `sortStateMark` | 0 | ⬜ |
-| `ASSET-009.61` | 800–803 | بلوک | `rowSummary` | 0 | ⬜ |
-| `ASSET-009.62` | 804–809 | بلوک | `renderOrders` | 0 | ⬜ |
-| `ASSET-009.63` | 810–830 | بلوک | `viewButton` | 0 | ⬜ |
-| `ASSET-009.64` | 831–844 | بلوک | `ordersByOrgHtml` | 0 | ⬜ |
-| `ASSET-009.65` | 845–853 | بلوک | `renderGroupOrders` | 0 | ⬜ |
-| `ASSET-009.66` | 854–878 | بلوک | `tableFor` | 0 | ⬜ |
-| `ASSET-009.67` | 879–886 | بلوک | `renderCancelRequests` | 0 | ⬜ |
-| `ASSET-009.68` | 887–899 | بلوک | `splitRow` | 0 | ⬜ |
-| `ASSET-009.69` | 900–909 | بلوک | `cancelValue` | 0 | ⬜ |
-| `ASSET-009.70` | 910–912 | بلوک | `cmp` | 0 | ⬜ |
-| `ASSET-009.71` | 913–931 | بلوک | `cancelHead` | 0 | ⬜ |
-| `ASSET-009.72` | 932–950 | بلوک | `renderStatistics` | 0 | ⬜ |
-| `ASSET-009.73` | 951–960 | بلوک | `mark` | 0 | ⬜ |
-| `ASSET-009.74` | 961–984 | بلوک | `peopleSortMark` | 0 | ⬜ |
-| `ASSET-009.75` | 985–1010 | بلوک | `foods` | 0 | ⬜ |
-| `ASSET-009.76` | 1011–1019 | بلوک | `normalizeJalaliMonth` | 0 | ⬜ |
-| `ASSET-009.77` | 1020–1029 | بلوک | `reconciliationGapCell` | 0 | ⬜ |
-| `ASSET-009.78` | 1030–1038 | بلوک | `reconciliationRemainingCell` | 0 | ⬜ |
-| `ASSET-009.79` | 1039–1045 | بلوک | `reconciliationLeftoverCell` | 0 | ⬜ |
-| `ASSET-009.80` | 1046–1049 | بلوک | `reconciliationNumber` | 0 | ⬜ |
-| `ASSET-009.81` | 1050–1054 | بلوک | `reconciliationAmount` | 0 | ⬜ |
-| `ASSET-009.82` | 1055–1135 | بلوک | `renderReconciliation` | 0 | ⬜ |
-| `ASSET-009.83` | 1136–1141 | بلوک | `renderGuestActualModal` | 0 | ⬜ |
-| `ASSET-009.84` | 1142–1142 | بلوک | `hasNoneRow` | 0 | ⬜ |
-| `ASSET-009.85` | 1143–1169 | بلوک | `rows` | 0 | ⬜ |
-| `ASSET-009.86` | 1170–1175 | بلوک | `guestActualInlineError` | 0 | ⬜ |
-| `ASSET-009.87` | 1176–1187 | بلوک | `guestActualSumFromDom` | 0 | ⬜ |
-| `ASSET-009.88` | 1188–1196 | بلوک | `guestActualLiveSumListener` | 0 | ⬜ |
-| `ASSET-009.89` | 1197–1222 | بلوک | `proceedToLeftover` | 0 | ⬜ |
-| `ASSET-009.90` | 1223–1261 | بلوک | `confirmGuestActualModal` | 0 | ⬜ |
-| `ASSET-009.91` | 1262–1267 | بلوک | `renderLeftoverModal` | 0 | ⬜ |
-| `ASSET-009.92` | 1268–1287 | بلوک | `row` | 0 | ⬜ |
-| `ASSET-009.93` | 1288–1293 | بلوک | `leftoverInlineError` | 0 | ⬜ |
-| `ASSET-009.94` | 1294–1369 | بلوک | `confirmLeftoverModal` | 0 | ⬜ |
-| `ASSET-009.95` | 1370–1377 | بلوک | `submitReconciliationBody` | 0 | ⬜ |
-| `ASSET-009.96` | 1378–1384 | بلوک | `message` | 0 | ⬜ |
-| `ASSET-009.97` | 1385–1393 | بلوک | `postReconciliation` | 0 | ⬜ |
-| `ASSET-009.98` | 1394–1434 | بلوک | `loadReconciliation` | 0 | ⬜ |
-| `ASSET-009.99` | 1435–1440 | بلوک | `downloadReconciliation` | 0 | ⬜ |
-| `ASSET-009.100` | 1441–1441 | بلوک | `selectReconciliationRow` | 0 | ⬜ |
-| `ASSET-009.101` | 1442–1458 | بلوک | `item` | 0 | ⬜ |
-| `ASSET-009.102` | 1459–1512 | بلوک | `saveReconciliationForm` | 0 | ⬜ |
-| `ASSET-009.103` | 1513–1549 | بلوک | `uploadReconciliationInvoice` | 0 | ⬜ |
-| `ASSET-009.104` | 1550–1553 | بلوک | `bulkOperationTitle` | 0 | ⬜ |
-| `ASSET-009.105` | 1554–1558 | بلوک | `bulkSelectedPeople` | 0 | ⬜ |
-| `ASSET-009.106` | 1559–1562 | بلوک | `bulkTargetValue` | 0 | ⬜ |
-| `ASSET-009.107` | 1563–1569 | بلوک | `bulkCanSelect` | 0 | ⬜ |
-| `ASSET-009.108` | 1570–1580 | بلوک | `group` | 0 | ⬜ |
-| `ASSET-009.109` | 1581–1597 | بلوک | `saveCancelCutoff` | 0 | ⬜ |
-| `ASSET-009.110` | 1598–1626 | بلوک | `loadBulkSnapshot` | 0 | ⬜ |
-| `ASSET-009.111` | 1627–1641 | بلوک | `bulkTargetOptions` | 0 | ⬜ |
-| `ASSET-009.112` | 1642–1657 | بلوک | `bulkPersonStatus` | 0 | ⬜ |
-| `ASSET-009.113` | 1658–1679 | بلوک | `group` | 0 | ⬜ |
-| `ASSET-009.114` | 1680–1685 | بلوک | `renderBulkResults` | 0 | ⬜ |
-| `ASSET-009.115` | 1686–1693 | بلوک | `renderBulkModal` | 0 | ⬜ |
-| `ASSET-009.116` | 1694–1711 | بلوک | `renderBulkOperations` | 0 | ⬜ |
-| `ASSET-009.117` | 1712–1717 | بلوک | `rows` | 0 | ⬜ |
-| `ASSET-009.118` | 1718–1730 | بلوک | `bulkValue` | 0 | ⬜ |
-| `ASSET-009.119` | 1731–1736 | بلوک | `bulkHead` | 0 | ⬜ |
-| `ASSET-009.120` | 1737–1750 | بلوک | `selected` | 0 | ⬜ |
-| `ASSET-009.121` | 1751–1761 | بلوک | `previewDisabled` | 0 | ⬜ |
-| `ASSET-009.122` | 1762–1772 | بلوک | `bulkTogglePerson` | 1 | ⬜ |
-| `ASSET-009.123` | 1773–1774 | بلوک | `bulkSelectEligible` | 0 | ⬜ |
-| `ASSET-009.124` | 1775–1780 | بلوک | `eligible` | 0 | ⬜ |
-| `ASSET-009.125` | 1781–1783 | بلوک | `submitBulkOperation` | 0 | ⬜ |
-| `ASSET-009.126` | 1784–1803 | بلوک | `ids` | 0 | ⬜ |
-| `ASSET-009.127` | 1804–1809 | بلوک | `mealTypeSwitch` | 0 | ⬜ |
-| `ASSET-009.128` | 1810–1817 | بلوک | `embeddedPanel` | 0 | ⬜ |
-| `ASSET-009.129` | 1818–1837 | بلوک | `loadEmbedded` | 0 | ⬜ |
-| `ASSET-009.130` | 1838–1845 | بلوک | `renderFocusKeyOf` | 0 | ⬜ |
-| `ASSET-009.131` | 1846–1857 | بلوک | `captureRenderFocus` | 4 | ⬜ |
-| `ASSET-009.132` | 1858–1870 | بلوک | `restoreRenderFocus` | 4 | ⬜ |
-| `ASSET-009.133` | 1871–1882 | بلوک | `render` | 0 | ⬜ |
-| `ASSET-009.134` | 1883–1889 | بلوک | `notices` | 0 | ⬜ |
-| `ASSET-009.135` | 1890–1901 | بلوک | `loadStatus` | 0 | ⬜ |
-| `ASSET-009.136` | 1902–1908 | بلوک | `loadCatalog` | 0 | ⬜ |
-| `ASSET-009.137` | 1909–1916 | بلوک | `loadMonth` | 0 | ⬜ |
-| `ASSET-009.138` | 1917–1938 | بلوک | `loadOrders` | 0 | ⬜ |
-| `ASSET-009.139` | 1939–1959 | بلوک | `loadFoodGroups` | 0 | ⬜ |
-| `ASSET-009.140` | 1960–1990 | بلوک | `loadGroupOrders` | 0 | ⬜ |
-| `ASSET-009.141` | 1991–2007 | بلوک | `loadCancelRequests` | 0 | ⬜ |
-| `ASSET-009.142` | 2008–2026 | بلوک | `loadGuestRequests` | 0 | ⬜ |
-| `ASSET-009.143` | 2027–2027 | بلوک | `beginGuestEdit` | 0 | ⬜ |
-| `ASSET-009.144` | 2028–2043 | بلوک | `row` | 0 | ⬜ |
-| `ASSET-009.145` | 2044–2049 | بلوک | `cancelGuestEdit` | 0 | ⬜ |
-| `ASSET-009.146` | 2050–2081 | بلوک | `saveGuestEdit` | 1 | ⬜ |
-| `ASSET-009.147` | 2082–2082 | بلوک | `guestRequestAction` | 0 | ⬜ |
-| `ASSET-009.148` | 2083–2105 | بلوک | `row` | 1 | ⬜ |
-| `ASSET-009.149` | 2106–2108 | بلوک | `renderGuestRequestManager` | 0 | ⬜ |
-| `ASSET-009.150` | 2109–2131 | بلوک | `rows` | 1 | ⬜ |
-| `ASSET-009.151` | 2132–2146 | بلوک | `decideCancelRequest` | 0 | ⬜ |
-| `ASSET-009.152` | 2147–2153 | بلوک | `loadStatistics` | 0 | ⬜ |
-| `ASSET-009.153` | 2154–2187 | بلوک | `selectedIds` | 0 | ⬜ |
-| `ASSET-009.154` | 2188–2215 | بلوک | `searchSelectedReportEmployees` | 0 | ⬜ |
-| `ASSET-009.155` | 2216–2242 | بلوک | `refreshAll` | 0 | ⬜ |
-| `ASSET-009.156` | 2243–2287 | بلوک | `saveDay` | 0 | ⬜ |
-| `ASSET-009.157` | 2288–2313 | بلوک | `saveCatalog` | 0 | ⬜ |
-| `ASSET-009.158` | 2314–2333 | بلوک | `orderExportRows` | 0 | ⬜ |
-| `ASSET-009.159` | 2334–2350 | بلوک | `downloadOrdersCsv` | 0 | ⬜ |
-| `ASSET-009.160` | 2351–2355 | بلوک | `downloadOrders` | 0 | ⬜ |
-| `ASSET-009.161` | 2356–2357 | بلوک | `printScopedReport` | 0 | ⬜ |
-| `ASSET-009.162` | 2358–2368 | بلوک | `target` | 0 | ⬜ |
-| `ASSET-009.163` | 2369–2386 | بلوک | `cleanup` | 0 | ⬜ |
-| `ASSET-009.164` | 2387–2391 | بلوک | `printOrders` | 0 | ⬜ |
-| `ASSET-009.165` | 2392–2398 | بلوک | `downloadStatistics` | 0 | ⬜ |
-| `ASSET-009.166` | 2399–2403 | بلوک | `printStatistics` | 0 | ⬜ |
-| `ASSET-009.167` | 2404–2411 | بلوک | `selectDay` | 0 | ⬜ |
-| `ASSET-009.168` | 2412–2417 | بلوک | `changeMonth` | 0 | ⬜ |
-| `ASSET-009.169` | 2418–2454 | بلوک | `switchTab` | 0 | ⬜ |
-| `ASSET-009.170` | 2455–2468 | بلوک | `emergencyEnsurePeople` | 0 | ⬜ |
-| `ASSET-009.171` | 2469–2477 | بلوک | `emergencyPanel` | 0 | ⬜ |
-| `ASSET-009.172` | 2478–2512 | بلوک | `msgs` | 0 | ⬜ |
-| `ASSET-009.173` | 2513–2518 | بلوک | `emergencyLoadOrders` | 0 | ⬜ |
-| `ASSET-009.174` | 2519–2563 | بلوک | `daySearchInput` | 4 | ⬜ |
-| `ASSET-009.175` | 2564–2574 | بلوک | `emergencyClick` | 0 | ⬜ |
-| `ASSET-009.176` | 2575–2603 | بلوک | `person` | 0 | ⬜ |
-| `ASSET-009.177` | 2604–2651 | بلوک | `eventClick` | 0 | ⬜ |
-| `ASSET-009.178` | 2652–2763 | بلوک | `person` | 1 | ⬜ |
-| `ASSET-009.179` | 2764–2772 | بلوک | `dayPickFor` | 0 | ⬜ |
-| `ASSET-009.180` | 2773–2779 | بلوک | `trackDayPick` | 0 | ⬜ |
-| `ASSET-009.181` | 2780–2787 | بلوک | `orderedDayFoodIds` | 0 | ⬜ |
-| `ASSET-009.182` | 2788–2824 | بلوک | `eventChange` | 0 | ⬜ |
-| `ASSET-009.183` | 2825–2858 | بلوک | `person` | 0 | ⬜ |
-| `ASSET-009.184` | 2859–2941 | بلوک | `eventSubmit` | 0 | ⬜ |
-| `ASSET-009.185` | 2942–2947 | بلوک | `spanDays` | 0 | ⬜ |
-| `ASSET-009.186` | 2948–2977 | بلوک | `mount` | 0 | ⬜ |
-| `ASSET-009.187` | 2978–2978 | بلوک | `reportInputFocused` | 0 | ⬜ |
-| `ASSET-009.188` | 2979–2981 | بلوک | `safeReportRender` | 0 | ⬜ |
-| `ASSET-009.189` | 2982–2991 | بلوک | `html` | 0 | ⬜ |
+| `ASSET-009.51` | 678–698 | بلوک | `renderPrintedDeliveryReport` | 0 | ⬜ |
+| `ASSET-009.52` | 699–734 | بلوک | `loadPrintedDeliveryReport` | 0 | ⬜ |
+| `ASSET-009.53` | 735–751 | بلوک | `exportPrintedDeliveryReport` | 0 | ⬜ |
+| `ASSET-009.54` | 752–756 | بلوک | `printPrintedDeliveryReport` | 0 | ⬜ |
+| `ASSET-009.55` | 757–762 | بلوک | `summaryHtml` | 0 | ⬜ |
+| `ASSET-009.56` | 763–771 | بلوک | `nameSplit` | 0 | ⬜ |
+| `ASSET-009.57` | 772–779 | بلوک | `personSortValue` | 0 | ⬜ |
+| `ASSET-009.58` | 780–790 | بلوک | `sortByState` | 0 | ⬜ |
+| `ASSET-009.59` | 791–796 | بلوک | `sortStateToggle` | 0 | ⬜ |
+| `ASSET-009.60` | 797–800 | بلوک | `sortStateMark` | 0 | ⬜ |
+| `ASSET-009.61` | 801–804 | بلوک | `rowSummary` | 0 | ⬜ |
+| `ASSET-009.62` | 805–810 | بلوک | `renderOrders` | 0 | ⬜ |
+| `ASSET-009.63` | 811–831 | بلوک | `viewButton` | 0 | ⬜ |
+| `ASSET-009.64` | 832–845 | بلوک | `ordersByOrgHtml` | 0 | ⬜ |
+| `ASSET-009.65` | 846–854 | بلوک | `renderGroupOrders` | 0 | ⬜ |
+| `ASSET-009.66` | 855–879 | بلوک | `tableFor` | 0 | ⬜ |
+| `ASSET-009.67` | 880–887 | بلوک | `renderCancelRequests` | 0 | ⬜ |
+| `ASSET-009.68` | 888–900 | بلوک | `splitRow` | 0 | ⬜ |
+| `ASSET-009.69` | 901–910 | بلوک | `cancelValue` | 0 | ⬜ |
+| `ASSET-009.70` | 911–913 | بلوک | `cmp` | 0 | ⬜ |
+| `ASSET-009.71` | 914–932 | بلوک | `cancelHead` | 0 | ⬜ |
+| `ASSET-009.72` | 933–951 | بلوک | `renderStatistics` | 0 | ⬜ |
+| `ASSET-009.73` | 952–961 | بلوک | `mark` | 0 | ⬜ |
+| `ASSET-009.74` | 962–985 | بلوک | `peopleSortMark` | 0 | ⬜ |
+| `ASSET-009.75` | 986–1011 | بلوک | `foods` | 0 | ⬜ |
+| `ASSET-009.76` | 1012–1020 | بلوک | `normalizeJalaliMonth` | 0 | ⬜ |
+| `ASSET-009.77` | 1021–1030 | بلوک | `reconciliationGapCell` | 0 | ⬜ |
+| `ASSET-009.78` | 1031–1039 | بلوک | `reconciliationRemainingCell` | 0 | ⬜ |
+| `ASSET-009.79` | 1040–1046 | بلوک | `reconciliationLeftoverCell` | 0 | ⬜ |
+| `ASSET-009.80` | 1047–1050 | بلوک | `reconciliationNumber` | 0 | ⬜ |
+| `ASSET-009.81` | 1051–1055 | بلوک | `reconciliationAmount` | 0 | ⬜ |
+| `ASSET-009.82` | 1056–1136 | بلوک | `renderReconciliation` | 0 | ⬜ |
+| `ASSET-009.83` | 1137–1142 | بلوک | `renderGuestActualModal` | 0 | ⬜ |
+| `ASSET-009.84` | 1143–1143 | بلوک | `hasNoneRow` | 0 | ⬜ |
+| `ASSET-009.85` | 1144–1170 | بلوک | `rows` | 0 | ⬜ |
+| `ASSET-009.86` | 1171–1176 | بلوک | `guestActualInlineError` | 0 | ⬜ |
+| `ASSET-009.87` | 1177–1188 | بلوک | `guestActualSumFromDom` | 0 | ⬜ |
+| `ASSET-009.88` | 1189–1197 | بلوک | `guestActualLiveSumListener` | 0 | ⬜ |
+| `ASSET-009.89` | 1198–1223 | بلوک | `proceedToLeftover` | 0 | ⬜ |
+| `ASSET-009.90` | 1224–1262 | بلوک | `confirmGuestActualModal` | 0 | ⬜ |
+| `ASSET-009.91` | 1263–1268 | بلوک | `renderLeftoverModal` | 0 | ⬜ |
+| `ASSET-009.92` | 1269–1288 | بلوک | `row` | 0 | ⬜ |
+| `ASSET-009.93` | 1289–1294 | بلوک | `leftoverInlineError` | 0 | ⬜ |
+| `ASSET-009.94` | 1295–1370 | بلوک | `confirmLeftoverModal` | 0 | ⬜ |
+| `ASSET-009.95` | 1371–1378 | بلوک | `submitReconciliationBody` | 0 | ⬜ |
+| `ASSET-009.96` | 1379–1385 | بلوک | `message` | 0 | ⬜ |
+| `ASSET-009.97` | 1386–1394 | بلوک | `postReconciliation` | 0 | ⬜ |
+| `ASSET-009.98` | 1395–1435 | بلوک | `loadReconciliation` | 0 | ⬜ |
+| `ASSET-009.99` | 1436–1441 | بلوک | `downloadReconciliation` | 0 | ⬜ |
+| `ASSET-009.100` | 1442–1442 | بلوک | `selectReconciliationRow` | 0 | ⬜ |
+| `ASSET-009.101` | 1443–1459 | بلوک | `item` | 0 | ⬜ |
+| `ASSET-009.102` | 1460–1513 | بلوک | `saveReconciliationForm` | 0 | ⬜ |
+| `ASSET-009.103` | 1514–1550 | بلوک | `uploadReconciliationInvoice` | 0 | ⬜ |
+| `ASSET-009.104` | 1551–1554 | بلوک | `bulkOperationTitle` | 0 | ⬜ |
+| `ASSET-009.105` | 1555–1559 | بلوک | `bulkSelectedPeople` | 0 | ⬜ |
+| `ASSET-009.106` | 1560–1563 | بلوک | `bulkTargetValue` | 0 | ⬜ |
+| `ASSET-009.107` | 1564–1570 | بلوک | `bulkCanSelect` | 0 | ⬜ |
+| `ASSET-009.108` | 1571–1581 | بلوک | `group` | 0 | ⬜ |
+| `ASSET-009.109` | 1582–1598 | بلوک | `saveCancelCutoff` | 0 | ⬜ |
+| `ASSET-009.110` | 1599–1627 | بلوک | `loadBulkSnapshot` | 0 | ⬜ |
+| `ASSET-009.111` | 1628–1642 | بلوک | `bulkTargetOptions` | 0 | ⬜ |
+| `ASSET-009.112` | 1643–1658 | بلوک | `bulkPersonStatus` | 0 | ⬜ |
+| `ASSET-009.113` | 1659–1680 | بلوک | `group` | 0 | ⬜ |
+| `ASSET-009.114` | 1681–1686 | بلوک | `renderBulkResults` | 0 | ⬜ |
+| `ASSET-009.115` | 1687–1694 | بلوک | `renderBulkModal` | 0 | ⬜ |
+| `ASSET-009.116` | 1695–1712 | بلوک | `renderBulkOperations` | 0 | ⬜ |
+| `ASSET-009.117` | 1713–1718 | بلوک | `rows` | 0 | ⬜ |
+| `ASSET-009.118` | 1719–1731 | بلوک | `bulkValue` | 0 | ⬜ |
+| `ASSET-009.119` | 1732–1737 | بلوک | `bulkHead` | 0 | ⬜ |
+| `ASSET-009.120` | 1738–1751 | بلوک | `selected` | 0 | ⬜ |
+| `ASSET-009.121` | 1752–1762 | بلوک | `previewDisabled` | 0 | ⬜ |
+| `ASSET-009.122` | 1763–1773 | بلوک | `bulkTogglePerson` | 1 | ⬜ |
+| `ASSET-009.123` | 1774–1775 | بلوک | `bulkSelectEligible` | 0 | ⬜ |
+| `ASSET-009.124` | 1776–1781 | بلوک | `eligible` | 0 | ⬜ |
+| `ASSET-009.125` | 1782–1784 | بلوک | `submitBulkOperation` | 0 | ⬜ |
+| `ASSET-009.126` | 1785–1804 | بلوک | `ids` | 0 | ⬜ |
+| `ASSET-009.127` | 1805–1810 | بلوک | `mealTypeSwitch` | 0 | ⬜ |
+| `ASSET-009.128` | 1811–1818 | بلوک | `embeddedPanel` | 0 | ⬜ |
+| `ASSET-009.129` | 1819–1838 | بلوک | `loadEmbedded` | 0 | ⬜ |
+| `ASSET-009.130` | 1839–1846 | بلوک | `renderFocusKeyOf` | 0 | ⬜ |
+| `ASSET-009.131` | 1847–1858 | بلوک | `captureRenderFocus` | 4 | ⬜ |
+| `ASSET-009.132` | 1859–1871 | بلوک | `restoreRenderFocus` | 4 | ⬜ |
+| `ASSET-009.133` | 1872–1883 | بلوک | `render` | 0 | ⬜ |
+| `ASSET-009.134` | 1884–1890 | بلوک | `notices` | 0 | ⬜ |
+| `ASSET-009.135` | 1891–1902 | بلوک | `loadStatus` | 0 | ⬜ |
+| `ASSET-009.136` | 1903–1909 | بلوک | `loadCatalog` | 0 | ⬜ |
+| `ASSET-009.137` | 1910–1917 | بلوک | `loadMonth` | 0 | ⬜ |
+| `ASSET-009.138` | 1918–1939 | بلوک | `loadOrders` | 0 | ⬜ |
+| `ASSET-009.139` | 1940–1960 | بلوک | `loadFoodGroups` | 0 | ⬜ |
+| `ASSET-009.140` | 1961–1991 | بلوک | `loadGroupOrders` | 0 | ⬜ |
+| `ASSET-009.141` | 1992–2008 | بلوک | `loadCancelRequests` | 0 | ⬜ |
+| `ASSET-009.142` | 2009–2027 | بلوک | `loadGuestRequests` | 0 | ⬜ |
+| `ASSET-009.143` | 2028–2028 | بلوک | `beginGuestEdit` | 0 | ⬜ |
+| `ASSET-009.144` | 2029–2044 | بلوک | `row` | 0 | ⬜ |
+| `ASSET-009.145` | 2045–2050 | بلوک | `cancelGuestEdit` | 0 | ⬜ |
+| `ASSET-009.146` | 2051–2082 | بلوک | `saveGuestEdit` | 1 | ⬜ |
+| `ASSET-009.147` | 2083–2083 | بلوک | `guestRequestAction` | 0 | ⬜ |
+| `ASSET-009.148` | 2084–2106 | بلوک | `row` | 1 | ⬜ |
+| `ASSET-009.149` | 2107–2109 | بلوک | `renderGuestRequestManager` | 0 | ⬜ |
+| `ASSET-009.150` | 2110–2132 | بلوک | `rows` | 1 | ⬜ |
+| `ASSET-009.151` | 2133–2147 | بلوک | `decideCancelRequest` | 0 | ⬜ |
+| `ASSET-009.152` | 2148–2154 | بلوک | `loadStatistics` | 0 | ⬜ |
+| `ASSET-009.153` | 2155–2188 | بلوک | `selectedIds` | 0 | ⬜ |
+| `ASSET-009.154` | 2189–2216 | بلوک | `searchSelectedReportEmployees` | 0 | ⬜ |
+| `ASSET-009.155` | 2217–2243 | بلوک | `refreshAll` | 0 | ⬜ |
+| `ASSET-009.156` | 2244–2288 | بلوک | `saveDay` | 0 | ⬜ |
+| `ASSET-009.157` | 2289–2314 | بلوک | `saveCatalog` | 0 | ⬜ |
+| `ASSET-009.158` | 2315–2334 | بلوک | `orderExportRows` | 0 | ⬜ |
+| `ASSET-009.159` | 2335–2351 | بلوک | `downloadOrdersCsv` | 0 | ⬜ |
+| `ASSET-009.160` | 2352–2356 | بلوک | `downloadOrders` | 0 | ⬜ |
+| `ASSET-009.161` | 2357–2358 | بلوک | `printScopedReport` | 0 | ⬜ |
+| `ASSET-009.162` | 2359–2369 | بلوک | `target` | 0 | ⬜ |
+| `ASSET-009.163` | 2370–2387 | بلوک | `cleanup` | 0 | ⬜ |
+| `ASSET-009.164` | 2388–2392 | بلوک | `printOrders` | 0 | ⬜ |
+| `ASSET-009.165` | 2393–2399 | بلوک | `downloadStatistics` | 0 | ⬜ |
+| `ASSET-009.166` | 2400–2404 | بلوک | `printStatistics` | 0 | ⬜ |
+| `ASSET-009.167` | 2405–2412 | بلوک | `selectDay` | 0 | ⬜ |
+| `ASSET-009.168` | 2413–2418 | بلوک | `changeMonth` | 0 | ⬜ |
+| `ASSET-009.169` | 2419–2455 | بلوک | `switchTab` | 0 | ⬜ |
+| `ASSET-009.170` | 2456–2469 | بلوک | `emergencyEnsurePeople` | 0 | ⬜ |
+| `ASSET-009.171` | 2470–2478 | بلوک | `emergencyPanel` | 0 | ⬜ |
+| `ASSET-009.172` | 2479–2513 | بلوک | `msgs` | 0 | ⬜ |
+| `ASSET-009.173` | 2514–2519 | بلوک | `emergencyLoadOrders` | 0 | ⬜ |
+| `ASSET-009.174` | 2520–2564 | بلوک | `daySearchInput` | 4 | ⬜ |
+| `ASSET-009.175` | 2565–2575 | بلوک | `emergencyClick` | 0 | ⬜ |
+| `ASSET-009.176` | 2576–2604 | بلوک | `person` | 0 | ⬜ |
+| `ASSET-009.177` | 2605–2652 | بلوک | `eventClick` | 0 | ⬜ |
+| `ASSET-009.178` | 2653–2764 | بلوک | `person` | 1 | ⬜ |
+| `ASSET-009.179` | 2765–2773 | بلوک | `dayPickFor` | 0 | ⬜ |
+| `ASSET-009.180` | 2774–2780 | بلوک | `trackDayPick` | 0 | ⬜ |
+| `ASSET-009.181` | 2781–2788 | بلوک | `orderedDayFoodIds` | 0 | ⬜ |
+| `ASSET-009.182` | 2789–2825 | بلوک | `eventChange` | 0 | ⬜ |
+| `ASSET-009.183` | 2826–2859 | بلوک | `person` | 0 | ⬜ |
+| `ASSET-009.184` | 2860–2942 | بلوک | `eventSubmit` | 0 | ⬜ |
+| `ASSET-009.185` | 2943–2948 | بلوک | `spanDays` | 0 | ⬜ |
+| `ASSET-009.186` | 2949–2978 | بلوک | `mount` | 0 | ⬜ |
+| `ASSET-009.187` | 2979–2979 | بلوک | `reportInputFocused` | 0 | ⬜ |
+| `ASSET-009.188` | 2980–2982 | بلوک | `safeReportRender` | 0 | ⬜ |
+| `ASSET-009.189` | 2983–2992 | بلوک | `html` | 0 | ⬜ |
 
 </details>
 
@@ -13137,7 +13137,7 @@
 </details>
 
 <details>
-<summary><b>WEB-020</b> — <code>food-ticket-web/assets/food-menu.css</code> (430 خط، 19 آدرس، بازبینی‌شده 0/19)</summary>
+<summary><b>WEB-020</b> — <code>food-ticket-web/assets/food-menu.css</code> (438 خط، 19 آدرس، بازبینی‌شده 0/19)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
@@ -13159,12 +13159,12 @@
 | `WEB-020.16` | 355–391 | بلوک | `تعیین تکلیف غذای باقیمانده (تطبیق روزانه)` | 1 | ⬜ |
 | `WEB-020.17` | 392–418 | بلوک | `1.62.93 follow-up: cancel-request cutoff + compact` | 1 | ⬜ |
 | `WEB-020.18` | 419–426 | بلوک | `تفکیک غذای هم‌گروه: «چلوکباب ۴ · قیمه ۲»` | 0 | ⬜ |
-| `WEB-020.19` | 427–430 | بلوک | `جدول داخل هر گروه، مثل گروه منو بدون حاشیهٔ اضافه` | 0 | ⬜ |
+| `WEB-020.19` | 427–438 | بلوک | `جدول داخل هر گروه، مثل گروه منو بدون حاشیهٔ اضافه` | 0 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>WEB-021</b> — <code>food-ticket-web/assets/food-menu.js</code> (2,991 خط، 189 آدرس، بازبینی‌شده 0/189)</summary>
+<summary><b>WEB-021</b> — <code>food-ticket-web/assets/food-menu.js</code> (2,992 خط، 189 آدرس، بازبینی‌شده 0/189)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
@@ -13218,145 +13218,145 @@
 | `WEB-021.48` | 656–660 | بلوک | `deliveredReportOrderedRows` | 0 | ⬜ |
 | `WEB-021.49` | 661–673 | بلوک | `key` | 0 | ⬜ |
 | `WEB-021.50` | 674–677 | بلوک | `deliveryDateForReport` | 0 | ⬜ |
-| `WEB-021.51` | 678–697 | بلوک | `renderPrintedDeliveryReport` | 0 | ⬜ |
-| `WEB-021.52` | 698–733 | بلوک | `loadPrintedDeliveryReport` | 0 | ⬜ |
-| `WEB-021.53` | 734–750 | بلوک | `exportPrintedDeliveryReport` | 0 | ⬜ |
-| `WEB-021.54` | 751–755 | بلوک | `printPrintedDeliveryReport` | 0 | ⬜ |
-| `WEB-021.55` | 756–761 | بلوک | `summaryHtml` | 0 | ⬜ |
-| `WEB-021.56` | 762–770 | بلوک | `nameSplit` | 0 | ⬜ |
-| `WEB-021.57` | 771–778 | بلوک | `personSortValue` | 0 | ⬜ |
-| `WEB-021.58` | 779–789 | بلوک | `sortByState` | 0 | ⬜ |
-| `WEB-021.59` | 790–795 | بلوک | `sortStateToggle` | 0 | ⬜ |
-| `WEB-021.60` | 796–799 | بلوک | `sortStateMark` | 0 | ⬜ |
-| `WEB-021.61` | 800–803 | بلوک | `rowSummary` | 0 | ⬜ |
-| `WEB-021.62` | 804–809 | بلوک | `renderOrders` | 0 | ⬜ |
-| `WEB-021.63` | 810–830 | بلوک | `viewButton` | 0 | ⬜ |
-| `WEB-021.64` | 831–844 | بلوک | `ordersByOrgHtml` | 0 | ⬜ |
-| `WEB-021.65` | 845–853 | بلوک | `renderGroupOrders` | 0 | ⬜ |
-| `WEB-021.66` | 854–878 | بلوک | `tableFor` | 0 | ⬜ |
-| `WEB-021.67` | 879–886 | بلوک | `renderCancelRequests` | 0 | ⬜ |
-| `WEB-021.68` | 887–899 | بلوک | `splitRow` | 0 | ⬜ |
-| `WEB-021.69` | 900–909 | بلوک | `cancelValue` | 0 | ⬜ |
-| `WEB-021.70` | 910–912 | بلوک | `cmp` | 0 | ⬜ |
-| `WEB-021.71` | 913–931 | بلوک | `cancelHead` | 0 | ⬜ |
-| `WEB-021.72` | 932–950 | بلوک | `renderStatistics` | 0 | ⬜ |
-| `WEB-021.73` | 951–960 | بلوک | `mark` | 0 | ⬜ |
-| `WEB-021.74` | 961–984 | بلوک | `peopleSortMark` | 0 | ⬜ |
-| `WEB-021.75` | 985–1010 | بلوک | `foods` | 0 | ⬜ |
-| `WEB-021.76` | 1011–1019 | بلوک | `normalizeJalaliMonth` | 0 | ⬜ |
-| `WEB-021.77` | 1020–1029 | بلوک | `reconciliationGapCell` | 0 | ⬜ |
-| `WEB-021.78` | 1030–1038 | بلوک | `reconciliationRemainingCell` | 0 | ⬜ |
-| `WEB-021.79` | 1039–1045 | بلوک | `reconciliationLeftoverCell` | 0 | ⬜ |
-| `WEB-021.80` | 1046–1049 | بلوک | `reconciliationNumber` | 0 | ⬜ |
-| `WEB-021.81` | 1050–1054 | بلوک | `reconciliationAmount` | 0 | ⬜ |
-| `WEB-021.82` | 1055–1135 | بلوک | `renderReconciliation` | 0 | ⬜ |
-| `WEB-021.83` | 1136–1141 | بلوک | `renderGuestActualModal` | 0 | ⬜ |
-| `WEB-021.84` | 1142–1142 | بلوک | `hasNoneRow` | 0 | ⬜ |
-| `WEB-021.85` | 1143–1169 | بلوک | `rows` | 0 | ⬜ |
-| `WEB-021.86` | 1170–1175 | بلوک | `guestActualInlineError` | 0 | ⬜ |
-| `WEB-021.87` | 1176–1187 | بلوک | `guestActualSumFromDom` | 0 | ⬜ |
-| `WEB-021.88` | 1188–1196 | بلوک | `guestActualLiveSumListener` | 0 | ⬜ |
-| `WEB-021.89` | 1197–1222 | بلوک | `proceedToLeftover` | 0 | ⬜ |
-| `WEB-021.90` | 1223–1261 | بلوک | `confirmGuestActualModal` | 0 | ⬜ |
-| `WEB-021.91` | 1262–1267 | بلوک | `renderLeftoverModal` | 0 | ⬜ |
-| `WEB-021.92` | 1268–1287 | بلوک | `row` | 0 | ⬜ |
-| `WEB-021.93` | 1288–1293 | بلوک | `leftoverInlineError` | 0 | ⬜ |
-| `WEB-021.94` | 1294–1369 | بلوک | `confirmLeftoverModal` | 0 | ⬜ |
-| `WEB-021.95` | 1370–1377 | بلوک | `submitReconciliationBody` | 0 | ⬜ |
-| `WEB-021.96` | 1378–1384 | بلوک | `message` | 0 | ⬜ |
-| `WEB-021.97` | 1385–1393 | بلوک | `postReconciliation` | 0 | ⬜ |
-| `WEB-021.98` | 1394–1434 | بلوک | `loadReconciliation` | 0 | ⬜ |
-| `WEB-021.99` | 1435–1440 | بلوک | `downloadReconciliation` | 0 | ⬜ |
-| `WEB-021.100` | 1441–1441 | بلوک | `selectReconciliationRow` | 0 | ⬜ |
-| `WEB-021.101` | 1442–1458 | بلوک | `item` | 0 | ⬜ |
-| `WEB-021.102` | 1459–1512 | بلوک | `saveReconciliationForm` | 0 | ⬜ |
-| `WEB-021.103` | 1513–1549 | بلوک | `uploadReconciliationInvoice` | 0 | ⬜ |
-| `WEB-021.104` | 1550–1553 | بلوک | `bulkOperationTitle` | 0 | ⬜ |
-| `WEB-021.105` | 1554–1558 | بلوک | `bulkSelectedPeople` | 0 | ⬜ |
-| `WEB-021.106` | 1559–1562 | بلوک | `bulkTargetValue` | 0 | ⬜ |
-| `WEB-021.107` | 1563–1569 | بلوک | `bulkCanSelect` | 0 | ⬜ |
-| `WEB-021.108` | 1570–1580 | بلوک | `group` | 0 | ⬜ |
-| `WEB-021.109` | 1581–1597 | بلوک | `saveCancelCutoff` | 0 | ⬜ |
-| `WEB-021.110` | 1598–1626 | بلوک | `loadBulkSnapshot` | 0 | ⬜ |
-| `WEB-021.111` | 1627–1641 | بلوک | `bulkTargetOptions` | 0 | ⬜ |
-| `WEB-021.112` | 1642–1657 | بلوک | `bulkPersonStatus` | 0 | ⬜ |
-| `WEB-021.113` | 1658–1679 | بلوک | `group` | 0 | ⬜ |
-| `WEB-021.114` | 1680–1685 | بلوک | `renderBulkResults` | 0 | ⬜ |
-| `WEB-021.115` | 1686–1693 | بلوک | `renderBulkModal` | 0 | ⬜ |
-| `WEB-021.116` | 1694–1711 | بلوک | `renderBulkOperations` | 0 | ⬜ |
-| `WEB-021.117` | 1712–1717 | بلوک | `rows` | 0 | ⬜ |
-| `WEB-021.118` | 1718–1730 | بلوک | `bulkValue` | 0 | ⬜ |
-| `WEB-021.119` | 1731–1736 | بلوک | `bulkHead` | 0 | ⬜ |
-| `WEB-021.120` | 1737–1750 | بلوک | `selected` | 0 | ⬜ |
-| `WEB-021.121` | 1751–1761 | بلوک | `previewDisabled` | 0 | ⬜ |
-| `WEB-021.122` | 1762–1772 | بلوک | `bulkTogglePerson` | 1 | ⬜ |
-| `WEB-021.123` | 1773–1774 | بلوک | `bulkSelectEligible` | 0 | ⬜ |
-| `WEB-021.124` | 1775–1780 | بلوک | `eligible` | 0 | ⬜ |
-| `WEB-021.125` | 1781–1783 | بلوک | `submitBulkOperation` | 0 | ⬜ |
-| `WEB-021.126` | 1784–1803 | بلوک | `ids` | 0 | ⬜ |
-| `WEB-021.127` | 1804–1809 | بلوک | `mealTypeSwitch` | 0 | ⬜ |
-| `WEB-021.128` | 1810–1817 | بلوک | `embeddedPanel` | 0 | ⬜ |
-| `WEB-021.129` | 1818–1837 | بلوک | `loadEmbedded` | 0 | ⬜ |
-| `WEB-021.130` | 1838–1845 | بلوک | `renderFocusKeyOf` | 0 | ⬜ |
-| `WEB-021.131` | 1846–1857 | بلوک | `captureRenderFocus` | 4 | ⬜ |
-| `WEB-021.132` | 1858–1870 | بلوک | `restoreRenderFocus` | 4 | ⬜ |
-| `WEB-021.133` | 1871–1882 | بلوک | `render` | 0 | ⬜ |
-| `WEB-021.134` | 1883–1889 | بلوک | `notices` | 0 | ⬜ |
-| `WEB-021.135` | 1890–1901 | بلوک | `loadStatus` | 0 | ⬜ |
-| `WEB-021.136` | 1902–1908 | بلوک | `loadCatalog` | 0 | ⬜ |
-| `WEB-021.137` | 1909–1916 | بلوک | `loadMonth` | 0 | ⬜ |
-| `WEB-021.138` | 1917–1938 | بلوک | `loadOrders` | 0 | ⬜ |
-| `WEB-021.139` | 1939–1959 | بلوک | `loadFoodGroups` | 0 | ⬜ |
-| `WEB-021.140` | 1960–1990 | بلوک | `loadGroupOrders` | 0 | ⬜ |
-| `WEB-021.141` | 1991–2007 | بلوک | `loadCancelRequests` | 0 | ⬜ |
-| `WEB-021.142` | 2008–2026 | بلوک | `loadGuestRequests` | 0 | ⬜ |
-| `WEB-021.143` | 2027–2027 | بلوک | `beginGuestEdit` | 0 | ⬜ |
-| `WEB-021.144` | 2028–2043 | بلوک | `row` | 0 | ⬜ |
-| `WEB-021.145` | 2044–2049 | بلوک | `cancelGuestEdit` | 0 | ⬜ |
-| `WEB-021.146` | 2050–2081 | بلوک | `saveGuestEdit` | 1 | ⬜ |
-| `WEB-021.147` | 2082–2082 | بلوک | `guestRequestAction` | 0 | ⬜ |
-| `WEB-021.148` | 2083–2105 | بلوک | `row` | 1 | ⬜ |
-| `WEB-021.149` | 2106–2108 | بلوک | `renderGuestRequestManager` | 0 | ⬜ |
-| `WEB-021.150` | 2109–2131 | بلوک | `rows` | 1 | ⬜ |
-| `WEB-021.151` | 2132–2146 | بلوک | `decideCancelRequest` | 0 | ⬜ |
-| `WEB-021.152` | 2147–2153 | بلوک | `loadStatistics` | 0 | ⬜ |
-| `WEB-021.153` | 2154–2187 | بلوک | `selectedIds` | 0 | ⬜ |
-| `WEB-021.154` | 2188–2215 | بلوک | `searchSelectedReportEmployees` | 0 | ⬜ |
-| `WEB-021.155` | 2216–2242 | بلوک | `refreshAll` | 0 | ⬜ |
-| `WEB-021.156` | 2243–2287 | بلوک | `saveDay` | 0 | ⬜ |
-| `WEB-021.157` | 2288–2313 | بلوک | `saveCatalog` | 0 | ⬜ |
-| `WEB-021.158` | 2314–2333 | بلوک | `orderExportRows` | 0 | ⬜ |
-| `WEB-021.159` | 2334–2350 | بلوک | `downloadOrdersCsv` | 0 | ⬜ |
-| `WEB-021.160` | 2351–2355 | بلوک | `downloadOrders` | 0 | ⬜ |
-| `WEB-021.161` | 2356–2357 | بلوک | `printScopedReport` | 0 | ⬜ |
-| `WEB-021.162` | 2358–2368 | بلوک | `target` | 0 | ⬜ |
-| `WEB-021.163` | 2369–2386 | بلوک | `cleanup` | 0 | ⬜ |
-| `WEB-021.164` | 2387–2391 | بلوک | `printOrders` | 0 | ⬜ |
-| `WEB-021.165` | 2392–2398 | بلوک | `downloadStatistics` | 0 | ⬜ |
-| `WEB-021.166` | 2399–2403 | بلوک | `printStatistics` | 0 | ⬜ |
-| `WEB-021.167` | 2404–2411 | بلوک | `selectDay` | 0 | ⬜ |
-| `WEB-021.168` | 2412–2417 | بلوک | `changeMonth` | 0 | ⬜ |
-| `WEB-021.169` | 2418–2454 | بلوک | `switchTab` | 0 | ⬜ |
-| `WEB-021.170` | 2455–2468 | بلوک | `emergencyEnsurePeople` | 0 | ⬜ |
-| `WEB-021.171` | 2469–2477 | بلوک | `emergencyPanel` | 0 | ⬜ |
-| `WEB-021.172` | 2478–2512 | بلوک | `msgs` | 0 | ⬜ |
-| `WEB-021.173` | 2513–2518 | بلوک | `emergencyLoadOrders` | 0 | ⬜ |
-| `WEB-021.174` | 2519–2563 | بلوک | `daySearchInput` | 4 | ⬜ |
-| `WEB-021.175` | 2564–2574 | بلوک | `emergencyClick` | 0 | ⬜ |
-| `WEB-021.176` | 2575–2603 | بلوک | `person` | 0 | ⬜ |
-| `WEB-021.177` | 2604–2651 | بلوک | `eventClick` | 0 | ⬜ |
-| `WEB-021.178` | 2652–2763 | بلوک | `person` | 1 | ⬜ |
-| `WEB-021.179` | 2764–2772 | بلوک | `dayPickFor` | 0 | ⬜ |
-| `WEB-021.180` | 2773–2779 | بلوک | `trackDayPick` | 0 | ⬜ |
-| `WEB-021.181` | 2780–2787 | بلوک | `orderedDayFoodIds` | 0 | ⬜ |
-| `WEB-021.182` | 2788–2824 | بلوک | `eventChange` | 0 | ⬜ |
-| `WEB-021.183` | 2825–2858 | بلوک | `person` | 0 | ⬜ |
-| `WEB-021.184` | 2859–2941 | بلوک | `eventSubmit` | 0 | ⬜ |
-| `WEB-021.185` | 2942–2947 | بلوک | `spanDays` | 0 | ⬜ |
-| `WEB-021.186` | 2948–2977 | بلوک | `mount` | 0 | ⬜ |
-| `WEB-021.187` | 2978–2978 | بلوک | `reportInputFocused` | 0 | ⬜ |
-| `WEB-021.188` | 2979–2981 | بلوک | `safeReportRender` | 0 | ⬜ |
-| `WEB-021.189` | 2982–2991 | بلوک | `html` | 0 | ⬜ |
+| `WEB-021.51` | 678–698 | بلوک | `renderPrintedDeliveryReport` | 0 | ⬜ |
+| `WEB-021.52` | 699–734 | بلوک | `loadPrintedDeliveryReport` | 0 | ⬜ |
+| `WEB-021.53` | 735–751 | بلوک | `exportPrintedDeliveryReport` | 0 | ⬜ |
+| `WEB-021.54` | 752–756 | بلوک | `printPrintedDeliveryReport` | 0 | ⬜ |
+| `WEB-021.55` | 757–762 | بلوک | `summaryHtml` | 0 | ⬜ |
+| `WEB-021.56` | 763–771 | بلوک | `nameSplit` | 0 | ⬜ |
+| `WEB-021.57` | 772–779 | بلوک | `personSortValue` | 0 | ⬜ |
+| `WEB-021.58` | 780–790 | بلوک | `sortByState` | 0 | ⬜ |
+| `WEB-021.59` | 791–796 | بلوک | `sortStateToggle` | 0 | ⬜ |
+| `WEB-021.60` | 797–800 | بلوک | `sortStateMark` | 0 | ⬜ |
+| `WEB-021.61` | 801–804 | بلوک | `rowSummary` | 0 | ⬜ |
+| `WEB-021.62` | 805–810 | بلوک | `renderOrders` | 0 | ⬜ |
+| `WEB-021.63` | 811–831 | بلوک | `viewButton` | 0 | ⬜ |
+| `WEB-021.64` | 832–845 | بلوک | `ordersByOrgHtml` | 0 | ⬜ |
+| `WEB-021.65` | 846–854 | بلوک | `renderGroupOrders` | 0 | ⬜ |
+| `WEB-021.66` | 855–879 | بلوک | `tableFor` | 0 | ⬜ |
+| `WEB-021.67` | 880–887 | بلوک | `renderCancelRequests` | 0 | ⬜ |
+| `WEB-021.68` | 888–900 | بلوک | `splitRow` | 0 | ⬜ |
+| `WEB-021.69` | 901–910 | بلوک | `cancelValue` | 0 | ⬜ |
+| `WEB-021.70` | 911–913 | بلوک | `cmp` | 0 | ⬜ |
+| `WEB-021.71` | 914–932 | بلوک | `cancelHead` | 0 | ⬜ |
+| `WEB-021.72` | 933–951 | بلوک | `renderStatistics` | 0 | ⬜ |
+| `WEB-021.73` | 952–961 | بلوک | `mark` | 0 | ⬜ |
+| `WEB-021.74` | 962–985 | بلوک | `peopleSortMark` | 0 | ⬜ |
+| `WEB-021.75` | 986–1011 | بلوک | `foods` | 0 | ⬜ |
+| `WEB-021.76` | 1012–1020 | بلوک | `normalizeJalaliMonth` | 0 | ⬜ |
+| `WEB-021.77` | 1021–1030 | بلوک | `reconciliationGapCell` | 0 | ⬜ |
+| `WEB-021.78` | 1031–1039 | بلوک | `reconciliationRemainingCell` | 0 | ⬜ |
+| `WEB-021.79` | 1040–1046 | بلوک | `reconciliationLeftoverCell` | 0 | ⬜ |
+| `WEB-021.80` | 1047–1050 | بلوک | `reconciliationNumber` | 0 | ⬜ |
+| `WEB-021.81` | 1051–1055 | بلوک | `reconciliationAmount` | 0 | ⬜ |
+| `WEB-021.82` | 1056–1136 | بلوک | `renderReconciliation` | 0 | ⬜ |
+| `WEB-021.83` | 1137–1142 | بلوک | `renderGuestActualModal` | 0 | ⬜ |
+| `WEB-021.84` | 1143–1143 | بلوک | `hasNoneRow` | 0 | ⬜ |
+| `WEB-021.85` | 1144–1170 | بلوک | `rows` | 0 | ⬜ |
+| `WEB-021.86` | 1171–1176 | بلوک | `guestActualInlineError` | 0 | ⬜ |
+| `WEB-021.87` | 1177–1188 | بلوک | `guestActualSumFromDom` | 0 | ⬜ |
+| `WEB-021.88` | 1189–1197 | بلوک | `guestActualLiveSumListener` | 0 | ⬜ |
+| `WEB-021.89` | 1198–1223 | بلوک | `proceedToLeftover` | 0 | ⬜ |
+| `WEB-021.90` | 1224–1262 | بلوک | `confirmGuestActualModal` | 0 | ⬜ |
+| `WEB-021.91` | 1263–1268 | بلوک | `renderLeftoverModal` | 0 | ⬜ |
+| `WEB-021.92` | 1269–1288 | بلوک | `row` | 0 | ⬜ |
+| `WEB-021.93` | 1289–1294 | بلوک | `leftoverInlineError` | 0 | ⬜ |
+| `WEB-021.94` | 1295–1370 | بلوک | `confirmLeftoverModal` | 0 | ⬜ |
+| `WEB-021.95` | 1371–1378 | بلوک | `submitReconciliationBody` | 0 | ⬜ |
+| `WEB-021.96` | 1379–1385 | بلوک | `message` | 0 | ⬜ |
+| `WEB-021.97` | 1386–1394 | بلوک | `postReconciliation` | 0 | ⬜ |
+| `WEB-021.98` | 1395–1435 | بلوک | `loadReconciliation` | 0 | ⬜ |
+| `WEB-021.99` | 1436–1441 | بلوک | `downloadReconciliation` | 0 | ⬜ |
+| `WEB-021.100` | 1442–1442 | بلوک | `selectReconciliationRow` | 0 | ⬜ |
+| `WEB-021.101` | 1443–1459 | بلوک | `item` | 0 | ⬜ |
+| `WEB-021.102` | 1460–1513 | بلوک | `saveReconciliationForm` | 0 | ⬜ |
+| `WEB-021.103` | 1514–1550 | بلوک | `uploadReconciliationInvoice` | 0 | ⬜ |
+| `WEB-021.104` | 1551–1554 | بلوک | `bulkOperationTitle` | 0 | ⬜ |
+| `WEB-021.105` | 1555–1559 | بلوک | `bulkSelectedPeople` | 0 | ⬜ |
+| `WEB-021.106` | 1560–1563 | بلوک | `bulkTargetValue` | 0 | ⬜ |
+| `WEB-021.107` | 1564–1570 | بلوک | `bulkCanSelect` | 0 | ⬜ |
+| `WEB-021.108` | 1571–1581 | بلوک | `group` | 0 | ⬜ |
+| `WEB-021.109` | 1582–1598 | بلوک | `saveCancelCutoff` | 0 | ⬜ |
+| `WEB-021.110` | 1599–1627 | بلوک | `loadBulkSnapshot` | 0 | ⬜ |
+| `WEB-021.111` | 1628–1642 | بلوک | `bulkTargetOptions` | 0 | ⬜ |
+| `WEB-021.112` | 1643–1658 | بلوک | `bulkPersonStatus` | 0 | ⬜ |
+| `WEB-021.113` | 1659–1680 | بلوک | `group` | 0 | ⬜ |
+| `WEB-021.114` | 1681–1686 | بلوک | `renderBulkResults` | 0 | ⬜ |
+| `WEB-021.115` | 1687–1694 | بلوک | `renderBulkModal` | 0 | ⬜ |
+| `WEB-021.116` | 1695–1712 | بلوک | `renderBulkOperations` | 0 | ⬜ |
+| `WEB-021.117` | 1713–1718 | بلوک | `rows` | 0 | ⬜ |
+| `WEB-021.118` | 1719–1731 | بلوک | `bulkValue` | 0 | ⬜ |
+| `WEB-021.119` | 1732–1737 | بلوک | `bulkHead` | 0 | ⬜ |
+| `WEB-021.120` | 1738–1751 | بلوک | `selected` | 0 | ⬜ |
+| `WEB-021.121` | 1752–1762 | بلوک | `previewDisabled` | 0 | ⬜ |
+| `WEB-021.122` | 1763–1773 | بلوک | `bulkTogglePerson` | 1 | ⬜ |
+| `WEB-021.123` | 1774–1775 | بلوک | `bulkSelectEligible` | 0 | ⬜ |
+| `WEB-021.124` | 1776–1781 | بلوک | `eligible` | 0 | ⬜ |
+| `WEB-021.125` | 1782–1784 | بلوک | `submitBulkOperation` | 0 | ⬜ |
+| `WEB-021.126` | 1785–1804 | بلوک | `ids` | 0 | ⬜ |
+| `WEB-021.127` | 1805–1810 | بلوک | `mealTypeSwitch` | 0 | ⬜ |
+| `WEB-021.128` | 1811–1818 | بلوک | `embeddedPanel` | 0 | ⬜ |
+| `WEB-021.129` | 1819–1838 | بلوک | `loadEmbedded` | 0 | ⬜ |
+| `WEB-021.130` | 1839–1846 | بلوک | `renderFocusKeyOf` | 0 | ⬜ |
+| `WEB-021.131` | 1847–1858 | بلوک | `captureRenderFocus` | 4 | ⬜ |
+| `WEB-021.132` | 1859–1871 | بلوک | `restoreRenderFocus` | 4 | ⬜ |
+| `WEB-021.133` | 1872–1883 | بلوک | `render` | 0 | ⬜ |
+| `WEB-021.134` | 1884–1890 | بلوک | `notices` | 0 | ⬜ |
+| `WEB-021.135` | 1891–1902 | بلوک | `loadStatus` | 0 | ⬜ |
+| `WEB-021.136` | 1903–1909 | بلوک | `loadCatalog` | 0 | ⬜ |
+| `WEB-021.137` | 1910–1917 | بلوک | `loadMonth` | 0 | ⬜ |
+| `WEB-021.138` | 1918–1939 | بلوک | `loadOrders` | 0 | ⬜ |
+| `WEB-021.139` | 1940–1960 | بلوک | `loadFoodGroups` | 0 | ⬜ |
+| `WEB-021.140` | 1961–1991 | بلوک | `loadGroupOrders` | 0 | ⬜ |
+| `WEB-021.141` | 1992–2008 | بلوک | `loadCancelRequests` | 0 | ⬜ |
+| `WEB-021.142` | 2009–2027 | بلوک | `loadGuestRequests` | 0 | ⬜ |
+| `WEB-021.143` | 2028–2028 | بلوک | `beginGuestEdit` | 0 | ⬜ |
+| `WEB-021.144` | 2029–2044 | بلوک | `row` | 0 | ⬜ |
+| `WEB-021.145` | 2045–2050 | بلوک | `cancelGuestEdit` | 0 | ⬜ |
+| `WEB-021.146` | 2051–2082 | بلوک | `saveGuestEdit` | 1 | ⬜ |
+| `WEB-021.147` | 2083–2083 | بلوک | `guestRequestAction` | 0 | ⬜ |
+| `WEB-021.148` | 2084–2106 | بلوک | `row` | 1 | ⬜ |
+| `WEB-021.149` | 2107–2109 | بلوک | `renderGuestRequestManager` | 0 | ⬜ |
+| `WEB-021.150` | 2110–2132 | بلوک | `rows` | 1 | ⬜ |
+| `WEB-021.151` | 2133–2147 | بلوک | `decideCancelRequest` | 0 | ⬜ |
+| `WEB-021.152` | 2148–2154 | بلوک | `loadStatistics` | 0 | ⬜ |
+| `WEB-021.153` | 2155–2188 | بلوک | `selectedIds` | 0 | ⬜ |
+| `WEB-021.154` | 2189–2216 | بلوک | `searchSelectedReportEmployees` | 0 | ⬜ |
+| `WEB-021.155` | 2217–2243 | بلوک | `refreshAll` | 0 | ⬜ |
+| `WEB-021.156` | 2244–2288 | بلوک | `saveDay` | 0 | ⬜ |
+| `WEB-021.157` | 2289–2314 | بلوک | `saveCatalog` | 0 | ⬜ |
+| `WEB-021.158` | 2315–2334 | بلوک | `orderExportRows` | 0 | ⬜ |
+| `WEB-021.159` | 2335–2351 | بلوک | `downloadOrdersCsv` | 0 | ⬜ |
+| `WEB-021.160` | 2352–2356 | بلوک | `downloadOrders` | 0 | ⬜ |
+| `WEB-021.161` | 2357–2358 | بلوک | `printScopedReport` | 0 | ⬜ |
+| `WEB-021.162` | 2359–2369 | بلوک | `target` | 0 | ⬜ |
+| `WEB-021.163` | 2370–2387 | بلوک | `cleanup` | 0 | ⬜ |
+| `WEB-021.164` | 2388–2392 | بلوک | `printOrders` | 0 | ⬜ |
+| `WEB-021.165` | 2393–2399 | بلوک | `downloadStatistics` | 0 | ⬜ |
+| `WEB-021.166` | 2400–2404 | بلوک | `printStatistics` | 0 | ⬜ |
+| `WEB-021.167` | 2405–2412 | بلوک | `selectDay` | 0 | ⬜ |
+| `WEB-021.168` | 2413–2418 | بلوک | `changeMonth` | 0 | ⬜ |
+| `WEB-021.169` | 2419–2455 | بلوک | `switchTab` | 0 | ⬜ |
+| `WEB-021.170` | 2456–2469 | بلوک | `emergencyEnsurePeople` | 0 | ⬜ |
+| `WEB-021.171` | 2470–2478 | بلوک | `emergencyPanel` | 0 | ⬜ |
+| `WEB-021.172` | 2479–2513 | بلوک | `msgs` | 0 | ⬜ |
+| `WEB-021.173` | 2514–2519 | بلوک | `emergencyLoadOrders` | 0 | ⬜ |
+| `WEB-021.174` | 2520–2564 | بلوک | `daySearchInput` | 4 | ⬜ |
+| `WEB-021.175` | 2565–2575 | بلوک | `emergencyClick` | 0 | ⬜ |
+| `WEB-021.176` | 2576–2604 | بلوک | `person` | 0 | ⬜ |
+| `WEB-021.177` | 2605–2652 | بلوک | `eventClick` | 0 | ⬜ |
+| `WEB-021.178` | 2653–2764 | بلوک | `person` | 1 | ⬜ |
+| `WEB-021.179` | 2765–2773 | بلوک | `dayPickFor` | 0 | ⬜ |
+| `WEB-021.180` | 2774–2780 | بلوک | `trackDayPick` | 0 | ⬜ |
+| `WEB-021.181` | 2781–2788 | بلوک | `orderedDayFoodIds` | 0 | ⬜ |
+| `WEB-021.182` | 2789–2825 | بلوک | `eventChange` | 0 | ⬜ |
+| `WEB-021.183` | 2826–2859 | بلوک | `person` | 0 | ⬜ |
+| `WEB-021.184` | 2860–2942 | بلوک | `eventSubmit` | 0 | ⬜ |
+| `WEB-021.185` | 2943–2948 | بلوک | `spanDays` | 0 | ⬜ |
+| `WEB-021.186` | 2949–2978 | بلوک | `mount` | 0 | ⬜ |
+| `WEB-021.187` | 2979–2979 | بلوک | `reportInputFocused` | 0 | ⬜ |
+| `WEB-021.188` | 2980–2982 | بلوک | `safeReportRender` | 0 | ⬜ |
+| `WEB-021.189` | 2983–2992 | بلوک | `html` | 0 | ⬜ |
 
 </details>
 

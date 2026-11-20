@@ -21,7 +21,7 @@ A(html.includes('window.AbsentLunchReport.load(false)'), 'render لودر تب �
 A(!html.includes('option value="absent"'), 'گزینهٔ قدیمی نوع گزارش حذف شده');
 A(!html.includes("['absent-report','غایبین ناهار']"), 'نمای مستقل اضافه نشده');
 A(html.includes("state.reportTab='absent-lunch'"), 'حالت ذخیرهشدهٔ قدیمی هدایت میشود');
-A(html.includes("PANEL_VERSION='1.37.59'") && php.includes("FOOD_TICKET_PANEL_VERSION = '1.37.59'"), 'نسخههای پنل هماهنگاند');
+A(html.includes("PANEL_VERSION='1.37.60'") && php.includes("FOOD_TICKET_PANEL_VERSION = '1.37.60'"), 'نسخههای پنل هماهنگاند');
 A(bundle.includes('window.AbsentLunchReport={html:html,load:load'), 'ماژول تب تعریف شده');
 A(bundle.includes('function mapped(items,orgMap)'), 'نگاشت بکاند');
 A(bundle.includes('window.FoodOrgGroups.groupOf(map,r)'), 'گروهبندی معاونت');
