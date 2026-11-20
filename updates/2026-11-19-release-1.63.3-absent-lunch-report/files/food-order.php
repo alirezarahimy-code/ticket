@@ -2432,6 +2432,7 @@ function food_order_status_summary(): array
 function food_order_api_body(): array
 {
     $raw = file_get_contents('php://input');
+    $raw = function_exists('fa_digits_normalize_digits') ? fa_digits_normalize_digits((string) $raw) : $raw;
     if (!is_string($raw) || trim($raw) === '') {
         return is_array($_POST ?? null) ? $_POST : [];
     }

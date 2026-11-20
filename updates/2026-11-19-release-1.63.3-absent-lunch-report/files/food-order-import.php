@@ -473,7 +473,7 @@ function food_order_import_handle(array $user): never
         }
         $html .= '</tbody></table></div>';
     }
-    $html .= '</body></html>';
+    $html .= '<script src="assets/fa-digits.js?v=1"></script></body></html>';
     header('Content-Type: text/html; charset=utf-8');
     echo $html;
     exit;

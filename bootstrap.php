@@ -87,6 +87,14 @@ require_once __DIR__ . '/lib/http-input.php';
 // متنِ داخل صفحه‌ها هنگام ارسال تبدیل می‌شود؛ اتربیوت‌ها/فرم‌ها/اسکریپت‌ها و
 // پاسخ‌های غیر HTML دست‌نخورده می‌مانند. می‌توان با تنظیم display.fa_digits=0 خاموش کرد.
 require_once __DIR__ . '/lib/fa-digits.php';
+if (PHP_SAPI !== 'cli' && function_exists('fa_digits_normalize_deep')) {
+    // ارقام فارسی/عربی در ورودی ($_GET/$_POST و آرایه‌های تودرتو) به لاتین برمی‌گردند؛
+    // خروجیِ فارسی (fa_digits_output_callback) دوباره آن‌ها را فارسی چاپ می‌کند.
+    // کلیدهای شبیه‌رمز/توکن در خود تابع مستثنا می‌شوند.
+    $_GET = fa_digits_normalize_deep($_GET);
+    $_POST = fa_digits_normalize_deep($_POST);
+    $_REQUEST = array_merge($_COOKIE, $_GET, $_POST);
+}
 if (PHP_SAPI !== 'cli' && function_exists('fa_digits_output_callback') && (function_exists('cfg') ? (bool) cfg('display.fa_digits', true) : true)) {
     ob_start('fa_digits_output_callback');
 }

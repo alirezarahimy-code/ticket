@@ -34,11 +34,14 @@ def convert(html: str) -> str:
 
 def test_helper_exists_and_registered():
     source = FA_DIGITS_PHP.read_text(encoding='utf-8')
-    for marker in ('function fa_digits_html(', 'function fa_digits_text(', 'function fa_digits_output_callback('):
+    for marker in ('function fa_digits_html(', 'function fa_digits_text(', 'function fa_digits_output_callback(',
+                   'function fa_digits_normalize_digits(', 'function fa_digits_normalize_deep('):
         assert marker in source, marker
     bootstrap = (ROOT / 'bootstrap.php').read_text(encoding='utf-8')
     assert "require_once __DIR__ . '/lib/fa-digits.php'" in bootstrap
     assert "ob_start('fa_digits_output_callback')" in bootstrap
+    assert "fa_digits_normalize_deep($_GET)" in bootstrap
+    assert "fa_digits_normalize_deep($_POST)" in bootstrap
     # راه برگشت اضطراری
     assert "cfg('display.fa_digits', true)" in bootstrap
 
@@ -58,7 +61,9 @@ def test_attributes_and_form_values_stay_latin():
     assert '>تیکت ۱۲۳<' in out
 
 
-def test_script_style_pre_code_textarea_and_comment_stay_latin():
+def test_script_style_pre_code_and_comment_stay_latin_but_textarea_converts():
+    # ۱٫۶۳٫۳ — متن تایپی کاربر (textarea) باید ارقام نمایشی فارسی داشته باشد؛
+    # دادهٔ canonical در پایگاه‌داده لاتین می‌ماند (fa_digits_normalize_deep).
     out = convert(
         '<script>var answer = 42; var s = "500";</script>'
         '<style>.x { margin: 10px; }</style>'
@@ -72,7 +77,7 @@ def test_script_style_pre_code_textarea_and_comment_stay_latin():
     assert 'margin: 10px;' in out
     assert 'خط 1: 111' in out
     assert '$n = 98765;' in out
-    assert 'عدد 123' in out
+    assert 'عدد ۱۲۳' in out
     assert 'نسخهٔ 1.62.95' in out
 
 
@@ -89,6 +94,43 @@ def test_mixed_tag_heavy_page_keeps_layout_valid():
     assert 'style="width:120px"' in out
     assert '<strong>۱۷ عدد</strong>' in out
     assert '۱۴۰۵/۰۸/۳۰' in out
+
+
+def test_normalize_digits_roundtrip():
+    proc = subprocess.run(
+        [PHP, '-r', 'require $argv[1]; echo fa_digits_normalize_digits($argv[2]);', str(FA_DIGITS_PHP),
+         '۱۴۰۵/۰۸/۲۲ و ١٢٣ و SUP-۰۰۰۰۹'],
+        capture_output=True, timeout=30,
+    )
+    assert proc.returncode == 0
+    assert proc.stdout.decode() == '1405/08/22 و 123 و SUP-00009'
+
+
+def test_normalize_deep_skips_sensitive_keys():
+    proc = subprocess.run(
+        [PHP, '-r', 'require $argv[1]; echo json_encode(fa_digits_normalize_deep(json_decode($argv[2], true)), JSON_UNESCAPED_UNICODE);', str(FA_DIGITS_PHP),
+         '{"password":"رمز۱۲۳","q":"SUP-۰۰۰۰۹","nested":{"csrf":"ا۱ب۲","n":"۴۵۶"}}'],
+        capture_output=True, timeout=30,
+    )
+    assert proc.returncode == 0
+    import json as _json
+    data = _json.loads(proc.stdout.decode())
+    assert data['password'] == 'رمز۱۲۳'
+    assert data['q'] == 'SUP-00009'
+    assert data['nested']['csrf'] == 'ا۱ب۲'
+    assert data['nested']['n'] == '456'
+
+
+def test_global_input_converter_shipped_and_included():
+    render = (ROOT / 'lib' / 'render.php').read_text(encoding='utf-8')
+    assert 'assets/fa-digits.js?v=1' in render
+    root_js = (ROOT / 'assets' / 'fa-digits.js').read_bytes()
+    panel_js = (ROOT / 'food-ticket-web' / 'assets' / 'fa-digits.js').read_bytes()
+    assert root_js == panel_js, 'هر دو نسخهٔ assets/fa-digits.js باید بایت‌به‌بایت یکی باشند'
+    import_js = (ROOT / 'food-order-import.php').read_text(encoding='utf-8')
+    assert 'assets/fa-digits.js?v=1' in import_js
+    panel = (ROOT / 'food-ticket-web' / 'index.html').read_text(encoding='utf-8')
+    assert 'assets/fa-digits.js?v=1' in panel
 
 
 def test_ticket_codes_convert_as_farsi_display():

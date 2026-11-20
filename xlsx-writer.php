@@ -26,6 +26,21 @@ function xlsx_col_name(int $index): string
     return $name;
 }
 
+/**
+ * تبدیل ارقام در متن خروجی Excel به فارسی (۱٫۶۳٫۳ — تصمیم محصول: «اعداد همه‌جا فارسی»).
+ *
+ * از لایهٔ نمایشی مشترک استفاده می‌شود تا مرزهای پذیرفته‌شده یکسان بماند:
+ * IP/ایمیل/نام هاست لاتین می‌مانند، کد تیکت (SUP-00009) و بقیه فارسی می‌شوند.
+ * اگر لایهٔ مشترک در دسترس نباشد (اجرای CLIِ مستقل)، فقط رقم‌ها نگاشته می‌شوند.
+ */
+function xlsx_fa_digits(string $text): string
+{
+    if (function_exists('fa_digits_text')) {
+        return fa_digits_text($text);
+    }
+    return strtr($text, ['0' => '۰', '1' => '۱', '2' => '۲', '3' => '۳', '4' => '۴', '5' => '۵', '6' => '۶', '7' => '۷', '8' => '۸', '9' => '۹']);
+}
+
 function xlsx_clean_text(string $text): string
 {
     $clean = preg_replace('/[^\x{9}\x{A}\x{D}\x{20}-\x{D7FF}\x{E000}-\x{FFFD}\x{10000}-\x{10FFFF}]/u', '', $text);
@@ -169,11 +184,15 @@ function xlsx_sheet_xml(array $sheet): string
             $ref = xlsx_col_name($col) . $rowNumber;
             $styleAttr = ' s="' . ($styleIds[$style] ?? 0) . '"';
             if (is_int($value) || is_float($value)) {
-                $cells .= '<c r="' . $ref . '"' . $styleAttr . '><v>' . $value . '</v></c>';
+                // ۱٫۶۳٫۳: اعداد در خروجی Excel هم فارسی چاپ می‌شوند — سلول به‌جای
+                // «عددِ واقعی» به متنِ با ارقام فارسی بدل می‌شود (طبق تصمیم محصول؛
+                // فرمول/مرتب‌سازی عددی روی این سلول‌ها ممکن نیست — پذیرفته‌شده است).
+                $num = is_float($value) ? rtrim(rtrim(sprintf('%.10f', (float) $value), '0'), '.') : (string) $value;
+                $cells .= '<c r="' . $ref . '"' . $styleAttr . ' t="inlineStr"><is><t xml:space="preserve">' . xlsx_xml(xlsx_fa_digits($num)) . '</t></is></c>';
             } elseif ($value === null || $value === '') {
                 $cells .= '<c r="' . $ref . '"' . $styleAttr . '/>';
             } else {
-                $text = (string) $value;
+                $text = xlsx_fa_digits((string) $value);
                 $cells .= '<c r="' . $ref . '"' . $styleAttr . ' t="inlineStr"><is><t xml:space="preserve">' . xlsx_xml($text) . '</t></is></c>';
             }
             $col++;

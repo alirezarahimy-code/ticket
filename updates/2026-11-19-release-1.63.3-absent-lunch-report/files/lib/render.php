@@ -268,7 +268,7 @@ function render_footer(): void
     $particleScript = function_exists('particle_effect_script_tag') ? particle_effect_script_tag() : '';
     $triangleScript = function_exists('triangle_effect_script_tag') ? triangle_effect_script_tag() : '';
     $chatbotWidget = function_exists('chatbot_render_widget') ? chatbot_render_widget($layoutUser) : '';
-    echo ';</script><script src="assets/jalali-calendar.js?v=3.4.7"></script><script src="assets/app.js?v=3.4.30&theme-mode=2"></script>' . $particleScript . $triangleScript . $chatbotWidget . $inspectionReminder . $systemAlarmChrome;
+    echo ';</script><script src="assets/jalali-calendar.js?v=3.4.7"></script><script src="assets/fa-digits.js?v=1"></script><script src="assets/app.js?v=3.4.30&theme-mode=2"></script>' . $particleScript . $triangleScript . $chatbotWidget . $inspectionReminder . $systemAlarmChrome;
     if ($systemAlarmChrome !== '') {
         echo '<script defer src="assets/system-alarm.js?v=1"></script>';
     }

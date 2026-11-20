@@ -76,6 +76,7 @@ if ($contentLength > 5 * 1024 * 1024) {
 }
 
 $raw = file_get_contents('php://input');
+$raw = function_exists('fa_digits_normalize_digits') ? fa_digits_normalize_digits((string) $raw) : $raw;
 $payload = json_decode(is_string($raw) ? $raw : '', true);
 if (!is_array($payload)) {
     inventory_api_response(400, ['ok' => false, 'error' => 'بدنه JSON معتبر نیست.']);

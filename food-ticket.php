@@ -58,7 +58,7 @@ if (is_file(__DIR__ . '/food-ticket-import.php')) {
 
 /** نسخهٔ پنل (food-ticket-web/index.html). پنل همان عدد را دارد و اگر مرورگر
  *  نسخهٔ کش‌شدهٔ قدیمی را نشان دهد، خودش هشدار می‌دهد. */
-const FOOD_TICKET_PANEL_VERSION = '1.37.58';
+const FOOD_TICKET_PANEL_VERSION = '1.37.59';
 
 function food_ticket_panel_version(): string
 {
@@ -3232,6 +3232,7 @@ function food_ticket_api_json(array $payload, int $status = 200): never
 function food_ticket_api_body(): array
 {
     $raw = file_get_contents('php://input');
+    $raw = function_exists('fa_digits_normalize_digits') ? fa_digits_normalize_digits((string) $raw) : $raw;
     if (!is_string($raw) || trim($raw) === '') {
         return [];
     }
@@ -5828,6 +5829,7 @@ function food_ticket_api_handle(string $route, array $user): never
         // idempotent است (کلید یکتای sha256)، پس اجرای دوباره بی‌خطر است.
         if ($_SERVER['REQUEST_METHOD'] === 'POST' && $route === 'backfill-auto-receipts') {
             $raw = (string) file_get_contents('php://input');
+            $raw = function_exists('fa_digits_normalize_digits') ? fa_digits_normalize_digits($raw) : $raw;
             $body = json_decode($raw, true);
             if (!is_array($body)) {
                 $body = $_POST;

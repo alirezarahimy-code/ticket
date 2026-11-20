@@ -640,7 +640,8 @@ if (($_GET['action'] ?? '') === 'export_view_xlsx') {
         exit('روش درخواست مجاز نیست.');
     }
     require_csrf();
-    $payload = json_decode((string) file_get_contents('php://input', false, null, 0, 2_000_000), true);
+    $rawExport = (string) file_get_contents('php://input', false, null, 0, 2_000_000);
+    $payload = json_decode(function_exists('fa_digits_normalize_digits') ? fa_digits_normalize_digits($rawExport) : $rawExport, true);
     if (!is_array($payload) || !is_array($payload['headers'] ?? null) || !is_array($payload['rows'] ?? null)) {
         http_response_code(400);
         exit('داده‌های خروجی معتبر نیست.');

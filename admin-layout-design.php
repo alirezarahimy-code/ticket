@@ -323,6 +323,7 @@ function admin_layout_design_api_handle(?array $user): never
         }
         require_csrf();
         $raw = file_get_contents('php://input');
+        $raw = function_exists('fa_digits_normalize_digits') ? fa_digits_normalize_digits((string) $raw) : $raw;
         if (!is_string($raw) || strlen($raw) > 90000) {
             throw new InvalidArgumentException('حجم تنظیم طراحی از حد مجاز بیشتر است.');
         }

@@ -46,6 +46,7 @@ if ($method !== 'POST') {
 }
 
 $raw = (string) file_get_contents('php://input');
+$raw = function_exists('fa_digits_normalize_digits') ? fa_digits_normalize_digits($raw) : $raw;
 $payload = json_decode($raw, true);
 if (!is_array($payload)) {
     $payload = [];

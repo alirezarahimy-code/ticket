@@ -19,7 +19,7 @@ DOWNLOADS = ROOT / 'downloads'
 ZIP_PATH = DOWNLOADS / 'ticket-update-1.63.2-to-1.63.3-absent-lunch-report-20261119.zip'
 VERSION = '1.63.3'
 REQUIRES = '1.63.2'
-PANEL_VERSION = '1.37.58'
+PANEL_VERSION = '1.37.59'
 DATE = '2026-11-20'
 
 def sha256(b: bytes) -> str:
@@ -52,8 +52,8 @@ if "const FOOD_TICKET_PANEL_VERSION = '1.37.53';" in backend:
     backend = must_replace(backend, "const FOOD_TICKET_PANEL_VERSION = '1.37.53';",
                            f"const FOOD_TICKET_PANEL_VERSION = '{PANEL_VERSION}';", 'panel version php')
     print('backend rebuilt from 1.63.2 base')
-elif "const FOOD_TICKET_PANEL_VERSION = '1.37.58';" in backend:
-    print('backend already built (1.37.58) — using as-is')
+elif "const FOOD_TICKET_PANEL_VERSION = '1.37.59';" in backend:
+    print('backend already built (1.37.59) — using as-is')
 else:
     raise SystemExit('نسخهٔ پنل food-ticket.php نه 1.37.53 است نه 1.37.58؛ بازسازی متوقف شد')
 
@@ -62,9 +62,9 @@ html = read('food-ticket-web/index.html')
 if "PANEL_VERSION='1.37.53'" in html:
     _html_rebuild = True
     html = must_replace(html, "PANEL_VERSION='1.37.53'", f"PANEL_VERSION='{PANEL_VERSION}'", 'panel version html')
-elif "PANEL_VERSION='1.37.58'" in html and 'window.AbsentLunchReport' in html:
+elif "PANEL_VERSION='1.37.59'" in html and 'window.AbsentLunchReport' in html:
     _html_rebuild = False
-    print('panel html already built (1.37.58) — using as-is')
+    print('panel html already built (1.37.59) — using as-is')
 else:
     raise SystemExit('panel HTML نه 1.37.53 است نه built 1.37.58؛ بازسازی متوقف شد')
 
@@ -156,6 +156,15 @@ EXTRA_FILES = [
     'assets/style.css',
     'lib/render.php',
     'lib/release-notes.php',
+    # بازسازی چهارم (۲۰۲۶-۱۱-۲۰) — «اعداد همیشه فارسی» + round-trip لاتین کانونی:
+    'bootstrap.php',
+    'lib/fa-digits.php',
+    'assets/fa-digits.js',
+    'food-ticket-web/assets/fa-digits.js',
+    'xlsx-writer.php',
+    'api/inventory.php',
+    'api/system-alarms.php',
+    'admin-layout-design.php',
 ]
 MIGRATIONS = ['038-food-guest-actuals.sql', '039-liaison-manager-role-sync.sql', '040-org-routing-departments.sql']
 for rel in EXTRA_FILES:
@@ -204,7 +213,7 @@ manifest = {
     'version': VERSION,
     'requires_version': REQUIRES,
     'date': DATE,
-    'title': 'تب «غایبین ناهار» + اصلاحات نهایی (بند ۱۷) + چارت/لغو/گزارش یک‌بار (بازسازی دوم) + ترمیم C10 و ۴۰۰ وعدهٔ نامعتبر (بازسازی سوم)',
+    'title': 'تب «غایبین ناهار» + اصلاحات نهایی (بند ۱۷) + چارت/لغو/گزارش یک‌بار (بازسازی دوم) + ترمیم C10 و ۴۰۰ وعده (بازسازی سوم) + اعداد همیشه فارسی (بازسازی چهارم)',
     'panel_version': PANEL_VERSION,
     'migrations': MIGRATIONS,
     'files': FILES_LIST,
@@ -214,14 +223,19 @@ manifest = {
                     'actuals popup (6 org roots + conditional "no anchor" row), chart-less guest registrations blocked, '
                     '6-section org lists everywhere, partner-company manager and CEO subtree visibility for guest requests '
                     '+ org-chart z-index fix (unit menu above subordinate cards) + cancellation decision requires note for '
-                    'both approve and reject + one-time release-notes popup with 1.63.3 entry + cache-bust 3.4.63/3.4.30. Rebuilt third time (2026-11-20): non-reviewer chart managers with food.menu get read-only subtree view in the guest-request manager panel (writes stay reviewer-only); /api/absent rejects explicit non-lunch meal_type with 400.'),
+                    'both approve and reject + one-time release-notes popup with 1.63.3 entry + cache-bust 3.4.63/3.4.30. Rebuilt third time (2026-11-20): non-reviewer chart managers with food.menu get read-only subtree view in the guest-request manager panel (writes stay reviewer-only); /api/absent rejects explicit non-lunch meal_type with 400. '
+                    'Rebuilt fourth time (2026-11-20): Persian digits are now universal — ALL visible numbers render in Persian '
+                    '(ticket codes like SUP-00009 -> SUP-۰۰۰۰۹, textarea content included); a new assets/fa-digits.js converts digits typed with a Latin keyboard in text/search/tel inputs and textareas (password/email/url/number/date and [data-fa-digits=off] exempt); '
+                    'the bootstrap normalizes Persian/Arabic digits back to Latin in $_GET/$_POST/$_REQUEST and all php://input JSON bodies (password/token-like keys exempt); '
+                    'xlsx exports write Persian-digit cells (IP/email/hostnames stay Latin per the display contract). Panel 1.37.59.'),
     'notes': ('پیشنیاز ۱٫۶۳٫۲؛ دارای سه مهاجرتِ idempotent است: 038-food-guest-actuals.sql (جدول food_guest_actuals)، '
               '039-liaison-manager-role-sync.sql (ارتقای مدیران واحدهای مستقل به نقش «مدیر») و 040-org-routing-departments.sql (نگاشت پایدار ردیف رسیدگی). پشتیبان و نصب آزمایشی الزامی. '
               'بازسازی دوم ۲۰۲۶-۱۱-۲۰ همان نسخهٔ ۱٫۶۳٫۳ است با اصلاحات چارت/لغو و گزارش یک‌بار به‌روزرسانی؛ SHA تازه است. '
               'روی سامانه‌هایی که ۱٫۶۳٫۳ را نصب کرده‌اند نصب مجدد همین بسته ترمیم فایل‌هاست و مهاجرت‌ها تکرار نمی‌شوند. '
-              'نسخهٔ پنل ۱٫۳۷٫۵۸؛ کش دارایی‌ها style.css=3.4.63 / app.js=3.4.30؛ پس از نصب Ctrl+F5 کنید. داده‌های تاریخی NULL مهمان هرگز بازنویسی نمی‌شوند. '
+              'نسخهٔ پنل ۱٫۳۷٫۵۹ (پنل محتوا عوض کرد)؛ کش دارایی‌ها style.css=3.4.63 / app.js=3.4.30؛ پس از نصب Ctrl+F5 کنید. داده‌های تاریخی NULL مهمان هرگز بازنویسی نمی‌شوند. '
               'گزارش به‌روزرسانی این نسخه فقط یک‌بار روی اولین ورود نمایش داده می‌شود؛ «راهنما ← تغییرات نسخه‌ها» مرجع همیشگی است. '
-              'بازسازی سوم ۲۰۲۶-۱۱-۲۰: مدیران چارت غیربازبین با مجوز food.menu پنل مهمان را فقط-خواندنی می‌بینند؛ /api/absent با meal_type غیرناهار، ۴۰۰ می‌دهد.'),
+              'بازسازی سوم ۲۰۲۶-۱۱-۲۰: مدیران چارت غیربازبین با مجوز food.menu پنل مهمان را فقط-خواندنی می‌بینند؛ /api/absent با meal_type غیرناهار، ۴۰۰ می‌دهد. '
+              'بازسازی چهارم ۲۰۲۶-۱۱-۲۰: اعداد در تمام سامانه فارسی‌اند (نمایش + تایپ حتی با کیبورد لاتین + خروجی Excel)؛ ذخیره canonical لاتین؛ IP/ایمیل/هاست لاتین؛ پنل ۱٫۳۷٫۵۹.'),
 }
 (PKG / 'manifest.json').write_text(json.dumps(manifest, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
 
