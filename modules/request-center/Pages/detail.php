@@ -330,7 +330,7 @@ if ($page === 'ticket') {
         if ($cancelStaleClosed) {
             echo '<form class="card cancellation-decision" method="post">' . csrf_field() . '<input type="hidden" name="action" value="decide_ticket_cancellation"><input type="hidden" name="ticket_id" value="' . (int) $ticket['id'] . '"><h3>پاک‌سازی درخواست لغو قدیمی</h3><p class="muted">درخواست قبلاً ' . e(request_center_status_label((string) $ticket['status'])) . ' شده است؛ این درخواست قدیمی باید با ذکر دلیل پاک‌سازی شود.</p><label>یادداشت پاک‌سازی (الزامی)<textarea name="decision_note" required maxlength="1000" rows="2" placeholder="مثلاً: درخواست پیش از بسته‌شدن ثبت شده بود؛ بایگانی شد."></textarea></label><div class="actions"><button class="button secondary" type="submit" name="decision" value="reject">پاک‌سازی درخواست قدیمی</button></div></form>';
         } else {
-            echo '<form class="card cancellation-decision" method="post">' . csrf_field() . '<input type="hidden" name="action" value="decide_ticket_cancellation"><input type="hidden" name="ticket_id" value="' . (int) $ticket['id'] . '"><h3>تصمیم مسئول رسیدگی دربارهٔ لغو</h3><label>یادداشت تصمیم (برای رد، نوشتن دلیل الزامی است)<textarea name="decision_note" maxlength="1000" rows="2" placeholder="در صورت رد، توضیح دهید رسیدگی چگونه ادامه می‌یابد."></textarea></label><div class="actions"><button class="button danger-button" type="submit" name="decision" value="approve" data-confirm="درخواست لغو را تأیید کنید؟ با این کار درخواست از صف فعال خارج می‌شود و سابقه حفظ می‌ماند.">تأیید لغو</button><button class="button secondary" type="submit" name="decision" value="reject">رد و ادامهٔ رسیدگی</button></div></form>';
+            echo '<form class="card cancellation-decision" method="post">' . csrf_field() . '<input type="hidden" name="action" value="decide_ticket_cancellation"><input type="hidden" name="ticket_id" value="' . (int) $ticket['id'] . '"><h3>تصمیم مسئول رسیدگی دربارهٔ لغو</h3><label>یادداشت تصمیم (الزامی — دلیل تأیید یا رد را بنویسید)<textarea name="decision_note" required maxlength="1000" rows="2" placeholder="برای مثال: لغو به دلیل ثبت اشتباه یا دلیل رد لغو را بنویسید…"></textarea></label><div class="actions"><button class="button danger-button" type="submit" name="decision" value="approve" data-confirm="درخواست لغو را تأیید کنید؟ با این کار درخواست از صف فعال خارج می‌شود و سابقه حفظ می‌ماند.">تأیید لغو</button><button class="button secondary" type="submit" name="decision" value="reject">رد و ادامهٔ رسیدگی</button></div></form>';
         }
     }
     if ($requiresRating && !user_can($user, 'ticket.rate')) {
@@ -618,17 +618,15 @@ if ($page === 'ticket') {
   });
   form.addEventListener("submit",function(event){
    var submitter=event.submitter,confirmText=submitter&&submitter.dataset.confirm?submitter.dataset.confirm:form.dataset.confirm;
+   form.dataset.confirmHandled="1";
    if(confirmText&&!window.confirm(confirmText)){event.preventDefault();return;}
    var requiredText=Array.prototype.slice.call(form.querySelectorAll("textarea[required],input[required]"));
    for(var i=0;i<requiredText.length;i++){if(!requiredText[i].value.trim()){event.preventDefault();requiredText[i].focus();return;}}
    if(form.classList.contains("rating-card")&&!form.querySelector("[name=score]:checked")){event.preventDefault();var first=form.querySelector("[name=score]");if(first)first.focus();return;}
    if(form.dataset.submitting==="1"){event.preventDefault();return;}
    form.dataset.submitting="1";
-   form.querySelectorAll("button[type=\"submit\"],input[type=\"submit\"]").forEach(function(button){
-    button.disabled=true;
-    if(button.tagName==="BUTTON"){button.dataset.originalText=button.textContent;button.textContent="در حال ثبت…";}
-    else{button.dataset.originalValue=button.value;button.value="در حال ثبت…";}
-   });
+   // کلید نام/مقدار دکمهٔ ارسال (مثل decision=approve) باید در FormData بماند؛ دکمه غیرفعال نشود.
+   form.setAttribute("aria-busy","true");
   });
  });
  document.querySelectorAll(".rating-options input[type=radio]").forEach(function(input){

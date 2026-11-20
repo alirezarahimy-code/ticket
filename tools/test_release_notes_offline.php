@@ -77,7 +77,7 @@ check('روی ۱.۶۲.۹۷، نسخهٔ جاری همان ۱.۶۲.۹۷ است', 
 $card = release_notes_dashboard_card();
 check('پاپ‌آپ تغییرات روی ۱.۶۲.۹۷ رندر می‌شود', strpos($card, 'release-notes-popup') !== false);
 check('پاپ‌آپ ابتدا پنهان است (hidden)', strpos($card, 'id="release-notes-popup"') !== false && strpos($card, ' hidden>') !== false);
-check('سقف نمایش دو بار در HTML ست شده', strpos($card, 'data-max-views="2"') !== false);
+check('سقف نمایش یک‌بار در HTML ست شده', strpos($card, 'data-max-views="1"') !== false);
 check('دکمهٔ بستن وجود دارد', strpos($card, 'data-rn-close="1"') !== false);
 check('کلید Esc هم می‌بندد', strpos($card, 'Escape') !== false);
 check('شمارندهٔ نمایش در localStorage ثبت می‌شود', strpos($card, 'release-notes-popup-seen:') !== false);
@@ -120,8 +120,8 @@ check(
     strpos($cardSrc, '.release-notes-popup[hidden]{display:none !important;}') !== false
 );
 check(
-    'سقف نمایش از یک ثابت واحد می‌آید (۲)',
-    strpos($cardSrc, 'RELEASE_NOTES_POPUP_MAX_VIEWS = 2') !== false
+    'سقف نمایش از یک ثابت واحد می‌آید (۱)',
+    strpos($cardSrc, 'RELEASE_NOTES_POPUP_MAX_VIEWS = 1') !== false
 );
 
 /* ── ۴) نسخهٔ ناشناخته ⇒ آخرین یادداشت (رفتار قبلی حفظ شود) ──────────── */

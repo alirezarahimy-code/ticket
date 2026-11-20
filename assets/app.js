@@ -1233,7 +1233,7 @@ document.addEventListener('DOMContentLoaded', function () {
 document.addEventListener('DOMContentLoaded', function () {
     document.addEventListener('submit', function (event) {
         var form = event.target.closest('form');
-        if (!form) return;
+        if (!form || form.dataset.confirmHandled === '1') return;
         var submitter = event.submitter || null;
         var action = form.querySelector('[name="action"]');
         var actionValue = submitter && submitter.name === 'action' ? submitter.value : (action ? action.value : '');

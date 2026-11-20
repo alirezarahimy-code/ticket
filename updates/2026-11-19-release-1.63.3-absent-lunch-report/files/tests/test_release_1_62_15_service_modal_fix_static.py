@@ -1,0 +1,121 @@
+# -*- coding: utf-8 -*-
+"""تست‌های ایستای ریلیز ۱.۶۲.۱۵ — اصلاح پاپ‌آپ‌های فرم خدمات:
+۱) پاپ‌آپ نباید زیر هدر برود (z-index در قاعدهٔ اختصاصی تثبیت شده باشد)
+۲) بستن با کلیک روی پس‌زمینه مثل بقیهٔ پاپ‌آپ‌های سامانه
++ پین‌های بسته‌بندی/صفحهٔ دانلود طبق سیاست انتشار.
+"""
+import hashlib
+import json
+import re
+import zipfile
+from pathlib import Path
+from download_page_helpers import check_download_page_lists_only_latest_package
+
+ROOT = Path(__file__).resolve().parents[1]
+PACKAGE_NAME = "ticket-update-1.62.15-service-modal-fix-20261025.zip"
+UPDATE_DIR = "updates/2026-10-25-release-162-15-service-modal-fix"
+
+
+def read(rel):
+    return (ROOT / rel).read_text(encoding="utf-8")
+
+
+def test_modal_layer_keeps_high_z_index_against_generic_rule():
+    css = read("assets/style.css")
+    # قاعدهٔ عمومی که z-index:1 تحمیل می‌کرد هنوز هست (نباید چیدمان بقیهٔ صفحات عوض شود)
+    assert ".content-wrap > *:not(.ambient-orbits) { position: relative; z-index: 1; }" in css
+    # قاعدهٔ اختصاصی با همان specificity و دیرتر در فایل، z-index را برمی‌گرداند
+    generic = css.index(".content-wrap > *:not(.ambient-orbits)")
+    specific = css.index(".content-wrap > .service-modal-layer { position: fixed; z-index: 1300; }")
+    assert generic < specific
+    # لایهٔ پایه هم مثل قبل fixed و 1300 است
+    assert ".service-modal-layer { position: fixed; inset: 0; z-index: 1300;" in css
+
+
+def test_backdrop_click_closes_service_modal_like_other_popups():
+    js = read("assets/app.js")
+    # کلیک روی خود لایه یا روی .service-modal (بیرونِ کارت) هر دو می‌بندند
+    assert "event.target === modalLayer || (event.target.classList && event.target.classList.contains('service-modal'))" in js
+    # Esc و دکمهٔ بستن مثل قبل
+    assert "if (event.key === 'Escape' && !modalLayer.hidden) closeModal();" in js
+    assert "modalLayer.querySelectorAll('[data-modal-close]')" in js
+
+
+def test_cache_bust_versions_bumped():
+    # پین‌ها با هر انتشار جلو می‌روند؛ از تجمیع RC چهرهٔ مشترک در lib/render.php است.
+    src = read("lib/render.php")
+    assert "assets/style.css?v=3.4.63" in src
+    assert "assets/app.js?v=3.4.30" in src
+    assert "assets/style.css?v=3.4.45" not in src
+    assert "assets/app.js?v=3.4.26" not in src
+
+
+def test_version_manifest_and_package():
+    # VERSION از ۱.۶۲.۱۶ جلوتر رفته؛ پین نسخهٔ جاری در تست ریلیز ۱.۶۲.۱۶ است.
+    manifest = json.loads(read(f"{UPDATE_DIR}/manifest.json"))
+    assert manifest["version"] == "1.62.15"
+    assert manifest["requires_version"] == "1.61.9"
+    assert manifest["migrations"] == ["009-traffic-destination-multi-approver.sql", "010-org-liaison-units.sql"]
+    files = manifest["files"]
+    assert len(files) == 47 and len(set(files)) == 47
+    for need in ("VERSION", "index.php", "assets/style.css", "assets/app.js",
+                 "actions/service-actions.php", "food-ticket-web/assets/food-capitalio-dashboard-r42.js"):
+        assert need in files, need
+    # ۱.۶۳: این دو فایل ریشه‌ای در تجمیع RC به modules/request-center/Pages/ منتقل شدند؛ بسته‌های ریلیز تغییرناپذیر می‌مانند.
+    MOVED_IN_1_63_RC_MIGRATION = {
+        "governance.php": "modules/request-center/Pages/governance.php",
+        "ola.php": "modules/request-center/Pages/ola.php",
+    }
+    # ۱.۶۳: لایهٔ MVC مرده کاملاً حذف شد (هیچ‌کس require نمی‌کرد).
+    DEAD_MVC_DELETED_IN_1_63 = {
+        "app/Views/layout/header.php",
+        "app/Views/layout/footer.php",
+    }
+    for f in files:
+        if f in MOVED_IN_1_63_RC_MIGRATION:
+            assert not (ROOT / f).exists(), f
+            assert (ROOT / MOVED_IN_1_63_RC_MIGRATION[f]).is_file(), f
+            continue
+        if f in DEAD_MVC_DELETED_IN_1_63:
+            assert not (ROOT / f).exists(), f
+            continue
+        assert (ROOT / f).is_file(), f
+
+    package = ROOT / "downloads" / PACKAGE_NAME
+    assert package.is_file()
+    zf = zipfile.ZipFile(package)
+    names = set(zf.namelist())
+    pattern = re.compile(r"^(manifest\.json|migrations/[^/]+\.sql|files/.+)$")
+    for name in names:
+        if not name.endswith("/"):
+            assert pattern.match(name), name
+    for mig in manifest["migrations"]:
+        assert f"migrations/{mig}" in names and f"files/migrations/{mig}" in names, mig
+    assert zf.read("files/VERSION").decode("utf-8").strip() == "1.62.15"
+    # خود اصلاح داخل بسته هم هست
+    assert ".content-wrap > .service-modal-layer { position: fixed; z-index: 1300; }" in zf.read("files/assets/style.css").decode("utf-8")
+    assert "event.target.classList.contains('service-modal')" in zf.read("files/assets/app.js").decode("utf-8")
+    # بستهٔ تاریخی است: محتوایش با کد جاری مقایسه نمی‌شود (style/app.js از ۱.۶۲.۱۵
+    # جلوتر رفته‌اند). یکپارچگی خودِ بسته با SHA-256 اش بررسی می‌شود و همهٔ مسیرهای
+    # manifest باید در مخزن موجود باشند (بالاتر بررسی شد).
+    for rel in ("assets/style.css", "assets/app.js"):
+        assert f"files/{rel}" in names
+    digest = hashlib.sha256(package.read_bytes()).hexdigest()
+    assert digest in read(f"downloads/{PACKAGE_NAME}.sha256")
+    # صفحهٔ دانلود اکنون بستهٔ ۱.۶۲.۱۶ را نشان می‌دهد؛ پین SHA صفحه در تست ریلیز ۱.۶۲.۱۶ است.
+
+
+def test_panel_asset_refs_are_all_packaged():
+    """قاعدهٔ دائمی fix1: هر asset ارجاع‌شده در index.html پنل غذا باید داخل همان بسته باشد."""
+    zf = zipfile.ZipFile(ROOT / "downloads" / PACKAGE_NAME)
+    names = set(zf.namelist())
+    html = zf.read("files/food-ticket-web/index.html").decode("utf-8")
+    for ref in sorted(set(re.findall(r'(?:src|href)="(assets/[^"?]+)', html))):
+        assert f"files/food-ticket-web/{ref}" in names, f"ارجاع بدون فایل در بسته: {ref}"
+
+
+def test_download_page_lists_only_latest_package():
+    # قاعدهٔ پروژه: صفحهٔ دانلود فقط جدیدترین بستهٔ منتشرشده را نشان می‌دهد.
+    # بررسی نسخه‌آگنوستیک است تا با هر انتشار، تست کهنه نشود.
+    check_download_page_lists_only_latest_package()
+

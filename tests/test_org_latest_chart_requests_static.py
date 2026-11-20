@@ -67,6 +67,11 @@ def test_fixed_company_labels_show_in_selector_and_root_card_and_membership_is_d
     assert 'org_company_user_label' in index
 
 
+def test_parent_node_stacks_above_child_cards_while_its_menu_is_open():
+    css = read('assets/style.css')
+    assert '.org-node:hover,\n.org-node:focus-within,\n.org-node.is-match { position: relative; z-index: 90; }' in css
+    assert '.org-node-menu { position: absolute; top: 36px; left: 0; z-index: 120;' in css
+
 if __name__ == '__main__':
     tests = [value for key, value in globals().items() if key.startswith('test_')]
     for test in tests:

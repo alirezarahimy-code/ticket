@@ -20,7 +20,7 @@ ZIP_PATH = DOWNLOADS / 'ticket-update-1.63.2-to-1.63.3-absent-lunch-report-20261
 VERSION = '1.63.3'
 REQUIRES = '1.63.2'
 PANEL_VERSION = '1.37.58'
-DATE = '2026-11-19'
+DATE = '2026-11-20'
 
 def sha256(b: bytes) -> str:
     return hashlib.sha256(b).hexdigest()
@@ -151,6 +151,11 @@ EXTRA_FILES = [
     'modules/request-center/Pages/detail.php',
     'modules/request-center/RequestCenterRepository.php',
     'modules/request-center/lib/functions.php',
+    # بازسازی دوم (۲۰۲۶-۱۱-۲۰) — رفع دو باگ رابط + گزارش یک‌بار به‌روزرسانی:
+    'assets/app.js',
+    'assets/style.css',
+    'lib/render.php',
+    'lib/release-notes.php',
 ]
 MIGRATIONS = ['038-food-guest-actuals.sql', '039-liaison-manager-role-sync.sql', '040-org-routing-departments.sql']
 for rel in EXTRA_FILES:
@@ -174,39 +179,48 @@ for name in MIGRATIONS:
 (PKG / 'README.md').write_text(src('README.md'), encoding='utf-8')
 (PKG / 'START.txt').write_text(src('START.txt'), encoding='utf-8')
 (PKG / 'CHANGE-REPORT-FA.md').write_text(src('CHANGE-REPORT-FA.md'), encoding='utf-8')
-for rel in ('tests/js/food-absent-lunch-tab.test.js', 'tests/js/food-absent-lunch-runtime.test.js',
-            'tests/test_food_absent_lunch_tab_static.py', 'tests/test_food_absent_lunch_backend_static.py',
-            'tests/test_auto_section_attribution_static.py', 'tests/test_org_routing_departments_static.py'):
+TEST_FILES = [
+    'tests/js/food-absent-lunch-tab.test.js', 'tests/js/food-absent-lunch-runtime.test.js',
+    'tests/test_food_absent_lunch_tab_static.py', 'tests/test_food_absent_lunch_backend_static.py',
+    'tests/test_auto_section_attribution_static.py', 'tests/test_org_routing_departments_static.py',
+    # بازسازی دوم (۲۰۲۶-۱۱-۲۰) — تست‌های هم‌ترازشده:
+    'tests/test_ticket_cancellation_static.py', 'tests/test_org_latest_chart_requests_static.py',
+    'tests/test_request_center_t12_scenarios.php', 'tests/test_food_report_ui_static.py',
+    'tests/test_release_1_62_15_service_modal_fix_static.py', 'tests/test_release_1_62_5_theme_toggle_static.py',
+]
+for rel in TEST_FILES:
     out = FILES / rel
     out.parent.mkdir(parents=True, exist_ok=True)
-    out.write_text((SRC / 'tests' / Path(rel).name if not rel.startswith('tests/js/') else SRC / rel).read_text(encoding='utf-8'), encoding='utf-8')
+    # تست‌ها را همیشه از مخزن کپی می‌کنیم تا بسته با کد تحویلی همگام بماند.
+    out.write_bytes((ROOT / rel).read_bytes())
 
 FILES_LIST = [
     'VERSION', 'chatbot.php', 'downloads/CHANGE-REPORT-FA-1.63.3.md',
     'food-ticket-web/index.html', 'food-ticket.php', 'help-guide.php',
-    'tests/js/food-absent-lunch-tab.test.js', 'tests/js/food-absent-lunch-runtime.test.js',
-    'tests/test_food_absent_lunch_backend_static.py', 'tests/test_food_absent_lunch_tab_static.py',
-    'tests/test_auto_section_attribution_static.py', 'tests/test_org_routing_departments_static.py',
-] + EXTRA_FILES
+] + TEST_FILES + EXTRA_FILES
 hashes = {rel: sha256((FILES / rel).read_bytes()) for rel in FILES_LIST}
 manifest = {
     'name': 'absent-lunch-report-and-guest-day-close',
     'version': VERSION,
     'requires_version': REQUIRES,
     'date': DATE,
-    'title': 'تب «غایبین ناهار» + اصلاحات نهایی (بند ۱۷): بستن روز، انتساب مهمان به ۶ بخش، یک‌دست‌سازی بخش‌های سازمانی',
+    'title': 'تب «غایبین ناهار» + اصلاحات نهایی (بند ۱۷) + چارت/لغو/گزارش یک‌بار (بازسازی دوم)',
     'panel_version': PANEL_VERSION,
     'migrations': MIGRATIONS,
     'files': FILES_LIST,
     'sha256': hashes,
-    'description': ('Final 1.63.3: absent-lunch report tab (three subviews, per-deputy checkboxes + "all deputies", '
+    'description': ('Final 1.63.3 (rebuilt 2026-11-20): absent-lunch report tab (three subviews, per-deputy checkboxes + "all deputies", '
                     'pure print, XLSX) + full section-17 scope: single-source remainder at day close, exact-equality guest '
                     'actuals popup (6 org roots + conditional "no anchor" row), chart-less guest registrations blocked, '
-                    '6-section org lists everywhere, partner-company manager and CEO subtree visibility for guest requests.'),
+                    '6-section org lists everywhere, partner-company manager and CEO subtree visibility for guest requests '
+                    '+ org-chart z-index fix (unit menu above subordinate cards) + cancellation decision requires note for '
+                    'both approve and reject + one-time release-notes popup with 1.63.3 entry + cache-bust 3.4.63/3.4.30.'),
     'notes': ('پیشنیاز ۱٫۶۳٫۲؛ دارای سه مهاجرتِ idempotent است: 038-food-guest-actuals.sql (جدول food_guest_actuals)، '
               '039-liaison-manager-role-sync.sql (ارتقای مدیران واحدهای مستقل به نقش «مدیر») و 040-org-routing-departments.sql (نگاشت پایدار ردیف رسیدگی). پشتیبان و نصب آزمایشی الزامی. '
-              'بستهٔ نهایی جایگزین بستهٔ اولیهٔ همان ورژن شد؛ SHA تازه است. '
-              'نسخهٔ پنل ۱٫۳۷٫۵۸؛ پس از نصب Ctrl+F5 کنید. داده‌های تاریخی NULL مهمان هرگز بازنویسی نمی‌شوند.'),
+              'بازسازی دوم ۲۰۲۶-۱۱-۲۰ همان نسخهٔ ۱٫۶۳٫۳ است با اصلاحات چارت/لغو و گزارش یک‌بار به‌روزرسانی؛ SHA تازه است. '
+              'روی سامانه‌هایی که ۱٫۶۳٫۳ را نصب کرده‌اند نصب مجدد همین بسته ترمیم فایل‌هاست و مهاجرت‌ها تکرار نمی‌شوند. '
+              'نسخهٔ پنل ۱٫۳۷٫۵۸؛ کش دارایی‌ها style.css=3.4.63 / app.js=3.4.30؛ پس از نصب Ctrl+F5 کنید. داده‌های تاریخی NULL مهمان هرگز بازنویسی نمی‌شوند. '
+              'گزارش به‌روزرسانی این نسخه فقط یک‌بار روی اولین ورود نمایش داده می‌شود؛ «راهنما ← تغییرات نسخه‌ها» مرجع همیشگی است.'),
 }
 (PKG / 'manifest.json').write_text(json.dumps(manifest, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
 

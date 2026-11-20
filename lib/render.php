@@ -51,7 +51,7 @@ function render_header(string $title, ?array $user = null): void
                 : '<a class="profile-shortcut" href="index.php?page=profile#appearance">🎨 انتخاب تم</a><a class="profile-shortcut" href="index.php?page=profile">پروفایل: ' . e((string) $user['username']) . '</a>')
             . '</div>';
     }
-    echo '<!doctype html><html lang="fa" dir="rtl" data-theme="' . e($theme) . '" data-theme-mode="' . e($themeMode) . '"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="' . ($themeMode === 'dark' ? '#101915' : '#174f43') . '"><title>' . e($title . ' | ' . $appName) . '</title><link rel="stylesheet" href="assets/style.css?v=3.4.62">' . ($layoutAdmin ? '<link rel="stylesheet" href="assets/admin-layout-design.css?v=9">' : '') . ($layoutCss !== '' ? '<style id="admin-page-layout-rules">' . $layoutCss . '</style>' : '') . '<link rel="stylesheet" href="assets/theme-mode.css?v=3"><link rel="stylesheet" href="assets/topbar-chrome.css?v=1">' . (($page ?? '') === 'logging-dashboard' ? '<link rel="stylesheet" href="assets/logging-dashboard.css?v=1">' : '') . '</head><body class="' . e($bodyPageClass) . '" data-theme-mode="' . e($themeMode) . '" data-layout-page="' . e($layoutPage) . '" data-layout-design-admin="' . ($layoutAdmin ? '1' : '0') . '" data-weekend-days="' . e(implode(',', sla_business_hours()['weekend'])) . '"><div class="app-shell"><header class="topbar"><div class="topbar-inner"><a class="brand" href="' . ($isRequestCenterEntry ? 'request-center.php' : 'index.php') . '"><span class="brand-mark">' . ($logo ? '<img src="' . e($logo) . '" alt="' . e($appName) . '">' : '<span class="brand-glyph">پ</span>') . '</span><span><strong>' . e($appName) . '</strong><small>مرکز خدمات و پشتیبانی</small></span></a>' . ($user ? $brandTools : app_theme_toggle_markup());
+    echo '<!doctype html><html lang="fa" dir="rtl" data-theme="' . e($theme) . '" data-theme-mode="' . e($themeMode) . '"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="' . ($themeMode === 'dark' ? '#101915' : '#174f43') . '"><title>' . e($title . ' | ' . $appName) . '</title><link rel="stylesheet" href="assets/style.css?v=3.4.63">' . ($layoutAdmin ? '<link rel="stylesheet" href="assets/admin-layout-design.css?v=9">' : '') . ($layoutCss !== '' ? '<style id="admin-page-layout-rules">' . $layoutCss . '</style>' : '') . '<link rel="stylesheet" href="assets/theme-mode.css?v=3"><link rel="stylesheet" href="assets/topbar-chrome.css?v=1">' . (($page ?? '') === 'logging-dashboard' ? '<link rel="stylesheet" href="assets/logging-dashboard.css?v=1">' : '') . '</head><body class="' . e($bodyPageClass) . '" data-theme-mode="' . e($themeMode) . '" data-layout-page="' . e($layoutPage) . '" data-layout-design-admin="' . ($layoutAdmin ? '1' : '0') . '" data-weekend-days="' . e(implode(',', sla_business_hours()['weekend'])) . '"><div class="app-shell"><header class="topbar"><div class="topbar-inner"><a class="brand" href="' . ($isRequestCenterEntry ? 'request-center.php' : 'index.php') . '"><span class="brand-mark">' . ($logo ? '<img src="' . e($logo) . '" alt="' . e($appName) . '">' : '<span class="brand-glyph">پ</span>') . '</span><span><strong>' . e($appName) . '</strong><small>مرکز خدمات و پشتیبانی</small></span></a>' . ($user ? $brandTools : app_theme_toggle_markup());
     if ($user) {
         $menuIcons = [
             'home' => '<path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>',
@@ -204,7 +204,7 @@ function inspection_food_reminder_markup(?array $user): string
  * نوار تبِ صفحهٔ راهنما — «راهنمای کامل» و «تغییرات نسخه‌ها».
  *
  * تصمیم مالک ۲۰۲۶-۱۱-۱۶: کارت تغییرات نباید هر بار روی داشبورد باز شود.
- * یک پاپ‌آپ حداکثر دو بار نشان داده می‌شود؛ مرجع همیشگی همان این تب است.
+ * یک پاپ‌آپ حداکثر یک‌بار نشان داده می‌شود؛ مرجع همیشگی همان این تب است.
  *
  * @param string $active 'guide' یا 'releases'
  */
@@ -268,7 +268,7 @@ function render_footer(): void
     $particleScript = function_exists('particle_effect_script_tag') ? particle_effect_script_tag() : '';
     $triangleScript = function_exists('triangle_effect_script_tag') ? triangle_effect_script_tag() : '';
     $chatbotWidget = function_exists('chatbot_render_widget') ? chatbot_render_widget($layoutUser) : '';
-    echo ';</script><script src="assets/jalali-calendar.js?v=3.4.7"></script><script src="assets/app.js?v=3.4.29&theme-mode=2"></script>' . $particleScript . $triangleScript . $chatbotWidget . $inspectionReminder . $systemAlarmChrome;
+    echo ';</script><script src="assets/jalali-calendar.js?v=3.4.7"></script><script src="assets/app.js?v=3.4.30&theme-mode=2"></script>' . $particleScript . $triangleScript . $chatbotWidget . $inspectionReminder . $systemAlarmChrome;
     if ($systemAlarmChrome !== '') {
         echo '<script defer src="assets/system-alarm.js?v=1"></script>';
     }

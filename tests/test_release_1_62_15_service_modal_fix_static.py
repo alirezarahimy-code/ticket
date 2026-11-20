@@ -44,8 +44,8 @@ def test_backdrop_click_closes_service_modal_like_other_popups():
 def test_cache_bust_versions_bumped():
     # پین‌ها با هر انتشار جلو می‌روند؛ از تجمیع RC چهرهٔ مشترک در lib/render.php است.
     src = read("lib/render.php")
-    assert "assets/style.css?v=3.4.62" in src
-    assert "assets/app.js?v=3.4.29" in src
+    assert "assets/style.css?v=3.4.63" in src
+    assert "assets/app.js?v=3.4.30" in src
     assert "assets/style.css?v=3.4.45" not in src
     assert "assets/app.js?v=3.4.26" not in src
 

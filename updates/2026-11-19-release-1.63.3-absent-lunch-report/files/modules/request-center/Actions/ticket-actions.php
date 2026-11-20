@@ -389,10 +389,14 @@ if (!defined('APP_ROOT')) {
             if (!in_array((string) $ticket['status'], ticket_cancellation_decision_statuses(), true)) {
                 throw new RuntimeException('درخواست لغوِ درانتظاری برای این درخواست وجود ندارد.');
             }
-            $decision = valid_choice(post_value('decision'), ['approve', 'reject'], 'reject');
+            $rawDecision = post_value('decision');
+            if (!in_array($rawDecision, ['approve', 'reject'], true)) {
+                throw new RuntimeException('تصمیم دربارهٔ درخواست لغو معتبر نیست؛ دوباره تلاش کنید.');
+            }
+            $decision = $rawDecision;
             $note = post_value('decision_note');
-            if ($decision === 'reject' && $note === '') {
-                throw new RuntimeException('برای رد درخواست لغو، دلیل تصمیم را بنویسید.');
+            if ($note === '') {
+                throw new RuntimeException('برای تصمیم دربارهٔ درخواست لغو، دلیل تصمیم را بنویسید.');
             }
             if (in_array((string) $ticket['status'], ['closed', 'cancelled'], true) && $decision === 'approve') {
                 throw new RuntimeException('درخواست قبلاً بسته/لغو شده است؛ برای پاک‌سازی درخواست قدیمی، «رد و ادامهٔ رسیدگی» را بزنید.');

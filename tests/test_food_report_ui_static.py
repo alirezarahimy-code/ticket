@@ -108,7 +108,7 @@ class FoodReportUiStaticTests(unittest.TestCase):
         self.assertIn("dialog.showModal()", script)
         self.assertIn(".domain-code-link-dialog::backdrop", css)
         # از تجمیع RC: بارگذاری app.js از چهرهٔ مشترک هسته (lib/render.php) انجام می‌شود، نه از index.php.
-        self.assertIn("assets/app.js?v=3.4.29", read("lib/render.php"))
+        self.assertIn("assets/app.js?v=3.4.30", read("lib/render.php"))
 
 
 if __name__ == "__main__":

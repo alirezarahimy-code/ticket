@@ -689,7 +689,7 @@ try {
                 t12s_pdo($app)->exec("UPDATE tickets SET status = 'assigned', assigned_to = 102, assigned_at = NOW() - INTERVAL 1 HOUR, first_response_at = NOW() - INTERVAL 30 MINUTE WHERE id = " . (int) $tid);
                 $r1 = t12s_post($app['base_url'] . '/index.php', $sess['requester'][$side], 'cancel_ticket', ['ticket_id' => $tid, 'cancel_reason' => 'لغو لازم است T12']);
                 $fields = ['ticket_id' => $tid, 'decision' => $decision];
-                if ($decision === 'reject') { $fields['decision_note'] = 'دلایل کافی نیست T12'; }
+                $fields['decision_note'] = $decision === 'reject' ? 'دلایل کافی نیست T12' : 'لغو با دلیل مستند T12';
                 $r2 = t12s_post($app['base_url'] . '/index.php', $sess['agent'][$side], 'decide_ticket_cancellation', $fields);
                 return [t12s_snapshot(t12s_pdo($app)), ['request_status' => $r1['status'], 'decision_status' => $r2['status']]];
             };

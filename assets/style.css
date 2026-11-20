@@ -1441,6 +1441,10 @@ html[data-theme="copper"] .card { border-top-color:#e5d2b8; }
 
 /* منوی واحد: اگر بلند بود، داخلی اسکرول می‌شود و از لبهٔ صفحه بیرون نمی‌زند. */
 .org-node-menu { max-height: calc(100vh - 90px); overflow-y: auto; }
+/* کارت والد هنگام بازبودن منو باید بالای کارت‌های فرزند بنشیند؛ hover آن را transformed می‌کند و بدون z-index صریح، اداره‌های پایین‌تر روی گزینه‌های پایین منو (ویرایش/حذف) می‌افتند. */
+.org-node:hover,
+.org-node:focus-within,
+.org-node.is-match { position: relative; z-index: 90; }
 
 /* افکت نمایشی — صفحه‌های انتخاب‌شده */
 body.triangle-mesh-background-active > .app-shell { position: relative; z-index: 1; }

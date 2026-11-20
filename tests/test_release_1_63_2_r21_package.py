@@ -15,6 +15,11 @@ PACKAGE = DOWNLOADS / NAME
 # POST_RELEASE_WORKTREE_CHANGES استفاده می‌کند. این فایل‌ها عمداً از بستهٔ ۱.۶۳.۲-r21 جدا شدند؛
 # بقیهٔ فایل‌های بسته باید با مخزن بایت‌به‌بایت یکی بمانند.
 POST_RELEASE_WORKTREE_CHANGES = {
+    # این سه فایل در کارهای نهایی ۱٫۶۳٫۳ (بازسازی دوم، ۲۰۲۶-۱۱-۲۰) تغییراتی دارند که به بستهٔ ۱٫۶۳٫۳
+    # افزوده شدند؛ بنابراین عمداً با بستهٔ ۱٫۶۳٫۲-r21 یکی نیستند.
+    "assets/style.css",
+    "lib/release-notes.php",
+    "tools/test_release_notes_offline.php",
     "assets/food-menu.css",
     "assets/food-menu.js",
     "assets/food-org-groups.js",

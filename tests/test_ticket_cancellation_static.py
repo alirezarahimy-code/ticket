@@ -56,6 +56,18 @@ check("decide_ticket_cancellation" in index
       and "'cancellation_approved'" in ticket_actions
       and "'cancel_requested_at' => $requestAt" in ticket_actions,
       "only the scoped handler/manager (not the requester) can decide, with locked snapshot and compare-and-set protection")
+check("'decision_note'" in ticket_actions
+      and "if ($note === '')" in ticket_actions
+      and "name=\"decision_note\" required" in (ROOT / "modules/request-center/Pages/detail.php").read_text(encoding="utf-8")
+      and 'name="decision" value="approve" data-confirm' in (ROOT / "modules/request-center/Pages/detail.php").read_text(encoding="utf-8")
+      and 'name="decision" value="reject"' in (ROOT / "modules/request-center/Pages/detail.php").read_text(encoding="utf-8"),
+      "the cancellation decision note is required for both approve and reject, and confirm is only wired to the approve button")
+check('form.dataset.confirmHandled="1";' in (ROOT / "modules/request-center/Pages/detail.php").read_text(encoding="utf-8")
+      and 'aria-busy' in (ROOT / "modules/request-center/Pages/detail.php").read_text(encoding="utf-8")
+      and "if (!form || form.dataset.confirmHandled === '1') return;" in app_js
+      and 'disabled=true' not in app_js,
+      "the global confirm listener is idempotent and submit buttons stay enabled so decision name/value is posted")
+
 check("$workflow->transition($ticketId, $oldStatus, 'cancelled'" in ticket_actions
       and "'requester_cancel'" in ticket_actions
       and "'cancellation_approved'" in ticket_actions

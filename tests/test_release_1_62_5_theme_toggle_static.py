@@ -24,7 +24,7 @@ def test_all_host_shells_load_the_new_app_js():
     # governance.php و ola.php در ۲۰۲۶-۱۱-۱۴ به ماژول منتقل شدند؛ چهره‌شان از lib/render.php هسته می‌آید.
     # index.php خودش app.js را صدا نمی‌زند؛ از تجمیع RC از طریق render_footer() به lib/render.php واگذار می‌کند.
     # لایهٔ MVC مرده (app/Views/*) در ۱.۶۳ حذف شد.
-    assert "assets/app.js?v=3.4.29" in read("lib/render.php")
+    assert "assets/app.js?v=3.4.30" in read("lib/render.php")
     assert "render_footer(" in read("index.php")
 
 

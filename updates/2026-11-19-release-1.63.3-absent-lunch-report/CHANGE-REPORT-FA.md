@@ -4,6 +4,7 @@
 - مهاجرت پایگاه داده: **سه فایل idempotent** — `038-food-guest-actuals.sql` (جدول `food_guest_actuals`) و `039-liaison-manager-role-sync.sql` (ارتقای مدیران واحدهای مستقل به نقش «مدیر») و `040-org-routing-departments.sql` (نگاشت پایدار ردیف رسیدگی). هیچ جدول/ستونی حذف نمی‌شود؛ داده‌های قبلی بازنویسی نمی‌شوند.
 - بسته: `ticket-update-1.63.2-to-1.63.3-absent-lunch-report-20261119.zip`
 - **این بستهٔ نهایی جایگزین بستهٔ اولیهٔ همان ورژن شد**؛ شمارهٔ نسخه عمداً همان `1.63.3` مانده است، ولی محتوا و SHA256 آن تازه است. بستهٔ اولیه را نصب نکنید.
+- **بازسازی دوم (۲۰۲۶-۱۱-۲۰):** رفع دو باگ رابط (هم‌پوشانی منوی واحد روی ادارات در چارت + تصمیم اجباری یادداشت‌دار برای لغو درخواست) و الزام نمایش **فقط یک‌بارِ** گزارش به‌روزرسانی به «این» بسته اضافه شد (جزئیات در «مرحلهٔ ششم»). روی سامانه‌هایی که ۱٫۶۳٫۳ را نصب کرده‌اند: نصب مجدد همین بسته به‌عنوان ترمیم فایل‌ها انجام می‌شود؛ مهاجرت‌ها تکرار نمی‌شوند.
 
 ## بخش اول — تب «غایبین ناهار» در «گزارشها»
 
@@ -79,7 +80,9 @@
 ## فایلهای بسته
 
 بسته علاوه بر فایل‌های بخش اول (تب «غایبین ناهار») شامل فایل‌های بخش دوم است:
-`food-ticket.php` (مسیرهای تازه + نسخهٔ پنل 1.37.58)، `food-ticket-web/index.html` (تب + کش v=1.63.3 + برچسب‌های یک‌دست)، `help-guide.php`، `chatbot.php`، `food-order.php`، `food-reconciliation.php`، `organization.php`، `cd-dvd.php`، `food-order-import.php`، `food-ticket-auto-receipts.php`، `food-ticket-groups.php`، `food-ticket-runtime.php`، `lib/org-grouping.php`، `modules/request-center/*` (create/detail/ticket-actions/lib-functions/RequestCenterRepository)، `cd-dvd.php`، `organization.php`، `help-guide.php`، `migrations/040-org-routing-departments.sql`، `assets/*` و `food-ticket-web/assets/*` (food-menu.js/css, food-org-groups.js, food-order-guest.js)، `migrations/*.sql` ×۲، `VERSION`، `downloads/CHANGE-REPORT-FA-1.63.3.md` و تست‌ها.
+`food-ticket.php` (مسیرهای تازه + نسخهٔ پنل 1.37.58)، `food-ticket-web/index.html` (تب + کش v=1.63.3 + برچسب‌های یک‌دست)، `help-guide.php`، `chatbot.php`، `food-order.php`، `food-reconciliation.php`، `organization.php`، `cd-dvd.php`، `food-order-import.php`، `food-ticket-auto-receipts.php`، `food-ticket-groups.php`، `food-ticket-runtime.php`، `lib/org-grouping.php`، `modules/request-center/*` (create/detail/ticket-actions/lib-functions/RequestCenterRepository)، `migrations/040-org-routing-departments.sql`، `assets/*` و `food-ticket-web/assets/*` (food-menu.js/css, food-org-groups.js, food-order-guest.js)، `migrations/*.sql` ×۲، `VERSION`، `downloads/CHANGE-REPORT-FA-1.63.3.md` و تست‌ها.
+
+**پس از بازسازی دوم (مرحلهٔ ششم) اضافه شدند:** `assets/app.js`، `assets/style.css`، `lib/render.php`، `lib/release-notes.php` و تست‌های هم‌تراز (`tests/test_ticket_cancellation_static.py`، `tests/test_org_latest_chart_requests_static.py`، `tests/test_request_center_t12_scenarios.php`، `tests/test_food_report_ui_static.py`، `tests/test_release_1_62_15_service_modal_fix_static.py`، `tests/test_release_1_62_5_theme_toggle_static.py`).
 
 ## آزمون‌ها
 
@@ -143,3 +146,20 @@
 - **داده‌ها دست‌نخورده‌اند:** این یک تغییر نمایش است؛ نام واحدها در چارت تغییری نمی‌کند و هیچ migration جدیدی لازم نیست. سطرهای رسیدگی شرکت همکار که با ۱٫۶۳٫۳ ساخته/ادعا شده‌اند از قبل پیشوندی هستند.
 
 فایل‌های تغییریافته: `organization.php`، `modules/request-center/lib/functions.php`، `lib/org-grouping.php`، `food-order.php`، `index.php`، `help-guide.php`.
+
+### ی) مرحلهٔ ششم — اصلاحات این بازسازی (۲۰۲۶-۱۱-۲۰): چارت، تصمیم لغو، گزارش یک‌بار به‌روزرسانی
+
+- **باگ ۱ — هم‌پوشانی منوی واحد روی ادارات:** کارت هر واحد هنگام بازبودن (یا هاور/فوکوس) منوی همان کارت، بالای کارت‌های ادارات زیردستش می‌نشیند. ریشه: هاور کارت `transform` می‌ساخت ولی `z-index` نداشت، پس منوی بازشده زیر کارت‌های فرزند paint می‌شد و گزینه‌های پایین منو (ازجمله «ویرایش» و «حذف») کلیک‌ناپذیر می‌شدند. اصلاح: قانون `position: relative; z-index: 90` برای `.org-node:hover / :focus-within / .is-match` در `assets/style.css`؛ منو همچنان با `z-index: 120` داخل همان کارت است.
+- **باگ ۲ — تصمیم مسئول دربارهٔ لغو درخواست:**
+  - یادداشت تصمیم (`decision_note`) برای **هر دو** «تأیید لغو» و «رد و ادامهٔ رسیدگی» الزامی شد (قبلاً فقط رد). بدون یادداشت، تصمیم از سمت سرور رد می‌شود.
+  - مقدار `decision` فقط `approve` | `reject` است؛ مقدار نامعتبر به‌جای پیش‌فرضِ خاموشِ `reject` خطای روشن برمی‌گرداند.
+  - دکمه‌های ارسال دیگر غیرفعال نمی‌شوند؛ تصمیم همراه با نام/مقدار خودِ دکمهٔ انتخاب‌شده (`decision=approve|reject`) ارسال می‌شود (فقط `aria-busy` ست می‌شود).
+  - پرسش تأیید مرورگر فقط **یک‌بار** ظاهر می‌شود؛ شنوندهٔ مرکزی `app.js` فرم‌هایی که inline مدیریت شده‌اند را از تأیید دوم معاف می‌کند (`form.dataset.confirmHandled`).
+- **گزارش به‌روزرسانی (این گزارش):**
+  - پاپ‌آپ «تغییرات این نسخه» حداکثر **یک‌بار** (قبلاً دوبار) روی اولین ورود پس از نصب نمایش داده می‌شود؛ با هر مکانیزم بستن، پس از یک‌بار دیگر خودکار باز نمی‌شود.
+  - محتوای یادداشت نسخهٔ **۱٫۶۳٫۳** اکنون در `lib/release-notes.php` ثبت شده است (قبلاً پاپ‌آپ به‌جای آن یادداشت ۱٫۶۳ را نشان می‌داد).
+  - مرجع همیشگی و کامل: «**راهنما ← تغییرات نسخه‌ها**» (و لینک «تغییرات سامانه» در پاورقی) — همان‌جا همیشه در دسترس است.
+- **کش دارایی‌ها:** `style.css` → `v=3.4.63` و `app.js` → `v=3.4.30` (پین‌های تست هم‌تراز شدند)؛ پس از نصب یک بار **Ctrl+F5** بزنید.
+- **فایل‌های افزوده‌شده به همین بسته:** `assets/app.js`، `assets/style.css`، `lib/render.php`، `lib/release-notes.php` + تست‌های استاتیک هم‌تراز (`tests/test_ticket_cancellation_static.py`، `tests/test_org_latest_chart_requests_static.py`، `tests/test_request_center_t12_scenarios.php`، `tests/test_release_notes_popup.js`، `tools/test_release_notes_offline.php` و پین‌های کش ۱٫۶۲٫۵/۱٫۶۲٫۱۵/گزارش غذا).
+- **وضعیت آزمون‌ها:** pytest → ۸۷۶ passed (۷ شکست پیش‌موجود مخزن بدون تغییر)؛ تست پاپ‌آپ Node ۲۱/۲۱ ✅؛ آفلاین PHP ۴۳/۴۳ ✅؛ بستهٔ بازسازی‌شده با مخزن بایت‌به‌بایت هم‌خوان است (`test_packaged_verbatim_files_match_repo` سبز). تأیید بصری چارت توصیه می‌شود.
+- **هیچ تغییری در مهاجرت‌ها یا اسکیما در این مرحله انجام نشده است.**
