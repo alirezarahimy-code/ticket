@@ -156,6 +156,8 @@ EXTRA_FILES = [
     'assets/style.css',
     'lib/render.php',
     'lib/release-notes.php',
+    # بازسازی هفتم (۲۰۲۶-۱۱-۲۰) — گزارش کامل ۱٫۶۳٫۳، پاپ‌آپ rev-scoped و یادداشت پنل:
+    'food-ticket-release-notes.php',
     # بازسازی چهارم (۲۰۲۶-۱۱-۲۰) — «اعداد همیشه فارسی» + round-trip لاتین کانونی:
     'bootstrap.php',
     'lib/fa-digits.php',
@@ -213,7 +215,7 @@ manifest = {
     'version': VERSION,
     'requires_version': REQUIRES,
     'date': DATE,
-    'title': 'تب «غایبین ناهار» + اصلاحات نهایی (بند ۱۷) + چارت/لغو/گزارش یک‌بار (بازسازی دوم) + ترمیم C10 و ۴۰۰ وعده (بازسازی سوم) + اعداد همیشه فارسی (بازسازی چهارم) + اصلاح چینش دکمه‌ها (بازسازی‌های پنجم و ششم)',
+    'title': 'تب «غایبین ناهار» + اصلاحات نهایی (بند ۱۷) + چارت/لغو/گزارش یک‌بار (بازسازی دوم) + ترمیم C10 و ۴۰۰ وعده (بازسازی سوم) + اعداد همیشه فارسی (بازسازی چهارم) + اصلاح چینش دکمه‌ها (بازسازی‌های پنجم و ششم) + گزارش کامل ۱٫۶۳٫۳ و پاپ‌آپ rev-scoped و یادداشت پنل (بازسازی هفتم)',
     'panel_version': PANEL_VERSION,
     'migrations': MIGRATIONS,
     'files': FILES_LIST,
@@ -232,7 +234,12 @@ manifest = {
                     'delivered report Excel/print buttons moved after the Today button, statistics mode pills moved inline after the print button, absent-lunch action buttons moved after the Today button, '
                     'and the "asset reset" card in the main settings page now renders only in the General tab. Panel 1.37.60. '
                     'Rebuilt sixth time (2026-11-20): classic-report filter fields narrowed so date/to/type fit on one line and the XLSX/print buttons moved next to the run button; '
-                    'statistics mode pills renamed to shorter labels (نوع غذا / سفارش نفرات / سفارش پرسنل انتخابی) and pinned to a single line. Panel 1.37.61.'),
+                    'statistics mode pills renamed to shorter labels (نوع غذا / سفارش نفرات / سفارش پرسنل انتخابی) and pinned to a single line. Panel 1.37.61. '
+                    'Rebuilt seventh time (2026-11-20): the 1.63.3 release-notes entry was rewritten to cover EVERYTHING in this package '
+                    '(absent-lunch tab, close-day guest actuals popup, 6 org roots everywhere, no-anchor registration blocks, subtree visibility for chart managers, '
+                    'stable routing with migration 040, partner-company prefix and (مستقل) suffix, chart-locked section attribution, mandatory decision notes for both cancel decisions, '
+                    'universal Persian digits, layout refresh, panel 1.37.61); the one-time popup now uses a package-scoped rev key so rebuilds of the same version show it once again after install; '
+                    'food-panel release banner points at the 1.37.61 entry; the user guide (and therefore Aria the chatbot) was taught all of these features; seven new FAQ entries. Panel unchanged at 1.37.61.'),
     'notes': ('پیشنیاز ۱٫۶۳٫۲؛ دارای سه مهاجرتِ idempotent است: 038-food-guest-actuals.sql (جدول food_guest_actuals)، '
               '039-liaison-manager-role-sync.sql (ارتقای مدیران واحدهای مستقل به نقش «مدیر») و 040-org-routing-departments.sql (نگاشت پایدار ردیف رسیدگی). پشتیبان و نصب آزمایشی الزامی. '
               'بازسازی دوم ۲۰۲۶-۱۱-۲۰ همان نسخهٔ ۱٫۶۳٫۳ است با اصلاحات چارت/لغو و گزارش یک‌بار به‌روزرسانی؛ SHA تازه است. '
@@ -242,7 +249,8 @@ manifest = {
               'بازسازی سوم ۲۰۲۶-۱۱-۲۰: مدیران چارت غیربازبین با مجوز food.menu پنل مهمان را فقط-خواندنی می‌بینند؛ /api/absent با meal_type غیرناهار، ۴۰۰ می‌دهد. '
               'بازسازی چهارم ۲۰۲۶-۱۱-۲۰: اعداد در تمام سامانه فارسی‌اند (نمایش + تایپ حتی با کیبورد لاتین + خروجی Excel)؛ ذخیره canonical لاتین؛ IP/ایمیل/هاست لاتین؛ پنل ۱٫۳۷٫۵۹. '
               'بازسازی پنجم ۲۰۲۶-۱۱-۲۰: فقط چینش رابط (کارکنان پنل غذا، دکمه‌های گزارش‌ها، ریست شناسنامه‌ها فقط تب عمومی)؛ نسخهٔ پنل ۱٫۳۷٫۶۰. '
-              'بازسازی ششم ۲۰۲۶-۱۱-۲۰: تکمیل چینش گزارش‌گیری (یک خط فیلدها + دکمه‌ها کنار «نمایش گزارش») و آمار سفارشها (pillها تک‌خطی با نام کوتاه)؛ نسخهٔ پنل ۱٫۳۷٫۶۱.'),
+              'بازسازی ششم ۲۰۲۶-۱۱-۲۰: تکمیل چینش گزارش‌گیری (یک خط فیلدها + دکمه‌ها کنار «نمایش گزارش») و آمار سفارشها (pillها تک‌خطی با نام کوتاه)؛ نسخهٔ پنل ۱٫۳۷٫۶۱. '
+              'بازسازی هفتم ۲۰۲۶-۱۱-۲۰: گزارش کامل ۱٫۶۳٫۳ (همهٔ موارد بالا)، پاپ‌آپ یک‌بار با کلید rev-scoped (روی اولین ورود پس از نصب همین بسته باز می‌شود)، ورودی تازهٔ بنر پنل (۱٫۳۷٫۶۱) و آموزش کامل چت‌بات از راهنما + واژه‌های محاوره‌ای تازه. پنل باز هم ۱٫۳۷٫۶۱.'),
 }
 (PKG / 'manifest.json').write_text(json.dumps(manifest, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
 

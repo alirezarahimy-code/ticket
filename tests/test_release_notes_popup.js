@@ -71,12 +71,15 @@ check(
 );
 check('عنصر با صفت hidden رندر شده', /id="release-notes-popup"[^>]*\shidden/.test(html));
 check('سقف نمایش در HTML یک است', /data-max-views="1"/.test(html));
+check('کلید نمایش شامل rev بسته است', /data-release-seen-scope="1\.63\.3@([^"]+)"/.test(html));
 
 /* ── شبیه‌سازی DOM + localStorage ─────────────────────────────────────── */
+const SEEN_SCOPE = (html.match(/data-release-seen-scope="([^"]+)"/) || [, '1.63.3@20261120-r7'])[1];
+
 function makeEnv({ storageBlocked = false, presetSeen = null, presetDismissed = false } = {}) {
   const store = new Map();
-  if (presetSeen !== null) store.set('release-notes-popup-seen:1.63.3', String(presetSeen));
-  if (presetDismissed) store.set('release-notes-popup-dismissed:1.63.3', '1');
+  if (presetSeen !== null) store.set('release-notes-popup-seen:' + SEEN_SCOPE, String(presetSeen));
+  if (presetDismissed) store.set('release-notes-popup-dismissed:' + SEEN_SCOPE, '1');
 
   const localStorage = storageBlocked
     ? {
@@ -95,6 +98,7 @@ function makeEnv({ storageBlocked = false, presetSeen = null, presetDismissed = 
     attrs: { 'data-release-version': '1.63.3', 'data-max-views': '1' },
     getAttribute(name) {
       if (name === 'data-release-version') return '1.63.3';
+      if (name === 'data-release-seen-scope') return SEEN_SCOPE;
       if (name === 'data-max-views') return '1';
       return null;
     },
@@ -134,13 +138,13 @@ function runScript(env) {
 let env = makeEnv();
 let el = runScript(env);
 check('نمایش اول: پاپ‌آپ باز می‌شود', el.hidden === false);
-check('نمایش اول: شمارندهٔ نمایش ۱ شد', env.store.get('release-notes-popup-seen:1.63.3') === '1');
+check('نمایش اول: شمارندهٔ نمایش ۱ شد', env.store.get('release-notes-popup-seen:' + SEEN_SCOPE) === '1');
 
 /* ۲) بستن با دکمه ─────────────────────────────────────────────────────── */
 el._click('close');
 check('بستن با دکمه: عنصر پنهان می‌شود', el.hidden === true);
 check('بستن با دکمه: وضعیت dismissed ثبت می‌شود',
-  env.store.get('release-notes-popup-dismissed:1.63.3') === '1');
+  env.store.get('release-notes-popup-dismissed:' + SEEN_SCOPE) === '1');
 check('بستن با دکمه: شنوندهٔ Esc برداشته می‌شود', !env.docListeners.keydown);
 
 /* ۳) بار دوم در یک بارگذاری تازه: چون dismissed=1 است، نباید باز شود ─── */
@@ -156,7 +160,7 @@ check('پس از یک‌بار نمایش، دیگر باز نمی‌شود', el
 env = makeEnv({ presetSeen: 0 });
 el = runScript(env);
 check('نمایش اول هنوز روی اولین ورود باز می‌شود', el.hidden === false);
-check('شمارندهٔ نمایش ۱ شد', env.store.get('release-notes-popup-seen:1.63.3') === '1');
+check('شمارندهٔ نمایش ۱ شد', env.store.get('release-notes-popup-seen:' + SEEN_SCOPE) === '1');
 
 /* ۵) Esc ──────────────────────────────────────────────────────────────── */
 env = makeEnv();

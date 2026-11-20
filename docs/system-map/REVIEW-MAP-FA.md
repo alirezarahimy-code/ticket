@@ -9,11 +9,11 @@
 | سنجه | مقدار |
 |---|---|
 | فایل‌های کد تولیدی | 708 |
-| خطوط | 178,511 |
-| آدرس‌ها (بلوک) | 8,506 |
+| خطوط | 178,595 |
+| آدرس‌ها (بلوک) | 8,507 |
 | موضوع‌های قابل جست‌وجو | 41 صفحه + 102 مجوز + 86 جدول |
 | بازبینی‌شده | 0 آدرس (0.0%) — 0 خط (0.0%) |
-| باقی‌مانده | 8,506 آدرس |
+| باقی‌مانده | 8,507 آدرس |
 
 ## 🔎 فهرست موضوعی — از اینجا شروع کنید
 
@@ -27,7 +27,7 @@
 | **chatbot api** | `chatbot-api` | — | `PAGE-033.34` <sub>index.php:811</sub> | 3 |
 | **domain scan** | `domain-scan` | `domain.scan` | `PAGE-033.69` <sub>index.php:1577</sub><br>`PAGE-011.47` <sub>domain-scan.php:1810</sub><br>`PAGE-011.20` <sub>domain-scan.php:425</sub><br>`PAGE-011.17` <sub>domain-scan.php:346</sub> | 59 |
 | **food personnel link** | `food-personnel-link` | — | `PAGE-033.32` <sub>index.php:729</sub><br>`PAGE-014.09` <sub>food-personnel-link.php:205</sub><br>`PAGE-014.04` <sub>food-personnel-link.php:39</sub><br>`PAGE-014.10` <sub>food-personnel-link.php:317</sub> | 31 |
-| **food ticket** | `food-ticket` | — | `PAGE-033.28` <sub>index.php:481</sub><br>`PAGE-033.38` <sub>index.php:867</sub><br>`PAGE-033.45` <sub>index.php:920</sub><br>`TOOL-062.04` <sub>tools/food_system_router.php:21</sub> | 156 |
+| **food ticket** | `food-ticket` | — | `PAGE-033.28` <sub>index.php:481</sub><br>`PAGE-033.38` <sub>index.php:867</sub><br>`PAGE-033.45` <sub>index.php:920</sub><br>`TOOL-063.04` <sub>tools/food_system_router.php:21</sub> | 156 |
 | **governance** | `governance` | — | `PAGE-055.03` <sub>modules/request-center/Pages/governance.php:17</sub><br>`PAGE-033.44` <sub>index.php:916</sub><br>`PAGE-077.20` <sub>request-center.php:208</sub><br>`PAGE-069.11` <sub>modules/request-center/lib/governance.php:65</sub> | 35 |
 | **help** | `help` | — | `PAGE-033.52` <sub>index.php:952</sub><br>`CORE-022.05` <sub>lib/settings-effects.php:57</sub> | 5 |
 | **local accounts** | `local-accounts` | — | `PAGE-033.42` <sub>index.php:895</sub><br>`PAGE-036.03` <sub>local-accounts.php:25</sub><br>`PAGE-036.05` <sub>local-accounts.php:81</sub><br>`PAGE-036.06` <sub>local-accounts.php:138</sub> | 11 |
@@ -49,7 +49,7 @@
 | **دارایی‌ها** | `assets` | `assets.view` | `ACT-014.09` <sub>actions/settings-actions.php:319</sub><br>`ACT-003.08` <sub>actions/asset-actions.php:200</sub><br>`PAGE-033.70` <sub>index.php:1696</sub><br>`DB-004.36` <sub>install-empty-db.sql:529</sub> | 206 |
 | **داشبورد** | `dashboard` | `dash.view` | `PAGE-033.75` <sub>index.php:2482</sub><br>`CORE-021.02` <sub>lib/render.php:14</sub><br>`CORE-022.16` <sub>lib/settings-effects.php:277</sub><br>`CORE-022.05` <sub>lib/settings-effects.php:57</sub> | 27 |
 | **دانش‌نامه** | `knowledge` | `knowledge.view` | `PAGE-057.03` <sub>modules/request-center/Pages/knowledge.php:16</sub><br>`PAGE-077.19` <sub>request-center.php:204</sub><br>`PAGE-057.01` <sub>modules/request-center/Pages/knowledge.php:1</sub><br>`PAGE-057.02` <sub>modules/request-center/Pages/knowledge.php:4</sub> | 14 |
-| **سفارش غذا** | `food-order` | — | `PAGE-033.29` <sub>index.php:495</sub><br>`PAGE-033.46` <sub>index.php:925</sub><br>`PAGE-033.47` <sub>index.php:933</sub><br>`TOOL-062.03` <sub>tools/food_system_router.php:18</sub> | 228 |
+| **سفارش غذا** | `food-order` | — | `PAGE-033.29` <sub>index.php:495</sub><br>`PAGE-033.46` <sub>index.php:925</sub><br>`PAGE-033.47` <sub>index.php:933</sub><br>`TOOL-063.03` <sub>tools/food_system_router.php:18</sub> | 228 |
 | **شناسنامه دارایی** | `asset` | `asset.view` | `PAGE-033.71` <sub>index.php:1740</sub><br>`PAGE-002.02` <sub>asset-inventory-page.php:4</sub><br>`CORE-022.05` <sub>lib/settings-effects.php:57</sub> | 11 |
 | **شناسنامه سیستم‌ها** | `inventory` | `inventory.view` | `PAGE-035.32` <sub>inventory.php:770</sub><br>`PAGE-035.30` <sub>inventory.php:680</sub><br>`PAGE-035.02` <sub>inventory.php:7</sub><br>`PAGE-035.17` <sub>inventory.php:265</sub> | 62 |
 | **صف کاری** | `queue` | `queue.view` | `PAGE-059.03` <sub>modules/request-center/Pages/queue.php:12</sub><br>`PAGE-077.14` <sub>request-center.php:184</sub><br>`PAGE-059.01` <sub>modules/request-center/Pages/queue.php:1</sub><br>`PAGE-059.02` <sub>modules/request-center/Pages/queue.php:4</sub> | 40 |
@@ -72,7 +72,7 @@
 
 | گروه | مجوز | کد | آدرس‌های اصلی | کل |
 |---|---|---|---|---|
-| داشبورد و پایه | **مشاهدهٔ داشبورد** | `dash.view` | `PAGE-075.26` <sub>permissions.php:488</sub><br>`PAGE-075.03` <sub>permissions.php:28</sub><br>`TOOL-087.12` <sub>tools/test_access_coverage_offline.php:108</sub> | 10 |
+| داشبورد و پایه | **مشاهدهٔ داشبورد** | `dash.view` | `PAGE-075.26` <sub>permissions.php:488</sub><br>`PAGE-075.03` <sub>permissions.php:28</sub><br>`TOOL-088.12` <sub>tools/test_access_coverage_offline.php:108</sub> | 10 |
 | داشبورد و پایه | **جست‌وجوی سراسری** | `search.global` | `PAGE-033.62` <sub>index.php:1212</sub> | 3 |
 | داشبورد و پایه | **اعلان‌های من** | `notif.view` | `PAGE-033.54` <sub>index.php:981</sub><br>`CORE-021.02` <sub>lib/render.php:14</sub> | 6 |
 | داشبورد و پایه | **ویرایش پروفایل خودم** | `profile.edit` | `PAGE-075.03` <sub>permissions.php:28</sub><br>`PAGE-033.34` <sub>index.php:811</sub><br>`PAGE-075.16` <sub>permissions.php:351</sub> | 3 |
@@ -89,8 +89,8 @@
 | درخواست | **اتصال دارایی به درخواست** | `ticket.attach_asset` | `PAGE-040.03` <sub>modules/request-center/Actions/bulk-actions.php:24</sub><br>`PAGE-075.03` <sub>permissions.php:28</sub><br>`PAGE-075.16` <sub>permissions.php:351</sub> | 3 |
 | درخواست | **صف کاری** | `queue.view` | `PAGE-059.03` <sub>modules/request-center/Pages/queue.php:12</sub><br>`CORE-021.02` <sub>lib/render.php:14</sub> | 25 |
 | درخواست | **پنل سوپروایزر** | `supervisor.panel` | `PAGE-063.03` <sub>modules/request-center/Pages/supervisor.php:16</sub><br>`PAGE-045.03` <sub>modules/request-center/Actions/supervisor-actions.php:26</sub><br>`PAGE-045.04` <sub>modules/request-center/Actions/supervisor-actions.php:175</sub> | 34 |
-| درخواست | **ویرایش** | `supervisor.decide` | `PAGE-063.03` <sub>modules/request-center/Pages/supervisor.php:16</sub><br>`PAGE-045.04` <sub>modules/request-center/Actions/supervisor-actions.php:175</sub><br>`TOOL-123.07` <sub>tools/test_key_roles_composition_offline.php:59</sub> | 15 |
-| درخواست | **بازگشایی/برگشت درخواست** | `supervisor.reopen` | `PAGE-063.03` <sub>modules/request-center/Pages/supervisor.php:16</sub><br>`PAGE-045.05` <sub>modules/request-center/Actions/supervisor-actions.php:406</sub><br>`TOOL-123.07` <sub>tools/test_key_roles_composition_offline.php:59</sub> | 9 |
+| درخواست | **ویرایش** | `supervisor.decide` | `PAGE-063.03` <sub>modules/request-center/Pages/supervisor.php:16</sub><br>`PAGE-045.04` <sub>modules/request-center/Actions/supervisor-actions.php:175</sub><br>`TOOL-124.07` <sub>tools/test_key_roles_composition_offline.php:59</sub> | 15 |
+| درخواست | **بازگشایی/برگشت درخواست** | `supervisor.reopen` | `PAGE-063.03` <sub>modules/request-center/Pages/supervisor.php:16</sub><br>`PAGE-045.05` <sub>modules/request-center/Actions/supervisor-actions.php:406</sub><br>`TOOL-124.07` <sub>tools/test_key_roles_composition_offline.php:59</sub> | 9 |
 | خدمات و دسته‌بندی | **مشاهدهٔ خدمات** | `services.view` | `PAGE-075.03` <sub>permissions.php:28</sub><br>`PAGE-030.03` <sub>global-search.php:31</sub><br>`PAGE-033.34` <sub>index.php:811</sub> | 5 |
 | خدمات و دسته‌بندی | **ویرایش** | `services.manage` | `PAGE-044.03` <sub>modules/request-center/Actions/service-actions.php:29</sub><br>`PAGE-044.07` <sub>modules/request-center/Actions/service-actions.php:155</sub><br>`PAGE-075.03` <sub>permissions.php:28</sub> | 8 |
 | خدمات و دسته‌بندی | **مدیریت دسته‌بندی خدمات** | `service_cat.manage` | `PAGE-075.03` <sub>permissions.php:28</sub><br>`ACT-017.03` <sub>actions/user-structure-actions.php:29</sub><br>`PAGE-075.16` <sub>permissions.php:351</sub> | 3 |
@@ -289,13 +289,13 @@
 
 | ناحیه | معنی | فایل | بلوک | خط |
 |---|---|---|---|---|
-| `TEST` | TEST | 260 | 2,083 | 29,939 |
+| `TEST` | TEST | 260 | 2,084 | 29,944 |
 | `TOOL` | TOOL | 153 | 1,464 | 40,274 |
 | `DB` | DB | 89 | 1,397 | 8,374 |
-| `PAGE` | صفحات (ریشه) | 84 | 1,652 | 59,260 |
+| `PAGE` | صفحات (ریشه) | 84 | 1,652 | 59,312 |
 | `ASSET` | دارایی‌های ایستا (assets/) | 34 | 858 | 15,327 |
 | `WEB` | پنل وب غذا (food-ticket-web/) | 30 | 511 | 10,360 |
-| `CORE` | موتور مشترک (lib/) | 24 | 394 | 9,875 |
+| `CORE` | موتور مشترک (lib/) | 24 | 394 | 9,902 |
 | `ACT` | کنش‌ها (actions/) | 17 | 99 | 3,130 |
 | `CRON` | زمان‌بندها (cron/) | 15 | 39 | 1,675 |
 | `API` | رابط برنامه (api/) | 2 | 9 | 297 |
@@ -344,7 +344,7 @@
 | 22 | `TEST-125.08` | `tests/test_logging_mysql_integration.php:229` | Verify migration 025 changes the live  | 13 | الحاق در SQL، سرکوب @، فراخوانی خطرناک، نوشتن بدون تراکنش | ⬜ در نوبت |
 | 23 | `TOOL-003.07` | `tools/asset_reset.php:169` | ۶) حذف | 13 | catch بی‌صدا، الحاق در SQL، فراخوانی خطرناک | ⬜ در نوبت |
 | 24 | `TOOL-045.10` | `tools/diag_extract.php:265` | اگر مسیر جایگزینی پیدا شد ولی در tools | 13 | الحاق در SQL، سرکوب @، فراخوانی خطرناک، >۱۲۰ خط | ⬜ در نوبت |
-| 25 | `PAGE-009.27` | `chatbot.php:708` | chatbot_api_handle | 12 | ورودی خام، چاپ بدون فرار، سرکوب @، فراخوانی خطرناک، نوشتن بدون تراکنش | ⬜ در نوبت |
+| 25 | `PAGE-009.27` | `chatbot.php:717` | chatbot_api_handle | 12 | ورودی خام، چاپ بدون فرار، سرکوب @، فراخوانی خطرناک، نوشتن بدون تراکنش | ⬜ در نوبت |
 | 26 | `CRON-009.01` | `cron/rebuild_logging_issues.php:1` | بلوک رویه‌ای 1-53 | 12 | الحاق در SQL، سرکوب @، فراخوانی خطرناک | ⬜ در نوبت |
 | 27 | `TEST-125.06` | `tests/test_logging_mysql_integration.php:136` | Migration 025 must remain safe when th | 12 | الحاق در SQL، سرکوب @، فراخوانی خطرناک | ⬜ در نوبت |
 | 28 | `TEST-205.11` | `tests/test_request_center_t12_preflight.php:210` | بلوک رویه‌ای 210-322 | 12 | catch بی‌صدا، سرکوب @، فراخوانی خطرناک، نوشتن بدون تراکنش | ⬜ در نوبت |
@@ -3192,7 +3192,7 @@
 </details>
 
 <details>
-<summary><b>TEST-188</b> — <code>tests/test_release_1_63_3_day_close_guest_actuals_static.py</code> (317 خط، 49 آدرس، بازبینی‌شده 0/49)</summary>
+<summary><b>TEST-188</b> — <code>tests/test_release_1_63_3_day_close_guest_actuals_static.py</code> (318 خط، 49 آدرس، بازبینی‌شده 0/49)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
@@ -3242,14 +3242,14 @@
 | `TEST-188.44` | 258–258 | بلوک | `PackageTests` | 0 | ⬜ |
 | `TEST-188.45` | 259–278 | بلوک | `test_manifest_and_zip` | 0 | ⬜ |
 | `TEST-188.46` | 279–283 | بلوک | `test_sha256_sidecar_matches` | 0 | ⬜ |
-| `TEST-188.47` | 284–305 | بلوک | `test_packaged_verbatim_files_match_repo` | 0 | ⬜ |
-| `TEST-188.48` | 306–308 | بلوک | `test_build_py_panel_version` | 0 | ⬜ |
-| `TEST-188.49` | 309–317 | بلوک | `test_change_report_mentions_migrations` | 0 | ⬜ |
+| `TEST-188.47` | 284–306 | بلوک | `test_packaged_verbatim_files_match_repo` | 0 | ⬜ |
+| `TEST-188.48` | 307–309 | بلوک | `test_build_py_panel_version` | 0 | ⬜ |
+| `TEST-188.49` | 310–318 | بلوک | `test_change_report_mentions_migrations` | 0 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TEST-189</b> — <code>tests/test_release_notes_popup.js</code> (190 خط، 18 آدرس، بازبینی‌شده 0/18)</summary>
+<summary><b>TEST-189</b> — <code>tests/test_release_notes_popup.js</code> (194 خط، 19 آدرس، بازبینی‌شده 0/19)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
@@ -3259,18 +3259,19 @@
 | `TEST-189.04` | 44–44 | بلوک | `e` | 0 | ⬜ |
 | `TEST-189.05` | 45–55 | بلوک | `csp_nonce` | 0 | ⬜ |
 | `TEST-189.06` | 56–59 | بلوک | `استخراج اسکریپت پاپ‌آپ` | 0 | ⬜ |
-| `TEST-189.07` | 60–74 | بلوک | `CSS: عنصر پایه نباید display داشته باشد (ریشهٔ باگ` | 0 | ⬜ |
-| `TEST-189.08` | 75–75 | بلوک | `شبیه‌سازی DOM + localStorage` | 0 | ⬜ |
-| `TEST-189.09` | 76–124 | بلوک | `makeEnv` | 1 | ⬜ |
-| `TEST-189.10` | 125–132 | بلوک | `runScript` | 0 | ⬜ |
-| `TEST-189.11` | 133–138 | بلوک | `۱) نمایش اول` | 0 | ⬜ |
-| `TEST-189.12` | 139–145 | بلوک | `۲) بستن با دکمه` | 0 | ⬜ |
-| `TEST-189.13` | 146–150 | بلوک | `۳) بار دوم در یک بارگذاری تازه: چون dismissed=1 اس` | 0 | ⬜ |
-| `TEST-189.14` | 151–160 | بلوک | `۴) سقف یک نمایش` | 0 | ⬜ |
-| `TEST-189.15` | 161–167 | بلوک | `۵) Esc` | 0 | ⬜ |
-| `TEST-189.16` | 168–174 | بلوک | `۶) localStorage مسدود (حالت ناشناس/سیاست سازمانی)` | 0 | ⬜ |
-| `TEST-189.17` | 175–180 | بلوک | `۷) کلیک روی پس‌زمینه` | 0 | ⬜ |
-| `TEST-189.18` | 181–190 | بلوک | `خلاصه` | 0 | ⬜ |
+| `TEST-189.07` | 60–75 | بلوک | `CSS: عنصر پایه نباید display داشته باشد (ریشهٔ باگ` | 0 | ⬜ |
+| `TEST-189.08` | 76–76 | بلوک | `شبیه‌سازی DOM + localStorage` | 0 | ⬜ |
+| `TEST-189.09` | 77–78 | بلوک | `SEEN_SCOPE` | 0 | ⬜ |
+| `TEST-189.10` | 79–128 | بلوک | `makeEnv` | 1 | ⬜ |
+| `TEST-189.11` | 129–136 | بلوک | `runScript` | 0 | ⬜ |
+| `TEST-189.12` | 137–142 | بلوک | `۱) نمایش اول` | 0 | ⬜ |
+| `TEST-189.13` | 143–149 | بلوک | `۲) بستن با دکمه` | 0 | ⬜ |
+| `TEST-189.14` | 150–154 | بلوک | `۳) بار دوم در یک بارگذاری تازه: چون dismissed=1 اس` | 0 | ⬜ |
+| `TEST-189.15` | 155–164 | بلوک | `۴) سقف یک نمایش` | 0 | ⬜ |
+| `TEST-189.16` | 165–171 | بلوک | `۵) Esc` | 0 | ⬜ |
+| `TEST-189.17` | 172–178 | بلوک | `۶) localStorage مسدود (حالت ناشناس/سیاست سازمانی)` | 0 | ⬜ |
+| `TEST-189.18` | 179–184 | بلوک | `۷) کلیک روی پس‌زمینه` | 0 | ⬜ |
+| `TEST-189.19` | 185–194 | بلوک | `خلاصه` | 0 | ⬜ |
 
 </details>
 
@@ -9547,7 +9548,7 @@
 </details>
 
 <details>
-<summary><b>PAGE-009</b> — <code>chatbot.php</code> (3,418 خط، 123 آدرس، بازبینی‌شده 0/123)</summary>
+<summary><b>PAGE-009</b> — <code>chatbot.php</code> (3,427 خط، 123 آدرس، بازبینی‌شده 0/123)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
@@ -9565,115 +9566,115 @@
 | `PAGE-009.12` | 181–193 | تابع | `chatbot_ticket_status` | 5 | ⬜ |
 | `PAGE-009.13` | 195–199 | تابع | `chatbot_ticket_line` | 0 | ⬜ |
 | `PAGE-009.14` | 201–415 | تابع | `chatbot_answer` | 1 | ⬜ |
-| `PAGE-009.15` | 416–456 | ناحیه | `بلوک رویه‌ای 416-456` | 0 | ⬜ |
-| `PAGE-009.16` | 457–479 | تابع | `chatbot_expand_words` | 0 | ⬜ |
-| `PAGE-009.17` | 481–495 | تابع | `chatbot_edit_distance` | 0 | ⬜ |
-| `PAGE-009.18` | 497–510 | تابع | `chatbot_typo_match` | 0 | ⬜ |
-| `PAGE-009.19` | 511–514 | ناحیه | `بلوک رویه‌ای 511-514` | 0 | ⬜ |
-| `PAGE-009.20` | 515–522 | تابع | `chatbot_contains_word` | 0 | ⬜ |
-| `PAGE-009.21` | 524–538 | تابع | `chatbot_guide_tokens` | 0 | ⬜ |
-| `PAGE-009.22` | 540–623 | تابع | `chatbot_guide_index` | 1 | ⬜ |
-| `PAGE-009.23` | 625–657 | تابع | `chatbot_guide_search` | 0 | ⬜ |
-| `PAGE-009.24` | 659–684 | تابع | `chatbot_guide_suggestions` | 0 | ⬜ |
-| `PAGE-009.25` | 686–691 | تابع | `chatbot_guide_reply` | 0 | ⬜ |
-| `PAGE-009.26` | 693–706 | تابع | `chatbot_guide_answer` | 0 | ⬜ |
-| `PAGE-009.27` | 708–791 | تابع | `chatbot_api_handle` | **12** | ⬜ |
-| `PAGE-009.28` | 793–823 | تابع | `chatbot_save_faq` | 1 | ⬜ |
-| `PAGE-009.29` | 825–880 | تابع | `chatbot_save_tts` | 0 | ⬜ |
-| `PAGE-009.30` | 882–904 | تابع | `chatbot_widget_defaults` | 0 | ⬜ |
-| `PAGE-009.31` | 906–954 | تابع | `chatbot_widget_config` | 0 | ⬜ |
-| `PAGE-009.32` | 956–998 | تابع | `chatbot_save_widget` | 0 | ⬜ |
-| `PAGE-009.33` | 1000–1014 | تابع | `chatbot_tts_config` | 0 | ⬜ |
-| `PAGE-009.34` | 1016–1024 | تابع | `chatbot_tts_proc_available` | 0 | ⬜ |
-| `PAGE-009.35` | 1026–1052 | تابع | `chatbot_tts_find_espeak` | 0 | ⬜ |
-| `PAGE-009.36` | 1054–1077 | تابع | `chatbot_tts_find_piper` | 0 | ⬜ |
-| `PAGE-009.37` | 1079–1112 | تابع | `chatbot_tts_piper_model_rank` | 0 | ⬜ |
-| `PAGE-009.38` | 1114–1155 | تابع | `chatbot_tts_piper_model` | 1 | ⬜ |
-| `PAGE-009.39` | 1157–1187 | تابع | `chatbot_tts_active` | 0 | ⬜ |
-| `PAGE-009.40` | 1189–1195 | تابع | `chatbot_tts_length_scale` | 0 | ⬜ |
-| `PAGE-009.41` | 1197–1224 | تابع | `chatbot_tts_status` | 0 | ⬜ |
-| `PAGE-009.42` | 1226–1229 | تابع | `chatbot_tts_rules_version` | 0 | ⬜ |
-| `PAGE-009.43` | 1231–1240 | تابع | `chatbot_tts_word_replace` | 0 | ⬜ |
-| `PAGE-009.44` | 1242–1249 | تابع | `chatbot_tts_ascii_digits` | 0 | ⬜ |
-| `PAGE-009.45` | 1251–1257 | تابع | `chatbot_tts_ascii_letters` | 0 | ⬜ |
-| `PAGE-009.46` | 1259–1273 | تابع | `chatbot_tts_digits_spoken` | 0 | ⬜ |
-| `PAGE-009.47` | 1275–1301 | تابع | `chatbot_tts_three_digit` | 0 | ⬜ |
-| `PAGE-009.48` | 1303–1328 | تابع | `chatbot_tts_int_to_words` | 0 | ⬜ |
-| `PAGE-009.49` | 1330–1347 | تابع | `chatbot_tts_number_token` | 0 | ⬜ |
-| `PAGE-009.50` | 1349–1359 | تابع | `chatbot_tts_number_int_string` | 0 | ⬜ |
-| `PAGE-009.51` | 1361–1373 | تابع | `chatbot_tts_ordinal` | 0 | ⬜ |
-| `PAGE-009.52` | 1375–1379 | تابع | `chatbot_tts_month_name` | 0 | ⬜ |
-| `PAGE-009.53` | 1381–1414 | تابع | `chatbot_tts_dates_times` | 0 | ⬜ |
-| `PAGE-009.54` | 1416–1456 | تابع | `chatbot_tts_ids` | 0 | ⬜ |
-| `PAGE-009.55` | 1458–1486 | تابع | `chatbot_tts_numbers_to_words` | 0 | ⬜ |
-| `PAGE-009.56` | 1488–1498 | تابع | `chatbot_tts_letter_name` | 0 | ⬜ |
-| `PAGE-009.57` | 1500–1511 | تابع | `chatbot_tts_log_unknown` | 2 | ⬜ |
-| `PAGE-009.58` | 1513–1536 | تابع | `chatbot_tts_spell_acronyms` | 0 | ⬜ |
-| `PAGE-009.59` | 1538–1563 | تابع | `chatbot_tts_unknown_latin` | 0 | ⬜ |
-| `PAGE-009.60` | 1565–1578 | تابع | `chatbot_tts_symbols` | 0 | ⬜ |
-| `PAGE-009.61` | 1580–1587 | تابع | `chatbot_tts_strip_markdown` | 0 | ⬜ |
-| `PAGE-009.62` | 1589–1594 | تابع | `chatbot_tts_zwnj_policy` | 1 | ⬜ |
-| `PAGE-009.63` | 1596–1606 | تابع | `chatbot_tts_apply_zwnj` | 1 | ⬜ |
-| `PAGE-009.64` | 1608–1615 | تابع | `chatbot_tts_he_yezafe` | 0 | ⬜ |
-| `PAGE-009.65` | 1617–1643 | تابع | `chatbot_tts_lexicon` | 0 | ⬜ |
-| `PAGE-009.66` | 1645–1649 | تابع | `chatbot_tts_lexicon_hash` | 0 | ⬜ |
-| `PAGE-009.67` | 1651–1662 | تابع | `chatbot_tts_lexicon_apply` | 0 | ⬜ |
-| `PAGE-009.68` | 1664–1667 | تابع | `chatbot_tts_spoken_path` | 0 | ⬜ |
-| `PAGE-009.69` | 1669–1677 | تابع | `chatbot_tts_spoken_map` | 1 | ⬜ |
-| `PAGE-009.70` | 1679–1696 | تابع | `chatbot_tts_spoken_set` | 2 | ⬜ |
-| `PAGE-009.71` | 1698–1709 | تابع | `chatbot_tts_spoken_for` | 0 | ⬜ |
-| `PAGE-009.72` | 1711–1722 | تابع | `chatbot_tts_clean` | 0 | ⬜ |
-| `PAGE-009.73` | 1724–1738 | تابع | `chatbot_tts_trim_length` | 0 | ⬜ |
-| `PAGE-009.74` | 1740–1785 | تابع | `chatbot_tts_colloquial` | 0 | ⬜ |
-| `PAGE-009.75` | 1787–1804 | تابع | `chatbot_tts_phrase` | 0 | ⬜ |
-| `PAGE-009.76` | 1806–1840 | تابع | `chatbot_tts_limit_phrase` | 0 | ⬜ |
-| `PAGE-009.77` | 1842–1849 | تابع | `chatbot_tts_vocalize` | 0 | ⬜ |
-| `PAGE-009.78` | 1851–1864 | تابع | `chatbot_tts_ezafe_skip_first` | 0 | ⬜ |
-| `PAGE-009.79` | 1866–1877 | تابع | `chatbot_tts_ezafe_skip_second` | 0 | ⬜ |
-| `PAGE-009.80` | 1879–1890 | تابع | `chatbot_tts_silent_heh` | 0 | ⬜ |
-| `PAGE-009.81` | 1892–1903 | تابع | `chatbot_tts_ezafe_nouns` | 0 | ⬜ |
-| `PAGE-009.82` | 1905–1916 | تابع | `chatbot_tts_ezafe_pairs_builtin` | 0 | ⬜ |
-| `PAGE-009.83` | 1918–1938 | تابع | `chatbot_tts_overlay_map` | 0 | ⬜ |
-| `PAGE-009.84` | 1940–1952 | تابع | `chatbot_tts_ezafe_pairs` | 0 | ⬜ |
-| `PAGE-009.85` | 1954–1961 | تابع | `chatbot_tts_ezafe_mode` | 0 | ⬜ |
-| `PAGE-009.86` | 1963–1967 | تابع | `chatbot_tts_word_bare` | 0 | ⬜ |
-| `PAGE-009.87` | 1969–1988 | تابع | `chatbot_tts_mark_ezafe_first` | 0 | ⬜ |
-| `PAGE-009.88` | 1990–2040 | تابع | `chatbot_tts_ezafe` | 0 | ⬜ |
-| `PAGE-009.89` | 2042–2046 | تابع | `chatbot_tts_colloquial_enabled` | 0 | ⬜ |
-| `PAGE-009.90` | 2048–2080 | تابع | `chatbot_tts_prepare` | 0 | ⬜ |
-| `PAGE-009.91` | 2082–2101 | تابع | `chatbot_tts_lab_variant` | 0 | ⬜ |
-| `PAGE-009.92` | 2103–2129 | تابع | `chatbot_tts_lab_harakat` | 0 | ⬜ |
-| `PAGE-009.93` | 2131–2169 | تابع | `chatbot_tts_stages` | 0 | ⬜ |
-| `PAGE-009.94` | 2171–2187 | تابع | `chatbot_tts_espeak_data_path` | 0 | ⬜ |
-| `PAGE-009.95` | 2189–2218 | تابع | `chatbot_tts_ipa` | 0 | ⬜ |
-| `PAGE-009.96` | 2220–2271 | تابع | `chatbot_tts_model_json_report` | 0 | ⬜ |
-| `PAGE-009.97` | 2273–2277 | تابع | `chatbot_tts_lab_filename` | 0 | ⬜ |
-| `PAGE-009.98` | 2279–2305 | تابع | `chatbot_tts_lab_run` | 2 | ⬜ |
-| `PAGE-009.99` | 2307–2311 | تابع | `chatbot_tts_voice_id` | 0 | ⬜ |
-| `PAGE-009.100` | 2313–2326 | تابع | `chatbot_tts_wait_exit` | 2 | ⬜ |
-| `PAGE-009.101` | 2328–2358 | تابع | `chatbot_tts_taskkill` | 7 | ⬜ |
-| `PAGE-009.102` | 2360–2448 | تابع | `chatbot_tts_exec` | 7 | ⬜ |
-| `PAGE-009.103` | 2450–2454 | تابع | `chatbot_tts_is_valid_wav` | 0 | ⬜ |
-| `PAGE-009.104` | 2456–2478 | تابع | `chatbot_tts_run_espeak` | 6 | ⬜ |
-| `PAGE-009.105` | 2480–2527 | تابع | `chatbot_tts_run_piper` | 7 | ⬜ |
-| `PAGE-009.106` | 2529–2543 | تابع | `chatbot_tts_probe_piper` | 0 | ⬜ |
-| `PAGE-009.107` | 2545–2557 | تابع | `chatbot_tts_probe_engine` | 0 | ⬜ |
-| `PAGE-009.108` | 2558–2559 | ناحیه | `بلوک رویه‌ای 2558-2559` | 0 | ⬜ |
-| `PAGE-009.109` | 2560–2606 | تابع | `chatbot_tts_voice_status` | 3 | ⬜ |
-| `PAGE-009.110` | 2608–2634 | تابع | `chatbot_tts_chunks` | 0 | ⬜ |
-| `PAGE-009.111` | 2636–2671 | تابع | `chatbot_tts_wav_parse` | 0 | ⬜ |
-| `PAGE-009.112` | 2673–2712 | تابع | `chatbot_tts_wav_concat` | 0 | ⬜ |
-| `PAGE-009.113` | 2714–2771 | تابع | `chatbot_tts_say` | 7 | ⬜ |
-| `PAGE-009.114` | 2773–2802 | تابع | `chatbot_tts_lab_default_phrases` | 0 | ⬜ |
-| `PAGE-009.115` | 2804–2864 | تابع | `chatbot_tts_render_lab` | 0 | ⬜ |
-| `PAGE-009.116` | 2866–2887 | تابع | `chatbot_tts_write_overlay` | 2 | ⬜ |
-| `PAGE-009.117` | 2889–2912 | تابع | `chatbot_tts_corpus_texts` | 4 | ⬜ |
-| `PAGE-009.118` | 2914–2918 | تابع | `chatbot_tts_propose_pair` | 0 | ⬜ |
-| `PAGE-009.119` | 2920–2959 | تابع | `chatbot_tts_mine_pairs` | 0 | ⬜ |
-| `PAGE-009.120` | 2961–2996 | تابع | `chatbot_tts_save_mined_pairs` | 0 | ⬜ |
-| `PAGE-009.121` | 2998–3018 | تابع | `chatbot_tts_render_pair_miner` | 0 | ⬜ |
-| `PAGE-009.122` | 3020–3212 | تابع | `chatbot_render_admin` | **8** | ⬜ |
-| `PAGE-009.123` | 3214–3417 | تابع | `chatbot_render_widget` | 5 | ⬜ |
+| `PAGE-009.15` | 416–465 | ناحیه | `بلوک رویه‌ای 416-465` | 0 | ⬜ |
+| `PAGE-009.16` | 466–488 | تابع | `chatbot_expand_words` | 0 | ⬜ |
+| `PAGE-009.17` | 490–504 | تابع | `chatbot_edit_distance` | 0 | ⬜ |
+| `PAGE-009.18` | 506–519 | تابع | `chatbot_typo_match` | 0 | ⬜ |
+| `PAGE-009.19` | 520–523 | ناحیه | `بلوک رویه‌ای 520-523` | 0 | ⬜ |
+| `PAGE-009.20` | 524–531 | تابع | `chatbot_contains_word` | 0 | ⬜ |
+| `PAGE-009.21` | 533–547 | تابع | `chatbot_guide_tokens` | 0 | ⬜ |
+| `PAGE-009.22` | 549–632 | تابع | `chatbot_guide_index` | 1 | ⬜ |
+| `PAGE-009.23` | 634–666 | تابع | `chatbot_guide_search` | 0 | ⬜ |
+| `PAGE-009.24` | 668–693 | تابع | `chatbot_guide_suggestions` | 0 | ⬜ |
+| `PAGE-009.25` | 695–700 | تابع | `chatbot_guide_reply` | 0 | ⬜ |
+| `PAGE-009.26` | 702–715 | تابع | `chatbot_guide_answer` | 0 | ⬜ |
+| `PAGE-009.27` | 717–800 | تابع | `chatbot_api_handle` | **12** | ⬜ |
+| `PAGE-009.28` | 802–832 | تابع | `chatbot_save_faq` | 1 | ⬜ |
+| `PAGE-009.29` | 834–889 | تابع | `chatbot_save_tts` | 0 | ⬜ |
+| `PAGE-009.30` | 891–913 | تابع | `chatbot_widget_defaults` | 0 | ⬜ |
+| `PAGE-009.31` | 915–963 | تابع | `chatbot_widget_config` | 0 | ⬜ |
+| `PAGE-009.32` | 965–1007 | تابع | `chatbot_save_widget` | 0 | ⬜ |
+| `PAGE-009.33` | 1009–1023 | تابع | `chatbot_tts_config` | 0 | ⬜ |
+| `PAGE-009.34` | 1025–1033 | تابع | `chatbot_tts_proc_available` | 0 | ⬜ |
+| `PAGE-009.35` | 1035–1061 | تابع | `chatbot_tts_find_espeak` | 0 | ⬜ |
+| `PAGE-009.36` | 1063–1086 | تابع | `chatbot_tts_find_piper` | 0 | ⬜ |
+| `PAGE-009.37` | 1088–1121 | تابع | `chatbot_tts_piper_model_rank` | 0 | ⬜ |
+| `PAGE-009.38` | 1123–1164 | تابع | `chatbot_tts_piper_model` | 1 | ⬜ |
+| `PAGE-009.39` | 1166–1196 | تابع | `chatbot_tts_active` | 0 | ⬜ |
+| `PAGE-009.40` | 1198–1204 | تابع | `chatbot_tts_length_scale` | 0 | ⬜ |
+| `PAGE-009.41` | 1206–1233 | تابع | `chatbot_tts_status` | 0 | ⬜ |
+| `PAGE-009.42` | 1235–1238 | تابع | `chatbot_tts_rules_version` | 0 | ⬜ |
+| `PAGE-009.43` | 1240–1249 | تابع | `chatbot_tts_word_replace` | 0 | ⬜ |
+| `PAGE-009.44` | 1251–1258 | تابع | `chatbot_tts_ascii_digits` | 0 | ⬜ |
+| `PAGE-009.45` | 1260–1266 | تابع | `chatbot_tts_ascii_letters` | 0 | ⬜ |
+| `PAGE-009.46` | 1268–1282 | تابع | `chatbot_tts_digits_spoken` | 0 | ⬜ |
+| `PAGE-009.47` | 1284–1310 | تابع | `chatbot_tts_three_digit` | 0 | ⬜ |
+| `PAGE-009.48` | 1312–1337 | تابع | `chatbot_tts_int_to_words` | 0 | ⬜ |
+| `PAGE-009.49` | 1339–1356 | تابع | `chatbot_tts_number_token` | 0 | ⬜ |
+| `PAGE-009.50` | 1358–1368 | تابع | `chatbot_tts_number_int_string` | 0 | ⬜ |
+| `PAGE-009.51` | 1370–1382 | تابع | `chatbot_tts_ordinal` | 0 | ⬜ |
+| `PAGE-009.52` | 1384–1388 | تابع | `chatbot_tts_month_name` | 0 | ⬜ |
+| `PAGE-009.53` | 1390–1423 | تابع | `chatbot_tts_dates_times` | 0 | ⬜ |
+| `PAGE-009.54` | 1425–1465 | تابع | `chatbot_tts_ids` | 0 | ⬜ |
+| `PAGE-009.55` | 1467–1495 | تابع | `chatbot_tts_numbers_to_words` | 0 | ⬜ |
+| `PAGE-009.56` | 1497–1507 | تابع | `chatbot_tts_letter_name` | 0 | ⬜ |
+| `PAGE-009.57` | 1509–1520 | تابع | `chatbot_tts_log_unknown` | 2 | ⬜ |
+| `PAGE-009.58` | 1522–1545 | تابع | `chatbot_tts_spell_acronyms` | 0 | ⬜ |
+| `PAGE-009.59` | 1547–1572 | تابع | `chatbot_tts_unknown_latin` | 0 | ⬜ |
+| `PAGE-009.60` | 1574–1587 | تابع | `chatbot_tts_symbols` | 0 | ⬜ |
+| `PAGE-009.61` | 1589–1596 | تابع | `chatbot_tts_strip_markdown` | 0 | ⬜ |
+| `PAGE-009.62` | 1598–1603 | تابع | `chatbot_tts_zwnj_policy` | 1 | ⬜ |
+| `PAGE-009.63` | 1605–1615 | تابع | `chatbot_tts_apply_zwnj` | 1 | ⬜ |
+| `PAGE-009.64` | 1617–1624 | تابع | `chatbot_tts_he_yezafe` | 0 | ⬜ |
+| `PAGE-009.65` | 1626–1652 | تابع | `chatbot_tts_lexicon` | 0 | ⬜ |
+| `PAGE-009.66` | 1654–1658 | تابع | `chatbot_tts_lexicon_hash` | 0 | ⬜ |
+| `PAGE-009.67` | 1660–1671 | تابع | `chatbot_tts_lexicon_apply` | 0 | ⬜ |
+| `PAGE-009.68` | 1673–1676 | تابع | `chatbot_tts_spoken_path` | 0 | ⬜ |
+| `PAGE-009.69` | 1678–1686 | تابع | `chatbot_tts_spoken_map` | 1 | ⬜ |
+| `PAGE-009.70` | 1688–1705 | تابع | `chatbot_tts_spoken_set` | 2 | ⬜ |
+| `PAGE-009.71` | 1707–1718 | تابع | `chatbot_tts_spoken_for` | 0 | ⬜ |
+| `PAGE-009.72` | 1720–1731 | تابع | `chatbot_tts_clean` | 0 | ⬜ |
+| `PAGE-009.73` | 1733–1747 | تابع | `chatbot_tts_trim_length` | 0 | ⬜ |
+| `PAGE-009.74` | 1749–1794 | تابع | `chatbot_tts_colloquial` | 0 | ⬜ |
+| `PAGE-009.75` | 1796–1813 | تابع | `chatbot_tts_phrase` | 0 | ⬜ |
+| `PAGE-009.76` | 1815–1849 | تابع | `chatbot_tts_limit_phrase` | 0 | ⬜ |
+| `PAGE-009.77` | 1851–1858 | تابع | `chatbot_tts_vocalize` | 0 | ⬜ |
+| `PAGE-009.78` | 1860–1873 | تابع | `chatbot_tts_ezafe_skip_first` | 0 | ⬜ |
+| `PAGE-009.79` | 1875–1886 | تابع | `chatbot_tts_ezafe_skip_second` | 0 | ⬜ |
+| `PAGE-009.80` | 1888–1899 | تابع | `chatbot_tts_silent_heh` | 0 | ⬜ |
+| `PAGE-009.81` | 1901–1912 | تابع | `chatbot_tts_ezafe_nouns` | 0 | ⬜ |
+| `PAGE-009.82` | 1914–1925 | تابع | `chatbot_tts_ezafe_pairs_builtin` | 0 | ⬜ |
+| `PAGE-009.83` | 1927–1947 | تابع | `chatbot_tts_overlay_map` | 0 | ⬜ |
+| `PAGE-009.84` | 1949–1961 | تابع | `chatbot_tts_ezafe_pairs` | 0 | ⬜ |
+| `PAGE-009.85` | 1963–1970 | تابع | `chatbot_tts_ezafe_mode` | 0 | ⬜ |
+| `PAGE-009.86` | 1972–1976 | تابع | `chatbot_tts_word_bare` | 0 | ⬜ |
+| `PAGE-009.87` | 1978–1997 | تابع | `chatbot_tts_mark_ezafe_first` | 0 | ⬜ |
+| `PAGE-009.88` | 1999–2049 | تابع | `chatbot_tts_ezafe` | 0 | ⬜ |
+| `PAGE-009.89` | 2051–2055 | تابع | `chatbot_tts_colloquial_enabled` | 0 | ⬜ |
+| `PAGE-009.90` | 2057–2089 | تابع | `chatbot_tts_prepare` | 0 | ⬜ |
+| `PAGE-009.91` | 2091–2110 | تابع | `chatbot_tts_lab_variant` | 0 | ⬜ |
+| `PAGE-009.92` | 2112–2138 | تابع | `chatbot_tts_lab_harakat` | 0 | ⬜ |
+| `PAGE-009.93` | 2140–2178 | تابع | `chatbot_tts_stages` | 0 | ⬜ |
+| `PAGE-009.94` | 2180–2196 | تابع | `chatbot_tts_espeak_data_path` | 0 | ⬜ |
+| `PAGE-009.95` | 2198–2227 | تابع | `chatbot_tts_ipa` | 0 | ⬜ |
+| `PAGE-009.96` | 2229–2280 | تابع | `chatbot_tts_model_json_report` | 0 | ⬜ |
+| `PAGE-009.97` | 2282–2286 | تابع | `chatbot_tts_lab_filename` | 0 | ⬜ |
+| `PAGE-009.98` | 2288–2314 | تابع | `chatbot_tts_lab_run` | 2 | ⬜ |
+| `PAGE-009.99` | 2316–2320 | تابع | `chatbot_tts_voice_id` | 0 | ⬜ |
+| `PAGE-009.100` | 2322–2335 | تابع | `chatbot_tts_wait_exit` | 2 | ⬜ |
+| `PAGE-009.101` | 2337–2367 | تابع | `chatbot_tts_taskkill` | 7 | ⬜ |
+| `PAGE-009.102` | 2369–2457 | تابع | `chatbot_tts_exec` | 7 | ⬜ |
+| `PAGE-009.103` | 2459–2463 | تابع | `chatbot_tts_is_valid_wav` | 0 | ⬜ |
+| `PAGE-009.104` | 2465–2487 | تابع | `chatbot_tts_run_espeak` | 6 | ⬜ |
+| `PAGE-009.105` | 2489–2536 | تابع | `chatbot_tts_run_piper` | 7 | ⬜ |
+| `PAGE-009.106` | 2538–2552 | تابع | `chatbot_tts_probe_piper` | 0 | ⬜ |
+| `PAGE-009.107` | 2554–2566 | تابع | `chatbot_tts_probe_engine` | 0 | ⬜ |
+| `PAGE-009.108` | 2567–2568 | ناحیه | `بلوک رویه‌ای 2567-2568` | 0 | ⬜ |
+| `PAGE-009.109` | 2569–2615 | تابع | `chatbot_tts_voice_status` | 3 | ⬜ |
+| `PAGE-009.110` | 2617–2643 | تابع | `chatbot_tts_chunks` | 0 | ⬜ |
+| `PAGE-009.111` | 2645–2680 | تابع | `chatbot_tts_wav_parse` | 0 | ⬜ |
+| `PAGE-009.112` | 2682–2721 | تابع | `chatbot_tts_wav_concat` | 0 | ⬜ |
+| `PAGE-009.113` | 2723–2780 | تابع | `chatbot_tts_say` | 7 | ⬜ |
+| `PAGE-009.114` | 2782–2811 | تابع | `chatbot_tts_lab_default_phrases` | 0 | ⬜ |
+| `PAGE-009.115` | 2813–2873 | تابع | `chatbot_tts_render_lab` | 0 | ⬜ |
+| `PAGE-009.116` | 2875–2896 | تابع | `chatbot_tts_write_overlay` | 2 | ⬜ |
+| `PAGE-009.117` | 2898–2921 | تابع | `chatbot_tts_corpus_texts` | 4 | ⬜ |
+| `PAGE-009.118` | 2923–2927 | تابع | `chatbot_tts_propose_pair` | 0 | ⬜ |
+| `PAGE-009.119` | 2929–2968 | تابع | `chatbot_tts_mine_pairs` | 0 | ⬜ |
+| `PAGE-009.120` | 2970–3005 | تابع | `chatbot_tts_save_mined_pairs` | 0 | ⬜ |
+| `PAGE-009.121` | 3007–3027 | تابع | `chatbot_tts_render_pair_miner` | 0 | ⬜ |
+| `PAGE-009.122` | 3029–3221 | تابع | `chatbot_render_admin` | **8** | ⬜ |
+| `PAGE-009.123` | 3223–3426 | تابع | `chatbot_render_widget` | 5 | ⬜ |
 
 </details>
 
@@ -10213,14 +10214,14 @@
 </details>
 
 <details>
-<summary><b>PAGE-023</b> — <code>food-ticket-release-notes.php</code> (47 خط، 4 آدرس، بازبینی‌شده 0/4)</summary>
+<summary><b>PAGE-023</b> — <code>food-ticket-release-notes.php</code> (62 خط، 4 آدرس، بازبینی‌شده 0/4)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
 | `PAGE-023.01` | 1–14 | ناحیه | `بلوک رویه‌ای 1-14` | 0 | ⬜ |
-| `PAGE-023.02` | 15–34 | تابع | `food_ticket_release_notes_all` | 0 | ⬜ |
-| `PAGE-023.03` | 36–44 | تابع | `food_ticket_release_notes_current` | 0 | ⬜ |
-| `PAGE-023.04` | 45–47 | ناحیه | `بلوک رویه‌ای 45-47` | 0 | ⬜ |
+| `PAGE-023.02` | 15–49 | تابع | `food_ticket_release_notes_all` | 0 | ⬜ |
+| `PAGE-023.03` | 51–59 | تابع | `food_ticket_release_notes_current` | 0 | ⬜ |
+| `PAGE-023.04` | 60–62 | ناحیه | `بلوک رویه‌ای 60-62` | 0 | ⬜ |
 
 </details>
 
@@ -10555,11 +10556,11 @@
 </details>
 
 <details>
-<summary><b>PAGE-031</b> — <code>help-guide.php</code> (729 خط، 1 آدرس، بازبینی‌شده 0/1)</summary>
+<summary><b>PAGE-031</b> — <code>help-guide.php</code> (757 خط، 1 آدرس، بازبینی‌شده 0/1)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `PAGE-031.01` | 1–729 | ناحیه | `بلوک رویه‌ای 1-729` | 5 | ⬜ |
+| `PAGE-031.01` | 1–757 | ناحیه | `بلوک رویه‌ای 1-757` | 5 | ⬜ |
 
 </details>
 
@@ -14002,20 +14003,20 @@
 </details>
 
 <details>
-<summary><b>CORE-020</b> — <code>lib/release-notes.php</code> (387 خط، 10 آدرس، بازبینی‌شده 0/10)</summary>
+<summary><b>CORE-020</b> — <code>lib/release-notes.php</code> (414 خط، 10 آدرس، بازبینی‌شده 0/10)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `CORE-020.01` | 1–27 | ناحیه | `بلوک رویه‌ای 1-27` | 0 | ⬜ |
-| `CORE-020.02` | 28–127 | تابع | `release_notes_all` | 0 | ⬜ |
-| `CORE-020.03` | 129–133 | تابع | `release_notes_version_key` | 1 | ⬜ |
-| `CORE-020.04` | 135–152 | تابع | `release_notes_current` | 0 | ⬜ |
-| `CORE-020.05` | 154–178 | تابع | `release_notes_history` | 0 | ⬜ |
-| `CORE-020.06` | 180–192 | تابع | `release_notes_render_items` | 0 | ⬜ |
-| `CORE-020.07` | 194–282 | تابع | `release_notes_dashboard_card` | 4 | ⬜ |
-| `CORE-020.08` | 284–337 | تابع | `release_notes_history_html` | 0 | ⬜ |
-| `CORE-020.09` | 339–355 | تابع | `release_notes_page_html` | 0 | ⬜ |
-| `CORE-020.10` | 357–386 | تابع | `release_notes_page_single` | 0 | ⬜ |
+| `CORE-020.01` | 1–30 | ناحیه | `بلوک رویه‌ای 1-30` | 0 | ⬜ |
+| `CORE-020.02` | 31–146 | تابع | `release_notes_all` | 0 | ⬜ |
+| `CORE-020.03` | 148–152 | تابع | `release_notes_version_key` | 1 | ⬜ |
+| `CORE-020.04` | 154–171 | تابع | `release_notes_current` | 0 | ⬜ |
+| `CORE-020.05` | 173–197 | تابع | `release_notes_history` | 0 | ⬜ |
+| `CORE-020.06` | 199–211 | تابع | `release_notes_render_items` | 0 | ⬜ |
+| `CORE-020.07` | 213–309 | تابع | `release_notes_dashboard_card` | 4 | ⬜ |
+| `CORE-020.08` | 311–364 | تابع | `release_notes_history_html` | 0 | ⬜ |
+| `CORE-020.09` | 366–382 | تابع | `release_notes_page_html` | 0 | ⬜ |
+| `CORE-020.10` | 384–413 | تابع | `release_notes_page_single` | 0 | ⬜ |
 
 </details>
 

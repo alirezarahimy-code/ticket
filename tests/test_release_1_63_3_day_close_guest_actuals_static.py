@@ -290,6 +290,7 @@ class PackageTests(unittest.TestCase):
                     "food-ticket-web/assets/food-menu.css", "food-ticket-web/assets/food-menu.js",
                     "food-ticket-web/assets/food-org-groups.js",
                     "lib/org-grouping.php", "organization.php",
+                    "food-ticket-release-notes.php",
                     "modules/request-center/Actions/ticket-actions.php",
                     "modules/request-center/Pages/create.php",
                     "modules/request-center/Pages/detail.php",

@@ -14293,14 +14293,14 @@
       "path": "chatbot.php",
       "area": "PAGE",
       "line": 416,
-      "anchor": "بلوک رویه‌ای 416-456",
+      "anchor": "بلوک رویه‌ای 416-465",
       "risk": 0,
-      "lines": 41
+      "lines": 50
     },
     "PAGE-009.16": {
       "path": "chatbot.php",
       "area": "PAGE",
-      "line": 457,
+      "line": 466,
       "anchor": "chatbot_expand_words",
       "risk": 0,
       "lines": 23
@@ -14308,7 +14308,7 @@
     "PAGE-009.17": {
       "path": "chatbot.php",
       "area": "PAGE",
-      "line": 481,
+      "line": 490,
       "anchor": "chatbot_edit_distance",
       "risk": 0,
       "lines": 15
@@ -14316,7 +14316,7 @@
     "PAGE-009.18": {
       "path": "chatbot.php",
       "area": "PAGE",
-      "line": 497,
+      "line": 506,
       "anchor": "chatbot_typo_match",
       "risk": 0,
       "lines": 14
@@ -14324,15 +14324,15 @@
     "PAGE-009.19": {
       "path": "chatbot.php",
       "area": "PAGE",
-      "line": 511,
-      "anchor": "بلوک رویه‌ای 511-514",
+      "line": 520,
+      "anchor": "بلوک رویه‌ای 520-523",
       "risk": 0,
       "lines": 4
     },
     "PAGE-009.20": {
       "path": "chatbot.php",
       "area": "PAGE",
-      "line": 515,
+      "line": 524,
       "anchor": "chatbot_contains_word",
       "risk": 0,
       "lines": 8
@@ -14340,7 +14340,7 @@
     "PAGE-009.21": {
       "path": "chatbot.php",
       "area": "PAGE",
-      "line": 524,
+      "line": 533,
       "anchor": "chatbot_guide_tokens",
       "risk": 0,
       "lines": 15
@@ -14348,7 +14348,7 @@
     "PAGE-009.22": {
       "path": "chatbot.php",
       "area": "PAGE",
-      "line": 540,
+      "line": 549,
       "anchor": "chatbot_guide_index",
       "risk": 1,
       "lines": 84
@@ -14356,7 +14356,7 @@
     "PAGE-009.23": {
       "path": "chatbot.php",
       "area": "PAGE",
-      "line": 625,
+      "line": 634,
       "anchor": "chatbot_guide_search",
       "risk": 0,
       "lines": 33
@@ -14364,7 +14364,7 @@
     "PAGE-009.24": {
       "path": "chatbot.php",
       "area": "PAGE",
-      "line": 659,
+      "line": 668,
       "anchor": "chatbot_guide_suggestions",
       "risk": 0,
       "lines": 26
@@ -14372,7 +14372,7 @@
     "PAGE-009.25": {
       "path": "chatbot.php",
       "area": "PAGE",
-      "line": 686,
+      "line": 695,
       "anchor": "chatbot_guide_reply",
       "risk": 0,
       "lines": 6
@@ -14380,7 +14380,7 @@
     "PAGE-009.26": {
       "path": "chatbot.php",
       "area": "PAGE",
-      "line": 693,
+      "line": 702,
       "anchor": "chatbot_guide_answer",
       "risk": 0,
       "lines": 14
@@ -14388,7 +14388,7 @@
     "PAGE-009.27": {
       "path": "chatbot.php",
       "area": "PAGE",
-      "line": 708,
+      "line": 717,
       "anchor": "chatbot_api_handle",
       "risk": 12,
       "lines": 84
@@ -14396,7 +14396,7 @@
     "PAGE-009.28": {
       "path": "chatbot.php",
       "area": "PAGE",
-      "line": 793,
+      "line": 802,
       "anchor": "chatbot_save_faq",
       "risk": 1,
       "lines": 31
@@ -14404,7 +14404,7 @@
     "PAGE-009.29": {
       "path": "chatbot.php",
       "area": "PAGE",
-      "line": 825,
+      "line": 834,
       "anchor": "chatbot_save_tts",
       "risk": 0,
       "lines": 56
@@ -14412,7 +14412,7 @@
     "PAGE-009.30": {
       "path": "chatbot.php",
       "area": "PAGE",
-      "line": 882,
+      "line": 891,
       "anchor": "chatbot_widget_defaults",
       "risk": 0,
       "lines": 23
@@ -14420,7 +14420,7 @@
     "PAGE-009.31": {
       "path": "chatbot.php",
       "area": "PAGE",
-      "line": 906,
+      "line": 915,
       "anchor": "chatbot_widget_config",
       "risk": 0,
       "lines": 49
@@ -14428,7 +14428,7 @@
     "PAGE-009.32": {
       "path": "chatbot.php",
       "area": "PAGE",
-      "line": 956,
+      "line": 965,
       "anchor": "chatbot_save_widget",
       "risk": 0,
       "lines": 43
@@ -14436,7 +14436,7 @@
     "PAGE-009.33": {
       "path": "chatbot.php",
       "area": "PAGE",
-      "line": 1000,
+      "line": 1009,
       "anchor": "chatbot_tts_config",
       "risk": 0,
       "lines": 15
@@ -14444,7 +14444,7 @@
     "PAGE-009.34": {
       "path": "chatbot.php",
       "area": "PAGE",
-      "line": 1016,
+      "line": 1025,
       "anchor": "chatbot_tts_proc_available",
       "risk": 0,
       "lines": 9
@@ -14452,7 +14452,7 @@
     "PAGE-009.35": {
       "path": "chatbot.php",
       "area": "PAGE",
-      "line": 1026,
+      "line": 1035,
       "anchor": "chatbot_tts_find_espeak",
       "risk": 0,
       "lines": 27
@@ -14460,7 +14460,7 @@
     "PAGE-009.36": {
       "path": "chatbot.php",
       "area": "PAGE",
-      "line": 1054,
+      "line": 1063,
       "anchor": "chatbot_tts_find_piper",
       "risk": 0,
       "lines": 24
@@ -14468,7 +14468,7 @@
     "PAGE-009.37": {
       "path": "chatbot.php",
       "area": "PAGE",
-      "line": 1079,
+      "line": 1088,
       "anchor": "chatbot_tts_piper_model_rank",
       "risk": 0,
       "lines": 34
@@ -14476,7 +14476,7 @@
     "PAGE-009.38": {
       "path": "chatbot.php",
       "area": "PAGE",
-      "line": 1114,
+      "line": 1123,
       "anchor": "chatbot_tts_piper_model",
       "risk": 1,
       "lines": 42
@@ -14484,7 +14484,7 @@
     "PAGE-009.39": {
       "path": "chatbot.php",
       "area": "PAGE",
-      "line": 1157,
+      "line": 1166,
       "anchor": "chatbot_tts_active",
       "risk": 0,
       "lines": 31
@@ -14492,7 +14492,7 @@
     "PAGE-009.40": {
       "path": "chatbot.php",
       "area": "PAGE",
-      "line": 1189,
+      "line": 1198,
       "anchor": "chatbot_tts_length_scale",
       "risk": 0,
       "lines": 7
@@ -14500,7 +14500,7 @@
     "PAGE-009.41": {
       "path": "chatbot.php",
       "area": "PAGE",
-      "line": 1197,
+      "line": 1206,
       "anchor": "chatbot_tts_status",
       "risk": 0,
       "lines": 28
@@ -14508,7 +14508,7 @@
     "PAGE-009.42": {
       "path": "chatbot.php",
       "area": "PAGE",
-      "line": 1226,
+      "line": 1235,
       "anchor": "chatbot_tts_rules_version",
       "risk": 0,
       "lines": 4
@@ -14516,7 +14516,7 @@
     "PAGE-009.43": {
       "path": "chatbot.php",
       "area": "PAGE",
-      "line": 1231,
+      "line": 1240,
       "anchor": "chatbot_tts_word_replace",
       "risk": 0,
       "lines": 10
@@ -14524,7 +14524,7 @@
     "PAGE-009.44": {
       "path": "chatbot.php",
       "area": "PAGE",
-      "line": 1242,
+      "line": 1251,
       "anchor": "chatbot_tts_ascii_digits",
       "risk": 0,
       "lines": 8
@@ -14532,7 +14532,7 @@
     "PAGE-009.45": {
       "path": "chatbot.php",
       "area": "PAGE",
-      "line": 1251,
+      "line": 1260,
       "anchor": "chatbot_tts_ascii_letters",
       "risk": 0,
       "lines": 7
@@ -14540,7 +14540,7 @@
     "PAGE-009.46": {
       "path": "chatbot.php",
       "area": "PAGE",
-      "line": 1259,
+      "line": 1268,
       "anchor": "chatbot_tts_digits_spoken",
       "risk": 0,
       "lines": 15
@@ -14548,7 +14548,7 @@
     "PAGE-009.47": {
       "path": "chatbot.php",
       "area": "PAGE",
-      "line": 1275,
+      "line": 1284,
       "anchor": "chatbot_tts_three_digit",
       "risk": 0,
       "lines": 27
@@ -14556,7 +14556,7 @@
     "PAGE-009.48": {
       "path": "chatbot.php",
       "area": "PAGE",
-      "line": 1303,
+      "line": 1312,
       "anchor": "chatbot_tts_int_to_words",
       "risk": 0,
       "lines": 26
@@ -14564,7 +14564,7 @@
     "PAGE-009.49": {
       "path": "chatbot.php",
       "area": "PAGE",
-      "line": 1330,
+      "line": 1339,
       "anchor": "chatbot_tts_number_token",
       "risk": 0,
       "lines": 18
@@ -14572,7 +14572,7 @@
     "PAGE-009.50": {
       "path": "chatbot.php",
       "area": "PAGE",
-      "line": 1349,
+      "line": 1358,
       "anchor": "chatbot_tts_number_int_string",
       "risk": 0,
       "lines": 11
@@ -14580,7 +14580,7 @@
     "PAGE-009.51": {
       "path": "chatbot.php",
       "area": "PAGE",
-      "line": 1361,
+      "line": 1370,
       "anchor": "chatbot_tts_ordinal",
       "risk": 0,
       "lines": 13
@@ -14588,7 +14588,7 @@
     "PAGE-009.52": {
       "path": "chatbot.php",
       "area": "PAGE",
-      "line": 1375,
+      "line": 1384,
       "anchor": "chatbot_tts_month_name",
       "risk": 0,
       "lines": 5
@@ -14596,7 +14596,7 @@
     "PAGE-009.53": {
       "path": "chatbot.php",
       "area": "PAGE",
-      "line": 1381,
+      "line": 1390,
       "anchor": "chatbot_tts_dates_times",
       "risk": 0,
       "lines": 34
@@ -14604,7 +14604,7 @@
     "PAGE-009.54": {
       "path": "chatbot.php",
       "area": "PAGE",
-      "line": 1416,
+      "line": 1425,
       "anchor": "chatbot_tts_ids",
       "risk": 0,
       "lines": 41
@@ -14612,7 +14612,7 @@
     "PAGE-009.55": {
       "path": "chatbot.php",
       "area": "PAGE",
-      "line": 1458,
+      "line": 1467,
       "anchor": "chatbot_tts_numbers_to_words",
       "risk": 0,
       "lines": 29
@@ -14620,7 +14620,7 @@
     "PAGE-009.56": {
       "path": "chatbot.php",
       "area": "PAGE",
-      "line": 1488,
+      "line": 1497,
       "anchor": "chatbot_tts_letter_name",
       "risk": 0,
       "lines": 11
@@ -14628,7 +14628,7 @@
     "PAGE-009.57": {
       "path": "chatbot.php",
       "area": "PAGE",
-      "line": 1500,
+      "line": 1509,
       "anchor": "chatbot_tts_log_unknown",
       "risk": 2,
       "lines": 12
@@ -14636,7 +14636,7 @@
     "PAGE-009.58": {
       "path": "chatbot.php",
       "area": "PAGE",
-      "line": 1513,
+      "line": 1522,
       "anchor": "chatbot_tts_spell_acronyms",
       "risk": 0,
       "lines": 24
@@ -14644,7 +14644,7 @@
     "PAGE-009.59": {
       "path": "chatbot.php",
       "area": "PAGE",
-      "line": 1538,
+      "line": 1547,
       "anchor": "chatbot_tts_unknown_latin",
       "risk": 0,
       "lines": 26
@@ -14652,7 +14652,7 @@
     "PAGE-009.60": {
       "path": "chatbot.php",
       "area": "PAGE",
-      "line": 1565,
+      "line": 1574,
       "anchor": "chatbot_tts_symbols",
       "risk": 0,
       "lines": 14
@@ -14660,7 +14660,7 @@
     "PAGE-009.61": {
       "path": "chatbot.php",
       "area": "PAGE",
-      "line": 1580,
+      "line": 1589,
       "anchor": "chatbot_tts_strip_markdown",
       "risk": 0,
       "lines": 8
@@ -14668,7 +14668,7 @@
     "PAGE-009.62": {
       "path": "chatbot.php",
       "area": "PAGE",
-      "line": 1589,
+      "line": 1598,
       "anchor": "chatbot_tts_zwnj_policy",
       "risk": 1,
       "lines": 6
@@ -14676,7 +14676,7 @@
     "PAGE-009.63": {
       "path": "chatbot.php",
       "area": "PAGE",
-      "line": 1596,
+      "line": 1605,
       "anchor": "chatbot_tts_apply_zwnj",
       "risk": 1,
       "lines": 11
@@ -14684,7 +14684,7 @@
     "PAGE-009.64": {
       "path": "chatbot.php",
       "area": "PAGE",
-      "line": 1608,
+      "line": 1617,
       "anchor": "chatbot_tts_he_yezafe",
       "risk": 0,
       "lines": 8
@@ -14692,7 +14692,7 @@
     "PAGE-009.65": {
       "path": "chatbot.php",
       "area": "PAGE",
-      "line": 1617,
+      "line": 1626,
       "anchor": "chatbot_tts_lexicon",
       "risk": 0,
       "lines": 27
@@ -14700,7 +14700,7 @@
     "PAGE-009.66": {
       "path": "chatbot.php",
       "area": "PAGE",
-      "line": 1645,
+      "line": 1654,
       "anchor": "chatbot_tts_lexicon_hash",
       "risk": 0,
       "lines": 5
@@ -14708,7 +14708,7 @@
     "PAGE-009.67": {
       "path": "chatbot.php",
       "area": "PAGE",
-      "line": 1651,
+      "line": 1660,
       "anchor": "chatbot_tts_lexicon_apply",
       "risk": 0,
       "lines": 12
@@ -14716,7 +14716,7 @@
     "PAGE-009.68": {
       "path": "chatbot.php",
       "area": "PAGE",
-      "line": 1664,
+      "line": 1673,
       "anchor": "chatbot_tts_spoken_path",
       "risk": 0,
       "lines": 4
@@ -14724,7 +14724,7 @@
     "PAGE-009.69": {
       "path": "chatbot.php",
       "area": "PAGE",
-      "line": 1669,
+      "line": 1678,
       "anchor": "chatbot_tts_spoken_map",
       "risk": 1,
       "lines": 9
@@ -14732,7 +14732,7 @@
     "PAGE-009.70": {
       "path": "chatbot.php",
       "area": "PAGE",
-      "line": 1679,
+      "line": 1688,
       "anchor": "chatbot_tts_spoken_set",
       "risk": 2,
       "lines": 18
@@ -14740,7 +14740,7 @@
     "PAGE-009.71": {
       "path": "chatbot.php",
       "area": "PAGE",
-      "line": 1698,
+      "line": 1707,
       "anchor": "chatbot_tts_spoken_for",
       "risk": 0,
       "lines": 12
@@ -14748,7 +14748,7 @@
     "PAGE-009.72": {
       "path": "chatbot.php",
       "area": "PAGE",
-      "line": 1711,
+      "line": 1720,
       "anchor": "chatbot_tts_clean",
       "risk": 0,
       "lines": 12
@@ -14756,7 +14756,7 @@
     "PAGE-009.73": {
       "path": "chatbot.php",
       "area": "PAGE",
-      "line": 1724,
+      "line": 1733,
       "anchor": "chatbot_tts_trim_length",
       "risk": 0,
       "lines": 15
@@ -14764,7 +14764,7 @@
     "PAGE-009.74": {
       "path": "chatbot.php",
       "area": "PAGE",
-      "line": 1740,
+      "line": 1749,
       "anchor": "chatbot_tts_colloquial",
       "risk": 0,
       "lines": 46
@@ -14772,7 +14772,7 @@
     "PAGE-009.75": {
       "path": "chatbot.php",
       "area": "PAGE",
-      "line": 1787,
+      "line": 1796,
       "anchor": "chatbot_tts_phrase",
       "risk": 0,
       "lines": 18
@@ -14780,7 +14780,7 @@
     "PAGE-009.76": {
       "path": "chatbot.php",
       "area": "PAGE",
-      "line": 1806,
+      "line": 1815,
       "anchor": "chatbot_tts_limit_phrase",
       "risk": 0,
       "lines": 35
@@ -14788,7 +14788,7 @@
     "PAGE-009.77": {
       "path": "chatbot.php",
       "area": "PAGE",
-      "line": 1842,
+      "line": 1851,
       "anchor": "chatbot_tts_vocalize",
       "risk": 0,
       "lines": 8
@@ -14796,7 +14796,7 @@
     "PAGE-009.78": {
       "path": "chatbot.php",
       "area": "PAGE",
-      "line": 1851,
+      "line": 1860,
       "anchor": "chatbot_tts_ezafe_skip_first",
       "risk": 0,
       "lines": 14
@@ -14804,7 +14804,7 @@
     "PAGE-009.79": {
       "path": "chatbot.php",
       "area": "PAGE",
-      "line": 1866,
+      "line": 1875,
       "anchor": "chatbot_tts_ezafe_skip_second",
       "risk": 0,
       "lines": 12
@@ -14812,7 +14812,7 @@
     "PAGE-009.80": {
       "path": "chatbot.php",
       "area": "PAGE",
-      "line": 1879,
+      "line": 1888,
       "anchor": "chatbot_tts_silent_heh",
       "risk": 0,
       "lines": 12
@@ -14820,7 +14820,7 @@
     "PAGE-009.81": {
       "path": "chatbot.php",
       "area": "PAGE",
-      "line": 1892,
+      "line": 1901,
       "anchor": "chatbot_tts_ezafe_nouns",
       "risk": 0,
       "lines": 12
@@ -14828,7 +14828,7 @@
     "PAGE-009.82": {
       "path": "chatbot.php",
       "area": "PAGE",
-      "line": 1905,
+      "line": 1914,
       "anchor": "chatbot_tts_ezafe_pairs_builtin",
       "risk": 0,
       "lines": 12
@@ -14836,7 +14836,7 @@
     "PAGE-009.83": {
       "path": "chatbot.php",
       "area": "PAGE",
-      "line": 1918,
+      "line": 1927,
       "anchor": "chatbot_tts_overlay_map",
       "risk": 0,
       "lines": 21
@@ -14844,7 +14844,7 @@
     "PAGE-009.84": {
       "path": "chatbot.php",
       "area": "PAGE",
-      "line": 1940,
+      "line": 1949,
       "anchor": "chatbot_tts_ezafe_pairs",
       "risk": 0,
       "lines": 13
@@ -14852,7 +14852,7 @@
     "PAGE-009.85": {
       "path": "chatbot.php",
       "area": "PAGE",
-      "line": 1954,
+      "line": 1963,
       "anchor": "chatbot_tts_ezafe_mode",
       "risk": 0,
       "lines": 8
@@ -14860,7 +14860,7 @@
     "PAGE-009.86": {
       "path": "chatbot.php",
       "area": "PAGE",
-      "line": 1963,
+      "line": 1972,
       "anchor": "chatbot_tts_word_bare",
       "risk": 0,
       "lines": 5
@@ -14868,7 +14868,7 @@
     "PAGE-009.87": {
       "path": "chatbot.php",
       "area": "PAGE",
-      "line": 1969,
+      "line": 1978,
       "anchor": "chatbot_tts_mark_ezafe_first",
       "risk": 0,
       "lines": 20
@@ -14876,7 +14876,7 @@
     "PAGE-009.88": {
       "path": "chatbot.php",
       "area": "PAGE",
-      "line": 1990,
+      "line": 1999,
       "anchor": "chatbot_tts_ezafe",
       "risk": 0,
       "lines": 51
@@ -14884,7 +14884,7 @@
     "PAGE-009.89": {
       "path": "chatbot.php",
       "area": "PAGE",
-      "line": 2042,
+      "line": 2051,
       "anchor": "chatbot_tts_colloquial_enabled",
       "risk": 0,
       "lines": 5
@@ -14892,7 +14892,7 @@
     "PAGE-009.90": {
       "path": "chatbot.php",
       "area": "PAGE",
-      "line": 2048,
+      "line": 2057,
       "anchor": "chatbot_tts_prepare",
       "risk": 0,
       "lines": 33
@@ -14900,7 +14900,7 @@
     "PAGE-009.91": {
       "path": "chatbot.php",
       "area": "PAGE",
-      "line": 2082,
+      "line": 2091,
       "anchor": "chatbot_tts_lab_variant",
       "risk": 0,
       "lines": 20
@@ -14908,7 +14908,7 @@
     "PAGE-009.92": {
       "path": "chatbot.php",
       "area": "PAGE",
-      "line": 2103,
+      "line": 2112,
       "anchor": "chatbot_tts_lab_harakat",
       "risk": 0,
       "lines": 27
@@ -14916,7 +14916,7 @@
     "PAGE-009.93": {
       "path": "chatbot.php",
       "area": "PAGE",
-      "line": 2131,
+      "line": 2140,
       "anchor": "chatbot_tts_stages",
       "risk": 0,
       "lines": 39
@@ -14924,7 +14924,7 @@
     "PAGE-009.94": {
       "path": "chatbot.php",
       "area": "PAGE",
-      "line": 2171,
+      "line": 2180,
       "anchor": "chatbot_tts_espeak_data_path",
       "risk": 0,
       "lines": 17
@@ -14932,7 +14932,7 @@
     "PAGE-009.95": {
       "path": "chatbot.php",
       "area": "PAGE",
-      "line": 2189,
+      "line": 2198,
       "anchor": "chatbot_tts_ipa",
       "risk": 0,
       "lines": 30
@@ -14940,7 +14940,7 @@
     "PAGE-009.96": {
       "path": "chatbot.php",
       "area": "PAGE",
-      "line": 2220,
+      "line": 2229,
       "anchor": "chatbot_tts_model_json_report",
       "risk": 0,
       "lines": 52
@@ -14948,7 +14948,7 @@
     "PAGE-009.97": {
       "path": "chatbot.php",
       "area": "PAGE",
-      "line": 2273,
+      "line": 2282,
       "anchor": "chatbot_tts_lab_filename",
       "risk": 0,
       "lines": 5
@@ -14956,7 +14956,7 @@
     "PAGE-009.98": {
       "path": "chatbot.php",
       "area": "PAGE",
-      "line": 2279,
+      "line": 2288,
       "anchor": "chatbot_tts_lab_run",
       "risk": 2,
       "lines": 27
@@ -14964,7 +14964,7 @@
     "PAGE-009.99": {
       "path": "chatbot.php",
       "area": "PAGE",
-      "line": 2307,
+      "line": 2316,
       "anchor": "chatbot_tts_voice_id",
       "risk": 0,
       "lines": 5
@@ -14972,7 +14972,7 @@
     "PAGE-009.100": {
       "path": "chatbot.php",
       "area": "PAGE",
-      "line": 2313,
+      "line": 2322,
       "anchor": "chatbot_tts_wait_exit",
       "risk": 2,
       "lines": 14
@@ -14980,7 +14980,7 @@
     "PAGE-009.101": {
       "path": "chatbot.php",
       "area": "PAGE",
-      "line": 2328,
+      "line": 2337,
       "anchor": "chatbot_tts_taskkill",
       "risk": 7,
       "lines": 31
@@ -14988,7 +14988,7 @@
     "PAGE-009.102": {
       "path": "chatbot.php",
       "area": "PAGE",
-      "line": 2360,
+      "line": 2369,
       "anchor": "chatbot_tts_exec",
       "risk": 7,
       "lines": 89
@@ -14996,7 +14996,7 @@
     "PAGE-009.103": {
       "path": "chatbot.php",
       "area": "PAGE",
-      "line": 2450,
+      "line": 2459,
       "anchor": "chatbot_tts_is_valid_wav",
       "risk": 0,
       "lines": 5
@@ -15004,7 +15004,7 @@
     "PAGE-009.104": {
       "path": "chatbot.php",
       "area": "PAGE",
-      "line": 2456,
+      "line": 2465,
       "anchor": "chatbot_tts_run_espeak",
       "risk": 6,
       "lines": 23
@@ -15012,7 +15012,7 @@
     "PAGE-009.105": {
       "path": "chatbot.php",
       "area": "PAGE",
-      "line": 2480,
+      "line": 2489,
       "anchor": "chatbot_tts_run_piper",
       "risk": 7,
       "lines": 48
@@ -15020,7 +15020,7 @@
     "PAGE-009.106": {
       "path": "chatbot.php",
       "area": "PAGE",
-      "line": 2529,
+      "line": 2538,
       "anchor": "chatbot_tts_probe_piper",
       "risk": 0,
       "lines": 15
@@ -15028,7 +15028,7 @@
     "PAGE-009.107": {
       "path": "chatbot.php",
       "area": "PAGE",
-      "line": 2545,
+      "line": 2554,
       "anchor": "chatbot_tts_probe_engine",
       "risk": 0,
       "lines": 13
@@ -15036,15 +15036,15 @@
     "PAGE-009.108": {
       "path": "chatbot.php",
       "area": "PAGE",
-      "line": 2558,
-      "anchor": "بلوک رویه‌ای 2558-2559",
+      "line": 2567,
+      "anchor": "بلوک رویه‌ای 2567-2568",
       "risk": 0,
       "lines": 2
     },
     "PAGE-009.109": {
       "path": "chatbot.php",
       "area": "PAGE",
-      "line": 2560,
+      "line": 2569,
       "anchor": "chatbot_tts_voice_status",
       "risk": 3,
       "lines": 47
@@ -15052,7 +15052,7 @@
     "PAGE-009.110": {
       "path": "chatbot.php",
       "area": "PAGE",
-      "line": 2608,
+      "line": 2617,
       "anchor": "chatbot_tts_chunks",
       "risk": 0,
       "lines": 27
@@ -15060,7 +15060,7 @@
     "PAGE-009.111": {
       "path": "chatbot.php",
       "area": "PAGE",
-      "line": 2636,
+      "line": 2645,
       "anchor": "chatbot_tts_wav_parse",
       "risk": 0,
       "lines": 36
@@ -15068,7 +15068,7 @@
     "PAGE-009.112": {
       "path": "chatbot.php",
       "area": "PAGE",
-      "line": 2673,
+      "line": 2682,
       "anchor": "chatbot_tts_wav_concat",
       "risk": 0,
       "lines": 40
@@ -15076,7 +15076,7 @@
     "PAGE-009.113": {
       "path": "chatbot.php",
       "area": "PAGE",
-      "line": 2714,
+      "line": 2723,
       "anchor": "chatbot_tts_say",
       "risk": 7,
       "lines": 58
@@ -15084,7 +15084,7 @@
     "PAGE-009.114": {
       "path": "chatbot.php",
       "area": "PAGE",
-      "line": 2773,
+      "line": 2782,
       "anchor": "chatbot_tts_lab_default_phrases",
       "risk": 0,
       "lines": 30
@@ -15092,7 +15092,7 @@
     "PAGE-009.115": {
       "path": "chatbot.php",
       "area": "PAGE",
-      "line": 2804,
+      "line": 2813,
       "anchor": "chatbot_tts_render_lab",
       "risk": 0,
       "lines": 61
@@ -15100,7 +15100,7 @@
     "PAGE-009.116": {
       "path": "chatbot.php",
       "area": "PAGE",
-      "line": 2866,
+      "line": 2875,
       "anchor": "chatbot_tts_write_overlay",
       "risk": 2,
       "lines": 22
@@ -15108,7 +15108,7 @@
     "PAGE-009.117": {
       "path": "chatbot.php",
       "area": "PAGE",
-      "line": 2889,
+      "line": 2898,
       "anchor": "chatbot_tts_corpus_texts",
       "risk": 4,
       "lines": 24
@@ -15116,7 +15116,7 @@
     "PAGE-009.118": {
       "path": "chatbot.php",
       "area": "PAGE",
-      "line": 2914,
+      "line": 2923,
       "anchor": "chatbot_tts_propose_pair",
       "risk": 0,
       "lines": 5
@@ -15124,7 +15124,7 @@
     "PAGE-009.119": {
       "path": "chatbot.php",
       "area": "PAGE",
-      "line": 2920,
+      "line": 2929,
       "anchor": "chatbot_tts_mine_pairs",
       "risk": 0,
       "lines": 40
@@ -15132,7 +15132,7 @@
     "PAGE-009.120": {
       "path": "chatbot.php",
       "area": "PAGE",
-      "line": 2961,
+      "line": 2970,
       "anchor": "chatbot_tts_save_mined_pairs",
       "risk": 0,
       "lines": 36
@@ -15140,7 +15140,7 @@
     "PAGE-009.121": {
       "path": "chatbot.php",
       "area": "PAGE",
-      "line": 2998,
+      "line": 3007,
       "anchor": "chatbot_tts_render_pair_miner",
       "risk": 0,
       "lines": 21
@@ -15148,7 +15148,7 @@
     "PAGE-009.122": {
       "path": "chatbot.php",
       "area": "PAGE",
-      "line": 3020,
+      "line": 3029,
       "anchor": "chatbot_render_admin",
       "risk": 8,
       "lines": 193
@@ -15156,7 +15156,7 @@
     "PAGE-009.123": {
       "path": "chatbot.php",
       "area": "PAGE",
-      "line": 3214,
+      "line": 3223,
       "anchor": "chatbot_render_widget",
       "risk": 5,
       "lines": 204
@@ -18959,12 +18959,12 @@
       "line": 15,
       "anchor": "food_ticket_release_notes_all",
       "risk": 0,
-      "lines": 20
+      "lines": 35
     },
     "PAGE-023.03": {
       "path": "food-ticket-release-notes.php",
       "area": "PAGE",
-      "line": 36,
+      "line": 51,
       "anchor": "food_ticket_release_notes_current",
       "risk": 0,
       "lines": 9
@@ -18972,8 +18972,8 @@
     "PAGE-023.04": {
       "path": "food-ticket-release-notes.php",
       "area": "PAGE",
-      "line": 45,
-      "anchor": "بلوک رویه‌ای 45-47",
+      "line": 60,
+      "anchor": "بلوک رویه‌ای 60-62",
       "risk": 0,
       "lines": 3
     },
@@ -25261,9 +25261,9 @@
       "path": "help-guide.php",
       "area": "PAGE",
       "line": 1,
-      "anchor": "بلوک رویه‌ای 1-729",
+      "anchor": "بلوک رویه‌ای 1-757",
       "risk": 5,
-      "lines": 729
+      "lines": 757
     },
     "PAGE-032.01": {
       "path": "holiday-board.php",
@@ -29677,22 +29677,22 @@
       "path": "lib/release-notes.php",
       "area": "CORE",
       "line": 1,
-      "anchor": "بلوک رویه‌ای 1-27",
+      "anchor": "بلوک رویه‌ای 1-30",
       "risk": 0,
-      "lines": 27
+      "lines": 30
     },
     "CORE-020.02": {
       "path": "lib/release-notes.php",
       "area": "CORE",
-      "line": 28,
+      "line": 31,
       "anchor": "release_notes_all",
       "risk": 0,
-      "lines": 100
+      "lines": 116
     },
     "CORE-020.03": {
       "path": "lib/release-notes.php",
       "area": "CORE",
-      "line": 129,
+      "line": 148,
       "anchor": "release_notes_version_key",
       "risk": 1,
       "lines": 5
@@ -29700,7 +29700,7 @@
     "CORE-020.04": {
       "path": "lib/release-notes.php",
       "area": "CORE",
-      "line": 135,
+      "line": 154,
       "anchor": "release_notes_current",
       "risk": 0,
       "lines": 18
@@ -29708,7 +29708,7 @@
     "CORE-020.05": {
       "path": "lib/release-notes.php",
       "area": "CORE",
-      "line": 154,
+      "line": 173,
       "anchor": "release_notes_history",
       "risk": 0,
       "lines": 25
@@ -29716,7 +29716,7 @@
     "CORE-020.06": {
       "path": "lib/release-notes.php",
       "area": "CORE",
-      "line": 180,
+      "line": 199,
       "anchor": "release_notes_render_items",
       "risk": 0,
       "lines": 13
@@ -29724,15 +29724,15 @@
     "CORE-020.07": {
       "path": "lib/release-notes.php",
       "area": "CORE",
-      "line": 194,
+      "line": 213,
       "anchor": "release_notes_dashboard_card",
       "risk": 4,
-      "lines": 89
+      "lines": 97
     },
     "CORE-020.08": {
       "path": "lib/release-notes.php",
       "area": "CORE",
-      "line": 284,
+      "line": 311,
       "anchor": "release_notes_history_html",
       "risk": 0,
       "lines": 54
@@ -29740,7 +29740,7 @@
     "CORE-020.09": {
       "path": "lib/release-notes.php",
       "area": "CORE",
-      "line": 339,
+      "line": 366,
       "anchor": "release_notes_page_html",
       "risk": 0,
       "lines": 17
@@ -29748,7 +29748,7 @@
     "CORE-020.10": {
       "path": "lib/release-notes.php",
       "area": "CORE",
-      "line": 357,
+      "line": 384,
       "anchor": "release_notes_page_single",
       "risk": 0,
       "lines": 30
@@ -52967,12 +52967,12 @@
       "line": 284,
       "anchor": "test_packaged_verbatim_files_match_repo",
       "risk": 0,
-      "lines": 22
+      "lines": 23
     },
     "TEST-188.48": {
       "path": "tests/test_release_1_63_3_day_close_guest_actuals_static.py",
       "area": "TEST",
-      "line": 306,
+      "line": 307,
       "anchor": "test_build_py_panel_version",
       "risk": 0,
       "lines": 3
@@ -52980,7 +52980,7 @@
     "TEST-188.49": {
       "path": "tests/test_release_1_63_3_day_close_guest_actuals_static.py",
       "area": "TEST",
-      "line": 309,
+      "line": 310,
       "anchor": "test_change_report_mentions_migrations",
       "risk": 0,
       "lines": 9
@@ -53039,12 +53039,12 @@
       "line": 60,
       "anchor": "CSS: عنصر پایه نباید display داشته باشد (ریشهٔ باگ)",
       "risk": 0,
-      "lines": 15
+      "lines": 16
     },
     "TEST-189.08": {
       "path": "tests/test_release_notes_popup.js",
       "area": "TEST",
-      "line": 75,
+      "line": 76,
       "anchor": "شبیه‌سازی DOM + localStorage",
       "risk": 0,
       "lines": 1
@@ -53052,79 +53052,87 @@
     "TEST-189.09": {
       "path": "tests/test_release_notes_popup.js",
       "area": "TEST",
-      "line": 76,
-      "anchor": "makeEnv",
-      "risk": 1,
-      "lines": 49
+      "line": 77,
+      "anchor": "SEEN_SCOPE",
+      "risk": 0,
+      "lines": 2
     },
     "TEST-189.10": {
       "path": "tests/test_release_notes_popup.js",
       "area": "TEST",
-      "line": 125,
-      "anchor": "runScript",
-      "risk": 0,
-      "lines": 8
+      "line": 79,
+      "anchor": "makeEnv",
+      "risk": 1,
+      "lines": 50
     },
     "TEST-189.11": {
       "path": "tests/test_release_notes_popup.js",
       "area": "TEST",
-      "line": 133,
-      "anchor": "۱) نمایش اول",
+      "line": 129,
+      "anchor": "runScript",
       "risk": 0,
-      "lines": 6
+      "lines": 8
     },
     "TEST-189.12": {
       "path": "tests/test_release_notes_popup.js",
       "area": "TEST",
-      "line": 139,
-      "anchor": "۲) بستن با دکمه",
+      "line": 137,
+      "anchor": "۱) نمایش اول",
       "risk": 0,
-      "lines": 7
+      "lines": 6
     },
     "TEST-189.13": {
       "path": "tests/test_release_notes_popup.js",
       "area": "TEST",
-      "line": 146,
-      "anchor": "۳) بار دوم در یک بارگذاری تازه: چون dismissed=1 است، نباید ب",
+      "line": 143,
+      "anchor": "۲) بستن با دکمه",
       "risk": 0,
-      "lines": 5
+      "lines": 7
     },
     "TEST-189.14": {
       "path": "tests/test_release_notes_popup.js",
       "area": "TEST",
-      "line": 151,
-      "anchor": "۴) سقف یک نمایش",
+      "line": 150,
+      "anchor": "۳) بار دوم در یک بارگذاری تازه: چون dismissed=1 است، نباید ب",
       "risk": 0,
-      "lines": 10
+      "lines": 5
     },
     "TEST-189.15": {
       "path": "tests/test_release_notes_popup.js",
       "area": "TEST",
-      "line": 161,
-      "anchor": "۵) Esc",
+      "line": 155,
+      "anchor": "۴) سقف یک نمایش",
       "risk": 0,
-      "lines": 7
+      "lines": 10
     },
     "TEST-189.16": {
       "path": "tests/test_release_notes_popup.js",
       "area": "TEST",
-      "line": 168,
-      "anchor": "۶) localStorage مسدود (حالت ناشناس/سیاست سازمانی)",
+      "line": 165,
+      "anchor": "۵) Esc",
       "risk": 0,
       "lines": 7
     },
     "TEST-189.17": {
       "path": "tests/test_release_notes_popup.js",
       "area": "TEST",
-      "line": 175,
-      "anchor": "۷) کلیک روی پس‌زمینه",
+      "line": 172,
+      "anchor": "۶) localStorage مسدود (حالت ناشناس/سیاست سازمانی)",
       "risk": 0,
-      "lines": 6
+      "lines": 7
     },
     "TEST-189.18": {
       "path": "tests/test_release_notes_popup.js",
       "area": "TEST",
-      "line": 181,
+      "line": 179,
+      "anchor": "۷) کلیک روی پس‌زمینه",
+      "risk": 0,
+      "lines": 6
+    },
+    "TEST-189.19": {
+      "path": "tests/test_release_notes_popup.js",
+      "area": "TEST",
+      "line": 185,
       "anchor": "خلاصه",
       "risk": 0,
       "lines": 10
