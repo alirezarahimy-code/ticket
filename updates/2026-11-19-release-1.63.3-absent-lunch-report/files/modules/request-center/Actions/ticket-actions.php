@@ -131,17 +131,30 @@ if (!defined('APP_ROOT')) {
             }
             // بخش سازمانی درخواست‌کننده از چارت سازمانی (org_units) جدا از مسیر رسیدگی
             // در ستون مستقل ذخیره می‌شود و درخواست به همان بخش مسیردهی می‌شود.
-            $requestingUnitId = (int) ($_POST['requesting_unit_id'] ?? 0) ?: null;
-            if ($requestingUnitId !== null && function_exists('org_unit_by_id')) {
-                $requestingUnit = org_unit_by_id($requestingUnitId);
-                $allowedTypes = function_exists('org_root_types') ? org_root_types() : ['deputy'];
-                if (!$requestingUnit || !in_array((string) ($requestingUnit['unit_type'] ?? ''), $allowedTypes, true) || (int) ($requestingUnit['is_active'] ?? 0) !== 1) {
-                    throw new RuntimeException('بخش سازمانی انتخاب‌شده معتبر نیست؛ از فهرست بخش‌های سازمانی یک گزینهٔ فعال انتخاب کنید.');
+            // فقط نقش‌های ثبت به‌جای دیگران (کارشناس/سوپروایزر/مدیر پشتیبانی/ادمین اصلی)
+            // می‌توانند بخش را دستی انتخاب کنند؛ بقیه — حتی مدیر — مقدار از چارت خوانده می‌شود.
+            $sectionOverride = function_exists('org_section_override_allowed')
+                ? org_section_override_allowed((string) ($user['role'] ?? ''))
+                : in_array((string) ($user['role'] ?? ''), ['agent', 'supervisor', 'support_manager', 'primary_admin'], true);
+            if ($sectionOverride) {
+                $requestingUnitId = (int) ($_POST['requesting_unit_id'] ?? 0) ?: null;
+                if ($requestingUnitId !== null && function_exists('org_unit_by_id')) {
+                    $requestingUnit = org_unit_by_id($requestingUnitId);
+                    $allowedTypes = function_exists('org_root_types') ? org_root_types() : ['deputy'];
+                    if (!$requestingUnit || !in_array((string) ($requestingUnit['unit_type'] ?? ''), $allowedTypes, true) || (int) ($requestingUnit['is_active'] ?? 0) !== 1) {
+                        throw new RuntimeException('بخش سازمانی انتخاب‌شده معتبر نیست؛ از فهرست بخش‌های سازمانی یک گزینهٔ فعال انتخاب کنید.');
+                    }
                 }
-            }
-            $requestCenterRoots = function_exists('org_root_units') ? org_root_units() : [];
-            if ($requestingUnitId === null && ($requestCenterRoots !== [] || (function_exists('org_deputy_units') && org_deputy_units() !== []))) {
-                throw new RuntimeException('انتخاب «بخش سازمانی درخواست‌کننده» الزامی است.');
+                $requestCenterRoots = function_exists('org_root_units') ? org_root_units() : [];
+                if ($requestingUnitId === null && ($requestCenterRoots !== [] || (function_exists('org_deputy_units') && org_deputy_units() !== []))) {
+                    throw new RuntimeException('انتخاب «بخش سازمانی درخواست‌کننده» الزامی است.');
+                }
+            } else {
+                $myOrgUnitId = function_exists('user_org_unit_id') ? user_org_unit_id($user) : (int) ($user['org_unit_id'] ?? 0);
+                $requestingUnitId = ($myOrgUnitId > 0 && function_exists('org_nearest_root_id'))
+                    ? (org_nearest_root_id($myOrgUnitId, true) ?: null)
+                    : null;
+                // کاربر بدون جایگاه فعال: درخواست با «بدون جایگاه» ثبت می‌شود (نه خطا).
             }
             if ($requestingUnitId !== null && function_exists('org_unit_routing_department_id')) {
                 $routingDepartmentId = org_unit_routing_department_id($requestingUnitId);

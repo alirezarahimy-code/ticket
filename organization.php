@@ -400,6 +400,22 @@ function org_root_units(): array
     }
 }
 
+/** نقش‌هایی که می‌توانند «بخش سازمانی / معاونت / بخش» را دستی انتخاب کنند (ثبت به‌جای دیگران): کارشناس (agent)، سوپروایزر، مدیر پشتیبانی و ادمین اصلی. بقیهٔ نقش‌ها — حتی مدیر — مقدار را از چارت می‌گیرند. */
+function org_section_override_allowed(?string $role): bool
+{
+    return in_array((string) $role, ['agent', 'supervisor', 'support_manager', 'primary_admin'], true);
+}
+
+/** ریشهٔ ۶ بخشیِ کاربر از چارت؛ 0 یعنی جایگاه فعال ندارد (بدون جایگاه). */
+function user_org_root_id(array $user): int
+{
+    $unitId = user_org_unit_id($user);
+    if ($unitId <= 0) {
+        return 0;
+    }
+    return org_nearest_root_id($unitId, true);
+}
+
 /** نزدیک‌ترین سرشاخهٔ ۶ بخشی از یک واحد (بالا رفتن سلسلهٔ والدها). 0 یعنی جایگاه یا سرشاخه‌ای ندارد. */
 function org_nearest_root_id(int $startUnitId, bool $activeOnly = true): int
 {

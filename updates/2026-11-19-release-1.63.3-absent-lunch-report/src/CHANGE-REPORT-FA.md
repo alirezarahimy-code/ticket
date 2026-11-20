@@ -78,7 +78,7 @@
 ## فایلهای بسته
 
 بسته علاوه بر فایل‌های بخش اول (تب «غایبین ناهار») شامل فایل‌های بخش دوم است:
-`food-ticket.php` (مسیرهای تازه + نسخهٔ پنل 1.37.58)، `food-ticket-web/index.html` (تب + کش v=1.63.3 + برچسب‌های یک‌دست)، `help-guide.php`، `chatbot.php`، `food-order.php`، `food-reconciliation.php`، `organization.php`، `cd-dvd.php`، `food-order-import.php`، `food-ticket-auto-receipts.php`، `food-ticket-groups.php`، `food-ticket-runtime.php`، `lib/org-grouping.php`، `modules/request-center/*` (create/detail/ticket-actions/lib-functions/RequestCenterRepository)، `assets/*` و `food-ticket-web/assets/*` (food-menu.js/css, food-org-groups.js, food-order-guest.js)، `migrations/*.sql` ×۲، `VERSION`، `downloads/CHANGE-REPORT-FA-1.63.3.md` و تست‌ها.
+`food-ticket.php` (مسیرهای تازه + نسخهٔ پنل 1.37.58)، `food-ticket-web/index.html` (تب + کش v=1.63.3 + برچسب‌های یک‌دست)، `help-guide.php`، `chatbot.php`، `food-order.php`، `food-reconciliation.php`، `organization.php`، `cd-dvd.php`، `food-order-import.php`، `food-ticket-auto-receipts.php`، `food-ticket-groups.php`، `food-ticket-runtime.php`، `lib/org-grouping.php`، `modules/request-center/*` (create/detail/ticket-actions/lib-functions/RequestCenterRepository)، `cd-dvd.php`، `organization.php`، `help-guide.php`، `assets/*` و `food-ticket-web/assets/*` (food-menu.js/css, food-org-groups.js, food-order-guest.js)، `migrations/*.sql` ×۲، `VERSION`، `downloads/CHANGE-REPORT-FA-1.63.3.md` و تست‌ها.
 
 ## آزمون‌ها
 
@@ -108,3 +108,15 @@
 - **V4-3** روی ثبت/ویرایش/لغو مستقیم API با توکن CSRF معتبر و نام جعلی از سمت کلاینت روی بستر تست تأیید شد: پس از هر عمل، نام ثبت‌کننده همان نام حساب نشست ماند («تست‌باز …») و مقدار ارسال‌شدهٔ کلاینت نادیده گرفته شد؛ انتساب معاونت/بخش هم از چارت خوانده شد.
 
 فایل‌های مربوط به V4-4 به فهرست بسته افزوده شدند (`modules/request-center/RequestCenterRepository.php` و `modules/request-center/lib/functions.php`). تست‌های استاتیک هم‌تراز شدند؛ ریهرسال guest-actuals روی بستر زندهٔ تست: GET/422/ثبت/`reconciliation-remainder` سبز.
+
+### ز) مرحلهٔ سوم — قفل انتساب «معاونت / بخش» از چارت (ثبت درخواست و CD/DVD)
+
+- **قوانین:** فقط نقش‌های `agent` (کارشناس)، `supervisor` (سوپروایزر)، `support_manager` (مدیر پشتیبانی) و `primary_admin` (ادمین اصلی) می‌توانند «بخش سازمانی درخواست‌کننده» (ثبت درخواست) و «معاونت / بخش» (کنترل CD/DVD) را دستی انتخاب کنند. بقیهٔ نقش‌ها — **حتی `manager`** — بخش را از جایگاه فعال خود در چارت سازمانی می‌گیرند و قابل تغییر نیست.
+- **سمت سرور:** مقدار POST برای نقش‌های غیرستادی نادیده گرفته می‌شود و ریشهٔ ۶ بخشی از چارت دوباره محاسبه می‌شود (همان الگوی درخواست مهمان). کاربر بدون جایگاه فعال، درخواست/رکورد را با «بدون جایگاه» ثبت می‌کند (نه خطا)؛ استثناها همچنان انتخاب الزامی دارند.
+- **سمت کلاینت:** برای نقش‌های غیرستادی به‌جای `<select>`، نمایش فقط‌خواندنی با نام بخش + فیلد مخفی رندر می‌شود.
+- **CD/DVD:**
+  - ویرایش توسط غیرستادی: بخشِ ذخیره‌شدهٔ رکورد حفظ می‌شود (هرگز از روی ویرایشگر بازنویسی نمی‌شود)؛ برای استثناها مثل قبل قابل تغییر است (ویرایش CD/DVD ذاتاً فقط برای ادمین اصلی/سوپروایزر/بازرسی است).
+  - رفع باگ قدیمی اعتبارسنجی: قبلاً فقط `unit_type = 'deputy'` پذیرفته می‌شد با این‌که فرم هر ۶ بخش را فهرست می‌کرد — اکنون `org_root_types()` هر ۶ سرشاخه را می‌پذیرد.
+  - پیش‌انتخاب فرم اصلاح شد (قبلاً شناسهٔ واحدِ خودِ کاربر با شناسهٔ ریشه‌ها مقایسه می‌شد و برای غیرریشه‌ها هرگز نمی‌چسبید؛ اکنون ریشهٔ نزدیک، مثل ثبت درخواست و مهمان).
+- **مهمان غذا** بدون تغییر می‌ماند (از قبل قفل بود)؛ «بدون جایگاه» در تیکت/CD-DVD مسدودکننده نیست.
+- راهنمای کاربری (`help-guide.php`) به‌روز شد؛ تست استاتیک `tests/test_auto_section_attribution_static.py` (۱۲ تست) افزوده شد.

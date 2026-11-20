@@ -178,6 +178,69 @@ function cd_dvd_active_users(): array
     return db()->query("SELECT u.id, u.username, u.full_name, u.department_id, d.name AS department_name FROM users u LEFT JOIN departments d ON d.id = u.department_id WHERE u.is_active = 1 AND u.auth_source <> 'food' ORDER BY u.full_name, u.username")->fetchAll();
 }
 
+/** نقش‌هایی که می‌توانند «معاونت / بخش» را دستی انتخاب کنند (ثبت به‌جای دیگران): کارشناس، سوپروایزر، مدیر پشتیبانی و ادمین اصلی. بقیه — حتی مدیر — مقدار را از چارت می‌گیرند. */
+function cd_dvd_section_override_allowed(array $user): bool
+{
+    if (function_exists('org_section_override_allowed')) {
+        return org_section_override_allowed((string) ($user['role'] ?? ''));
+    }
+    return in_array((string) ($user['role'] ?? ''), ['agent', 'supervisor', 'support_manager', 'primary_admin'], true);
+}
+
+/** ریشهٔ ۶ بخشیِ کاربر از چارت؛ 0 یعنی جایگاه فعال ندارد (بدون جایگاه). */
+function cd_dvd_user_root_id(array $user): int
+{
+    if (function_exists('user_org_root_id')) {
+        return user_org_root_id($user);
+    }
+    $unitId = function_exists('user_org_unit_id') ? user_org_unit_id($user) : (int) ($user['org_unit_id'] ?? 0);
+    if ($unitId <= 0 || !function_exists('org_nearest_root_id')) {
+        return 0;
+    }
+    return org_nearest_root_id($unitId, true);
+}
+
+/**
+ * فیلد «معاونت / بخش»: برای بیشتر نقش‌ها فقط نمایش است (از چارت / از رکورد قبلی)؛
+ * فقط نقش‌های کارشناس، سوپروایزر، مدیر پشتیبانی و ادمین اصلی انتخاب می‌کنند.
+ * مقدار نهایی سمت سرور دوباره محاسبه می‌شود؛ این نمایش فقط برای کاربر است.
+ */
+function cd_dvd_department_field_html(array $departments, array $form, array $user, ?array $editRecord, bool $withHelp): string
+{
+    $override = cd_dvd_section_override_allowed($user);
+    $helpText = $withHelp ? '<small class="field-help">فهرست مستقیماً از بخش‌های سازمانیِ فعالِ بخش سازمان بارگذاری می‌شود.</small>' : '';
+    if ($override) {
+        if (!$departments) {
+            return '<label>معاونت / بخش<select name="department_id" required data-required-label="معاونت / بخش" disabled><option value="">ابتدا در بخش سازمان یک بخش سازمانی فعال ثبت کنید</option></select>' . $helpText . '</label>';
+        }
+        $html = '<label>معاونت / بخش<select name="department_id" required data-required-label="معاونت / بخش"><option value="">انتخاب بخش سازمانی</option>';
+        foreach ($departments as $department) {
+            $html .= '<option value="' . (int) $department['id'] . '" ' . ((int) $form['department_id'] === (int) $department['id'] ? 'selected' : '') . '>' . e($department['name']) . '</option>';
+        }
+        return $html . '</select>' . $helpText . '</label>';
+    }
+    if ($editRecord) {
+        // ویرایش توسط غیرستادی: بخش ذخیره‌شدهٔ رکورد حفظ می‌شود و تغییر نمی‌کند
+        $storedDepartmentId = (int) ($editRecord['department_id'] ?? 0);
+        $display = 'بدون جایگاه';
+        if ($storedDepartmentId > 0) {
+            $storedQuery = db()->prepare('SELECT name FROM departments WHERE id = ? LIMIT 1');
+            $storedQuery->execute([$storedDepartmentId]);
+            $display = (string) ($storedQuery->fetchColumn() ?: 'بدون جایگاه');
+        }
+        return '<label>معاونت / بخش<input value="' . e($display) . '" readonly><input type="hidden" name="department_id" value="0"><small class="field-help">رکورد بخشِ ثبت‌شدهٔ خود را حفظ می‌کند؛ فقط کارشناس، سوپروایزر، مدیر پشتیبانی و ادمین اصلی می‌توانند بخش را تغییر دهند.</small></label>';
+    }
+    $rootId = cd_dvd_user_root_id($user);
+    $display = 'بدون جایگاه — جایگاه فعالی در چارت سازمانی برای حساب شما ثبت نشده است';
+    foreach ($departments as $department) {
+        if ((int) $department['id'] === $rootId) {
+            $display = (string) $department['name'];
+            break;
+        }
+    }
+    return '<label>معاونت / بخش<input value="' . e($display) . '" readonly><input type="hidden" name="department_id" value="' . (int) $rootId . '"><small class="field-help">به‌صورت خودکار از جایگاه شما در چارت سازمانی ثبت می‌شود و قابل تغییر نیست.</small></label>';
+}
+
 /** بخش‌های سازمانی فعال (۶ بخش)؛ فهرست قدیمی departments منبع این فیلد نیست. */
 function cd_dvd_deputy_options(): array
 {
@@ -270,7 +333,7 @@ function cd_dvd_default_date(): string
     return sprintf('%04d/%02d/%02d', $jy, $jm, $jd);
 }
 
-function cd_dvd_validate_payload(array $data, array $user, int $excludeId = 0, ?string $originalDirection = null): array
+function cd_dvd_validate_payload(array $data, array $user, int $excludeId = 0, ?string $originalDirection = null, ?int $keepDepartmentIdParam = null): array
 {
     $media = valid_choice((string) ($data['media'] ?? ''), ['CD', 'DVD'], 'CD');
     $direction = valid_choice((string) ($data['direction'] ?? ''), ['IN', 'OUT'], 'OUT');
@@ -352,23 +415,38 @@ function cd_dvd_validate_payload(array $data, array $user, int $excludeId = 0, ?
         $broughtByUserId = 0;
     }
     [$jy, $jm, $jd, $date] = cd_dvd_parse_date((string) ($data['event_date'] ?? ''));
-    $departmentUnitId = (int) ($data['department_id'] ?? 0);
-    if ($departmentUnitId <= 0) {
-        throw new RuntimeException('فیلد «معاونت / بخش» خالی است و باید پر شود.');
-    }
-    $departmentUnit = function_exists('org_unit_by_id') ? org_unit_by_id($departmentUnitId) : null;
-    if (!$departmentUnit || (string) ($departmentUnit['unit_type'] ?? '') !== 'deputy' || (int) ($departmentUnit['is_active'] ?? 0) !== 1) {
-        throw new RuntimeException('فیلد «معاونت / بخش» باید از بخش‌های سازمانیِ فعالِ ثبت‌شده در بخش سازمان انتخاب شود.');
-    }
-    // بخش انتخاب‌شده یک سرشاخهٔ سازمانی است و به واحد مسیر رسیدگی (departments) تبدیل می‌شود.
-    $departmentId = cd_dvd_routing_department_id($departmentUnitId);
-    if ($departmentId <= 0) {
-        throw new RuntimeException('بخش انتخاب‌شده به واحد گزارش‌دهی متصل نیست.');
-    }
-    $departmentCheck = db()->prepare('SELECT id FROM departments WHERE id = ? AND is_active = 1 LIMIT 1');
-    $departmentCheck->execute([$departmentId]);
-    if (!$departmentCheck->fetchColumn()) {
-        throw new RuntimeException('بخش انتخاب‌شده معتبر نیست.');
+    // فقط نقش‌های ثبت به‌جای دیگران (کارشناس/سوپروایزر/مدیر پشتیبانی/ادمین اصلی) بخش را
+    // دستی انتخاب می‌کنند؛ بقیه مقدار را از چارت می‌گیرند؛ در ویرایش غیرستادی بخش رکورد حفظ می‌شود.
+    $sectionOverride = cd_dvd_section_override_allowed($user);
+    $keepDepartmentId = ($keepDepartmentIdParam !== null && !$sectionOverride) ? max(0, (int) $keepDepartmentIdParam) : null;
+    if ($keepDepartmentId !== null) {
+        // ویرایش توسط غیرستادی: بخش ذخیره‌شدهٔ رکورد بدون تغییر می‌ماند
+        $finalDepartmentId = $keepDepartmentId > 0 ? $keepDepartmentId : null;
+    } else {
+        $departmentUnitId = $sectionOverride ? (int) ($data['department_id'] ?? 0) : cd_dvd_user_root_id($user);
+        if ($departmentUnitId > 0) {
+            $departmentUnit = function_exists('org_unit_by_id') ? org_unit_by_id($departmentUnitId) : null;
+            $allowedTypes = function_exists('org_root_types') ? org_root_types() : ['ceo', 'liaison', 'deputy', 'management', 'office', 'company_manager'];
+            if (!$departmentUnit || !in_array((string) ($departmentUnit['unit_type'] ?? ''), $allowedTypes, true) || (int) ($departmentUnit['is_active'] ?? 0) !== 1) {
+                throw new RuntimeException('فیلد «معاونت / بخش» باید از بخش‌های سازمانیِ فعالِ ثبت‌شده در بخش سازمان انتخاب شود.');
+            }
+            // بخش انتخاب‌شده یک سرشاخهٔ سازمانی است و به واحد مسیر رسیدگی (departments) تبدیل می‌شود.
+            $departmentId = cd_dvd_routing_department_id($departmentUnitId);
+            if ($departmentId <= 0) {
+                throw new RuntimeException('بخش انتخاب‌شده به واحد گزارش‌دهی متصل نیست.');
+            }
+            $departmentCheck = db()->prepare('SELECT id FROM departments WHERE id = ? AND is_active = 1 LIMIT 1');
+            $departmentCheck->execute([$departmentId]);
+            if (!$departmentCheck->fetchColumn()) {
+                throw new RuntimeException('بخش انتخاب‌شده معتبر نیست.');
+            }
+            $finalDepartmentId = $departmentId;
+        } elseif ($sectionOverride) {
+            throw new RuntimeException('فیلد «معاونت / بخش» خالی است و باید پر شود.');
+        } else {
+            // کاربر بدون جایگاه فعال: رکورد بدون بخش ثبت می‌شود (بدون جایگاه)
+            $finalDepartmentId = null;
+        }
     }
     $exitSheet = strtr(trim((string) ($data['exit_sheet'] ?? '')), ['۰' => '0', '۱' => '1', '۲' => '2', '۳' => '3', '۴' => '4', '۵' => '5', '۶' => '6', '۷' => '7', '۸' => '8', '۹' => '9']);
     if ($exitSheet !== '' && !preg_match('/^\d+$/', $exitSheet)) {
@@ -384,7 +462,7 @@ function cd_dvd_validate_payload(array $data, array $user, int $excludeId = 0, ?
         'sort_key' => $jy * 10000 + $jm * 100 + $jd, 'event_date' => $date,
         'receiver' => $direction === 'OUT' ? trim((string) ($data['receiver'] ?? '')) : '', 'receiver_unit' => $direction === 'OUT' ? trim((string) ($data['receiver_unit'] ?? '')) : '',
         'brought_by' => $direction === 'IN' ? $broughtBy : '', 'brought_by_user_id' => $direction === 'IN' && $broughtByUserId > 0 ? $broughtByUserId : null, 'exit_sheet' => $exitSheet,
-        'note' => trim((string) ($data['note'] ?? '')), 'department_id' => $departmentId > 0 ? $departmentId : null,
+        'note' => trim((string) ($data['note'] ?? '')), 'department_id' => $finalDepartmentId,
     ];
 }
 
@@ -466,7 +544,7 @@ function cd_dvd_update_record(array $user): void
     if (!$record || !cd_dvd_can_edit_records($user)) {
         throw new RuntimeException('ویرایش مستقیم سوابق فقط برای ادمین اصلی، سوپروایزر و بازرسی مجاز است؛ برای اصلاح این رکورد درخواست ثبت کنید.');
     }
-    $payload = cd_dvd_validate_payload($_POST, $user, $id, (string) ($record['direction'] ?? ''));
+    $payload = cd_dvd_validate_payload($_POST, $user, $id, (string) ($record['direction'] ?? ''), (int) ($record['department_id'] ?? 0));
     db()->beginTransaction();
     try {
         $query = db()->prepare('UPDATE cd_dvd_records SET media = ?, direction = ?, serial = ?, info_type = ?, info_desc = ?, jy = ?, jm = ?, jd = ?, date_str = ?, sort_key = ?, receiver = ?, receiver_unit = ?, brought_by = ?, brought_by_user_id = ?, exit_sheet = ?, note = ?, department_id = ? WHERE id = ?');
@@ -668,11 +746,11 @@ function cd_dvd_render_page_legacy(array $user): never
                 break;
             }
         }
-    } elseif (function_exists('user_org_unit_id')) {
-        $userUnitId = user_org_unit_id($user);
+    } elseif (function_exists('user_org_root_id')) {
+        $rootId = user_org_root_id($user);
         foreach ($departments as $unit) {
-            if ((int) $unit['id'] === $userUnitId) {
-                $form['department_id'] = $userUnitId;
+            if ((int) $unit['id'] === $rootId) {
+                $form['department_id'] = $rootId;
                 break;
             }
         }
@@ -722,13 +800,13 @@ function cd_dvd_render_page_legacy(array $user): never
                 <label>شماره رسانه<input name="serial" id="cd-dvd-serial" value="<?= e($form['serial']) ?>" maxlength="20" required data-required-label="شماره CD/DVD"><small id="cd-dvd-serial-help">CD: P86-0001 تا P86-1000</small></label>
                 <label>نوع اطلاعات<select name="info_type" required data-required-label="نوع اطلاعات"><?php foreach ($types as $type): ?><option value="<?= e($type) ?>" <?= $form['info_type'] === $type ? 'selected' : '' ?>><?= e($type) ?></option><?php endforeach; ?></select></label>
                 <label>تاریخ شمسی<input name="event_date" value="<?= e($form['event_date']) ?>" placeholder="۱۴۰۵/۰۱/۰۱" required data-required-label="تاریخ"></label>
-                <?php if ($departments): ?><label>معاونت / بخش<select name="department_id" required data-required-label="معاونت / بخش"><option value="">انتخاب بخش سازمانی</option><?php foreach ($departments as $department): ?><option value="<?= (int) $department['id'] ?>" <?= (int) $form['department_id'] === (int) $department['id'] ? 'selected' : '' ?>><?= e($department['name']) ?></option><?php endforeach; ?></select></label><?php else: ?><label>معاونت / بخش<select name="department_id" required data-required-label="معاونت / بخش" disabled><option value="">ابتدا در بخش سازمان یک بخش سازمانی فعال ثبت کنید</option></select></label><?php endif; ?>
+                <?= cd_dvd_department_field_html($departments, $form, $user, $editRecord, false) ?>
                 <label class="full">شرح اطلاعات<textarea name="info_desc" rows="3" required data-required-label="اطلاعات ارسالی"><?= e($form['info_desc']) ?></textarea></label>
                 <label>تحویل‌گیرنده<input name="receiver" value="<?= e($form['receiver']) ?>"></label><label>واحد مقصد<input name="receiver_unit" value="<?= e($form['receiver_unit']) ?>"></label>
                 <label class="cd-dvd-incoming-field">شخص واردکننده رسانه *<div class="cd-dvd-user-picker" data-user-picker><input type="hidden" name="brought_by_user_id" id="cd-dvd-brought-by-id" value="<?= (int) $form['brought_by_user_id'] ?>"><input name="brought_by" id="cd-dvd-brought-by" value="<?= e($broughtByDisplay) ?>" autocomplete="off" placeholder="بخشی از نام، نام خانوادگی یا نام کاربری را بنویسید" data-required-label="شخص واردکننده"><div class="cd-dvd-user-options" role="listbox" hidden><button type="button" class="cd-dvd-user-option external" data-user-id="-1" data-label="">شخص خارج از سامانه</button><?php foreach ($broughtUsers as $broughtUser): ?><button type="button" class="cd-dvd-user-option" data-user-id="<?= (int) $broughtUser['id'] ?>" data-label="<?= e($broughtUser['full_name'] . ' - ' . $broughtUser['username']) ?>" data-search="<?= e($broughtUser['full_name'] . ' ' . $broughtUser['username'] . ' ' . ($broughtUser['department_name'] ?? '')) ?>"><?= e($broughtUser['full_name']) ?><small><?= e($broughtUser['username'] . ($broughtUser['department_name'] ? ' • ' . $broughtUser['department_name'] : '')) ?></small></button><?php endforeach; ?></div></div><small>کاربر داخلی را از فهرست انتخاب کنید تا ورود دقیقاً به حساب او منتسب شود.</small></label>
                 <label>شماره برگه خروج<input name="exit_sheet" value="<?= e($form['exit_sheet']) ?>"></label><label class="full">یادداشت<textarea name="note" rows="2"><?= e($form['note']) ?></textarea></label>
             </div>
-            <div class="actions"><button class="button" type="submit" <?= $departments ? '' : 'disabled' ?>><?= $editRecord ? 'ذخیره ویرایش' : 'ثبت گردش رسانه' ?></button></div>
+            <div class="actions"><button class="button" type="submit" <?= (!$departments && cd_dvd_section_override_allowed($user)) ? 'disabled' : '' ?>><?= $editRecord ? 'ذخیره ویرایش' : 'ثبت گردش رسانه' ?></button></div>
         </form>
     </section>
     <section class="card filter-card cd-dvd-filter-card"><form method="get"><input type="hidden" name="page" value="cd-dvd"><div class="filter-grid"><label>جهت<select name="direction"><option value="">همه</option><option value="IN" <?= $filters['direction'] === 'IN' ? 'selected' : '' ?>>ورود</option><option value="OUT" <?= $filters['direction'] === 'OUT' ? 'selected' : '' ?>>خروج</option></select></label><label>رسانه<select name="media"><option value="">همه</option><option value="CD" <?= $filters['media'] === 'CD' ? 'selected' : '' ?>>CD</option><option value="DVD" <?= $filters['media'] === 'DVD' ? 'selected' : '' ?>>DVD</option></select></label><label>نوع اطلاعات<select name="info_type"><option value="">همه</option><?php foreach ($types as $type): ?><option value="<?= e($type) ?>" <?= $filters['info_type'] === $type ? 'selected' : '' ?>><?= e($type) ?></option><?php endforeach; ?></select></label><label class="filter-search">جست‌وجو<input name="search" value="<?= e($filters['search']) ?>" placeholder="شماره، شرح یا تحویل‌گیرنده"></label><button class="button" type="submit">اعمال فیلتر</button><a class="button secondary" href="index.php?page=cd-dvd">پاک‌کردن</a></div></form></section>
@@ -795,11 +873,11 @@ function cd_dvd_render_page(array $user): never
                 break;
             }
         }
-    } elseif (function_exists('user_org_unit_id')) {
-        $userUnitId = user_org_unit_id($user);
+    } elseif (function_exists('user_org_root_id')) {
+        $rootId = user_org_root_id($user);
         foreach ($departments as $unit) {
-            if ((int) $unit['id'] === $userUnitId) {
-                $form['department_id'] = $userUnitId;
+            if ((int) $unit['id'] === $rootId) {
+                $form['department_id'] = $rootId;
                 break;
             }
         }
@@ -856,13 +934,13 @@ function cd_dvd_render_page(array $user): never
                             <input type="text" id="cd-dvd-serial-manual" name="serial_manual" class="cd-dvd-serial-in" maxlength="20" autocomplete="off" placeholder="شماره روی رسانه را دستی وارد کنید" value="<?= $form['direction'] === 'IN' ? e((string) $form['serial']) : '' ?>" data-required-label="شماره CD/DVD" <?= $form['direction'] === 'IN' ? 'required' : 'hidden' ?>>
                             <small id="cd-dvd-serial-help"><?= $form['direction'] === 'IN' ? 'برای رسانه ورودی از بیرون سازمان، شماره را همان‌طور که روی رسانه درج شده دستی وارد کنید.' : 'CD: P86-0001 تا P86-1000' ?></small>
                         </label>
-                        <?php if ($departments): ?><label>معاونت / بخش<select name="department_id" required data-required-label="معاونت / بخش"><option value="">انتخاب بخش سازمانی</option><?php foreach ($departments as $department): ?><option value="<?= (int) $department['id'] ?>" <?= (int) $form['department_id'] === (int) $department['id'] ? 'selected' : '' ?>><?= e($department['name']) ?></option><?php endforeach; ?></select><small class="field-help">فهرست مستقیماً از معاونت‌های فعالِ بخش سازمان بارگذاری می‌شود.</small></label><?php else: ?><label>معاونت / بخش<select name="department_id" required data-required-label="معاونت / بخش" disabled><option value="">ابتدا در بخش سازمان یک بخش سازمانی فعال ثبت کنید</option></select><small class="field-help">فهرست پیش‌فرض استفاده نمی‌شود؛ تا ثبت معاونت در بخش سازمان، امکان ذخیره وجود ندارد.</small></label><?php endif; ?>
+                        <?= cd_dvd_department_field_html($departments, $form, $user, $editRecord, true) ?>
                         <label class="cd-dvd-outgoing-field" <?= $form['direction'] === 'IN' ? 'hidden' : '' ?>>تحویل‌گیرنده<input name="receiver" value="<?= e($form['receiver']) ?>" placeholder="نام تحویل‌گیرنده"></label><label class="cd-dvd-outgoing-field" <?= $form['direction'] === 'IN' ? 'hidden' : '' ?>>واحد مقصد<input name="receiver_unit" value="<?= e($form['receiver_unit']) ?>" placeholder="واحد سازمانی"></label><label class="cd-dvd-exit-sheet-field" <?= $form['direction'] === 'IN' ? 'hidden' : '' ?>>شماره برگه خروج<input name="exit_sheet" value="<?= e($form['exit_sheet']) ?>" inputmode="numeric" pattern="[0-9۰-۹]*" data-digits-only autocomplete="off" required data-required-label="شماره برگه خروج" <?= $form['direction'] === 'IN' ? 'disabled' : '' ?>></label>
                         <?php if ($canIn): ?><fieldset class="cd-dvd-incoming-field" <?= $form['direction'] === 'IN' ? '' : 'hidden' ?>><legend>شخص واردکننده</legend><div class="cd-dvd-brought-by-kind"><label><input type="radio" name="brought_by_type" value="internal" <?= !$broughtByExternal ? 'checked' : '' ?>> داخلی</label><label><input type="radio" name="brought_by_type" value="external" <?= $broughtByExternal ? 'checked' : '' ?>> خارجی</label></div><input type="hidden" name="brought_by_user_id" id="cd-dvd-brought-by-id" value="<?= (int) $form['brought_by_user_id'] ?>"><div class="cd-dvd-brought-internal"><label for="cd-dvd-brought-by">کاربر داخل ساختمان<div class="cd-dvd-user-picker" data-user-picker><input type="text" id="cd-dvd-brought-by" name="brought_by" value="<?= e($broughtByDisplay) ?>" autocomplete="off" placeholder="هر بخشی از نام، نام خانوادگی یا نام کاربری را بنویسید" data-required-label="کاربر داخل ساختمان"><div class="cd-dvd-user-options" role="listbox" hidden><?php foreach ($broughtUsers as $broughtUser): ?><button type="button" class="cd-dvd-user-option" data-user-id="<?= (int) $broughtUser['id'] ?>" data-label="<?= e($broughtUser['full_name'] . ' - ' . $broughtUser['username']) ?>" data-search="<?= e($broughtUser['full_name'] . ' ' . $broughtUser['username'] . ' ' . ($broughtUser['department_name'] ?? '')) ?>"><?= e($broughtUser['full_name']) ?><small><?= e($broughtUser['username'] . (($broughtUser['department_name'] ?? '') !== '' ? ' • ' . $broughtUser['department_name'] : '')) ?></small></button><?php endforeach; ?><div class="cd-dvd-user-empty" hidden>کاربری با این عبارت پیدا نشد.</div></div></div><small>فهرست شامل کاربران دامینی و محلیِ فعال است. تایپ کنید تا فیلتر شود — نام‌وسط، نام خانوادگی، نام کاربری و واحد همه جست‌وجو می‌شوند.</small></label></div><div class="cd-dvd-brought-external" <?= $broughtByExternal ? '' : 'hidden' ?>><label for="cd-dvd-brought-by-external">نام شخص واردکننده از بیرون<input id="cd-dvd-brought-by-external" name="brought_by" value="<?= e($broughtByExternal ? (string) $form['brought_by'] : '') ?>" maxlength="190" autocomplete="off" placeholder="نام شخص خارجی را بنویسید" <?= $broughtByExternal ? '' : 'disabled' ?> data-required-label="نام شخص خارجی"></label></div></fieldset><?php endif; ?>
                         <label class="wide-half">اطلاعات ارسالی<textarea name="info_desc" rows="3" required data-required-label="اطلاعات ارسالی" placeholder="توضیح مختصر محتویات رسانه..."><?= e($form['info_desc']) ?></textarea></label><label class="wide-half">یادداشت / تذکر<textarea name="note" rows="3" placeholder="مثلاً رمزگذاری شده یا پیوست دارد..."><?= e($form['note']) ?></textarea></label>
                         <label class="full recorder-display">🔒 ثبت‌کننده: <strong><?= e($user['full_name']) ?></strong><small>این مقدار به‌صورت خودکار در رکورد ذخیره می‌شود.</small></label>
                     </div>
-                    <div class="actions"><button class="button" type="submit" <?= $departments ? '' : 'disabled' ?>><?= $editRecord ? 'ذخیره ویرایش' : 'ذخیره ثبت' ?></button></div>
+                    <div class="actions"><button class="button" type="submit" <?= (!$departments && cd_dvd_section_override_allowed($user)) ? 'disabled' : '' ?>><?= $editRecord ? 'ذخیره ویرایش' : 'ذخیره ثبت' ?></button></div>
                 </form>
              </section>
         </section>

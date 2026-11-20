@@ -179,26 +179,45 @@ if ($page === 'new-ticket') {
     echo '</select><small class="field-help">ابتدا حوزه و سپس خدمت را انتخاب کنید؛ دسته‌بندی، اولویت و مسیر رسیدگی خودکار تنظیم می‌شود.</small></label>';
     if ($departments) {
         $myUnitId = function_exists('user_org_unit_id') ? user_org_unit_id($user) : 0;
+        $sectionOverride = function_exists('org_section_override_allowed')
+            ? org_section_override_allowed((string) ($user['role'] ?? ''))
+            : in_array((string) ($user['role'] ?? ''), ['agent', 'supervisor', 'support_manager', 'primary_admin'], true);
         $myRootId = 0;
         if (function_exists('org_nearest_root_id') && $myUnitId > 0) {
             $myRootId = org_nearest_root_id($myUnitId, true);
         }
-        $preselectId = $retryUnitId > 0 ? $retryUnitId : ($myRootId > 0 ? $myRootId : $myUnitId);
-        $mySectionKnown = false;
-        foreach ($departments as $department) {
-            if ((int) $department['id'] === $preselectId) {
-                $mySectionKnown = true;
-                break;
+        if (!$sectionOverride) {
+            // بیشتر نقش‌ها — حتی مدیر — بخش را از جایگاه خود در چارت می‌گیرند و قابل تغییر نیست؛
+            // مقدار نهایی سمت سرور دوباره از چارت محاسبه می‌شود.
+            $autoSectionName = '';
+            foreach ($departments as $department) {
+                if ((int) $department['id'] === $myRootId) {
+                    $autoSectionName = (string) $department['name'];
+                    break;
+                }
             }
+            $displayText = $autoSectionName !== ''
+                ? $autoSectionName
+                : 'بدون جایگاه — جایگاه فعالی در چارت سازمانی برای حساب شما ثبت نشده است';
+            echo '<label>بخش سازمانی درخواست‌کننده<input value="' . e($displayText) . '" readonly><input type="hidden" name="requesting_unit_id" value="' . (int) $myRootId . '"><small class="field-help">به‌صورت خودکار از جایگاه شما در چارت سازمانی ثبت می‌شود و قابل تغییر نیست.</small></label>';
+        } else {
+            $preselectId = $retryUnitId > 0 ? $retryUnitId : ($myRootId > 0 ? $myRootId : $myUnitId);
+            $mySectionKnown = false;
+            foreach ($departments as $department) {
+                if ((int) $department['id'] === $preselectId) {
+                    $mySectionKnown = true;
+                    break;
+                }
+            }
+            if (!$mySectionKnown && $myRootId > 0) {
+                $preselectId = $myRootId;
+            }
+            echo '<label>بخش سازمانی درخواست‌کننده<select name="requesting_unit_id" required><option value="">انتخاب کنید…</option>';
+            foreach ($departments as $department) {
+                echo '<option value="' . (int) $department['id'] . '" ' . ((int) $department['id'] === $preselectId ? 'selected' : '') . '>' . e($department['name']) . '</option>';
+            }
+            echo '</select><small class="field-help">' . ($mySectionKnown ? 'بخش سازمانی شما به‌صورت پیش‌فرض انتخاب شده است؛ ' : '') . 'درخواست به بخش انتخاب‌شده ارجاع داده می‌شود.</small></label>';
         }
-        if (!$mySectionKnown && $myRootId > 0) {
-            $preselectId = $myRootId;
-        }
-        echo '<label>بخش سازمانی درخواست‌کننده<select name="requesting_unit_id" required><option value="">انتخاب کنید…</option>';
-        foreach ($departments as $department) {
-            echo '<option value="' . (int) $department['id'] . '" ' . ((int) $department['id'] === $preselectId ? 'selected' : '') . '>' . e($department['name']) . '</option>';
-        }
-        echo '</select><small class="field-help">' . ($mySectionKnown ? 'بخش سازمانی شما به‌صورت پیش‌فرض انتخاب شده است؛ ' : '') . 'درخواست به بخش انتخاب‌شده ارجاع داده می‌شود.</small></label>';
     } else {
         echo '<label>بخش سازمانی درخواست‌کننده<input value="هیچ بخش سازمانی‌ای در چارت سازمانی تعریف نشده است" readonly></label>';
     }

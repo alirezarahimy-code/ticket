@@ -40,7 +40,7 @@ class PermissionFollowupStaticTests(unittest.TestCase):
         self.assertIn("if (!in_array((string) ($user['role'] ?? ''), $allowedRoles, true))", cd_dvd)
         self.assertIn("return cd_dvd_can_edit_records($user);", cd_dvd)
         self.assertIn("if (!$record || !cd_dvd_can_edit_records($user))", cd_dvd)
-        self.assertIn("cd_dvd_validate_payload($_POST, $user, $id, (string) ($record['direction'] ?? ''))", cd_dvd)
+        self.assertIn("cd_dvd_validate_payload($_POST, $user, $id, (string) ($record['direction'] ?? ''), (int) ($record['department_id'] ?? 0))", cd_dvd)
         self.assertIn("درخواست اصلاح", cd_dvd)
 
     def test_primary_admin_promotion_is_not_delegated(self):

@@ -175,7 +175,8 @@ for name in MIGRATIONS:
 (PKG / 'START.txt').write_text(src('START.txt'), encoding='utf-8')
 (PKG / 'CHANGE-REPORT-FA.md').write_text(src('CHANGE-REPORT-FA.md'), encoding='utf-8')
 for rel in ('tests/js/food-absent-lunch-tab.test.js', 'tests/js/food-absent-lunch-runtime.test.js',
-            'tests/test_food_absent_lunch_tab_static.py', 'tests/test_food_absent_lunch_backend_static.py'):
+            'tests/test_food_absent_lunch_tab_static.py', 'tests/test_food_absent_lunch_backend_static.py',
+            'tests/test_auto_section_attribution_static.py'):
     out = FILES / rel
     out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text((SRC / 'tests' / Path(rel).name if not rel.startswith('tests/js/') else SRC / rel).read_text(encoding='utf-8'), encoding='utf-8')
@@ -185,6 +186,7 @@ FILES_LIST = [
     'food-ticket-web/index.html', 'food-ticket.php', 'help-guide.php',
     'tests/js/food-absent-lunch-tab.test.js', 'tests/js/food-absent-lunch-runtime.test.js',
     'tests/test_food_absent_lunch_backend_static.py', 'tests/test_food_absent_lunch_tab_static.py',
+    'tests/test_auto_section_attribution_static.py',
 ] + EXTRA_FILES
 hashes = {rel: sha256((FILES / rel).read_bytes()) for rel in FILES_LIST}
 manifest = {
