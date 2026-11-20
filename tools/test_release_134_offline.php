@@ -54,6 +54,8 @@ $root = dirname(__DIR__);
 $index = (string) file_get_contents($root . '/index.php');
 $groups = (string) file_get_contents($root . '/food-ticket-groups.php');
 $groupsJs = (string) file_get_contents($root . '/food-ticket-web/assets/food-groups.js');
+// گزارش‌ها پس از «مرکز درخواست‌ها» به این فایل‌ها منتقل شده‌اند؛ پین‌های قدیمی به index.php دیگر کهنه بودند.
+$reportFunctions = (string) file_get_contents($root . '/modules/request-center/lib/functions.php');
 $ticket = (string) file_get_contents($root . '/food-ticket.php');
 $inventory = (string) file_get_contents($root . '/inventory.php');
 $bootstrap = (string) file_get_contents($root . '/lib/tickets-sla.php');
@@ -70,12 +72,12 @@ $cards = [
     ['نمایش داده‌شده', 'status=all'],
 ];
 foreach ($cards as [$label, $query]) {
-    $needle = 'index.php?page=reports&amp;' . $query;
+    $needle = 'request-center.php?page=reports&amp;' . $query;
     check('۱-' . $label . ': کارت به گزارش فیلترشده لینک شده', strpos($index, $needle) !== false, $needle);
 }
-check('۱-ب: فیلتر «در حال پیگیری» همهٔ وضعیت‌های باز و قدیمی pending را می‌گیرد', strpos($index, 't.status IN ("new", "manager_review", "assigned", "in_progress", "waiting_user", "pending")') !== false);
-check('۱-پ: فیلتر «حل‌شده» درخواست‌های بسته‌شده را هم شامل می‌شود', strpos($index, 't.status IN ("resolved", "closed")') !== false);
-check('۱-ت: مقادیر active/all و cancelled در فهرست مجاز فیلتر گزارش‌ها هستند', strpos($index, "'resolved', 'closed', 'cancelled', 'active', 'all'") !== false);
+check('۱-ب: فیلتر «در حال پیگیری» همهٔ وضعیت‌های باز و قدیمی pending را می‌گیرد', strpos($reportFunctions, 't.status IN ("new", "manager_review", "assigned", "in_progress", "waiting_user", "pending")') !== false);
+check('۱-پ: فیلتر «حل‌شده» درخواست‌های بسته‌شده را هم شامل می‌شود', strpos($reportFunctions, 't.status IN ("resolved", "closed")') !== false);
+check('۱-ت: مقادیر active/all و cancelled در فهرست مجاز فیلتر گزارش‌ها هستند', strpos($reportFunctions, "'resolved', 'closed', 'cancelled', 'rejected', 'active', 'all'") !== false);
 check('۱-ث: CSS کارتِ لینک‌شده (حالت hover/focus) اضافه شده', strpos((string) file_get_contents($root . '/assets/style.css'), 'a.stat-card') !== false);
 
 /* ───────── ۲) حذف شمارهٔ کارت از فرم گروه غذا ───────── */

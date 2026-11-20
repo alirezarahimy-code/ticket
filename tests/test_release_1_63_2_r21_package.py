@@ -5,7 +5,7 @@ import json
 from pathlib import Path
 from zipfile import ZipFile
 
-from download_page_helpers import check_download_page_lists_only_latest_package
+from download_page_helpers import check_download_page_lists_only_latest_package, latest_package_name
 
 ROOT = Path(__file__).resolve().parents[1]
 DOWNLOADS = ROOT / "downloads"
@@ -137,6 +137,8 @@ def test_1632_r21_is_a_valid_cumulative_installable_package():
     assert "مستقیماً" in release_note_text
 
     check_download_page_lists_only_latest_package()
+    # صفحهٔ دانلود طبق قاعدهٔ پروژه فقط جدیدترین بسته را نشان می‌دهد (اکنون ۱.۶۳.۳)؛
+    # ثابت‌کردن متن نسخهٔ ۱.۶۳.۲ در این صفحه در هر انتشار بعدی تست را کهنه می‌کند.
+    # بستهٔ r21-۱.۶۳.۲ همچنان در آرشیو downloads/ معتبر و موجود است؛ صرفاً دیگر در صفحه منتشر نیست.
     page = (DOWNLOADS / "index.html").read_text(encoding="utf-8")
-    assert "نسخهٔ ۱.۶۳.۲" in page
-    assert NAME in page
+    assert latest_package_name() in page

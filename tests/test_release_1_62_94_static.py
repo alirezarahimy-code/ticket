@@ -183,7 +183,7 @@ class PackageTests(unittest.TestCase):
                     continue
                 self.assertIsNone(foreign.search(zf.read(name).decode("utf-8", errors="ignore")), f"RC token in {name}")
             shipped_index = zf.read("files/index.php").decode("utf-8")
-            self.assertIn("assets/style.css?v=3.4.61", shipped_index)
+            self.assertIn("assets/style.css?v=3.4.61", shipped_index)  # cache-pin-guard: legacy-zip
             self.assertIn("assets/organization.js?v=23", shipped_index)
             self.assertNotIn("lib/render.php", shipped_index)
             self.assertNotIn("request-center", shipped_index)
