@@ -954,7 +954,7 @@ tools/print_calibration.php	tools	136	8005
 tools/print_test.php	tools	50	2103
 tools/render_code_map.py	tools	152	8120
 tools/repair_source_rows.php	tools	98	4599
-tools/seed_test_data.php	tools	814	59509
+tools/seed_test_data.php	tools	1240	93796
 tools/session-boot.py	tools	346	15761
 tools/set_attendance_password.php	tools	109	4625
 tools/set_logging_acl.ps1	tools	77	3550
