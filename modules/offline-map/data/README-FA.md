@@ -2,11 +2,13 @@
 
 این پوشه محل استقرار بستهٔ تولیدشدهٔ نقشه است؛ فایل‌های حجیم نقشه در مخزن کد قرار نمی‌گیرند.
 
+فایل منبع ورودی را خارج از Git در `source/iran-latest.osm.pbf` قرار دهید. ابزار تولید در `../tools/Build-OfflineIranMap.ps1` خروجی `iran.pmtiles` و `manifest.json` را می‌سازد. کنترل بسته با `../tools/Test-OfflineIranMapPackage.ps1` انجام می‌شود.
+
 ساختار مورد انتظار:
 - `iran.pmtiles`: کاشی‌های برداری کل کشور با attribution و نسخهٔ منبع مشخص.
 - `style.json`: سبک کاملاً محلی؛ همهٔ sourceها، spriteها و glyphها باید مسیر نسبی محلی داشته باشند.
 - `sprites/` و `fonts/`: نمادها و قلم‌های محلی موردنیاز سبک.
-- `manifest.json`: نسخهٔ بسته، تاریخ تولید، منبع داده، مجوزها، zoom range، پوشش و SHA-256 فایل‌ها.
+- `manifest.json`: نسخهٔ ابزار، تاریخ تولید، منبع داده، مجوز و SHA-256 فایل منبع و PMTiles. گزارش پوشش/zoom باید پس از اعتبارسنجی جداگانه تکمیل شود.
 
 کتابخانهٔ مرورگر باید در `../vendor/maplibre-gl.js` و `../vendor/maplibre-gl.css` قرار گیرد. در زمان اجرا هیچ CDN، tile server، geocoder یا فونت اینترنتی مجاز نیست.
 
