@@ -68,7 +68,7 @@ class SearchIndexer(osmium.SimpleHandler):
         self.insert = connection.cursor()
 
     def save(self, osm_id: int, tags: dict[str, str], lon: float, lat: float, source: str) -> None:
-        name = tags.get("name") or tags.get("official_name") or tags.get("alt_name")
+        name = tags.get("name") or tags.get("name:fa") or tags.get("official_name") or tags.get("alt_name")
         name_fa = tags.get("name:fa") or tags.get("name:per") or (name if any("\u0600" <= c <= "\u06ff" for c in (name or "")) else "")
         if not name or len(name.strip()) < 2 or not in_iran(lon, lat):
             self.skipped += 1
