@@ -86,3 +86,14 @@ def test_leftover_employee_list_is_lazy_and_submission_keeps_quantities():
     assert "saveLeftoverDraftFromDom" in js
     assert "var allocations=allocationsDraft" in js
     assert "leftover_allocations: allocations" in js
+
+
+def test_food_modals_use_top_layer_popovers_for_all_three_dialogs():
+    js = (ROOT / "assets/food-menu.js").read_text()
+    assert js.count('popover="manual" data-fm-action=') >= 3
+    assert "function showFoodModals()" in js
+    assert "modal.showPopover()" in js
+    assert "showFoodModals();" in js
+    css = (ROOT / "assets/food-menu.css").read_text()
+    assert ".fm-leftover-backdrop{position:fixed" in css
+    assert "z-index:2147483000" in css

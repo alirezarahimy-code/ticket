@@ -353,7 +353,7 @@
 .fm-order-report-table.is-compact td{max-width:0;overflow:hidden;text-overflow:ellipsis}
 
 /* تعیین تکلیف غذای باقیمانده (تطبیق روزانه) */
-.fm-leftover-backdrop{position:fixed;inset:0;background:#132b36a8;z-index:2147483000;display:grid;place-items:center;padding:18px;overflow:auto;isolation:isolate}
+.fm-leftover-backdrop{position:fixed;inset:0;background:#132b36a8;z-index:2147483000;display:grid;place-items:center;padding:18px;overflow:auto;isolation:isolate;margin:0;width:auto;height:auto;max-width:none;max-height:none;border:0;color:inherit}
 .fm-leftover-modal{width:min(520px,100%);max-height:92vh;overflow:auto;background:#fff;border-radius:16px;box-shadow:0 22px 70px #132b3644}
 .fm-leftover-modal header{padding:18px 20px;border-bottom:1px solid #e9eeee}
 .fm-leftover-modal header h3{margin:0;font-size:16px;color:#203a43}

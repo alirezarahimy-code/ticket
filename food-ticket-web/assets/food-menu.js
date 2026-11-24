@@ -1146,7 +1146,7 @@
       var status=food.price_status==='final'?'قیمت قطعی همین ماه':(food.price_status==='draft'?'قیمت ثبت‌شدهٔ غیرقطعی':(food.price_status==='estimated'?'پیش‌فرض موقت از ماه قبل':'بدون سابقهٔ قیمت؛ ورود الزامی'));
       return '<div class="fm-price-row"><strong class="fm-price-food-name">'+esc(food.food_name)+'</strong><input class="fm-price-input" type="text" inputmode="numeric" maxlength="12" size="12" name="price_'+Number(food.food_id)+'" value="'+esc(value)+'" aria-label="قیمت ریالی '+esc(food.food_name)+'" required><span class="fm-price-currency">ریال</span><small class="fm-price-state">'+esc(status)+(food.price_status==='estimated'?' · تا نهایی‌شدن فاکتور برآوردی است':'')+'</small></div>';
     }).join('');
-    return '<div class="fm-leftover-backdrop" data-fm-action="invoice-price-backdrop"><section class="fm-leftover-modal fm-price-modal" role="dialog" aria-modal="true" aria-labelledby="fm-price-title"><header><h3 id="fm-price-title">قیمت قطعی غذاهای ماه '+esc(faDigits(m.monthLabel))+'</h3><p>هر غذا یک نرخ دارد و برای ناهار و شام یکسان است. مبالغ به ریال‌اند؛ قیمت‌های ماه قبل فقط تا نهایی‌شدن این فاکتور برآوردی هستند.</p></header><form id="fm-invoice-prices-form" class="fm-leftover-modal-body"><div class="fm-reconciliation-form">'+(rows||'<p class="fm-empty">برای این ماه غذای ثبت‌شده‌ای در برنامه وجود ندارد.</p>')+'</div><footer><button type="button" class="btn secondary" data-fm-action="invoice-price-cancel">انصراف</button><button type="submit" class="btn primary">نهایی‌کردن فاکتور و قیمت‌ها</button></footer></form></section></div>';
+    return '<div class="fm-leftover-backdrop" popover="manual" data-fm-action="invoice-price-backdrop"><section class="fm-leftover-modal fm-price-modal" role="dialog" aria-modal="true" aria-labelledby="fm-price-title"><header><h3 id="fm-price-title">قیمت قطعی غذاهای ماه '+esc(faDigits(m.monthLabel))+'</h3><p>هر غذا یک نرخ دارد و برای ناهار و شام یکسان است. مبالغ به ریال‌اند؛ قیمت‌های ماه قبل فقط تا نهایی‌شدن این فاکتور برآوردی هستند.</p></header><form id="fm-invoice-prices-form" class="fm-leftover-modal-body"><div class="fm-reconciliation-form">'+(rows||'<p class="fm-empty">برای این ماه غذای ثبت‌شده‌ای در برنامه وجود ندارد.</p>')+'</div><footer><button type="button" class="btn secondary" data-fm-action="invoice-price-cancel">انصراف</button><button type="submit" class="btn primary">نهایی‌کردن فاکتور و قیمت‌ها</button></footer></form></section></div>';
   }
 
   function renderGuestActualModal() {
@@ -1168,7 +1168,7 @@
         + '<input type="number" class="fm-ga-input" data-guest-actual-input="' + esc(String(section.id)) + '" min="0" step="1" inputmode="numeric" value="' + esc(actual === '' ? '' : String(actual)) + '" placeholder="۰" aria-label="واقعیِ ' + esc(section.name || '') + '">'
         + '</div>';
     }).join('');
-    return '<div class="fm-leftover-backdrop" data-fm-action="guest-actual-backdrop">'
+    return '<div class="fm-leftover-backdrop" popover="manual" data-fm-action="guest-actual-backdrop">'
       + '<section class="fm-leftover-modal fm-ga-modal" role="dialog" aria-modal="true" aria-labelledby="fm-ga-title">'
       + '<header><h3 id="fm-ga-title">انتساب مهمان به بخش‌های سازمانی</h3><p>فیش‌های مهمان چاپ‌شدهٔ امروز: <b>' + faDigits(printed) + '</b> · ' + esc(dateJalali) + ' · ' + esc(mealLabel) + '</p></header>'
       + '<div class="fm-leftover-modal-body" id="fm-guest-actual-form">'
@@ -1292,7 +1292,7 @@
       else if(m.peopleLoaded&&m.people&&m.people.length) peopleContent=m.people.map(function(person){var id=Number(person.id),checked=Object.prototype.hasOwnProperty.call(selected,String(id));return '<div class="fm-leftover-person" data-leftover-person-row><label><input type="checkbox" data-leftover-person-id="'+id+'"'+(checked?' checked':'')+'><span class="fm-leftover-person-label">'+esc(person.name||'')+(person.employee_number?' · '+esc(faDigits(person.employee_number)):'')+'</span></label><input type="number" min="1" step="1" inputmode="numeric" value="'+esc(checked?asciiDigits(selected[String(id)]):'1')+'" data-leftover-person-qty="'+id+'"'+(checked?'':' disabled')+'></div>';}).join('');
       else peopleContent='<div class="fm-empty">فهرست پرسنل در دسترس نیست.</div>';
     }
-    return '<div class="fm-leftover-backdrop" data-fm-action="leftover-backdrop"><section class="fm-leftover-modal" role="dialog" aria-modal="true" aria-labelledby="fm-leftover-title"><header><h3 id="fm-leftover-title">تعیین تکلیف غذای باقیمانده</h3><p>مانده: <b>'+faDigits(remaining)+'</b> پرس · '+esc(dateJalali)+' · '+esc(mealLabel)+'</p></header><div class="fm-leftover-modal-body" id="fm-leftover-form"><p class="fm-leftover-hint">مجموع تعدادهای تخصیص‌یافته باید دقیقاً برابر مانده باشد.</p><div class="fm-leftover-row fm-leftover-staff"><label class="fm-leftover-check"><input type="checkbox" name="opt_staff" data-leftover-opt="staff"'+(staffEnabled?' checked':'')+'><b>توزیع بین پرسنل</b></label><strong>تعداد انتخاب‌شده: <span data-leftover-staff-total>'+faDigits(leftoverSelectedTotal(selected))+'</span></strong></div><div class="fm-leftover-people"'+(staffEnabled?'':' hidden')+'><label class="fm-field">جستجوی پرسنل<input type="search" data-leftover-people-search placeholder="نام یا کد پرسنلی" autocomplete="off" value="'+esc(m.peopleQuery||'')+'"></label><div class="fm-leftover-people-list">'+peopleContent+'</div></div>'+row('waste','دورریز (ضایعات)')+row('keep','نگه‌داری برای وعدهٔ بعد')+row('other','سایر')+'<label class="fm-leftover-note">یادداشت سایر (اختیاری)<textarea name="leftover_other_note" rows="2" maxlength="500">'+esc(m.otherNote||'')+'</textarea></label><div class="fm-leftover-error" id="fm-leftover-error" role="alert"></div></div><footer><button type="button" class="btn secondary" data-fm-action="leftover-cancel">انصراف</button><button type="button" class="btn primary" data-fm-action="leftover-confirm">ثبت نهایی</button></footer></section></div>';
+    return '<div class="fm-leftover-backdrop" popover="manual" data-fm-action="leftover-backdrop"><section class="fm-leftover-modal" role="dialog" aria-modal="true" aria-labelledby="fm-leftover-title"><header><h3 id="fm-leftover-title">تعیین تکلیف غذای باقیمانده</h3><p>مانده: <b>'+faDigits(remaining)+'</b> پرس · '+esc(dateJalali)+' · '+esc(mealLabel)+'</p></header><div class="fm-leftover-modal-body" id="fm-leftover-form"><p class="fm-leftover-hint">مجموع تعدادهای تخصیص‌یافته باید دقیقاً برابر مانده باشد.</p><div class="fm-leftover-row fm-leftover-staff"><label class="fm-leftover-check"><input type="checkbox" name="opt_staff" data-leftover-opt="staff"'+(staffEnabled?' checked':'')+'><b>توزیع بین پرسنل</b></label><strong>تعداد انتخاب‌شده: <span data-leftover-staff-total>'+faDigits(leftoverSelectedTotal(selected))+'</span></strong></div><div class="fm-leftover-people"'+(staffEnabled?'':' hidden')+'><label class="fm-field">جستجوی پرسنل<input type="search" data-leftover-people-search placeholder="نام یا کد پرسنلی" autocomplete="off" value="'+esc(m.peopleQuery||'')+'"></label><div class="fm-leftover-people-list">'+peopleContent+'</div></div>'+row('waste','دورریز (ضایعات)')+row('keep','نگه‌داری برای وعدهٔ بعد')+row('other','سایر')+'<label class="fm-leftover-note">یادداشت سایر (اختیاری)<textarea name="leftover_other_note" rows="2" maxlength="500">'+esc(m.otherNote||'')+'</textarea></label><div class="fm-leftover-error" id="fm-leftover-error" role="alert"></div></div><footer><button type="button" class="btn secondary" data-fm-action="leftover-cancel">انصراف</button><button type="button" class="btn primary" data-fm-action="leftover-confirm">ثبت نهایی</button></footer></section></div>';
   }
 
   function leftoverLiveInput(event) {
@@ -1946,8 +1946,18 @@
     var notices = (state.error ? '<div class="fm-alert error">' + esc(state.error) + '</div>' : '') + (state.notice && !state.error ? '<div class="fm-alert good">' + esc(state.notice) + '</div>' : '');
     var renderFocusSnap = captureRenderFocus();
     root.innerHTML = state.embeddedMode ? ('<div class="fm-embedded-report">' + notices + panel + '</div>') : ('<div class="fm-intro"><div><h2>برنامه غذایی</h2></div></div>' + notices + navTabs() + mealTypeSwitch() + panel);
+    showFoodModals();
     if (global.ItsmJalali && typeof global.ItsmJalali.enhanceAll === 'function') global.ItsmJalali.enhanceAll(root);
     restoreRenderFocus(renderFocusSnap);
+  }
+
+  function showFoodModals() {
+    if (!root || !root.querySelectorAll) return;
+    root.querySelectorAll('.fm-leftover-backdrop[popover="manual"]').forEach(function (modal) {
+      try {
+        if (typeof modal.showPopover === 'function' && !modal.matches(':popover-open')) modal.showPopover();
+      } catch (e) { /* z-index fallback remains for browsers without top-layer popover support */ }
+    });
   }
 
   async function loadStatus() {

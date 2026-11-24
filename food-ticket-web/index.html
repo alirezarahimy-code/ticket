@@ -1153,9 +1153,9 @@ setInterval(function(){var box=document.getElementById('guest-cap-live');if(box&
 (function(){
 'use strict';
 var FIELDS=[{key:'row',label:'ردیف'},{key:'pc',label:'کد پرسنلی'},{key:'first',label:'نام'},{key:'last',label:'نام خانوادگی'},
- {key:'dep',label:'معاونت'},{key:'count',label:'تعداد غیبت'},{key:'food',label:'نوع غذا'},{key:'jal',label:'تاریخ غیبت'},{key:'status',label:'وضعیت غیبت'},{key:'amount',label:'مبلغ برآوردی (ریال)'},{key:'priceState',label:'وضعیت قیمت'}];
-var TAB_FIELDS={flat:['row','pc','first','last','dep','count','jal','status'],dept:['row','pc','first','last','dep','count','status'],detail:['row','pc','first','last','dep','food','jal','status','amount','priceState']};
-var FKEY='food-ticket-absent-fields-v2',BKEY='food-ticket-absent-blocks-v1';
+ {key:'dep',label:'معاونت'},{key:'count',label:'تعداد غیبت'},{key:'food',label:'نوع غذا'},{key:'jal',label:'تاریخ غیبت'},{key:'status',label:'وضعیت غیبت'},{key:'amount',label:'مبلغ غذا (ریال)'},{key:'amountTotal',label:'مجموع مبلغ (ریال)'},{key:'priceState',label:'وضعیت قیمت'}];
+var TAB_FIELDS={flat:['row','pc','first','last','dep','count','amountTotal','status'],dept:['row','pc','first','last','dep','count','amountTotal','status'],detail:['row','pc','first','last','dep','food','jal','status','amount','priceState']};
+var FKEY='food-ticket-absent-fields-v3',BKEY='food-ticket-absent-blocks-v1';
 var PAL=['var(--teal)','var(--navy-2)','var(--gold)','var(--danger)','#4f91c6','#8a63c9','#d9812b'];
 var S={rows:[],key:'',seq:0,loading:false,error:'',tab:'detail',blocks:1,metric:'people',chart:true,query:'',deps:new Set(),
   fieldsByTab:{flat:new Set(TAB_FIELDS.flat),dept:new Set(TAB_FIELDS.dept),detail:new Set(TAB_FIELDS.detail)},
@@ -1269,8 +1269,11 @@ function tableHtml(rows,b,sortable){
 function rowsForMode(mode){
  var rows=sorted(filtered());if(mode==='detail')return rows;
  var m={},order=[];rows.forEach(function(r){var u=m[r.pc];
-  if(!u){u=Object.assign({},r,{count:0});m[r.pc]=u;order.push(u)}
-  u.count++;if(r.iso>=u.iso){u.iso=r.iso;u.jal=r.jal;u.food=r.food;u.status=r.status;u.short=r.short;u.declared=r.declared}});
+  if(!u){u=Object.assign({},r,{count:0,amountValue:0,amountMissingCount:0});m[r.pc]=u;order.push(u)}
+  u.count++;
+  if(r.amountValue===null||!Number.isFinite(r.amountValue))u.amountMissingCount++;else u.amountValue+=r.amountValue;
+  if(r.iso>=u.iso){u.iso=r.iso;u.jal=r.jal;u.food=r.food;u.status=r.status;u.short=r.short;u.declared=r.declared}});
+ order.forEach(function(u){u.amountTotal=fa(u.amountValue)+(u.amountMissingCount?' · قیمت نامشخص برای '+fa(u.amountMissingCount)+' وعده':'')});
  return order;
 }
 function groupStats(){var m={};filtered().forEach(function(r){if(!m[r.dep])m[r.dep]={people:{},portions:0,amount:0,missingAmount:0};m[r.dep].people[r.pc]=1;m[r.dep].portions++;if(r.amountValue===null||!Number.isFinite(r.amountValue))m[r.dep].missingAmount++;else m[r.dep].amount+=r.amountValue});return m}

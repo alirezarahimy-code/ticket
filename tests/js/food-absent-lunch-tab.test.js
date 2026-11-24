@@ -35,8 +35,11 @@ A(html.includes('alr-chips'), 'چیپهای صفحهٔ غایبین');
 // سه تب و فیلدها
 A(['فهرست یکجا','بر اساس معاونت','تفکیک و جزئیات'].every(t => bundle.includes(t)), 'نام سه زیرنما');
 A(bundle.includes("detail:['row','pc','first','last','dep','food','jal','status','amount','priceState']"), 'فیلدهای تفکیک و جزئیات');
-A(bundle.includes("flat:['row','pc','first','last','dep','count','jal','status']"), 'تاریخ غیبت در فهرست یکجا');
-A(bundle.includes("dept:['row','pc','first','last','dep','count','status']"), 'تعداد غیبت در بر اساس معاونت');
+A(bundle.includes("flat:['row','pc','first','last','dep','count','amountTotal','status']"), 'فهرست یکجا بدون تاریخ غیبت و با مجموع مبلغ');
+A(bundle.includes("dept:['row','pc','first','last','dep','count','amountTotal','status']"), 'تب معاونت بدون تاریخ غیبت و با مجموع مبلغ');
+A(bundle.includes("key:'amountTotal',label:'مجموع مبلغ (ریال)'"), 'فیلد مجموع مبلغ برای هر پرسنل');
+A(bundle.includes('u.amountTotal=fa(u.amountValue)'), 'جمع مبالغ هر پرسنل در بازه');
+A(bundle.includes('u.amountValue+=r.amountValue'), 'تجمیع قیمت روزهای غیبت');
 A(!bundle.includes("label:'وعده'"), 'ستون وعده حذف شده');
 A(bundle.includes("label:'نوع غذا'"), 'نوع غذا = نام غذای سفارش');
 A(bundle.includes('alr-group-head h4 b'), 'N نفر · M وعده بولد چسبیده');

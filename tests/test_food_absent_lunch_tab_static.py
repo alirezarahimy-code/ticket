@@ -39,8 +39,8 @@ def test_three_subviews_and_fields():
     for title in ('فهرست یکجا', 'بر اساس معاونت', 'تفکیک و جزئیات'):
         assert title in BUNDLE
     assert "detail:['row','pc','first','last','dep','food','jal','status','amount','priceState']" in BUNDLE
-    assert "flat:['row','pc','first','last','dep','count','jal','status']" in BUNDLE
-    assert "dept:['row','pc','first','last','dep','count','status']" in BUNDLE
+    assert "flat:['row','pc','first','last','dep','count','amountTotal','status']" in BUNDLE
+    assert "dept:['row','pc','first','last','dep','count','amountTotal','status']" in BUNDLE
     assert "label:'وعده'" not in BUNDLE
     assert "label:'نوع غذا'" in BUNDLE
     assert 'alr-group-head h4 b' in BUNDLE
@@ -88,3 +88,15 @@ def test_absent_amount_totals_appear_in_flat_and_department_views():
     assert "S.tab==='flat'||S.tab==='dept'?amountSummary()" in BUNDLE
     assert "مبلغ غذا: '+amountLabel(st)" in BUNDLE
     assert "قیمت نامشخص برای" in BUNDLE
+
+
+def test_flat_and_department_show_per_person_absence_amount_totals_without_dates():
+    assert "key:'amountTotal',label:'مجموع مبلغ (ریال)'" in BUNDLE
+    assert "u.amountValue+=r.amountValue" in BUNDLE
+    assert "u.amountMissingCount++" in BUNDLE
+    assert "u.amountTotal=fa(u.amountValue)" in BUNDLE
+    fields = BUNDLE[BUNDLE.index("var TAB_FIELDS="):BUNDLE.index("var FKEY=")]
+    flat = fields.split("flat:[", 1)[1].split("]", 1)[0]
+    dept = fields.split("dept:[", 1)[1].split("]", 1)[0]
+    assert 'jal' not in flat and 'jal' not in dept
+    assert 'amountTotal' in flat and 'amountTotal' in dept
