@@ -84463,7 +84463,7 @@
             "path": "tests/test_release_notes_popup.js",
             "area": "TEST",
             "lines": 194,
-            "file_fingerprint": "db29f27942b7",
+            "file_fingerprint": "ee125fd5eed3",
             "blocks": [
                 {
                     "kind": "block",
@@ -84575,7 +84575,7 @@
                     "line_start": 77,
                     "line_end": 78,
                     "lines": 2,
-                    "fingerprint": "206b6a0626fc",
+                    "fingerprint": "340945727e98",
                     "risk": {
                         "score": 0,
                         "flags": []
@@ -97950,8 +97950,8 @@
             "id": "TOOL-034",
             "path": "tools/build_full_1_63_3.py",
             "area": "TOOL",
-            "lines": 149,
-            "file_fingerprint": "08a533fc2b65",
+            "lines": 151,
+            "file_fingerprint": "b5722e7cb672",
             "blocks": [
                 {
                     "kind": "block",
@@ -97959,7 +97959,7 @@
                     "line_start": 1,
                     "line_end": 47,
                     "lines": 47,
-                    "fingerprint": "cb505b1d9c0c",
+                    "fingerprint": "f06767effd50",
                     "risk": {
                         "score": 0,
                         "flags": []
@@ -98011,9 +98011,9 @@
                     "kind": "block",
                     "anchor": "main",
                     "line_start": 66,
-                    "line_end": 149,
-                    "lines": 84,
-                    "fingerprint": "2960e2d7dfcb",
+                    "line_end": 151,
+                    "lines": 86,
+                    "fingerprint": "5bbeaf88c98f",
                     "risk": {
                         "score": 1,
                         "flags": {
