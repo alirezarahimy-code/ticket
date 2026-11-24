@@ -9,11 +9,13 @@ $schemaReady = $mapRepo->ready();
 $mapDataPath = __DIR__ . '/../data/iran.pmtiles';
 $mapStylePath = __DIR__ . '/../data/style.json';
 $mapLibraryPath = __DIR__ . '/../vendor/maplibre-gl.js';
-$mapReady = is_file($mapDataPath) && is_file($mapStylePath) && is_file($mapLibraryPath);
+$pmtilesLibraryPath = __DIR__ . '/../vendor/pmtiles.js';
+$mapReady = is_file($mapDataPath) && is_file($mapStylePath) && is_file($mapLibraryPath) && is_file($pmtilesLibraryPath);
 $features = $schemaReady ? $mapRepo->search(trim((string) ($_GET['q'] ?? ''))) : [];
 render_header('نقشهٔ آفلاین ایران', $user);
 ?>
 <link rel="stylesheet" href="modules/offline-map/Assets/offline-map.css?v=1">
+<?php if ($mapReady): ?><link rel="stylesheet" href="modules/offline-map/vendor/maplibre-gl.css"><?php endif; ?>
 <section class="page-heading offline-map-heading">
   <div><span class="eyebrow">سامانهٔ اطلاعات مکانی</span><h1>نقشهٔ آفلاین ایران</h1><p>نمایش نقشهٔ پایه از بستهٔ محلی و نگهداری مستقل نقاط و اطلاعات ثبت‌شدهٔ سازمان.</p></div>
   <a class="button secondary" href="index.php">بازگشت به داشبورد</a>
@@ -26,7 +28,7 @@ render_header('نقشهٔ آفلاین ایران', $user);
 <?php endif; ?>
 <div class="offline-map-layout">
   <section class="card offline-map-canvas" aria-label="محیط نقشه">
-    <div class="offline-map-canvas-inner"><div class="offline-map-compass">N</div><div class="offline-map-empty"><span class="offline-map-globe">◎</span><strong>محیط نقشهٔ ایران</strong><span>در انتظار نصب داده‌های برداری آفلاین</span></div></div>
+    <div class="offline-map-canvas-inner"><div class="offline-map-compass">N</div><div id="offline-map-map" data-map-ready="<?= $mapReady ? '1' : '0' ?>" aria-label="نقشهٔ برداری آفلاین ایران"></div><?php if (!$mapReady): ?><div class="offline-map-empty"><span class="offline-map-globe">◎</span><strong>محیط نقشهٔ ایران</strong><span>در انتظار نصب داده‌های برداری آفلاین</span></div><?php endif; ?></div>
     <div class="offline-map-legend"><span><i></i> نقاط ثبت‌شدهٔ سازمان</span><span>مختصات جغرافیایی WGS84</span></div>
   </section>
   <aside class="card offline-map-sidebar">
@@ -49,5 +51,6 @@ render_header('نقشهٔ آفلاین ایران', $user);
 <?php elseif (!$features): ?><div class="card empty-state">هنوز نقطه‌ای ثبت نشده است.</div>
 <?php else: ?><div class="card offline-map-feature-table"><?php foreach ($features as $feature): ?><article class="offline-map-feature" data-feature-id="<?= (int) $feature['id'] ?>"><div><strong><?= e($feature['title']) ?></strong><p><?= e((string) ($feature['description'] ?? '')) ?></p><small><?= e(number_format((float) $feature['geometry']['coordinates'][1], 6)) ?> ، <?= e(number_format((float) $feature['geometry']['coordinates'][0], 6)) ?></small></div><?php if ((int) $feature['created_by'] === (int) $user['id'] || user_can($user, 'map.admin')): ?><button type="button" class="button danger small" data-delete-feature="<?= (int) $feature['id'] ?>">حذف</button><?php endif; ?></article><?php endforeach; ?></div><?php endif; ?>
 </section>
-<script src="modules/offline-map/Assets/offline-map.js?v=1" defer></script>
+<?php if ($mapReady): ?><script src="modules/offline-map/vendor/maplibre-gl.js" defer></script><script src="modules/offline-map/vendor/pmtiles.js" defer></script><?php endif; ?>
+<script src="modules/offline-map/Assets/offline-map.js?v=2" defer></script>
 <?php render_footer(); ?>
