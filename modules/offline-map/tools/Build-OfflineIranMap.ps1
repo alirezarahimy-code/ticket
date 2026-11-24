@@ -3,6 +3,7 @@ param(
     [string]$Root = (Split-Path -Parent $PSScriptRoot),
     [string]$SourcePbf = (Join-Path $PSScriptRoot '..\data\source\iran-latest.osm.pbf'),
     [string]$PlanetilerExe = (Join-Path $PSScriptRoot 'bin\planetiler.exe'),
+    [string]$SchemaPath = (Join-Path $PSScriptRoot 'iran-high-zoom-schema.yml'),
     [string]$OutputPmtiles = (Join-Path $PSScriptRoot '..\data\iran.pmtiles'),
     [string]$ManifestPath = (Join-Path $PSScriptRoot '..\data\manifest.json'),
     [string[]]$AdditionalPlanetilerArgs = @(),
@@ -13,10 +14,12 @@ $ErrorActionPreference = 'Stop'
 function Stop-Build([string]$Message) { Write-Error $Message; exit 1 }
 $SourcePbf = [IO.Path]::GetFullPath($SourcePbf)
 $PlanetilerExe = [IO.Path]::GetFullPath($PlanetilerExe)
+$SchemaPath = [IO.Path]::GetFullPath($SchemaPath)
 $OutputPmtiles = [IO.Path]::GetFullPath($OutputPmtiles)
 $ManifestPath = [IO.Path]::GetFullPath($ManifestPath)
 if (-not (Test-Path -LiteralPath $SourcePbf -PathType Leaf)) { Stop-Build "فایل ورودی پیدا نشد: $SourcePbf" }
 if (-not (Test-Path -LiteralPath $PlanetilerExe -PathType Leaf)) { Stop-Build "Planetiler پیدا نشد: $PlanetilerExe. نسخه Windows x64 را از راهنمای رسمی Planetiler دریافت و در tools\bin قرار دهید." }
+if (-not (Test-Path -LiteralPath $SchemaPath -PathType Leaf)) { Stop-Build "طرح سفارشی نقشه پیدا نشد: $SchemaPath" }
 $sourceInfo = Get-Item -LiteralPath $SourcePbf
 if ($sourceInfo.Length -lt 1024) { Stop-Build 'حجم فایل PBF غیرعادی و کمتر از ۱ کیلوبایت است.' }
 $driveRoot = [IO.Path]::GetPathRoot($OutputPmtiles)
@@ -30,12 +33,13 @@ $manifestDir = Split-Path -Parent $ManifestPath
 New-Item -ItemType Directory -Force -Path $outDir, $manifestDir | Out-Null
 $sourceHash = (Get-FileHash -LiteralPath $SourcePbf -Algorithm SHA256).Hash.ToLowerInvariant()
 $toolHash = (Get-FileHash -LiteralPath $PlanetilerExe -Algorithm SHA256).Hash.ToLowerInvariant()
+$schemaHash = (Get-FileHash -LiteralPath $SchemaPath -Algorithm SHA256).Hash.ToLowerInvariant()
 Write-Host 'شروع تولید کاشی‌های برداری ایران'
 Write-Host "ورودی: $SourcePbf"
 Write-Host ("حجم PBF: {0:N2} MB" -f ($sourceInfo.Length / 1MB))
 Write-Host "خروجی: $OutputPmtiles"
-Write-Host 'این مرحله فقط بستهٔ کاشی را تولید می‌کند؛ style، فونت، آیکون، جست‌وجو و مرزهای رسمی مراحل جداگانه‌اند.'
-$argsList = @("--osm-path=$SourcePbf", "--output=$OutputPmtiles", '--force', '--memory=6g', '--all-names=true') + $AdditionalPlanetilerArgs
+Write-Host 'این مرحله طرح سفارشی با حداکثر زوم دادهٔ ۱۷ را اجرا می‌کند؛ جزئیات بیشتر همچنان به پوشش OSM وابسته است.'
+$argsList = @('generate-custom', "--schema=$SchemaPath", "--osm-path=$SourcePbf", "--output=$OutputPmtiles", '--force', '--memory=6g') + $AdditionalPlanetilerArgs
 Push-Location (Split-Path -Parent $PlanetilerExe)
 try { & $PlanetilerExe @argsList; $exitCode = $LASTEXITCODE }
 finally { Pop-Location }
@@ -54,7 +58,7 @@ $manifest = [ordered]@{
     generated_at_utc = [DateTime]::UtcNow.ToString('o')
     region = 'IR'
     source = [ordered]@{ file = [IO.Path]::GetFileName($SourcePbf); bytes = $sourceInfo.Length; sha256 = $sourceHash; dataset = 'OpenStreetMap'; license = 'ODbL-1.0'; attribution = '© OpenStreetMap contributors' }
-    generator = [ordered]@{ name = 'Planetiler'; executable = [IO.Path]::GetFileName($PlanetilerExe); executable_sha256 = $toolHash; arguments = $argsList }
+    generator = [ordered]@{ name = 'Planetiler Custom Map'; executable = [IO.Path]::GetFileName($PlanetilerExe); executable_sha256 = $toolHash; schema = [IO.Path]::GetFileName($SchemaPath); schema_sha256 = $schemaHash; maxzoom = 17; arguments = $argsList }
     tiles = [ordered]@{ file = [IO.Path]::GetFileName($OutputPmtiles); bytes = $outputInfo.Length; sha256 = $outputHash; format = 'PMTiles' }
     not_included_or_not_verified = @('MapLibre style and local glyphs/sprites','Persian offline search index','official administrative boundaries','municipal districts and public transport completeness','street/building/address coverage completeness')
 }
