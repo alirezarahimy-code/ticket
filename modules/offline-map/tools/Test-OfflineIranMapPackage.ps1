@@ -45,7 +45,7 @@ if (Test-Path -LiteralPath $searchPath -PathType Leaf) {
 if (Test-Path -LiteralPath $schemaPath -PathType Leaf) {
     $schemaText = Get-Content -LiteralPath $schemaPath -Raw
     if ($schemaText -notmatch '(?m)^\s*maxzoom:\s*17\s*$') { $errors.Add('Custom schema must declare maxzoom: 17.') }
-    foreach ($layerName in @('roads','buildings','poi','places','admin_boundaries','railways','addresses','transit')) {
+    foreach ($layerName in @('roads','buildings','poi','poi_areas','places','admin_boundaries','railways','addresses','transit')) {
         $pattern = '(?m)^\s*- id: ' + [regex]::Escape($layerName) + '\s*$'
         if ($schemaText -notmatch $pattern) { $errors.Add("Custom schema layer missing: $layerName") }
     }
