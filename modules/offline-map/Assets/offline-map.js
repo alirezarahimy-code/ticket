@@ -2,7 +2,7 @@
   'use strict';
   var form = document.getElementById('offline-map-create');
   var feedback = document.getElementById('offline-map-feedback');
-  var endpoint = 'offline-map.php';
+  var endpoint = 'offline-map.php?api=1';
   function send(data) {
     return fetch(endpoint, { method: 'POST', credentials: 'same-origin', headers: { 'X-CSRF-Token': data.csrf || '', 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' }, body: data });
   }
