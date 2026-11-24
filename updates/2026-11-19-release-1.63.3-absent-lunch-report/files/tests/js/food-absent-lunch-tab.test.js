@@ -21,7 +21,7 @@ A(html.includes('window.AbsentLunchReport.load(false)'), 'render لودر تب �
 A(!html.includes('option value="absent"'), 'گزینهٔ قدیمی نوع گزارش حذف شده');
 A(!html.includes("['absent-report','غایبین ناهار']"), 'نمای مستقل اضافه نشده');
 A(html.includes("state.reportTab='absent-lunch'"), 'حالت ذخیرهشدهٔ قدیمی هدایت میشود');
-A(html.includes("PANEL_VERSION='1.37.61'") && php.includes("FOOD_TICKET_PANEL_VERSION = '1.37.61'"), 'نسخههای پنل هماهنگاند');
+A(html.includes("PANEL_VERSION='1.37.62'") && php.includes("FOOD_TICKET_PANEL_VERSION = '1.37.62'"), 'نسخههای پنل هماهنگاند');
 A(bundle.includes('window.AbsentLunchReport={html:html,load:load'), 'ماژول تب تعریف شده');
 A(bundle.includes('function mapped(items,orgMap)'), 'نگاشت بکاند');
 A(bundle.includes('window.FoodOrgGroups.groupOf(map,r)'), 'گروهبندی معاونت');
@@ -53,9 +53,10 @@ A(bundle.includes('alr-mean') && bundle.includes('alr-grid'), 'grid و میان�
 A(!bundle.includes('<svg'), 'چارت SVG کشیده نیست');
 
 // چاپ خالص
-A(bundle.includes('body>*:not(#alrPrint){display:none!important}'), 'چاپ فقط لیست');
-A(!bundle.includes('absent-lunch-printing'), 'کلاس printing حذف شده');
-A(!bundle.includes("'afterprint'"), 'afterprint حذف شده');
+A(bundle.includes('body.printing-absent-lunch>*:not(#alrPrint){display:none!important}'), 'چاپ محدود به کلاس غایبین');
+A(!bundle.includes('body>*:not(#alrPrint)'), 'قانون چاپ سراسری حذف شده');
+A(bundle.includes('data-no-sort'), 'جدول غایبین از مرتب‌ساز عمومی DOM مستثنا است');
+A(bundle.includes("'afterprint'"), 'پاک‌سازی کلاس بعد از چاپ');
 A(bundle.includes('<h1>گزارش غایبین ناهار</h1>'), 'عنوان گزارش');
 A(bundle.includes('beforeprint'), 'beforeprint فقط محتوا را تازه میکند');
 

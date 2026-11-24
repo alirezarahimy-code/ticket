@@ -9,7 +9,7 @@
 | سنجه | مقدار |
 |---|---|
 | فایل‌های کد تولیدی | 708 |
-| خطوط | 178,596 |
+| خطوط | 178,616 |
 | آدرس‌ها (بلوک) | 8,507 |
 | موضوع‌های قابل جست‌وجو | 41 صفحه + 102 مجوز + 86 جدول |
 | بازبینی‌شده | 0 آدرس (0.0%) — 0 خط (0.0%) |
@@ -289,13 +289,13 @@
 
 | ناحیه | معنی | فایل | بلوک | خط |
 |---|---|---|---|---|
-| `TEST` | TEST | 260 | 2,084 | 29,944 |
+| `TEST` | TEST | 260 | 2,084 | 29,948 |
 | `TOOL` | TOOL | 153 | 1,464 | 40,275 |
 | `DB` | DB | 89 | 1,397 | 8,374 |
-| `PAGE` | صفحات (ریشه) | 84 | 1,652 | 59,312 |
+| `PAGE` | صفحات (ریشه) | 84 | 1,652 | 59,326 |
 | `ASSET` | دارایی‌های ایستا (assets/) | 34 | 858 | 15,327 |
 | `WEB` | پنل وب غذا (food-ticket-web/) | 30 | 511 | 10,360 |
-| `CORE` | موتور مشترک (lib/) | 24 | 394 | 9,902 |
+| `CORE` | موتور مشترک (lib/) | 24 | 394 | 9,904 |
 | `ACT` | کنش‌ها (actions/) | 17 | 99 | 3,130 |
 | `CRON` | زمان‌بندها (cron/) | 15 | 39 | 1,675 |
 | `API` | رابط برنامه (api/) | 2 | 9 | 297 |
@@ -525,12 +525,12 @@
 </details>
 
 <details>
-<summary><b>TEST-014</b> — <code>tests/js/food-absent-lunch-tab.test.js</code> (71 خط، 2 آدرس، بازبینی‌شده 0/2)</summary>
+<summary><b>TEST-014</b> — <code>tests/js/food-absent-lunch-tab.test.js</code> (72 خط، 2 آدرس، بازبینی‌شده 0/2)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
 | `TEST-014.01` | 1–14 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
-| `TEST-014.02` | 15–71 | بلوک | `A` | 0 | ⬜ |
+| `TEST-014.02` | 15–72 | بلوک | `A` | 0 | ⬜ |
 
 </details>
 
@@ -1011,7 +1011,7 @@
 </details>
 
 <details>
-<summary><b>TEST-051</b> — <code>tests/test_food_absent_lunch_tab_static.py</code> (80 خط، 9 آدرس، بازبینی‌شده 0/9)</summary>
+<summary><b>TEST-051</b> — <code>tests/test_food_absent_lunch_tab_static.py</code> (83 خط، 9 آدرس، بازبینی‌شده 0/9)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
@@ -1022,8 +1022,8 @@
 | `TEST-051.05` | 38–48 | بلوک | `test_three_subviews_and_fields` | 0 | ⬜ |
 | `TEST-051.06` | 49–57 | بلوک | `test_multi_deputy_checkboxes` | 0 | ⬜ |
 | `TEST-051.07` | 58–65 | بلوک | `test_chart_is_compact_and_explicit` | 0 | ⬜ |
-| `TEST-051.08` | 66–75 | بلوک | `test_print_is_pure_and_reversible` | 0 | ⬜ |
-| `TEST-051.09` | 76–80 | بلوک | `test_xlsx_and_docs` | 0 | ⬜ |
+| `TEST-051.08` | 66–78 | بلوک | `test_print_is_pure_and_reversible` | 0 | ⬜ |
+| `TEST-051.09` | 79–83 | بلوک | `test_xlsx_and_docs` | 0 | ⬜ |
 
 </details>
 
@@ -10214,14 +10214,14 @@
 </details>
 
 <details>
-<summary><b>PAGE-023</b> — <code>food-ticket-release-notes.php</code> (62 خط، 4 آدرس، بازبینی‌شده 0/4)</summary>
+<summary><b>PAGE-023</b> — <code>food-ticket-release-notes.php</code> (76 خط، 4 آدرس، بازبینی‌شده 0/4)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
 | `PAGE-023.01` | 1–14 | ناحیه | `بلوک رویه‌ای 1-14` | 0 | ⬜ |
-| `PAGE-023.02` | 15–49 | تابع | `food_ticket_release_notes_all` | 0 | ⬜ |
-| `PAGE-023.03` | 51–59 | تابع | `food_ticket_release_notes_current` | 0 | ⬜ |
-| `PAGE-023.04` | 60–62 | ناحیه | `بلوک رویه‌ای 60-62` | 0 | ⬜ |
+| `PAGE-023.02` | 15–63 | تابع | `food_ticket_release_notes_all` | 0 | ⬜ |
+| `PAGE-023.03` | 65–73 | تابع | `food_ticket_release_notes_current` | 0 | ⬜ |
+| `PAGE-023.04` | 74–76 | ناحیه | `بلوک رویه‌ای 60-62` | 0 | ⬜ |
 
 </details>
 
@@ -14003,20 +14003,20 @@
 </details>
 
 <details>
-<summary><b>CORE-020</b> — <code>lib/release-notes.php</code> (414 خط، 10 آدرس، بازبینی‌شده 0/10)</summary>
+<summary><b>CORE-020</b> — <code>lib/release-notes.php</code> (416 خط، 10 آدرس، بازبینی‌شده 0/10)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
 | `CORE-020.01` | 1–30 | ناحیه | `بلوک رویه‌ای 1-30` | 0 | ⬜ |
-| `CORE-020.02` | 31–146 | تابع | `release_notes_all` | 0 | ⬜ |
-| `CORE-020.03` | 148–152 | تابع | `release_notes_version_key` | 1 | ⬜ |
-| `CORE-020.04` | 154–171 | تابع | `release_notes_current` | 0 | ⬜ |
-| `CORE-020.05` | 173–197 | تابع | `release_notes_history` | 0 | ⬜ |
-| `CORE-020.06` | 199–211 | تابع | `release_notes_render_items` | 0 | ⬜ |
-| `CORE-020.07` | 213–309 | تابع | `release_notes_dashboard_card` | 4 | ⬜ |
-| `CORE-020.08` | 311–364 | تابع | `release_notes_history_html` | 0 | ⬜ |
-| `CORE-020.09` | 366–382 | تابع | `release_notes_page_html` | 0 | ⬜ |
-| `CORE-020.10` | 384–413 | تابع | `release_notes_page_single` | 0 | ⬜ |
+| `CORE-020.02` | 31–148 | تابع | `release_notes_all` | 0 | ⬜ |
+| `CORE-020.03` | 150–154 | تابع | `release_notes_version_key` | 1 | ⬜ |
+| `CORE-020.04` | 156–173 | تابع | `release_notes_current` | 0 | ⬜ |
+| `CORE-020.05` | 175–199 | تابع | `release_notes_history` | 0 | ⬜ |
+| `CORE-020.06` | 201–213 | تابع | `release_notes_render_items` | 0 | ⬜ |
+| `CORE-020.07` | 215–311 | تابع | `release_notes_dashboard_card` | 4 | ⬜ |
+| `CORE-020.08` | 313–366 | تابع | `release_notes_history_html` | 0 | ⬜ |
+| `CORE-020.09` | 368–384 | تابع | `release_notes_page_html` | 0 | ⬜ |
+| `CORE-020.10` | 386–415 | تابع | `release_notes_page_single` | 0 | ⬜ |
 
 </details>
 

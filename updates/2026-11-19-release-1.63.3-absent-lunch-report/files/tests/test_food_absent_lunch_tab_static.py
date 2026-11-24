@@ -31,8 +31,8 @@ def test_pages_are_separate():
 
 
 def test_panel_versions_match():
-    assert "PANEL_VERSION='1.37.61'" in HTML
-    assert "FOOD_TICKET_PANEL_VERSION = '1.37.61'" in PHP
+    assert "PANEL_VERSION='1.37.62'" in HTML
+    assert "FOOD_TICKET_PANEL_VERSION = '1.37.62'" in PHP
 
 
 def test_three_subviews_and_fields():
@@ -64,9 +64,12 @@ def test_chart_is_compact_and_explicit():
 
 
 def test_print_is_pure_and_reversible():
-    assert 'body>*:not(#alrPrint){display:none!important}' in BUNDLE
-    assert 'absent-lunch-printing' not in BUNDLE
-    assert "'afterprint'" not in BUNDLE
+    # قانون چاپ باید به کلاس body.printing-absent-lunch محدود باشد تا چاپ سایر گزارش‌ها سفید نشود
+    assert 'body.printing-absent-lunch>*:not(#alrPrint){display:none!important}' in BUNDLE
+    assert 'body>*:not(#alrPrint)' not in BUNDLE
+    assert 'printing-absent-lunch' in BUNDLE
+    assert "'afterprint'" in BUNDLE
+    assert 'data-no-sort' in BUNDLE
     assert '<h1>گزارش غایبین ناهار</h1>' in BUNDLE
     assert 'beforeprint' in BUNDLE
     assert 'width:100%!important' in BUNDLE and 'table-layout:fixed' in BUNDLE

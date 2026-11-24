@@ -114,7 +114,7 @@ function tableHtml(rows,b,sortable){
     c.map(function(f,j){return '<td class="'+(j===0&&k2>0?'alr-block-start':'')+'" title="'+esc2(plain(r,f,idx))+'">'+cell(r,f,idx)+'</td>'}).join('')}
   body+='<tr>'+tds+'</tr>'}
  if(!body)body='<tr><td colspan="'+c.length*b+'" class="alr-empty">در این بازه غایبی ثبت نشده است.</td></tr>';
- return '<div class="alr-table-wrap"><table class="alr-table">'+cg+'<thead>'+head+'</thead><tbody>'+body+'</tbody></table></div>';
+ return '<div class="alr-table-wrap"><table class="alr-table" data-no-sort>'+cg+'<thead>'+head+'</thead><tbody>'+body+'</tbody></table></div>';
 }
 function rowsForMode(mode){
  var rows=sorted(filtered());if(mode==='detail')return rows;
@@ -160,6 +160,12 @@ function exportXlsx(){
 }
 /* ---------- چاپ خالص: فقط عنوان گزارش + عنوان تب + لیست؛ بعد از کنسل هم فرم سرجاست ---------- */
 function preparePrint(){
+ try{
+  document.body.classList.add('printing-absent-lunch');
+  var cleanup=function(){try{document.body.classList.remove('printing-absent-lunch')}catch(e){}};
+  window.addEventListener('afterprint',cleanup,{once:true});
+  setTimeout(cleanup,1500);
+ }catch(e){}
  var area=document.getElementById('alrPrint');
  if(!area){area=document.createElement('div');area.id='alrPrint';document.body.appendChild(area)}
  area.innerHTML='<h1>گزارش غایبین ناهار</h1><div class="alr-tab-title">'+esc2(tabTitle())+'</div>'+viewHtml(false);

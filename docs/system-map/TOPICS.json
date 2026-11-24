@@ -18959,12 +18959,12 @@
       "line": 15,
       "anchor": "food_ticket_release_notes_all",
       "risk": 0,
-      "lines": 35
+      "lines": 49
     },
     "PAGE-023.03": {
       "path": "food-ticket-release-notes.php",
       "area": "PAGE",
-      "line": 51,
+      "line": 65,
       "anchor": "food_ticket_release_notes_current",
       "risk": 0,
       "lines": 9
@@ -18972,7 +18972,7 @@
     "PAGE-023.04": {
       "path": "food-ticket-release-notes.php",
       "area": "PAGE",
-      "line": 60,
+      "line": 74,
       "anchor": "بلوک رویه‌ای 60-62",
       "risk": 0,
       "lines": 3
@@ -29687,12 +29687,12 @@
       "line": 31,
       "anchor": "release_notes_all",
       "risk": 0,
-      "lines": 116
+      "lines": 118
     },
     "CORE-020.03": {
       "path": "lib/release-notes.php",
       "area": "CORE",
-      "line": 148,
+      "line": 150,
       "anchor": "release_notes_version_key",
       "risk": 1,
       "lines": 5
@@ -29700,7 +29700,7 @@
     "CORE-020.04": {
       "path": "lib/release-notes.php",
       "area": "CORE",
-      "line": 154,
+      "line": 156,
       "anchor": "release_notes_current",
       "risk": 0,
       "lines": 18
@@ -29708,7 +29708,7 @@
     "CORE-020.05": {
       "path": "lib/release-notes.php",
       "area": "CORE",
-      "line": 173,
+      "line": 175,
       "anchor": "release_notes_history",
       "risk": 0,
       "lines": 25
@@ -29716,7 +29716,7 @@
     "CORE-020.06": {
       "path": "lib/release-notes.php",
       "area": "CORE",
-      "line": 199,
+      "line": 201,
       "anchor": "release_notes_render_items",
       "risk": 0,
       "lines": 13
@@ -29724,7 +29724,7 @@
     "CORE-020.07": {
       "path": "lib/release-notes.php",
       "area": "CORE",
-      "line": 213,
+      "line": 215,
       "anchor": "release_notes_dashboard_card",
       "risk": 4,
       "lines": 97
@@ -29732,7 +29732,7 @@
     "CORE-020.08": {
       "path": "lib/release-notes.php",
       "area": "CORE",
-      "line": 311,
+      "line": 313,
       "anchor": "release_notes_history_html",
       "risk": 0,
       "lines": 54
@@ -29740,7 +29740,7 @@
     "CORE-020.09": {
       "path": "lib/release-notes.php",
       "area": "CORE",
-      "line": 366,
+      "line": 368,
       "anchor": "release_notes_page_html",
       "risk": 0,
       "lines": 17
@@ -29748,7 +29748,7 @@
     "CORE-020.10": {
       "path": "lib/release-notes.php",
       "area": "CORE",
-      "line": 384,
+      "line": 386,
       "anchor": "release_notes_page_single",
       "risk": 0,
       "lines": 30
@@ -42407,7 +42407,7 @@
       "line": 15,
       "anchor": "A",
       "risk": 0,
-      "lines": 57
+      "lines": 58
     },
     "TEST-015.01": {
       "path": "tests/js/food-aggregate-report.test.js",
@@ -43975,12 +43975,12 @@
       "line": 66,
       "anchor": "test_print_is_pure_and_reversible",
       "risk": 0,
-      "lines": 10
+      "lines": 13
     },
     "TEST-051.09": {
       "path": "tests/test_food_absent_lunch_tab_static.py",
       "area": "TEST",
-      "line": 76,
+      "line": 79,
       "anchor": "test_xlsx_and_docs",
       "risk": 0,
       "lines": 5

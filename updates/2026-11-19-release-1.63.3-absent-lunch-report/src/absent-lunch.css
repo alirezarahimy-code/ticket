@@ -65,17 +65,19 @@
 .alr-empty{text-align:center;color:var(--muted);padding:14px}
 .alr-info{font-size:11px;color:var(--muted);font-weight:700}
 #alrPrint{display:none}
+/* چاپ فقط برای «غایبین ناهار»: کل بخش چاپ به کلاس body.printing-absent-lunch محدود است تا
+   چاپ سایر گزارش‌ها (پیش‌نمایش چاپ/مهمان/فیش‌های چاپ‌شده) درگیر قاعدهٔ مخفی‌سازی نشود. */
 @media print{
  html,body{background:#fff!important}
- body>*:not(#alrPrint){display:none!important}
- #alrPrint{display:block!important;background:#fff;color:#111;padding:0;margin:0}
- #alrPrint h1{text-align:center;font-size:18px;margin:0 0 5px;color:#111}
- #alrPrint .alr-tab-title{text-align:center;font-size:12px;font-weight:800;margin:0 0 12px;color:#334}
- #alrPrint .alr-table{width:100%!important;table-layout:fixed;border-collapse:collapse}
- #alrPrint .alr-table col{width:auto!important}
- #alrPrint .alr-table thead{display:table-header-group}
- #alrPrint th,#alrPrint td{border:1px solid #777;padding:3px;font-size:8px;color:#111!important;background:#fff!important}
- #alrPrint tr,#alrPrint .alr-group{break-inside:avoid}
+ body.printing-absent-lunch>*:not(#alrPrint){display:none!important}
+ body.printing-absent-lunch #alrPrint{display:block!important;background:#fff;color:#111;padding:0;margin:0}
+ body.printing-absent-lunch #alrPrint h1{text-align:center;font-size:18px;margin:0 0 5px;color:#111}
+ body.printing-absent-lunch #alrPrint .alr-tab-title{text-align:center;font-size:12px;font-weight:800;margin:0 0 12px;color:#334}
+ body.printing-absent-lunch #alrPrint .alr-table{width:100%!important;table-layout:fixed;border-collapse:collapse}
+ body.printing-absent-lunch #alrPrint .alr-table col{width:auto!important}
+ body.printing-absent-lunch #alrPrint .alr-table thead{display:table-header-group}
+ body.printing-absent-lunch #alrPrint th,body.printing-absent-lunch #alrPrint td{border:1px solid #777;padding:3px;font-size:8px;color:#111!important;background:#fff!important}
+ body.printing-absent-lunch #alrPrint tr,body.printing-absent-lunch #alrPrint .alr-group{break-inside:avoid}
 }
 @media(max-width:720px){.alr-name{flex-basis:110px}.alr-val{flex-basis:76px}}
 .alr-chips,.alr-classic-chips{display:inline-flex;align-items:center;gap:6px;flex-wrap:wrap}

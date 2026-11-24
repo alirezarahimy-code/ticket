@@ -149,7 +149,7 @@ const t = async (name, fn) => { try { await fn(); P++; console.log('  PASS ' + n
     assert(area.querySelector('.alr-tab-title').textContent === 'تفکیک و جزئیات');
     assert(area.querySelector('table'));
     assert(!area.querySelector('.alr-chart') && !area.querySelector('.alr-tools') && !area.querySelector('.alr-chip'));
-    assert.strictEqual(w.document.body.classList.length, 0);
+    assert(w.document.body.classList.contains('printing-absent-lunch'), 'کلاس چاپ غایبین بعد از preparePrint فعال است');
     assert(d.getElementById('app').querySelector('#alr-filter'));
   });
   await t('XLSX واقعی با فیلدهای تب فعال', async () => {

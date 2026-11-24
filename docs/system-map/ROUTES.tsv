@@ -356,8 +356,8 @@ page	inventory-diagnostics	index.php	1527
 page	domain-scan	index.php	1577
 page	asset	index.php	1740
 page	organization	index.php	1767
-page	new-ticket	index.php	2509
-page	reports	index.php	2515
+page	new-ticket	index.php	2508
+page	reports	index.php	2514
 action	save_rc_work_hours	modules/request-center/Actions/admin-actions.php	10
 action	create_ola_policy	modules/request-center/Actions/admin-actions.php	67
 action	update_ola_policy	modules/request-center/Actions/admin-actions.php	148

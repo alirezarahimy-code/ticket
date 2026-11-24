@@ -19,7 +19,7 @@ DOWNLOADS = ROOT / 'downloads'
 ZIP_PATH = DOWNLOADS / 'ticket-update-1.63.2-to-1.63.3-absent-lunch-report-20261119.zip'
 VERSION = '1.63.3'
 REQUIRES = '1.63.2'
-PANEL_VERSION = '1.37.61'
+PANEL_VERSION = '1.37.62'
 DATE = '2026-11-20'
 
 def sha256(b: bytes) -> str:
@@ -52,8 +52,8 @@ if "const FOOD_TICKET_PANEL_VERSION = '1.37.53';" in backend:
     backend = must_replace(backend, "const FOOD_TICKET_PANEL_VERSION = '1.37.53';",
                            f"const FOOD_TICKET_PANEL_VERSION = '{PANEL_VERSION}';", 'panel version php')
     print('backend rebuilt from 1.63.2 base')
-elif "const FOOD_TICKET_PANEL_VERSION = '1.37.61';" in backend:
-    print('backend already built (1.37.61) — using as-is')
+elif "const FOOD_TICKET_PANEL_VERSION = '1.37.62';" in backend:
+    print('backend already built (1.37.62) — using as-is')
 else:
     raise SystemExit('نسخهٔ پنل food-ticket.php نه 1.37.53 است نه 1.37.58؛ بازسازی متوقف شد')
 
@@ -62,9 +62,9 @@ html = read('food-ticket-web/index.html')
 if "PANEL_VERSION='1.37.53'" in html:
     _html_rebuild = True
     html = must_replace(html, "PANEL_VERSION='1.37.53'", f"PANEL_VERSION='{PANEL_VERSION}'", 'panel version html')
-elif "PANEL_VERSION='1.37.61'" in html and 'window.AbsentLunchReport' in html:
+elif "PANEL_VERSION='1.37.62'" in html and 'window.AbsentLunchReport' in html:
     _html_rebuild = False
-    print('panel html already built (1.37.61) — using as-is')
+    print('panel html already built (1.37.62) — using as-is')
 else:
     raise SystemExit('panel HTML نه 1.37.53 است نه built 1.37.58؛ بازسازی متوقف شد')
 
@@ -215,7 +215,7 @@ manifest = {
     'version': VERSION,
     'requires_version': REQUIRES,
     'date': DATE,
-    'title': 'تب «غایبین ناهار» + اصلاحات نهایی (بند ۱۷) + چارت/لغو/گزارش یک‌بار (بازسازی دوم) + ترمیم C10 و ۴۰۰ وعده (بازسازی سوم) + اعداد همیشه فارسی (بازسازی چهارم) + اصلاح چینش دکمه‌ها (بازسازی‌های پنجم و ششم) + گزارش کامل ۱٫۶۳٫۳ و پاپ‌آپ rev-scoped و یادداشت پنل (بازسازی هفتم)',
+    'title': 'تب «غایبین ناهار» + اصلاحات نهایی (بند ۱۷) + چارت/لغو/گزارش یک‌بار (بازسازی دوم) + ترمیم C10 و ۴۰۰ وعده (بازسازی سوم) + اعداد همیشه فارسی (بازسازی چهارم) + اصلاح چینش دکمه‌ها (بازسازی‌های پنجم و ششم) + گزارش کامل ۱٫۶۳٫۳ و پاپ‌آپ rev-scoped و یادداشت پنل (بازسازی هفتم) + رفع سفیدی چاپ همهٔ گزارش‌ها و شماره ردیف غایبین پس از سورت (بازسازی هشتم)',
     'panel_version': PANEL_VERSION,
     'migrations': MIGRATIONS,
     'files': FILES_LIST,
@@ -239,18 +239,21 @@ manifest = {
                     '(absent-lunch tab, close-day guest actuals popup, 6 org roots everywhere, no-anchor registration blocks, subtree visibility for chart managers, '
                     'stable routing with migration 040, partner-company prefix and (مستقل) suffix, chart-locked section attribution, mandatory decision notes for both cancel decisions, '
                     'universal Persian digits, layout refresh, panel 1.37.61); the one-time popup now uses a package-scoped rev key so rebuilds of the same version show it once again after install; '
-                    'food-panel release banner points at the 1.37.61 entry; the user guide (and therefore Aria the chatbot) was taught all of these features; seven new FAQ entries. Panel unchanged at 1.37.61.'),
+                    'food-panel release banner points at the 1.37.61 entry; the user guide (and therefore Aria the chatbot) was taught all of these features; seven new FAQ entries. Panel unchanged at 1.37.61. '
+                    'Rebuilt eighth time (2026-11-24): two print regressions fixed — the inline @media print rule that hid every direct child of body except #alrPrint (specificity above the theme.css print layer) made ALL report prints come out blank; the rule is now scoped to body.printing-absent-lunch (class is added by the absent-lunch print flow and removed afterprint), so every other report prints through its own preview/print-host layer again (report export print, aggregate report, delivered/printed delivery report, statistics/today orders via fm-print-host). '
+                    'The absent-lunch table now carries data-no-sort so the global list-sort widget no longer reorders its DOM rows (which dragged the rendered row numbers with them); row numbers are re-counted 1..N in view order by the module on every render/sort. Panel 1.37.62.'),
     'notes': ('پیشنیاز ۱٫۶۳٫۲؛ دارای سه مهاجرتِ idempotent است: 038-food-guest-actuals.sql (جدول food_guest_actuals)، '
               '039-liaison-manager-role-sync.sql (ارتقای مدیران واحدهای مستقل به نقش «مدیر») و 040-org-routing-departments.sql (نگاشت پایدار ردیف رسیدگی). پشتیبان و نصب آزمایشی الزامی. '
               'بازسازی دوم ۲۰۲۶-۱۱-۲۰ همان نسخهٔ ۱٫۶۳٫۳ است با اصلاحات چارت/لغو و گزارش یک‌بار به‌روزرسانی؛ SHA تازه است. '
               'روی سامانه‌هایی که ۱٫۶۳٫۳ را نصب کرده‌اند نصب مجدد همین بسته ترمیم فایل‌هاست و مهاجرت‌ها تکرار نمی‌شوند. '
-              'نسخهٔ پنل ۱٫۳۷٫۶۱ (پنل محتوا عوض کرد)؛ کش دارایی‌ها style.css=3.4.63 / app.js=3.4.30؛ پس از نصب Ctrl+F5 کنید. داده‌های تاریخی NULL مهمان هرگز بازنویسی نمی‌شوند. '
+              'نسخهٔ پنل ۱٫۳۷٫۶۲ (بازسازی هشتم: رفع چاپ گزارشها؛ پیش از آن ۱٫۳۷٫۶۱)؛ کش دارایی‌ها style.css=3.4.63 / app.js=3.4.30؛ پس از نصب Ctrl+F5 کنید. داده‌های تاریخی NULL مهمان هرگز بازنویسی نمی‌شوند. '
               'گزارش به‌روزرسانی این نسخه فقط یک‌بار روی اولین ورود نمایش داده می‌شود؛ «راهنما ← تغییرات نسخه‌ها» مرجع همیشگی است. '
               'بازسازی سوم ۲۰۲۶-۱۱-۲۰: مدیران چارت غیربازبین با مجوز food.menu پنل مهمان را فقط-خواندنی می‌بینند؛ /api/absent با meal_type غیرناهار، ۴۰۰ می‌دهد. '
               'بازسازی چهارم ۲۰۲۶-۱۱-۲۰: اعداد در تمام سامانه فارسی‌اند (نمایش + تایپ حتی با کیبورد لاتین + خروجی Excel)؛ ذخیره canonical لاتین؛ IP/ایمیل/هاست لاتین؛ پنل ۱٫۳۷٫۵۹. '
               'بازسازی پنجم ۲۰۲۶-۱۱-۲۰: فقط چینش رابط (کارکنان پنل غذا، دکمه‌های گزارش‌ها، ریست شناسنامه‌ها فقط تب عمومی)؛ نسخهٔ پنل ۱٫۳۷٫۶۰. '
               'بازسازی ششم ۲۰۲۶-۱۱-۲۰: تکمیل چینش گزارش‌گیری (یک خط فیلدها + دکمه‌ها کنار «نمایش گزارش») و آمار سفارشها (pillها تک‌خطی با نام کوتاه)؛ نسخهٔ پنل ۱٫۳۷٫۶۱. '
-              'بازسازی هفتم ۲۰۲۶-۱۱-۲۰: گزارش کامل ۱٫۶۳٫۳ (همهٔ موارد بالا)، پاپ‌آپ یک‌بار با کلید rev-scoped (روی اولین ورود پس از نصب همین بسته باز می‌شود)، ورودی تازهٔ بنر پنل (۱٫۳۷٫۶۱) و آموزش کامل چت‌بات از راهنما + واژه‌های محاوره‌ای تازه. پنل باز هم ۱٫۳۷٫۶۱.'),
+              'بازسازی هفتم ۲۰۲۶-۱۱-۲۰: گزارش کامل ۱٫۶۳٫۳ (همهٔ موارد بالا)، پاپ‌آپ یک‌بار با کلید rev-scoped (روی اولین ورود پس از نصب همین بسته باز می‌شود)، ورودی تازهٔ بنر پنل (۱٫۳۷٫۶۱) و آموزش کامل چت‌بات از راهنما + واژه‌های محاوره‌ای تازه. پنل باز هم ۱٫۳۷٫۶۱. '
+              'بازسازی هشتم ۲۰۲۶-۱۱-۲۴: رفع رگرسیون چاپ — چاپ همهٔ گزارشها دیگر صفحهٔ سفید نمیدهد (قانون چاپ اینلاین به «body.printing-absent-lunch» محدود شد؛ چاپ غایبین مثل قبل فقط لیست را چاپ میکند). جدول «غایبین ناهار» داده-no-sort دارد تا مرتبساز عمومی ردیفها را جابهجا نکند و شماره ردیف پس از سورت به‌ترتیب نمای فعلی ۱..N بازشماری میشود. نسخهٔ پنل ۱٫۳۷٫۶۲.'),
 }
 (PKG / 'manifest.json').write_text(json.dumps(manifest, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
 
