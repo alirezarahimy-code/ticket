@@ -60,7 +60,7 @@ render_header('سامانه اطلاعات مکانی آفلاین ایران', 
       </div>
     </div>
     <div class="offline-map-canvas-inner">
-      <div id="offline-map-map" data-map-ready="<?= $mapReady ? '1' : '0' ?>" data-can-edit="<?= $canManageFeatures ? '1' : '0' ?>" aria-label="نقشهٔ تعاملی آفلاین ایران">
+      <div id="offline-map-map" data-map-ready="<?= $mapReady ? '1' : '0' ?>" data-can-edit="<?= $canManageFeatures ? '1' : '0' ?>" data-can-admin="<?= user_can($user, 'map.admin') ? '1' : '0' ?>" data-user-id="<?= (int) $user['id'] ?>" aria-label="نقشهٔ تعاملی آفلاین ایران">
       <?php if (!$mapReady): ?><div class="offline-map-empty"><span class="offline-map-globe">◎</span><strong>محیط نقشهٔ ایران</strong><span>پس از نصب بستهٔ داده فعال می‌شود.</span></div><?php endif; ?>
       </div>
       <div class="offline-map-compass" aria-hidden="true">N</div>
