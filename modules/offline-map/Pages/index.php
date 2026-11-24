@@ -17,6 +17,8 @@ $styleText = is_file($mapStylePath) ? (string) file_get_contents($mapStylePath) 
 $manifestReady = is_array($manifest)
     && ($manifest['tiles']['file'] ?? '') === 'iran.pmtiles'
     && ($manifest['tiles']['format'] ?? '') === 'PMTiles'
+    && (int) ($manifest['generator']['maxzoom'] ?? 0) >= 17
+    && !empty($manifest['generator']['schema_sha256'])
     && (int) ($manifest['tiles']['bytes'] ?? 0) === (is_file($mapDataPath) ? (int) filesize($mapDataPath) : 0);
 $pmtilesUrl = is_array($styleJson) ? (string) ($styleJson['sources']['iran']['url'] ?? '') : '';
 $styleHasPmtiles = strpos($pmtilesUrl, 'pmtiles://') === 0 && strpos($pmtilesUrl, 'iran.pmtiles') !== false;
