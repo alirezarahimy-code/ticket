@@ -57,7 +57,8 @@ def test_offline_map_supports_draw_edit_measure_and_export_controls() -> None:
     for tool in ('data-tool="Point"', 'data-tool="LineString"', 'data-tool="Polygon"', 'data-tool="measure"'):
         assert tool in page
     assert "offline-map-export" in page and "offline-map-print" in page
-    assert "distanceKm" in script and "offline-map-draft" in script
+    assert "distanceKm" in script and "areaKm2" in script and "offline-map-draft" in script
+    assert "ویرایش هندسه" in script
     assert "action', 'save'" in script
     assert "'LineString', 'Polygon'" in api
 
@@ -84,7 +85,9 @@ def test_offline_map_private_attachments_have_migration_and_access_guard() -> No
     assert "move_uploaded_file" in api and "finfo" in api
     assert "Require all denied" in guard
     assert "offline_map_feature_attachments" in schema
+    assert "offline_map_feature_attachments" in read("install-empty-db.sql")
     assert "039-offline-map-attachments.sql" in schema
+    assert "039-offline-map-attachments.sql" in read("install-empty-db.sql")
 
 
 def test_offline_map_has_local_library_and_glyph_installers() -> None:
