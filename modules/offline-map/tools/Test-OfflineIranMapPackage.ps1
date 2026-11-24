@@ -21,6 +21,9 @@ Require-File $stylePath 'MapLibre style'
 Require-File (Join-Path $VendorDir 'maplibre-gl.js') 'MapLibre GL JS'
 Require-File (Join-Path $VendorDir 'maplibre-gl.css') 'MapLibre CSS'
 Require-File (Join-Path $VendorDir 'pmtiles.js') 'PMTiles protocol library'
+$glyphDir = Join-Path $DataDir 'fonts\Noto Sans Arabic Regular'
+Require-File (Join-Path $glyphDir '0-255.pbf') 'Latin glyph range'
+Require-File (Join-Path $glyphDir '1536-1791.pbf') 'Arabic glyph range'
 
 if (Test-Path -LiteralPath $tilePath -PathType Leaf) {
     $stream = [IO.File]::OpenRead($tilePath)
