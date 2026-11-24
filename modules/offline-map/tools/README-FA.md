@@ -102,3 +102,13 @@ python .\modules\offline-map\tools\build-search-index.py --pbf .\modules\offline
 ```
 
 صفحهٔ نقشه فقط overlayهایی را بارگذاری می‌کند که فایل آن‌ها و اطلاعات منبع/مجوز/تاریخ/اندازه در manifest وجود داشته باشد. اعتبارسنجی checksum نیز با همین اسکریپت انجام می‌شود.
+
+## اجرای یکپارچهٔ آماده‌سازی
+
+پس از قرار دادن PBF، فایل اجرایی Planetiler و ZIP قلم فارسی، همهٔ مراحل آماده‌سازی را با یک فرمان اجرا کنید:
+
+```powershell
+.\modules\offline-map\tools\Prepare-OfflineIranMap.ps1 -GlyphArchive "C:\GIS\noto-arabic-glyphs.zip"
+```
+
+اگر کتابخانه‌ها از قبل در `vendor/` نصب شده‌اند، گزینهٔ `-SkipLibraryInstall` را بدهید. این فرمان PMTiles، شاخص جست‌وجو و کنترل بسته را اجرا می‌کند. فایل‌های مرز رسمی و حمل‌ونقل اختیاری هستند و نبود آن‌ها با عنوان «نصب نشده» باقی می‌ماند.
