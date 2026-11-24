@@ -45,7 +45,6 @@ $seeded = static function (string $schema, string $name): bool {
 
 /* ── ۱) مهاجرت‌هایی که اثرشان در اسکیما هست باید ثبت شده باشند ────────── */
 $mustSeed = [
-    '033-logging-legacy-context-collation.sql' => 'backfill داده؛ روی نصب تازه کاری ندارد',
     '034-logging-escalation.sql'              => 'ستون‌های escalation_* در اسکیما هست',
     '036-food-meal-leftover-disposition.sql'  => 'ستون‌های leftover_* در اسکیما هست',
     '037-food-auto-receipts-delivered.sql'    => 'backfill تحویل؛ روی نصب تازه کاری ندارد',
