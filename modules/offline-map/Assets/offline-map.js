@@ -20,7 +20,8 @@
   }
   function csrfToken() {
     var node = document.querySelector('meta[name="csrf-token"]');
-    return node ? node.content : (window.ITSM_CSRF || '');
+    var hidden = document.querySelector('#offline-map-feature-form [name="csrf"]');
+    return node ? node.content : (hidden ? hidden.value : (window.ITSM_CSRF || ''));
   }
   function post(data) {
     data.set('csrf', csrfToken());
@@ -54,6 +55,18 @@
     }
     state.map.getSource('offline-map-draft').setData({ type: 'FeatureCollection', features: geometry ? [{ type: 'Feature', geometry: geometry, properties: {} }] : [] });
   }
+  function loadAttachments(featureId) {
+    var box = document.getElementById('offline-map-attachments');
+    if (!box) return;
+    box.replaceChildren();
+    if (!featureId) return;
+    request(api + '&kind=attachments&feature_id=' + encodeURIComponent(featureId)).then(function (body) {
+      (body.attachments || []).forEach(function (item) {
+        var link = document.createElement('a'); link.href = item.download_url; link.textContent = item.original_name + ' (' + Math.ceil(item.size_bytes / 1024) + ' KB)';
+        link.target = '_blank'; link.rel = 'noopener'; box.appendChild(link);
+      });
+    }).catch(function (e) { box.textContent = e.message; });
+  }
   function openFeatureDialog(geometry, existing) {
     if (!dialog || !form) return;
     state.geometry = geometry;
@@ -67,6 +80,7 @@
     form.elements.phone.value = existing && existing.properties ? (existing.properties.phone || '') : '';
     document.getElementById('offline-map-dialog-title').textContent = state.editId ? 'ویرایش عارضه' : 'ثبت عارضهٔ جدید';
     if (formFeedback) formFeedback.textContent = '';
+    loadAttachments(state.editId);
     if (typeof dialog.showModal === 'function') dialog.showModal();
     else dialog.setAttribute('open', 'open');
   }
@@ -225,6 +239,14 @@
     data.set('properties', JSON.stringify({ category: form.elements.category.value, address: form.elements.address.value, phone: form.elements.phone.value }));
     if (formFeedback) formFeedback.textContent = 'در حال ذخیره…';
     post(data).then(function (body) {
+      var featureId = Number(body.id || state.editId);
+      var filesInput = form.elements.namedItem('files[]');
+      var files = filesInput && filesInput.files ? Array.prototype.slice.call(filesInput.files) : [];
+      if (!files.length) return body;
+      var upload = new FormData(); upload.set('action', 'attachment'); upload.set('feature_id', String(featureId));
+      files.forEach(function (file) { upload.append('files[]', file); });
+      return post(upload).then(function () { return body; });
+    }).then(function (body) {
       dialog.close(); state.geometry = null; state.editId = 0; setTool('pan');
       return loadFeatures(false).then(function () { status(body.message || 'ذخیره شد.'); });
     }).catch(function (e) { if (formFeedback) formFeedback.textContent = e.message; });
@@ -243,6 +265,8 @@
   document.querySelectorAll('[data-layer-toggle]').forEach(function (input) {
     input.addEventListener('change', function () {
       var layer = input.getAttribute('data-layer-toggle');
+      var layerMap = { roads: ['roads-casing','roads-main','road-labels'], places: ['place-labels','poi-circles','poi-labels'], boundaries: ['boundary-admin'], transport: ['transport-rail'] };
+      if (state.map && layerMap[layer]) layerMap[layer].forEach(function (id) { if (state.map.getLayer(id)) state.map.setLayoutProperty(id, 'visibility', input.checked ? 'visible' : 'none'); });
       if (layer === 'user' && state.map) {
         ['offline-map-user-points', 'offline-map-user-lines', 'offline-map-user-polygons'].forEach(function (id) {
           if (state.map.getLayer(id)) state.map.setLayoutProperty(id, 'visibility', input.checked ? 'visible' : 'none');
@@ -276,5 +300,16 @@
     }).catch(function (e) { results.textContent = e.message; });
   });
 
+  var exportButton = document.getElementById('offline-map-export');
+  if (exportButton) exportButton.addEventListener('click', function () {
+    var collection = { type: 'FeatureCollection', features: state.features.map(function (item) {
+      return { type: 'Feature', id: item.id, geometry: item.geometry, properties: { title: item.title, description: item.description, feature_type: item.feature_type, properties: item.properties || {} } };
+    }) };
+    var blob = new Blob([JSON.stringify(collection, null, 2)], { type: 'application/geo+json;charset=utf-8' });
+    var url = URL.createObjectURL(blob); var link = document.createElement('a'); link.href = url; link.download = 'offline-map-features.geojson';
+    document.body.appendChild(link); link.click(); link.remove(); URL.revokeObjectURL(url);
+  });
+  var printButton = document.getElementById('offline-map-print');
+  if (printButton) printButton.addEventListener('click', function () { window.print(); });
   initMap();
 })();
