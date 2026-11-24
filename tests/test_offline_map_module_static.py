@@ -67,8 +67,8 @@ def test_offline_map_search_and_overlays_are_local() -> None:
     script = read("modules/offline-map/Assets/offline-map.js")
     page = read("modules/offline-map/Pages/index.php")
     builder = read("modules/offline-map/tools/build-search-index.py")
-    assert "search.sqlite" in api and "kind === 'places'" in api
-    assert "build-search-index.py" in builder
+    assert "search.sqlite" in api and "$kind === 'places'" in api
+    assert "osmium.SimpleHandler" in builder
     assert "official-boundaries.geojson" in script
     assert "municipal-districts.geojson" in script
     assert "transit.geojson" in script
