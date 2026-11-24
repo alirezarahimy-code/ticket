@@ -96,6 +96,27 @@ final class OfflineMapRepository
         return $stmt->rowCount() > 0;
     }
 
+    public function addAttachment(int $featureId, string $originalName, string $storedName, string $mimeType, int $size, int $userId): int
+    {
+        $stmt = $this->pdo->prepare('INSERT INTO offline_map_feature_attachments (feature_id,original_name,stored_name,mime_type,size_bytes,uploaded_by) VALUES (?,?,?,?,?,?)');
+        $stmt->execute([$featureId, $originalName, $storedName, $mimeType, $size, $userId]);
+        return (int) $this->pdo->lastInsertId();
+    }
+
+    public function attachments(int $featureId): array
+    {
+        $stmt = $this->pdo->prepare('SELECT id,feature_id,original_name,mime_type,size_bytes,uploaded_by,created_at FROM offline_map_feature_attachments WHERE feature_id=? ORDER BY created_at DESC');
+        $stmt->execute([$featureId]);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
+    }
+
+    public function attachment(int $attachmentId): ?array
+    {
+        $stmt = $this->pdo->prepare('SELECT a.*, f.created_by AS feature_owner FROM offline_map_feature_attachments a JOIN offline_map_features f ON f.id=a.feature_id WHERE a.id=?');
+        $stmt->execute([$attachmentId]);
+        return $stmt->fetch(PDO::FETCH_ASSOC) ?: null;
+    }
+
     public function delete(int $id, int $userId, bool $canAdmin): bool
     {
         $sql = 'DELETE FROM offline_map_features WHERE id = ?' . ($canAdmin ? '' : ' AND created_by = ?');
