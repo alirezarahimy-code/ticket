@@ -1,0 +1,29 @@
+{
+  "schema_version": 1,
+  "datasets": {
+    "official_boundaries": {
+      "file": "official-boundaries.geojson",
+      "source": "",
+      "source_url": "",
+      "license": "",
+      "updated_at": "",
+      "sha256": ""
+    },
+    "municipal_districts": {
+      "file": "municipal-districts.geojson",
+      "source": "",
+      "source_url": "",
+      "license": "",
+      "updated_at": "",
+      "sha256": ""
+    },
+    "transit": {
+      "file": "transit.geojson",
+      "source": "",
+      "source_url": "",
+      "license": "",
+      "updated_at": "",
+      "sha256": ""
+    }
+  }
+}
