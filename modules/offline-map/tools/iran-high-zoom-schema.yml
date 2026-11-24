@@ -204,6 +204,46 @@ layers:
           - { key: name, tag_value: name }
           - { key: name_fa, tag_value: name:fa }
 
+  - id: poi_areas
+    buffer: 8
+    features:
+      - source: osm
+        geometry: polygon
+        min_zoom: 14
+        include_when:
+          amenity: "%"
+        attributes:
+          - { key: class, tag_value: amenity }
+          - { key: name, tag_value: name }
+          - { key: name_fa, tag_value: name:fa }
+      - source: osm
+        geometry: polygon
+        min_zoom: 15
+        include_when:
+          shop: "%"
+        attributes:
+          - { key: class, tag_value: shop }
+          - { key: name, tag_value: name }
+          - { key: name_fa, tag_value: name:fa }
+      - source: osm
+        geometry: polygon
+        min_zoom: 14
+        include_when:
+          healthcare: "%"
+        attributes:
+          - { key: class, tag_value: healthcare }
+          - { key: name, tag_value: name }
+          - { key: name_fa, tag_value: name:fa }
+      - source: osm
+        geometry: polygon
+        min_zoom: 14
+        include_when:
+          leisure: "%"
+        attributes:
+          - { key: class, tag_value: leisure }
+          - { key: name, tag_value: name }
+          - { key: name_fa, tag_value: name:fa }
+
   - id: places
     buffer: 8
     features:
