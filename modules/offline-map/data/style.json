@@ -474,6 +474,37 @@
         "circle-stroke-color": "#fff",
         "circle-stroke-width": 1.5
       }
+    },
+    {
+      "id": "rail-stations",
+      "type": "circle",
+      "source": "iran",
+      "source-layer": "railways",
+      "filter": [
+        "==",
+        [
+          "geometry-type"
+        ],
+        "Point"
+      ],
+      "paint": {
+        "circle-color": "#8a6b9d",
+        "circle-radius": [
+          "interpolate",
+          [
+            "linear"
+          ],
+          [
+            "zoom"
+          ],
+          10,
+          2,
+          17,
+          6
+        ],
+        "circle-stroke-color": "#fff",
+        "circle-stroke-width": 1.5
+      }
     }
   ]
 }
