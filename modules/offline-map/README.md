@@ -10,7 +10,7 @@
 - اطلاعات توصیفی، دسته‌بندی، نشانی و تلفن برای عوارض.
 - پیوست خصوصی PDF و تصویر PNG/JPEG/WEBP با سقف ۱۰ مگابایت برای هر فایل.
 - فهرست عوارض، فیلتر «موارد من»، پرش دوربین به عارضه و پنجرهٔ اطلاعات.
-- اندازه‌گیری طول مسیر، بازگشت رأس و لغو ترسیم.
+- اندازه‌گیری طول و مساحت، بازگشت رأس، لغو ترسیم و بازترسیم هندسهٔ عوارض.
 - جست‌وجوی محلی مکان‌ها، راه‌های نام‌دار و POIهای موجود در شاخص SQLite؛ نرمال‌سازی حروف فارسی/عربی و ارقام.
 - لایه‌های نقشهٔ پایه، معابر، مکان‌ها، مرزهای اداری OSM، حمل‌ونقل، مرزهای رسمی و مناطق شهرداری.
 - کنترل شفافیت لایهٔ مناطق شهرداری، خروجی GeoJSON و چاپ نقشه.
@@ -30,10 +30,12 @@
 
 راهنمای کامل در `tools/README-FA.md` است. فایل خام PBF در `data/source/` و خروجی‌های حجیم خارج از Git نگهداری می‌شوند. ابزارهای موجود:
 
-- `tools/Build-OfflineIranMap.ps1`: تولید PMTiles از PBF با Planetiler.
+- `tools/Build-OfflineIranMap.ps1`: تولید PMTiles با طرح سفارشی Planetiler و لایه‌های جزئی تا maxzoom=17.
 - `tools/build-search-index.py`: ساخت جست‌وجوی فارسی از PBF با pyosmium.
 - `tools/Install-OfflineMapLibraries.ps1`: نصب محلی نسخه‌های قفل‌شده MapLibre و PMTiles.
 - `tools/Install-OfflineMapGlyphs.ps1`: نصب بستهٔ glyph فارسی.
+- `tools/Prepare-OfflineIranMap.ps1`: اجرای یکپارچهٔ تولید نقشه، جست‌وجو و اعتبارسنجی.
+- `tools/Validate-OfflineMapOverlays.ps1`: کنترل منبع، مجوز، اندازه و checksum لایه‌های رسمی.
 - `tools/Test-OfflineIranMapPackage.ps1`: کنترل سلامت بسته و وابستگی‌ها.
 
 ## مرزهای رسمی و پوشش
