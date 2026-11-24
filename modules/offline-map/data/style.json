@@ -360,6 +360,27 @@
       }
     },
     {
+      "id": "poi-area-fill",
+      "type": "fill",
+      "source": "iran",
+      "source-layer": "poi_areas",
+      "paint": {
+        "fill-color": "#d8b7a7",
+        "fill-opacity": 0.28,
+        "fill-outline-color": "#b98270"
+      }
+    },
+    {
+      "id": "poi-area-line",
+      "type": "line",
+      "source": "iran",
+      "source-layer": "poi_areas",
+      "paint": {
+        "line-color": "#b98270",
+        "line-width": 1
+      }
+    },
+    {
       "id": "poi-circles",
       "type": "circle",
       "source": "iran",
