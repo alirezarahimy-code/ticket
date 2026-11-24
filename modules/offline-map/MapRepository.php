@@ -93,7 +93,11 @@ final class OfflineMapRepository
         ];
         if (!$canAdmin) $values[] = $userId;
         $stmt->execute($values);
-        return $stmt->rowCount() > 0;
+        if ($stmt->rowCount() > 0) return true;
+        $checkSql = 'SELECT 1 FROM offline_map_features WHERE id=?' . ($canAdmin ? '' : ' AND created_by=?') . ' LIMIT 1';
+        $check = $this->pdo->prepare($checkSql);
+        $check->execute($canAdmin ? [$id] : [$id, $userId]);
+        return (bool) $check->fetchColumn();
     }
 
     public function addAttachment(int $featureId, string $originalName, string $storedName, string $mimeType, int $size, int $userId): int
