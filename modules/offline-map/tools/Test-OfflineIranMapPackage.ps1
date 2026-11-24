@@ -28,7 +28,6 @@ Require-File (Join-Path $VendorDir 'pmtiles.js') 'PMTiles protocol library'
 $glyphDir = Join-Path $DataDir 'fonts\Noto Sans Arabic Regular'
 Require-File (Join-Path $glyphDir '0-255.pbf') 'Latin glyph range'
 Require-File (Join-Path $glyphDir '1536-1791.pbf') 'Arabic glyph range'
-Require-File (Join-Path $glyphDir '8192-8447.pbf') 'Zero-width joiner glyph range'
 
 if (Test-Path -LiteralPath $tilePath -PathType Leaf) {
     $stream = [IO.File]::OpenRead($tilePath)
