@@ -30,9 +30,22 @@ $glyphStackPath = $dataDir . '/fonts/Noto Sans Arabic Regular';
 $glyphsReady = is_file($glyphStackPath . '/0-255.pbf') && is_file($glyphStackPath . '/1536-1791.pbf');
 $mapReady = is_file($mapDataPath) && $manifestReady && $styleIsOffline && $glyphsReady && is_file($mapLibraryPath) && is_file($pmtilesLibraryPath) && is_file($mapCssPath);
 $searchReady = is_file($dataDir . '/search.sqlite');
-$officialBoundariesReady = is_file($dataDir . '/overlays/official-boundaries.geojson');
-$municipalDistrictsReady = is_file($dataDir . '/overlays/municipal-districts.geojson');
-$transitOverlayReady = is_file($dataDir . '/overlays/transit.geojson');
+$overlayDir = $dataDir . '/overlays';
+$overlayManifestPath = $overlayDir . '/manifest.json';
+$overlayManifest = is_file($overlayManifestPath) ? json_decode((string) file_get_contents($overlayManifestPath), true) : null;
+$overlayReady = static function (string $key, string $file) use ($overlayDir, $overlayManifest): bool {
+    $path = $overlayDir . '/' . $file;
+    $entry = is_array($overlayManifest) ? ($overlayManifest['datasets'][$key] ?? null) : null;
+    return is_file($path) && is_array($entry)
+        && ($entry['file'] ?? '') === $file
+        && trim((string) ($entry['source'] ?? '')) !== ''
+        && trim((string) ($entry['license'] ?? '')) !== ''
+        && trim((string) ($entry['updated_at'] ?? '')) !== ''
+        && (int) ($entry['bytes'] ?? 0) === (int) filesize($path);
+};
+$officialBoundariesReady = $overlayReady('official_boundaries', 'official-boundaries.geojson');
+$municipalDistrictsReady = $overlayReady('municipal_districts', 'municipal-districts.geojson');
+$transitOverlayReady = $overlayReady('transit', 'transit.geojson');
 $features = $schemaReady ? $mapRepo->search(trim((string) ($_GET['q'] ?? '')), 1000) : [];
 render_header('سامانه اطلاعات مکانی آفلاین ایران', $user);
 ?>
