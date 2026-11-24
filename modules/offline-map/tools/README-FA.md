@@ -92,3 +92,13 @@ python .\modules\offline-map\tools\build-search-index.py --pbf .\modules\offline
 ```
 
 کنترل موفق این اسکریپت به معنی کامل بودن پوشش جغرافیایی نیست؛ فقط سلامت فایل‌ها، checksum، ساختار استایل، عدم ارجاع اینترنتی و وجود قلم‌ها/کتابخانه‌ها را بررسی می‌کند.
+
+## اعتبارسنجی لایه‌های رسمی
+
+پس از قرار دادن GeoJSONها و تکمیل منبع، مجوز، تاریخ دریافت، اندازه و SHA-256 در `data/overlays/manifest.json` اجرا کنید:
+
+```powershell
+.\modules\offline-map\tools\Validate-OfflineMapOverlays.ps1
+```
+
+صفحهٔ نقشه فقط overlayهایی را بارگذاری می‌کند که فایل آن‌ها و اطلاعات منبع/مجوز/تاریخ/اندازه در manifest وجود داشته باشد. اعتبارسنجی checksum نیز با همین اسکریپت انجام می‌شود.
