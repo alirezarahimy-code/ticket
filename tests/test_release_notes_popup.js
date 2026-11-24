@@ -74,7 +74,7 @@ check('سقف نمایش در HTML یک است', /data-max-views="1"/.test(html)
 check('کلید نمایش شامل rev بسته است', /data-release-seen-scope="1\.63\.3@([^"]+)"/.test(html));
 
 /* ── شبیه‌سازی DOM + localStorage ─────────────────────────────────────── */
-const SEEN_SCOPE = (html.match(/data-release-seen-scope="([^"]+)"/) || [, '1.63.3@20261124-r8'])[1];
+const SEEN_SCOPE = (html.match(/data-release-seen-scope="([^"]+)"/) || [, '1.63.3@20261124-r9'])[1];
 
 function makeEnv({ storageBlocked = false, presetSeen = null, presetDismissed = false } = {}) {
   const store = new Map();

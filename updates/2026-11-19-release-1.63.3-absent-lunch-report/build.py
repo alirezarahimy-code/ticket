@@ -151,6 +151,8 @@ EXTRA_FILES = [
     'modules/request-center/Pages/detail.php',
     'modules/request-center/RequestCenterRepository.php',
     'modules/request-center/lib/functions.php',
+    # بازسازی نهم (۲۰۲۶-۱۱-۲۴) — دارایی اصلاح‌شدهٔ شنوندهٔ ارسال فرم (باگ تصمیم مسئول لغو):
+    'modules/request-center/Assets/request-center.js',
     # بازسازی دوم (۲۰۲۶-۱۱-۲۰) — رفع دو باگ رابط + گزارش یک‌بار به‌روزرسانی:
     'assets/app.js',
     'assets/style.css',
@@ -215,7 +217,7 @@ manifest = {
     'version': VERSION,
     'requires_version': REQUIRES,
     'date': DATE,
-    'title': 'تب «غایبین ناهار» + اصلاحات نهایی (بند ۱۷) + چارت/لغو/گزارش یک‌بار (بازسازی دوم) + ترمیم C10 و ۴۰۰ وعده (بازسازی سوم) + اعداد همیشه فارسی (بازسازی چهارم) + اصلاح چینش دکمه‌ها (بازسازی‌های پنجم و ششم) + گزارش کامل ۱٫۶۳٫۳ و پاپ‌آپ rev-scoped و یادداشت پنل (بازسازی هفتم) + رفع سفیدی چاپ همهٔ گزارش‌ها و شماره ردیف غایبین پس از سورت (بازسازی هشتم)',
+    'title': 'تب «غایبین ناهار» + اصلاحات نهایی (بند ۱۷) + چارت/لغو/گزارش یک‌بار (بازسازی دوم) + ترمیم C10 و ۴۰۰ وعده (بازسازی سوم) + اعداد همیشه فارسی (بازسازی چهارم) + اصلاح چینش دکمه‌ها (بازسازی‌های پنجم و ششم) + گزارش کامل ۱٫۶۳٫۳ و پاپ‌آپ rev-scoped و یادداشت پنل (بازسازی هفتم) + رفع سفیدی چاپ همهٔ گزارش‌ها و شماره ردیف غایبین پس از سورت (بازسازی هشتم) + رفع خطای «تصمیم دربارهٔ درخواست لغو معتبر نیست» برای مسئول رسیدگی (بازسازی نهم)',
     'panel_version': PANEL_VERSION,
     'migrations': MIGRATIONS,
     'files': FILES_LIST,
@@ -241,7 +243,9 @@ manifest = {
                     'universal Persian digits, layout refresh, panel 1.37.61); the one-time popup now uses a package-scoped rev key so rebuilds of the same version show it once again after install; '
                     'food-panel release banner points at the 1.37.61 entry; the user guide (and therefore Aria the chatbot) was taught all of these features; seven new FAQ entries. Panel unchanged at 1.37.61. '
                     'Rebuilt eighth time (2026-11-24): two print regressions fixed — the inline @media print rule that hid every direct child of body except #alrPrint (specificity above the theme.css print layer) made ALL report prints come out blank; the rule is now scoped to body.printing-absent-lunch (class is added by the absent-lunch print flow and removed afterprint), so every other report prints through its own preview/print-host layer again (report export print, aggregate report, delivered/printed delivery report, statistics/today orders via fm-print-host). '
-                    'The absent-lunch table now carries data-no-sort so the global list-sort widget no longer reorders its DOM rows (which dragged the rendered row numbers with them); row numbers are re-counted 1..N in view order by the module on every render/sort. Panel 1.37.62.'),
+                    'The absent-lunch table now carries data-no-sort so the global list-sort widget no longer reorders its DOM rows (which dragged the rendered row numbers with them); row numbers are re-counted 1..N in view order by the module on every render/sort. Panel 1.37.62. '
+                    'Rebuilt ninth time (2026-11-24): the assignee cancellation-decision buttons in the request decision panel ("تأیید لغو" / "رد و ادامهٔ رسیدگی") no longer land on the flash "تصمیم دربارهٔ درخواست لغو معتبر نیست" — the Request Center submit listener now leaves the form fully untouched when a prior listener already canceled the submit with preventDefault (e.g. the confirmation dialog"s "انصراف"), copies the pressed button"s name/value (event.submitter, e.g. decision=approve) into a hidden input (data-rc-submit-carrier; stale carriers from the same form are removed first) instead of dropping it when disabling submit buttons afterward, and no longer disables named submit buttons at all in browsers without event.submitter; the listener is registered in the bubble phase (false). '
+                    'modules/request-center/Assets/request-center.js is now part of the package files list (it was missing before this rebuild). Panel stays 1.37.62; the release-notes popup rev is 20261124-r9.'),
     'notes': ('پیشنیاز ۱٫۶۳٫۲؛ دارای سه مهاجرتِ idempotent است: 038-food-guest-actuals.sql (جدول food_guest_actuals)، '
               '039-liaison-manager-role-sync.sql (ارتقای مدیران واحدهای مستقل به نقش «مدیر») و 040-org-routing-departments.sql (نگاشت پایدار ردیف رسیدگی). پشتیبان و نصب آزمایشی الزامی. '
               'بازسازی دوم ۲۰۲۶-۱۱-۲۰ همان نسخهٔ ۱٫۶۳٫۳ است با اصلاحات چارت/لغو و گزارش یک‌بار به‌روزرسانی؛ SHA تازه است. '
@@ -253,7 +257,9 @@ manifest = {
               'بازسازی پنجم ۲۰۲۶-۱۱-۲۰: فقط چینش رابط (کارکنان پنل غذا، دکمه‌های گزارش‌ها، ریست شناسنامه‌ها فقط تب عمومی)؛ نسخهٔ پنل ۱٫۳۷٫۶۰. '
               'بازسازی ششم ۲۰۲۶-۱۱-۲۰: تکمیل چینش گزارش‌گیری (یک خط فیلدها + دکمه‌ها کنار «نمایش گزارش») و آمار سفارشها (pillها تک‌خطی با نام کوتاه)؛ نسخهٔ پنل ۱٫۳۷٫۶۱. '
               'بازسازی هفتم ۲۰۲۶-۱۱-۲۰: گزارش کامل ۱٫۶۳٫۳ (همهٔ موارد بالا)، پاپ‌آپ یک‌بار با کلید rev-scoped (روی اولین ورود پس از نصب همین بسته باز می‌شود)، ورودی تازهٔ بنر پنل (۱٫۳۷٫۶۱) و آموزش کامل چت‌بات از راهنما + واژه‌های محاوره‌ای تازه. پنل باز هم ۱٫۳۷٫۶۱. '
-              'بازسازی هشتم ۲۰۲۶-۱۱-۲۴: رفع رگرسیون چاپ — چاپ همهٔ گزارشها دیگر صفحهٔ سفید نمیدهد (قانون چاپ اینلاین به «body.printing-absent-lunch» محدود شد؛ چاپ غایبین مثل قبل فقط لیست را چاپ میکند). جدول «غایبین ناهار» داده-no-sort دارد تا مرتبساز عمومی ردیفها را جابهجا نکند و شماره ردیف پس از سورت به‌ترتیب نمای فعلی ۱..N بازشماری میشود. نسخهٔ پنل ۱٫۳۷٫۶۲.'),
+              'بازسازی هشتم ۲۰۲۶-۱۱-۲۴: رفع رگرسیون چاپ — چاپ همهٔ گزارشها دیگر صفحهٔ سفید نمیدهد (قانون چاپ اینلاین به «body.printing-absent-lunch» محدود شد؛ چاپ غایبین مثل قبل فقط لیست را چاپ میکند). جدول «غایبین ناهار» داده-no-sort دارد تا مرتبساز عمومی ردیفها را جابهجا نکند و شماره ردیف پس از سورت به‌ترتیب نمای فعلی ۱..N بازشماری میشود. نسخهٔ پنل ۱٫۳۷٫۶۲. '
+              'بازسازی نهم ۲۰۲۶-۱۱-۲۴: رفع باگ «تصمیم مسئول دربارهٔ لغو» در مرکز درخواست‌ها — دکمه‌های «تأیید لغو» و «رد و ادامهٔ رسیدگی» دیگر با خطای «تصمیم دربارهٔ درخواست لغو معتبر نیست؛ دوباره تلاش کنید.» فلش قرمز نمی‌دهند؛ شنوندهٔ submit، مقدار همان دکمهٔ فشرده‌شده (event.submitter) را پیش از غیرفعال‌سازی در input[type=hidden] با data-rc-submit-carrier کپی می‌کند (حامل‌های قدیمی ابتدا پاک می‌شوند) و اگر ارسال قبلاً با preventDefault لغو شده باشد (انصراف در window.confirm) فرم کاملاً دست‌نخورده می‌ماند؛ در مرورگرهای بدون event.submitter دکمه‌های نام‌دار غیرفعال نمی‌شوند. '
+              'دارایی modules/request-center/Assets/request-center.js حالا داخل فهرست files بسته است (قبلاً نبود). کلید rev پاپ‌آپ 20261124-r9 است؛ هیچ تغییری در مهاجرت‌ها/اسکیما نیست؛ نصب روی ۱٫۶۳٫۳ = ترمیم فایل‌ها؛ نسخهٔ پنل همان ۱٫۳۷٫۶۲.'),
 }
 (PKG / 'manifest.json').write_text(json.dumps(manifest, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
 

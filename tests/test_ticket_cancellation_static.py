@@ -184,4 +184,16 @@ check("save_setting('login_announcements'" in index
 check("data-announcements" in app_js and "setInterval" in app_js,
       "the browser rotates login messages one full scroll pass at a time")
 
+rc_js = (ROOT / "modules/request-center/Assets/request-center.js").read_text(encoding="utf-8")
+carrier_index = rc_js.find("data-rc-submit-carrier")
+disable_index = rc_js.find("button.disabled = true")
+check("addEventListener('submit'" in rc_js
+      and "}, false);" in rc_js
+      and "event.defaultPrevented" in rc_js
+      and "data-rc-submit-carrier" in rc_js
+      and "carrier.name = button.name" in rc_js
+      and "carrier.value = button.value" in rc_js
+      and carrier_index != -1 and disable_index != -1 and carrier_index < disable_index,
+      "named submit buttons keep their name/value via a hidden carrier before being disabled, and a pre-canceled submit leaves the form untouched")
+
 print("Ticket workflow static checks passed.")

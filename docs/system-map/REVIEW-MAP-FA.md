@@ -9,11 +9,11 @@
 | سنجه | مقدار |
 |---|---|
 | فایل‌های کد تولیدی | 708 |
-| خطوط | 178,616 |
-| آدرس‌ها (بلوک) | 8,507 |
+| خطوط | 178,673 |
+| آدرس‌ها (بلوک) | 8,508 |
 | موضوع‌های قابل جست‌وجو | 41 صفحه + 102 مجوز + 86 جدول |
 | بازبینی‌شده | 0 آدرس (0.0%) — 0 خط (0.0%) |
-| باقی‌مانده | 8,507 آدرس |
+| باقی‌مانده | 8,508 آدرس |
 
 ## 🔎 فهرست موضوعی — از اینجا شروع کنید
 
@@ -32,7 +32,7 @@
 | **help** | `help` | — | `PAGE-033.52` <sub>index.php:952</sub><br>`CORE-022.05` <sub>lib/settings-effects.php:57</sub> | 5 |
 | **local accounts** | `local-accounts` | — | `PAGE-033.42` <sub>index.php:895</sub><br>`PAGE-036.03` <sub>local-accounts.php:25</sub><br>`PAGE-036.05` <sub>local-accounts.php:81</sub><br>`PAGE-036.06` <sub>local-accounts.php:138</sub> | 11 |
 | **logging dashboard** | `logging-dashboard` | — | `PAGE-033.57` <sub>index.php:1016</sub><br>`ASSET-018.01` <sub>assets/logging-dashboard.css:1</sub><br>`PAGE-037.04` <sub>logging-dashboard.php:114</sub><br>`PAGE-037.02` <sub>logging-dashboard.php:4</sub> | 11 |
-| **release notes** | `release-notes` | — | `PAGE-033.53` <sub>index.php:971</sub><br>`CORE-020.07` <sub>lib/release-notes.php:213</sub><br>`CORE-020.03` <sub>lib/release-notes.php:148</sub><br>`CORE-020.01` <sub>lib/release-notes.php:1</sub> | 12 |
+| **release notes** | `release-notes` | — | `PAGE-033.53` <sub>index.php:971</sub><br>`CORE-020.07` <sub>lib/release-notes.php:215</sub><br>`CORE-020.03` <sub>lib/release-notes.php:150</sub><br>`CORE-020.01` <sub>lib/release-notes.php:1</sub> | 12 |
 | **system health** | `system-health` | — | `PAGE-033.58` <sub>index.php:1020</sub><br>`PAGE-079.28` <sub>system-health.php:947</sub><br>`PAGE-079.03` <sub>system-health.php:25</sub><br>`PAGE-079.04` <sub>system-health.php:43</sub> | 36 |
 | **اعلان‌ها** | `notifications` | — | `PAGE-033.55` <sub>index.php:989</sub><br>`ACT-010.03` <sub>actions/notification-actions.php:23</sub><br>`PAGE-033.54` <sub>index.php:981</sub><br>`DB-004.30` <sub>install-empty-db.sql:445</sub> | 51 |
 | **به‌روزرسانی و پشتیبان‌گیری** | `backup` | `backup.view` | `PAGE-005.04` <sub>backup.php:32</sub><br>`PAGE-005.02` <sub>backup.php:6</sub><br>`PAGE-005.03` <sub>backup.php:12</sub><br>`PAGE-005.05` <sub>backup.php:78</sub> | 45 |
@@ -289,13 +289,13 @@
 
 | ناحیه | معنی | فایل | بلوک | خط |
 |---|---|---|---|---|
-| `TEST` | TEST | 260 | 2,084 | 29,948 |
+| `TEST` | TEST | 260 | 2,084 | 29,960 |
 | `TOOL` | TOOL | 153 | 1,464 | 40,275 |
 | `DB` | DB | 89 | 1,397 | 8,374 |
-| `PAGE` | صفحات (ریشه) | 84 | 1,652 | 59,326 |
+| `PAGE` | صفحات (ریشه) | 84 | 1,653 | 59,370 |
 | `ASSET` | دارایی‌های ایستا (assets/) | 34 | 858 | 15,327 |
 | `WEB` | پنل وب غذا (food-ticket-web/) | 30 | 511 | 10,360 |
-| `CORE` | موتور مشترک (lib/) | 24 | 394 | 9,904 |
+| `CORE` | موتور مشترک (lib/) | 24 | 394 | 9,905 |
 | `ACT` | کنش‌ها (actions/) | 17 | 99 | 3,130 |
 | `CRON` | زمان‌بندها (cron/) | 15 | 39 | 1,675 |
 | `API` | رابط برنامه (api/) | 2 | 9 | 297 |
@@ -309,7 +309,7 @@
 | `write_no_tx` | نوشتن بدون تراکنش | 965 |
 | `error_suppression` | سرکوب @ | 388 |
 | `dangerous_call` | فراخوانی خطرناک | 281 |
-| `sql_concat` | الحاق در SQL | 240 |
+| `sql_concat` | الحاق در SQL | 239 |
 | `raw_input` | ورودی خام | 221 |
 | `long` | >۱۲۰ خط | 180 |
 | `silent_catch` | catch بی‌صدا | 167 |
@@ -4028,13 +4028,13 @@
 </details>
 
 <details>
-<summary><b>TEST-232</b> — <code>tests/test_ticket_cancellation_static.py</code> (188 خط، 3 آدرس، بازبینی‌شده 0/3)</summary>
+<summary><b>TEST-232</b> — <code>tests/test_ticket_cancellation_static.py</code> (200 خط، 3 آدرس، بازبینی‌شده 0/3)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
 | `TEST-232.01` | 1–23 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
-| `TEST-232.02` | 24–158 | بلوک | `check` | 7 | ⬜ |
-| `TEST-232.03` | 159–188 | بلوک | `strip_php_comments` | 0 | ⬜ |
+| `TEST-232.02` | 24–158 | بلوک | `check` | 2 | ⬜ |
+| `TEST-232.03` | 159–200 | بلوک | `strip_php_comments` | 0 | ⬜ |
 
 </details>
 
@@ -10913,11 +10913,12 @@
 </details>
 
 <details>
-<summary><b>PAGE-049</b> — <code>modules/request-center/Assets/request-center.js</code> (47 خط، 1 آدرس، بازبینی‌شده 0/1)</summary>
+<summary><b>PAGE-049</b> — <code>modules/request-center/Assets/request-center.js</code> (91 خط، 2 آدرس، بازبینی‌شده 0/2)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `PAGE-049.01` | 1–47 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
+| `PAGE-049.01` | 1–27 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
+| `PAGE-049.02` | 28–91 | بلوک | `injectSubmitterCarrier` | 0 | ⬜ |
 
 </details>
 
@@ -14003,20 +14004,20 @@
 </details>
 
 <details>
-<summary><b>CORE-020</b> — <code>lib/release-notes.php</code> (416 خط، 10 آدرس، بازبینی‌شده 0/10)</summary>
+<summary><b>CORE-020</b> — <code>lib/release-notes.php</code> (417 خط، 10 آدرس، بازبینی‌شده 0/10)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
 | `CORE-020.01` | 1–30 | ناحیه | `بلوک رویه‌ای 1-30` | 0 | ⬜ |
-| `CORE-020.02` | 31–148 | تابع | `release_notes_all` | 0 | ⬜ |
-| `CORE-020.03` | 150–154 | تابع | `release_notes_version_key` | 1 | ⬜ |
-| `CORE-020.04` | 156–173 | تابع | `release_notes_current` | 0 | ⬜ |
-| `CORE-020.05` | 175–199 | تابع | `release_notes_history` | 0 | ⬜ |
-| `CORE-020.06` | 201–213 | تابع | `release_notes_render_items` | 0 | ⬜ |
-| `CORE-020.07` | 215–311 | تابع | `release_notes_dashboard_card` | 4 | ⬜ |
-| `CORE-020.08` | 313–366 | تابع | `release_notes_history_html` | 0 | ⬜ |
-| `CORE-020.09` | 368–384 | تابع | `release_notes_page_html` | 0 | ⬜ |
-| `CORE-020.10` | 386–415 | تابع | `release_notes_page_single` | 0 | ⬜ |
+| `CORE-020.02` | 31–149 | تابع | `release_notes_all` | 0 | ⬜ |
+| `CORE-020.03` | 151–155 | تابع | `release_notes_version_key` | 1 | ⬜ |
+| `CORE-020.04` | 157–174 | تابع | `release_notes_current` | 0 | ⬜ |
+| `CORE-020.05` | 176–200 | تابع | `release_notes_history` | 0 | ⬜ |
+| `CORE-020.06` | 202–214 | تابع | `release_notes_render_items` | 0 | ⬜ |
+| `CORE-020.07` | 216–312 | تابع | `release_notes_dashboard_card` | 4 | ⬜ |
+| `CORE-020.08` | 314–367 | تابع | `release_notes_history_html` | 0 | ⬜ |
+| `CORE-020.09` | 369–385 | تابع | `release_notes_page_html` | 0 | ⬜ |
+| `CORE-020.10` | 387–416 | تابع | `release_notes_page_single` | 0 | ⬜ |
 
 </details>
 
