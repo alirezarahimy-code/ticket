@@ -49,6 +49,7 @@ $mustSeed = [
     '034-logging-escalation.sql'              => 'ستون‌های escalation_* در اسکیما هست',
     '036-food-meal-leftover-disposition.sql'  => 'ستون‌های leftover_* در اسکیما هست',
     '037-food-auto-receipts-delivered.sql'    => 'backfill تحویل؛ روی نصب تازه کاری ندارد',
+    '038-offline-map-features.sql'             => 'جدول عوارض نقشه در اسکیما ساخته شده است',
 ];
 foreach ($mustSeed as $name => $why) {
     check("schema.sql مهاجرت {$name} را ثبت کرده ({$why})", $seeded($schema, $name));
@@ -58,6 +59,7 @@ foreach ($mustSeed as $name => $why) {
 $structural = [
     '034-logging-escalation.sql'             => ['escalation_count', 'escalation_label'],
     '036-food-meal-leftover-disposition.sql' => ['leftover_staff_quantity', 'leftover_waste_quantity', 'leftover_keep_quantity', 'leftover_other_quantity', 'leftover_other_note'],
+    '038-offline-map-features.sql' => ['offline_map_features', 'geometry_json', 'properties_json'],
 ];
 foreach ($structural as $migration => $columns) {
     foreach ($columns as $col) {
