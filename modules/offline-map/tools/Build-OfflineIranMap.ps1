@@ -4,7 +4,7 @@ param(
     [string]$SourcePbf = (Join-Path $PSScriptRoot '..\data\source\iran-latest.osm.pbf'),
     [string]$PlanetilerExe = (Join-Path $PSScriptRoot 'bin\planetiler.exe'),
     [string]$OutputPmtiles = (Join-Path $PSScriptRoot '..\data\iran.pmtiles'),
-    [string]$ManifestPath = (Join-Path $PSScriptRoot '..\data\build-manifest.json'),
+    [string]$ManifestPath = (Join-Path $PSScriptRoot '..\data\manifest.json'),
     [string[]]$AdditionalPlanetilerArgs = @(),
     [switch]$AllowLowDiskSpace
 )
