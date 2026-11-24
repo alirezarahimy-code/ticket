@@ -106,9 +106,9 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'GET' && (string) ($_GET['api'] ??
         try {
             $db = new PDO('sqlite:' . $searchPath, null, null, [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION, PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC]);
             $normalise = static function (string $value): string {
-                $value = strtr($value, ['ي'=>'ی','ك'=>'ک','٠'=>'0','١'=>'1','٢'=>'2','٣'=>'3','٤'=>'4','٥'=>'5','٦'=>'6','٧'=>'7','٨'=>'8','٩'=>'9','۰'=>'0','۱'=>'1','۲'=>'2','۳'=>'3','۴'=>'4','۵'=>'5','۶'=>'6','۷'=>'7','۸'=>'8','۹'=>'9']);
-                $value = preg_replace('/[\x{064B}-\x{065F}\x{0670}\x{0640}]/u', '', $value) ?? $value;
-                return trim(preg_replace('/\s+/u', ' ', $value) ?? $value);
+                $value = strtr($value, ['ي'=>'ی','ى'=>'ی','ك'=>'ک','ۀ'=>'ه','ة'=>'ه','ؤ'=>'و','إ'=>'ا','أ'=>'ا','ٱ'=>'ا','٠'=>'0','١'=>'1','٢'=>'2','٣'=>'3','٤'=>'4','٥'=>'5','٦'=>'6','٧'=>'7','٨'=>'8','٩'=>'9','۰'=>'0','۱'=>'1','۲'=>'2','۳'=>'3','۴'=>'4','۵'=>'5','۶'=>'6','۷'=>'7','۸'=>'8','۹'=>'9']);
+                $value = preg_replace('/[\\x{064B}-\\x{065F}\\x{0670}\\x{0640}]/u', '', $value) ?? $value;
+                return trim(preg_replace('/[\\s\\x{200c}\\x{200d}]+/u', ' ', $value) ?? $value);
             };
             $term = $normalise($q);
             $stmt = $db->prepare('SELECT id,name,name_fa,kind,category,lat,lon FROM places WHERE normalized LIKE :q ORDER BY rank DESC LIMIT 30');
