@@ -9,6 +9,9 @@ args:
   maxzoom: 17
   render_maxzoom: 17
   threads: 8
+  nodemap_type: sortedtable
+  nodemap_storage: ram
+  mmap_temp: true
   force: true
 
 sources:
