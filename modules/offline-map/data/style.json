@@ -505,6 +505,45 @@
         "circle-stroke-color": "#fff",
         "circle-stroke-width": 1.5
       }
+    },
+    {
+      "id": "transit-lines",
+      "type": "line",
+      "source": "iran",
+      "source-layer": "transit",
+      "filter": [
+        "in",
+        [
+          "geometry-type"
+        ],
+        [
+          "literal",
+          [
+            "LineString",
+            "MultiLineString"
+          ]
+        ]
+      ],
+      "paint": {
+        "line-color": "#7b4ca0",
+        "line-width": [
+          "interpolate",
+          [
+            "linear"
+          ],
+          [
+            "zoom"
+          ],
+          8,
+          1.2,
+          17,
+          4
+        ],
+        "line-dasharray": [
+          2,
+          1
+        ]
+      }
     }
   ]
 }
