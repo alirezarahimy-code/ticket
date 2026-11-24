@@ -107,6 +107,8 @@ render_header('سامانه اطلاعات مکانی آفلاین ایران', 
         <label><input type="checkbox" data-layer-toggle="base" checked disabled> نقشهٔ پایه</label>
         <label><input type="checkbox" data-layer-toggle="user" checked> عوارض سازمانی</label>
         <label><input type="checkbox" data-layer-toggle="roads" checked> معابر</label>
+        <label><input type="checkbox" data-layer-toggle="buildings" checked> ساختمان‌ها</label>
+        <label><input type="checkbox" data-layer-toggle="water" checked> آبراهه‌ها و پهنه‌های آبی</label>
         <label><input type="checkbox" data-layer-toggle="places" checked> مکان‌ها و خدمات</label>
         <label><input type="checkbox" data-layer-toggle="boundaries" checked> مرزهای اداری پایه</label>
         <label><input type="checkbox" data-layer-toggle="official-boundaries" checked> مرزهای رسمی</label>
