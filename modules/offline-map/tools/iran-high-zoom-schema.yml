@@ -1,0 +1,309 @@
+schema_name: Iran National Offline GIS
+schema_description: High zoom OpenStreetMap vector tiles for Iran, including streets, alleys, buildings, places, POIs, addresses, boundaries and transit.
+attribution: "© OpenStreetMap contributors"
+version: 1
+is_overlay: false
+
+args:
+  minzoom: 0
+  maxzoom: 17
+  render_maxzoom: 17
+  threads: 8
+  force: true
+
+sources:
+  osm:
+    type: osm
+
+layers:
+  - id: roads
+    buffer: 8
+    features:
+      - source: osm
+        geometry: line
+        min_zoom: 5
+        include_when:
+          highway: [motorway, motorway_link, trunk, trunk_link, primary, primary_link]
+        attributes: &road_attributes
+          - { key: class, tag_value: highway }
+          - { key: name, tag_value: name }
+          - { key: name_fa, tag_value: name:fa }
+          - { key: name_en, tag_value: name:en }
+          - { key: ref, tag_value: ref }
+          - { key: surface, tag_value: surface }
+          - { key: access, tag_value: access }
+          - { key: service, tag_value: service }
+          - { key: oneway, tag_value: oneway }
+          - { key: bridge, tag_value: bridge }
+          - { key: tunnel, tag_value: tunnel }
+          - { key: maxspeed, tag_value: maxspeed }
+      - source: osm
+        geometry: line
+        min_zoom: 8
+        include_when:
+          highway: [secondary, secondary_link, tertiary, tertiary_link, unclassified]
+        attributes: *road_attributes
+      - source: osm
+        geometry: line
+        min_zoom: 11
+        include_when:
+          highway: [residential, living_street, pedestrian, road]
+        attributes: *road_attributes
+      - source: osm
+        geometry: line
+        min_zoom: 13
+        include_when:
+          highway: [service, track, footway, path, steps, cycleway, bridleway, corridor]
+        attributes: *road_attributes
+
+  - id: buildings
+    buffer: 8
+    features:
+      - source: osm
+        geometry: polygon
+        min_zoom: 14
+        include_when:
+          building: "%"
+        attributes:
+          - { key: class, tag_value: building }
+          - { key: name, tag_value: name }
+          - { key: name_fa, tag_value: name:fa }
+          - { key: levels, tag_value: building:levels, type: integer }
+          - { key: height, tag_value: height, type: double }
+          - { key: house_number, tag_value: addr:housenumber }
+          - { key: street, tag_value: addr:street }
+          - { key: postcode, tag_value: addr:postcode }
+
+  - id: water
+    buffer: 8
+    features:
+      - source: osm
+        geometry: polygon
+        min_zoom: 7
+        include_when:
+          natural: [water, wetland, glacier]
+        attributes:
+          - { key: class, tag_value: natural }
+          - { key: water, tag_value: water }
+          - { key: name, tag_value: name }
+          - { key: name_fa, tag_value: name:fa }
+      - source: osm
+        geometry: polygon
+        min_zoom: 9
+        include_when:
+          landuse: [reservoir]
+        attributes:
+          - { key: class, tag_value: landuse }
+          - { key: name, tag_value: name }
+          - { key: name_fa, tag_value: name:fa }
+
+  - id: waterway
+    buffer: 8
+    features:
+      - source: osm
+        geometry: line
+        min_zoom: 8
+        include_when:
+          waterway: [river, canal, stream, drain, ditch, tidal_channel]
+        attributes:
+          - { key: class, tag_value: waterway }
+          - { key: name, tag_value: name }
+          - { key: name_fa, tag_value: name:fa }
+          - { key: intermittent, tag_value: intermittent }
+
+  - id: landuse
+    buffer: 8
+    features:
+      - source: osm
+        geometry: polygon
+        min_zoom: 7
+        include_when:
+          landuse: [residential, commercial, industrial, retail, forest, farmland, orchard, grass, meadow, cemetery, education, military, recreation_ground]
+        attributes:
+          - { key: class, tag_value: landuse }
+          - { key: name, tag_value: name }
+          - { key: name_fa, tag_value: name:fa }
+      - source: osm
+        geometry: polygon
+        min_zoom: 9
+        include_when:
+          leisure: [park, garden, playground, golf_course, sports_centre, nature_reserve]
+        attributes:
+          - { key: class, tag_value: leisure }
+          - { key: name, tag_value: name }
+          - { key: name_fa, tag_value: name:fa }
+      - source: osm
+        geometry: polygon
+        min_zoom: 9
+        include_when:
+          natural: [wood, scrub, grassland, heath, bare_rock, sand]
+        attributes:
+          - { key: class, tag_value: natural }
+          - { key: name, tag_value: name }
+          - { key: name_fa, tag_value: name:fa }
+
+  - id: poi
+    buffer: 8
+    features:
+      - source: osm
+        geometry: point
+        min_zoom: 13
+        include_when:
+          amenity: "%"
+        attributes:
+          - { key: class, tag_value: amenity }
+          - { key: name, tag_value: name }
+          - { key: name_fa, tag_value: name:fa }
+          - { key: name_en, tag_value: name:en }
+          - { key: operator, tag_value: operator }
+          - { key: phone, tag_value: phone }
+          - { key: website, tag_value: website }
+      - source: osm
+        geometry: point
+        min_zoom: 14
+        include_when:
+          shop: "%"
+        attributes:
+          - { key: class, tag_value: shop }
+          - { key: name, tag_value: name }
+          - { key: name_fa, tag_value: name:fa }
+      - source: osm
+        geometry: point
+        min_zoom: 14
+        include_when:
+          office: "%"
+        attributes:
+          - { key: class, tag_value: office }
+          - { key: name, tag_value: name }
+          - { key: name_fa, tag_value: name:fa }
+      - source: osm
+        geometry: point
+        min_zoom: 14
+        include_when:
+          healthcare: "%"
+        attributes:
+          - { key: class, tag_value: healthcare }
+          - { key: name, tag_value: name }
+          - { key: name_fa, tag_value: name:fa }
+      - source: osm
+        geometry: point
+        min_zoom: 14
+        include_when:
+          tourism: "%"
+        attributes:
+          - { key: class, tag_value: tourism }
+          - { key: name, tag_value: name }
+          - { key: name_fa, tag_value: name:fa }
+      - source: osm
+        geometry: point
+        min_zoom: 14
+        include_when:
+          leisure: "%"
+        attributes:
+          - { key: class, tag_value: leisure }
+          - { key: name, tag_value: name }
+          - { key: name_fa, tag_value: name:fa }
+
+  - id: places
+    buffer: 8
+    features:
+      - source: osm
+        geometry: point
+        min_zoom: 3
+        include_when:
+          place: [country, state, province, region, county, city, town, village, hamlet, suburb, neighbourhood, quarter, locality, island]
+        attributes:
+          - { key: class, tag_value: place }
+          - { key: name, tag_value: name }
+          - { key: name_fa, tag_value: name:fa }
+          - { key: name_en, tag_value: name:en }
+          - { key: population, tag_value: population, type: integer }
+          - { key: capital, tag_value: capital }
+
+  - id: admin_boundaries
+    buffer: 8
+    features:
+      - source: osm
+        geometry: line
+        min_zoom: 4
+        include_when:
+          boundary: administrative
+        attributes:
+          - { key: admin_level, tag_value: admin_level, type: integer }
+          - { key: name, tag_value: name }
+          - { key: name_fa, tag_value: name:fa }
+          - { key: name_en, tag_value: name:en }
+          - { key: ref, tag_value: ref }
+
+  - id: railways
+    buffer: 8
+    features:
+      - source: osm
+        geometry: line
+        min_zoom: 8
+        include_when:
+          railway: [rail, subway, light_rail, tram, narrow_gauge, monorail, funicular]
+        attributes:
+          - { key: class, tag_value: railway }
+          - { key: name, tag_value: name }
+          - { key: name_fa, tag_value: name:fa }
+          - { key: usage, tag_value: usage }
+          - { key: service, tag_value: service }
+      - source: osm
+        geometry: point
+        min_zoom: 12
+        include_when:
+          railway: [station, halt, tram_stop, subway_entrance]
+        attributes:
+          - { key: class, tag_value: railway }
+          - { key: name, tag_value: name }
+          - { key: name_fa, tag_value: name:fa }
+          - { key: operator, tag_value: operator }
+
+  - id: addresses
+    buffer: 8
+    features:
+      - source: osm
+        geometry: point
+        min_zoom: 16
+        include_when:
+          addr:housenumber: "%"
+        attributes:
+          - { key: house_number, tag_value: addr:housenumber }
+          - { key: street, tag_value: addr:street }
+          - { key: city, tag_value: addr:city }
+          - { key: postcode, tag_value: addr:postcode }
+          - { key: name, tag_value: name }
+          - { key: name_fa, tag_value: name:fa }
+
+  - id: transit
+    buffer: 8
+    features:
+      - source: osm
+        geometry: point
+        min_zoom: 12
+        include_when:
+          public_transport: [station, stop_position, platform]
+        attributes:
+          - { key: class, tag_value: public_transport }
+          - { key: name, tag_value: name }
+          - { key: name_fa, tag_value: name:fa }
+          - { key: operator, tag_value: operator }
+      - source: osm
+        geometry: point
+        min_zoom: 13
+        include_when:
+          highway: bus_stop
+        attributes:
+          - { key: class, value: bus_stop }
+          - { key: name, tag_value: name }
+          - { key: name_fa, tag_value: name:fa }
+      - source: osm
+        geometry: point
+        min_zoom: 12
+        include_when:
+          amenity: [bus_station, ferry_terminal]
+        attributes:
+          - { key: class, tag_value: amenity }
+          - { key: name, tag_value: name }
+          - { key: name_fa, tag_value: name:fa }
