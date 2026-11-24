@@ -54,7 +54,8 @@ render_header('سامانه اطلاعات مکانی آفلاین ایران', 
         <button type="button" class="button secondary map-tool" data-tool="LineString">خط</button>
         <button type="button" class="button secondary map-tool" data-tool="Polygon">محدوده</button>
         <?php endif; ?>
-        <button type="button" class="button secondary map-tool" data-tool="measure">اندازه‌گیری</button>
+        <button type="button" class="button secondary map-tool" data-tool="measure">طول مسیر</button>
+        <button type="button" class="button secondary map-tool" data-tool="measure-area">مساحت</button>
       </div>
       <div class="offline-map-tool-group">
         <button type="button" class="button secondary" id="offline-map-undo" disabled>بازگشت رأس</button>
