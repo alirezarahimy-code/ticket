@@ -54,6 +54,8 @@ render_header('سامانه اطلاعات مکانی آفلاین ایران', 
         <button type="button" class="button secondary" id="offline-map-undo" disabled>بازگشت رأس</button>
         <button type="button" class="button secondary" id="offline-map-finish" disabled>پایان ترسیم</button>
         <button type="button" class="button secondary" id="offline-map-cancel" disabled>لغو</button>
+        <button type="button" class="button secondary" id="offline-map-export">خروجی GeoJSON</button>
+        <button type="button" class="button secondary" id="offline-map-print">چاپ</button>
       </div>
     </div>
     <div class="offline-map-canvas-inner">
@@ -83,10 +85,10 @@ render_header('سامانه اطلاعات مکانی آفلاین ایران', 
       <div class="offline-map-layer-list">
         <label><input type="checkbox" data-layer-toggle="base" checked disabled> نقشهٔ پایه</label>
         <label><input type="checkbox" data-layer-toggle="user" checked> عوارض سازمانی</label>
-        <label><input type="checkbox" data-layer-toggle="roads" checked disabled> معابر</label>
-        <label><input type="checkbox" data-layer-toggle="places" checked disabled> مکان‌ها و خدمات</label>
-        <label><input type="checkbox" data-layer-toggle="boundaries" checked disabled> مرزهای اداری</label>
-        <label><input type="checkbox" data-layer-toggle="transport" checked disabled> حمل‌ونقل عمومی</label>
+        <label><input type="checkbox" data-layer-toggle="roads" checked> معابر</label>
+        <label><input type="checkbox" data-layer-toggle="places" checked> مکان‌ها و خدمات</label>
+        <label><input type="checkbox" data-layer-toggle="boundaries" checked> مرزهای اداری</label>
+        <label><input type="checkbox" data-layer-toggle="transport" checked> حمل‌ونقل عمومی</label>
       </div>
       <p class="muted small">فعال‌سازی هر لایهٔ پایه به وجود دادهٔ متناظر در بستهٔ نقشه وابسته است.</p>
     </section>
@@ -111,7 +113,7 @@ render_header('سامانه اطلاعات مکانی آفلاین ایران', 
 <?php if ($canManageFeatures): ?>
 <dialog id="offline-map-feature-dialog" class="offline-map-dialog">
   <form id="offline-map-feature-form" method="dialog">
-    <input type="hidden" name="id" value="0">
+    <input type="hidden" name="id" value="0"><input type="hidden" name="csrf" value="<?= e(csrf_token()) ?>">
     <h2 id="offline-map-dialog-title">ثبت عارضهٔ جدید</h2>
     <label>عنوان <input name="title" maxlength="190" required></label>
     <label>توضیحات <textarea name="description" rows="3" maxlength="4000"></textarea></label>
@@ -120,6 +122,8 @@ render_header('سامانه اطلاعات مکانی آفلاین ایران', 
     </label>
     <label>نشانی یا توضیح مکانی <input name="address" maxlength="500"></label>
     <label>شماره تماس <input name="phone" maxlength="60"></label>
+    <label>پیوست‌ها (PDF یا تصویر، حداکثر ۱۰ مگابایت برای هر فایل)<input type="file" name="files[]" accept=".pdf,.png,.jpg,.jpeg,.webp,application/pdf,image/png,image/jpeg,image/webp" multiple></label>
+    <div id="offline-map-attachments" class="offline-map-attachments"></div>
     <div class="offline-map-dialog-actions"><button type="button" class="button secondary" data-dialog-close>انصراف</button><button type="submit" class="button">ذخیره</button></div>
     <p id="offline-map-form-feedback" aria-live="polite"></p>
   </form>
