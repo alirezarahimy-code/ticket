@@ -1035,13 +1035,22 @@ function food_reconciliation_download_invoice(int $invoiceId, array $user): neve
         http_response_code(404);
         exit('فایل فاکتور روی سرور پیدا نشد.');
     }
-    $original = str_replace(["\r", "\n", "\0"], '', (string) ($row['original_name'] ?? 'invoice'));
-    header('Content-Type: application/octet-stream');
+    $extension = strtolower(pathinfo($stored, PATHINFO_EXTENSION));
+    $mimeTypes = [
+        'pdf' => 'application/pdf',
+        'jpg' => 'image/jpeg',
+        'jpeg' => 'image/jpeg',
+        'png' => 'image/png',
+        'xls' => 'application/vnd.ms-excel',
+        'xlsx' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    ];
+    $mimeType = $mimeTypes[$extension] ?? 'application/octet-stream';
+    $inline = in_array($extension, ['pdf', 'jpg', 'jpeg', 'png'], true);
+    header('Content-Type: ' . $mimeType);
     header('Content-Length: ' . (string) filesize($path));
     header('X-Content-Type-Options: nosniff');
     header('Cache-Control: private, no-store, max-age=0');
-    header('Content-Security-Policy: sandbox');
-    header('Content-Disposition: attachment; filename="food-invoice-' . $invoiceId . '.' . pathinfo($stored, PATHINFO_EXTENSION) . '"; filename*=UTF-8\'\'' . rawurlencode($original));
+    header('Content-Disposition: ' . ($inline ? 'inline' : 'attachment') . '; filename="food-invoice-' . $invoiceId . '.' . $extension . '"');
     readfile($path);
     exit;
 }

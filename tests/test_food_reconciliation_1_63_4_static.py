@@ -111,14 +111,21 @@ def test_leftover_person_rows_show_full_names_only_with_aligned_checkboxes():
     assert "overflow:visible;text-overflow:clip" in css
 
 
-def test_leftover_assignment_modal_uses_fullscreen_and_unclipped_people_list():
+def test_leftover_popup_remains_compact_and_quantity_fields_align_left():
     js = (ROOT / "assets/food-menu.js").read_text()
-    assert "fm-leftover-assignment-backdrop" in js
-    assert "fm-leftover-assignment-modal" in js
+    assert 'class="fm-leftover-backdrop"' in js
+    assert 'fm-leftover-assignment-modal' not in js
     css = (ROOT / "assets/food-menu.css").read_text()
-    assert "width:100vw!important;height:100vh!important;height:100dvh!important" in css
-    assert "fm-leftover-assignment-modal .fm-leftover-people-list{flex:1 1 auto;min-height:0;overflow:auto}" in css
+    assert ".fm-leftover-modal{width:min(520px,100%);max-height:92vh" in css
     assert ".fm-leftover-row:not(.fm-leftover-staff) .fm-leftover-count" in css
+
+
+def test_reconciliation_form_has_fullscreen_toggle():
+    js = (ROOT / "assets/food-menu.js").read_text()
+    css = (ROOT / "assets/food-menu.css").read_text()
+    assert "data-fm-action=\"reconciliation-fullscreen\"" in js
+    assert "fm-embedded-reconciliation" in js and "' is-fullscreen'" in js
+    assert ".fm-embedded-reconciliation.is-fullscreen{position:fixed;inset:0" in css
 
 
 def test_reconciliation_invoice_content_is_separated_into_invoice_tab():
@@ -131,3 +138,22 @@ def test_reconciliation_invoice_content_is_separated_into_invoice_tab():
     php = (ROOT / "food-reconciliation.php").read_text()
     assert "function food_reconciliation_invoice_rows(?string $monthStart = null)" in php
     assert "'invoice_history' => $invoiceHistory" in php
+
+
+def test_invoice_upload_form_follows_month_summary_and_pdf_images_render_inline():
+    js = (ROOT / "assets/food-menu.js").read_text()
+    invoice_content = js[js.index("var invoiceContent ="):js.index("return '<section class=\"fm-card fm-reconciliation-report")]
+    assert invoice_content.index("invoiceSummary + invoiceForm") < invoice_content.index("monthlyPriceTable")
+    php = (ROOT / "food-reconciliation.php").read_text()
+    assert "'pdf' => 'application/pdf'" in php
+    assert "'jpg' => 'image/jpeg'" in php and "'png' => 'image/png'" in php
+    assert "($inline ? 'inline' : 'attachment')" in php
+    assert "Content-Disposition: attachment; filename=\"food-invoice-'" not in php
+
+
+def test_grouped_absence_tables_are_sortable_without_breaking_rows():
+    html = (ROOT / "food-ticket-web/index.html").read_text()
+    assert "tableHtml(gs[dep],S.blocks,true)" in html
+    assert "return sorted(order);" in html
+    assert "if(S.sort.key==='dep')" in html
+    assert "else if(key==='jal'||key==='row'){x=a.iso;y=b.iso}" in html

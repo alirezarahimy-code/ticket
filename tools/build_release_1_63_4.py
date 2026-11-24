@@ -9,7 +9,7 @@ EXCLUDED=('downloads/','updates/','patches/','preview/','storage/','.git/','node
 MIGRATIONS=('041-food-monthly-prices-and-leftover-allocations.sql','042-food-invoice-finalization-state.sql')
 REQUIRED_FILES=(
     'VERSION','assets/food-menu.css','assets/food-menu.js',
-    'downloads/CHANGE-REPORT-FA-1.63.4-r4.md','food-reconciliation.php','food-ticket.php',
+    'downloads/CHANGE-REPORT-FA-1.63.4-r5.md','food-reconciliation.php','food-ticket.php',
     'food-ticket-web/assets/food-menu.css','food-ticket-web/assets/food-menu.js','food-ticket-web/index.html',
     'install-empty-db.sql','lib/release-notes.php','schema.sql',
     'tests/test_food_absent_lunch_backend_static.py','tests/test_food_absent_lunch_tab_static.py',
@@ -39,14 +39,14 @@ def main():
         if allowed(n) and (ROOT/n).is_file(): full[n]=(ROOT/n).read_bytes()
     note='''بستهٔ سورس کامل ۱.۶۳.۴ — نصب تازه
 
-شامل سورس جاری برنامه، اسکیما و مهاجرت‌های ۰۴۱ و ۰۴۲ برای قیمت‌های ماهانه، تخصیص فردی غذای مازاد، ممیزی تغییرها و تشخیص صریح نهایی‌شدن فاکتور است. پنجرهٔ تعیین تکلیف مانده تمام‌صفحه است؛ تب جداگانهٔ مبلغ و فاکتور شامل قیمت ماه، کارت‌های مقایسهٔ مستقل و تاریخچهٔ همهٔ فاکتورهاست. اصلاحات پیشین گزارش غایبین و نمایش/چاپ نمودار حفظ شده‌اند. فایل config.php و داده‌های storage عمداً در بسته نیستند. پیش از نصب از دیتابیس و فایل‌ها نسخهٔ پشتیبان تهیه کنید.
+شامل سورس جاری برنامه، اسکیما و مهاجرت‌های ۰۴۱ و ۰۴۲ برای قیمت‌های ماهانه، تخصیص فردی غذای مازاد، ممیزی تغییرها و تشخیص صریح نهایی‌شدن فاکتور است. فرم تطبیق روزانه در حالت تمام‌صفحه نمایش داده می‌شود؛ پنجرهٔ کوچک سرنوشت مانده حفظ شده است. تب مبلغ و فاکتور، ثبت فاکتور را بلافاصله پس از خلاصه قرار می‌دهد و PDF/تصویر را با نوع محتوای صحیح باز می‌کند. مرتب‌سازی همهٔ نماهای گزارش غایبین و اصلاحات قبلی حفظ شده‌اند. فایل config.php و داده‌های storage عمداً در بسته نیستند. پیش از نصب از دیتابیس و فایل‌ها نسخهٔ پشتیبان تهیه کنید.
 
 نصب: ZIP را در htdocs استخراج کنید، سپس install.php را از خود سرور اجرا کنید.
 '''
     full['00-FULL-PACKAGE-1.63.4-FA.txt']=note.encode()
-    report=ROOT/'downloads/CHANGE-REPORT-FA-1.63.4-r4.md'
-    if report.is_file(): full['downloads/CHANGE-REPORT-FA-1.63.4-r4.md']=report.read_bytes()
-    out=ROOT/'downloads'; full_path=out/'ticket-full-1.63.4-r4-fullscreen-reconciliation-invoice-tab-20261119.zip'
+    report=ROOT/'downloads/CHANGE-REPORT-FA-1.63.4-r5.md'
+    if report.is_file(): full['downloads/CHANGE-REPORT-FA-1.63.4-r5.md']=report.read_bytes()
+    out=ROOT/'downloads'; full_path=out/'ticket-full-1.63.4-r5-reconciliation-fullscreen-invoice-view-sort-20261119.zip'
     full_sha=zip_write(full_path,{'ticket/'+k:v for k,v in full.items()})
     changed=set(tracked_paths(['diff','--name-only','HEAD','-z']))|set(tracked_paths(['ls-files','--others','--exclude-standard','-z']))
     changed={n for n in changed if allowed(n) and (ROOT/n).is_file()}
@@ -55,11 +55,11 @@ def main():
     migration_bytes={name:Path('migrations/'+name).read_bytes() for name in MIGRATIONS}
     for name,data in migration_bytes.items(): files['migrations/'+name]=data
     files['VERSION']=b'1.63.4\n'
-    manifest={'name':'food-fullscreen-leftover-and-invoice-tab-r4','version':VERSION,'requires_version':REQUIRES,'date':'2026-11-19','title':'اصلاحات ۱.۶۳.۴: تمام‌صفحه‌شدن مانده و تب مبلغ و فاکتور','migrations':list(MIGRATIONS),'files':sorted(files),'sha256':{n:digest(files[n]) for n in sorted(files)},'description':'Refreshes version 1.63.4 without changing its number. Keeps previous absence comparison/chart printing and amount fixes, makes the leftover disposition modal full-screen with aligned quantity fields, adds a separate amount and invoice tab, and displays invoice/price history for all months.'}
+    manifest={'name':'food-reconciliation-fullscreen-invoice-inline-sort-r5','version':VERSION,'requires_version':REQUIRES,'date':'2026-11-19','title':'اصلاحات ۱.۶۳.۴: تمام‌صفحه‌شدن تطبیق و نمایش درست فاکتور','migrations':list(MIGRATIONS),'files':sorted(files),'sha256':{n:digest(files[n]) for n in sorted(files)},'description':'Refreshes version 1.63.4 without changing its number. Keeps the leftover modal compact while aligning its quantity fields, provides a fullscreen reconciliation view, places invoice entry below the month summary, serves PDF/images with inline MIME types, and enables grouped absence table sorting without splitting row data.'}
     update={'manifest.json':(json.dumps(manifest,ensure_ascii=False,indent=2)+'\n').encode()}
     update.update({'migrations/'+name:data for name,data in migration_bytes.items()})
     update.update({'files/'+n:b for n,b in files.items()})
-    upd_path=out/'ticket-update-1.63.4-r4-fullscreen-reconciliation-invoice-tab-20261119.zip'
+    upd_path=out/'ticket-update-1.63.4-r5-reconciliation-fullscreen-invoice-view-sort-20261119.zip'
     upd_sha=zip_write(upd_path,update)
     print(f'FULL {full_path.name} files={len(full)} bytes={full_path.stat().st_size} sha256={full_sha}')
     print(f'UPDATE {upd_path.name} files={len(files)} bytes={upd_path.stat().st_size} sha256={upd_sha}')

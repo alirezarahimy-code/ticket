@@ -1176,7 +1176,14 @@ function filtered(){var q=String(S.query||'').trim(),d=selectedDeps();return S.r
   if(d.indexOf(r.dep)<0)return false;
   if(q&&(r.first+r.last+r.pc+r.dep+r.food+r.jal).indexOf(q)<0)return false;
   return true;})}
-function sorted(rows){var s=S.sort;return rows.slice().sort(function(a,b){var x=a[s.key],y=b[s.key];var c=String(x==null?'':x).localeCompare(String(y==null?'':y),'en',{numeric:true});return c?(s.dir==='desc'?-c:c):0})}
+function sorted(rows){var s=S.sort;return rows.slice().sort(function(a,b){
+ var key=s.key,x=a[key],y=b[key],numeric=false;
+ if(key==='amount'){x=a.amountValue;y=b.amountValue;numeric=true}
+ else if(key==='amountTotal'){x=a.amountValue;y=b.amountValue;numeric=true}
+ else if(key==='count'){numeric=true}
+ else if(key==='jal'||key==='row'){x=a.iso;y=b.iso}
+ if(numeric){var ax=x==null?null:Number(x),by=y==null?null:Number(y);if(ax==null||!Number.isFinite(ax))return by==null||!Number.isFinite(by)?0:(s.dir==='desc'?1:-1);if(by==null||!Number.isFinite(by))return s.dir==='desc'?-1:1;return (ax<by?-1:ax>by?1:0)*(s.dir==='desc'?-1:1)}
+ var c=String(x==null?'':x).localeCompare(String(y==null?'':y),'fa',{numeric:true,sensitivity:'base'});return c?(s.dir==='desc'?-c:c):0})}
 function activeFields(){return FIELDS.filter(function(f){return TAB_FIELDS[S.tab].indexOf(f.key)>=0&&S.fieldsByTab[S.tab].has(f.key)})}
 function tabTitle(){return S.tab==='detail'?'تفکیک و جزئیات':(S.tab==='dept'?'بر اساس معاونت':'فهرست یکجا')}
 
@@ -1285,7 +1292,7 @@ function rowsForMode(mode){
   if(r.amountValue===null||!Number.isFinite(r.amountValue))u.amountMissingCount++;else u.amountValue+=r.amountValue;
   if(r.iso>=u.iso){u.iso=r.iso;u.jal=r.jal;u.food=r.food;u.status=r.status;u.short=r.short;u.declared=r.declared}});
  order.forEach(function(u){u.amountTotal=fa(u.amountValue)+(u.amountMissingCount?' · قیمت نامشخص برای '+fa(u.amountMissingCount)+' وعده':'')});
- return order;
+ return sorted(order);
 }
 function groupStats(){var m={};filtered().forEach(function(r){if(!m[r.dep])m[r.dep]={people:{},portions:0,amount:0,missingAmount:0};m[r.dep].people[r.pc]=1;m[r.dep].portions++;if(r.amountValue===null||!Number.isFinite(r.amountValue))m[r.dep].missingAmount++;else m[r.dep].amount+=r.amountValue});return m}
 function amountTotal(rows){return (rows||[]).reduce(function(a,r){if(r.amountValue===null||!Number.isFinite(r.amountValue))a.missing++;else a.amount+=r.amountValue;return a},{amount:0,missing:0})}
@@ -1295,10 +1302,11 @@ function groupedHtml(mode){
  var rows=mode==='detail'?rowsForMode('detail'):rowsForMode('dept'),stats=groupStats(),gs={},order=[];
  rows.forEach(function(r){if(!gs[r.dep]){gs[r.dep]=[];order.push(r.dep)}gs[r.dep].push(r)});
  if(!order.length)return '<div class="alr-empty">'+(S.deps.size?'موردی یافت نشد.':'هیچ معاونتی انتخاب نشده؛ تیک «همه معاونتها» را بزنید.')+'</div>';
- order.sort(function(a,b){return(stats[b]?stats[b].portions:0)-(stats[a]?stats[a].portions:0)||a.localeCompare(b,'fa')});
+ if(S.sort.key==='dep'){order.sort(function(a,b){var c=a.localeCompare(b,'fa');return S.sort.dir==='desc'?-c:c})}
+ else order.sort(function(a,b){return(stats[b]?stats[b].portions:0)-(stats[a]?stats[a].portions:0)||a.localeCompare(b,'fa')});
  return order.map(function(dep){var st=stats[dep]||{people:{},portions:0};
   return '<section class="alr-group"><div class="alr-group-head"><h4>'+esc2(dep)+' <b>'+fa(Object.keys(st.people).length)+' نفر · '+fa(st.portions)+' وعده · مبلغ غذا: '+amountLabel(st)+'</b></h4></div>'+
-   tableHtml(gs[dep],S.blocks,false)+'</section>'}).join('');
+   tableHtml(gs[dep],S.blocks,true)+'</section>'}).join('');
 }
 function viewHtml(sortable){
  if(S.tab==='flat')return tableHtml(rowsForMode('flat'),S.blocks,sortable);
