@@ -280,6 +280,17 @@ layers:
     buffer: 8
     features:
       - source: osm
+        geometry: line
+        min_zoom: 9
+        include_when:
+          route: [bus, trolleybus, tram, subway, train, light_rail]
+        attributes:
+          - { key: class, tag_value: route }
+          - { key: name, tag_value: name }
+          - { key: name_fa, tag_value: name:fa }
+          - { key: operator, tag_value: operator }
+          - { key: ref, tag_value: ref }
+      - source: osm
         geometry: point
         min_zoom: 12
         include_when:
