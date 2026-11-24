@@ -21,6 +21,27 @@ if (!$canView) {
 }
 
 $repo = new OfflineMapRepository(db());
+
+if (isset($_GET['attachment'])) {
+    $attachment = $repo->attachment(max(0, (int) $_GET['attachment']));
+    if (!$attachment || (!$canAdmin && (int) $attachment['feature_owner'] !== (int) $user['id'])) {
+        http_response_code(404);
+        exit('فایل پیدا نشد.');
+    }
+    $stored = (string) $attachment['stored_name'];
+    if (!preg_match('/^[a-f0-9]{32}\\.(pdf|png|jpg|webp)$/', $stored)) {
+        http_response_code(404); exit('فایل معتبر نیست.');
+    }
+    $filePath = __DIR__ . '/storage/private/offline-map/' . $stored;
+    if (!is_file($filePath)) { http_response_code(404); exit('فایل روی سرور موجود نیست.'); }
+    header('Content-Type: ' . $attachment['mime_type']);
+    header('Content-Length: ' . (string) filesize($filePath));
+    header("Content-Disposition: attachment; filename*=UTF-8''" . rawurlencode((string) $attachment['original_name']));
+    header('X-Content-Type-Options: nosniff');
+    header('Cache-Control: private, no-store');
+    readfile($filePath);
+    exit;
+}
 if (!$repo->ready()) {
     if (($_GET['api'] ?? '') === '1') $respond(503, ['error' => 'ساختار پایگاه‌دادهٔ نقشه نصب نشده است.']);
     require __DIR__ . '/modules/offline-map/Pages/index.php';
@@ -64,6 +85,19 @@ $normaliseGeometry = static function (array $geometry): array {
 
 if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'GET' && (string) ($_GET['api'] ?? '') === '1') {
     $kind = (string) ($_GET['kind'] ?? 'features');
+    if ($kind === 'attachments') {
+        $featureId = max(0, (int) ($_GET['feature_id'] ?? 0));
+        $feature = $repo->find($featureId);
+        if (!$feature || (!$canAdmin && (int) $feature['created_by'] !== (int) $user['id'])) $respond(404, ['error' => 'عارضه پیدا نشد.']);
+        $items = $repo->attachments($featureId);
+        foreach ($items as &$item) {
+            $item['id'] = (int) $item['id'];
+            $item['size_bytes'] = (int) $item['size_bytes'];
+            $item['download_url'] = 'offline-map.php?attachment=' . $item['id'];
+        }
+        unset($item);
+        $respond(200, ['attachments' => $items]);
+    }
     if ($kind === 'places') {
         $q = trim((string) ($_GET['q'] ?? ''));
         if ($q === '' || mb_strlen($q) < 2 || mb_strlen($q) > 100) $respond(200, ['results' => []]);
@@ -103,6 +137,35 @@ require_csrf(false);
 if (!$canManage) $respond(403, ['error' => 'مجوز مدیریت عوارض نقشه را ندارید.']);
 
 $action = (string) ($_POST['action'] ?? 'create');
+if ($action === 'attachment') {
+    $featureId = max(0, (int) ($_POST['feature_id'] ?? 0));
+    $feature = $repo->find($featureId);
+    if (!$feature || (!$canAdmin && (int) $feature['created_by'] !== (int) $user['id'])) $respond(404, ['error' => 'عارضه پیدا نشد یا اجازهٔ پیوست ندارید.']);
+    if (empty($_FILES['files']) || !is_array($_FILES['files']['name'])) $respond(422, ['error' => 'فایلی برای بارگذاری انتخاب نشده است.']);
+    $allowed = ['application/pdf' => 'pdf', 'image/png' => 'png', 'image/jpeg' => 'jpg', 'image/webp' => 'webp'];
+    $storage = __DIR__ . '/storage/private/offline-map';
+    if (!is_dir($storage) && !mkdir($storage, 0750, true) && !is_dir($storage)) $respond(500, ['error' => 'مسیر امن ذخیره‌سازی ساخته نشد.']);
+    $finfo = new finfo(FILEINFO_MIME_TYPE);
+    $saved = [];
+    $total = count($_FILES['files']['name']);
+    if ($total > 8) $respond(422, ['error' => 'در هر بار حداکثر ۸ فایل قابل بارگذاری است.']);
+    for ($i = 0; $i < $total; $i++) {
+        $error = (int) ($_FILES['files']['error'][$i] ?? UPLOAD_ERR_NO_FILE);
+        if ($error !== UPLOAD_ERR_OK) $respond(422, ['error' => 'بارگذاری یکی از فایل‌ها ناموفق بود.']);
+        $tmp = (string) $_FILES['files']['tmp_name'][$i];
+        $size = (int) ($_FILES['files']['size'][$i] ?? 0);
+        if ($size < 1 || $size > 10 * 1024 * 1024 || !is_uploaded_file($tmp)) $respond(422, ['error' => 'حجم فایل باید حداکثر ۱۰ مگابایت باشد.']);
+        $mime = (string) $finfo->file($tmp);
+        if (!isset($allowed[$mime])) $respond(415, ['error' => 'فقط PDF و تصویر PNG/JPEG/WEBP مجاز است.']);
+        $stored = bin2hex(random_bytes(16)) . '.' . $allowed[$mime];
+        if (!move_uploaded_file($tmp, $storage . '/' . $stored)) $respond(500, ['error' => 'ذخیرهٔ فایل روی سرور ناموفق بود.']);
+        $name = basename((string) $_FILES['files']['name'][$i]);
+        $name = preg_replace('/[\\x00-\\x1F\\x7F]/u', '', $name) ?: 'attachment';
+        $attachmentId = $repo->addAttachment($featureId, mb_substr($name, 0, 255), $stored, $mime, $size, (int) $user['id']);
+        $saved[] = ['id' => $attachmentId, 'name' => $name];
+    }
+    $respond(201, ['attachments' => $saved, 'message' => 'پیوست‌ها بارگذاری شدند.']);
+}
 if ($action === 'delete') {
     $deleted = $repo->delete(max(0, (int) ($_POST['id'] ?? 0)), (int) $user['id'], $canAdmin);
     $respond($deleted ? 200 : 404, ['deleted' => $deleted]);
