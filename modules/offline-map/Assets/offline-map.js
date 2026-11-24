@@ -47,7 +47,7 @@
     if (!state.map || !state.map.getSource('offline-map-draft')) return;
     var geometry = null;
     if (state.tool === 'Point' && state.vertices.length) geometry = { type: 'Point', coordinates: state.vertices[0] };
-    if (state.tool === 'LineString' && state.vertices.length) geometry = { type: 'LineString', coordinates: state.vertices };
+    if ((state.tool === 'LineString' || state.tool === 'measure') && state.vertices.length) geometry = { type: 'LineString', coordinates: state.vertices };
     if ((state.tool === 'Polygon' || state.tool === 'measure-area') && state.vertices.length >= 2) {
       var ring = state.vertices.slice();
       if (ring.length >= 3) ring.push(ring[0]);
@@ -296,13 +296,21 @@
 
   document.querySelectorAll('[data-tool]').forEach(function (button) { button.addEventListener('click', function () { setTool(button.getAttribute('data-tool')); }); });
   var undo = document.getElementById('offline-map-undo');
-  if (undo) undo.addEventListener('click', function () { state.vertices.pop(); updateDrawPreview(); undo.disabled = !state.vertices.length; });
+  if (undo) undo.addEventListener('click', function () {
+    state.vertices.pop(); updateDrawPreview(); undo.disabled = !state.vertices.length;
+    var finishButton = document.getElementById('offline-map-finish');
+    if (finishButton) finishButton.disabled = state.tool === 'Point' ? !state.vertices.length : state.vertices.length < (state.tool === 'LineString' || state.tool === 'measure' ? 2 : 3);
+    var cancelButton = document.getElementById('offline-map-cancel'); if (cancelButton) cancelButton.disabled = !state.vertices.length;
+  });
   var finish = document.getElementById('offline-map-finish');
   if (finish) finish.addEventListener('click', finishDrawing);
   var cancel = document.getElementById('offline-map-cancel');
   if (cancel) cancel.addEventListener('click', function () { state.vertices = []; updateDrawPreview(); setTool('pan'); });
   document.querySelectorAll('[data-dialog-close]').forEach(function (button) { button.addEventListener('click', function () { if (dialog) dialog.close(); setTool('pan'); }); });
-  if (dialog) dialog.addEventListener('click', function (event) { if (event.target === dialog) dialog.close(); });
+  if (dialog) {
+    dialog.addEventListener('click', function (event) { if (event.target === dialog) dialog.close(); });
+    dialog.addEventListener('close', function () { state.geometry = null; state.editId = 0; state.vertices = []; setTool('pan'); updateDrawPreview(); });
+  }
   if (form) form.addEventListener('submit', function (event) {
     event.preventDefault();
     if (!state.geometry) { if (formFeedback) formFeedback.textContent = 'هندسه‌ای برای ذخیره وجود ندارد.'; return; }
@@ -312,6 +320,7 @@
     if (formFeedback) formFeedback.textContent = 'در حال ذخیره…';
     post(data).then(function (body) {
       var featureId = Number(body.id || state.editId);
+      if (featureId > 0) { state.editId = featureId; form.elements.id.value = String(featureId); }
       var filesInput = form.elements.namedItem('files[]');
       var files = filesInput && filesInput.files ? Array.prototype.slice.call(filesInput.files) : [];
       if (!files.length) return body;
@@ -365,7 +374,8 @@
         button.addEventListener('click', function () {
           if (state.map) state.map.flyTo({ center: [Number(item.lon), Number(item.lat)], zoom: 16 });
           var marker = document.createElement('div'); marker.className = 'offline-map-search-marker';
-          if (state.map) new window.maplibregl.Marker({ element: marker }).setLngLat([Number(item.lon), Number(item.lat)]).addTo(state.map);
+          if (state.searchMarker) state.searchMarker.remove();
+          if (state.map) state.searchMarker = new window.maplibregl.Marker({ element: marker }).setLngLat([Number(item.lon), Number(item.lat)]).addTo(state.map);
         });
         results.appendChild(button);
       });
