@@ -13,6 +13,7 @@ final class OfflineMapRepository
     {
         try {
             $this->pdo->query('SELECT 1 FROM offline_map_features LIMIT 1');
+            $this->pdo->query('SELECT 1 FROM offline_map_feature_attachments LIMIT 1');
             return true;
         } catch (Throwable) {
             return false;
@@ -54,8 +55,7 @@ final class OfflineMapRepository
 
     public function find(int $id): ?array
     {
-        $rows = $this->search('', 1);
-        // Use a targeted query instead of relying on list ordering.
+        // Targeted lookup avoids scanning the feature list.
         $stmt = $this->pdo->prepare('SELECT id,title,description,feature_type,geometry_json,properties_json,created_by,updated_by,created_at,updated_at FROM offline_map_features WHERE id = ?');
         $stmt->execute([$id]);
         $row = $stmt->fetch(PDO::FETCH_ASSOC);
