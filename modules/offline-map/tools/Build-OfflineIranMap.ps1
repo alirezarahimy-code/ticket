@@ -58,7 +58,9 @@ $manifest = [ordered]@{
     tiles = [ordered]@{ file = [IO.Path]::GetFileName($OutputPmtiles); bytes = $outputInfo.Length; sha256 = $outputHash; format = 'PMTiles' }
     not_included_or_not_verified = @('MapLibre style and local glyphs/sprites','Persian offline search index','official administrative boundaries','municipal districts and public transport completeness','street/building/address coverage completeness')
 }
-$manifest | ConvertTo-Json -Depth 8 | Set-Content -LiteralPath $ManifestPath -Encoding UTF8
+$manifestJson = $manifest | ConvertTo-Json -Depth 8
+$utf8NoBom = New-Object System.Text.UTF8Encoding($false)
+[IO.File]::WriteAllText($ManifestPath, $manifestJson + [Environment]::NewLine, $utf8NoBom)
 Write-Host 'تولید کاشی‌ها و کنترل هدر PMTiles موفق بود.' -ForegroundColor Green
 Write-Host "SHA-256 خروجی: $outputHash"
 Write-Host "Manifest: $ManifestPath"
