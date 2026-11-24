@@ -56,6 +56,10 @@ if ((Test-Path -LiteralPath $manifestPath -PathType Leaf) -and (Test-Path -Liter
         if ($manifest.tiles.file -ne 'iran.pmtiles') { $errors.Add('Manifest tiles.file must be iran.pmtiles.') }
         if ($manifest.tiles.format -ne 'PMTiles') { $errors.Add('Manifest tiles.format must be PMTiles.') }
         if ([int]$manifest.generator.maxzoom -lt 17 -or -not $manifest.generator.schema_sha256) { $errors.Add('Manifest does not describe the custom high-zoom schema (maxzoom >= 17).') }
+        if (Test-Path -LiteralPath $schemaPath -PathType Leaf) {
+            $schemaHash = (Get-FileHash -LiteralPath $schemaPath -Algorithm SHA256).Hash.ToLowerInvariant()
+            if ($manifest.generator.schema_sha256 -ne $schemaHash) { $errors.Add('Manifest schema SHA-256 does not match the current custom schema.') }
+        }
         if ([long]$manifest.tiles.bytes -ne (Get-Item -LiteralPath $tilePath).Length) { $errors.Add('Manifest tile size does not match iran.pmtiles.') }
         $actualHash = (Get-FileHash -LiteralPath $tilePath -Algorithm SHA256).Hash.ToLowerInvariant()
         if ($manifest.tiles.sha256 -ne $actualHash) { $errors.Add('Manifest SHA-256 does not match iran.pmtiles.') }
