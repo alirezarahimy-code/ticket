@@ -337,7 +337,7 @@
   document.querySelectorAll('[data-layer-toggle]').forEach(function (input) {
     input.addEventListener('change', function () {
       var layer = input.getAttribute('data-layer-toggle');
-      var layerMap = { roads: ['roads-casing','roads-main','road-labels'], places: ['places','poi-circles','poi-labels'], buildings: ['buildings'], water: ['water','waterway'], boundaries: ['admin-boundaries','offline-map-official-fill','offline-map-official-line'], 'official-boundaries': ['offline-map-official-fill','offline-map-official-line'], districts: ['offline-map-district-fill','offline-map-district-line'], transport: ['railways','rail-stations','transit-points','transit-lines','offline-map-transit-lines','offline-map-transit-points'] };
+      var layerMap = { roads: ['roads-casing','roads-main','road-labels'], places: ['places','poi-area-fill','poi-area-line','poi-area-labels','poi-circles','poi-labels'], buildings: ['buildings'], water: ['water','waterway'], boundaries: ['admin-boundaries','offline-map-official-fill','offline-map-official-line'], 'official-boundaries': ['offline-map-official-fill','offline-map-official-line'], districts: ['offline-map-district-fill','offline-map-district-line'], transport: ['railways','rail-stations','transit-points','transit-lines','offline-map-transit-lines','offline-map-transit-points'] };
       if (state.map && layerMap[layer]) layerMap[layer].forEach(function (id) { if (state.map.getLayer(id)) state.map.setLayoutProperty(id, 'visibility', input.checked ? 'visible' : 'none'); });
       if (layer === 'user' && state.map) {
         ['offline-map-user-points', 'offline-map-user-lines', 'offline-map-user-polygons'].forEach(function (id) {
