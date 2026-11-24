@@ -381,6 +381,36 @@
       }
     },
     {
+      "id": "poi-area-labels",
+      "type": "symbol",
+      "source": "iran",
+      "source-layer": "poi_areas",
+      "minzoom": 16,
+      "layout": {
+        "text-field": [
+          "coalesce",
+          [
+            "get",
+            "name_fa"
+          ],
+          [
+            "get",
+            "name"
+          ]
+        ],
+        "text-font": [
+          "Noto Sans Arabic Regular"
+        ],
+        "text-size": 11,
+        "text-anchor": "center"
+      },
+      "paint": {
+        "text-color": "#684b43",
+        "text-halo-color": "#fffdf8",
+        "text-halo-width": 1.2
+      }
+    },
+    {
       "id": "poi-circles",
       "type": "circle",
       "source": "iran",
