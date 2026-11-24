@@ -37,6 +37,8 @@ def tags_dict(tags) -> dict[str, str]:
     return {tag.k: tag.v for tag in tags}
 
 def classify(tags: dict[str, str]) -> tuple[str, str, int] | None:
+    if tags.get("addr:housenumber") or tags.get("addr:street"):
+        return ("address", "house_number", 100)
     if tags.get("highway"):
         highway = tags["highway"]
         if highway in {"motorway", "trunk", "primary", "secondary", "tertiary", "unclassified", "residential", "living_street", "service", "pedestrian", "footway", "path", "track", "road"}:
@@ -69,6 +71,8 @@ class SearchIndexer(osmium.SimpleHandler):
 
     def save(self, osm_id: int, tags: dict[str, str], lon: float, lat: float, source: str) -> None:
         name = tags.get("name") or tags.get("name:fa") or tags.get("official_name") or tags.get("alt_name")
+        if not name and tags.get("addr:housenumber"):
+            name = "پلاک " + tags.get("addr:housenumber", "") + (" - " + tags.get("addr:street", "") if tags.get("addr:street") else "")
         name_fa = tags.get("name:fa") or tags.get("name:per") or (name if any("\u0600" <= c <= "\u06ff" for c in (name or "")) else "")
         if not name or len(name.strip()) < 2 or not in_iran(lon, lat):
             self.skipped += 1
