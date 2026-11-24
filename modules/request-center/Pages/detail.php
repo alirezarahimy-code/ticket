@@ -607,6 +607,10 @@ if ($page === 'ticket') {
     echo '<script id="rc-ticket-detail-interactions" nonce="' . e(csp_nonce()) . '">
 (function(){
  document.querySelectorAll(".cancel-ticket-card,.cancellation-decision,.rating-card,.reply-box").forEach(function(form){
+  // «تصمیم مسئول رسیدگی دربارهٔ لغو» دکمهٔ نام‌دار دارد (decision=approve|reject). این هندلر همیشه تازه است
+  // (داخل خودِ HTML)، پس تصمیم باید از این‌جا تضمین شود — نه از اسکریپت خارجی که ممکن است از کش قدیمی بیاید:
+  // data-rc-no-busy می‌گوید «ماشین ارسالِ اسکریپت خارجی دکمه‌های این فرم را غیرفعال نکند».
+  if(form.classList.contains("cancellation-decision")){form.setAttribute("data-rc-no-busy","1");}
   var textareas=Array.prototype.slice.call(form.querySelectorAll("textarea"));
    var attachment=form.querySelector("[name=attachment]"),attachmentFeedback=form.querySelector("[data-reply-attachment-feedback]");
    if(attachment){attachment.addEventListener("change",function(){var file=attachment.files&&attachment.files[0];if(!file){attachment.setCustomValidity("");if(attachmentFeedback)attachmentFeedback.textContent="حداکثر ۸ مگابایت";return;}if(file.size>8*1024*1024){attachment.value="";attachment.setCustomValidity("حجم فایل پیوست نباید بیشتر از ۸ مگابایت باشد.");if(attachmentFeedback)attachmentFeedback.textContent="فایل انتخاب‌شده بیش از ۸ مگابایت است.";attachment.reportValidity();return;}attachment.setCustomValidity("");if(attachmentFeedback)attachmentFeedback.textContent=file.name+" · "+(file.size/1024/1024).toFixed(2)+" مگابایت";});}
@@ -617,6 +621,7 @@ if ($page === 'ticket') {
    area.insertAdjacentElement("afterend",counter);area.addEventListener("input",update);update();
   });
   form.addEventListener("submit",function(event){
+   if(event.defaultPrevented){return;}
    var submitter=event.submitter,confirmText=submitter&&submitter.dataset.confirm?submitter.dataset.confirm:form.dataset.confirm;
    form.dataset.confirmHandled="1";
    if(confirmText&&!window.confirm(confirmText)){event.preventDefault();return;}
@@ -625,7 +630,15 @@ if ($page === 'ticket') {
    if(form.classList.contains("rating-card")&&!form.querySelector("[name=score]:checked")){event.preventDefault();var first=form.querySelector("[name=score]");if(first)first.focus();return;}
    if(form.dataset.submitting==="1"){event.preventDefault();return;}
    form.dataset.submitting="1";
-   // کلید نام/مقدار دکمهٔ ارسال (مثل decision=approve) باید در FormData بماند؛ دکمه غیرفعال نشود.
+   // حامل نام/مقدارِ همان دکمهٔ فشرده‌شده (مثل decision=approve): پاک‌سازی حامل‌های قدیمیِ همین فرم و تزریق یک نسخه؛
+   // چون دکمه ممکن است به‌واسطهٔ کش قدیمی غیرفعال شود، حامل تضمین می‌کند مقدار تصمیم به سرور می‌رسد.
+   var staleCarriers=form.querySelectorAll("input[data-rc-submit-carrier]");
+   for(var s=0;s<staleCarriers.length;s+=1){if(staleCarriers[s].parentNode){staleCarriers[s].parentNode.removeChild(staleCarriers[s]);}}
+   if(submitter&&submitter.form===form&&submitter.name){
+    var carrier=document.createElement("input");
+    carrier.type="hidden";carrier.name=submitter.name;carrier.value=submitter.value;carrier.setAttribute("data-rc-submit-carrier","1");
+    form.appendChild(carrier);
+   }
    form.setAttribute("aria-busy","true");
   });
  });

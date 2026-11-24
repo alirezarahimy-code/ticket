@@ -339,7 +339,7 @@ downloads/CHANGE-REPORT-FA-1.63.1-r17.md	history-downloads	994	59193
 downloads/CHANGE-REPORT-FA-1.63.1-r20-assets-tenter.md	history-downloads	35	2549
 downloads/CHANGE-REPORT-FA-1.63.1.md	history-downloads	509	29402
 downloads/CHANGE-REPORT-FA-1.63.2-r21-assets-tenter.md	history-downloads	36	4308
-downloads/CHANGE-REPORT-FA-1.63.3.md	history-downloads	240	61035
+downloads/CHANGE-REPORT-FA-1.63.3.md	history-downloads	249	64834
 downloads/CHANGE-REPORT-FA-1.63.md	history-downloads	455	126338
 downloads/CHANGE-REPORT-FA-asset-names.md	history-downloads	117	4741
 downloads/CHANGE-REPORT-FA-cd-org.md	history-downloads	235	11798
@@ -471,7 +471,7 @@ lib/logging-integrity.php	lib	237	15084
 lib/logging-replay.php	lib	260	18905
 lib/notify-users.php	lib	524	26237
 lib/org-grouping.php	lib	329	16243
-lib/release-notes.php	lib	416	50169
+lib/release-notes.php	lib	416	50413
 lib/render.php	lib	279	22479
 lib/settings-effects.php	lib	388	14577
 lib/system-alarms.php	lib	630	31397
@@ -539,7 +539,7 @@ modules/request-center/Pages/admin.php	other	383	34759
 modules/request-center/Pages/analytics.php	other	62	5889
 modules/request-center/Pages/calendar.php	other	1183	86660
 modules/request-center/Pages/create.php	other	357	33457
-modules/request-center/Pages/detail.php	other	641	68118
+modules/request-center/Pages/detail.php	other	654	69491
 modules/request-center/Pages/governance.php	other	159	20735
 modules/request-center/Pages/index.php	other	428	27820
 modules/request-center/Pages/knowledge.php	other	51	4584
@@ -550,7 +550,7 @@ modules/request-center/Pages/services.php	other	279	30112
 modules/request-center/Pages/supervisor-workspace.php	other	127	12368
 modules/request-center/Pages/supervisor.php	other	191	24638
 modules/request-center/Pages/unit.php	other	185	14005
-modules/request-center/README.md	other	374	51710
+modules/request-center/README.md	other	375	52344
 modules/request-center/RequestCenterRepository.php	other	661	33676
 modules/request-center/WorkflowService.php	other	387	18766
 modules/request-center/lib/.htaccess	config	2	197
@@ -780,7 +780,7 @@ tests/test_release_1_62_94_static.py	tests	233	12513
 tests/test_release_1_62_9_manual_ticket_date_guest_static.py	tests	170	8680
 tests/test_release_1_63_2_r21_package.py	tests	146	7075
 tests/test_release_1_63_3_day_close_guest_actuals_static.py	tests	317	16117
-tests/test_release_notes_popup.js	tests	193	9349
+tests/test_release_notes_popup.js	tests	193	9350
 tests/test_repair_16236_full_source_restore.py	tests	162	7687
 tests/test_request_center_access_matrix_static.py	tests	214	10391
 tests/test_request_center_appointment_concurrency_mariadb.php	tests	219	12763
@@ -824,7 +824,7 @@ tests/test_system_update_migration_registry.php	tests	67	2242
 tests/test_system_update_requires_version.php	tests	95	5750
 tests/test_technical_profile_form_refresh_static.py	tests	69	3911
 tests/test_ticket_auto_assignment_static.py	tests	23	1202
-tests/test_ticket_cancellation_static.py	tests	199	13381
+tests/test_ticket_cancellation_static.py	tests	208	14060
 tests/test_ticket_lifecycle_guide_static.py	tests	41	1801
 tests/test_ticket_number_autofill_unit.php	tests	158	7261
 tests/test_ticket_number_repair_static.py	tests	150	7076
@@ -1389,10 +1389,10 @@ updates/2026-11-05-ticket-hardening-1.62.87/manifest.json	history-updates	71	253
 updates/2026-11-05-ticket-number-repair-1.62.83/CHANGE-REPORT-FA-1.62.83.md	history-updates	172	10838
 updates/2026-11-05-ticket-number-repair-1.62.83/README.md	history-updates	13	912
 updates/2026-11-05-ticket-number-repair-1.62.83/manifest.json	history-updates	21	694
-updates/2026-11-19-release-1.63.3-absent-lunch-report/CHANGE-REPORT-FA.md	history-updates	240	61035
+updates/2026-11-19-release-1.63.3-absent-lunch-report/CHANGE-REPORT-FA.md	history-updates	249	64834
 updates/2026-11-19-release-1.63.3-absent-lunch-report/README.md	history-updates	23	2671
 updates/2026-11-19-release-1.63.3-absent-lunch-report/START.txt	history-updates	26	2551
-updates/2026-11-19-release-1.63.3-absent-lunch-report/build.py	history-updates	278	25184
+updates/2026-11-19-release-1.63.3-absent-lunch-report/build.py	history-updates	280	26794
 updates/2026-11-19-release-1.63.3-absent-lunch-report/files/VERSION	history-updates	1	7
 updates/2026-11-19-release-1.63.3-absent-lunch-report/files/admin-layout-design.php	history-updates	362	15846
 updates/2026-11-19-release-1.63.3-absent-lunch-report/files/api/inventory.php	history-updates	225	10666
@@ -1407,7 +1407,7 @@ updates/2026-11-19-release-1.63.3-absent-lunch-report/files/assets/style.css	his
 updates/2026-11-19-release-1.63.3-absent-lunch-report/files/bootstrap.php	history-updates	100	6048
 updates/2026-11-19-release-1.63.3-absent-lunch-report/files/cd-dvd.php	history-updates	981	77630
 updates/2026-11-19-release-1.63.3-absent-lunch-report/files/chatbot.php	history-updates	3426	183106
-updates/2026-11-19-release-1.63.3-absent-lunch-report/files/downloads/CHANGE-REPORT-FA-1.63.3.md	history-updates	240	61035
+updates/2026-11-19-release-1.63.3-absent-lunch-report/files/downloads/CHANGE-REPORT-FA-1.63.3.md	history-updates	249	64834
 updates/2026-11-19-release-1.63.3-absent-lunch-report/files/food-order-import.php	history-updates	480	26762
 updates/2026-11-19-release-1.63.3-absent-lunch-report/files/food-order.php	history-updates	4150	224729
 updates/2026-11-19-release-1.63.3-absent-lunch-report/files/food-reconciliation.php	history-updates	1433	76863
@@ -1425,12 +1425,12 @@ updates/2026-11-19-release-1.63.3-absent-lunch-report/files/help-guide.php	histo
 updates/2026-11-19-release-1.63.3-absent-lunch-report/files/index.php	history-updates	2559	258959
 updates/2026-11-19-release-1.63.3-absent-lunch-report/files/lib/fa-digits.php	history-updates	264	14279
 updates/2026-11-19-release-1.63.3-absent-lunch-report/files/lib/org-grouping.php	history-updates	329	16243
-updates/2026-11-19-release-1.63.3-absent-lunch-report/files/lib/release-notes.php	history-updates	416	50169
+updates/2026-11-19-release-1.63.3-absent-lunch-report/files/lib/release-notes.php	history-updates	416	50413
 updates/2026-11-19-release-1.63.3-absent-lunch-report/files/lib/render.php	history-updates	279	22479
 updates/2026-11-19-release-1.63.3-absent-lunch-report/files/modules/request-center/Actions/ticket-actions.php	history-updates	1438	104125
 updates/2026-11-19-release-1.63.3-absent-lunch-report/files/modules/request-center/Assets/request-center.js	history-updates	90	5147
 updates/2026-11-19-release-1.63.3-absent-lunch-report/files/modules/request-center/Pages/create.php	history-updates	357	33457
-updates/2026-11-19-release-1.63.3-absent-lunch-report/files/modules/request-center/Pages/detail.php	history-updates	641	68118
+updates/2026-11-19-release-1.63.3-absent-lunch-report/files/modules/request-center/Pages/detail.php	history-updates	654	69491
 updates/2026-11-19-release-1.63.3-absent-lunch-report/files/modules/request-center/RequestCenterRepository.php	history-updates	661	33676
 updates/2026-11-19-release-1.63.3-absent-lunch-report/files/modules/request-center/lib/functions.php	history-updates	958	50112
 updates/2026-11-19-release-1.63.3-absent-lunch-report/files/organization.php	history-updates	1105	54934
@@ -1445,11 +1445,11 @@ updates/2026-11-19-release-1.63.3-absent-lunch-report/files/tests/test_org_routi
 updates/2026-11-19-release-1.63.3-absent-lunch-report/files/tests/test_release_1_62_15_service_modal_fix_static.py	history-updates	121	6786
 updates/2026-11-19-release-1.63.3-absent-lunch-report/files/tests/test_release_1_62_5_theme_toggle_static.py	history-updates	42	1778
 updates/2026-11-19-release-1.63.3-absent-lunch-report/files/tests/test_request_center_t12_scenarios.php	history-updates	1104	69701
-updates/2026-11-19-release-1.63.3-absent-lunch-report/files/tests/test_ticket_cancellation_static.py	history-updates	199	13381
+updates/2026-11-19-release-1.63.3-absent-lunch-report/files/tests/test_ticket_cancellation_static.py	history-updates	208	14060
 updates/2026-11-19-release-1.63.3-absent-lunch-report/files/xlsx-writer.php	history-updates	268	14481
-updates/2026-11-19-release-1.63.3-absent-lunch-report/manifest.json	history-updates	127	18367
+updates/2026-11-19-release-1.63.3-absent-lunch-report/manifest.json	history-updates	127	19937
 updates/2026-11-19-release-1.63.3-absent-lunch-report/migrations/README.md	history-updates	3	136
-updates/2026-11-19-release-1.63.3-absent-lunch-report/src/CHANGE-REPORT-FA.md	history-updates	240	61035
+updates/2026-11-19-release-1.63.3-absent-lunch-report/src/CHANGE-REPORT-FA.md	history-updates	249	64834
 updates/2026-11-19-release-1.63.3-absent-lunch-report/src/README.md	history-updates	23	2671
 updates/2026-11-19-release-1.63.3-absent-lunch-report/src/START.txt	history-updates	26	2551
 updates/2026-11-19-release-1.63.3-absent-lunch-report/src/absent-lunch-module.js	history-updates	246	22455

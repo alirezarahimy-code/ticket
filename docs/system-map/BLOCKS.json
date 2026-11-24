@@ -42768,7 +42768,7 @@
             "path": "lib/release-notes.php",
             "area": "CORE",
             "lines": 417,
-            "file_fingerprint": "f4ea0014d195",
+            "file_fingerprint": "2ab07c599e4b",
             "blocks": [
                 {
                     "kind": "region",
@@ -42789,7 +42789,7 @@
                     "line_start": 31,
                     "line_end": 149,
                     "lines": 119,
-                    "fingerprint": "e44cf46e8c65",
+                    "fingerprint": "9c55a483da2a",
                     "risk": {
                         "score": 0,
                         "flags": []
@@ -58244,8 +58244,8 @@
             "id": "PAGE-054",
             "path": "modules/request-center/Pages/detail.php",
             "area": "PAGE",
-            "lines": 642,
-            "file_fingerprint": "e758cf4a2188",
+            "lines": 655,
+            "file_fingerprint": "8c6c4d9bc681",
             "blocks": [
                 {
                     "kind": "region",
@@ -58277,9 +58277,9 @@
                     "kind": "region",
                     "anchor": "مسیر: ticket",
                     "line_start": 17,
-                    "line_end": 642,
-                    "lines": 626,
-                    "fingerprint": "c8904ce962c1",
+                    "line_end": 655,
+                    "lines": 639,
+                    "fingerprint": "ecde1d04c6e2",
                     "risk": {
                         "score": 14,
                         "flags": {
@@ -84463,7 +84463,7 @@
             "path": "tests/test_release_notes_popup.js",
             "area": "TEST",
             "lines": 194,
-            "file_fingerprint": "ee125fd5eed3",
+            "file_fingerprint": "7af232534e21",
             "blocks": [
                 {
                     "kind": "block",
@@ -84575,7 +84575,7 @@
                     "line_start": 77,
                     "line_end": 78,
                     "lines": 2,
-                    "fingerprint": "340945727e98",
+                    "fingerprint": "198f9f624efe",
                     "risk": {
                         "score": 0,
                         "flags": []
@@ -90743,8 +90743,8 @@
             "id": "TEST-232",
             "path": "tests/test_ticket_cancellation_static.py",
             "area": "TEST",
-            "lines": 200,
-            "file_fingerprint": "17255d424a1e",
+            "lines": 209,
+            "file_fingerprint": "7363b3ad273d",
             "blocks": [
                 {
                     "kind": "block",
@@ -90779,9 +90779,9 @@
                     "kind": "block",
                     "anchor": "strip_php_comments",
                     "line_start": 159,
-                    "line_end": 200,
-                    "lines": 42,
-                    "fingerprint": "b61d0e0f24a7",
+                    "line_end": 209,
+                    "lines": 51,
+                    "fingerprint": "d4c3249b50d7",
                     "risk": {
                         "score": 0,
                         "flags": {}

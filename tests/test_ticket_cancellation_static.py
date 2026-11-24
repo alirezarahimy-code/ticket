@@ -184,6 +184,15 @@ check("save_setting('login_announcements'" in index
 check("data-announcements" in app_js and "setInterval" in app_js,
       "the browser rotates login messages one full scroll pass at a time")
 
+detail_php = (ROOT / "modules/request-center/Pages/detail.php").read_text(encoding="utf-8")
+check('id="rc-ticket-detail-interactions"' in detail_php
+      and 'form.setAttribute("data-rc-no-busy","1")' in detail_php
+      and 'data-rc-submit-carrier' in detail_php
+      and "event.submitter" in detail_php
+      and "event.defaultPrevented" in detail_php
+      and detail_php.index("event.defaultPrevented") < detail_php.index("data-rc-submit-carrier"),
+      "the inline detail-page handler (always fresh HTML) itself marks the decision form data-rc-no-busy and injects the pressed button's name/value carrier, so a stale external request-center.js cannot drop the decision")
+
 rc_js = (ROOT / "modules/request-center/Assets/request-center.js").read_text(encoding="utf-8")
 carrier_index = rc_js.find("data-rc-submit-carrier")
 disable_index = rc_js.find("button.disabled = true")
