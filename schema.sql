@@ -1544,6 +1544,25 @@ CREATE TABLE IF NOT EXISTS offline_map_features (
     KEY idx_offline_map_features_owner (created_by)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+CREATE TABLE IF NOT EXISTS offline_map_feature_attachments (
+    id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+    feature_id BIGINT UNSIGNED NOT NULL,
+    original_name VARCHAR(255) NOT NULL,
+    stored_name VARCHAR(80) NOT NULL,
+    mime_type VARCHAR(120) NOT NULL,
+    size_bytes BIGINT UNSIGNED NOT NULL,
+    uploaded_by BIGINT UNSIGNED NOT NULL,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (id),
+    KEY idx_map_attachment_feature (feature_id),
+    KEY idx_map_attachment_uploader (uploaded_by),
+    CONSTRAINT fk_map_attachment_feature
+        FOREIGN KEY (feature_id) REFERENCES offline_map_features(id)
+        ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+
+
 -- رجیستری مهاجرت‌های اجراشده. تا پیش از این فقط system-update.php آن را
 -- در لحظهٔ نیاز می‌ساخت؛ بودنش در اسکیمای پایه، نصب تازه را هم‌شکل می‌کند.
 CREATE TABLE IF NOT EXISTS schema_updates (
@@ -1619,5 +1638,6 @@ INSERT IGNORE INTO schema_updates (version, migration) VALUES
     -- ۰۳۵: جدولش را همین اسکیما چند خط بالاتر می‌سازد؛ بدون این ردیف، نصب تازه
     -- هشدار کاذب «۰۳۵ اجرا نشده» می‌داد. فایل مهاجرت هم idempotent است.
     ('1.63', '035-request-center-appointments.sql'),
-    ('1.63', '038-offline-map-features.sql');
+    ('1.63', '038-offline-map-features.sql'),
+    ('1.63', '039-offline-map-attachments.sql');
 
