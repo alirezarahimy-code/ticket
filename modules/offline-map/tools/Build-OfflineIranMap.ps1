@@ -35,7 +35,7 @@ Write-Host "ورودی: $SourcePbf"
 Write-Host ("حجم PBF: {0:N2} MB" -f ($sourceInfo.Length / 1MB))
 Write-Host "خروجی: $OutputPmtiles"
 Write-Host 'این مرحله فقط بستهٔ کاشی را تولید می‌کند؛ style، فونت، آیکون، جست‌وجو و مرزهای رسمی مراحل جداگانه‌اند.'
-$argsList = @("--osm-path=$SourcePbf", "--output=$OutputPmtiles", '--force', '--memory=1g') + $AdditionalPlanetilerArgs
+$argsList = @("--osm-path=$SourcePbf", "--output=$OutputPmtiles", '--force', '--memory=6g', '--all-names=true') + $AdditionalPlanetilerArgs
 Push-Location (Split-Path -Parent $PlanetilerExe)
 try { & $PlanetilerExe @argsList; $exitCode = $LASTEXITCODE }
 finally { Pop-Location }
