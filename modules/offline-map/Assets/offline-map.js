@@ -29,7 +29,7 @@
   }
   function setTool(tool, preserveVertices) {
     state.tool = tool;
-    if (!preserveVertices) state.vertices = [];
+    if (!preserveVertices) { state.vertices = []; state.editId = 0; }
     document.querySelectorAll('[data-tool]').forEach(function (button) {
       button.classList.toggle('is-active', button.getAttribute('data-tool') === tool);
     });
