@@ -394,13 +394,18 @@ function food_reconciliation_rows(string $from, string $to, string $mealFilter =
     return $items;
 }
 
-function food_reconciliation_invoice_rows(string $monthStart): array
+function food_reconciliation_invoice_rows(?string $monthStart = null): array
 {
     food_reconciliation_schema_ensure();
-    $stmt = db()->prepare('SELECT id, invoice_month, invoice_date, supplier_name, invoice_number,
+    $sql = 'SELECT id, invoice_month, invoice_date, supplier_name, invoice_number,
             portion_count, amount_irr, finalized_at, original_name, mime_type, size_bytes, created_at
-        FROM food_monthly_invoices WHERE invoice_month = ? ORDER BY invoice_date DESC, id DESC');
-    $stmt->execute([$monthStart]);
+        FROM food_monthly_invoices';
+    if ($monthStart !== null) {
+        $stmt = db()->prepare($sql . ' WHERE invoice_month = ? ORDER BY invoice_date DESC, id DESC');
+        $stmt->execute([$monthStart]);
+    } else {
+        $stmt = db()->query($sql . ' ORDER BY invoice_month DESC, invoice_date DESC, id DESC');
+    }
     return array_map(static function (array $row): array {
         return [
             'id' => (int) $row['id'],
@@ -453,6 +458,7 @@ function food_reconciliation_report(string $fromRaw, string $toRaw, string $meal
     $items = food_reconciliation_rows($from, $to, $meal);
     $monthItems = food_reconciliation_rows($monthFrom, $monthTo, 'all');
     $invoices = food_reconciliation_invoice_rows($monthStart);
+    $invoiceHistory = food_reconciliation_invoice_rows();
 
     $summary = [
         'current_active_employee_orders' => 0,
@@ -526,6 +532,7 @@ function food_reconciliation_report(string $fromRaw, string $toRaw, string $meal
         'month' => food_reconciliation_month_key($monthStart),
         'items' => $items,
         'invoices' => $invoices,
+        'invoice_history' => $invoiceHistory,
         'summary' => $summary,
         'month_summary' => $monthSummary,
     ];

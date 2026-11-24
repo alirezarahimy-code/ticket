@@ -59,6 +59,7 @@
     reconciliationFrom: '',
     reconciliationTo: '',
     reconciliationMonth: '',
+    reconciliationTab: 'daily',
     reconciliationMealType: 'all',
     reconciliationForm: { food_date: '', meal_type: 'lunch', portion_quantity: '', note: '', edit_reason: '' },
     leftoverModal: null,
@@ -1073,7 +1074,7 @@
     var invoiceDateIso = normalizeIsoDate(invoiceDraft.invoice_date || '');
     var invoiceDateInput = invoiceDateIso ? jalaliFromIso(invoiceDateIso) : String(invoiceDraft.invoice_date || '');
     var invoiceMonthValue = invoiceDraft.invoice_month || month;
-    var invoiceRows = Array.isArray(report.invoices) ? report.invoices : [];
+    var invoiceRows = Array.isArray(report.invoice_history) ? report.invoice_history : (Array.isArray(report.invoices) ? report.invoices : []);
     var dailyRows = Array.isArray(report.items) ? report.items : [];
     var difference = monthSummary.invoice_difference;
     var differenceLabel = difference == null
@@ -1130,13 +1131,20 @@
       : '';
     var invoiceTable = invoiceRows.length ? '<div class="fm-table-wrap"><table class="fm-rows"><thead><tr><th>ماه</th><th>تاریخ</th><th>پیمانکار</th><th>شمارهٔ فاکتور</th><th>پرس</th><th>مبلغ (ریال)</th><th>وضعیت</th><th>فایل</th></tr></thead><tbody>'
       + invoiceRows.map(function (invoice) {
-        return '<tr><td>' + esc(faDigits(month)) + '</td><td>' + esc(faDigits(jalaliFromIso(invoice.invoice_date) || invoice.invoice_date || '—')) + '</td><td>' + esc(invoice.supplier_name || '—') + '</td><td>' + esc(invoice.invoice_number || '—') + '</td><td>' + reconciliationNumber(invoice.portion_count) + '</td><td>' + reconciliationAmount(invoice.amount_irr) + '</td><td>' + (invoice.is_finalized ? 'نهایی‌شده' : 'قدیمی · نهایی‌نشده') + '</td><td><a class="btn secondary" href="' + esc(buildUrl('food-menu/invoice-file', { id: invoice.id })) + '" target="_blank" rel="noopener">دریافت امن · ' + esc(invoice.original_name || 'فاکتور') + '</a></td></tr>';
-      }).join('') + '</tbody></table></div>' : '<div class="fm-empty">برای این ماه فاکتوری ثبت نشده است.</div>';
+        return '<tr><td>' + esc(faDigits((jalaliFromIso(invoice.invoice_month) || invoice.invoice_month || month).slice(0, 7))) + '</td><td>' + esc(faDigits(jalaliFromIso(invoice.invoice_date) || invoice.invoice_date || '—')) + '</td><td>' + esc(invoice.supplier_name || '—') + '</td><td>' + esc(invoice.invoice_number || '—') + '</td><td>' + reconciliationNumber(invoice.portion_count) + '</td><td>' + reconciliationAmount(invoice.amount_irr) + '</td><td>' + (invoice.is_finalized ? 'نهایی‌شده' : 'قدیمی · نهایی‌نشده') + '</td><td><a class="btn secondary" href="' + esc(buildUrl('food-menu/invoice-file', { id: invoice.id })) + '" target="_blank" rel="noopener">دریافت امن · ' + esc(invoice.original_name || 'فاکتور') + '</a></td></tr>';
+      }).join('') + '</tbody></table></div>' : '<div class="fm-empty">هیچ فاکتوری ثبت نشده است.</div>';
     var loading = state.reconciliationLoading ? '<div class="fm-spinner">در حال دریافت گزارش تطبیق…</div>' : '';
     var errors = !state.reconciliationLoaded && !state.reconciliationLoading ? '<div class="fm-empty">برای دریافت گزارش، بازهٔ تاریخ و ماه را انتخاب کنید.</div>' : '';
+    var invoiceTab = state.reconciliationTab === 'invoice';
+    var tabs = '<div class="fm-reconciliation-tabs" role="tablist" aria-label="بخش‌های تطبیق خرید و توزیع">'
+      + '<button type="button" role="tab" aria-selected="' + (!invoiceTab) + '" class="fm-reconciliation-tab' + (!invoiceTab ? ' active' : '') + '" data-fm-action="reconciliation-tab" data-tab="daily">تطبیق روزانه</button>'
+      + '<button type="button" role="tab" aria-selected="' + invoiceTab + '" class="fm-reconciliation-tab' + (invoiceTab ? ' active' : '') + '" data-fm-action="reconciliation-tab" data-tab="invoice">مبلغ و فاکتور</button></div>';
+    var dailyFilter = !invoiceTab ? '<form id="fm-reconciliation-filter" class="fm-order-date"><label class="fm-field">از تاریخ شمسی<input type="text" name="from" data-jalali inputmode="numeric" placeholder="۱۴۰۵/۰۷/۰۱" value="' + esc(faDigits(from)) + '" required></label><label class="fm-field">تا تاریخ شمسی<input type="text" name="to" data-jalali inputmode="numeric" placeholder="۱۴۰۵/۰۷/۳۰" value="' + esc(faDigits(to)) + '" required></label><label class="fm-field">وعده<select name="meal_type"><option value="all"' + (state.reconciliationMealType === 'all' ? ' selected' : '') + '>همه</option><option value="lunch"' + (state.reconciliationMealType === 'lunch' ? ' selected' : '') + '>ناهار</option><option value="dinner"' + (state.reconciliationMealType === 'dinner' ? ' selected' : '') + '>شام</option></select></label><button class="btn primary" type="submit">نمایش گزارش</button></form>' : '';
+    var invoiceFilter = invoiceTab ? '<form id="fm-reconciliation-invoice-filter" class="fm-order-date"><label class="fm-field">ماه فاکتور (شمسی)<input type="text" name="month" data-jalali-month inputmode="numeric" placeholder="۱۴۰۵/۰۷" value="' + esc(faDigits(month)) + '" required></label><button class="btn primary" type="submit">نمایش مبلغ و فاکتور</button></form>' : '';
+    var dailyContent = '<section class="fm-section-gap"><h3>تطبیق روزانه</h3>' + dailyTable + '</section>' + dailyForm + renderGuestActualModal() + renderLeftoverModal();
+    var invoiceContent = '<section class="fm-section-gap"><h3>خلاصهٔ مبلغ و فاکتور ماه ' + esc(faDigits(month)) + '</h3>' + invoiceSummary + '<div class="fm-alert">«پرس فاکتور ماهانه» و «جمع تحویل روزانه» دو عدد مستقل‌اند؛ فقط اختلافشان گزارش می‌شود و هرگز با هم جمع نمی‌شوند.</div>' + monthlyPriceTable + '</section><section class="fm-section-gap"><h3>فاکتورهای ثبت‌شدهٔ ماه‌های قبل و ماه جاری</h3>' + invoiceTable + '</section>' + invoiceForm;
     return '<section class="fm-card fm-reconciliation-report"><div class="fm-toolbar"><div><h3>تطبیق سفارش، خرید و توزیع غذا</h3><span class="fm-small">تقاضای کل = سفارش فعال پرسنل + درخواست فعال مهمان (نفرات)؛ لغوشده‌ها جدا هستند و وارد این جمع نمی‌شوند. کسری/اضافهٔ سفارش روی همین تقاضای کل است.</span></div><button class="btn secondary" type="button" data-fm-action="reconciliation-export"' + (!state.reconciliationLoaded || state.reconciliationLoading ? ' disabled' : '') + '>خروجی Excel</button></div>'
-      + '<form id="fm-reconciliation-filter" class="fm-order-date"><label class="fm-field">از تاریخ شمسی<input type="text" name="from" data-jalali inputmode="numeric" placeholder="۱۴۰۵/۰۷/۰۱" value="' + esc(faDigits(from)) + '" required></label><label class="fm-field">تا تاریخ شمسی<input type="text" name="to" data-jalali inputmode="numeric" placeholder="۱۴۰۵/۰۷/۳۰" value="' + esc(faDigits(to)) + '" required></label><label class="fm-field">ماه فاکتور (شمسی)<input type="text" name="month" data-jalali-month inputmode="numeric" placeholder="۱۴۰۵/۰۷" value="' + esc(faDigits(month)) + '" required></label><label class="fm-field">وعده<select name="meal_type"><option value="all"' + (state.reconciliationMealType === 'all' ? ' selected' : '') + '>همه</option><option value="lunch"' + (state.reconciliationMealType === 'lunch' ? ' selected' : '') + '>ناهار</option><option value="dinner"' + (state.reconciliationMealType === 'dinner' ? ' selected' : '') + '>شام</option></select></label><button class="btn primary" type="submit">نمایش گزارش</button></form>'
-      + loading + errors + (state.reconciliationLoaded ? invoiceSummary + monthlyPriceTable + '<div class="fm-alert">«پرس فاکتور ماهانه» و «جمع تحویل روزانه» دو عدد مستقل‌اند؛ فقط اختلافشان گزارش می‌شود و هرگز با هم جمع نمی‌شوند. «پرس سفارش/تحویل پیمانکار» در این جدول یک عدد واحد است (در ۹۹٫۹٪ موارد سفارش و تحویل برابرند).</div><section class="fm-section-gap"><h3>تطبیق روزانه</h3>' + dailyTable + '</section>' + dailyForm + '<section class="fm-section-gap"><h3>فاکتورهای ماه ' + esc(faDigits(month)) + '</h3>' + invoiceTable + '</section>' + invoiceForm + renderGuestActualModal() + renderLeftoverModal() : '') + renderInvoicePriceModal() + '</section>';
+      + tabs + dailyFilter + invoiceFilter + loading + errors + (state.reconciliationLoaded ? (invoiceTab ? invoiceContent : dailyContent) : '') + renderInvoicePriceModal() + '</section>';
   }
 
   function renderInvoicePriceModal() {
@@ -1292,7 +1300,7 @@
       else if(m.peopleLoaded&&m.people&&m.people.length) peopleContent=m.people.map(function(person){var id=Number(person.id),checked=Object.prototype.hasOwnProperty.call(selected,String(id));return '<div class="fm-leftover-person" data-leftover-person-row><label><input type="checkbox" data-leftover-person-id="'+id+'"'+(checked?' checked':'')+'><span class="fm-leftover-person-label">'+esc(person.name||'')+'</span></label><input type="number" min="1" step="1" inputmode="numeric" value="'+esc(checked?asciiDigits(selected[String(id)]):'1')+'" data-leftover-person-qty="'+id+'"'+(checked?'':' disabled')+'></div>';}).join('');
       else peopleContent='<div class="fm-empty">فهرست پرسنل در دسترس نیست.</div>';
     }
-    return '<div class="fm-leftover-backdrop" popover="manual" data-fm-action="leftover-backdrop"><section class="fm-leftover-modal" role="dialog" aria-modal="true" aria-labelledby="fm-leftover-title"><header><h3 id="fm-leftover-title">تعیین تکلیف غذای باقیمانده</h3><p>مانده: <b>'+faDigits(remaining)+'</b> پرس · '+esc(dateJalali)+' · '+esc(mealLabel)+'</p></header><div class="fm-leftover-modal-body" id="fm-leftover-form"><p class="fm-leftover-hint">مجموع تعدادهای تخصیص‌یافته باید دقیقاً برابر مانده باشد.</p><div class="fm-leftover-row fm-leftover-staff"><label class="fm-leftover-check"><input type="checkbox" name="opt_staff" data-leftover-opt="staff"'+(staffEnabled?' checked':'')+'><b>توزیع بین پرسنل</b></label><strong>تعداد انتخاب‌شده: <span data-leftover-staff-total>'+faDigits(leftoverSelectedTotal(selected))+'</span></strong></div><div class="fm-leftover-people"'+(staffEnabled?'':' hidden')+'><label class="fm-field">جستجوی پرسنل<input type="search" data-leftover-people-search placeholder="نام یا کد پرسنلی" autocomplete="off" value="'+esc(m.peopleQuery||'')+'"></label><div class="fm-leftover-people-list">'+peopleContent+'</div></div>'+row('waste','دورریز (ضایعات)')+row('keep','نگه‌داری برای وعدهٔ بعد')+row('other','سایر')+'<label class="fm-leftover-note">یادداشت سایر (اختیاری)<textarea name="leftover_other_note" rows="2" maxlength="500">'+esc(m.otherNote||'')+'</textarea></label><div class="fm-leftover-error" id="fm-leftover-error" role="alert"></div></div><footer><button type="button" class="btn secondary" data-fm-action="leftover-cancel">انصراف</button><button type="button" class="btn primary" data-fm-action="leftover-confirm">ثبت نهایی</button></footer></section></div>';
+    return '<div class="fm-leftover-backdrop fm-leftover-assignment-backdrop" popover="manual" data-fm-action="leftover-backdrop"><section class="fm-leftover-modal fm-leftover-assignment-modal" role="dialog" aria-modal="true" aria-labelledby="fm-leftover-title"><header><h3 id="fm-leftover-title">تعیین تکلیف غذای باقیمانده</h3><p>مانده: <b>'+faDigits(remaining)+'</b> پرس · '+esc(dateJalali)+' · '+esc(mealLabel)+'</p></header><div class="fm-leftover-modal-body" id="fm-leftover-form"><p class="fm-leftover-hint">مجموع تعدادهای تخصیص‌یافته باید دقیقاً برابر مانده باشد.</p><div class="fm-leftover-row fm-leftover-staff"><label class="fm-leftover-check"><input type="checkbox" name="opt_staff" data-leftover-opt="staff"'+(staffEnabled?' checked':'')+'><b>توزیع بین پرسنل</b></label><strong>تعداد انتخاب‌شده: <span data-leftover-staff-total>'+faDigits(leftoverSelectedTotal(selected))+'</span></strong></div><div class="fm-leftover-people"'+(staffEnabled?'':' hidden')+'><label class="fm-field">جستجوی پرسنل<input type="search" data-leftover-people-search placeholder="نام یا کد پرسنلی" autocomplete="off" value="'+esc(m.peopleQuery||'')+'"></label><div class="fm-leftover-people-list">'+peopleContent+'</div></div>'+row('waste','دورریز (ضایعات)')+row('keep','نگه‌داری برای وعدهٔ بعد')+row('other','سایر')+'<label class="fm-leftover-note">یادداشت سایر (اختیاری)<textarea name="leftover_other_note" rows="2" maxlength="500">'+esc(m.otherNote||'')+'</textarea></label><div class="fm-leftover-error" id="fm-leftover-error" role="alert"></div></div><footer><button type="button" class="btn secondary" data-fm-action="leftover-cancel">انصراف</button><button type="button" class="btn primary" data-fm-action="leftover-confirm">ثبت نهایی</button></footer></section></div>';
   }
 
   function leftoverLiveInput(event) {
@@ -2816,6 +2824,7 @@
       if (act === 'guest-actual-cancel' || act === 'guest-actual-backdrop') { if (act === 'guest-actual-backdrop' && event.target !== action) return; state.guestActualModal = null; state.error = ''; render(); return; }
       if (act === 'guest-actual-confirm') { confirmGuestActualModal(); return; }
       if (act === 'leftover-confirm') { confirmLeftoverModal(); return; }
+      if (act === 'reconciliation-tab') { state.reconciliationTab = action.dataset.tab === 'invoice' ? 'invoice' : 'daily'; state.error = ''; render(); return; }
       if (act === 'reconciliation-export') downloadReconciliation();
       if (act === 'reconciliation-select') selectReconciliationRow(action.dataset.date || '', action.dataset.meal || 'lunch');
       if (act === 'reconciliation-reset') {
@@ -2973,13 +2982,20 @@
       var recFilter = new FormData(form);
       var recFrom = normalizeIsoDate(recFilter.get('from'));
       var recTo = normalizeIsoDate(recFilter.get('to'));
-      var recMonth = normalizeJalaliMonth(recFilter.get('month'));
       var recMeal = String(recFilter.get('meal_type') || 'all');
-      if (!recFrom || !recTo || !recMonth) { state.error = 'بازهٔ تاریخ و ماه شمسی را به‌درستی وارد کنید.'; render(); return; }
+      if (!recFrom || !recTo) { state.error = 'بازهٔ تاریخ شمسی را به‌درستی وارد کنید.'; render(); return; }
       if (recFrom > recTo) { state.error = 'تاریخ پایان باید برابر یا پس از شروع باشد.'; render(); return; }
-      state.reconciliationFrom = recFrom; state.reconciliationTo = recTo; state.reconciliationMonth = recMonth;
+      state.reconciliationFrom = recFrom; state.reconciliationTo = recTo;
       state.reconciliationMealType = ['all', 'lunch', 'dinner'].includes(recMeal) ? recMeal : 'all';
-      loadReconciliation(recFrom, recTo, state.reconciliationMealType, recMonth); return;
+      state.reconciliationTab = 'daily';
+      loadReconciliation(recFrom, recTo, state.reconciliationMealType, state.reconciliationMonth); return;
+    }
+    if (form.id === 'fm-reconciliation-invoice-filter') {
+      event.preventDefault();
+      var invoiceMonth = normalizeJalaliMonth(new FormData(form).get('month'));
+      if (!invoiceMonth) { state.error = 'ماه شمسی را به‌شکل سال/ماه وارد کنید.'; render(); return; }
+      state.reconciliationMonth = invoiceMonth; state.reconciliationTab = 'invoice';
+      loadReconciliation(state.reconciliationFrom, state.reconciliationTo, state.reconciliationMealType, invoiceMonth); return;
     }
     if (form.id === 'fm-reconciliation-form') {
       event.preventDefault();

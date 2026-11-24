@@ -109,3 +109,25 @@ def test_leftover_person_rows_show_full_names_only_with_aligned_checkboxes():
     css = (ROOT / "assets/food-menu.css").read_text()
     assert "grid-template-columns:20px max-content 76px" in css
     assert "overflow:visible;text-overflow:clip" in css
+
+
+def test_leftover_assignment_modal_uses_fullscreen_and_unclipped_people_list():
+    js = (ROOT / "assets/food-menu.js").read_text()
+    assert "fm-leftover-assignment-backdrop" in js
+    assert "fm-leftover-assignment-modal" in js
+    css = (ROOT / "assets/food-menu.css").read_text()
+    assert "width:100vw!important;height:100vh!important;height:100dvh!important" in css
+    assert "fm-leftover-assignment-modal .fm-leftover-people-list{flex:1 1 auto;min-height:0;overflow:auto}" in css
+    assert ".fm-leftover-row:not(.fm-leftover-staff) .fm-leftover-count" in css
+
+
+def test_reconciliation_invoice_content_is_separated_into_invoice_tab():
+    js = (ROOT / "assets/food-menu.js").read_text()
+    assert "data-tab=\"invoice\">مبلغ و فاکتور" in js
+    assert "fm-reconciliation-invoice-filter" in js
+    assert "var invoiceContent =" in js
+    assert "invoiceTab ? invoiceContent : dailyContent" in js
+    assert "فاکتورهای ثبت‌شدهٔ ماه‌های قبل و ماه جاری" in js
+    php = (ROOT / "food-reconciliation.php").read_text()
+    assert "function food_reconciliation_invoice_rows(?string $monthStart = null)" in php
+    assert "'invoice_history' => $invoiceHistory" in php

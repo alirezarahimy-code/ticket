@@ -386,7 +386,7 @@
 .fm-leftover-modal footer{display:flex;justify-content:flex-end;gap:8px;padding:0 20px 16px}
 .fm-gap-extra b{color:#087e72;font-size:14px}
 .fm-reconciliation-auto-hint{margin:4px 0 0;padding:9px 12px;border:1px dashed #d3e4e1;border-radius:10px;background:#fbfdfc;color:#5f7a76}
-@media(max-width:520px){.fm-leftover-row{flex-wrap:wrap}.fm-leftover-count{margin-right:26px}.fm-leftover-person{grid-template-columns:18px max-content 56px;width:max-content;min-width:100%;gap:6px}.fm-leftover-person label{grid-template-columns:18px max-content;gap:6px}.fm-leftover-person input[type=number][data-leftover-person-qty]{width:56px;min-width:56px}}
+@media(max-width:520px){.fm-leftover-row:not(.fm-leftover-staff){flex-wrap:nowrap;gap:8px}.fm-leftover-count{margin:0;width:76px;min-width:76px}.fm-leftover-person{grid-template-columns:18px max-content 56px;width:max-content;min-width:100%;gap:6px}.fm-leftover-person label{grid-template-columns:18px max-content;gap:6px}.fm-leftover-person input[type=number][data-leftover-person-qty]{width:56px;min-width:56px}}
 
 
 /* 1.62.93 follow-up: cancel-request cutoff + compact date/meal fields + wide single-line reason */
@@ -458,3 +458,17 @@
 .alr-chart-summary{display:block;margin:12px 0 2px;padding:10px 12px;border:1px solid var(--food-line);border-radius:9px;background:var(--food-paper);color:var(--navy);text-align:center;font-size:16px;font-weight:800;line-height:1.5;white-space:nowrap;overflow-x:auto}
 .alr-chart-summary b{font-size:18px;font-weight:900;color:var(--teal)}
 @media print{#alrPrint .alr-print-chart{display:block!important;break-inside:avoid;page-break-inside:avoid}#alrPrint .alr-chart-summary{white-space:nowrap;overflow:visible;border:1px solid #333;color:#111;background:#fff!important;font-size:14px}#alrPrint .alr-chart-summary b{color:#111!important}}
+
+/* نمای تمام‌صفحهٔ تعیین تکلیف مانده؛ فهرست پرسنل فضای اصلی را می‌گیرد و پیمایش مستقل دارد. */
+.fm-leftover-row:not(.fm-leftover-staff){direction:rtl;flex-wrap:nowrap;align-items:center}
+.fm-leftover-row:not(.fm-leftover-staff) .fm-leftover-count{margin:0;flex:0 0 92px;width:92px;min-width:92px}
+.fm-leftover-assignment-backdrop{padding:0!important;place-items:stretch!important;overflow:hidden!important}
+.fm-leftover-assignment-modal{width:100vw!important;height:100vh!important;height:100dvh!important;max-width:none!important;max-height:none!important;border-radius:0!important;display:flex;flex-direction:column;overflow:hidden}
+.fm-leftover-assignment-modal header,.fm-leftover-assignment-modal footer{flex:0 0 auto}
+.fm-leftover-assignment-modal .fm-leftover-modal-body{flex:1 1 auto;min-height:0;overflow:auto;display:flex;flex-direction:column}
+.fm-leftover-assignment-modal .fm-leftover-people{flex:1 1 45vh;min-height:220px;max-height:none;overflow:hidden;display:flex;flex-direction:column}
+.fm-leftover-assignment-modal .fm-leftover-people-list{flex:1 1 auto;min-height:0;overflow:auto}
+@media(max-width:520px){.fm-leftover-row:not(.fm-leftover-staff) .fm-leftover-count{flex-basis:76px;width:76px;min-width:76px}.fm-leftover-assignment-modal header{padding:12px 14px}.fm-leftover-assignment-modal .fm-leftover-modal-body{padding:10px 12px 4px}.fm-leftover-assignment-modal footer{padding:0 12px 12px}}
+.fm-reconciliation-tabs{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0;padding-bottom:8px;border-bottom:1px solid #dce5e6}
+.fm-reconciliation-tab{border:1px solid #d5e0e2;border-radius:9px;background:#f7f9fa;color:#526970;padding:9px 16px;font:inherit;font-weight:800;cursor:pointer}
+.fm-reconciliation-tab.active{background:#087f78;border-color:#087f78;color:#fff}
