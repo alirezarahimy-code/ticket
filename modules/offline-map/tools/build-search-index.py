@@ -37,7 +37,7 @@ def tags_dict(tags) -> dict[str, str]:
     return {tag.k: tag.v for tag in tags}
 
 def classify(tags: dict[str, str]) -> tuple[str, str, int] | None:
-    if tags.get("addr:housenumber") or tags.get("addr:street"):
+    if tags.get("addr:housenumber") or (tags.get("addr:street") and not tags.get("highway")):
         return ("address", "house_number", 100)
     if tags.get("highway"):
         highway = tags["highway"]
