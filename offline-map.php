@@ -75,10 +75,15 @@ $normaliseGeometry = static function (array $geometry): array {
     if ($type === 'Point' && $count !== 1) throw new InvalidArgumentException('نقطه باید دقیقاً یک مختصات داشته باشد.');
     if ($type === 'LineString' && (count($coords) < 2 || count($coords) > 10000)) throw new InvalidArgumentException('خط باید حداقل دو رأس داشته باشد.');
     if ($type === 'Polygon') {
-        if (!$coords || !isset($coords[0]) || count($coords[0]) < 4) throw new InvalidArgumentException('محدوده باید حداقل سه رأس و یک نقطهٔ پایانی بسته داشته باشد.');
-        $ring = $coords[0]; $first = $ring[0]; $last = $ring[count($ring) - 1];
-        if ((float) $first[0] !== (float) $last[0] || (float) $first[1] !== (float) $last[1]) {
-            throw new InvalidArgumentException('حلقهٔ چندضلعی باید بسته باشد.');
+        if (!$coords || !isset($coords[0])) throw new InvalidArgumentException('محدوده باید حداقل یک حلقه داشته باشد.');
+        foreach ($coords as $ring) {
+            if (!is_array($ring) || count($ring) < 4) throw new InvalidArgumentException('هر حلقهٔ محدوده باید حداقل سه رأس و یک نقطهٔ پایانی بسته داشته باشد.');
+            $first = $ring[0]; $last = $ring[count($ring) - 1];
+            if (!is_array($first) || !is_array($last)
+                || (float) $first[0] !== (float) $last[0]
+                || (float) $first[1] !== (float) $last[1]) {
+                throw new InvalidArgumentException('تمام حلقه‌های چندضلعی باید بسته باشند.');
+            }
         }
     }
     return ['type' => $type, 'coordinates' => $coords];
