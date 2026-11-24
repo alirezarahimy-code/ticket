@@ -28,6 +28,9 @@ $pmtilesLibraryPath = __DIR__ . '/../vendor/pmtiles.js';
 $mapCssPath = __DIR__ . '/../vendor/maplibre-gl.css';
 $mapReady = is_file($mapDataPath) && $manifestReady && $styleIsOffline && is_file($mapLibraryPath) && is_file($pmtilesLibraryPath) && is_file($mapCssPath);
 $searchReady = is_file($dataDir . '/search.sqlite');
+$officialBoundariesReady = is_file($dataDir . '/overlays/official-boundaries.geojson');
+$municipalDistrictsReady = is_file($dataDir . '/overlays/municipal-districts.geojson');
+$transitOverlayReady = is_file($dataDir . '/overlays/transit.geojson');
 $features = $schemaReady ? $mapRepo->search(trim((string) ($_GET['q'] ?? '')), 1000) : [];
 render_header('سامانه اطلاعات مکانی آفلاین ایران', $user);
 ?>
@@ -60,7 +63,7 @@ render_header('سامانه اطلاعات مکانی آفلاین ایران', 
       </div>
     </div>
     <div class="offline-map-canvas-inner">
-      <div id="offline-map-map" data-map-ready="<?= $mapReady ? '1' : '0' ?>" data-can-edit="<?= $canManageFeatures ? '1' : '0' ?>" data-can-admin="<?= user_can($user, 'map.admin') ? '1' : '0' ?>" data-user-id="<?= (int) $user['id'] ?>" aria-label="نقشهٔ تعاملی آفلاین ایران">
+      <div id="offline-map-map" data-map-ready="<?= $mapReady ? '1' : '0' ?>" data-can-edit="<?= $canManageFeatures ? '1' : '0' ?>" data-can-admin="<?= user_can($user, 'map.admin') ? '1' : '0' ?>" data-user-id="<?= (int) $user['id'] ?>" data-official-boundaries="<?= $officialBoundariesReady ? '1' : '0' ?>" data-municipal-districts="<?= $municipalDistrictsReady ? '1' : '0' ?>" data-transit-overlay="<?= $transitOverlayReady ? '1' : '0' ?>" aria-label="نقشهٔ تعاملی آفلاین ایران">
       <?php if (!$mapReady): ?><div class="offline-map-empty"><span class="offline-map-globe">◎</span><strong>محیط نقشهٔ ایران</strong><span>پس از نصب بستهٔ داده فعال می‌شود.</span></div><?php endif; ?>
       </div>
       <div class="offline-map-compass" aria-hidden="true">N</div>
@@ -88,8 +91,11 @@ render_header('سامانه اطلاعات مکانی آفلاین ایران', 
         <label><input type="checkbox" data-layer-toggle="user" checked> عوارض سازمانی</label>
         <label><input type="checkbox" data-layer-toggle="roads" checked> معابر</label>
         <label><input type="checkbox" data-layer-toggle="places" checked> مکان‌ها و خدمات</label>
-        <label><input type="checkbox" data-layer-toggle="boundaries" checked> مرزهای اداری</label>
+        <label><input type="checkbox" data-layer-toggle="boundaries" checked> مرزهای اداری پایه</label>
+        <label><input type="checkbox" data-layer-toggle="official-boundaries" checked> مرزهای رسمی</label>
+        <label><input type="checkbox" data-layer-toggle="districts" checked> مناطق شهرداری</label>
         <label><input type="checkbox" data-layer-toggle="transport" checked> حمل‌ونقل عمومی</label>
+        <label class="offline-map-opacity-control">شفافیت مناطق <input id="offline-map-district-opacity" type="range" min="5" max="80" value="22"></label>
       </div>
       <p class="muted small">فعال‌سازی هر لایهٔ پایه به وجود دادهٔ متناظر در بستهٔ نقشه وابسته است.</p>
     </section>
