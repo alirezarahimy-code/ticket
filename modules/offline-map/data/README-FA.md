@@ -1,15 +1,44 @@
 # بستهٔ دادهٔ نقشهٔ آفلاین ایران
 
-این پوشه محل استقرار بستهٔ تولیدشدهٔ نقشه است؛ فایل‌های حجیم نقشه در مخزن کد قرار نمی‌گیرند.
+این پوشه محل استقرار دادهٔ پایه و لایه‌های تکمیلی است. فایل خام PBF و فایل SQLite در Git قرار نمی‌گیرند.
 
-فایل منبع ورودی را خارج از Git در `source/iran-latest.osm.pbf` قرار دهید. ابزار تولید در `../tools/Build-OfflineIranMap.ps1` خروجی `iran.pmtiles` و `manifest.json` را می‌سازد. کنترل بسته با `../tools/Test-OfflineIranMapPackage.ps1` انجام می‌شود.
+## ساختار نهایی
 
-ساختار مورد انتظار:
-- `iran.pmtiles`: کاشی‌های برداری کل کشور با attribution و نسخهٔ منبع مشخص.
-- `style.json`: سبک کاملاً محلی؛ همهٔ sourceها، spriteها و glyphها باید مسیر نسبی محلی داشته باشند.
-- `sprites/` و `fonts/`: نمادها و قلم‌های محلی موردنیاز سبک.
-- `manifest.json`: نسخهٔ ابزار، تاریخ تولید، منبع داده، مجوز و SHA-256 فایل منبع و PMTiles. گزارش پوشش/zoom باید پس از اعتبارسنجی جداگانه تکمیل شود.
+```text
+data/
+├── source/iran-latest.osm.pbf
+├── iran.pmtiles
+├── style.json
+├── manifest.json
+├── search.sqlite
+├── fonts/
+│   └── Noto Sans Arabic Regular/
+│       ├── 0-255.pbf
+│       ├── 1536-1791.pbf
+│       └── ... سایر بازه‌های Unicode
+└── overlays/
+    ├── official-boundaries.geojson
+    ├── municipal-districts.geojson
+    └── transit.geojson
+```
 
-کتابخانهٔ مرورگر باید در `../vendor/maplibre-gl.js` و `../vendor/maplibre-gl.css` قرار گیرد. در زمان اجرا هیچ CDN، tile server، geocoder یا فونت اینترنتی مجاز نیست.
+## تولید داده
 
-تا پیش از نصب و اعتبارسنجی این فایل‌ها، صفحهٔ نقشه وضعیت «نصب نشده» نشان می‌دهد و از نقشهٔ جایگزین اینترنتی استفاده نمی‌کند. سطح جزئیات خیابان، کوچه، ساختمان و نشانی تابع پوشش واقعی منبع داده است؛ صرف تنظیم zoom بالا جزئیات غایب را ایجاد نمی‌کند.
+1. فایل `source/iran-latest.osm.pbf` را دریافت کنید.
+2. با `tools/Build-OfflineIranMap.ps1` بستهٔ `iran.pmtiles` را بسازید.
+3. با `tools/build-search-index.py` شاخص جست‌وجوی فارسی را در `search.sqlite` بسازید.
+4. استایل محلی و قلم‌ها را مطابق `tools/README-FA.md` نصب کنید.
+5. داده‌های رسمی مرزها و حمل‌ونقل را در `overlays/` قرار دهید.
+6. `tools/Test-OfflineIranMapPackage.ps1` را اجرا کنید.
+
+## استایل و قلم
+
+استایل `style.json` به PMTiles محلی ارجاع می‌دهد. کد مرورگر مسیر مطلق محلی glyph را متناسب با محل نصب برنامه تولید می‌کند تا استقرار در زیرپوشه‌ای مانند `/ticket/` نیز کار کند. نام پوشهٔ font stack باید دقیقاً با مقدار `text-font` در استایل برابر باشد.
+
+## لایه‌های تکمیلی
+
+ساختار GeoJSON، محدودهٔ مختصات و الزامات منبع در `overlays/README-FA.md` تشریح شده است. دادهٔ رسمیِ فاقد منبع معتبر در این بسته تولید نمی‌شود.
+
+## مجوز و انتساب
+
+دادهٔ OSM تحت ODbL ارائه می‌شود. انتساب `© OpenStreetMap contributors` باید در رابط نقشه قابل مشاهده باشد. مجوز Planetiler، MapLibre، PMTiles و قلم‌ها جداگانه رعایت و فایل‌های LICENSE همراه بسته نگهداری شوند.
