@@ -60,7 +60,6 @@
     reconciliationTo: '',
     reconciliationMonth: '',
     reconciliationTab: 'daily',
-    reconciliationFullscreen: true,
     reconciliationMealType: 'all',
     reconciliationForm: { food_date: '', meal_type: 'lunch', portion_quantity: '', note: '', edit_reason: '' },
     leftoverModal: null,
@@ -1144,7 +1143,7 @@
     var invoiceFilter = invoiceTab ? '<form id="fm-reconciliation-invoice-filter" class="fm-order-date"><label class="fm-field">ماه فاکتور (شمسی)<input type="text" name="month" data-jalali-month inputmode="numeric" placeholder="۱۴۰۵/۰۷" value="' + esc(faDigits(month)) + '" required></label><button class="btn primary" type="submit">نمایش مبلغ و فاکتور</button></form>' : '';
     var dailyContent = '<section class="fm-section-gap"><h3>تطبیق روزانه</h3>' + dailyTable + '</section>' + dailyForm + renderGuestActualModal() + renderLeftoverModal();
     var invoiceContent = '<section class="fm-section-gap"><h3>خلاصهٔ مبلغ و فاکتور ماه ' + esc(faDigits(month)) + '</h3>' + invoiceSummary + invoiceForm + '<div class="fm-alert">«پرس فاکتور ماهانه» و «جمع تحویل روزانه» دو عدد مستقل‌اند؛ فقط اختلافشان گزارش می‌شود و هرگز با هم جمع نمی‌شوند.</div>' + monthlyPriceTable + '</section><section class="fm-section-gap"><h3>فاکتورهای ثبت‌شدهٔ ماه‌های قبل و ماه جاری</h3>' + invoiceTable + '</section>';
-    return '<section class="fm-card fm-reconciliation-report"><div class="fm-toolbar"><div><h3>تطبیق سفارش، خرید و توزیع غذا</h3><span class="fm-small">تقاضای کل = سفارش فعال پرسنل + درخواست فعال مهمان (نفرات)؛ لغوشده‌ها جدا هستند و وارد این جمع نمی‌شوند. کسری/اضافهٔ سفارش روی همین تقاضای کل است.</span></div><button class="btn secondary" type="button" data-fm-action="reconciliation-fullscreen" aria-pressed="' + (state.reconciliationFullscreen ? 'true' : 'false') + '">' + (state.reconciliationFullscreen ? 'بازگشت به نمای عادی' : 'نمایش تمام‌صفحه') + '</button><button class="btn secondary" type="button" data-fm-action="reconciliation-export"' + (!state.reconciliationLoaded || state.reconciliationLoading ? ' disabled' : '') + '>خروجی Excel</button></div>'
+    return '<section class="fm-card fm-reconciliation-report"><div class="fm-toolbar"><div><h3>تطبیق سفارش، خرید و توزیع غذا</h3><span class="fm-small">تقاضای کل = سفارش فعال پرسنل + درخواست فعال مهمان (نفرات)؛ لغوشده‌ها جدا هستند و وارد این جمع نمی‌شوند. کسری/اضافهٔ سفارش روی همین تقاضای کل است.</span></div><button class="btn secondary" type="button" data-fm-action="reconciliation-export"' + (!state.reconciliationLoaded || state.reconciliationLoading ? ' disabled' : '') + '>خروجی Excel</button></div>'
       + tabs + dailyFilter + invoiceFilter + loading + errors + (state.reconciliationLoaded ? (invoiceTab ? invoiceContent : dailyContent) : '') + renderInvoicePriceModal() + '</section>';
   }
 
@@ -1954,7 +1953,7 @@
     var panel = state.embeddedMode ? embeddedPanel() : (state.tab === 'calendar' && (canMenu || canClose) ? renderCalendar() : state.tab === 'catalog' && canMenu ? renderCatalog() : state.tab === 'orders' && canReports ? renderOrders() : state.tab === 'cancel-requests' && canMenu ? renderCancelRequests() : state.tab === 'statistics' && canReports ? renderStatistics() : state.tab === 'bulk' && canMenu ? renderBulkOperations() : '<div class="fm-card fm-empty">این بخش با مجوزهای فعلی در دسترس نیست.</div>');
     var notices = (state.error ? '<div class="fm-alert error">' + esc(state.error) + '</div>' : '') + (state.notice && !state.error ? '<div class="fm-alert good">' + esc(state.notice) + '</div>' : '');
     var renderFocusSnap = captureRenderFocus();
-    root.innerHTML = state.embeddedMode ? ('<div class="fm-embedded-report' + (state.embeddedMode === 'reconciliation' ? ' fm-embedded-reconciliation' + (state.reconciliationFullscreen ? ' is-fullscreen' : '') : '') + '">' + notices + panel + '</div>') : ('<div class="fm-intro"><div><h2>برنامه غذایی</h2></div></div>' + notices + navTabs() + mealTypeSwitch() + panel);
+    root.innerHTML = state.embeddedMode ? ('<div class="fm-embedded-report' + (state.embeddedMode === 'reconciliation' ? ' fm-embedded-reconciliation' : '') + '">' + notices + panel + '</div>') : ('<div class="fm-intro"><div><h2>برنامه غذایی</h2></div></div>' + notices + navTabs() + mealTypeSwitch() + panel);
     showFoodModals();
     if (global.ItsmJalali && typeof global.ItsmJalali.enhanceAll === 'function') global.ItsmJalali.enhanceAll(root);
     restoreRenderFocus(renderFocusSnap);
@@ -2826,7 +2825,6 @@
       if (act === 'guest-actual-confirm') { confirmGuestActualModal(); return; }
       if (act === 'leftover-confirm') { confirmLeftoverModal(); return; }
       if (act === 'reconciliation-tab') { state.reconciliationTab = action.dataset.tab === 'invoice' ? 'invoice' : 'daily'; state.error = ''; render(); return; }
-      if (act === 'reconciliation-fullscreen') { state.reconciliationFullscreen = !state.reconciliationFullscreen; render(); return; }
       if (act === 'reconciliation-export') downloadReconciliation();
       if (act === 'reconciliation-select') selectReconciliationRow(action.dataset.date || '', action.dataset.meal || 'lunch');
       if (act === 'reconciliation-reset') {

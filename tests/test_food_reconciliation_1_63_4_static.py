@@ -120,12 +120,15 @@ def test_leftover_popup_remains_compact_and_quantity_fields_align_left():
     assert ".fm-leftover-row:not(.fm-leftover-staff) .fm-leftover-count" in css
 
 
-def test_reconciliation_form_has_fullscreen_toggle():
+def test_reconciliation_panel_preserves_page_height_and_uses_full_width():
     js = (ROOT / "assets/food-menu.js").read_text()
     css = (ROOT / "assets/food-menu.css").read_text()
-    assert "data-fm-action=\"reconciliation-fullscreen\"" in js
-    assert "fm-embedded-reconciliation" in js and "' is-fullscreen'" in js
-    assert ".fm-embedded-reconciliation.is-fullscreen{position:fixed;inset:0" in css
+    assert "reconciliation-fullscreen" not in js
+    assert "نمایش تمام‌صفحه" not in js and "بازگشت به نمای عادی" not in js
+    assert ".fm-embedded-reconciliation .fm-reconciliation-report{width:calc(100vw - 40px)" in css
+    assert ".fm-embedded-reconciliation.is-fullscreen" not in css
+    assert ".fm-embedded-reconciliation .fm-reconciliation-table{width:100%;min-width:0;table-layout:fixed}" in css
+    assert "overflow-x:hidden" in css
 
 
 def test_reconciliation_invoice_content_is_separated_into_invoice_tab():

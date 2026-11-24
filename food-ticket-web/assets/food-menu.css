@@ -463,10 +463,13 @@
 .fm-leftover-row:not(.fm-leftover-staff){direction:rtl;flex-wrap:nowrap;align-items:center}
 .fm-leftover-row:not(.fm-leftover-staff) .fm-leftover-count{margin:0;flex:0 0 92px;width:92px;min-width:92px}
 @media(max-width:520px){.fm-leftover-row:not(.fm-leftover-staff) .fm-leftover-count{flex-basis:76px;width:76px;min-width:76px}}
-/* تمام‌صفحه فقط برای صفحه/فرم اصلی تطبیق، نه پنجرهٔ کوچک سرنوشت مانده */
-.fm-embedded-reconciliation.is-fullscreen{position:fixed;inset:0;z-index:2147482000;overflow:auto;background:#f5f8f8;padding:12px 16px;box-sizing:border-box}
-.fm-embedded-reconciliation.is-fullscreen .fm-reconciliation-report{min-height:calc(100vh - 72px);width:100%;box-sizing:border-box}
-.fm-embedded-reconciliation .fm-reconciliation-report{width:100%;max-width:none}
+/* گزارش در ارتفاع معمول صفحه می‌ماند؛ فقط باکس و جدول تطبیق تا عرض viewport باز می‌شوند. */
+.fm-embedded-reconciliation .fm-reconciliation-report{width:calc(100vw - 40px);max-width:none;margin-inline:calc(50% - 50vw + 20px);box-sizing:border-box}
+.fm-embedded-reconciliation .fm-reconciliation-table{width:100%;min-width:0;table-layout:fixed}
+.fm-embedded-reconciliation .fm-reconciliation-report .fm-table-wrap{width:100%;max-width:100%;overflow-x:hidden}
+.fm-embedded-reconciliation .fm-reconciliation-table th,.fm-embedded-reconciliation .fm-reconciliation-table td{white-space:normal;overflow-wrap:anywhere;word-break:break-word;padding:5px 3px;font-size:10px}
+.fm-embedded-reconciliation .fm-reconciliation-table th{font-size:10px}
+@media(max-width:900px){.fm-embedded-reconciliation .fm-reconciliation-table th,.fm-embedded-reconciliation .fm-reconciliation-table td{padding:3px 2px;font-size:9px}}
 .fm-reconciliation-tabs{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0;padding-bottom:8px;border-bottom:1px solid #dce5e6}
 .fm-reconciliation-tab{border:1px solid #d5e0e2;border-radius:9px;background:#f7f9fa;color:#526970;padding:9px 16px;font:inherit;font-weight:800;cursor:pointer}
 .fm-reconciliation-tab.active{background:#087f78;border-color:#087f78;color:#fff}
