@@ -1575,6 +1575,24 @@ CREATE TABLE IF NOT EXISTS log_issue_notifications (
     KEY idx_log_issue_notification_fingerprint (fingerprint)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+-- User-authored geographic annotations are kept separate from the immutable base map package.
+CREATE TABLE IF NOT EXISTS offline_map_features (
+    id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+    title VARCHAR(190) NOT NULL,
+    description TEXT NULL,
+    feature_type VARCHAR(32) NOT NULL DEFAULT 'point',
+    geometry_json LONGTEXT NOT NULL,
+    properties_json LONGTEXT NULL,
+    created_by BIGINT UNSIGNED NOT NULL,
+    updated_by BIGINT UNSIGNED NULL,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    PRIMARY KEY (id),
+    KEY idx_offline_map_features_created (created_at),
+    KEY idx_offline_map_features_type (feature_type),
+    KEY idx_offline_map_features_owner (created_by)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 -- رجیستری مهاجرت‌های اجراشده. تا پیش از این فقط system-update.php آن را
 -- در لحظهٔ نیاز می‌ساخت؛ بودنش در اسکیمای پایه، نصب تازه را هم‌شکل می‌کند.
 CREATE TABLE IF NOT EXISTS schema_updates (
@@ -1648,5 +1666,6 @@ INSERT IGNORE INTO schema_updates (version, migration) VALUES
     ('1.62.95', '037-food-auto-receipts-delivered.sql'),
     -- ۰۳۵: جدولش را همین فایل در بالا می‌سازد (request_center_appointments)؛
     -- بدون این ردیف، نصب تازه از install-empty-db هشدار کاذب «۰۳۵ اجرا نشده» می‌داد.
-    ('1.63', '035-request-center-appointments.sql');
+    ('1.63', '035-request-center-appointments.sql'),
+    ('1.63', '038-offline-map-features.sql');
 
