@@ -12,6 +12,7 @@ on:
       - 'schema.sql'
       - 'install-empty-db.sql'
       - 'migrations/038-offline-map-features.sql'
+      - 'migrations/039-offline-map-attachments.sql'
       - 'tests/test_offline_map_module_static.py'
       - 'tools/test_schema_baseline_offline.php'
       - '.github/workflows/offline-map-contract.yml'
