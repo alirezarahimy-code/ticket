@@ -102967,8 +102967,8 @@
             "id": "TOOL-154",
             "path": "tools/seed_test_data.php",
             "area": "TOOL",
-            "lines": 1241,
-            "file_fingerprint": "7eea2bbccf31",
+            "lines": 1565,
+            "file_fingerprint": "cf46e38b17c9",
             "blocks": [
                 {
                     "kind": "region",
@@ -103152,23 +103152,25 @@
                     "kind": "function",
                     "anchor": "seed_wipe",
                     "line_start": 206,
-                    "line_end": 325,
-                    "lines": 120,
-                    "fingerprint": "462fab7c7207",
+                    "line_end": 339,
+                    "lines": 134,
+                    "fingerprint": "e7f207c060ca",
                     "risk": {
-                        "score": 5,
+                        "score": 7,
                         "flags": {
+                            "error_suppression": 1,
                             "dangerous_call": 4,
-                            "write_no_tx": 1
+                            "write_no_tx": 1,
+                            "long": 1
                         }
                     },
                     "id": "TOOL-154.14"
                 },
                 {
                     "kind": "region",
-                    "anchor": "بلوک رویه‌ای 326-347",
-                    "line_start": 326,
-                    "line_end": 347,
+                    "anchor": "بلوک رویه‌ای 340-361",
+                    "line_start": 340,
+                    "line_end": 361,
                     "lines": 22,
                     "fingerprint": "e6fee9465f34",
                     "risk": {
@@ -103180,10 +103182,10 @@
                 {
                     "kind": "region",
                     "anchor": "ساخت دادهٔ نمونه",
-                    "line_start": 348,
-                    "line_end": 360,
+                    "line_start": 362,
+                    "line_end": 374,
                     "lines": 13,
-                    "fingerprint": "3193e9248605",
+                    "fingerprint": "591da49f0611",
                     "risk": {
                         "score": 0,
                         "flags": []
@@ -103193,15 +103195,16 @@
                 {
                     "kind": "region",
                     "anchor": "جدول شماره‌گذاری را پیش از تراکنش اصلی بساز (CREATE در MySQL",
-                    "line_start": 361,
-                    "line_end": 1194,
-                    "lines": 834,
-                    "fingerprint": "8189427c458a",
+                    "line_start": 375,
+                    "line_end": 1514,
+                    "lines": 1140,
+                    "fingerprint": "461488010aa4",
                     "risk": {
-                        "score": 16,
+                        "score": 19,
                         "flags": {
                             "silent_catch": 4,
                             "sql_concat": 5,
+                            "error_suppression": 3,
                             "dangerous_call": 4,
                             "very_long": 3
                         }
@@ -103211,10 +103214,10 @@
                 {
                     "kind": "region",
                     "anchor": "گزارش پایانی",
-                    "line_start": 1195,
-                    "line_end": 1241,
-                    "lines": 47,
-                    "fingerprint": "2fb267894e3b",
+                    "line_start": 1515,
+                    "line_end": 1565,
+                    "lines": 51,
+                    "fingerprint": "07fe87ed3a42",
                     "risk": {
                         "score": 0,
                         "flags": []

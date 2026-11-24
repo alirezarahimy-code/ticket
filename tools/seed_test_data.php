@@ -230,6 +230,8 @@ function seed_wipe(PDO $pdo, array $m): array
     $guestActualIds = seed_manifest_ids($m, 'food_guest_actuals');
     $guestCardIds = seed_manifest_ids($m, 'food_guest_cards');
     $cancelRequestIds = seed_manifest_ids($m, 'food_cancel_requests');
+    $invoiceIds = seed_manifest_ids($m, 'food_monthly_invoices');
+    $invoiceFiles = is_array($m['invoice_files'] ?? null) ? $m['invoice_files'] : [];
 
     if ($foodLogIds) {
         $deleted['food_order_logs'] = seed_delete_in($pdo, 'DELETE FROM food_order_logs WHERE id IN ({IN})', $foodLogIds);
@@ -257,6 +259,18 @@ function seed_wipe(PDO $pdo, array $m): array
     }
     if ($guestCardIds) {
         $deleted['food_guest_cards'] = seed_delete_in($pdo, 'DELETE FROM food_ticket_guest_cards WHERE id IN ({IN})', $guestCardIds);
+    }
+    if ($invoiceIds) {
+        $deleted['food_monthly_invoices'] = seed_delete_in($pdo, 'DELETE FROM food_monthly_invoices WHERE id IN ({IN})', $invoiceIds);
+    }
+    // فایل‌های PDF نمونه‌ای فاکتورها را هم پاک کن (فقط داخل پوشهٔ فاکتورها)
+    $invoiceDir = realpath(dirname(__DIR__) . '/storage/uploads/food-invoices');
+    foreach ($invoiceFiles as $invoiceFile) {
+        $invoiceFile = (string) $invoiceFile;
+        $full = $invoiceDir ? realpath($invoiceDir . '/' . basename($invoiceFile)) : false;
+        if ($full && $invoiceDir && str_starts_with($full, rtrim($invoiceDir, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR) && is_file($full)) {
+            @unlink($full);
+        }
     }
     // وضعیت تک‌ردیفهٔ ورکر را به حالت پیش‌فرض برگردان (بعداً دوباره با دادهٔ نمونه پر می‌شود).
     $pdo->exec("UPDATE food_ticket_worker_status SET host_name = '', process_id = 0, last_seen = NULL, status = 'ok', last_message = '', last_error = NULL, processed_count = 0, printed_count = 0, error_count = 0 WHERE id = 1");
@@ -354,7 +368,7 @@ $created = [
     'food_guest_requests' => [], 'cd_dvd_records' => [], 'food_ticket_events' => [],
     'food_ticket_print_log' => [], 'food_daily_absence' => [], 'food_group_runs' => [],
     'food_meal_reconciliations' => [], 'food_guest_actuals' => [], 'food_guest_cards' => [],
-    'food_cancel_requests' => [],
+    'food_cancel_requests' => [], 'food_monthly_invoices' => [], 'invoice_files' => [],
 ];
 $summary = [];
 
@@ -403,6 +417,33 @@ try {
             $created['org_units'][] = (int) $id;
         }
         $orgUnitIds[$code] = (int) $id;
+    }
+
+    // ریشه‌های نمونهٔ شش‌گانه برای پرشدن ریزگزارش مهمان به تفکیک بخش سازمانی.
+    $guestRootUnitIds = ['ceo' => (int) $ceoUnit, 'none' => 0];
+    $guestRootMeta = [(int) $ceoUnit => ['name' => 'مدیرعامل', 'type' => 'ceo'], 0 => ['name' => 'بدون جایگاه', 'type' => 'none']];
+    $guestRootSeeds = [
+        ['liaison', 'واحد مستقل نمونه', 'SEED-FOOD-ROOT-LIAISON', 1],
+        ['deputy', 'معاونت نمونه', 'SEED-FOOD-ROOT-DEPUTY', 1],
+        ['management', 'مدیریت مستقل نمونه', 'SEED-FOOD-ROOT-MANAGEMENT', 1],
+        ['office', 'دفتر مدیرعامل نمونه', 'SEED-FOOD-ROOT-OFFICE', 1],
+        ['company_manager', 'شرکت همکار نمونه', 'SEED-FOOD-ROOT-COMPANY', 2],
+    ];
+    foreach ($guestRootSeeds as [$rootType, $rootName, $rootCode, $companyId]) {
+        $st = $pdo->prepare('SELECT id, name FROM org_units WHERE company_id = ? AND is_active = 1 AND (code = ? OR unit_type = ?) ORDER BY (code = ?) DESC, id LIMIT 1');
+        $st->execute([$companyId, $rootCode, $rootType, $rootCode]);
+        $rootRow = $st->fetch(PDO::FETCH_ASSOC);
+        if ($rootRow === false) {
+            $pdo->prepare('INSERT INTO org_units (company_id, name, code, parent_id, unit_type, is_active, sort_order) VALUES (?, ?, ?, NULL, ?, 1, 20)')
+                ->execute([$companyId, $rootName, $rootCode, $rootType]);
+            $rootId = (int) $pdo->lastInsertId();
+            $created['org_units'][] = $rootId;
+        } else {
+            $rootId = (int) $rootRow['id'];
+            $rootName = (string) $rootRow['name'];
+        }
+        $guestRootUnitIds[$rootType] = $rootId;
+        $guestRootMeta[$rootId] = ['name' => $rootName, 'type' => $rootType];
     }
 
     // ─── ۳) کاربران نمونه با نقش‌های اصلی ───
@@ -463,6 +504,55 @@ try {
         $created['users'][] = $userIds[$username];
         $userMeta[$username] = ['full_name' => $fullName, 'employee_number' => $employeeNumber, 'national_code' => $nationalCode];
     }
+    // ─── حساب‌های ویژهٔ تست ماژول غذا: دامین (LDAP) و پرسنل غذای قدیمی ───
+    // برای «ارتباط بین پرسنل و غذا» (food-personnel-link.php) و «گزارش کاربران دامین».
+    // این حساب‌ها فقط برای تست آن صفحات ساخته می‌شوند و ورود آنها (بدون LDAP واقعی) انجام نمی‌شود.
+    $legacyFoodInsert = $pdo->prepare("INSERT INTO users (company_id, username, password_hash, full_name, email, employee_number, national_code, phone, department, department_id, requesting_unit_id, org_unit_id, handling_unit_id, is_it_agent, role, auth_source, is_active, must_change_password) VALUES (1, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NULL, 0, 'local_user', 'food', 1, 0)");
+    $legacyFoodSeeds = [
+        ['seed_food_legacy_001', 'حمید رضایی', 'DP-1001', '0010001011'],
+        ['seed_food_legacy_002', 'نسرین احمدی', 'DP-1002', '0010001012'],
+        ['seed_food_legacy_003', 'نسرین احمدی', 'DP-1003', '0010001013'],
+        ['seed_food_legacy_004', 'کیوان مردانی', 'DP-1004', '0010001014'],
+    ];
+    foreach ($legacyFoodSeeds as [$username, $fullName, $empNum, $national]) {
+        $st = $pdo->prepare('SELECT id FROM users WHERE username = ?');
+        $st->execute([$username]);
+        if ($st->fetchColumn() !== false) {
+            throw new RuntimeException("حساب {$username} از قبل وجود دارد؛ برای جلوگیری از تداخل ابتدا --fresh بزنید.");
+        }
+        $legacyFoodInsert->execute([
+            $username, $passwordHash, $fullName, $username . '@seed.test.local',
+            $empNum, $national, '09130000001', $deptNames['ADM'], $deptByCode['ADM'], $orgUnitIds['ORG-WS'] ?? null, $orgUnitIds['ORG-WS'] ?? null,
+        ]);
+        $userIds[$username] = (int) $pdo->lastInsertId();
+        $created['users'][] = $userIds[$username];
+        $userMeta[$username] = ['full_name' => $fullName, 'employee_number' => $empNum, 'national_code' => $national];
+    }
+    $ldapInsert = $pdo->prepare("INSERT INTO users (company_id, username, password_hash, full_name, email, employee_number, national_code, phone, department, department_id, requesting_unit_id, org_unit_id, handling_unit_id, is_it_agent, role, auth_source, is_active, must_change_password) VALUES (1, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NULL, 0, 'user', 'ldap', ?, 0)");
+    $ldapSeeds = [
+        // [username, full_name, employee_number, national_code, is_active] — نمونه‌ها دسته‌های اصلی گزارش را پوشش می‌دهند
+        ['seed_ldap_1', 'حمید رضایی', 'SEED-DOMAIN-1001', '0010001011', 1], // دارای_کد (با کد یکتای مستقل)
+        ['seed_ldap_2', 'نسرین احمدی', '', '', 1],           // همنام (دو پرسنل غذای همنام)
+        ['seed_ldap_3', 'کیوان مردانی', '', '0010001014', 1],          // تطبیق_یک‌به‌یک
+        ['seed_ldap_4', 'آزیتا قره‌گوزلو', '', '1000001004', 1],       // بدون_تطبیق
+        ['seed_ldap_5', 'کاربر دامین غیرفعال', '', '1000001005', 0],   // غیرفعال_دامین
+        ['seed_ldap_6', 'حمید رضایی', '', '0099999999', 1],            // کد_ملی_متفاوت با پرسنل غذای هم‌نام
+    ];
+    foreach ($ldapSeeds as [$username, $fullName, $empNum, $national, $active]) {
+        $st = $pdo->prepare('SELECT id FROM users WHERE username = ?');
+        $st->execute([$username]);
+        if ($st->fetchColumn() !== false) {
+            throw new RuntimeException("حساب {$username} از قبل وجود دارد؛ برای جلوگیری از تداخل ابتدا --fresh بزنید.");
+        }
+        $ldapInsert->execute([
+            $username, $passwordHash, $fullName, $username . '@seed.test.local',
+            $empNum === '' ? null : $empNum, $national, '09140000001', $deptNames['IT'], $deptByCode['IT'], $orgUnitIds['ORG-IT'] ?? null, $orgUnitIds['ORG-IT'] ?? null, (int) $active,
+        ]);
+        $userIds[$username] = (int) $pdo->lastInsertId();
+        $created['users'][] = $userIds[$username];
+        $userMeta[$username] = ['full_name' => $fullName, 'employee_number' => $empNum, 'national_code' => $national];
+    }
+
     // مدیران واحدها
     $unitManager = $pdo->prepare('UPDATE org_units SET manager_user_id = ? WHERE id = ?');
     $unitManager->execute([$userIds['seed_it_manager'], $orgUnitIds['ORG-IT']]);
@@ -764,6 +854,38 @@ try {
         }
     }
 
+    // تقویم شام همان بازه (برای گزارش‌های شام و فیش خودکار پایان روز)
+    foreach ($openDays as $openDay) {
+        $date = $openDay['date'];
+        $isPast = $openDay['is_past'];
+        $st = $pdo->prepare("SELECT id FROM food_calendar WHERE food_date = ? AND meal_type = 'dinner'");
+        $st->execute([$date]);
+        $calendarId = $st->fetchColumn();
+        if ($calendarId === false) {
+            if ($isPast) {
+                $pdo->prepare("INSERT INTO food_calendar (food_date, meal_type, order_status, note, closed_by, closed_at, created_by) VALUES (?, 'dinner', 'closed', 'دادهٔ نمونهٔ تست (بسته‌شده)', ?, ?, ?)")
+                    ->execute([$date, $userIds['seed_admin'], $date . ' 21:00:00', $userIds['seed_admin']]);
+            } else {
+                $pdo->prepare("INSERT INTO food_calendar (food_date, meal_type, order_status, note, created_by) VALUES (?, 'dinner', 'open', 'دادهٔ نمونهٔ تست', ?)")
+                    ->execute([$date, $userIds['seed_admin']]);
+            }
+            $calendarId = (int) $pdo->lastInsertId();
+            $created['food_calendars'][] = $calendarId;
+        } else {
+            $calendarId = (int) $calendarId;
+        }
+        foreach (array_slice($catalogIds, 0, 3) as $sortOrder => $foodId) {
+            $st = $pdo->prepare('SELECT id FROM food_calendar_items WHERE calendar_id = ? AND food_id = ?');
+            $st->execute([$calendarId, $foodId]);
+            if ($st->fetchColumn() !== false) {
+                continue;
+            }
+            $pdo->prepare('INSERT INTO food_calendar_items (calendar_id, food_id, sort_order, active) VALUES (?, ?, ?, 1)')
+                ->execute([$calendarId, $foodId, $sortOrder + 1]);
+            $created['food_calendar_items'][] = (int) $pdo->lastInsertId();
+        }
+    }
+
     // کارکنانی که غذا سفارش می‌دهند: نقش‌های «user» به‌علاوهٔ کارشناسان (مثل سلف واقعی).
     $orderUsernames = [];
     foreach ($userSeeds as [$uname, , $role]) {
@@ -817,6 +939,45 @@ try {
     }
     $summary['food_orders'] = $ordersMade;
 
+    // سفارش شام: ~۴۵٪ همان پرسنل، برای روزهای گذشته و امروز (مثل شام شب‌کارها)
+    $dinnerOrderFoodItem = $pdo->prepare("SELECT id FROM food_calendar_items WHERE calendar_id = (SELECT id FROM food_calendar WHERE food_date = ? AND meal_type = 'dinner') AND active = 1 ORDER BY sort_order LIMIT 1");
+    $dinnerOrderInsert = $pdo->prepare("INSERT INTO food_orders (employee_id, calendar_item_id, food_date, meal_type, created_by, status, created_at) VALUES (?, ?, ?, 'dinner', ?, ?, ?)");
+    $dinnerDayIndex = 0;
+    $dinnerOrdersMade = 0;
+    foreach ($openDays as $openDay) {
+        $dinnerDayIndex++;
+        $date = $openDay['date'];
+        if (!$openDay['is_past'] && $date !== $todayStr) {
+            continue;
+        }
+        $dinnerOrderFoodItem->execute([$date]);
+        $dinnerItemId = $dinnerOrderFoodItem->fetchColumn();
+        if ($dinnerItemId === false) {
+            continue;
+        }
+        foreach ($orderUsernames as $userIndex => $username) {
+            if ((($userIndex * 13 + $dinnerDayIndex * 7) % 100) >= 45) {
+                continue;
+            }
+            $employeeId = $userIds[$username];
+            $exists = $pdo->prepare("SELECT id FROM food_orders WHERE employee_id = ? AND food_date = ? AND meal_type = 'dinner'");
+            $exists->execute([$employeeId, $date]);
+            if ($exists->fetchColumn() !== false) {
+                continue;
+            }
+            $createdAtDinner = $date . sprintf(' 16:%02d:00', ($userIndex * 11 + $dinnerDayIndex * 5) % 60);
+            $dinnerOrderInsert->execute([$employeeId, (int) $dinnerItemId, $date, $employeeId, 'active', $createdAtDinner]);
+            $dinnerOrderId = (int) $pdo->lastInsertId();
+            $created['food_orders'][] = $dinnerOrderId;
+            $logInsert->execute([$dinnerOrderId, 'create', $employeeId, null, 'seed dinner order', $createdAtDinner]);
+            $created['food_order_logs'][] = (int) $pdo->lastInsertId();
+            $dinnerOrdersMade++;
+            $ordersMade++;
+        }
+    }
+    $summary['food_dinner_orders'] = $dinnerOrdersMade;
+    $summary['food_orders'] = $ordersMade;
+
     // گروه سلف نمونه با چند عضو (برای رانت/غیبت گروهی)
     $st = $pdo->prepare('SELECT id FROM food_ticket_groups WHERE l_uid = ?');
     $st->execute(['SEED-L-0001']);
@@ -839,7 +1000,7 @@ try {
         ['seed_user_bahram', 8, 'مرخصی استعلاجی'],
         ['seed_emp_03', 5, 'مأموریت اداری'],
         ['seed_emp_11', 12, 'مرخصی استحقاقی'],
-        ['seed_emp_17', 20, 'مأموریت آموزشی'],
+        ['seed_emp_17', 21, 'مأموریت آموزشی'],
         ['seed_user_leila', 3, 'مرخصی استعلاجی (گروه)'],
     ];
     foreach ($absenceCandidates as [$uname, $daysAgo, $reason]) {
@@ -858,8 +1019,8 @@ try {
                 ->execute([$absenceDate, $linkGroup ? $groupId : null, $userIds[$uname], $reason, $userIds['seed_admin']]);
             $absenceId = (int) $pdo->lastInsertId();
             $created['food_daily_absence'][] = $absenceId;
-            $absenceSeeds[$absenceDate][$userIds[$uname]] = true;
         }
+        $absenceSeeds[$absenceDate][$userIds[$uname]] = true;
     }
     $summary['food_absences'] = count($created['food_daily_absence']);
 
@@ -887,30 +1048,49 @@ try {
 
     // درخواست‌های مهمان: تاریخی (انجام‌شده) + آینده + یک لغوشده
     $pastGuestPlans = [
-        [10, 'شرکت همکار الف', 8, 'دبیر هیئت مدیره'],
-        [18, 'بازدیدکنندگان نمایشگاه', 15, 'روابط عمومی'],
-        [25, 'شرکت تعاونی ساحل', 6, 'امور قراردادها'],
+        [10, 'شرکت همکار الف', 8, 'دبیر هیئت مدیره', 'lunch', 'liaison'],
+        [18, 'بازدیدکنندگان نمایشگاه', 15, 'روابط عمومی', 'lunch', 'deputy'],
+        [25, 'شرکت تعاونی ساحل', 6, 'امور قراردادها', 'lunch', 'management'],
+        [12, 'مهمانان شیفت شب نمونه', 4, 'مدیر شیفت شب', 'dinner', 'office'],
+        [8, 'مهمانان بدون انتساب نمونه', 3, 'دبیر جلسات', 'lunch', 'none'],
+        [15, 'شرکت همکار قدیمی نمونه', 7, 'دبیر قراردادها', 'lunch', 'company_manager'],
+        [22, 'مهمانان دفتر مدیرعامل نمونه', 5, 'دفتر مدیرعامل', 'lunch', 'ceo'],
     ];
     $guestPlanIds = [];
-    foreach ($pastGuestPlans as [$daysAgo, $org, $count, $requester]) {
+    foreach ($pastGuestPlans as [$daysAgo, $org, $count, $requester, $mealType, $rootType]) {
         $reqDate = $today->modify("-{$daysAgo} days");
         if (in_array((int) $reqDate->format('N'), [4, 5], true)) {
             $reqDate = $reqDate->modify('-3 days');
         }
         $reqDateStr = $reqDate->format('Y-m-d');
-        $st = $pdo->prepare("SELECT id FROM food_guest_requests WHERE request_date = ? AND organization = ?");
-        $st->execute([$reqDateStr, $org]);
-        $reqId = $st->fetchColumn();
-        if ($reqId === false) {
-            $pdo->prepare("INSERT INTO food_guest_requests (request_date, meal_type, organization, guest_count, food_id, requester_name, deputy_unit_id, note, status, created_by, created_at) VALUES (?, 'lunch', ?, ?, ?, ?, ?, 'دادهٔ نمونهٔ تست', 'active', ?, ?)")
-                ->execute([$reqDateStr, $org, $count, $catalogIds[0], $requester, $orgUnitIds['ORG-WS'] ?? null, $userIds['seed_admin'], $reqDateStr . ' 08:30:00']);
+        $st = $pdo->prepare('SELECT id, guest_count, deputy_unit_id, status FROM food_guest_requests WHERE request_date = ? AND organization = ? AND meal_type = ? LIMIT 1');
+        $st->execute([$reqDateStr, $org, $mealType]);
+        $requestRow = $st->fetch(PDO::FETCH_ASSOC);
+        if ($requestRow === false) {
+            $requestRootId = $rootType === 'none' ? null : (int) ($guestRootUnitIds[$rootType] ?? $ceoUnit);
+            $pdo->prepare("INSERT INTO food_guest_requests (request_date, meal_type, organization, guest_count, food_id, requester_name, deputy_unit_id, note, status, created_by, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, 'دادهٔ نمونهٔ تست', 'active', ?, ?)")
+                ->execute([$reqDateStr, $mealType, $org, $count, $catalogIds[0], $requester, $requestRootId, $userIds['seed_admin'], $reqDateStr . ' 08:30:00']);
             $reqId = (int) $pdo->lastInsertId();
             $created['food_guest_requests'][] = $reqId;
+            $requestCount = $count;
+            $requestStatus = 'active';
+        } else {
+            $reqId = (int) $requestRow['id'];
+            $requestCount = (int) $requestRow['guest_count'];
+            $requestStatus = (string) $requestRow['status'];
+            $requestRootId = (int) ($requestRow['deputy_unit_id'] ?? 0);
         }
-        $guestPlanIds[$reqDateStr] = ['id' => (int) $reqId, 'count' => $count, 'organization' => $org, 'food_id' => $catalogIds[0]];
+        if ($requestStatus !== 'active') {
+            continue;
+        }
+        $requestRootId = (int) ($requestRootId ?? 0);
+        if (!in_array($requestRootId, $guestRootUnitIds, true)) {
+            $requestRootId = (int) $ceoUnit; // ردیف‌های قدیمیِ منتسب به واحد فرزند، در گزارش به مدیرعامل نرمال می‌شوند.
+        }
+        $guestPlanIds[$reqDateStr . "\0" . $mealType] = ['id' => $reqId, 'count' => $requestCount, 'organization' => $org, 'food_id' => $catalogIds[0], 'meal_type' => $mealType, 'root_unit_id' => $requestRootId];
     }
     // مهمان آینده: یکی این هفته، یکی دو هفتهٔ بعد (علاوه بر مورد +۷ روز قدیمیِ قبلی حذف شد)
-    foreach ([[14, 'شرکت همکار ب', 10, 'دبیر هیئت مدیره'], [21, 'هیئت مدیرهٔ مهمان', 20, 'دفتر مدیرعامل']] as [$daysAhead, $org, $count, $requester]) {
+    foreach ([[14, 'شرکت همکار ب', 10, 'دبیر هیئت مدیره', 'company_manager'], [21, 'هیئت مدیرهٔ مهمان', 20, 'دفتر مدیرعامل', 'ceo']] as [$daysAhead, $org, $count, $requester, $rootType]) {
         $reqDate = $today->modify("+{$daysAhead} days");
         if (in_array((int) $reqDate->format('N'), [4, 5], true)) {
             $reqDate = $reqDate->modify('+2 days');
@@ -921,7 +1101,7 @@ try {
             continue;
         }
         $pdo->prepare("INSERT INTO food_guest_requests (request_date, meal_type, organization, guest_count, food_id, requester_name, deputy_unit_id, note, status, created_by) VALUES (?, 'lunch', ?, ?, ?, ?, ?, 'دادهٔ نمونهٔ تست', 'active', ?)")
-            ->execute([$reqDate->format('Y-m-d'), $org, $count, $catalogIds[1], $requester, $orgUnitIds['ORG-WS'] ?? null, $userIds['seed_admin']]);
+            ->execute([$reqDate->format('Y-m-d'), $org, $count, $catalogIds[1], $requester, $guestRootUnitIds[$rootType] ?? $ceoUnit, $userIds['seed_admin']]);
         $created['food_guest_requests'][] = (int) $pdo->lastInsertId();
     }
     // یک درخواست مهمان لغوشده (برای آمار لغوها)
@@ -953,15 +1133,16 @@ try {
     // به‌ازای هر سفارشِ فعالِ روزِ گذشته، یک رویداد فیش ثبت می‌شود:
     //   ~۸۸٪ تحویل‌شده (printed + delivered)، ~۲٪ خطای چاپ، ~۱٪ بدون غذا، ~۹٪ اصلاً حضور نداشتند.
     // سفارش‌های لغوشده فیش ندارند (درست مثل روز واقعی).
-    $eventInsert = $pdo->prepare("INSERT INTO food_ticket_events (source_key, source_uid, punch_date, punch_time, personnel_code, user_id, national_code, full_name, food_type, ticket_key, print_job_id, event_type, meal_type, print_status, delivery_status, delivered_at, delivered_by, print_attempts, retry_count, printer_name, processed_at, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'lunch', ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+    $eventInsert = $pdo->prepare("INSERT INTO food_ticket_events (source_key, source_uid, punch_date, punch_time, personnel_code, user_id, national_code, full_name, food_type, ticket_key, print_job_id, event_type, meal_type, print_status, delivery_status, delivered_at, delivered_by, print_attempts, retry_count, printer_name, processed_at, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
     $printLogInsert = $pdo->prepare("INSERT INTO food_ticket_print_log (event_id, print_job_id, source_key, ticket_key, printer, status, retry_count, message, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
     $orderFoodName = $pdo->prepare('SELECT c.food_name FROM food_orders o JOIN food_calendar_items i ON i.id = o.calendar_item_id JOIN food_catalog c ON c.id = i.food_id WHERE o.id = ?');
     $printerName = 'SEED-PRN-CANTEEN';
     $printedTotal = 0;
     $deliveredTotal = 0;
     $errorTotal = 0;
-    foreach ($created['food_orders'] ? $pdo->query('SELECT id, employee_id, food_date, status FROM food_orders ORDER BY id')->fetchAll(PDO::FETCH_ASSOC) : [] as $orderRow) {
+    foreach ($created['food_orders'] ? $pdo->query('SELECT id, employee_id, food_date, meal_type, status FROM food_orders ORDER BY id')->fetchAll(PDO::FETCH_ASSOC) : [] as $orderRow) {
         $date = (string) $orderRow['food_date'];
+        $mealType = (string) ($orderRow['meal_type'] ?? 'lunch');
         if ($date >= $todayStr) {
             continue; // امروز/آینده: هنوز فیشی ثبت نشده
         }
@@ -988,9 +1169,29 @@ try {
         $punchTime = sprintf('12:%02d:00', $punchMinute);
         $deliveredAt = $date . ' ' . sprintf('12:%02d:00', min(59, $punchMinute + 4 + ($userId % 7)));
 
+        // شامِ سلف بسته با مسیر خودکار پایان‌روز ثبت می‌شود (بدون چاپ فیزیکی).
+        if ($mealType === 'dinner') {
+            $autoSourceKey = hash('sha256', 'seed-auto-dinner|' . $date . '|' . $userId);
+            $eventExists = $pdo->prepare('SELECT id FROM food_ticket_events WHERE source_key = ? LIMIT 1');
+            $eventExists->execute([$autoSourceKey]);
+            if ($eventExists->fetchColumn() !== false) {
+                continue;
+            }
+            $eventInsert->execute([$autoSourceKey, 'auto-dinner', $date, null, $meta['employee_number'], $userId, $meta['national_code'], $meta['full_name'], $foodName, null, null, 'auto_printed', 'dinner', 'printed', 'delivered', $deliveredAt, $userIds['seed_guard'], 1, 0, $printerName, $deliveredAt, $date . ' ' . $punchTime]);
+            $created['food_ticket_events'][] = (int) $pdo->lastInsertId();
+            $printedTotal++;
+            $deliveredTotal++;
+            continue;
+        }
+
+        $eventExists = $pdo->prepare('SELECT id FROM food_ticket_events WHERE source_key = ? LIMIT 1');
+        $eventExists->execute([$sourceKey]);
+        if ($eventExists->fetchColumn() !== false) {
+            continue;
+        }
         if ($pick < 2) {
             // خطای چاپ: ورکر دیده و خطا ثبت کرده
-            $eventInsert->execute([$sourceKey, 'SEED-CARD-' . str_pad((string) $userId, 4, '0', STR_PAD_LEFT), $date, $punchTime, $meta['employee_number'], $userId, $meta['national_code'], $meta['full_name'], $foodName, $ticketKey, 'SEED-JOB-' . str_replace('-', '', $date) . '-' . $userId, 'print_error', 'print_error', 'pending', null, null, 3, 2, $printerName, $date . ' ' . $punchTime, $date . ' ' . $punchTime]);
+            $eventInsert->execute([$sourceKey, 'SEED-CARD-' . str_pad((string) $userId, 4, '0', STR_PAD_LEFT), $date, $punchTime, $meta['employee_number'], $userId, $meta['national_code'], $meta['full_name'], $foodName, $ticketKey, 'SEED-JOB-' . str_replace('-', '', $date) . '-' . $userId, 'print_error', $mealType, 'print_error', 'pending', null, null, 3, 2, $printerName, $date . ' ' . $punchTime, $date . ' ' . $punchTime]);
             $eventId = (int) $pdo->lastInsertId();
             $created['food_ticket_events'][] = $eventId;
             $printLogInsert->execute([$eventId, 'SEED-JOB-' . str_replace('-', '', $date) . '-' . $userId, $sourceKey, $ticketKey, $printerName, 'print_error', 2, 'گیر کاغذ/خطای چاپ (دادهٔ نمونه)', $date . ' ' . $punchTime]);
@@ -1000,7 +1201,7 @@ try {
         }
         if ($pick < 3) {
             // بدون غذا: رویداد ثبت شد ولی فیش چاپ نشد
-            $eventInsert->execute([$sourceKey, 'SEED-CARD-' . str_pad((string) $userId, 4, '0', STR_PAD_LEFT), $date, $punchTime, $meta['employee_number'], $userId, $meta['national_code'], $meta['full_name'], $foodName, $ticketKey, null, 'no_food', 'not_printed', 'pending', null, null, 1, 0, $printerName, $date . ' ' . $punchTime, $date . ' ' . $punchTime]);
+            $eventInsert->execute([$sourceKey, 'SEED-CARD-' . str_pad((string) $userId, 4, '0', STR_PAD_LEFT), $date, $punchTime, $meta['employee_number'], $userId, $meta['national_code'], $meta['full_name'], $foodName, $ticketKey, null, 'no_food', $mealType, 'not_printed', 'pending', null, null, 1, 0, $printerName, $date . ' ' . $punchTime, $date . ' ' . $punchTime]);
             $created['food_ticket_events'][] = (int) $pdo->lastInsertId();
             continue;
         }
@@ -1008,7 +1209,7 @@ try {
             continue; // اصلاً حاضر نشد (سفارش فعال ولی بدون فیش)
         }
         // تحویل‌شده
-        $eventInsert->execute([$sourceKey, 'SEED-CARD-' . str_pad((string) $userId, 4, '0', STR_PAD_LEFT), $date, $punchTime, $meta['employee_number'], $userId, $meta['national_code'], $meta['full_name'], $foodName, $ticketKey, 'SEED-JOB-' . str_replace('-', '', $date) . '-' . $userId, 'printed', 'printed', 'delivered', $deliveredAt, $userIds['seed_guard'], 1, 0, $printerName, $deliveredAt, $date . ' ' . $punchTime]);
+        $eventInsert->execute([$sourceKey, 'SEED-CARD-' . str_pad((string) $userId, 4, '0', STR_PAD_LEFT), $date, $punchTime, $meta['employee_number'], $userId, $meta['national_code'], $meta['full_name'], $foodName, $ticketKey, 'SEED-JOB-' . str_replace('-', '', $date) . '-' . $userId, 'printed', $mealType, 'printed', 'delivered', $deliveredAt, $userIds['seed_guard'], 1, 0, $printerName, $deliveredAt, $date . ' ' . $punchTime]);
         $eventId = (int) $pdo->lastInsertId();
         $created['food_ticket_events'][] = $eventId;
         $printLogInsert->execute([$eventId, 'SEED-JOB-' . str_replace('-', '', $date) . '-' . $userId, $sourceKey, $ticketKey, $printerName, 'printed', 0, 'چاپ موفق (دادهٔ نمونه)', $deliveredAt]);
@@ -1021,36 +1222,68 @@ try {
     $summary['food_events_print_errors'] = $errorTotal;
 
     // رویدادهای چاپی مهمان برای روزهای تاریخیِ دارای درخواست مهمان فعال
-    foreach ($guestPlanIds as $reqDateStr => $plan) {
+    $guestActualByRoot = [];
+    $guestRequestedByRoot = [];
+    foreach ($guestPlanIds as $planKey => $plan) {
+        [$reqDateStr, $guestMealType] = explode("\0", $planKey, 2);
+        $guestRequestedByRoot[$reqDateStr][$guestMealType][$plan['root_unit_id']] = ($guestRequestedByRoot[$reqDateStr][$guestMealType][$plan['root_unit_id']] ?? 0) + $plan['count'];
         for ($guestIndex = 1; $guestIndex <= $plan['count']; $guestIndex++) {
-            $sourceKey = hash('sha256', 'seed-guest-event|' . $reqDateStr . '|' . $plan['id'] . '|' . $guestIndex);
+            $sourceKey = hash('sha256', 'seed-guest-event|' . $reqDateStr . '|' . $plan['id'] . '|' . $guestMealType . '|' . $guestIndex);
+            $eventExists = $pdo->prepare('SELECT print_status, event_type FROM food_ticket_events WHERE source_key = ? LIMIT 1');
+            $eventExists->execute([$sourceKey]);
+            $existingGuestEvent = $eventExists->fetch(PDO::FETCH_ASSOC);
+            if ($existingGuestEvent !== false) {
+                if (($existingGuestEvent['print_status'] ?? '') === 'printed'
+                    && in_array((string) ($existingGuestEvent['event_type'] ?? ''), ['guest', 'auto_guest'], true)) {
+                    $guestActualByRoot[$reqDateStr][$guestMealType][$plan['root_unit_id']] = ($guestActualByRoot[$reqDateStr][$guestMealType][$plan['root_unit_id']] ?? 0) + 1;
+                }
+                continue;
+            }
             $ticketKey = sprintf('SEED-G-T-%s-%d-%d', str_replace('-', '', $reqDateStr), $plan['id'], $guestIndex);
             $fullName = $plan['organization'] . ' — مهمان ' . $guestIndex;
-            $punchTime = sprintf('12:%02d:00', 10 + ($guestIndex * 7) % 45);
-            $deliveredAt = $reqDateStr . ' ' . sprintf('12:%02d:00', 15 + ($guestIndex * 7) % 40);
-            $eventInsert->execute([$sourceKey, 'SEED-GUEST-CARD-1', $reqDateStr, $punchTime, '', null, '', $fullName, 'مهمان', $ticketKey, 'SEED-JOB-G-' . str_replace('-', '', $reqDateStr) . '-' . $guestIndex, 'guest', 'printed', 'delivered', $deliveredAt, $userIds['seed_guard'], 1, 0, $printerName, $deliveredAt, $reqDateStr . ' ' . $punchTime]);
+            $guestPunchMinute = 10 + ($guestIndex * 7) % 45;
+            $punchTime = sprintf('12:%02d:00', $guestPunchMinute);
+            $deliveredAt = $reqDateStr . ' ' . sprintf('12:%02d:00', min(59, $guestPunchMinute + 4 + ($guestIndex % 5)));
+            $isAutoGuest = $guestMealType === 'dinner';
+            $guestEventType = $isAutoGuest ? 'auto_guest' : 'guest';
+            $guestSourceUid = $isAutoGuest ? 'auto-guest-dinner' : 'SEED-GUEST-CARD-1';
+            $guestTicketKey = $isAutoGuest ? null : $ticketKey;
+            $guestJobId = $isAutoGuest ? null : 'SEED-JOB-G-' . str_replace('-', '', $reqDateStr) . '-' . $guestIndex;
+            $guestDeliveryStatus = $isAutoGuest ? 'pending' : 'delivered';
+            $guestDeliveredAt = $isAutoGuest ? null : $deliveredAt;
+            $eventInsert->execute([$sourceKey, $guestSourceUid, $reqDateStr, $isAutoGuest ? null : $punchTime, '', null, '', $fullName, 'مهمان', $guestTicketKey, $guestJobId, $guestEventType, $guestMealType, 'printed', $guestDeliveryStatus, $guestDeliveredAt, $isAutoGuest ? null : $userIds['seed_guard'], 1, 0, $printerName, $deliveredAt, $reqDateStr . ' ' . $punchTime]);
             $eventId = (int) $pdo->lastInsertId();
             $created['food_ticket_events'][] = $eventId;
-            $printLogInsert->execute([$eventId, 'SEED-JOB-G-' . str_replace('-', '', $reqDateStr) . '-' . $guestIndex, $sourceKey, $ticketKey, $printerName, 'printed', 0, 'چاپ موفق مهمان (دادهٔ نمونه)', $deliveredAt]);
-            $created['food_ticket_print_log'][] = (int) $pdo->lastInsertId();
+            $guestActualByRoot[$reqDateStr][$guestMealType][$plan['root_unit_id']] = ($guestActualByRoot[$reqDateStr][$guestMealType][$plan['root_unit_id']] ?? 0) + 1;
+            if (!$isAutoGuest) {
+                $printLogInsert->execute([$eventId, $guestJobId, $sourceKey, $ticketKey, $printerName, 'printed', 0, 'چاپ موفق مهمان (دادهٔ نمونه)', $deliveredAt]);
+                $created['food_ticket_print_log'][] = (int) $pdo->lastInsertId();
+            }
         }
     }
 
-    // شمار واقعی تحویل‌ها برای تطبیق: از جدول رویدادها خوانده می‌شود (نه از شمارندهٔ داخلی).
+    // شمار واقعی تحویل‌ها برای تطبیق: از جدول رویدادها و به تفکیک روز/وعده.
     $servedMap = [];
-    $servedStmt = $pdo->query("SELECT punch_date, COUNT(DISTINCT user_id) AS served FROM food_ticket_events WHERE punch_date < '" . $todayStr . "' AND delivery_status = 'delivered' AND event_type IN ('printed', 'auto_printed') AND user_id IS NOT NULL GROUP BY punch_date");
+    $servedStmt = $pdo->query("SELECT punch_date, COALESCE(meal_type, 'lunch') AS meal_type, COUNT(DISTINCT user_id) AS served FROM food_ticket_events WHERE punch_date < '" . $todayStr . "' AND delivery_status = 'delivered' AND event_type IN ('printed', 'auto_printed') AND user_id IS NOT NULL GROUP BY punch_date, COALESCE(meal_type, 'lunch')");
     foreach ($servedStmt->fetchAll(PDO::FETCH_ASSOC) as $servedRow) {
-        $servedMap[(string) $servedRow['punch_date']] = (int) $servedRow['served'];
+        $servedMap[(string) $servedRow['punch_date'] . "\0" . (string) $servedRow['meal_type']] = (int) $servedRow['served'];
     }
     $guestServedMap = [];
-    $guestStmt = $pdo->query("SELECT punch_date, COUNT(*) AS served FROM food_ticket_events WHERE punch_date < '" . $todayStr . "' AND event_type IN ('guest', 'auto_guest') AND print_status = 'printed' GROUP BY punch_date");
+    $guestStmt = $pdo->query("SELECT punch_date, COALESCE(meal_type, 'lunch') AS meal_type, COUNT(*) AS served FROM food_ticket_events WHERE punch_date < '" . $todayStr . "' AND event_type IN ('guest', 'auto_guest') AND print_status = 'printed' GROUP BY punch_date, COALESCE(meal_type, 'lunch')");
     foreach ($guestStmt->fetchAll(PDO::FETCH_ASSOC) as $guestRow) {
-        $guestServedMap[(string) $guestRow['punch_date']] = (int) $guestRow['served'];
+        $guestServedMap[(string) $guestRow['punch_date'] . "\0" . (string) $guestRow['meal_type']] = (int) $guestRow['served'];
     }
 
-    // تطبیق سفارش/توزیع و آرک فاکتورهای ماهانه برای روزهای گذشته
-    $reconciliationInsert = $pdo->prepare("INSERT INTO food_meal_reconciliations (food_date, meal_type, employee_orders_at_order, guest_meals_at_order, supplier_order_quantity, received_quantity, employee_served_quantity, guest_served_quantity, waste_quantity, leftover_staff_quantity, leftover_waste_quantity, leftover_keep_quantity, leftover_other_quantity, status, note, ordered_by, ordered_at, snapshot_at, closed_by, closed_at, created_by, updated_by) VALUES (?, 'lunch', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0, 'closed', ?, ?, ?, ?, ?, ?, ?, ?)");
-    $guestActualInsert = $pdo->prepare("INSERT INTO food_guest_actuals (food_date, meal_type, root_unit_id, root_name, root_type, requested_count, actual_count, created_by, updated_by, created_at) VALUES (?, 'lunch', ?, ?, 'org_unit', ?, ?, ?, ?, ?)");
+    // تطبیق سفارش/توزیع برای هر دو وعده؛ مقادیر از سفارش و رویدادهای چاپ/تحویل خوانده می‌شود.
+    $reconciliationInsert = $pdo->prepare('INSERT INTO food_meal_reconciliations
+        (food_date, meal_type, employee_orders_at_order, guest_meals_at_order, supplier_order_quantity, received_quantity,
+         employee_served_quantity, guest_served_quantity, waste_quantity, leftover_staff_quantity, leftover_waste_quantity,
+         leftover_keep_quantity, leftover_other_quantity, status, note, ordered_by, ordered_at, snapshot_at,
+         closed_by, closed_at, created_by, updated_by)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)');
+    $guestActualInsert = $pdo->prepare('INSERT INTO food_guest_actuals
+        (food_date, meal_type, root_unit_id, root_name, root_type, requested_count, actual_count, created_by, updated_by, created_at)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)');
     $reconciliationsMade = 0;
     $dayCounter = 0;
     foreach ($openDays as $openDay) {
@@ -1059,50 +1292,130 @@ try {
         if ($date >= $todayStr) {
             continue;
         }
-        $st = $pdo->prepare("SELECT COUNT(DISTINCT employee_id) AS active_orders FROM food_orders WHERE food_date = ? AND meal_type = 'lunch' AND status = 'active'");
-        $st->execute([$date]);
-        $activeOrders = (int) $st->fetchColumn();
-        $guestMeals = 0;
-        $st = $pdo->prepare("SELECT COALESCE(SUM(guest_count), 0) FROM food_guest_requests WHERE request_date = ? AND meal_type = 'lunch' AND status = 'active'");
-        $st->execute([$date]);
-        $guestMeals = (int) $st->fetchColumn();
-        $demand = $activeOrders + $guestMeals;
-        if ($demand <= 0) {
-            continue;
-        }
-        $employeeServed = (int) ($servedMap[$date] ?? 0);
-        $guestServed = (int) ($guestServedMap[$date] ?? 0);
-        $servedTotal = $employeeServed + $guestServed;
-        $supplierQuantity = $demand + (($dayCounter * 7) % 5) - 1; // -۱..+۳ عددی که پیمانکار فرستاده
-        $receivedQuantity = $supplierQuantity + (($dayCounter % 3) === 0 ? -1 : 0); // گاهی یکی کمتر می‌رسد
-        $remaining = max(0, $receivedQuantity - $servedTotal);
-        $leftoverStaff = min(2, $remaining);
-        $leftoverKeep = min(3, max(0, $remaining - $leftoverStaff));
-        $leftoverWaste = max(0, $remaining - $leftoverStaff - $leftoverKeep);
-        $st = $pdo->prepare('SELECT id FROM food_meal_reconciliations WHERE food_date = ? AND meal_type = ?');
-        $st->execute([$date, 'lunch']);
-        if ($st->fetchColumn() !== false) {
-            continue;
-        }
-        $reconciliationInsert->execute([
-            $date, $activeOrders, $guestMeals, $supplierQuantity, $receivedQuantity,
-            $employeeServed, $guestServed, $leftoverWaste, $leftoverStaff, $leftoverWaste, $leftoverKeep,
-            $dayCounter % 6 === 0 ? 'توزیع کامل و بدون اتلاف قابل‌توجه (دادهٔ نمونه)' : null,
-            $userIds['seed_admin'], $date . ' 09:30:00', $date . ' 13:30:00', $userIds['seed_admin'], $date . ' 15:00:00', $userIds['seed_admin'], $userIds['seed_admin'],
-        ]);
-        $created['food_meal_reconciliations'][] = (int) $pdo->lastInsertId();
-        $reconciliationsMade++;
-        // واقعیت مهمان همان روز (برای «ویژهٔ مهمان» گزارش تطبیق)
-        if ($guestServed > 0 && isset($orgUnitIds['ORG-WS'])) {
-            $st = $pdo->prepare("SELECT id FROM food_guest_actuals WHERE food_date = ? AND meal_type = 'lunch' AND root_unit_id = ?");
-            $st->execute([$date, $orgUnitIds['ORG-WS']]);
+        foreach (['lunch', 'dinner'] as $mealType) {
+            $st = $pdo->prepare("SELECT COUNT(DISTINCT employee_id) FROM food_orders WHERE food_date = ? AND meal_type = ? AND status = 'active'");
+            $st->execute([$date, $mealType]);
+            $activeOrders = (int) $st->fetchColumn();
+            $st = $pdo->prepare("SELECT COALESCE(SUM(guest_count), 0) FROM food_guest_requests WHERE request_date = ? AND meal_type = ? AND status = 'active'");
+            $st->execute([$date, $mealType]);
+            $guestMeals = (int) $st->fetchColumn();
+            $demand = $activeOrders + $guestMeals;
+            if ($demand <= 0) {
+                continue;
+            }
+            $servedKey = $date . "\0" . $mealType;
+            $employeeServed = (int) ($servedMap[$servedKey] ?? 0);
+            $guestServed = (int) ($guestServedMap[$servedKey] ?? 0);
+            $supplierQuantity = max(0, $demand + (($dayCounter * 7) % 5) - 1); // پیمانکار گاهی کسری/اضافه دارد
+            $receivedQuantity = max(0, $supplierQuantity + (($dayCounter % 3) === 0 ? -1 : 0));
+            $remaining = max(0, $receivedQuantity - $employeeServed - $guestServed);
+            $leftoverStaff = min(2, $remaining);
+            $leftoverKeep = min(3, max(0, $remaining - $leftoverStaff));
+            $leftoverWaste = max(0, $remaining - $leftoverStaff - $leftoverKeep);
+            $st = $pdo->prepare('SELECT id FROM food_meal_reconciliations WHERE food_date = ? AND meal_type = ?');
+            $st->execute([$date, $mealType]);
             if ($st->fetchColumn() === false) {
-                $guestActualInsert->execute([$date, $orgUnitIds['ORG-WS'], 'کارگاه مرکزی', $guestMeals, $guestServed, $userIds['seed_admin'], $userIds['seed_admin'], $date . ' 13:30:00']);
-                $created['food_guest_actuals'][] = (int) $pdo->lastInsertId();
+                $reconciliationInsert->execute([
+                    $date, $mealType, $activeOrders, $guestMeals, $supplierQuantity, $receivedQuantity,
+                    $employeeServed, $guestServed, $leftoverWaste, $leftoverStaff, $leftoverWaste, $leftoverKeep, 0,
+                    'closed', $dayCounter % 6 === 0 ? 'توزیع کامل و بدون اتلاف قابل‌توجه (دادهٔ نمونه)' : 'تطبیق نمونه؛ مقادیر بر اساس سفارش و فیش‌های ثبت‌شده',
+                    $userIds['seed_admin'], $date . ($mealType === 'dinner' ? ' 17:00:00' : ' 10:00:00'),
+                    $date . ($mealType === 'dinner' ? ' 21:30:00' : ' 13:30:00'), $userIds['seed_admin'],
+                    $date . ($mealType === 'dinner' ? ' 22:00:00' : ' 15:00:00'), $userIds['seed_admin'], $userIds['seed_admin'],
+                ]);
+                $created['food_meal_reconciliations'][] = (int) $pdo->lastInsertId();
+                $reconciliationsMade++;
+            }
+            $rootIds = array_unique(array_merge(
+                array_keys($guestRequestedByRoot[$date][$mealType] ?? []),
+                array_keys($guestActualByRoot[$date][$mealType] ?? [])
+            ));
+            foreach ($rootIds as $rootId) {
+                $rootId = (int) $rootId;
+                $rootMeta = $guestRootMeta[$rootId] ?? ['name' => 'مدیرعامل', 'type' => 'ceo'];
+                $st = $pdo->prepare('SELECT id FROM food_guest_actuals WHERE food_date = ? AND meal_type = ? AND root_unit_id = ?');
+                $st->execute([$date, $mealType, $rootId]);
+                if ($st->fetchColumn() === false) {
+                    $guestActualInsert->execute([
+                        $date, $mealType, $rootId, $rootMeta['name'], $rootMeta['type'],
+                        (int) ($guestRequestedByRoot[$date][$mealType][$rootId] ?? 0),
+                        (int) ($guestActualByRoot[$date][$mealType][$rootId] ?? 0),
+                        $userIds['seed_admin'], $userIds['seed_admin'],
+                        $date . ($mealType === 'dinner' ? ' 21:30:00' : ' 13:30:00'),
+                    ]);
+                    $created['food_guest_actuals'][] = (int) $pdo->lastInsertId();
+                }
             }
         }
     }
     $summary['food_reconciliations'] = $reconciliationsMade;
+    $summary['food_guest_actuals'] = count($created['food_guest_actuals']);
+
+    // فاکتور نمونهٔ ماهانه: یک PDF داخلیِ ساختگی و رکورد فاکتور برای هر ماه دارای دادهٔ تطبیق.
+    // مجموع فاکتور عمداً ۲ پرس بیشتر از مجموع دریافت‌های روزانه است تا invoice_difference هم قابل مشاهده باشد.
+    $invoiceMonthRows = $pdo->query("SELECT DATE_FORMAT(food_date, '%Y-%m-01') AS invoice_month, COALESCE(SUM(received_quantity), 0) AS received_total
+        FROM food_meal_reconciliations WHERE food_date < '" . $todayStr . "' AND received_quantity IS NOT NULL
+        GROUP BY DATE_FORMAT(food_date, '%Y-%m-01') ORDER BY invoice_month")->fetchAll(PDO::FETCH_ASSOC);
+    $invoiceDirectory = dirname(__DIR__) . '/storage/uploads/food-invoices';
+    if (!is_dir($invoiceDirectory) && !mkdir($invoiceDirectory, 0750, true) && !is_dir($invoiceDirectory)) {
+        throw new RuntimeException('پوشهٔ فاکتور نمونه ساخته نشد: ' . $invoiceDirectory);
+    }
+    if (!is_file($invoiceDirectory . '/.htaccess')) {
+        @file_put_contents($invoiceDirectory . '/.htaccess', "Require all denied\nOptions -Indexes\n");
+    }
+    foreach ($invoiceMonthRows as $invoiceRow) {
+        $invoiceMonth = (string) $invoiceRow['invoice_month'];
+        $invoiceNumber = 'SEED-' . str_replace('-', '', $invoiceMonth);
+        $st = $pdo->prepare('SELECT id FROM food_monthly_invoices WHERE invoice_month = ? AND supplier_name = ? AND invoice_number = ?');
+        $st->execute([$invoiceMonth, 'پیمانکار نمونهٔ غذا', $invoiceNumber]);
+        if ($st->fetchColumn() !== false) {
+            continue;
+        }
+        $storedName = substr(hash('sha256', 'seed-food-invoice|' . $invoiceMonth), 0, 48) . '.pdf';
+        $invoicePath = $invoiceDirectory . '/' . $storedName;
+        $created['invoice_files'][] = $storedName;
+        $portionCount = max(0, (int) $invoiceRow['received_total'] + 2);
+        // PDF تک‌صفحه‌ای معتبر و بی‌محتوای حساس؛ برای نمایش/دانلود نمونهٔ فاکتور.
+        $stream = "BT /F1 18 Tf 40 145 Td (SAMPLE FOOD INVOICE) Tj 0 -30 Td /F1 12 Tf (Invoice: " . $invoiceNumber . ") Tj 0 -20 Td (Portions: " . $portionCount . ") Tj ET";
+        $objects = [
+            '<< /Type /Catalog /Pages 2 0 R >>',
+            '<< /Type /Pages /Kids [3 0 R] /Count 1 >>',
+            '<< /Type /Page /Parent 2 0 R /MediaBox [0 0 300 200] /Resources << /Font << /F1 4 0 R >> >> /Contents 5 0 R >>',
+            '<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>',
+            "<< /Length " . strlen($stream) . " >>\nstream\n" . $stream . "\nendstream",
+        ];
+        $pdf = "%PDF-1.4\n";
+        $offsets = [0];
+        foreach ($objects as $index => $object) {
+            $offsets[] = strlen($pdf);
+            $pdf .= ($index + 1) . " 0 obj\n" . $object . "\nendobj\n";
+        }
+        $xrefOffset = strlen($pdf);
+        $pdf .= "xref\n0 6\n0000000000 65535 f \n";
+        for ($objectId = 1; $objectId <= 5; $objectId++) {
+            $pdf .= sprintf('%010d 00000 n ', $offsets[$objectId]) . "\n";
+        }
+        $pdf .= "trailer << /Size 6 /Root 1 0 R >>\nstartxref\n" . $xrefOffset . "\n%%EOF\n";
+        if (file_put_contents($invoicePath, $pdf, LOCK_EX) === false) {
+            throw new RuntimeException('فایل PDF نمونهٔ فاکتور نوشته نشد: ' . $invoicePath);
+        }
+        @chmod($invoicePath, 0640);
+        $monthEnd = (new DateTimeImmutable($invoiceMonth))->modify('last day of this month')->format('Y-m-d');
+        $invoiceDate = $monthEnd < $todayStr ? $monthEnd : $todayStr;
+        $sha256 = hash_file('sha256', $invoicePath) ?: '';
+        $invoiceInsert = $pdo->prepare('INSERT INTO food_monthly_invoices
+            (invoice_month, invoice_date, supplier_name, invoice_number, portion_count, amount_toman,
+             original_name, stored_name, mime_type, size_bytes, sha256, uploaded_by)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)');
+        $invoiceInsert->execute([
+            $invoiceMonth, $invoiceDate, 'پیمانکار نمونهٔ غذا', $invoiceNumber, $portionCount,
+            $portionCount * 125000, 'فاکتور نمونه ' . $invoiceMonth . '.pdf', $storedName, 'application/pdf',
+            strlen($pdf), $sha256, $userIds['seed_admin'],
+        ]);
+        $created['food_monthly_invoices'][] = (int) $pdo->lastInsertId();
+    }
+
+    $summary['food_monthly_invoices'] = count($created['food_monthly_invoices']);
 
     // ثبت اجرای کارت گروهی سلف (run) برای روزهای کاری گذشته — آمار گروه برای گزارش‌ها
     $groupRunsMade = 0;
@@ -1188,6 +1501,13 @@ try {
     if ($pdo->inTransaction()) {
         $pdo->rollBack();
     }
+    $invoiceCleanupDir = realpath(dirname(__DIR__) . '/storage/uploads/food-invoices');
+    foreach (($created['invoice_files'] ?? []) as $invoiceFile) {
+        $invoicePath = $invoiceCleanupDir ? realpath($invoiceCleanupDir . '/' . basename((string) $invoiceFile)) : false;
+        if ($invoicePath && $invoiceCleanupDir && str_starts_with($invoicePath, rtrim($invoiceCleanupDir, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR) && is_file($invoicePath)) {
+            @unlink($invoicePath);
+        }
+    }
     fwrite(STDERR, 'خطا در ساخت دادهٔ نمونه (همه‌چیز به حالت قبل برگردانده شد): ' . $exception->getMessage() . PHP_EOL);
     exit(1);
 }
@@ -1217,12 +1537,13 @@ fwrite(STDOUT, "  • «تعمیر کولر اتاق جلسات» (مسئول: s
 fwrite(STDOUT, "با حساب مسئول رسیدگی وارد شوید و «تأیید لغو» یا «رد و ادامهٔ رسیدگی» را بزنید.\n");
 fwrite(STDOUT, $line . PHP_EOL);
 fwrite(STDOUT, "── ماژول غذا (دادهٔ نمونهٔ حجیم) ─────────────────────────────\n");
-fwrite(STDOUT, "۳۴ روز گذشتهٔ کاری + امروز؛ سفارش «ثبت‌شده» برای روزهای گذشته با:\n");
+fwrite(STDOUT, "بازهٔ ۳۴روزه تا امروز، با روزهای کاری سلف؛ سفارش «ثبت‌شده» برای روزهای گذشته با:\n");
 fwrite(STDOUT, "  • فیش چاپ/تحویل‌شده (printed + delivered) به‌ازای سفارش‌های فعال\n");
 fwrite(STDOUT, "  • خطای چاپ و «بدون غذا» برای واقع‌نمایی\n");
 fwrite(STDOUT, "  • سفارشِ فعال بدون فیش (غایبین) و سفارش‌های لغوشده\n");
-fwrite(STDOUT, "  • تطبیق سفارش/توزیع روزانهٔ بسته‌شده + واقعیت مهمان\n");
-fwrite(STDOUT, "  • ثبت اجرای کارت گروهی سلف، غیبت‌ها، کارت مهمان، وضعیت «ورکر فعال»\n");
+fwrite(STDOUT, "  • تطبیق سفارش/توزیع روزانه برای ناهار و شام + فاکتور PDF ماهانه با اختلاف قابل‌مشاهده\n");
+fwrite(STDOUT, "  • گزارش واقعیت مهمان با چند بخش سازمانی، «بدون جایگاه» و فیش خودکار مهمان\n");
+fwrite(STDOUT, "  • سفارش‌های شام و فیش خودکار پرسنل، اجرای کارت گروهی، غیبت‌ها، کارت مهمان و وضعیت «ورکر فعال»\n");
 fwrite(STDOUT, "نمونهٔ خروجی‌ها: «گزارش‌های غذا» (فیلتر چاپ/تحویل)، «تطبیق سفارش و توزیع غذا»،\n");
 fwrite(STDOUT, "«گزارش تحویل غذا» (food-order.php) و پایش ورکر در پنل مدیریت. بازهٔ پیش‌فرض: ۳۴ روز گذشته تا امروز.\n");
 fwrite(STDOUT, $line . PHP_EOL);
@@ -1233,8 +1554,11 @@ fwrite(STDOUT, "سفارش غذا: " . ($summary['food_orders'] ?? 0)
     . " | فیش تحویل‌شده: " . ($summary['food_events_delivered'] ?? 0)
     . " | خطای چاپ: " . ($summary['food_events_print_errors'] ?? 0)
     . " | تطبیق روزانه: " . ($summary['food_reconciliations'] ?? 0)
+    . " | واقعیت مهمان: " . ($summary['food_guest_actuals'] ?? 0)
+    . " | فاکتور ماهانه: " . ($summary['food_monthly_invoices'] ?? 0)
     . " | غیبت‌ها: " . ($summary['food_absences'] ?? 0)
     . " | اجرای کارت گروهی: " . ($summary['food_group_runs'] ?? 0) . PHP_EOL);
 fwrite(STDOUT, "کاربران غذا: ۱۵ کارکن + ۲۰ کارمند نمونه (seed_emp_01..seed_emp_20) — همه با رمز {$password}\n");
+fwrite(STDOUT, "حساب‌های گزارش کاربران دامین: seed_ldap_1..6 و حساب‌های پرسنل غذای قدیمی: seed_food_legacy_001..004 — دادهٔ آزمایشیِ تطبیق\n");
 fwrite(STDOUT, $line . PHP_EOL);
 fwrite(STDOUT, "برای حذف کامل این داده‌ها و ساخت دوباره: php tools/seed_test_data.php --test-env --fresh\n");
