@@ -27,19 +27,19 @@
     data.set('csrf', csrfToken());
     return request('offline-map.php', { method: 'POST', headers: { Accept: 'application/json', 'X-CSRF-Token': csrfToken(), 'X-Requested-With': 'XMLHttpRequest' }, body: data });
   }
-  function setTool(tool) {
+  function setTool(tool, preserveVertices) {
     state.tool = tool;
-    state.vertices = [];
+    if (!preserveVertices) state.vertices = [];
     document.querySelectorAll('[data-tool]').forEach(function (button) {
       button.classList.toggle('is-active', button.getAttribute('data-tool') === tool);
     });
-    var drawing = tool === 'Point' || tool === 'LineString' || tool === 'Polygon' || tool === 'measure';
+    var drawing = tool === 'Point' || tool === 'LineString' || tool === 'Polygon' || tool === 'measure' || tool === 'measure-area';
     ['offline-map-undo', 'offline-map-finish', 'offline-map-cancel'].forEach(function (id) {
       var button = document.getElementById(id);
       if (button) button.disabled = !drawing || state.vertices.length === 0;
     });
     if (state.map) state.map.getCanvas().style.cursor = drawing ? 'crosshair' : '';
-    if (tool === 'measure') status('برای اندازه‌گیری، نقاط مسیر را روی نقشه انتخاب کنید.');
+    if (tool === 'measure' || tool === 'measure-area') status('برای اندازه‌گیری، نقاط مسیر یا رأس‌های محدوده را روی نقشه انتخاب کنید.');
     else if (drawing) status('برای ترسیم، رأس‌ها را روی نقشه انتخاب کنید؛ سپس «پایان ترسیم» را بزنید.');
     else status('حالت انتخاب و جابه‌جایی فعال است.');
   }
@@ -48,7 +48,7 @@
     var geometry = null;
     if (state.tool === 'Point' && state.vertices.length) geometry = { type: 'Point', coordinates: state.vertices[0] };
     if (state.tool === 'LineString' && state.vertices.length) geometry = { type: 'LineString', coordinates: state.vertices };
-    if (state.tool === 'Polygon' && state.vertices.length >= 2) {
+    if ((state.tool === 'Polygon' || state.tool === 'measure-area') && state.vertices.length >= 2) {
       var ring = state.vertices.slice();
       if (ring.length >= 3) ring.push(ring[0]);
       geometry = { type: 'Polygon', coordinates: [ring] };
@@ -133,18 +133,34 @@
     }
     return total;
   }
+  function areaKm2(points) {
+    if (points.length < 3) return 0;
+    var sum = 0, rad = Math.PI / 180, meanLat = points.reduce(function (v, p) { return v + p[1]; }, 0) / points.length;
+    var scaleX = 111.320 * Math.cos(meanLat * rad), scaleY = 110.574;
+    for (var i = 0; i < points.length; i++) {
+      var a = points[i], b = points[(i + 1) % points.length];
+      sum += (a[0] * scaleX) * (b[1] * scaleY) - (b[0] * scaleX) * (a[1] * scaleY);
+    }
+    return Math.abs(sum / 2);
+  }
   function finishDrawing() {
     if (state.tool === 'measure') {
       status('طول مسیر: ' + distanceKm(state.vertices).toFixed(3) + ' کیلومتر');
+      if (state.map && state.map.getSource('offline-map-draft')) state.map.getSource('offline-map-draft').setData({ type: 'FeatureCollection', features: [] });
+      setTool('pan'); return;
+    }
+    if (state.tool === 'measure-area') {
+      status('مساحت تقریبی: ' + areaKm2(state.vertices).toFixed(3) + ' کیلومتر مربع');
+      if (state.map && state.map.getSource('offline-map-draft')) state.map.getSource('offline-map-draft').setData({ type: 'FeatureCollection', features: [] });
       setTool('pan'); return;
     }
     if (state.tool === 'Point' && state.vertices.length >= 1) {
-      openFeatureDialog({ type: 'Point', coordinates: state.vertices[0] });
+      openFeatureDialog({ type: 'Point', coordinates: state.vertices[state.vertices.length - 1] }, state.editId ? state.features.find(function (x) { return Number(x.id) === Number(state.editId); }) : null);
     } else if (state.tool === 'LineString' && state.vertices.length >= 2) {
-      openFeatureDialog({ type: 'LineString', coordinates: state.vertices.slice() });
+      openFeatureDialog({ type: 'LineString', coordinates: state.vertices.slice() }, state.editId ? state.features.find(function (x) { return Number(x.id) === Number(state.editId); }) : null);
     } else if (state.tool === 'Polygon' && state.vertices.length >= 3) {
       var ring = state.vertices.slice(); ring.push(ring[0]);
-      openFeatureDialog({ type: 'Polygon', coordinates: [ring] });
+      openFeatureDialog({ type: 'Polygon', coordinates: [ring] }, state.editId ? state.features.find(function (x) { return Number(x.id) === Number(state.editId); }) : null);
     } else {
       status('برای تکمیل این هندسه رأس کافی انتخاب نشده است.'); return;
     }
@@ -158,12 +174,26 @@
     var isOwner = mapNode && Number(feature.properties.created_by) === Number(mapNode.getAttribute('data-user-id'));
     var isAdmin = mapNode && mapNode.getAttribute('data-can-admin') === '1';
     if (mapNode && mapNode.getAttribute('data-can-edit') === '1' && (isOwner || isAdmin)) {
-      var edit = document.createElement('button'); edit.type = 'button'; edit.className = 'button secondary'; edit.textContent = 'ویرایش';
+      var edit = document.createElement('button'); edit.type = 'button'; edit.className = 'button secondary'; edit.textContent = 'ویرایش اطلاعات';
       edit.addEventListener('click', function () {
         var item = state.features.find(function (x) { return Number(x.id) === Number(feature.properties.id); });
         if (item) openFeatureDialog(item.geometry, item);
       });
       box.appendChild(edit);
+      var geometryEdit = document.createElement('button'); geometryEdit.type = 'button'; geometryEdit.className = 'button secondary'; geometryEdit.textContent = 'ویرایش هندسه';
+      geometryEdit.addEventListener('click', function () {
+        var item = state.features.find(function (x) { return Number(x.id) === Number(feature.properties.id); });
+        if (!item || !item.geometry) return;
+        state.editId = Number(item.id);
+        var type = item.geometry.type;
+        if (type === 'Point') state.vertices = [];
+        else if (type === 'LineString') state.vertices = item.geometry.coordinates.map(function (p) { return p.slice(); });
+        else if (type === 'Polygon') state.vertices = item.geometry.coordinates[0].slice(0, -1).map(function (p) { return p.slice(); });
+        else return;
+        setTool(type, true); updateDrawPreview();
+        status('هندسهٔ موجود بارگذاری شد؛ رأس‌ها را اضافه یا با «بازگشت رأس» حذف کنید و پایان ترسیم را بزنید.');
+      });
+      box.appendChild(geometryEdit);
       var del = document.createElement('button'); del.type = 'button'; del.className = 'button danger'; del.textContent = 'حذف';
       del.addEventListener('click', function () {
         if (!window.confirm('این عارضه حذف شود؟')) return;
@@ -246,7 +276,7 @@
           map.on('mouseleave', layer, function () { if (state.tool === 'pan') map.getCanvas().style.cursor = ''; });
         });
         map.on('click', function (event) {
-          if (!['Point', 'LineString', 'Polygon', 'measure'].includes(state.tool)) return;
+          if (!['Point', 'LineString', 'Polygon', 'measure', 'measure-area'].includes(state.tool)) return;
           var point = [event.lngLat.lng, event.lngLat.lat];
           state.vertices.push(point); updateDrawPreview();
           var undo = document.getElementById('offline-map-undo'), finish = document.getElementById('offline-map-finish'), cancel = document.getElementById('offline-map-cancel');
@@ -254,6 +284,7 @@
           if (finish) finish.disabled = state.tool === 'Point' ? false : state.vertices.length < (state.tool === 'LineString' ? 2 : 3);
           if (cancel) cancel.disabled = false;
           if (state.tool === 'measure' && state.vertices.length > 1) status('طول فعلی: ' + distanceKm(state.vertices).toFixed(3) + ' کیلومتر');
+          else if (state.tool === 'measure-area' && state.vertices.length > 2) status('مساحت تقریبی: ' + areaKm2(state.vertices).toFixed(3) + ' کیلومتر مربع');
           else status('تعداد رأس‌های انتخاب‌شده: ' + state.vertices.length);
           if (state.tool === 'Point') finishDrawing();
         });
