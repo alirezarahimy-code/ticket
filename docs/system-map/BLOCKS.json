@@ -102964,6 +102964,265 @@
             ]
         },
         {
+            "id": "TOOL-154",
+            "path": "tools/seed_test_data.php",
+            "area": "TOOL",
+            "lines": 815,
+            "file_fingerprint": "7822408558a9",
+            "blocks": [
+                {
+                    "kind": "region",
+                    "anchor": "بلوک رویه‌ای 1-28",
+                    "line_start": 1,
+                    "line_end": 28,
+                    "lines": 28,
+                    "fingerprint": "6f6c02b81011",
+                    "risk": {
+                        "score": 0,
+                        "flags": {}
+                    },
+                    "id": "TOOL-154.01"
+                },
+                {
+                    "kind": "region",
+                    "anchor": "آرگومان‌ها",
+                    "line_start": 29,
+                    "line_end": 29,
+                    "lines": 1,
+                    "fingerprint": "8e478649e3b6",
+                    "risk": {
+                        "score": 0,
+                        "flags": {}
+                    },
+                    "id": "TOOL-154.02"
+                },
+                {
+                    "kind": "function",
+                    "anchor": "seed_usage",
+                    "line_start": 30,
+                    "line_end": 42,
+                    "lines": 13,
+                    "fingerprint": "8770bce6f46f",
+                    "risk": {
+                        "score": 0,
+                        "flags": {}
+                    },
+                    "id": "TOOL-154.03"
+                },
+                {
+                    "kind": "region",
+                    "anchor": "بلوک رویه‌ای 43-96",
+                    "line_start": 43,
+                    "line_end": 96,
+                    "lines": 54,
+                    "fingerprint": "dd74fe6aa726",
+                    "risk": {
+                        "score": 4,
+                        "flags": {
+                            "dangerous_call": 4
+                        }
+                    },
+                    "id": "TOOL-154.04"
+                },
+                {
+                    "kind": "region",
+                    "anchor": "ابزارها",
+                    "line_start": 97,
+                    "line_end": 97,
+                    "lines": 1,
+                    "fingerprint": "d7d4fcea1c34",
+                    "risk": {
+                        "score": 0,
+                        "flags": {}
+                    },
+                    "id": "TOOL-154.05"
+                },
+                {
+                    "kind": "function",
+                    "anchor": "seed_manifest_load",
+                    "line_start": 98,
+                    "line_end": 108,
+                    "lines": 11,
+                    "fingerprint": "28b603d2302a",
+                    "risk": {
+                        "score": 0,
+                        "flags": {}
+                    },
+                    "id": "TOOL-154.06"
+                },
+                {
+                    "kind": "function",
+                    "anchor": "seed_manifest_save",
+                    "line_start": 110,
+                    "line_end": 115,
+                    "lines": 6,
+                    "fingerprint": "ba9b889bc136",
+                    "risk": {
+                        "score": 1,
+                        "flags": {
+                            "write_no_tx": 1
+                        }
+                    },
+                    "id": "TOOL-154.07"
+                },
+                {
+                    "kind": "function",
+                    "anchor": "seed_manifest_clear",
+                    "line_start": 117,
+                    "line_end": 121,
+                    "lines": 5,
+                    "fingerprint": "da3932203c44",
+                    "risk": {
+                        "score": 1,
+                        "flags": {
+                            "write_no_tx": 1
+                        }
+                    },
+                    "id": "TOOL-154.08"
+                },
+                {
+                    "kind": "function",
+                    "anchor": "seed_delete_in",
+                    "line_start": 123,
+                    "line_end": 134,
+                    "lines": 12,
+                    "fingerprint": "04b0c495bcf4",
+                    "risk": {
+                        "score": 0,
+                        "flags": {}
+                    },
+                    "id": "TOOL-154.09"
+                },
+                {
+                    "kind": "function",
+                    "anchor": "seed_col_exists",
+                    "line_start": 136,
+                    "line_end": 141,
+                    "lines": 6,
+                    "fingerprint": "9afc9416cff2",
+                    "risk": {
+                        "score": 0,
+                        "flags": {}
+                    },
+                    "id": "TOOL-154.10"
+                },
+                {
+                    "kind": "function",
+                    "anchor": "seed_next_ticket_no",
+                    "line_start": 143,
+                    "line_end": 165,
+                    "lines": 23,
+                    "fingerprint": "f34357629083",
+                    "risk": {
+                        "score": 5,
+                        "flags": {
+                            "dangerous_call": 4,
+                            "write_no_tx": 1
+                        }
+                    },
+                    "id": "TOOL-154.11"
+                },
+                {
+                    "kind": "function",
+                    "anchor": "seed_gregorian_to_jalali",
+                    "line_start": 167,
+                    "line_end": 189,
+                    "lines": 23,
+                    "fingerprint": "4b2455828f05",
+                    "risk": {
+                        "score": 0,
+                        "flags": {}
+                    },
+                    "id": "TOOL-154.12"
+                },
+                {
+                    "kind": "function",
+                    "anchor": "seed_manifest_ids",
+                    "line_start": 191,
+                    "line_end": 196,
+                    "lines": 6,
+                    "fingerprint": "4abf2fb4bd9f",
+                    "risk": {
+                        "score": 0,
+                        "flags": {}
+                    },
+                    "id": "TOOL-154.13"
+                },
+                {
+                    "kind": "function",
+                    "anchor": "seed_wipe",
+                    "line_start": 198,
+                    "line_end": 283,
+                    "lines": 86,
+                    "fingerprint": "658d31e4fc77",
+                    "risk": {
+                        "score": 1,
+                        "flags": {
+                            "write_no_tx": 1
+                        }
+                    },
+                    "id": "TOOL-154.14"
+                },
+                {
+                    "kind": "region",
+                    "anchor": "بلوک رویه‌ای 284-305",
+                    "line_start": 284,
+                    "line_end": 305,
+                    "lines": 22,
+                    "fingerprint": "e6fee9465f34",
+                    "risk": {
+                        "score": 0,
+                        "flags": {}
+                    },
+                    "id": "TOOL-154.15"
+                },
+                {
+                    "kind": "region",
+                    "anchor": "ساخت دادهٔ نمونه",
+                    "line_start": 306,
+                    "line_end": 315,
+                    "lines": 10,
+                    "fingerprint": "3734aae5f258",
+                    "risk": {
+                        "score": 0,
+                        "flags": {}
+                    },
+                    "id": "TOOL-154.16"
+                },
+                {
+                    "kind": "region",
+                    "anchor": "جدول شماره‌گذاری را پیش از تراکنش اصلی بساز (CREATE در MySQL",
+                    "line_start": 316,
+                    "line_end": 785,
+                    "lines": 470,
+                    "fingerprint": "dac8b17d41a5",
+                    "risk": {
+                        "score": 16,
+                        "flags": {
+                            "silent_catch": 4,
+                            "sql_concat": 5,
+                            "dangerous_call": 4,
+                            "very_long": 3
+                        }
+                    },
+                    "id": "TOOL-154.17"
+                },
+                {
+                    "kind": "region",
+                    "anchor": "گزارش پایانی",
+                    "line_start": 786,
+                    "line_end": 815,
+                    "lines": 30,
+                    "fingerprint": "48f1c57432e2",
+                    "risk": {
+                        "score": 0,
+                        "flags": {}
+                    },
+                    "id": "TOOL-154.18"
+                }
+            ]
+        },
+        {
             "id": "TOOL-081",
             "path": "tools/session-boot.py",
             "area": "TOOL",

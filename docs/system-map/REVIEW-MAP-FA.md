@@ -8,12 +8,12 @@
 
 | سنجه | مقدار |
 |---|---|
-| فایل‌های کد تولیدی | 708 |
-| خطوط | 178,698 |
-| آدرس‌ها (بلوک) | 8,508 |
+| فایل‌های کد تولیدی | 709 |
+| خطوط | 179,513 |
+| آدرس‌ها (بلوک) | 8,526 |
 | موضوع‌های قابل جست‌وجو | 41 صفحه + 102 مجوز + 86 جدول |
 | بازبینی‌شده | 0 آدرس (0.0%) — 0 خط (0.0%) |
-| باقی‌مانده | 8,508 آدرس |
+| باقی‌مانده | 8,526 آدرس |
 
 ## 🔎 فهرست موضوعی — از اینجا شروع کنید
 
@@ -290,7 +290,7 @@
 | ناحیه | معنی | فایل | بلوک | خط |
 |---|---|---|---|---|
 | `TEST` | TEST | 260 | 2,084 | 29,969 |
-| `TOOL` | TOOL | 153 | 1,464 | 40,278 |
+| `TOOL` | TOOL | 154 | 1,482 | 41,093 |
 | `DB` | DB | 89 | 1,397 | 8,374 |
 | `PAGE` | صفحات (ریشه) | 84 | 1,653 | 59,383 |
 | `ASSET` | دارایی‌های ایستا (assets/) | 34 | 858 | 15,327 |
@@ -306,15 +306,15 @@
 
 | نشانه | معنی | بلوک |
 |---|---|---|
-| `write_no_tx` | نوشتن بدون تراکنش | 965 |
+| `write_no_tx` | نوشتن بدون تراکنش | 969 |
 | `error_suppression` | سرکوب @ | 388 |
-| `dangerous_call` | فراخوانی خطرناک | 281 |
-| `sql_concat` | الحاق در SQL | 239 |
+| `dangerous_call` | فراخوانی خطرناک | 284 |
+| `sql_concat` | الحاق در SQL | 240 |
 | `raw_input` | ورودی خام | 221 |
 | `long` | >۱۲۰ خط | 180 |
-| `silent_catch` | catch بی‌صدا | 167 |
+| `silent_catch` | catch بی‌صدا | 168 |
 | `unescaped_echo` | چاپ بدون فرار | 39 |
-| `very_long` | >۳۰۰ خط | 29 |
+| `very_long` | >۳۰۰ خط | 30 |
 
 ## ترتیب بازبینی — ۴۰ آدرس پرخطر
 
@@ -327,39 +327,39 @@
 | 5 | `TEST-227.13` | `tests/test_system_update_migration_failure_gates.php:147` | بلوک رویه‌ای 147-232 | 17 | catch بی‌صدا، الحاق در SQL، سرکوب @، فراخوانی خطرناک، نوشتن بدون تراکنش | ⬜ در نوبت |
 | 6 | `PAGE-033.73` | `index.php:1958` | مسیر: settings | 16 | catch بی‌صدا، الحاق در SQL، ورودی خام، سرکوب @، نوشتن بدون تراکنش، >۳۰۰ خط | ⬜ در نوبت |
 | 7 | `TEST-199.08` | `tests/test_request_center_phase2_smoke_mariadb.php:158` | بلوک رویه‌ای 158-949 | 16 | الحاق در SQL، سرکوب @، فراخوانی خطرناک، نوشتن بدون تراکنش، >۳۰۰ خط | ⬜ در نوبت |
-| 8 | `TOOL-110.01` | `tools/test_food_group_representative.php:1` | بلوک رویه‌ای 1-517 | 16 | catch بی‌صدا، الحاق در SQL، چاپ بدون فرار، نوشتن بدون تراکنش، >۳۰۰ خط | ⬜ در نوبت |
-| 9 | `ACT-014.09` | `actions/settings-actions.php:319` | مسیر: reset_assets | 15 | catch بی‌صدا، الحاق در SQL، سرکوب @، فراخوانی خطرناک | ⬜ در نوبت |
-| 10 | `TOOL-056.01` | `tools/explain_alarms.php:1` | بلوک رویه‌ای 1-219 | 15 | catch بی‌صدا، چاپ بدون فرار، سرکوب @، فراخوانی خطرناک، نوشتن بدون تراکنش، >۱۲۰ خط | ⬜ در نوبت |
-| 11 | `PAGE-024.30` | `food-ticket-runtime.php:1250` | food_ticket_events_ensure_source_delet | 14 | catch بی‌صدا، الحاق در SQL، فراخوانی خطرناک، نوشتن بدون تراکنش | ⬜ در نوبت |
-| 12 | `PAGE-029.91` | `food-ticket.php:2592` | food_ticket_cleanup_source_rows | 14 | catch بی‌صدا، الحاق در SQL، سرکوب @، نوشتن بدون تراکنش، >۱۲۰ خط | ⬜ در نوبت |
-| 13 | `PAGE-029.137` | `food-ticket.php:5061` | food_ticket_api_upload_access_file | 14 | الحاق در SQL، ورودی خام، سرکوب @، فراخوانی خطرناک | ⬜ در نوبت |
-| 14 | `PAGE-029.138` | `food-ticket.php:5131` | food_ticket_api_handle | 14 | الحاق در SQL، ورودی خام، سرکوب @، نوشتن بدون تراکنش، >۳۰۰ خط | ⬜ در نوبت |
-| 15 | `PAGE-054.03` | `modules/request-center/Pages/detail.php:17` | مسیر: ticket | 14 | الحاق در SQL، ورودی خام، سرکوب @، نوشتن بدون تراکنش، >۳۰۰ خط | ⬜ در نوبت |
-| 16 | `TEST-194.03` | `tests/test_request_center_claim_concurrency_mariadb.php:38` | بلوک رویه‌ای 38-198 | 14 | الحاق در SQL، سرکوب @، فراخوانی خطرناک، نوشتن بدون تراکنش، >۱۲۰ خط | ⬜ در نوبت |
-| 17 | `TOOL-105.10` | `tools/test_employees_import_offline.php:121` | بلوک رویه‌ای 121-276 | 14 | الحاق در SQL، سرکوب @، فراخوانی خطرناک، نوشتن بدون تراکنش، >۱۲۰ خط | ⬜ در نوبت |
-| 18 | `PAGE-024.23` | `food-ticket-runtime.php:872` | food_ticket_send_windows_graphic | 13 | الحاق در SQL، سرکوب @، فراخوانی خطرناک، >۱۲۰ خط | ⬜ در نوبت |
-| 19 | `PAGE-029.41` | `food-ticket.php:827` | food_ticket_access_rows_powershell | 13 | الحاق در SQL، سرکوب @، فراخوانی خطرناک، >۱۲۰ خط | ⬜ در نوبت |
-| 20 | `PAGE-029.43` | `food-ticket.php:1045` | food_ticket_access_delete_powershell_e | 13 | الحاق در SQL، سرکوب @، فراخوانی خطرناک، نوشتن بدون تراکنش | ⬜ در نوبت |
-| 21 | `PAGE-029.92` | `food-ticket.php:2796` | food_ticket_retry_failed | 13 | catch بی‌صدا، الحاق در SQL، سرکوب @، نوشتن بدون تراکنش | ⬜ در نوبت |
-| 22 | `TEST-125.08` | `tests/test_logging_mysql_integration.php:229` | Verify migration 025 changes the live  | 13 | الحاق در SQL، سرکوب @، فراخوانی خطرناک، نوشتن بدون تراکنش | ⬜ در نوبت |
-| 23 | `TOOL-003.07` | `tools/asset_reset.php:169` | ۶) حذف | 13 | catch بی‌صدا، الحاق در SQL، فراخوانی خطرناک | ⬜ در نوبت |
-| 24 | `TOOL-045.10` | `tools/diag_extract.php:265` | اگر مسیر جایگزینی پیدا شد ولی در tools | 13 | الحاق در SQL، سرکوب @، فراخوانی خطرناک، >۱۲۰ خط | ⬜ در نوبت |
-| 25 | `PAGE-009.27` | `chatbot.php:717` | chatbot_api_handle | 12 | ورودی خام، چاپ بدون فرار، سرکوب @، فراخوانی خطرناک، نوشتن بدون تراکنش | ⬜ در نوبت |
-| 26 | `CRON-009.01` | `cron/rebuild_logging_issues.php:1` | بلوک رویه‌ای 1-53 | 12 | الحاق در SQL، سرکوب @، فراخوانی خطرناک | ⬜ در نوبت |
-| 27 | `TEST-125.06` | `tests/test_logging_mysql_integration.php:136` | Migration 025 must remain safe when th | 12 | الحاق در SQL، سرکوب @، فراخوانی خطرناک | ⬜ در نوبت |
-| 28 | `TEST-205.11` | `tests/test_request_center_t12_preflight.php:210` | بلوک رویه‌ای 210-322 | 12 | catch بی‌صدا، سرکوب @، فراخوانی خطرناک، نوشتن بدون تراکنش | ⬜ در نوبت |
-| 29 | `TOOL-045.11` | `tools/diag_extract.php:406` | آیا Apache با LocalSystem بالا آمده؟ ر | 12 | الحاق در SQL، سرکوب @، فراخوانی خطرناک | ⬜ در نوبت |
-| 30 | `TOOL-051.01` | `tools/diag_source_row_delete.php:1` | بلوک رویه‌ای 1-128 | 12 | الحاق در SQL، ورودی خام، سرکوب @، نوشتن بدون تراکنش، >۱۲۰ خط | ⬜ در نوبت |
-| 31 | `PAGE-024.19` | `food-ticket-runtime.php:567` | food_ticket_process_print_queue | 11 | catch بی‌صدا، الحاق در SQL، نوشتن بدون تراکنش، >۱۲۰ خط | ⬜ در نوبت |
-| 32 | `WEB-004.01` | `food-ticket-web/assets/food-capitalio-dashboard-4179.js:1` | مقدمهٔ فایل | 11 | catch بی‌صدا، الحاق در SQL، نوشتن بدون تراکنش، >۱۲۰ خط | ⬜ در نوبت |
-| 33 | `WEB-006.01` | `food-ticket-web/assets/food-capitalio-dashboard-r37.js:1` | مقدمهٔ فایل | 11 | catch بی‌صدا، الحاق در SQL، نوشتن بدون تراکنش، >۱۲۰ خط | ⬜ در نوبت |
-| 34 | `WEB-006.04` | `food-ticket-web/assets/food-capitalio-dashboard-r37.js:187` | assert on the output | 11 | الحاق در SQL، فراخوانی خطرناک، نوشتن بدون تراکنش، >۱۲۰ خط | ⬜ در نوبت |
-| 35 | `WEB-008.01` | `food-ticket-web/assets/food-capitalio-dashboard-r38.js:1` | مقدمهٔ فایل | 11 | catch بی‌صدا، الحاق در SQL، نوشتن بدون تراکنش، >۱۲۰ خط | ⬜ در نوبت |
-| 36 | `WEB-008.04` | `food-ticket-web/assets/food-capitalio-dashboard-r38.js:187` | assert on the output | 11 | الحاق در SQL، فراخوانی خطرناک، نوشتن بدون تراکنش، >۱۲۰ خط | ⬜ در نوبت |
-| 37 | `WEB-010.01` | `food-ticket-web/assets/food-capitalio-dashboard-r39.js:1` | مقدمهٔ فایل | 11 | catch بی‌صدا، الحاق در SQL، نوشتن بدون تراکنش، >۱۲۰ خط | ⬜ در نوبت |
-| 38 | `WEB-010.04` | `food-ticket-web/assets/food-capitalio-dashboard-r39.js:187` | assert on the output | 11 | الحاق در SQL، فراخوانی خطرناک، نوشتن بدون تراکنش، >۱۲۰ خط | ⬜ در نوبت |
-| 39 | `WEB-013.01` | `food-ticket-web/assets/food-capitalio-dashboard-r41.js:1` | مقدمهٔ فایل | 11 | catch بی‌صدا، الحاق در SQL، نوشتن بدون تراکنش، >۱۲۰ خط | ⬜ در نوبت |
-| 40 | `WEB-013.04` | `food-ticket-web/assets/food-capitalio-dashboard-r41.js:187` | assert on the output | 11 | الحاق در SQL، فراخوانی خطرناک، نوشتن بدون تراکنش، >۱۲۰ خط | ⬜ در نوبت |
+| 8 | `TOOL-154.17` | `tools/seed_test_data.php:316` | جدول شماره‌گذاری را پیش از تراکنش اصلی | 16 | catch بی‌صدا، الحاق در SQL، فراخوانی خطرناک، >۳۰۰ خط | ⬜ در نوبت |
+| 9 | `TOOL-110.01` | `tools/test_food_group_representative.php:1` | بلوک رویه‌ای 1-517 | 16 | catch بی‌صدا، الحاق در SQL، چاپ بدون فرار، نوشتن بدون تراکنش، >۳۰۰ خط | ⬜ در نوبت |
+| 10 | `ACT-014.09` | `actions/settings-actions.php:319` | مسیر: reset_assets | 15 | catch بی‌صدا، الحاق در SQL، سرکوب @، فراخوانی خطرناک | ⬜ در نوبت |
+| 11 | `TOOL-056.01` | `tools/explain_alarms.php:1` | بلوک رویه‌ای 1-219 | 15 | catch بی‌صدا، چاپ بدون فرار، سرکوب @، فراخوانی خطرناک، نوشتن بدون تراکنش، >۱۲۰ خط | ⬜ در نوبت |
+| 12 | `PAGE-024.30` | `food-ticket-runtime.php:1250` | food_ticket_events_ensure_source_delet | 14 | catch بی‌صدا، الحاق در SQL، فراخوانی خطرناک، نوشتن بدون تراکنش | ⬜ در نوبت |
+| 13 | `PAGE-029.91` | `food-ticket.php:2592` | food_ticket_cleanup_source_rows | 14 | catch بی‌صدا، الحاق در SQL، سرکوب @، نوشتن بدون تراکنش، >۱۲۰ خط | ⬜ در نوبت |
+| 14 | `PAGE-029.137` | `food-ticket.php:5061` | food_ticket_api_upload_access_file | 14 | الحاق در SQL، ورودی خام، سرکوب @، فراخوانی خطرناک | ⬜ در نوبت |
+| 15 | `PAGE-029.138` | `food-ticket.php:5131` | food_ticket_api_handle | 14 | الحاق در SQL، ورودی خام، سرکوب @، نوشتن بدون تراکنش، >۳۰۰ خط | ⬜ در نوبت |
+| 16 | `PAGE-054.03` | `modules/request-center/Pages/detail.php:17` | مسیر: ticket | 14 | الحاق در SQL، ورودی خام، سرکوب @، نوشتن بدون تراکنش، >۳۰۰ خط | ⬜ در نوبت |
+| 17 | `TEST-194.03` | `tests/test_request_center_claim_concurrency_mariadb.php:38` | بلوک رویه‌ای 38-198 | 14 | الحاق در SQL، سرکوب @، فراخوانی خطرناک، نوشتن بدون تراکنش، >۱۲۰ خط | ⬜ در نوبت |
+| 18 | `TOOL-105.10` | `tools/test_employees_import_offline.php:121` | بلوک رویه‌ای 121-276 | 14 | الحاق در SQL، سرکوب @، فراخوانی خطرناک، نوشتن بدون تراکنش، >۱۲۰ خط | ⬜ در نوبت |
+| 19 | `PAGE-024.23` | `food-ticket-runtime.php:872` | food_ticket_send_windows_graphic | 13 | الحاق در SQL، سرکوب @، فراخوانی خطرناک، >۱۲۰ خط | ⬜ در نوبت |
+| 20 | `PAGE-029.41` | `food-ticket.php:827` | food_ticket_access_rows_powershell | 13 | الحاق در SQL، سرکوب @، فراخوانی خطرناک، >۱۲۰ خط | ⬜ در نوبت |
+| 21 | `PAGE-029.43` | `food-ticket.php:1045` | food_ticket_access_delete_powershell_e | 13 | الحاق در SQL، سرکوب @، فراخوانی خطرناک، نوشتن بدون تراکنش | ⬜ در نوبت |
+| 22 | `PAGE-029.92` | `food-ticket.php:2796` | food_ticket_retry_failed | 13 | catch بی‌صدا، الحاق در SQL، سرکوب @، نوشتن بدون تراکنش | ⬜ در نوبت |
+| 23 | `TEST-125.08` | `tests/test_logging_mysql_integration.php:229` | Verify migration 025 changes the live  | 13 | الحاق در SQL، سرکوب @، فراخوانی خطرناک، نوشتن بدون تراکنش | ⬜ در نوبت |
+| 24 | `TOOL-003.07` | `tools/asset_reset.php:169` | ۶) حذف | 13 | catch بی‌صدا، الحاق در SQL، فراخوانی خطرناک | ⬜ در نوبت |
+| 25 | `TOOL-045.10` | `tools/diag_extract.php:265` | اگر مسیر جایگزینی پیدا شد ولی در tools | 13 | الحاق در SQL، سرکوب @، فراخوانی خطرناک، >۱۲۰ خط | ⬜ در نوبت |
+| 26 | `PAGE-009.27` | `chatbot.php:717` | chatbot_api_handle | 12 | ورودی خام، چاپ بدون فرار، سرکوب @، فراخوانی خطرناک، نوشتن بدون تراکنش | ⬜ در نوبت |
+| 27 | `CRON-009.01` | `cron/rebuild_logging_issues.php:1` | بلوک رویه‌ای 1-53 | 12 | الحاق در SQL، سرکوب @، فراخوانی خطرناک | ⬜ در نوبت |
+| 28 | `TEST-125.06` | `tests/test_logging_mysql_integration.php:136` | Migration 025 must remain safe when th | 12 | الحاق در SQL، سرکوب @، فراخوانی خطرناک | ⬜ در نوبت |
+| 29 | `TEST-205.11` | `tests/test_request_center_t12_preflight.php:210` | بلوک رویه‌ای 210-322 | 12 | catch بی‌صدا، سرکوب @، فراخوانی خطرناک، نوشتن بدون تراکنش | ⬜ در نوبت |
+| 30 | `TOOL-045.11` | `tools/diag_extract.php:406` | آیا Apache با LocalSystem بالا آمده؟ ر | 12 | الحاق در SQL، سرکوب @، فراخوانی خطرناک | ⬜ در نوبت |
+| 31 | `TOOL-051.01` | `tools/diag_source_row_delete.php:1` | بلوک رویه‌ای 1-128 | 12 | الحاق در SQL، ورودی خام، سرکوب @، نوشتن بدون تراکنش، >۱۲۰ خط | ⬜ در نوبت |
+| 32 | `PAGE-024.19` | `food-ticket-runtime.php:567` | food_ticket_process_print_queue | 11 | catch بی‌صدا، الحاق در SQL، نوشتن بدون تراکنش، >۱۲۰ خط | ⬜ در نوبت |
+| 33 | `WEB-004.01` | `food-ticket-web/assets/food-capitalio-dashboard-4179.js:1` | مقدمهٔ فایل | 11 | catch بی‌صدا، الحاق در SQL، نوشتن بدون تراکنش، >۱۲۰ خط | ⬜ در نوبت |
+| 34 | `WEB-006.01` | `food-ticket-web/assets/food-capitalio-dashboard-r37.js:1` | مقدمهٔ فایل | 11 | catch بی‌صدا، الحاق در SQL، نوشتن بدون تراکنش، >۱۲۰ خط | ⬜ در نوبت |
+| 35 | `WEB-006.04` | `food-ticket-web/assets/food-capitalio-dashboard-r37.js:187` | assert on the output | 11 | الحاق در SQL، فراخوانی خطرناک، نوشتن بدون تراکنش، >۱۲۰ خط | ⬜ در نوبت |
+| 36 | `WEB-008.01` | `food-ticket-web/assets/food-capitalio-dashboard-r38.js:1` | مقدمهٔ فایل | 11 | catch بی‌صدا، الحاق در SQL، نوشتن بدون تراکنش، >۱۲۰ خط | ⬜ در نوبت |
+| 37 | `WEB-008.04` | `food-ticket-web/assets/food-capitalio-dashboard-r38.js:187` | assert on the output | 11 | الحاق در SQL، فراخوانی خطرناک، نوشتن بدون تراکنش، >۱۲۰ خط | ⬜ در نوبت |
+| 38 | `WEB-010.01` | `food-ticket-web/assets/food-capitalio-dashboard-r39.js:1` | مقدمهٔ فایل | 11 | catch بی‌صدا، الحاق در SQL، نوشتن بدون تراکنش، >۱۲۰ خط | ⬜ در نوبت |
+| 39 | `WEB-010.04` | `food-ticket-web/assets/food-capitalio-dashboard-r39.js:187` | assert on the output | 11 | الحاق در SQL، فراخوانی خطرناک، نوشتن بدون تراکنش، >۱۲۰ خط | ⬜ در نوبت |
+| 40 | `WEB-013.01` | `food-ticket-web/assets/food-capitalio-dashboard-r41.js:1` | مقدمهٔ فایل | 11 | catch بی‌صدا، الحاق در SQL، نوشتن بدون تراکنش، >۱۲۰ خط | ⬜ در نوبت |
 
 ## فهرست کامل آدرس‌ها
 
@@ -5724,6 +5724,32 @@
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
 | `TOOL-080.01` | 1–99 | ناحیه | `بلوک رویه‌ای 1-99` | 0 | ⬜ |
+
+</details>
+
+<details>
+<summary><b>TOOL-154</b> — <code>tools/seed_test_data.php</code> (815 خط، 18 آدرس، بازبینی‌شده 0/18)</summary>
+
+| آدرس | خط | نوع | لنگر | ریسک | وضعیت |
+|---|---|---|---|---|---|
+| `TOOL-154.01` | 1–28 | ناحیه | `بلوک رویه‌ای 1-28` | 0 | ⬜ |
+| `TOOL-154.02` | 29–29 | ناحیه | `آرگومان‌ها` | 0 | ⬜ |
+| `TOOL-154.03` | 30–42 | تابع | `seed_usage` | 0 | ⬜ |
+| `TOOL-154.04` | 43–96 | ناحیه | `بلوک رویه‌ای 43-96` | 4 | ⬜ |
+| `TOOL-154.05` | 97–97 | ناحیه | `ابزارها` | 0 | ⬜ |
+| `TOOL-154.06` | 98–108 | تابع | `seed_manifest_load` | 0 | ⬜ |
+| `TOOL-154.07` | 110–115 | تابع | `seed_manifest_save` | 1 | ⬜ |
+| `TOOL-154.08` | 117–121 | تابع | `seed_manifest_clear` | 1 | ⬜ |
+| `TOOL-154.09` | 123–134 | تابع | `seed_delete_in` | 0 | ⬜ |
+| `TOOL-154.10` | 136–141 | تابع | `seed_col_exists` | 0 | ⬜ |
+| `TOOL-154.11` | 143–165 | تابع | `seed_next_ticket_no` | 5 | ⬜ |
+| `TOOL-154.12` | 167–189 | تابع | `seed_gregorian_to_jalali` | 0 | ⬜ |
+| `TOOL-154.13` | 191–196 | تابع | `seed_manifest_ids` | 0 | ⬜ |
+| `TOOL-154.14` | 198–283 | تابع | `seed_wipe` | 1 | ⬜ |
+| `TOOL-154.15` | 284–305 | ناحیه | `بلوک رویه‌ای 284-305` | 0 | ⬜ |
+| `TOOL-154.16` | 306–315 | ناحیه | `ساخت دادهٔ نمونه` | 0 | ⬜ |
+| `TOOL-154.17` | 316–785 | ناحیه | `جدول شماره‌گذاری را پیش از تراکنش اصلی بساز (CREAT` | **16** | ⬜ |
+| `TOOL-154.18` | 786–815 | ناحیه | `گزارش پایانی` | 0 | ⬜ |
 
 </details>
 
