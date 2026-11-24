@@ -15,9 +15,11 @@ function Require-File([string]$Path, [string]$Label) {
 $tilePath = Join-Path $DataDir 'iran.pmtiles'
 $manifestPath = Join-Path $DataDir 'manifest.json'
 $stylePath = Join-Path $DataDir 'style.json'
+$schemaPath = Join-Path $PSScriptRoot 'iran-high-zoom-schema.yml'
 Require-File $tilePath 'PMTiles archive'
 Require-File $manifestPath 'build manifest'
 Require-File $stylePath 'MapLibre style'
+Require-File $schemaPath 'Custom Iran high-zoom schema'
 $searchPath = Join-Path $DataDir 'search.sqlite'
 Require-File $searchPath 'Persian offline search index'
 Require-File (Join-Path $VendorDir 'maplibre-gl.js') 'MapLibre GL JS'
@@ -44,6 +46,7 @@ if ((Test-Path -LiteralPath $manifestPath -PathType Leaf) -and (Test-Path -Liter
     try {
         $manifest = Get-Content -LiteralPath $manifestPath -Raw | ConvertFrom-Json
         if ($manifest.tiles.file -ne 'iran.pmtiles') { $errors.Add('Manifest tiles.file must be iran.pmtiles.') }
+        if ([int]$manifest.generator.maxzoom -lt 17 -or -not $manifest.generator.schema_sha256) { $errors.Add('Manifest does not describe the custom high-zoom schema (maxzoom >= 17).') }
         if ($manifest.tiles.format -ne 'PMTiles') { $errors.Add('Manifest tiles.format must be PMTiles.') }
         if ([long]$manifest.tiles.bytes -ne (Get-Item -LiteralPath $tilePath).Length) { $errors.Add('Manifest tile size does not match iran.pmtiles.') }
         $actualHash = (Get-FileHash -LiteralPath $tilePath -Algorithm SHA256).Hash.ToLowerInvariant()
@@ -53,6 +56,65 @@ if ((Test-Path -LiteralPath $manifestPath -PathType Leaf) -and (Test-Path -Liter
             if ($manifest.search_index.sha256 -ne $searchHash) { $errors.Add('Manifest SHA-256 does not match search.sqlite.') }
         } else { $errors.Add('Manifest does not describe the offline search index.') }
     } catch { $errors.Add("Manifest cannot be parsed or verified: $($_.Exception.Message)") }
+}
+if (Test-Path -LiteralPath $schemaPath -PathType Leaf) {
+    $schemaText = Get-Content -LiteralPath $schemaPath -Raw
+    if ($schemaText -notmatch '(?m)^\\s*maxzoom:\\s*17\\s*
+    try {
+        $style = Get-Content -LiteralPath $stylePath -Raw | ConvertFrom-Json
+        $styleText = Get-Content -LiteralPath $stylePath -Raw
+        $styleTextWithoutPmtiles = $styleText -replace '(?i)pmtiles://', ''
+        if ($styleTextWithoutPmtiles -match '(?i)(https?:)?//|mapbox://') { $errors.Add('Style contains a remote URL or mapbox:// reference.') }
+        if ($styleText -notmatch '(?i)pmtiles://[^"]*iran\.pmtiles') { $errors.Add('Style does not reference the local iran.pmtiles archive through pmtiles://.') }
+        if (-not $style.sources -or $style.sources.Count -lt 1) { $errors.Add('Style has no vector sources.') }
+        if (-not $style.glyphs) { $errors.Add('Style has no local glyphs path; Persian labels may not render.') }
+        if (-not $style.sprite) { $warnings.Add('Style has no sprite path. This is acceptable only if no symbol layers require sprites.') }
+    } catch { $errors.Add("Style JSON cannot be parsed: $($_.Exception.Message)") }
+}
+foreach ($optional in @('search.sqlite','boundaries.pmtiles','transport.pmtiles')) {
+    if (-not (Test-Path -LiteralPath (Join-Path $DataDir $optional) -PathType Leaf)) { $warnings.Add("Optional national dataset not installed: $optional") }
+}
+if ($errors.Count -gt 0) {
+    Write-Host 'OFFLINE MAP PACKAGE: FAIL' -ForegroundColor Red
+    $errors | ForEach-Object { Write-Host " - $_" -ForegroundColor Red }
+} else {
+    Write-Host 'OFFLINE MAP BASE PACKAGE: PASS' -ForegroundColor Green
+}
+if ($warnings.Count -gt 0) {
+    Write-Host 'INCOMPLETE COVERAGE / OPTIONAL DATA:' -ForegroundColor Yellow
+    $warnings | ForEach-Object { Write-Host " - $_" -ForegroundColor Yellow }
+}
+if ($errors.Count -gt 0) { exit 1 }
+) { $errors.Add('Custom schema must declare maxzoom: 17.') }
+    foreach ($layerName in @('roads','buildings','poi','places','admin_boundaries','railways','addresses','transit')) {
+        if ($schemaText -notmatch ('(?m)^\\s*- id: ' + [regex]::Escape($layerName) + '\\s*
+    try {
+        $style = Get-Content -LiteralPath $stylePath -Raw | ConvertFrom-Json
+        $styleText = Get-Content -LiteralPath $stylePath -Raw
+        $styleTextWithoutPmtiles = $styleText -replace '(?i)pmtiles://', ''
+        if ($styleTextWithoutPmtiles -match '(?i)(https?:)?//|mapbox://') { $errors.Add('Style contains a remote URL or mapbox:// reference.') }
+        if ($styleText -notmatch '(?i)pmtiles://[^"]*iran\.pmtiles') { $errors.Add('Style does not reference the local iran.pmtiles archive through pmtiles://.') }
+        if (-not $style.sources -or $style.sources.Count -lt 1) { $errors.Add('Style has no vector sources.') }
+        if (-not $style.glyphs) { $errors.Add('Style has no local glyphs path; Persian labels may not render.') }
+        if (-not $style.sprite) { $warnings.Add('Style has no sprite path. This is acceptable only if no symbol layers require sprites.') }
+    } catch { $errors.Add("Style JSON cannot be parsed: $($_.Exception.Message)") }
+}
+foreach ($optional in @('search.sqlite','boundaries.pmtiles','transport.pmtiles')) {
+    if (-not (Test-Path -LiteralPath (Join-Path $DataDir $optional) -PathType Leaf)) { $warnings.Add("Optional national dataset not installed: $optional") }
+}
+if ($errors.Count -gt 0) {
+    Write-Host 'OFFLINE MAP PACKAGE: FAIL' -ForegroundColor Red
+    $errors | ForEach-Object { Write-Host " - $_" -ForegroundColor Red }
+} else {
+    Write-Host 'OFFLINE MAP BASE PACKAGE: PASS' -ForegroundColor Green
+}
+if ($warnings.Count -gt 0) {
+    Write-Host 'INCOMPLETE COVERAGE / OPTIONAL DATA:' -ForegroundColor Yellow
+    $warnings | ForEach-Object { Write-Host " - $_" -ForegroundColor Yellow }
+}
+if ($errors.Count -gt 0) { exit 1 }
+)) { $errors.Add("Custom schema layer missing: $layerName") }
+    }
 }
 if (Test-Path -LiteralPath $stylePath -PathType Leaf) {
     try {
