@@ -353,7 +353,7 @@
 .fm-order-report-table.is-compact td{max-width:0;overflow:hidden;text-overflow:ellipsis}
 
 /* تعیین تکلیف غذای باقیمانده (تطبیق روزانه) */
-.fm-leftover-backdrop{position:fixed;inset:0;background:#132b36a8;z-index:10000;display:grid;place-items:center;padding:18px}
+.fm-leftover-backdrop{position:fixed;inset:0;background:#132b36a8;z-index:2147483000;display:grid;place-items:center;padding:18px;overflow:auto;isolation:isolate}
 .fm-leftover-modal{width:min(520px,100%);max-height:92vh;overflow:auto;background:#fff;border-radius:16px;box-shadow:0 22px 70px #132b3644}
 .fm-leftover-modal header{padding:18px 20px;border-bottom:1px solid #e9eeee}
 .fm-leftover-modal header h3{margin:0;font-size:16px;color:#203a43}
@@ -435,4 +435,21 @@
 .fm-stats-mode:hover { background:#f3f7f6; }
 .fm-stats-mode input { margin:0; accent-color:var(--teal,#087f78); }
 .fm-stats-mode:has(input:checked) { background:var(--teal2,#d9f3ef); border-color:var(--teal,#087f78); color:var(--teal,#087f78); font-weight:700; }
-.fm-leftover-people{max-height:270px;overflow:auto;border:1px solid var(--fm-line,#dbe4e8);border-radius:10px;padding:8px;margin:8px 0}.fm-leftover-person{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:7px 4px;border-bottom:1px solid #e8eef0}.fm-leftover-person[hidden]{display:none}.fm-leftover-person label{display:flex;align-items:center;gap:8px;min-width:0}.fm-leftover-person small{color:#71808a}.fm-leftover-person-qty{display:flex;align-items:center;gap:4px}.fm-leftover-person-qty input{width:64px;text-align:center}.fm-leftover-person-qty button{width:30px;height:30px;border:1px solid #cbd8dc;border-radius:7px;background:white;font-weight:700;cursor:pointer}.fm-leftover-person-qty button:disabled{opacity:.4}.fm-leftover-person-qty input:disabled{opacity:.55}.fm-invoice-price-modal .fm-field small{display:block}
+.fm-leftover-people{max-height:270px;overflow:auto;border:1px solid var(--fm-line,#dbe4e8);border-radius:10px;padding:8px;margin:8px 0}.fm-leftover-person{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:7px 4px;border-bottom:1px solid #e8eef0}.fm-leftover-person[hidden]{display:none}.fm-leftover-person label{display:flex;align-items:center;gap:8px;min-width:0}.fm-leftover-person small{color:#71808a}.fm-leftover-person-qty{display:flex;align-items:center;gap:4px}.fm-leftover-person-qty input{width:64px;text-align:center}.fm-leftover-person-qty button{display:none!important}.fm-leftover-person-qty button:disabled{opacity:.4}.fm-leftover-person-qty input:disabled{opacity:.55}.fm-invoice-price-modal .fm-field small{display:block}
+
+/* مودال‌های قیمت قطعی و سرنوشت مانده: لایهٔ مستقل بالای هدر و فرم قیمت فشرده */
+.fm-price-modal{width:min(680px,100%)}
+.fm-price-modal .fm-reconciliation-form{display:block}
+.fm-price-row{display:grid;grid-template-columns:minmax(150px,1fr) minmax(8ch,12ch) auto;align-items:center;gap:8px 10px;padding:9px 0;border-bottom:1px solid #e8eef0}
+.fm-price-food-name{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#24424b;font-size:12px}
+.fm-price-input{box-sizing:border-box;width:100%;min-width:0;height:38px;padding:6px 9px;border:1px solid #cbd8df;border-radius:8px;text-align:left;direction:ltr;font:inherit;font-variant-numeric:tabular-nums}
+.fm-price-currency{font-size:12px;font-weight:800;color:#24424b;white-space:nowrap}
+.fm-price-state{grid-column:1/-1;color:#71808a;font-size:10px}
+.fm-leftover-people[hidden]{display:none}
+.fm-leftover-person-label{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.fm-leftover-person input[type=number]{box-sizing:border-box;width:76px;min-width:76px;height:34px;padding:4px 7px;border:1px solid #cbd8df;border-radius:8px;text-align:center;font:inherit}
+.fm-leftover-person input[type=number]:disabled{opacity:.5;background:#f2f5f5}
+.fm-leftover-person-row[hidden]{display:none}
+.fm-leftover-person-qty button{display:none!important}
+.fm-invoice-price-modal .fm-field small{display:block}
+@media(max-width:520px){.fm-price-row{grid-template-columns:minmax(0,1fr) minmax(8ch,12ch) auto}.fm-leftover-person{gap:6px}.fm-leftover-person input[type=number]{width:62px;min-width:62px}}

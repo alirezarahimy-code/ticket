@@ -1414,6 +1414,7 @@ CREATE TABLE IF NOT EXISTS food_monthly_invoices (
     portion_count INT UNSIGNED NOT NULL,
     amount_toman BIGINT UNSIGNED NULL,
     amount_irr BIGINT UNSIGNED NULL,
+    finalized_at DATETIME NULL,
     original_name VARCHAR(255) NOT NULL,
     stored_name VARCHAR(96) NOT NULL,
     mime_type VARCHAR(120) NOT NULL,
@@ -1424,6 +1425,7 @@ CREATE TABLE IF NOT EXISTS food_monthly_invoices (
     UNIQUE KEY uq_food_monthly_invoice_number (invoice_month, supplier_name, invoice_number),
     UNIQUE KEY uq_food_monthly_invoice_stored_name (stored_name),
     INDEX idx_food_monthly_invoice_month (invoice_month, invoice_date),
+    INDEX idx_food_monthly_invoice_finalized (invoice_month, finalized_at),
     INDEX idx_food_monthly_invoice_uploaded_by (uploaded_by, created_at)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
@@ -1626,11 +1628,12 @@ INSERT IGNORE INTO schema_updates (version, migration) VALUES
     ('1.63.2', '039-liaison-manager-role-sync.sql'),
     -- ۰۴۰ نیز idempotent است و در این اسکیما اعمال می‌شود (نگاشت پایدار ردیف رسیدگی به واحد چارت).
     ('1.63.3', '040-org-routing-departments.sql'),
-    ('1.63.4', '041-food-monthly-prices-and-leftover-allocations.sql');
+    ('1.63.4', '041-food-monthly-prices-and-leftover-allocations.sql'),
+    ('1.63.5', '042-food-invoice-finalization-state.sql');
 
 
 
--- Tables added in 1.63.4
+-- Tables added in 1.63.4 and 1.63.5
 -- 041 — قیمت قطعی ماهانه، تخصیص مستقل مانده و مبلغ فاکتور به ریال.
 
 CREATE TABLE IF NOT EXISTS food_monthly_prices (

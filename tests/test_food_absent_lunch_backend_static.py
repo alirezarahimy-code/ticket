@@ -23,3 +23,9 @@ def test_route_and_permission_unchanged():
     assert "$route === 'absent'" in PHP
     assert "'absent' => 'food.reports'" in PHP
     assert "FOOD_TICKET_PANEL_VERSION = '1.37.62'" in PHP
+
+
+def test_absent_amount_uses_only_final_current_month_prices():
+    fn = PHP[PHP.index('function food_ticket_api_absent('):PHP.index('\nfunction ', PHP.index('function food_ticket_api_absent(') + 10)]
+    assert "p.invoice_month<? OR EXISTS (SELECT 1 FROM food_monthly_invoices" in fn
+    assert "i.finalized_at IS NOT NULL" in fn

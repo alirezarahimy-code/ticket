@@ -4100,8 +4100,8 @@ function food_ticket_api_absent(string $fromDate, ?string $toDate = null): array
             }
             $row['full_name'] = trim(($row['first'] ?? '') . ' ' . ($row['last'] ?? ''));
             $foodId=(int)($row['foodId']??0); $dayMonth=substr((string)$day,0,7).'-01';
-            $priceStmt=db()->prepare('SELECT price_irr, invoice_month FROM food_monthly_prices WHERE food_id=? AND invoice_month<=? ORDER BY invoice_month DESC LIMIT 1');
-            $priceStmt->execute([$foodId,$dayMonth]); $priceRow=$priceStmt->fetch(PDO::FETCH_ASSOC)?:null;
+            $priceStmt=db()->prepare('SELECT p.price_irr,p.invoice_month FROM food_monthly_prices p WHERE p.food_id=? AND p.invoice_month<=? AND (p.invoice_month<? OR EXISTS (SELECT 1 FROM food_monthly_invoices i WHERE i.invoice_month=p.invoice_month AND i.finalized_at IS NOT NULL)) ORDER BY p.invoice_month DESC LIMIT 1');
+            $priceStmt->execute([$foodId,$dayMonth,$dayMonth]); $priceRow=$priceStmt->fetch(PDO::FETCH_ASSOC)?:null;
             $row['price_irr']=$priceRow?(int)$priceRow['price_irr']:null;
             $row['price_status']=$priceRow&&$priceRow['invoice_month']===$dayMonth?'final':($priceRow?'estimated':'missing');
             $row['amount_irr']=$row['price_irr'];

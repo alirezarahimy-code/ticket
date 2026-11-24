@@ -1086,7 +1086,7 @@
       + '<div class="fm-card fm-reconciliation-stat"><span>مقایسهٔ مستقل (جمع نمی‌شوند)</span><strong>' + (difference == null ? '—' : reconciliationNumber(Math.abs(Number(difference)))) + '</strong><small class="' + differenceClass + '">' + esc(differenceLabel) + '</small></div>'
       + '</div>';
     var priceFoods=Array.isArray(report.price_foods)?report.price_foods:[];
-    var monthlyPriceTable='<section class="fm-section-gap"><h3>قیمت‌های غذا در ماه '+esc(faDigits(month))+'</h3>'+(priceFoods.length?'<div class="fm-table-wrap"><table class="fm-rows"><thead><tr><th>غذا</th><th>قیمت هر پرس (ریال)</th><th>وضعیت</th></tr></thead><tbody>'+priceFoods.map(function(food){var st=food.price_status==='final'?'قطعی این ماه':(food.price_status==='estimated'?'برآوردی از ماه قبل':'قیمت ثبت نشده');return '<tr><td>'+esc(food.food_name||'—')+'</td><td>'+reconciliationAmount(food.price_irr)+'</td><td>'+esc(st)+'</td></tr>';}).join('')+'</tbody></table></div>':'<div class="fm-empty">در این ماه غذای سفارشی برای نمایش قیمت ثبت نشده است.</div>')+'</section>';
+    var monthlyPriceTable='<section class="fm-section-gap"><h3>قیمت‌های غذا در ماه '+esc(faDigits(month))+'</h3>'+(priceFoods.length?'<div class="fm-table-wrap"><table class="fm-rows"><thead><tr><th>غذا</th><th>قیمت هر پرس (ریال)</th><th>وضعیت</th></tr></thead><tbody>'+priceFoods.map(function(food){var st=food.price_status==='final'?'قطعی این ماه':(food.price_status==='draft'?'ثبت‌شده، فاکتور نهایی‌نشده':(food.price_status==='estimated'?'برآوردی از ماه قبل':'قیمت ثبت نشده'));return '<tr><td>'+esc(food.food_name||'—')+'</td><td>'+reconciliationAmount(food.price_irr)+'</td><td>'+esc(st)+'</td></tr>';}).join('')+'</tbody></table></div>':'<div class="fm-empty">در این ماه غذای سفارشی برای نمایش قیمت ثبت نشده است.</div>')+'</section>';
     var dailyTable = dailyRows.length ? '<div class="fm-table-wrap"><table class="fm-rows fm-reconciliation-table"><thead><tr>'
       + '<th>تاریخ</th><th>وعده</th><th>کل سفارشات پرسنل</th><th>تقاضای فعال پرسنل</th><th>لغوشدهٔ پرسنل</th><th>درخواست مهمان (نفرات)</th><th>پرس سفارش/تحویل پیمانکار</th><th>توزیع پرسنل</th><th>مهمان توزیع‌شده</th><th>کل توزیع</th><th>پرس باقیمانده</th><th>کسری/اضافهٔ سفارش</th><th>غایبین</th><th>سرنوشت باقیمانده</th><th>وضعیت</th><th>ثبت/ویرایش</th></tr></thead><tbody>'
       + dailyRows.map(function (item) {
@@ -1128,9 +1128,9 @@
         + '<label class="fm-field fm-field-wide">فایل فاکتور<input type="file" name="file" accept=".pdf,.jpg,.jpeg,.png,.xls,.xlsx,application/pdf,image/jpeg,image/png" required></label>'
         + '<div class="fm-form-actions"><button class="btn primary" type="submit"' + (state.invoiceUploading ? ' disabled' : '') + '>ثبت فاکتور و بارگذاری امن</button></div></form></section>'
       : '';
-    var invoiceTable = invoiceRows.length ? '<div class="fm-table-wrap"><table class="fm-rows"><thead><tr><th>ماه</th><th>تاریخ</th><th>پیمانکار</th><th>شمارهٔ فاکتور</th><th>پرس</th><th>مبلغ (ریال)</th><th>فایل</th></tr></thead><tbody>'
+    var invoiceTable = invoiceRows.length ? '<div class="fm-table-wrap"><table class="fm-rows"><thead><tr><th>ماه</th><th>تاریخ</th><th>پیمانکار</th><th>شمارهٔ فاکتور</th><th>پرس</th><th>مبلغ (ریال)</th><th>وضعیت</th><th>فایل</th></tr></thead><tbody>'
       + invoiceRows.map(function (invoice) {
-        return '<tr><td>' + esc(faDigits(month)) + '</td><td>' + esc(faDigits(jalaliFromIso(invoice.invoice_date) || invoice.invoice_date || '—')) + '</td><td>' + esc(invoice.supplier_name || '—') + '</td><td>' + esc(invoice.invoice_number || '—') + '</td><td>' + reconciliationNumber(invoice.portion_count) + '</td><td>' + reconciliationAmount(invoice.amount_irr) + '</td><td><a class="btn secondary" href="' + esc(buildUrl('food-menu/invoice-file', { id: invoice.id })) + '" target="_blank" rel="noopener">دریافت امن · ' + esc(invoice.original_name || 'فاکتور') + '</a></td></tr>';
+        return '<tr><td>' + esc(faDigits(month)) + '</td><td>' + esc(faDigits(jalaliFromIso(invoice.invoice_date) || invoice.invoice_date || '—')) + '</td><td>' + esc(invoice.supplier_name || '—') + '</td><td>' + esc(invoice.invoice_number || '—') + '</td><td>' + reconciliationNumber(invoice.portion_count) + '</td><td>' + reconciliationAmount(invoice.amount_irr) + '</td><td>' + (invoice.is_finalized ? 'نهایی‌شده' : 'قدیمی · نهایی‌نشده') + '</td><td><a class="btn secondary" href="' + esc(buildUrl('food-menu/invoice-file', { id: invoice.id })) + '" target="_blank" rel="noopener">دریافت امن · ' + esc(invoice.original_name || 'فاکتور') + '</a></td></tr>';
       }).join('') + '</tbody></table></div>' : '<div class="fm-empty">برای این ماه فاکتوری ثبت نشده است.</div>';
     var loading = state.reconciliationLoading ? '<div class="fm-spinner">در حال دریافت گزارش تطبیق…</div>' : '';
     var errors = !state.reconciliationLoaded && !state.reconciliationLoading ? '<div class="fm-empty">برای دریافت گزارش، بازهٔ تاریخ و ماه را انتخاب کنید.</div>' : '';
@@ -1143,10 +1143,10 @@
     var m=state.invoicePriceModal; if(!m) return '';
     var rows=(m.foods||[]).map(function(food){
       var prior=(state.invoicePending&&state.invoicePending.prices||[]).find(function(x){return Number(x.food_id)===Number(food.food_id);}); var value=prior?String(prior.price_irr):(food.price_irr==null?'':String(food.price_irr));
-      var status=food.price_status==='final'?'قیمت قطعی همین ماه':(food.price_status==='estimated'?'پیش‌فرض موقت از ماه قبل':'بدون سابقهٔ قیمت؛ ورود الزامی');
-      return '<label class="fm-field fm-field-wide">'+esc(food.food_name)+'<input type="text" inputmode="numeric" name="price_'+Number(food.food_id)+'" value="'+esc(value)+'" required><small class="fm-small">'+esc(status)+(food.price_status==='estimated'?' · تا نهایی‌شدن فاکتور برآوردی است':'')+'</small></label>';
+      var status=food.price_status==='final'?'قیمت قطعی همین ماه':(food.price_status==='draft'?'قیمت ثبت‌شدهٔ غیرقطعی':(food.price_status==='estimated'?'پیش‌فرض موقت از ماه قبل':'بدون سابقهٔ قیمت؛ ورود الزامی'));
+      return '<div class="fm-price-row"><strong class="fm-price-food-name">'+esc(food.food_name)+'</strong><input class="fm-price-input" type="text" inputmode="numeric" maxlength="12" size="12" name="price_'+Number(food.food_id)+'" value="'+esc(value)+'" aria-label="قیمت ریالی '+esc(food.food_name)+'" required><span class="fm-price-currency">ریال</span><small class="fm-price-state">'+esc(status)+(food.price_status==='estimated'?' · تا نهایی‌شدن فاکتور برآوردی است':'')+'</small></div>';
     }).join('');
-    return '<div class="fm-leftover-backdrop" data-fm-action="invoice-price-backdrop"><section class="fm-leftover-modal" role="dialog" aria-modal="true" aria-labelledby="fm-price-title"><header><h3 id="fm-price-title">قیمت قطعی غذاهای ماه '+esc(faDigits(m.monthLabel))+'</h3><p>هر غذا یک نرخ دارد و برای ناهار و شام یکسان است. قیمت‌های ماه قبل فقط تا نهایی‌شدن این فاکتور برآوردی هستند.</p></header><form id="fm-invoice-prices-form" class="fm-leftover-modal-body"><div class="fm-reconciliation-form">'+(rows||'<p class="fm-empty">برای این ماه غذای ثبت‌شده‌ای در برنامه وجود ندارد.</p>')+'</div><footer><button type="button" class="btn secondary" data-fm-action="invoice-price-cancel">انصراف</button><button type="submit" class="btn primary">نهایی‌کردن فاکتور و قیمت‌ها</button></footer></form></section></div>';
+    return '<div class="fm-leftover-backdrop" data-fm-action="invoice-price-backdrop"><section class="fm-leftover-modal fm-price-modal" role="dialog" aria-modal="true" aria-labelledby="fm-price-title"><header><h3 id="fm-price-title">قیمت قطعی غذاهای ماه '+esc(faDigits(m.monthLabel))+'</h3><p>هر غذا یک نرخ دارد و برای ناهار و شام یکسان است. مبالغ به ریال‌اند؛ قیمت‌های ماه قبل فقط تا نهایی‌شدن این فاکتور برآوردی هستند.</p></header><form id="fm-invoice-prices-form" class="fm-leftover-modal-body"><div class="fm-reconciliation-form">'+(rows||'<p class="fm-empty">برای این ماه غذای ثبت‌شده‌ای در برنامه وجود ندارد.</p>')+'</div><footer><button type="button" class="btn secondary" data-fm-action="invoice-price-cancel">انصراف</button><button type="submit" class="btn primary">نهایی‌کردن فاکتور و قیمت‌ها</button></footer></form></section></div>';
   }
 
   function renderGuestActualModal() {
@@ -1229,9 +1229,8 @@
     var servedTotal = Number((fresh && fresh.served_total) || 0);
     var remaining = Number(portionQuantity) - servedTotal;
     if (isFinite(remaining) && remaining >= 1) {
-      state.leftoverModal = { food_date: foodDate, meal_type: meal, remaining: remaining, body: body, people: [], peopleLoading: true };
+      state.leftoverModal = { food_date: foodDate, meal_type: meal, remaining: remaining, body: body, people: [], peopleLoading: false, peopleLoaded: false, staffEnabled: false, selectedEmployees: {}, peopleQuery: '' };
       render();
-      request('food-menu/reconciliation-employees', {}).then(function(result){ if(state.leftoverModal&&state.leftoverModal.food_date===foodDate){state.leftoverModal.people=result.items||[];state.leftoverModal.peopleLoading=false;render();} }).catch(function(){if(state.leftoverModal){state.leftoverModal.peopleLoading=false;state.leftoverModal.people=[];render();}});
       return;
     }
     await postReconciliation(body);
@@ -1276,38 +1275,53 @@
     await proceedToLeftover(body, foodDate, meal, portionQuantity);
   }
 
+  function leftoverSelectedTotal(selected) {
+    return Object.keys(selected||{}).reduce(function(sum,id){var q=Number(asciiDigits(selected[id]));return sum+(Number.isFinite(q)&&q>0?q:0);},0);
+  }
+
   function renderLeftoverModal() {
-    var m = state.leftoverModal;
-    if (!m) return '';
-    var remaining = Math.max(0, Number(m.remaining || 0));
-    var dateJalali = faDigits(jalaliFromIso(m.food_date) || m.food_date || '—');
-    var mealLabel = m.meal_type === 'dinner' ? 'شام' : 'ناهار';
-    function row(key, title) {
-      return '<div class="fm-leftover-row"><label class="fm-leftover-check"><input type="checkbox" name="opt_' + key + '" data-leftover-opt="' + key + '"><b>' + esc(title) + '</b></label>'
-        + '<input type="number" class="fm-leftover-count" data-leftover-count="' + key + '" min="1" step="1" inputmode="numeric" placeholder="تعداد" disabled></div>';
+    var m=state.leftoverModal; if(!m)return '';
+    var remaining=Math.max(0,Number(m.remaining||0));
+    var dateJalali=faDigits(jalaliFromIso(m.food_date)||m.food_date||'—');
+    var mealLabel=m.meal_type==='dinner'?'شام':'ناهار';
+    var selected=m.selectedEmployees||{}; var staffEnabled=!!m.staffEnabled; var otherCounts=m.otherCounts||{};
+    function row(key,title){var saved=otherCounts[key]||{};return '<div class="fm-leftover-row"><label class="fm-leftover-check"><input type="checkbox" name="opt_'+key+'" data-leftover-opt="'+key+'"'+(saved.checked?' checked':'')+'><b>'+esc(title)+'</b></label><input type="number" class="fm-leftover-count" data-leftover-count="'+key+'" min="1" step="1" inputmode="numeric" placeholder="تعداد" value="'+esc(saved.value||'')+'"'+(saved.checked?'':' disabled')+'></div>';}
+    var peopleContent='';
+    if(staffEnabled){
+      if(m.peopleLoading) peopleContent='<div class="fm-small">در حال دریافت فهرست پرسنل…</div>';
+      else if(m.peopleLoaded&&m.people&&m.people.length) peopleContent=m.people.map(function(person){var id=Number(person.id),checked=Object.prototype.hasOwnProperty.call(selected,String(id));return '<div class="fm-leftover-person" data-leftover-person-row><label><input type="checkbox" data-leftover-person-id="'+id+'"'+(checked?' checked':'')+'><span class="fm-leftover-person-label">'+esc(person.name||'')+(person.employee_number?' · '+esc(faDigits(person.employee_number)):'')+'</span></label><input type="number" min="1" step="1" inputmode="numeric" value="'+esc(checked?asciiDigits(selected[String(id)]):'1')+'" data-leftover-person-qty="'+id+'"'+(checked?'':' disabled')+'></div>';}).join('');
+      else peopleContent='<div class="fm-empty">فهرست پرسنل در دسترس نیست.</div>';
     }
-    return '<div class="fm-leftover-backdrop" data-fm-action="leftover-backdrop">'
-      + '<section class="fm-leftover-modal" role="dialog" aria-modal="true" aria-labelledby="fm-leftover-title">'
-      + '<header><h3 id="fm-leftover-title">تعیین تکلیف غذای باقیمانده</h3><p>امروز برابر با «' + faDigits(remaining) + '» عدد غذا باقیمانده · ' + esc(dateJalali) + ' · ' + esc(mealLabel) + '</p></header>'
-      + '<div class="fm-leftover-modal-body" id="fm-leftover-form">'
-      + '<p class="fm-leftover-hint">سرنوشت غذاهای باقیمانده را مشخص کنید؛ می‌توانید چند گزینه را هم‌زمان انتخاب کنید. مجموع تعدادها باید <b>دقیقاً برابر</b> با «' + faDigits(remaining) + '» پرس باشد — نه بیشتر، نه کمتر.</p>'
-      + '<div class="fm-leftover-row fm-leftover-staff"><label class="fm-leftover-check"><input type="checkbox" name="opt_staff" data-leftover-opt="staff"><b>توزیع بین پرسنل همین شرکت</b></label><strong>تعداد انتخاب‌شده: <span data-leftover-staff-total>۰</span></strong></div>'
-      + '<div class="fm-leftover-people"><label class="fm-field">جستجوی پرسنل<input type="search" data-leftover-people-search placeholder="نام یا کد پرسنلی" autocomplete="off"></label>'
-      + (m.peopleLoading ? '<div class="fm-small">در حال دریافت فهرست پرسنل…</div>' : (m.people||[]).map(function(person){return '<div class="fm-leftover-person" data-leftover-person-row><label><input type="checkbox" data-leftover-person-id="'+Number(person.id)+'"><span>'+esc(person.name||'')+'</span><small>'+esc(faDigits(person.employee_number||''))+'</small></label><div class="fm-leftover-person-qty"><button type="button" data-fm-action="leftover-person-step" data-leftover-person-step="-1" data-employee-id="'+Number(person.id)+'" aria-label="کاهش">−</button><input type="number" min="1" step="1" value="1" data-leftover-person-qty="'+Number(person.id)+'" disabled><button type="button" data-fm-action="leftover-person-step" data-leftover-person-step="1" data-employee-id="'+Number(person.id)+'" aria-label="افزایش">+</button></div></div>';}).join('') || '<div class="fm-empty">فهرست پرسنل در دسترس نیست.</div>')+'</div>'
-      + row('waste', 'دورریز (ضایعات)')
-      + row('keep', 'نگه‌داری برای وعدهٔ بعد')
-      + row('other', 'سایر')
-      + '<label class="fm-leftover-note">یادداشت سایر (اختیاری)<textarea name="leftover_other_note" rows="2" maxlength="500" placeholder="مثلاً: به خیرآباد اهدا شد"></textarea></label>'
-      + '<div class="fm-leftover-error" id="fm-leftover-error" role="alert"></div>'
-      + '</div>'
-      + '<footer><button type="button" class="btn secondary" data-fm-action="leftover-cancel">انصراف</button><button type="button" class="btn primary" data-fm-action="leftover-confirm">ثبت نهایی</button></footer>'
-      + '</section></div>';
+    return '<div class="fm-leftover-backdrop" data-fm-action="leftover-backdrop"><section class="fm-leftover-modal" role="dialog" aria-modal="true" aria-labelledby="fm-leftover-title"><header><h3 id="fm-leftover-title">تعیین تکلیف غذای باقیمانده</h3><p>مانده: <b>'+faDigits(remaining)+'</b> پرس · '+esc(dateJalali)+' · '+esc(mealLabel)+'</p></header><div class="fm-leftover-modal-body" id="fm-leftover-form"><p class="fm-leftover-hint">مجموع تعدادهای تخصیص‌یافته باید دقیقاً برابر مانده باشد.</p><div class="fm-leftover-row fm-leftover-staff"><label class="fm-leftover-check"><input type="checkbox" name="opt_staff" data-leftover-opt="staff"'+(staffEnabled?' checked':'')+'><b>توزیع بین پرسنل</b></label><strong>تعداد انتخاب‌شده: <span data-leftover-staff-total>'+faDigits(leftoverSelectedTotal(selected))+'</span></strong></div><div class="fm-leftover-people"'+(staffEnabled?'':' hidden')+'><label class="fm-field">جستجوی پرسنل<input type="search" data-leftover-people-search placeholder="نام یا کد پرسنلی" autocomplete="off" value="'+esc(m.peopleQuery||'')+'"></label><div class="fm-leftover-people-list">'+peopleContent+'</div></div>'+row('waste','دورریز (ضایعات)')+row('keep','نگه‌داری برای وعدهٔ بعد')+row('other','سایر')+'<label class="fm-leftover-note">یادداشت سایر (اختیاری)<textarea name="leftover_other_note" rows="2" maxlength="500">'+esc(m.otherNote||'')+'</textarea></label><div class="fm-leftover-error" id="fm-leftover-error" role="alert"></div></div><footer><button type="button" class="btn secondary" data-fm-action="leftover-cancel">انصراف</button><button type="button" class="btn primary" data-fm-action="leftover-confirm">ثبت نهایی</button></footer></section></div>';
+  }
+
+  function leftoverLiveInput(event) {
+    var target=event.target;if(!target||!target.matches)return;
+    var m=state.leftoverModal;if(!m)return;
+    if(target.matches('[data-leftover-person-qty]')){var id=String(target.getAttribute('data-leftover-person-qty'));if(m.selectedEmployees&&Object.prototype.hasOwnProperty.call(m.selectedEmployees,id))m.selectedEmployees[id]=String(asciiDigits(target.value||''));var total=root.querySelector('[data-leftover-staff-total]');if(total)total.textContent=faDigits(leftoverSelectedTotal(m.selectedEmployees));}
+    if(target.matches('[data-leftover-count]')){m.otherCounts=m.otherCounts||{};var key=target.getAttribute('data-leftover-count');m.otherCounts[key]=m.otherCounts[key]||{};m.otherCounts[key].value=String(target.value||'');}
+    if(target.matches('[data-leftover-people-search]')){m.peopleQuery=String(target.value||'');var q=m.peopleQuery.toLocaleLowerCase().trim();root.querySelectorAll('[data-leftover-person-row]').forEach(function(row){row.hidden=!!q&&row.textContent.toLocaleLowerCase().indexOf(q)<0;});}
   }
 
   function leftoverInlineError(message) {
     var box = root && root.querySelector('#fm-leftover-error');
     if (box) { box.textContent = message; box.classList.add('show'); }
     else { state.error = message; }
+  }
+
+  function loadLeftoverPeople() {
+    var m=state.leftoverModal;if(!m||m.peopleLoading||m.peopleLoaded)return;
+    m.peopleLoading=true;render();
+    request('food-menu/reconciliation-employees',{}).then(function(result){if(state.leftoverModal!==m)return;m.people=result.items||[];m.peopleLoaded=true;m.peopleLoading=false;render();}).catch(function(){if(state.leftoverModal!==m)return;m.people=[];m.peopleLoaded=true;m.peopleLoading=false;render();});
+  }
+
+  function saveLeftoverDraftFromDom(form) {
+    var m=state.leftoverModal;if(!m||!form)return [];
+    m.selectedEmployees={};
+    form.querySelectorAll('[data-leftover-person-id]:checked').forEach(function(check){var id=String(check.getAttribute('data-leftover-person-id'));var qty=form.querySelector('[data-leftover-person-qty="'+id+'"]');m.selectedEmployees[id]=String(asciiDigits(qty&&qty.value||'1'));});
+    var note=form.querySelector('[name="leftover_other_note"]');m.otherNote=String(note&&note.value||'');
+    m.otherCounts={};['waste','keep','other'].forEach(function(key){var opt=form.querySelector('[data-leftover-opt="'+key+'"]'),count=form.querySelector('[data-leftover-count="'+key+'"]');m.otherCounts[key]={checked:!!(opt&&opt.checked),value:String(count&&count.value||'')};});
+    return Object.keys(m.selectedEmployees).map(function(id){return {employee_id:Number(id),quantity:Number(asciiDigits(m.selectedEmployees[id]))};});
   }
 
   async function confirmLeftoverModal() {
@@ -1337,6 +1351,7 @@
       return;
     }
     if (Math.round(liveRemaining) !== Math.round(Number(m.remaining || 0))) {
+      saveLeftoverDraftFromDom(root && root.querySelector('#fm-leftover-form'));
       m.remaining = liveRemaining;
       render();
       var box3 = root && root.querySelector('#fm-leftover-error');
@@ -1347,6 +1362,8 @@
     }
     var form = root && root.querySelector('#fm-leftover-form');
     if (!form) { leftoverInlineError('فرم تعیین تکلیف پیدا نشد؛ روز را دوباره بارگذاری کنید.'); return; }
+    var allocationsDraft=saveLeftoverDraftFromDom(form);
+    m.staffEnabled=!!(form.querySelector('[data-leftover-opt="staff"]')&&form.querySelector('[data-leftover-opt="staff"]').checked);
     var remaining = Math.max(0, Number(m.remaining || 0));
     var labels = { staff: 'توزیع بین پرسنل همین شرکت', waste: 'دورریز (ضایعات)', keep: 'نگه‌داری برای وعدهٔ بعد', other: 'سایر' };
     var counts = { staff: 0, waste: 0, keep: 0, other: 0 };
@@ -1355,7 +1372,9 @@
       var box = form.querySelector('[data-leftover-opt="' + key + '"]');
       if (!box || !box.checked) continue;
       if (key === 'staff') {
-        var selectedTotal=0; form.querySelectorAll('[data-leftover-person-id]:checked').forEach(function(ch){var pid=Number(ch.getAttribute('data-leftover-person-id'));var q=form.querySelector('[data-leftover-person-qty="'+pid+'"]');selectedTotal+=Number(asciiDigits(q&&q.value||'1'))||0;});
+        var selectedTotal=leftoverSelectedTotal(m.selectedEmployees);
+        var invalidStaff=Object.keys(m.selectedEmployees||{}).some(function(id){var v=Number(asciiDigits(m.selectedEmployees[id]));return !Number.isInteger(v)||v<1;});
+        if(invalidStaff){leftoverInlineError('تعداد هر پرسنل باید عدد صحیح و حداقل ۱ باشد.');return;}
         if(selectedTotal<1){leftoverInlineError('برای توزیع بین پرسنل، دست‌کم یک نفر را انتخاب کنید.');return;}
         counts.staff=selectedTotal; sum+=selectedTotal; continue;
       }
@@ -1366,8 +1385,7 @@
     }
     if (sum === 0) { leftoverInlineError('حداقل یک گزینه را تیک بزنید و تعداد را وارد کنید.'); return; }
     if (sum !== remaining) { leftoverInlineError('مجموع تعیین تکلیف (' + faDigits(sum) + ' پرس) باید دقیقاً برابر با ماندهٔ امروز (' + faDigits(remaining) + ' پرس) باشد.'); return; }
-    var allocations=[]; var allocationTotal=0;
-    form.querySelectorAll('[data-leftover-person-id]:checked').forEach(function(check){var id=Number(check.getAttribute('data-leftover-person-id'));var qty=form.querySelector('[data-leftover-person-qty="'+id+'"]');var n=Number(asciiDigits(qty&&qty.value||'1'));if(!isFinite(n)||n<1||Math.floor(n)!==n){allocationTotal=-1;return;}allocations.push({employee_id:id,quantity:n});allocationTotal+=n;});
+    var allocations=allocationsDraft; var allocationTotal=leftoverSelectedTotal(m.selectedEmployees);
     if(counts.staff>0 && allocationTotal!==counts.staff){leftoverInlineError('مجموع تعداد افراد انتخاب‌شده ('+faDigits(allocationTotal)+') باید برابر مقدار توزیع بین پرسنل باشد.');return;}
     if(counts.staff===0 && allocationTotal>0){leftoverInlineError('برای تخصیص پرسنل، گزینهٔ توزیع بین پرسنل را انتخاب کنید.');return;}
     var otherNote = String((form.querySelector('[name="leftover_other_note"]') || {}).value || '').trim();
@@ -2783,7 +2801,6 @@
       }
       if (act === 'delivered-report-export') exportPrintedDeliveryReport();
       if (act === 'delivered-report-print') printPrintedDeliveryReport();
-      if (act === 'leftover-person-step') { var eid=Number(action.dataset.employeeId||0); var q=root.querySelector('[data-leftover-person-qty="'+eid+'"]'); if(q){q.value=String(Math.max(1,Number(q.value||1)+Number(action.dataset.leftoverPersonStep||0)));} return; }
       if (act === 'invoice-price-cancel' || act === 'invoice-price-backdrop') { if(act==='invoice-price-backdrop'&&event.target!==action)return; state.invoicePriceModal=null; state.invoicePending=null; state.error=''; render(); return; }
             if (act === 'leftover-cancel' || act === 'leftover-backdrop') { if (act === 'leftover-backdrop' && event.target !== action) return; state.leftoverModal = null; state.error = ''; render(); return; }
       if (act === 'guest-actual-cancel' || act === 'guest-actual-backdrop') { if (act === 'guest-actual-backdrop' && event.target !== action) return; state.guestActualModal = null; state.error = ''; render(); return; }
@@ -2836,9 +2853,18 @@
 
   function eventChange(event) {
     var input = event.target;
-    if(input&&input.matches&&input.matches('[data-leftover-person-id]')){var eid=Number(input.getAttribute('data-leftover-person-id'));var qty=root.querySelector('[data-leftover-person-qty="'+eid+'"]');if(qty)qty.disabled=!input.checked;var staffOpt=root.querySelector('[data-leftover-opt="staff"]');if(staffOpt)staffOpt.checked=Array.from(root.querySelectorAll('[data-leftover-person-id]:checked')).length>0;}
+    if(input&&input.matches&&input.matches('[data-leftover-person-id]')){
+      var m=state.leftoverModal,eid=String(input.getAttribute('data-leftover-person-id')),qty=root.querySelector('[data-leftover-person-qty="'+eid+'"]');
+      if(m){m.selectedEmployees=m.selectedEmployees||{};m.staffEnabled=true;if(input.checked)m.selectedEmployees[eid]=String(qty&&qty.value||'1');else delete m.selectedEmployees[eid];}
+      if(qty)qty.disabled=!input.checked;
+      var staffOpt=root.querySelector('[data-leftover-opt="staff"]');if(staffOpt)staffOpt.checked=!!(m&&m.staffEnabled);
+      var peopleBox=root.querySelector('.fm-leftover-people');if(peopleBox)peopleBox.hidden=!(m&&m.staffEnabled);
+      var total=root.querySelector('[data-leftover-staff-total]');if(total)total.textContent=faDigits(leftoverSelectedTotal(m&&m.selectedEmployees));
+      return;
+    }
     if (input && input.matches && input.matches('[data-leftover-opt]')) {
       var leftoverKey = input.dataset.leftoverOpt || '';
+      if(leftoverKey==='staff'){var lm=state.leftoverModal;if(lm){lm.staffEnabled=input.checked;if(!input.checked){lm.selectedEmployees={};root.querySelectorAll('[data-leftover-person-id]').forEach(function(personCheck){personCheck.checked=false;var qty=root.querySelector('[data-leftover-person-qty="'+personCheck.getAttribute('data-leftover-person-id')+'"]');if(qty)qty.disabled=true;});}if(input.checked&&!lm.peopleLoaded&&!lm.peopleLoading){saveLeftoverDraftFromDom(root.querySelector('#fm-leftover-form'));loadLeftoverPeople();}}var peopleBox=root.querySelector('.fm-leftover-people');if(peopleBox)peopleBox.hidden=!input.checked;var total=root.querySelector('[data-leftover-staff-total]');if(total)total.textContent=faDigits(leftoverSelectedTotal(lm&&lm.selectedEmployees));return;}
       var leftoverTarget = root && root.querySelector('[data-leftover-count="' + leftoverKey + '"]');
       if (leftoverTarget) {
         leftoverTarget.disabled = !input.checked;
@@ -2953,7 +2979,7 @@
     if (form.id === 'fm-invoice-prices-form') {
       event.preventDefault();
       var entries=[]; var foods=(state.invoicePriceModal&&state.invoicePriceModal.foods)||[]; var missing=false;
-      foods.forEach(function(food){var input=form.elements['price_'+Number(food.food_id)]; if(!input||!String(input.value||'').trim()||Number(asciiDigits(input.value))<=0){missing=true;return;} entries.push({food_id:Number(food.food_id),price_irr:String(input.value)});});
+      foods.forEach(function(food){var input=form.elements['price_'+Number(food.food_id)],digits=asciiDigits(input&&input.value||'').replace(/\D/g,''); if(!input||!/^\d+$/.test(digits)||Number(digits)<=0||digits.length>12){missing=true;return;} entries.push({food_id:Number(food.food_id),price_irr:digits});});
       if(missing){state.error='قیمت ریالی همهٔ غذاها را وارد کنید؛ غذای بدون سابقهٔ قیمت نمی‌تواند صفر بماند.';safeReportRender();return;}
       var pending=state.invoicePending; if(pending)pending.prices=entries; state.invoicePriceModal=null; render();
       var invoiceForm=root.querySelector('#fm-invoice-form');
@@ -3021,6 +3047,7 @@
     root.addEventListener('click', eventClick);
     root.addEventListener('change', eventChange);
     root.addEventListener('input', guestActualLiveSumListener);
+    root.addEventListener('input', leftoverLiveInput);
     root.addEventListener('input', daySearchInput);
     root.addEventListener('input', function(e){if(e.target && e.target.closest('#fm-orders-date,#fm-group-orders-form,#fm-statistics-date,#fm-delivery-date,#fm-reconciliation-filter,#fm-reconciliation-form,#fm-invoice-form')) reportDraft=true;});
     root.addEventListener('focusout', function(){setTimeout(function(){if(reportRenderPending&&!reportDraft&&!reportInputFocused()){reportRenderPending=false;render();}},0);});

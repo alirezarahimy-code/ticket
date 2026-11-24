@@ -80,3 +80,11 @@ def test_xlsx_and_docs():
     assert 'export_view_xlsx' in BUNDLE
     assert 'تفکیک و جزئیات' in GUIDE and 'همه معاونتها' in GUIDE
     assert "'food_absent_lunch_report'" in BOT
+
+
+def test_absent_amount_totals_appear_in_flat_and_department_views():
+    assert "amountValue:it.amount_irr==null?null:Number(it.amount_irr)" in BUNDLE
+    assert "function amountSummary()" in BUNDLE
+    assert "S.tab==='flat'||S.tab==='dept'?amountSummary()" in BUNDLE
+    assert "مبلغ غذا: '+amountLabel(st)" in BUNDLE
+    assert "قیمت نامشخص برای" in BUNDLE

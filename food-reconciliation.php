@@ -398,7 +398,7 @@ function food_reconciliation_invoice_rows(string $monthStart): array
 {
     food_reconciliation_schema_ensure();
     $stmt = db()->prepare('SELECT id, invoice_month, invoice_date, supplier_name, invoice_number,
-            portion_count, amount_irr, original_name, mime_type, size_bytes, created_at
+            portion_count, amount_irr, finalized_at, original_name, mime_type, size_bytes, created_at
         FROM food_monthly_invoices WHERE invoice_month = ? ORDER BY invoice_date DESC, id DESC');
     $stmt->execute([$monthStart]);
     return array_map(static function (array $row): array {
@@ -410,6 +410,7 @@ function food_reconciliation_invoice_rows(string $monthStart): array
             'invoice_number' => (string) $row['invoice_number'],
             'portion_count' => (int) $row['portion_count'],
             'amount_irr' => $row['amount_irr'] === null ? null : (int) $row['amount_irr'],
+            'is_finalized' => !empty($row['finalized_at']),
             'original_name' => (string) $row['original_name'],
             'mime_type' => (string) $row['mime_type'],
             'size_bytes' => (int) $row['size_bytes'],
@@ -423,17 +424,21 @@ function food_reconciliation_month_foods(string $from, string $to, string $month
     $stmt = db()->prepare("SELECT food_id AS id, food_name FROM (SELECT DISTINCT c.id AS food_id,c.food_name FROM food_orders o JOIN food_calendar_items i ON i.id=o.calendar_item_id JOIN food_catalog c ON c.id=i.food_id WHERE o.food_date BETWEEN ? AND ? AND o.status='active' UNION SELECT DISTINCT c.id AS food_id,c.food_name FROM food_guest_requests g JOIN food_catalog c ON c.id=g.food_id WHERE g.request_date BETWEEN ? AND ? AND g.status='active' AND g.food_id IS NOT NULL) selected_foods ORDER BY food_name,id");
     $stmt->execute([$from, $to, $from, $to]);
     $foods = $stmt->fetchAll(PDO::FETCH_ASSOC);
-    $current = db()->prepare('SELECT food_id, price_irr FROM food_monthly_prices WHERE invoice_month = ?');
+    $current = db()->prepare('SELECT p.food_id,p.price_irr FROM food_monthly_prices p WHERE p.invoice_month=?');
     $current->execute([$monthStart]);
     $currentMap = [];
     foreach ($current->fetchAll(PDO::FETCH_ASSOC) as $row) $currentMap[(int)$row['food_id']] = (int)$row['price_irr'];
+    $finalStmt=db()->prepare('SELECT 1 FROM food_monthly_invoices WHERE invoice_month=? AND finalized_at IS NOT NULL LIMIT 1');
+    $finalStmt->execute([$monthStart]); $monthIsFinal=$finalStmt->fetchColumn()!==false;
     $previous = db()->prepare('SELECT p.food_id, p.price_irr FROM food_monthly_prices p JOIN (SELECT food_id, MAX(invoice_month) AS last_month FROM food_monthly_prices WHERE invoice_month < ? GROUP BY food_id) x ON x.food_id=p.food_id AND x.last_month=p.invoice_month');
     $previous->execute([$monthStart]);
     $previousMap = [];
     foreach ($previous->fetchAll(PDO::FETCH_ASSOC) as $row) $previousMap[(int)$row['food_id']] = (int)$row['price_irr'];
-    return array_map(static function(array $food) use ($currentMap,$previousMap): array {
-        $id=(int)$food['id']; $final=array_key_exists($id,$currentMap);
-        return ['food_id'=>$id,'food_name'=>(string)$food['food_name'],'price_irr'=>$final?$currentMap[$id]:($previousMap[$id]??null),'price_status'=>$final?'final':(isset($previousMap[$id])?'estimated':'missing')];
+    return array_map(static function(array $food) use ($currentMap,$previousMap,$monthIsFinal): array {
+        $id=(int)$food['id'];
+        if($monthIsFinal && array_key_exists($id,$currentMap)) return ['food_id'=>$id,'food_name'=>(string)$food['food_name'],'price_irr'=>$currentMap[$id],'price_status'=>'final'];
+        if(array_key_exists($id,$currentMap)) return ['food_id'=>$id,'food_name'=>(string)$food['food_name'],'price_irr'=>$currentMap[$id],'price_status'=>'draft'];
+        return ['food_id'=>$id,'food_name'=>(string)$food['food_name'],'price_irr'=>$previousMap[$id]??null,'price_status'=>isset($previousMap[$id])?'estimated':'missing'];
     }, $foods);
 }
 
@@ -511,7 +516,7 @@ function food_reconciliation_report(string $fromRaw, string $toRaw, string $meal
         $monthSummary['invoice_difference'] = $monthSummary['invoice_portions'] - $monthSummary['daily_received_portions'];
     }
     $priceFoods = food_reconciliation_month_foods($monthFrom, $monthTo, $monthStart);
-    $invoiceFinalized = count($invoices) > 0;
+    $invoiceFinalized = count(array_filter($invoices, static fn(array $invoice): bool => !empty($invoice['is_finalized']))) > 0;
     return [
         'price_foods' => $priceFoods,
         'invoice_finalized' => $invoiceFinalized,
@@ -549,7 +554,7 @@ function food_meal_closed_guard(string $date, string $mealType, string $action =
     if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $date)) return;
     try {
         $monthStart = food_reconciliation_month(substr($date, 0, 7));
-        $stmt = db()->prepare('SELECT id FROM food_monthly_invoices WHERE invoice_month = ? LIMIT 1');
+        $stmt = db()->prepare('SELECT id FROM food_monthly_invoices WHERE invoice_month = ? AND finalized_at IS NOT NULL LIMIT 1');
         $stmt->execute([$monthStart]);
         if ($stmt->fetchColumn() !== false) {
             throw new RuntimeException('فاکتور ماه نهایی شده است؛ تغییر سفارش یا تطبیق در این ماه مسدود است.');
@@ -581,6 +586,10 @@ function food_reconciliation_day_remainder(string $date, string $mealType): arra
     $stmt = db()->prepare('SELECT supplier_order_quantity, received_quantity, status FROM food_meal_reconciliations WHERE food_date = ? AND meal_type = ? LIMIT 1');
     $stmt->execute([$date, $mealType]);
     $existing = $stmt->fetch(PDO::FETCH_ASSOC) ?: null;
+    $monthStart=food_reconciliation_month(substr($date,0,7));
+    $finalStmt=db()->prepare('SELECT id FROM food_monthly_invoices WHERE invoice_month=? AND finalized_at IS NOT NULL LIMIT 1');
+    $finalStmt->execute([$monthStart]);
+    $monthFinalized=$finalStmt->fetchColumn()!==false;
     $supplier = $existing !== null && $existing['supplier_order_quantity'] !== null ? (int) $existing['supplier_order_quantity'] : null;
     $received = $existing !== null && $existing['received_quantity'] !== null ? (int) $existing['received_quantity'] : $supplier;
     return [
@@ -593,6 +602,7 @@ function food_reconciliation_day_remainder(string $date, string $mealType): arra
         'served_total' => $servedTotal,
         'remaining_quantity' => $received === null ? null : $received - $servedTotal,
         'status' => $existing !== null ? (string) $existing['status'] : 'not_ordered',
+        'month_finalized' => $monthFinalized,
     ];
 }
 
@@ -704,7 +714,7 @@ function food_reconciliation_save(array $body, array $user): array
         $existing = $existingStmt->fetch(PDO::FETCH_ASSOC) ?: null;
         $wasClosed = $existing !== null && (string) $existing['status'] === 'closed';
         $monthStart = food_reconciliation_month(substr($date, 0, 7));
-        $lock = $pdo->prepare('SELECT id FROM food_monthly_invoices WHERE invoice_month = ? LIMIT 1 FOR UPDATE');
+        $lock = $pdo->prepare('SELECT id FROM food_monthly_invoices WHERE invoice_month = ? AND finalized_at IS NOT NULL LIMIT 1 FOR UPDATE');
         $lock->execute([$monthStart]);
         if ($lock->fetchColumn() !== false) throw new RuntimeException('فاکتور این ماه نهایی شده است؛ روزهای ماه دیگر قابل ویرایش نیستند.');
         $counts = food_reconciliation_order_counts($date, $meal);
@@ -950,7 +960,7 @@ function food_reconciliation_upload_invoice(array $post, array $files, array $us
     foreach($rawPrices as $entry){
         if(!is_array($entry)) continue;
         $id=(int)($entry['food_id']??0); $raw=trim(food_order_normalize_digits($entry['price_irr']??'')); $raw=str_replace([',','٬',' '],'',$raw);
-        if($id<1||!preg_match('/^\d+$/',$raw)||strlen(ltrim($raw,'0'))>15||(int)$raw<1) throw new RuntimeException('قیمت ریالی همهٔ غذاهای فهرست را به‌صورت عدد مثبت وارد کنید.');
+        if($id<1||!preg_match('/^\d+$/',$raw)||strlen(ltrim($raw,'0'))>12||(int)$raw<1) throw new RuntimeException('قیمت ریالی همهٔ غذاهای فهرست را به‌صورت عدد مثبت وارد کنید.');
         if(isset($prices[$id])) throw new RuntimeException('یک غذا در فهرست قیمت تکرار شده است.');
         $prices[$id]=(int)$raw;
     }
@@ -962,19 +972,35 @@ function food_reconciliation_upload_invoice(array $post, array $files, array $us
     $storedName=bin2hex(random_bytes(24)).'.'.$fileInfo['extension']; $destination=$directory.'/'.$storedName;
     if(!move_uploaded_file((string)$upload['tmp_name'],$destination)) throw new RuntimeException('ذخیرهٔ امن فایل فاکتور ناموفق بود.');
     @chmod($destination,0640); $sha256=hash_file('sha256',$destination)?:''; $pdo=db();
+    $oldStoredName=null; $oldInvoiceAudit=null; $oldPriceAudit=[];
     try {
         $pdo->beginTransaction();
-        $check=$pdo->prepare('SELECT id FROM food_monthly_invoices WHERE invoice_month=? LIMIT 1 FOR UPDATE'); $check->execute([$monthStart]);
-        if($check->fetchColumn()!==false) throw new RuntimeException('برای این ماه فاکتور قبلاً نهایی شده است.');
-        $ins=$pdo->prepare('INSERT INTO food_monthly_invoices (invoice_month,invoice_date,supplier_name,invoice_number,portion_count,amount_toman,amount_irr,original_name,stored_name,mime_type,size_bytes,sha256,uploaded_by) VALUES (?,?,?,?,?,NULL,?,?,?,?,?,?,?)');
-        $ins->execute([$monthStart,$invoiceDate,$supplier,$number,$portions,$amount,$fileInfo['original_name'],$storedName,$fileInfo['mime_type'],$fileInfo['size_bytes'],$sha256,(int)($user['id']??0)]);
-        $invoiceId=(int)$pdo->lastInsertId();
-        $priceIns=$pdo->prepare('INSERT INTO food_monthly_prices (invoice_month,food_id,price_irr,invoice_id,created_by) VALUES (?,?,?,?,?)');
+        $check=$pdo->prepare('SELECT id,invoice_month,invoice_date,supplier_name,invoice_number,portion_count,amount_toman,amount_irr,finalized_at,original_name,stored_name,mime_type,size_bytes,sha256,uploaded_by,created_at FROM food_monthly_invoices WHERE invoice_month=? ORDER BY id LIMIT 2 FOR UPDATE');
+        $check->execute([$monthStart]); $existingInvoices=$check->fetchAll(PDO::FETCH_ASSOC);
+        foreach($existingInvoices as $existingInvoice) if(!empty($existingInvoice['finalized_at'])) throw new RuntimeException('برای این ماه فاکتور قبلاً نهایی شده است.');
+        if(count($existingInvoices)===1){
+            $oldInvoiceAudit=$existingInvoices[0];
+            $oldPriceStmt=$pdo->prepare('SELECT food_id,price_irr,invoice_id FROM food_monthly_prices WHERE invoice_month=? ORDER BY food_id');
+            $oldPriceStmt->execute([$monthStart]); $oldPriceAudit=$oldPriceStmt->fetchAll(PDO::FETCH_ASSOC);
+        }
+        if(count($existingInvoices)>1) throw new RuntimeException('برای این ماه چند فاکتور قدیمی وجود دارد؛ برای جلوگیری از ثبت تکراری ابتدا سوابق ماه را بررسی کنید.');
+        if($existingInvoices){
+            $invoiceId=(int)$existingInvoices[0]['id']; $oldStoredName=(string)$existingInvoices[0]['stored_name'];
+            $ins=$pdo->prepare('UPDATE food_monthly_invoices SET invoice_date=?,supplier_name=?,invoice_number=?,portion_count=?,amount_toman=NULL,amount_irr=?,original_name=?,stored_name=?,mime_type=?,size_bytes=?,sha256=?,uploaded_by=?,finalized_at=CURRENT_TIMESTAMP WHERE id=? AND finalized_at IS NULL');
+            $ins->execute([$invoiceDate,$supplier,$number,$portions,$amount,$fileInfo['original_name'],$storedName,$fileInfo['mime_type'],$fileInfo['size_bytes'],$sha256,(int)($user['id']??0),$invoiceId]);
+            if($ins->rowCount()!==1) throw new RuntimeException('فاکتور قدیمی هم‌زمان تغییر کرده است؛ صفحه را تازه‌سازی کنید.');
+        } else {
+            $ins=$pdo->prepare('INSERT INTO food_monthly_invoices (invoice_month,invoice_date,supplier_name,invoice_number,portion_count,amount_toman,amount_irr,finalized_at,original_name,stored_name,mime_type,size_bytes,sha256,uploaded_by) VALUES (?,?,?,?,?,NULL,?,CURRENT_TIMESTAMP,?,?,?,?,?,?)');
+            $ins->execute([$monthStart,$invoiceDate,$supplier,$number,$portions,$amount,$fileInfo['original_name'],$storedName,$fileInfo['mime_type'],$fileInfo['size_bytes'],$sha256,(int)($user['id']??0)]);
+            $invoiceId=(int)$pdo->lastInsertId();
+        }
+        $priceIns=$pdo->prepare('INSERT INTO food_monthly_prices (invoice_month,food_id,price_irr,invoice_id,created_by) VALUES (?,?,?,?,?) ON DUPLICATE KEY UPDATE price_irr=VALUES(price_irr),invoice_id=VALUES(invoice_id),created_by=VALUES(created_by),created_at=CURRENT_TIMESTAMP');
         foreach($prices as $foodId=>$price) $priceIns->execute([$monthStart,$foodId,$price,$invoiceId,(int)($user['id']??0)]);
         $audit=$pdo->prepare('INSERT INTO food_reconciliation_change_audit (reconciliation_id,action,changed_by,old_value,new_value) VALUES (0,?,?,?,?)');
-        $audit->execute(['food_monthly_invoice_finalized',(int)($user['id']??0),null,json_encode(['invoice_id'=>$invoiceId,'invoice_month'=>$monthStart,'amount_irr'=>$amount,'food_prices'=>$prices],JSON_UNESCAPED_UNICODE|JSON_INVALID_UTF8_SUBSTITUTE)]);
+        $audit->execute(['food_monthly_invoice_finalized',(int)($user['id']??0),json_encode(['invoice'=>$oldInvoiceAudit,'prices'=>$oldPriceAudit],JSON_UNESCAPED_UNICODE|JSON_INVALID_UTF8_SUBSTITUTE),json_encode(['invoice_id'=>$invoiceId,'invoice_month'=>$monthStart,'amount_irr'=>$amount,'food_prices'=>$prices],JSON_UNESCAPED_UNICODE|JSON_INVALID_UTF8_SUBSTITUTE)]);
         $pdo->commit();
     } catch(Throwable $e) { if($pdo->inTransaction())$pdo->rollBack(); @unlink($destination); if($e instanceof PDOException&&(string)$e->getCode()==='23000') throw new RuntimeException('فاکتور یا قیمت این ماه قبلاً ثبت شده است.'); throw $e; }
+    if($oldStoredName!==null && $oldStoredName!==$storedName && preg_match('/^[a-f0-9]{48}\\.(pdf|jpg|jpeg|png|xls|xlsx)$/',$oldStoredName)) @unlink($directory.'/'.$oldStoredName);
     try { food_order_audit('food_monthly_invoice_finalized',$user,'food_monthly_invoice',$invoiceId,null,['month'=>food_reconciliation_month_key($monthStart),'invoice_number'=>$number,'portion_count'=>$portions,'amount_irr'=>$amount,'food_prices'=>$prices]); } catch(Throwable $e){app_error_log('[food-reconciliation] invoice audit failed: '.$e->getMessage());}
     return ['ok'=>true,'id'=>$invoiceId,'message'=>'فاکتور، فایل و قیمت‌های ماه با موفقیت نهایی شدند؛ روزهای این ماه قفل شد.'];
 }
