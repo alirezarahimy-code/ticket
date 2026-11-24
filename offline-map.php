@@ -21,6 +21,7 @@ if (!$canView) {
 }
 
 $repo = new OfflineMapRepository(db());
+if (!$repo->ready() && isset($_GET['attachment'])) { http_response_code(503); exit('ساختار پایگاه‌دادهٔ نقشه نصب نشده است.'); }
 
 if (isset($_GET['attachment'])) {
     $attachment = $repo->attachment(max(0, (int) $_GET['attachment']));
