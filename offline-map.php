@@ -2,6 +2,7 @@
 declare(strict_types=1);
 
 require __DIR__ . '/bootstrap.php';
+$page = 'offline-map';
 $user = require_login();
 require_once __DIR__ . '/modules/offline-map/MapRepository.php';
 
