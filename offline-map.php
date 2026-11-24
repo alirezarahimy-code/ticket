@@ -22,12 +22,16 @@ if (!$repo->ready()) {
     $respond(503, ['error' => 'ساختار پایگاه‌دادهٔ نقشه نصب نشده است. مهاجرت 038 را اجرا کنید.']);
 }
 
-if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'GET') {
+if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'GET' && (string) ($_GET['api'] ?? '') === '1') {
     $q = trim((string) ($_GET['q'] ?? ''));
     if (strlen($q) > 120) {
         $respond(422, ['error' => 'عبارت جست‌وجو بیش از حد طولانی است.']);
     }
     $respond(200, ['features' => $repo->search($q)]);
+}
+if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'GET') {
+    require __DIR__ . '/modules/offline-map/Pages/index.php';
+    exit;
 }
 if (($_SERVER['REQUEST_METHOD'] ?? 'GET') !== 'POST') {
     header('Allow: GET, POST');
