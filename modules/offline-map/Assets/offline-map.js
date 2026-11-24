@@ -174,6 +174,17 @@
     }
     new window.maplibregl.Popup({ maxWidth: '280px' }).setLngLat(lngLat).setDOMContent(box).addTo(state.map);
   }
+  function loadLocalOverlay(file, sourceId, layers) {
+    if (!state.map) return Promise.resolve(false);
+    return fetch('modules/offline-map/data/overlays/' + file, { credentials: 'same-origin', headers: { Accept: 'application/geo+json, application/json' } })
+      .then(function (response) { if (!response.ok) throw new Error('overlay unavailable'); return response.json(); })
+      .then(function (geojson) {
+        if (!geojson || geojson.type !== 'FeatureCollection' || !Array.isArray(geojson.features)) throw new Error('GeoJSON overlay format is invalid');
+        state.map.addSource(sourceId, { type: 'geojson', data: geojson });
+        layers.forEach(function (layer) { state.map.addLayer(layer); });
+        return true;
+      }).catch(function () { return false; });
+  }
   function initMap() {
     if (!mapNode || mapNode.getAttribute('data-map-ready') !== '1') return;
     if (!window.maplibregl || !window.pmtiles) { status('کتابخانه‌های محلی MapLibre/PMTiles بارگذاری نشده‌اند.'); return; }
@@ -201,6 +212,24 @@
         map.addLayer({ id: 'offline-map-draft-fill', type: 'fill', source: 'offline-map-draft', paint: { 'fill-color': '#e7a33e', 'fill-opacity': 0.22 } });
         map.addLayer({ id: 'offline-map-draft-line', type: 'line', source: 'offline-map-draft', paint: { 'line-color': '#c47713', 'line-width': 3, 'line-dasharray': [2, 1] } });
         map.addLayer({ id: 'offline-map-draft-point', type: 'circle', source: 'offline-map-draft', paint: { 'circle-radius': 5, 'circle-color': '#c47713' } });
+        if (mapNode.getAttribute('data-official-boundaries') === '1') {
+          loadLocalOverlay('official-boundaries.geojson', 'offline-map-official-boundaries', [
+            { id: 'offline-map-official-fill', type: 'fill', source: 'offline-map-official-boundaries', paint: { 'fill-color': '#8aa89a', 'fill-opacity': 0.035 } },
+            { id: 'offline-map-official-line', type: 'line', source: 'offline-map-official-boundaries', paint: { 'line-color': '#658b79', 'line-width': ['interpolate', ['linear'], ['zoom'], 4, 0.8, 12, 1.5], 'line-opacity': 0.8 } }
+          ]);
+        }
+        if (mapNode.getAttribute('data-municipal-districts') === '1') {
+          loadLocalOverlay('municipal-districts.geojson', 'offline-map-municipal-districts', [
+            { id: 'offline-map-district-fill', type: 'fill', source: 'offline-map-municipal-districts', paint: { 'fill-color': '#c5a36a', 'fill-opacity': 0.22 } },
+            { id: 'offline-map-district-line', type: 'line', source: 'offline-map-municipal-districts', paint: { 'line-color': '#b08a4b', 'line-width': 1, 'line-opacity': 0.55 } }
+          ]);
+        }
+        if (mapNode.getAttribute('data-transit-overlay') === '1') {
+          loadLocalOverlay('transit.geojson', 'offline-map-transit', [
+            { id: 'offline-map-transit-lines', type: 'line', source: 'offline-map-transit', filter: ['in', ['geometry-type'], ['literal', ['LineString', 'MultiLineString']]], paint: { 'line-color': '#7b4ca0', 'line-width': 3 } },
+            { id: 'offline-map-transit-points', type: 'circle', source: 'offline-map-transit', filter: ['==', ['geometry-type'], 'Point'], paint: { 'circle-color': '#7b4ca0', 'circle-radius': 5, 'circle-stroke-color': '#fff', 'circle-stroke-width': 1.5 } }
+          ]);
+        }
         loadFeatures(false).then(function () { status('نقشه و عوارض سازمانی بارگذاری شدند.'); }).catch(function (e) { status(e.message); });
         ['offline-map-user-points', 'offline-map-user-lines', 'offline-map-user-polygons'].forEach(function (layer) {
           map.on('click', layer, function (event) { if (state.tool !== 'pan') return; var f = event.features && event.features[0]; if (f) popupForFeature(f, event.lngLat); });
@@ -267,7 +296,7 @@
   document.querySelectorAll('[data-layer-toggle]').forEach(function (input) {
     input.addEventListener('change', function () {
       var layer = input.getAttribute('data-layer-toggle');
-      var layerMap = { roads: ['roads-casing','roads-main','road-labels'], places: ['place-labels','poi-circles','poi-labels'], boundaries: ['boundary-admin'], transport: ['transport-rail'] };
+      var layerMap = { roads: ['roads-casing','roads-main','road-labels'], places: ['place-labels','poi-circles','poi-labels'], boundaries: ['boundary-admin','offline-map-official-fill','offline-map-official-line'], 'official-boundaries': ['offline-map-official-fill','offline-map-official-line'], districts: ['offline-map-district-fill','offline-map-district-line'], transport: ['transport-rail','offline-map-transit-lines','offline-map-transit-points'] };
       if (state.map && layerMap[layer]) layerMap[layer].forEach(function (id) { if (state.map.getLayer(id)) state.map.setLayoutProperty(id, 'visibility', input.checked ? 'visible' : 'none'); });
       if (layer === 'user' && state.map) {
         ['offline-map-user-points', 'offline-map-user-lines', 'offline-map-user-polygons'].forEach(function (id) {
@@ -302,6 +331,10 @@
     }).catch(function (e) { results.textContent = e.message; });
   });
 
+  var districtOpacity = document.getElementById('offline-map-district-opacity');
+  if (districtOpacity) districtOpacity.addEventListener('input', function () {
+    if (state.map && state.map.getLayer('offline-map-district-fill')) state.map.setPaintProperty('offline-map-district-fill', 'fill-opacity', Number(districtOpacity.value) / 100);
+  });
   var exportButton = document.getElementById('offline-map-export');
   if (exportButton) exportButton.addEventListener('click', function () {
     var collection = { type: 'FeatureCollection', features: state.features.map(function (item) {
