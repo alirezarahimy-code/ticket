@@ -2,8 +2,8 @@
 declare(strict_types=1);
 
 /**
- * Persistence for user-authored map features. Base map tiles are read-only,
- * versioned files and are intentionally never stored in this table.
+ * User-authored GIS features. Base map data is immutable and versioned separately.
+ * Geometry is GeoJSON in WGS84 (EPSG:4326).
  */
 final class OfflineMapRepository
 {
@@ -19,21 +19,32 @@ final class OfflineMapRepository
         }
     }
 
-    public function search(string $query = '', int $limit = 200): array
+    public function search(string $query = '', int $limit = 500, ?int $ownerId = null): array
     {
-        $limit = max(1, min(500, $limit));
-        if ($query === '') {
-            $stmt = $this->pdo->query('SELECT id,title,description,feature_type,geometry_json,properties_json,created_by,created_at,updated_at FROM offline_map_features ORDER BY updated_at DESC LIMIT ' . $limit);
-        } else {
-            $stmt = $this->pdo->prepare('SELECT id,title,description,feature_type,geometry_json,properties_json,created_by,created_at,updated_at FROM offline_map_features WHERE title LIKE ? OR description LIKE ? ORDER BY updated_at DESC LIMIT ' . $limit);
+        $limit = max(1, min(1000, $limit));
+        $where = [];
+        $params = [];
+        if ($query !== '') {
+            $where[] = '(title LIKE ? OR description LIKE ?)';
             $like = '%' . $query . '%';
-            $stmt->execute([$like, $like]);
+            $params[] = $like;
+            $params[] = $like;
         }
+        if ($ownerId !== null) {
+            $where[] = 'created_by = ?';
+            $params[] = $ownerId;
+        }
+        $sql = 'SELECT id,title,description,feature_type,geometry_json,properties_json,created_by,updated_by,created_at,updated_at FROM offline_map_features'
+            . ($where ? ' WHERE ' . implode(' AND ', $where) : '')
+            . ' ORDER BY updated_at DESC LIMIT ' . $limit;
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->execute($params);
         $rows = $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
         foreach ($rows as &$row) {
             $row['id'] = (int) $row['id'];
             $row['created_by'] = (int) $row['created_by'];
-            $row['geometry'] = json_decode((string) $row['geometry_json'], true) ?: null;
+            $row['updated_by'] = $row['updated_by'] === null ? null : (int) $row['updated_by'];
+            $row['geometry'] = json_decode((string) $row['geometry_json'], true);
             $row['properties'] = json_decode((string) ($row['properties_json'] ?? '{}'), true) ?: [];
             unset($row['geometry_json'], $row['properties_json']);
         }
@@ -41,12 +52,48 @@ final class OfflineMapRepository
         return $rows;
     }
 
-    public function create(string $title, string $description, array $geometry, int $userId): int
+    public function find(int $id): ?array
     {
+        $rows = $this->search('', 1);
+        // Use a targeted query instead of relying on list ordering.
+        $stmt = $this->pdo->prepare('SELECT id,title,description,feature_type,geometry_json,properties_json,created_by,updated_by,created_at,updated_at FROM offline_map_features WHERE id = ?');
+        $stmt->execute([$id]);
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+        if (!$row) return null;
+        $row['id'] = (int) $row['id'];
+        $row['created_by'] = (int) $row['created_by'];
+        $row['updated_by'] = $row['updated_by'] === null ? null : (int) $row['updated_by'];
+        $row['geometry'] = json_decode((string) $row['geometry_json'], true);
+        $row['properties'] = json_decode((string) ($row['properties_json'] ?? '{}'), true) ?: [];
+        unset($row['geometry_json'], $row['properties_json']);
+        return $row;
+    }
+
+    public function create(string $title, string $description, array $geometry, array $properties, int $userId): int
+    {
+        $type = strtolower((string) ($geometry['type'] ?? ''));
         $geometryJson = json_encode($geometry, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_THROW_ON_ERROR);
-        $stmt = $this->pdo->prepare("INSERT INTO offline_map_features (title,description,feature_type,geometry_json,properties_json,created_by) VALUES (?,?, 'point', ?, '{}', ?)");
-        $stmt->execute([$title, $description, $geometryJson, $userId]);
+        $propertiesJson = json_encode($properties, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_THROW_ON_ERROR);
+        $stmt = $this->pdo->prepare('INSERT INTO offline_map_features (title,description,feature_type,geometry_json,properties_json,created_by,updated_by) VALUES (?,?,?,?,?,?,?)');
+        $stmt->execute([$title, $description, $type, $geometryJson, $propertiesJson, $userId, $userId]);
         return (int) $this->pdo->lastInsertId();
+    }
+
+    public function update(int $id, string $title, string $description, array $geometry, array $properties, int $userId, bool $canAdmin): bool
+    {
+        $type = strtolower((string) ($geometry['type'] ?? ''));
+        $sql = 'UPDATE offline_map_features SET title=?,description=?,feature_type=?,geometry_json=?,properties_json=?,updated_by=? WHERE id=?'
+            . ($canAdmin ? '' : ' AND created_by=?');
+        $stmt = $this->pdo->prepare($sql);
+        $values = [
+            $title, $description, $type,
+            json_encode($geometry, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_THROW_ON_ERROR),
+            json_encode($properties, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_THROW_ON_ERROR),
+            $userId, $id
+        ];
+        if (!$canAdmin) $values[] = $userId;
+        $stmt->execute($values);
+        return $stmt->rowCount() > 0;
     }
 
     public function delete(int $id, int $userId, bool $canAdmin): bool
