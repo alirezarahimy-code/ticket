@@ -19,7 +19,7 @@ try {
         if ($allPbf.Count -gt 0 -and (Split-Path $allPbf[0].DirectoryName -Leaf) -eq $FontStack) { $stack = Get-Item $allPbf[0].DirectoryName }
     }
     if (-not $stack) { throw "Font stack '$FontStack' not found in archive." }
-    $requiredRanges = @('0-255.pbf','1536-1791.pbf')
+    $requiredRanges = @('0-255.pbf','1536-1791.pbf','8192-8447.pbf')
     foreach ($range in $requiredRanges) {
         if (-not (Test-Path (Join-Path $stack.FullName $range))) { throw "Required glyph range missing: $range" }
     }
