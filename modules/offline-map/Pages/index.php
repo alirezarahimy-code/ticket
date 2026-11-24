@@ -6,11 +6,15 @@ $user = require_permission('map.view');
 require_once __DIR__ . '/../MapRepository.php';
 $mapRepo = new OfflineMapRepository(db());
 $schemaReady = $mapRepo->ready();
+$canManageFeatures = user_can($user, 'map.features.manage') || user_can($user, 'map.admin');
 $mapDataPath = __DIR__ . '/../data/iran.pmtiles';
 $mapStylePath = __DIR__ . '/../data/style.json';
+$styleJson = is_file($mapStylePath) ? json_decode((string) file_get_contents($mapStylePath), true) : null;
+$styleText = is_file($mapStylePath) ? (string) file_get_contents($mapStylePath) : '';
+$styleIsOffline = is_array($styleJson) && !preg_match('~(?:https?:)?//|mapbox://~i', $styleText);
 $mapLibraryPath = __DIR__ . '/../vendor/maplibre-gl.js';
 $pmtilesLibraryPath = __DIR__ . '/../vendor/pmtiles.js';
-$mapReady = is_file($mapDataPath) && is_file($mapStylePath) && is_file($mapLibraryPath) && is_file($pmtilesLibraryPath);
+$mapReady = is_file($mapDataPath) && $styleIsOffline && is_file($mapLibraryPath) && is_file($pmtilesLibraryPath);
 $features = $schemaReady ? $mapRepo->search(trim((string) ($_GET['q'] ?? ''))) : [];
 render_header('نقشهٔ آفلاین ایران', $user);
 ?>
@@ -32,6 +36,7 @@ render_header('نقشهٔ آفلاین ایران', $user);
     <div class="offline-map-legend"><span><i></i> نقاط ثبت‌شدهٔ سازمان</span><span>مختصات جغرافیایی WGS84</span></div>
   </section>
   <aside class="card offline-map-sidebar">
+    <?php if ($canManageFeatures): ?>
     <h2>ثبت نقطهٔ جدید</h2>
     <p class="muted">مختصات را به درجهٔ اعشاری وارد کنید. طول جغرافیایی بین ۴۴ تا ۶۴ و عرض جغرافیایی بین ۲۴ تا ۴۰ برای محدودهٔ تقریبی ایران پذیرفته می‌شود.</p>
     <form id="offline-map-create" class="offline-map-form">
@@ -42,6 +47,7 @@ render_header('نقشهٔ آفلاین ایران', $user);
       <button class="button" type="submit" <?= $schemaReady ? '' : 'disabled' ?>>ثبت نقطه</button>
       <p id="offline-map-feedback" class="muted" aria-live="polite"></p>
     </form>
+    <?php else: ?><h2>نقشهٔ سازمانی</h2><p class="muted">دسترسی شما فقط مشاهدهٔ نقشه و نقاط ثبت‌شده است.</p><?php endif; ?>
     <hr>
     <form method="get" class="offline-map-search"><input type="hidden" name="page" value="offline-map"><label>جست‌وجوی نقاط ثبت‌شده<input name="q" value="<?= e((string) ($_GET['q'] ?? '')) ?>" placeholder="عنوان یا توضیحات"></label><button class="button secondary" type="submit">جست‌وجو</button></form>
   </aside>
@@ -49,7 +55,7 @@ render_header('نقشهٔ آفلاین ایران', $user);
 <section class="list-section offline-map-feature-list"><div class="section-title"><div><h2>نقاط ثبت‌شده</h2><p><?= count($features) ?> نقطه در فهرست فعلی</p></div></div>
 <?php if (!$schemaReady): ?><div class="card empty-state">پس از اجرای مهاجرت، فهرست نقاط در این قسمت نمایش داده می‌شود.</div>
 <?php elseif (!$features): ?><div class="card empty-state">هنوز نقطه‌ای ثبت نشده است.</div>
-<?php else: ?><div class="card offline-map-feature-table"><?php foreach ($features as $feature): ?><article class="offline-map-feature" data-feature-id="<?= (int) $feature['id'] ?>"><div><strong><?= e($feature['title']) ?></strong><p><?= e((string) ($feature['description'] ?? '')) ?></p><small><?= e(number_format((float) $feature['geometry']['coordinates'][1], 6)) ?> ، <?= e(number_format((float) $feature['geometry']['coordinates'][0], 6)) ?></small></div><?php if ((int) $feature['created_by'] === (int) $user['id'] || user_can($user, 'map.admin')): ?><button type="button" class="button danger small" data-delete-feature="<?= (int) $feature['id'] ?>">حذف</button><?php endif; ?></article><?php endforeach; ?></div><?php endif; ?>
+<?php else: ?><div class="card offline-map-feature-table"><?php foreach ($features as $feature): ?><article class="offline-map-feature" data-feature-id="<?= (int) $feature['id'] ?>"><div><strong><?= e($feature['title']) ?></strong><p><?= e((string) ($feature['description'] ?? '')) ?></p><small><?= e(number_format((float) $feature['geometry']['coordinates'][1], 6)) ?> ، <?= e(number_format((float) $feature['geometry']['coordinates'][0], 6)) ?></small></div><?php if ($canManageFeatures && ((int) $feature['created_by'] === (int) $user['id'] || user_can($user, 'map.admin'))): ?><button type="button" class="button danger small" data-delete-feature="<?= (int) $feature['id'] ?>">حذف</button><?php endif; ?></article><?php endforeach; ?></div><?php endif; ?>
 </section>
 <?php if ($mapReady): ?><script src="modules/offline-map/vendor/maplibre-gl.js" defer></script><script src="modules/offline-map/vendor/pmtiles.js" defer></script><?php endif; ?>
 <script src="modules/offline-map/Assets/offline-map.js?v=2" defer></script>
