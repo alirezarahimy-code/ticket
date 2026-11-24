@@ -89,7 +89,7 @@
     if (!geometry) return null;
     return { type: 'Feature', id: item.id, geometry: geometry, properties: {
       id: String(item.id), title: item.title || '', description: item.description || '',
-      feature_type: item.feature_type || geometry.type, category: (item.properties || {}).category || 'general',
+      feature_type: item.feature_type || geometry.type, created_by: String(item.created_by || ''), category: (item.properties || {}).category || 'general',
       address: (item.properties || {}).address || '', phone: (item.properties || {}).phone || ''
     } };
   }
@@ -155,7 +155,9 @@
     var title = document.createElement('strong'); title.textContent = feature.properties.title || 'عارضه';
     var desc = document.createElement('p'); desc.textContent = feature.properties.description || '';
     box.appendChild(title); box.appendChild(desc);
-    if (mapNode && mapNode.getAttribute('data-can-edit') === '1') {
+    var isOwner = mapNode && Number(feature.properties.created_by) === Number(mapNode.getAttribute('data-user-id'));
+    var isAdmin = mapNode && mapNode.getAttribute('data-can-admin') === '1';
+    if (mapNode && mapNode.getAttribute('data-can-edit') === '1' && (isOwner || isAdmin)) {
       var edit = document.createElement('button'); edit.type = 'button'; edit.className = 'button secondary'; edit.textContent = 'ویرایش';
       edit.addEventListener('click', function () {
         var item = state.features.find(function (x) { return Number(x.id) === Number(feature.properties.id); });
