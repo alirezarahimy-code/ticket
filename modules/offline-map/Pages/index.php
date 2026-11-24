@@ -11,11 +11,22 @@ $mapDataPath = __DIR__ . '/../data/iran.pmtiles';
 $mapStylePath = __DIR__ . '/../data/style.json';
 $styleJson = is_file($mapStylePath) ? json_decode((string) file_get_contents($mapStylePath), true) : null;
 $styleText = is_file($mapStylePath) ? (string) file_get_contents($mapStylePath) : '';
-$styleIsOffline = is_array($styleJson) && !preg_match('~(?:https?:)?//|mapbox://~i', $styleText);
+$dataDir = __DIR__ . '/../data';
+$manifestPath = $dataDir . '/manifest.json';
+$manifest = is_file($manifestPath) ? json_decode((string) file_get_contents($manifestPath), true) : null;
+$manifestReady = is_array($manifest)
+    && ($manifest['tiles']['file'] ?? '') === 'iran.pmtiles'
+    && ($manifest['tiles']['format'] ?? '') === 'PMTiles'
+    && (int) ($manifest['tiles']['bytes'] ?? 0) === (is_file($mapDataPath) ? (int) filesize($mapDataPath) : 0);
+$styleHasPmtiles = is_array($styleJson)
+    && preg_match('~pmtiles://[^"\\\\]+iran\\.pmtiles~i', $styleText) === 1;
+$styleIsOffline = is_array($styleJson)
+    && !preg_match('~(?:https?:)?//|mapbox://~i', $styleText)
+    && $styleHasPmtiles;
 $mapLibraryPath = __DIR__ . '/../vendor/maplibre-gl.js';
 $pmtilesLibraryPath = __DIR__ . '/../vendor/pmtiles.js';
 $mapCssPath = __DIR__ . '/../vendor/maplibre-gl.css';
-$mapReady = is_file($mapDataPath) && $styleIsOffline && is_file($mapLibraryPath) && is_file($pmtilesLibraryPath) && is_file($mapCssPath);
+$mapReady = is_file($mapDataPath) && $manifestReady && $styleIsOffline && is_file($mapLibraryPath) && is_file($pmtilesLibraryPath) && is_file($mapCssPath);
 $features = $schemaReady ? $mapRepo->search(trim((string) ($_GET['q'] ?? ''))) : [];
 render_header('نقشهٔ آفلاین ایران', $user);
 ?>
