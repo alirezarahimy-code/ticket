@@ -187,6 +187,15 @@ function permission_catalog(): array
             ],
         ],
         [
+            'key' => 'offline_map',
+            'label' => 'نقشهٔ آفلاین',
+            'items' => [
+                ['code' => 'map.view', 'label' => 'مشاهدهٔ نقشهٔ آفلاین'],
+                ['code' => 'map.features.manage', 'label' => 'ثبت و مدیریت عوارض نقشه'],
+                ['code' => 'map.admin', 'label' => 'مدیریت کامل نقشه و عوارض همهٔ کاربران'],
+            ],
+        ],
+        [
             'key' => 'system',
             'label' => 'تنظیمات و سیستم',
             'items' => [
@@ -351,15 +360,15 @@ function user_default_removed_codes(): array
 function permission_defaults_raw(): array
 {
     $all = ['dash.view', 'search.global', 'notif.view', 'profile.edit', 'chatbot.use', 'ticket.create', 'ticket.view_own', 'ticket.reply', 'ticket.rate', 'services.view', 'knowledge.view', 'cddvd.view', 'cddvd.submit_out', 'traffic.view', 'food.dashboard', 'food.monitor', 'food.orders', 'food.reports', 'foodorder.self', 'org.view', 'governance.manage'];
-    $common = array_merge($all, ['ticket.view_unit', 'queue.view', 'assets.view', 'assets.own_unit', 'asset.view', 'asset.history', 'reports.view', 'inventory.view', 'cddvd.history', 'cddvd.export', 'traffic.manage']);
+    $common = array_merge($all, ['map.view', 'ticket.view_unit', 'queue.view', 'assets.view', 'assets.own_unit', 'asset.view', 'asset.history', 'reports.view', 'inventory.view', 'cddvd.history', 'cddvd.export', 'traffic.manage']);
     return [
         'primary_admin' => permission_all_codes(),
         // ۱.۳۷.۷ — پیش‌فرض نقش قدیمی «admin» (قابل ویرایش از تنظیمات ← نقش‌ها).
-        'supervisor' => array_values(array_unique(array_merge($common, ['ticket.view_all', 'ticket.edit', 'supervisor.panel', 'supervisor.decide', 'supervisor.reopen', 'analytics.view', 'asset.edit', 'asset.extract', 'asset.ping', 'domain.import', 'domain.scan', 'knowledge.manage', 'cddvd.edit', 'cddvd.view_all', 'traffic.destinations', 'logs.activity', 'food.dashboard', 'food.monitor', 'food.orders', 'food.reports', 'food.employees', 'food.guest', 'food.groups', 'food.groups_override']))),
-        'support_manager' => array_values(array_unique(array_merge($common, ['ticket.edit', 'ticket.assign', 'ticket.bulk', 'ticket.attach_asset', 'services.manage', 'service_cat.manage', 'service_field.manage', 'knowledge.manage', 'cddvd.view_all', 'traffic.destinations', 'analytics.view', 'asset.edit', 'asset.extract', 'asset.ping', 'asset.remote_extract', 'asset.remote_prepare', 'inventory.diagnostics', 'domain.import', 'domain.scan', 'audit.view', 'logs.view', 'logs.activity', 'logs.activity_export', 'food.dashboard', 'food.monitor', 'food.orders', 'food.reports', 'food.employees', 'food.guest', 'food.groups', 'food.groups_override', 'food.menu', 'food.menu_edit', 'settings.general', 'settings.domain', 'holidays.manage']))),
+        'supervisor' => array_values(array_unique(array_merge($common, ['map.features.manage', 'ticket.view_all', 'ticket.edit', 'supervisor.panel', 'supervisor.decide', 'supervisor.reopen', 'analytics.view', 'asset.edit', 'asset.extract', 'asset.ping', 'domain.import', 'domain.scan', 'knowledge.manage', 'cddvd.edit', 'cddvd.view_all', 'traffic.destinations', 'logs.activity', 'food.dashboard', 'food.monitor', 'food.orders', 'food.reports', 'food.employees', 'food.guest', 'food.groups', 'food.groups_override']))),
+        'support_manager' => array_values(array_unique(array_merge($common, ['map.features.manage', 'ticket.edit', 'ticket.assign', 'ticket.bulk', 'ticket.attach_asset', 'services.manage', 'service_cat.manage', 'service_field.manage', 'knowledge.manage', 'cddvd.view_all', 'traffic.destinations', 'analytics.view', 'asset.edit', 'asset.extract', 'asset.ping', 'asset.remote_extract', 'asset.remote_prepare', 'inventory.diagnostics', 'domain.import', 'domain.scan', 'audit.view', 'logs.view', 'logs.activity', 'logs.activity_export', 'food.dashboard', 'food.monitor', 'food.orders', 'food.reports', 'food.employees', 'food.guest', 'food.groups', 'food.groups_override', 'food.menu', 'food.menu_edit', 'settings.general', 'settings.domain', 'holidays.manage']))),
         'inspector' => array_values(array_unique(array_merge($all, ['ticket.view_unit', 'ticket.view_all', 'ticket.edit', 'queue.view', 'assets.view', 'asset.view', 'asset.history', 'asset.ping', 'reports.view', 'analytics.view', 'audit.view', 'inventory.view', 'cddvd.submit_in', 'cddvd.edit', 'cddvd.view_all', 'cddvd.history', 'cddvd.export', 'traffic.manage']))),
-        'manager' => array_values(array_unique(array_merge($common, ['ticket.edit', 'ticket.assign', 'ticket.bulk', 'ticket.attach_asset', 'knowledge.manage', 'asset.edit', 'asset.extract', 'asset.ping', 'analytics.view']))),
-        'agent' => array_values(array_unique(array_merge($common, ['ticket.attach_asset', 'knowledge.manage', 'asset.edit', 'asset.extract', 'asset.ping']))),
+        'manager' => array_values(array_unique(array_merge($common, ['map.features.manage', 'ticket.edit', 'ticket.assign', 'ticket.bulk', 'ticket.attach_asset', 'knowledge.manage', 'asset.edit', 'asset.extract', 'asset.ping', 'analytics.view']))),
+        'agent' => array_values(array_unique(array_merge($common, ['map.features.manage', 'ticket.attach_asset', 'knowledge.manage', 'asset.edit', 'asset.extract', 'asset.ping']))),
         // کاربر عادی (از جمله کاربران AD): بخش‌های چاپ فیش، نظارت و سیاست‌های دارایی/ترافیک ندارد.
         // «سفارش غذای خود» (foodorder.self) عمداً باقی است تا کاربر بتواند برای خودش سفارش دهد.
         'user' => array_values(array_diff($all, user_default_removed_codes())),
