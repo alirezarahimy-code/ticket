@@ -1,16 +1,19 @@
 {
   "version": 8,
-  "name": "Iran Offline Basemap",
+  "name": "Iran National Offline GIS",
   "metadata": {
     "map:license": "OpenStreetMap ODbL-1.0",
-    "map:attribution": "© OpenStreetMap contributors"
+    "map:attribution": "© OpenStreetMap contributors",
+    "map:max-data-zoom": 17
   },
   "glyphs": "./fonts/{fontstack}/{range}.pbf",
   "sources": {
     "iran": {
       "type": "vector",
       "url": "pmtiles://./iran.pmtiles",
-      "attribution": "© OpenStreetMap contributors"
+      "attribution": "© OpenStreetMap contributors",
+      "minzoom": 0,
+      "maxzoom": 17
     }
   },
   "layers": [
@@ -18,30 +21,7 @@
       "id": "background",
       "type": "background",
       "paint": {
-        "background-color": "#f1f0e9"
-      }
-    },
-    {
-      "id": "landcover",
-      "type": "fill",
-      "source": "iran",
-      "source-layer": "landcover",
-      "paint": {
-        "fill-color": [
-          "match",
-          [
-            "get",
-            "class"
-          ],
-          "wood",
-          "#dce8d5",
-          "grass",
-          "#e5ecd9",
-          "scrub",
-          "#e9ecd9",
-          "#e7ebdf"
-        ],
-        "fill-opacity": 0.8
+        "background-color": "#f2f0e8"
       }
     },
     {
@@ -56,6 +36,8 @@
             "get",
             "class"
           ],
+          "forest",
+          "#d9e7d1",
           "park",
           "#d8e9d1",
           "garden",
@@ -66,9 +48,11 @@
           "#e9e5df",
           "commercial",
           "#eee8df",
+          "farmland",
+          "#e8ebd9",
           "#e8eadf"
         ],
-        "fill-opacity": 0.65
+        "fill-opacity": 0.75
       }
     },
     {
@@ -98,27 +82,29 @@
           5,
           0.5,
           13,
-          2.5
+          2.5,
+          17,
+          4
         ]
       }
     },
     {
-      "id": "building",
+      "id": "buildings",
       "type": "fill",
       "source": "iran",
-      "source-layer": "building",
-      "minzoom": 13,
+      "source-layer": "buildings",
+      "minzoom": 14,
       "paint": {
         "fill-color": "#d8d2c8",
         "fill-outline-color": "#c6beb2",
-        "fill-opacity": 0.8
+        "fill-opacity": 0.85
       }
     },
     {
-      "id": "boundary-admin",
+      "id": "admin-boundaries",
       "type": "line",
       "source": "iran",
-      "source-layer": "boundary",
+      "source-layer": "admin_boundaries",
       "paint": {
         "line-color": "#a58e82",
         "line-width": [
@@ -134,7 +120,9 @@
           8,
           1.2,
           12,
-          1.8
+          1.8,
+          17,
+          2.5
         ],
         "line-dasharray": [
           3,
@@ -146,7 +134,7 @@
       "id": "roads-casing",
       "type": "line",
       "source": "iran",
-      "source-layer": "transportation",
+      "source-layer": "roads",
       "filter": [
         "in",
         [
@@ -157,10 +145,11 @@
           "literal",
           [
             "motorway",
+            "motorway_link",
             "trunk",
+            "trunk_link",
             "primary",
-            "secondary",
-            "tertiary"
+            "primary_link"
           ]
         ]
       ],
@@ -178,8 +167,8 @@
           1,
           12,
           5,
-          18,
-          12
+          17,
+          13
         ]
       }
     },
@@ -187,7 +176,7 @@
       "id": "roads-main",
       "type": "line",
       "source": "iran",
-      "source-layer": "transportation",
+      "source-layer": "roads",
       "paint": {
         "line-color": [
           "match",
@@ -197,18 +186,28 @@
           ],
           "motorway",
           "#e8a65a",
+          "motorway_link",
+          "#e8a65a",
           "trunk",
+          "#e8b86d",
+          "trunk_link",
           "#e8b86d",
           "primary",
           "#f4d28b",
+          "primary_link",
+          "#f4d28b",
           "secondary",
-          "#fffdf5",
+          "#fff5dc",
           "tertiary",
+          "#fffdf5",
+          "residential",
           "#fffdf8",
-          "minor",
+          "living_street",
           "#fffdf8",
           "service",
           "#fffdf8",
+          "footway",
+          "#f6f2e9",
           "#ffffff"
         ],
         "line-width": [
@@ -221,10 +220,12 @@
           ],
           5,
           0.4,
-          12,
-          2,
+          11,
+          1.4,
+          14,
+          3,
           17,
-          7
+          8
         ]
       }
     },
@@ -232,14 +233,14 @@
       "id": "road-labels",
       "type": "symbol",
       "source": "iran",
-      "source-layer": "transportation_name",
+      "source-layer": "roads",
       "minzoom": 12,
       "layout": {
         "text-field": [
           "coalesce",
           [
             "get",
-            "name:fa"
+            "name_fa"
           ],
           [
             "get",
@@ -247,7 +248,7 @@
           ],
           [
             "get",
-            "name:en"
+            "ref"
           ]
         ],
         "text-font": [
@@ -277,16 +278,51 @@
       }
     },
     {
-      "id": "place-labels",
+      "id": "railways",
+      "type": "line",
+      "source": "iran",
+      "source-layer": "railways",
+      "filter": [
+        "==",
+        [
+          "geometry-type"
+        ],
+        "LineString"
+      ],
+      "paint": {
+        "line-color": "#8a6b9d",
+        "line-width": [
+          "interpolate",
+          [
+            "linear"
+          ],
+          [
+            "zoom"
+          ],
+          5,
+          0.8,
+          14,
+          3,
+          17,
+          4
+        ],
+        "line-dasharray": [
+          2,
+          1
+        ]
+      }
+    },
+    {
+      "id": "places",
       "type": "symbol",
       "source": "iran",
-      "source-layer": "place",
+      "source-layer": "places",
       "layout": {
         "text-field": [
           "coalesce",
           [
             "get",
-            "name:fa"
+            "name_fa"
           ],
           [
             "get",
@@ -294,7 +330,7 @@
           ],
           [
             "get",
-            "name:en"
+            "name_en"
           ]
         ],
         "text-font": [
@@ -328,7 +364,7 @@
       "type": "circle",
       "source": "iran",
       "source-layer": "poi",
-      "minzoom": 13,
+      "minzoom": 14,
       "paint": {
         "circle-radius": [
           "interpolate",
@@ -338,7 +374,7 @@
           [
             "zoom"
           ],
-          13,
+          14,
           2,
           18,
           5
@@ -353,21 +389,17 @@
       "type": "symbol",
       "source": "iran",
       "source-layer": "poi",
-      "minzoom": 15,
+      "minzoom": 16,
       "layout": {
         "text-field": [
           "coalesce",
           [
             "get",
-            "name:fa"
+            "name_fa"
           ],
           [
             "get",
             "name"
-          ],
-          [
-            "get",
-            "name:en"
           ]
         ],
         "text-font": [
@@ -387,21 +419,46 @@
       }
     },
     {
-      "id": "transport-rail",
-      "type": "line",
+      "id": "addresses",
+      "type": "symbol",
       "source": "iran",
-      "source-layer": "transportation",
-      "filter": [
-        "==",
-        [
-          "get",
-          "class"
+      "source-layer": "addresses",
+      "minzoom": 17,
+      "layout": {
+        "text-field": [
+          "coalesce",
+          [
+            "get",
+            "house_number"
+          ],
+          [
+            "get",
+            "name_fa"
+          ],
+          [
+            "get",
+            "name"
+          ]
         ],
-        "rail"
-      ],
+        "text-font": [
+          "Noto Sans Arabic Regular"
+        ],
+        "text-size": 10
+      },
       "paint": {
-        "line-color": "#8a6b9d",
-        "line-width": [
+        "text-color": "#5a5148",
+        "text-halo-color": "#fff",
+        "text-halo-width": 1
+      }
+    },
+    {
+      "id": "transit-points",
+      "type": "circle",
+      "source": "iran",
+      "source-layer": "transit",
+      "paint": {
+        "circle-color": "#7b4ca0",
+        "circle-radius": [
           "interpolate",
           [
             "linear"
@@ -409,15 +466,13 @@
           [
             "zoom"
           ],
-          5,
-          0.8,
-          14,
-          3
-        ],
-        "line-dasharray": [
+          10,
           2,
-          1
-        ]
+          17,
+          6
+        ],
+        "circle-stroke-color": "#fff",
+        "circle-stroke-width": 1.5
       }
     }
   ]
