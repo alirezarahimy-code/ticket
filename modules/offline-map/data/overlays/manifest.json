@@ -8,6 +8,7 @@
       "license": "",
       "updated_at": "",
       "sha256": "",
+      "bytes": 0,
       "bytes": 0
     },
     "municipal_districts": {
@@ -16,7 +17,8 @@
       "source_url": "",
       "license": "",
       "updated_at": "",
-      "sha256": ""
+      "sha256": "",
+      "bytes": 0
     },
     "transit": {
       "file": "transit.geojson",
@@ -24,7 +26,8 @@
       "source_url": "",
       "license": "",
       "updated_at": "",
-      "sha256": ""
+      "sha256": "",
+      "bytes": 0
     }
   }
 }
