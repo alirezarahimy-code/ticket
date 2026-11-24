@@ -21,6 +21,7 @@ foreach ($key in $expected.Keys) {
     }
     if (-not $entry) { $errors.Add("Manifest metadata missing for $key"); continue }
     if ($entry.file -ne $expected[$key]) { $errors.Add("Manifest filename mismatch for $key") }
+    if ([long]$entry.bytes -ne (Get-Item -LiteralPath $path).Length) { $errors.Add("Byte size mismatch for $key") }
     if ([string]::IsNullOrWhiteSpace([string]$entry.source)) { $errors.Add("Source publisher is required for $key") }
     if ([string]::IsNullOrWhiteSpace([string]$entry.license)) { $errors.Add("License is required for $key") }
     if ([string]::IsNullOrWhiteSpace([string]$entry.updated_at)) { $errors.Add("Dataset date is required for $key") }
