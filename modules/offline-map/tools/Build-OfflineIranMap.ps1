@@ -39,7 +39,7 @@ Write-Host "ورودی: $SourcePbf"
 Write-Host ("حجم PBF: {0:N2} MB" -f ($sourceInfo.Length / 1MB))
 Write-Host "خروجی: $OutputPmtiles"
 Write-Host 'این مرحله طرح سفارشی با حداکثر زوم دادهٔ ۱۷ را اجرا می‌کند؛ جزئیات بیشتر همچنان به پوشش OSM وابسته است.'
-$argsList = @('generate-custom', "--schema=$SchemaPath", "--osm-path=$SourcePbf", "--output=$OutputPmtiles", '--force', '--memory=6g') + $AdditionalPlanetilerArgs
+$argsList = @('generate-custom', "--schema=$SchemaPath", "--osm-path=$SourcePbf", "--output=$OutputPmtiles", '--force') + $AdditionalPlanetilerArgs
 Push-Location (Split-Path -Parent $PlanetilerExe)
 try { & $PlanetilerExe @argsList; $exitCode = $LASTEXITCODE }
 finally { Pop-Location }
