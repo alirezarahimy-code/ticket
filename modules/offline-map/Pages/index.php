@@ -19,8 +19,9 @@ $manifestReady = is_array($manifest)
     && ($manifest['tiles']['format'] ?? '') === 'PMTiles'
     && (int) ($manifest['tiles']['bytes'] ?? 0) === (is_file($mapDataPath) ? (int) filesize($mapDataPath) : 0);
 $styleHasPmtiles = is_array($styleJson) && preg_match('~pmtiles://[^"\\\\]*iran\\.pmtiles~i', $styleText) === 1;
+$styleTextWithoutPmtiles = str_ireplace('pmtiles://', '', $styleText);
 $styleIsOffline = is_array($styleJson)
-    && !preg_match('~(?:https?:)?//|mapbox://~i', $styleText)
+    && !preg_match('~(?:https?:)?//|mapbox://~i', $styleTextWithoutPmtiles)
     && $styleHasPmtiles;
 $mapLibraryPath = __DIR__ . '/../vendor/maplibre-gl.js';
 $pmtilesLibraryPath = __DIR__ . '/../vendor/pmtiles.js';
@@ -36,7 +37,7 @@ render_header('سامانه اطلاعات مکانی آفلاین ایران', 
   <div><span class="eyebrow">سامانه اطلاعات مکانی</span><h1>نقشهٔ آفلاین ایران</h1><p>نقشهٔ پایه، جست‌وجوی محلی و عوارض مکانی سازمان در یک محیط مستقل.</p></div>
   <div class="offline-map-heading-actions"><span class="offline-map-status <?= $mapReady ? 'is-ready' : 'is-pending' ?>"><?= $mapReady ? 'بستهٔ پایه نصب شده' : 'بستهٔ پایه نصب نشده' ?></span><a class="button secondary" href="index.php">بازگشت</a></div>
 </section>
-<?php if (!$schemaReady): ?><section class="card offline-map-notice"><h2>پایگاه‌دادهٔ ماژول آماده نیست</h2><p>مهاجرت <code>migrations/038-offline-map-features.sql</code> را روی نسخهٔ پشتیبان‌شده اجرا کنید.</p></section><?php endif; ?>
+<?php if (!$schemaReady): ?><section class="card offline-map-notice"><h2>پایگاه‌دادهٔ ماژول آماده نیست</h2><p>مهاجرت‌های <code>migrations/038-offline-map-features.sql</code> و <code>migrations/039-offline-map-attachments.sql</code> را روی نسخهٔ پشتیبان‌شده اجرا کنید.</p></section><?php endif; ?>
 <?php if (!$mapReady): ?><section class="card offline-map-notice" role="status"><h2>فایل‌های نقشهٔ پایه نصب نشده‌اند</h2><p>برای نمایش نقشه، PMTiles، manifest، استایل محلی، کتابخانه‌های MapLibre و PMTiles باید در مسیر <code>modules/offline-map/</code> نصب شوند. در حالت آفلاین هیچ سرویس اینترنتی جایگزین نمی‌شود.</p></section><?php endif; ?>
 <div class="offline-map-workspace">
   <main class="offline-map-main card">
