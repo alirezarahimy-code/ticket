@@ -133,6 +133,9 @@ function render_header(string $title, ?array $user = null): void
         if (user_can($user, 'traffic.view')) {
             $menuItems[] = '<li>' . $menuLink('index.php?page=traffic-control', 'کنترل تردد', 'traffic') . '</li>';
         }
+        if (user_can($user, 'map.view')) {
+            $menuItems[] = '<li>' . $menuLink('offline-map.php', 'نقشهٔ آفلاین ایران', 'traffic') . '</li>';
+        }
         if (user_can($user, 'foodorder.self')) {
             $menuItems[] = '<li>' . $menuLink('index.php?page=food-order', 'سفارش غذا', 'food') . '</li>';
         }
