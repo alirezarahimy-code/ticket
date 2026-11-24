@@ -191,12 +191,21 @@
     try {
       var protocol = new window.pmtiles.Protocol();
       window.maplibregl.addProtocol('pmtiles', protocol.tile);
-      var map = new window.maplibregl.Map({
-        container: mapNode, style: 'modules/offline-map/data/style.json',
-        center: [53.2, 32.4], zoom: 4.3, minZoom: 3, maxZoom: 19,
-        attributionControl: true, preserveDrawingBuffer: true
-      });
-      state.map = map;
+      fetch('modules/offline-map/data/style.json', { credentials: 'same-origin', headers: { Accept: 'application/json' } })
+        .then(function (response) { if (!response.ok) throw new Error('دریافت استایل محلی نقشه ناموفق بود.'); return response.json(); })
+        .then(function (style) {
+          // MapLibre requires an absolute glyph URL. Resolve it against the current application path,
+          // and resolve PMTiles to the same local origin so subfolder deployments remain portable.
+          style.glyphs = new URL('modules/offline-map/data/fonts/{fontstack}/{range}.pbf', window.location.href).toString();
+          if (style.sources && style.sources.iran) {
+            style.sources.iran.url = 'pmtiles://' + new URL('modules/offline-map/data/iran.pmtiles', window.location.href).toString();
+          }
+          var map = new window.maplibregl.Map({
+            container: mapNode, style: style,
+            center: [53.2, 32.4], zoom: 4.3, minZoom: 3, maxZoom: 19,
+            attributionControl: true, preserveDrawingBuffer: true
+          });
+          state.map = map;
       map.addControl(new window.maplibregl.NavigationControl({ showCompass: true }), 'top-left');
       map.addControl(new window.maplibregl.ScaleControl({ maxWidth: 120, unit: 'metric' }), 'bottom-left');
       map.on('mousemove', function (event) {
@@ -249,7 +258,8 @@
           if (state.tool === 'Point') finishDrawing();
         });
       });
-      map.on('error', function (event) { if (event && event.error) status('خطای بارگذاری نقشه: ' + event.error.message); });
+          map.on('error', function (event) { if (event && event.error) status('خطای بارگذاری نقشه: ' + event.error.message); });
+        }).catch(function (e) { status('راه‌اندازی نقشه ناموفق بود: ' + e.message); });
     } catch (e) { status('راه‌اندازی نقشه ناموفق بود: ' + e.message); }
   }
 
