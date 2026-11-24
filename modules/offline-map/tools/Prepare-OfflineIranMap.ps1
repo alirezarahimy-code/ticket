@@ -20,8 +20,8 @@ if ($GlyphArchive) {
     & (Join-Path $tools 'Install-OfflineMapGlyphs.ps1') -GlyphArchive $GlyphArchive
     if ($LASTEXITCODE -ne 0) { throw "Glyph installation failed: $LASTEXITCODE" }
 }
-if (-not (Test-Path (Join-Path $data 'fonts\Noto Sans Arabic Regular\1536-1791.pbf');
-if (-not (Test-Path (Join-Path $data 'fonts\Noto Sans Arabic Regular\8192-8447.pbf'))) {
+$glyphDir = Join-Path $data 'fonts\Noto Sans Arabic Regular'
+if (-not (Test-Path (Join-Path $glyphDir '0-255.pbf')) -or -not (Test-Path (Join-Path $glyphDir '1536-1791.pbf')) -or -not (Test-Path (Join-Path $glyphDir '8192-8447.pbf'))) {
     throw 'Persian glyphs are missing. Provide -GlyphArchive or install them with Install-OfflineMapGlyphs.ps1.'
 }
 & (Join-Path $tools 'Build-OfflineIranMap.ps1') -SourcePbf $SourcePbf -PlanetilerExe $PlanetilerExe
