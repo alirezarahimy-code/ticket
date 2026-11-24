@@ -1,11 +1,20 @@
 #!/usr/bin/env python3
-"""Build deterministic 1.63.4 full-install and incremental update archives."""
+"""Build the refreshed 1.63.4 full-install and incremental update packages."""
 from __future__ import annotations
 import hashlib, json, subprocess, zipfile
 from pathlib import Path
 ROOT=Path(__file__).resolve().parents[1]
 VERSION='1.63.4'; REQUIRES='1.63.3'; DATE=(2026,11,19,12,0,0)
 EXCLUDED=('downloads/','updates/','patches/','preview/','storage/','.git/','node_modules/','vendor/','.venv/','coverage/','build/','dist/')
+MIGRATIONS=('041-food-monthly-prices-and-leftover-allocations.sql','042-food-invoice-finalization-state.sql')
+REQUIRED_FILES=(
+    'VERSION','assets/food-menu.css','assets/food-menu.js',
+    'downloads/CHANGE-REPORT-FA-1.63.4.md','food-reconciliation.php','food-ticket.php',
+    'food-ticket-web/assets/food-menu.css','food-ticket-web/assets/food-menu.js','food-ticket-web/index.html',
+    'install-empty-db.sql','lib/release-notes.php','schema.sql',
+    'tests/test_food_absent_lunch_backend_static.py','tests/test_food_absent_lunch_tab_static.py',
+    'tests/test_food_reconciliation_1_63_4_static.py','tools/build_release_1_63_4.py',
+)
 
 def tracked_paths(args):
     raw=subprocess.run(['git',*args],cwd=ROOT,check=True,capture_output=True).stdout.split(b'\0')
@@ -21,27 +30,34 @@ def zip_write(path, entries):
     return sha
 
 def main():
-    if (ROOT/'VERSION').read_text().strip()!=VERSION: raise SystemExit('Set VERSION to 1.63.4 before building')
+    if (ROOT/'VERSION').read_text().strip()!=VERSION: raise SystemExit('VERSION must remain 1.63.4')
     tracked=tracked_paths(['ls-files','-z'])
     full={}
     for n in tracked:
         if allowed(n) and (ROOT/n).is_file(): full[n]=(ROOT/n).read_bytes()
     for n in tracked_paths(['ls-files','--others','--exclude-standard','-z']):
         if allowed(n) and (ROOT/n).is_file(): full[n]=(ROOT/n).read_bytes()
-    note='''بستهٔ سورس کامل ۱.۶۳.۴ — نصب تازه\n\nشامل سورس جاری برنامه، اسکیما و مهاجرت ۰۴۱ برای قیمت‌های قطعی ماهانه، تخصیص فردی غذای مازاد و ممیزی تغییرها. فایل config.php و داده‌های storage عمداً در بسته نیستند. پیش از نصب از دیتابیس و فایل‌ها نسخهٔ پشتیبان تهیه کنید.\n\nنصب: ZIP را در htdocs استخراج کنید، سپس install.php را از خود سرور اجرا کنید.\n'''
+    note='''بستهٔ سورس کامل ۱.۶۳.۴ — نصب تازه
+
+شامل سورس جاری برنامه، اسکیما و مهاجرت‌های ۰۴۱ و ۰۴۲ برای قیمت‌های ماهانه، تخصیص فردی غذای مازاد، ممیزی تغییرها و تشخیص صریح نهایی‌شدن فاکتور است. پنجره‌های ثبت و جمع مبلغ گزارش غایبین نیز اصلاح شده‌اند. فایل config.php و داده‌های storage عمداً در بسته نیستند. پیش از نصب از دیتابیس و فایل‌ها نسخهٔ پشتیبان تهیه کنید.
+
+نصب: ZIP را در htdocs استخراج کنید، سپس install.php را از خود سرور اجرا کنید.
+'''
     full['00-FULL-PACKAGE-1.63.4-FA.txt']=note.encode()
+    report=ROOT/'downloads/CHANGE-REPORT-FA-1.63.4.md'
+    if report.is_file(): full['downloads/CHANGE-REPORT-FA-1.63.4.md']=report.read_bytes()
     out=ROOT/'downloads'; full_path=out/'ticket-full-1.63.4-20261119.zip'
     full_sha=zip_write(full_path,{'ticket/'+k:v for k,v in full.items()})
     changed=set(tracked_paths(['diff','--name-only','HEAD','-z']))|set(tracked_paths(['ls-files','--others','--exclude-standard','-z']))
     changed={n for n in changed if allowed(n) and (ROOT/n).is_file()}
-    # Add current release report explicitly; it is part of the user-facing patch.
-    changed.add('downloads/CHANGE-REPORT-FA-1.63.4.md')
+    changed.update(REQUIRED_FILES)
     files={n:(ROOT/n).read_bytes() for n in sorted(changed) if (ROOT/n).is_file()}
-    mig=Path('migrations/041-food-monthly-prices-and-leftover-allocations.sql').read_bytes()
-    files['migrations/041-food-monthly-prices-and-leftover-allocations.sql']=mig
+    migration_bytes={name:Path('migrations/'+name).read_bytes() for name in MIGRATIONS}
+    for name,data in migration_bytes.items(): files['migrations/'+name]=data
     files['VERSION']=b'1.63.4\n'
-    manifest={'name':'food-monthly-pricing-and-reconciliation-lock','version':VERSION,'requires_version':REQUIRES,'date':'2026-11-19','title':'قیمت‌های ماهانه، فاکتور قطعی، تخصیص فردی باقیمانده و قفل قابل ممیزی','migrations':['041-food-monthly-prices-and-leftover-allocations.sql'],'files':sorted(files),'sha256':{n:digest(files[n]) for n in sorted(files)},'description':'Finalizes monthly food invoices with required IRR amounts and food prices, monthly server-side locks, per-person leftover allocation history, and absent-meal price estimates.'}
-    update={'manifest.json':(json.dumps(manifest,ensure_ascii=False,indent=2)+'\n').encode(), 'migrations/041-food-monthly-prices-and-leftover-allocations.sql':mig}
+    manifest={'name':'food-monthly-pricing-final-invoice-lock-leftover-and-absent-totals','version':VERSION,'requires_version':REQUIRES,'date':'2026-11-19','title':'بازسازی ۱.۶۳.۴: قفل فاکتور نهایی، پنجره‌های مانده و قیمت، و مبلغ غایبین','migrations':list(MIGRATIONS),'files':sorted(files),'sha256':{n:digest(files[n]) for n in sorted(files)},'description':'Refreshes version 1.63.4 without changing its number. Only invoices explicitly finalized lock the month; legacy invoice prices and audit data are reconciled transactionally. Leftover allocation UI retains selections and absent meal reports total known meal amounts.'}
+    update={'manifest.json':(json.dumps(manifest,ensure_ascii=False,indent=2)+'\n').encode()}
+    update.update({'migrations/'+name:data for name,data in migration_bytes.items()})
     update.update({'files/'+n:b for n,b in files.items()})
     upd_path=out/'ticket-update-1.63.3-to-1.63.4-food-monthly-prices-20261119.zip'
     upd_sha=zip_write(upd_path,update)

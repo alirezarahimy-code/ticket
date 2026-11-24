@@ -1677,11 +1677,11 @@ INSERT IGNORE INTO schema_updates (version, migration) VALUES
     -- ۰۴۰ نیز idempotent است و در این اسکیما اعمال می‌شود (نگاشت پایدار ردیف رسیدگی به واحد چارت).
     ('1.63.3', '040-org-routing-departments.sql'),
     ('1.63.4', '041-food-monthly-prices-and-leftover-allocations.sql'),
-    ('1.63.5', '042-food-invoice-finalization-state.sql');
+    ('1.63.4', '042-food-invoice-finalization-state.sql');
 
 
 
--- Tables added in 1.63.4 and 1.63.5
+-- Tables added in 1.63.4
 -- 041 — قیمت قطعی ماهانه، تخصیص مستقل مانده و مبلغ فاکتور به ریال.
 
 CREATE TABLE IF NOT EXISTS food_monthly_prices (

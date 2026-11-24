@@ -69,6 +69,7 @@ def test_fresh_schema_marks_041_and_has_irr_column():
     for name in ("schema.sql", "install-empty-db.sql"):
         sql = (ROOT / name).read_text()
         assert "('1.63.4', '041-food-monthly-prices-and-leftover-allocations.sql')" in sql
+        assert "('1.63.4', '042-food-invoice-finalization-state.sql')" in sql
         assert "amount_irr BIGINT UNSIGNED" in sql
         assert "CREATE TABLE IF NOT EXISTS food_monthly_prices" in sql
 
