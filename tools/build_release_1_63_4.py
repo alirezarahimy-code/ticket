@@ -9,7 +9,7 @@ EXCLUDED=('downloads/','updates/','patches/','preview/','storage/','.git/','node
 MIGRATIONS=('041-food-monthly-prices-and-leftover-allocations.sql','042-food-invoice-finalization-state.sql')
 REQUIRED_FILES=(
     'VERSION','assets/food-menu.css','assets/food-menu.js',
-    'downloads/CHANGE-REPORT-FA-1.63.4-r2.md','food-reconciliation.php','food-ticket.php',
+    'downloads/CHANGE-REPORT-FA-1.63.4-r3.md','food-reconciliation.php','food-ticket.php',
     'food-ticket-web/assets/food-menu.css','food-ticket-web/assets/food-menu.js','food-ticket-web/index.html',
     'install-empty-db.sql','lib/release-notes.php','schema.sql',
     'tests/test_food_absent_lunch_backend_static.py','tests/test_food_absent_lunch_tab_static.py',
@@ -39,14 +39,14 @@ def main():
         if allowed(n) and (ROOT/n).is_file(): full[n]=(ROOT/n).read_bytes()
     note='''بستهٔ سورس کامل ۱.۶۳.۴ — نصب تازه
 
-شامل سورس جاری برنامه، اسکیما و مهاجرت‌های ۰۴۱ و ۰۴۲ برای قیمت‌های ماهانه، تخصیص فردی غذای مازاد، ممیزی تغییرها و تشخیص صریح نهایی‌شدن فاکتور است. پنجره‌های ثبت و جمع مبلغ گزارش غایبین نیز اصلاح شده‌اند. فایل config.php و داده‌های storage عمداً در بسته نیستند. پیش از نصب از دیتابیس و فایل‌ها نسخهٔ پشتیبان تهیه کنید.
+شامل سورس جاری برنامه، اسکیما و مهاجرت‌های ۰۴۱ و ۰۴۲ برای قیمت‌های ماهانه، تخصیص فردی غذای مازاد، ممیزی تغییرها و تشخیص صریح نهایی‌شدن فاکتور است. پنجرهٔ مانده و گزارش غایبین اصلاح شده‌اند؛ نمودار گزارش قابلیت چاپ دارد و درصد غایبین با کل سفارش‌های بازه مقایسه می‌شود. فایل config.php و داده‌های storage عمداً در بسته نیستند. پیش از نصب از دیتابیس و فایل‌ها نسخهٔ پشتیبان تهیه کنید.
 
 نصب: ZIP را در htdocs استخراج کنید، سپس install.php را از خود سرور اجرا کنید.
 '''
     full['00-FULL-PACKAGE-1.63.4-FA.txt']=note.encode()
-    report=ROOT/'downloads/CHANGE-REPORT-FA-1.63.4-r2.md'
-    if report.is_file(): full['downloads/CHANGE-REPORT-FA-1.63.4-r2.md']=report.read_bytes()
-    out=ROOT/'downloads'; full_path=out/'ticket-full-1.63.4-r2-food-modals-absent-totals-20261119.zip'
+    report=ROOT/'downloads/CHANGE-REPORT-FA-1.63.4-r3.md'
+    if report.is_file(): full['downloads/CHANGE-REPORT-FA-1.63.4-r3.md']=report.read_bytes()
+    out=ROOT/'downloads'; full_path=out/'ticket-full-1.63.4-r3-absence-range-chart-print-20261119.zip'
     full_sha=zip_write(full_path,{'ticket/'+k:v for k,v in full.items()})
     changed=set(tracked_paths(['diff','--name-only','HEAD','-z']))|set(tracked_paths(['ls-files','--others','--exclude-standard','-z']))
     changed={n for n in changed if allowed(n) and (ROOT/n).is_file()}
@@ -55,11 +55,11 @@ def main():
     migration_bytes={name:Path('migrations/'+name).read_bytes() for name in MIGRATIONS}
     for name,data in migration_bytes.items(): files['migrations/'+name]=data
     files['VERSION']=b'1.63.4\n'
-    manifest={'name':'food-monthly-pricing-final-invoice-lock-leftover-and-absent-totals-r2','version':VERSION,'requires_version':REQUIRES,'date':'2026-11-19','title':'بازسازی ۱.۶۳.۴: قفل فاکتور نهایی، پنجره‌های مانده و قیمت، و مبلغ غایبین','migrations':list(MIGRATIONS),'files':sorted(files),'sha256':{n:digest(files[n]) for n in sorted(files)},'description':'Refreshes version 1.63.4 without changing its number. Only invoices explicitly finalized lock the month; legacy invoice prices and audit data are reconciled transactionally. Leftover allocation UI retains selections and absent meal reports total known meal amounts.'}
+    manifest={'name':'food-absence-range-chart-print-leftover-ui-r3','version':VERSION,'requires_version':REQUIRES,'date':'2026-11-19','title':'اصلاحات ۱.۶۳.۴: پنجرهٔ مانده، مقایسهٔ غایبین با سفارش‌های بازه و چاپ نمودار','migrations':list(MIGRATIONS),'files':sorted(files),'sha256':{n:digest(files[n]) for n in sorted(files)},'description':'Refreshes version 1.63.4 without changing its number. Aligns leftover personnel names and checkboxes, normalizes absent report field controls, adds ordered-person and ordered-portion range denominators and bold chart ratios, and includes the enabled chart in print output.'}
     update={'manifest.json':(json.dumps(manifest,ensure_ascii=False,indent=2)+'\n').encode()}
     update.update({'migrations/'+name:data for name,data in migration_bytes.items()})
     update.update({'files/'+n:b for n,b in files.items()})
-    upd_path=out/'ticket-update-1.63.4-r2-food-modals-absent-totals-20261119.zip'
+    upd_path=out/'ticket-update-1.63.4-r3-absence-range-chart-print-20261119.zip'
     upd_sha=zip_write(upd_path,update)
     print(f'FULL {full_path.name} files={len(full)} bytes={full_path.stat().st_size} sha256={full_sha}')
     print(f'UPDATE {upd_path.name} files={len(files)} bytes={upd_path.stat().st_size} sha256={upd_sha}')

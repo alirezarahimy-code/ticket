@@ -100,7 +100,7 @@ label.field .browse-btn{max-width:100%}
 .alr-fields{display:flex;flex-wrap:wrap;align-items:center;gap:7px 11px;padding:10px 12px;border:1px solid var(--food-line);border-radius:10px;background:var(--food-paper)}
 .alr-fields-label{font-size:11px;font-weight:800;color:var(--muted)}
 .alr-field-chip{display:inline-flex;align-items:center;gap:5px;border:1px solid var(--food-line);border-radius:99px;padding:4px 9px;background:var(--food-white);font-size:11px;font-weight:700}
-.alr-field-chip input{accent-color:var(--teal)}
+.alr-field-chip input[type=checkbox]{accent-color:var(--teal);width:16px;height:16px;min-width:16px;min-height:16px;flex:0 0 16px;margin:0;vertical-align:middle}
 .alr-blocks{display:flex;align-items:center;gap:7px;flex-wrap:wrap;margin-top:10px}
 .alr-block-btn{border:1px solid var(--food-line);border-radius:8px;padding:4px 11px;background:var(--food-white);color:var(--muted);font-size:11px;font-weight:800;cursor:pointer}
 .alr-block-btn.active{background:var(--teal-light);border-color:var(--teal);color:var(--navy)}
@@ -1157,7 +1157,7 @@ var FIELDS=[{key:'row',label:'ردیف'},{key:'pc',label:'کد پرسنلی'},{k
 var TAB_FIELDS={flat:['row','pc','first','last','dep','count','amountTotal','status'],dept:['row','pc','first','last','dep','count','amountTotal','status'],detail:['row','pc','first','last','dep','food','jal','status','amount','priceState']};
 var FKEY='food-ticket-absent-fields-v3',BKEY='food-ticket-absent-blocks-v1';
 var PAL=['var(--teal)','var(--navy-2)','var(--gold)','var(--danger)','#4f91c6','#8a63c9','#d9812b'];
-var S={rows:[],key:'',seq:0,loading:false,error:'',tab:'detail',blocks:1,metric:'people',chart:true,query:'',deps:new Set(),
+var S={rows:[],totals:{total_ordered_people:0,total_ordered_portions:0},key:'',seq:0,loading:false,error:'',tab:'detail',blocks:1,metric:'people',chart:true,query:'',deps:new Set(),
   fieldsByTab:{flat:new Set(TAB_FIELDS.flat),dept:new Set(TAB_FIELDS.dept),detail:new Set(TAB_FIELDS.detail)},
   sort:{key:'iso',dir:'asc'}};
 try{var raw=localStorage.getItem(FKEY);if(raw){var saved=JSON.parse(raw);Object.keys(TAB_FIELDS).forEach(function(t){if(Array.isArray(saved[t])){var v=saved[t].filter(function(k){return TAB_FIELDS[t].indexOf(k)>=0});if(v.length)S.fieldsByTab[t]=new Set(v)}})}var bb=Number(localStorage.getItem(BKEY));if(bb===2||bb===3)S.blocks=bb;}catch(e){}
@@ -1184,7 +1184,7 @@ function mapped(items,orgMap){
  var map=orgMap||state.__orgMap||null;
  return (items||[]).map(function(it){
   var declared=!!it.declared_absent;
-  var r={pc:String(it.pc||it.nat||'—'),nat:String(it.nat||''),first:String(it.first||''),last:String(it.last||''),
+  var r={pc:String(it.pc||it.nat||'—'),nat:String(it.nat||''),identity:String(it.nat?'nat:'+it.nat:'pc:'+(it.pc||'')),first:String(it.first||''),last:String(it.last||''),
    food:String(it.food||''),iso:String(it.foodDate||''),jal:jal(String(it.foodDate||'')),amount:it.amount_irr==null?'—':fa(it.amount_irr),amountValue:it.amount_irr==null?null:Number(it.amount_irr),priceState:it.price_status==='final'?'قطعی':(it.price_status==='estimated'?'برآوردی':'قیمت ثبت نشده'),
    dep:'بدون معاونت سازمانی',deputy:'بدون معاونت سازمانی',declared:declared,
    status:declared?'غایب اعلامشده — فیش چاپ نشده':'غایب — سفارش دارد، فیش چاپ نشده',short:declared?'غایب اعلامشده':'غایب'};
@@ -1203,9 +1203,10 @@ function load(force){
   .then(function(res){
    if(seq!==S.seq||S.key!==key)return;
    S.rows=mapped(res[0]&&Array.isArray(res[0].items)?res[0].items:[],res[1]||state.__orgMap||null);
+   S.totals=(res[0]&&res[0].totals)||{total_ordered_people:0,total_ordered_portions:0};
    S.loading=false;S.deps=new Set(allDeps());
    if(active())rerender();
-  }).catch(function(e){if(seq!==S.seq)return;S.rows=[];S.deps=new Set();S.loading=false;S.error=e.message||'خطا در دریافت گزارش غایبین ناهار';if(active())rerender();});
+  }).catch(function(e){if(seq!==S.seq)return;S.rows=[];S.totals={total_ordered_people:0,total_ordered_portions:0};S.deps=new Set();S.loading=false;S.error=e.message||'خطا در دریافت گزارش غایبین ناهار';if(active())rerender();});
 }
 
 /* ---------- چارت جمعوجور + تیک چندمعاونتی + «همه» ---------- */
@@ -1219,10 +1220,20 @@ function chartGroups(){
 }
 function rangeLabel(){var r=reportRange();return 'شروع بازه: '+jal(r.from)+' ← پایان بازه: '+jal(r.to)}
 function daysForChart(){var out=[];try{var r=reportRange(),a=new Date(r.from+'T00:00:00'),b=new Date(r.to+'T00:00:00');for(var d=new Date(a),n=0;d<=b&&n<12;d.setDate(d.getDate()+1),n++)out.push(jal(d.toISOString().slice(0,10)).slice(-2))}catch(e){}return out}
+function chartSummaryHtml(){
+ var absentPeople={},absentPortions=S.rows.length;
+ S.rows.forEach(function(r){absentPeople[r.identity]=true;});
+ var people=Object.keys(absentPeople).length,orderedPeople=Number((S.totals||{}).total_ordered_people||0),orderedPortions=Number((S.totals||{}).total_ordered_portions||0);
+ var n=S.metric==='people'?people:absentPortions,d=S.metric==='people'?orderedPeople:orderedPortions;
+ var pct=d>0?Math.round(n/d*1000)/10:0,pctText=fa(Number.isInteger(pct)?String(pct):pct.toFixed(1));
+ if(S.loading)return '<div class="alr-chart-summary">در حال محاسبهٔ آمار بازه…</div>';
+ if(S.error)return '<div class="alr-chart-summary">آمار مخرج نمودار دریافت نشد.</div>';
+ return '<div class="alr-chart-summary">'+(S.metric==='people'?'مجموع نفرات غایب = <b>'+fa(people)+' نفر از '+fa(orderedPeople)+' نفر = '+pctText+'%</b>':'مجموع پرس غذا = <b>'+fa(absentPortions)+' از '+fa(orderedPortions)+' = '+pctText+'%</b>')+'</div>';
+}
 function chartHtml(){
  var gs=chartGroups().map(function(g){return{name:g.name,v:S.metric==='people'?g.people:g.portions,people:g.people,portions:g.portions}})
   .filter(function(g){return g.v>0}).sort(function(a,b){return b.v-a.v});
- if(!gs.length)return '<div class="alr-empty">موردی یافت نشد.</div>';
+ if(!gs.length)return '<div class="alr-empty">موردی یافت نشد.</div>'+chartSummaryHtml();
  var max=Math.max.apply(null,gs.map(function(g){return g.v}))||1,total=gs.reduce(function(s,g){return s+g.v},0),mean=total/gs.length,meanPct=(mean/max*100).toFixed(2)+'%';
  var all=allDeps(),sel=selectedDeps(),allOn=sel.length===all.length&&all.length>0;
  var h='<label class="alr-all"><input type="checkbox" data-alr-all'+(allOn?' checked':'')+'> همه معاونتها</label>';
@@ -1242,7 +1253,7 @@ function chartHtml(){
  h+='<div class="alr-legend">'+gs.map(function(g,i){return '<span data-alr-dep-toggle="'+esc2(g.name)+'"><i style="background:'+depColor(g.name)+'"></i>'+esc2(g.name)+
    ' <b>'+fa(g.people)+' نفر · '+fa(g.portions)+' وعده</b>'+(i===0?' ▼ بیشترین':'')+(i===gs.length-1?' ▲ کمترین':'')+'</span>'}).join('')+
    '<span class="alr-mean-key"><i></i>میانگین '+fa(mean.toFixed(1))+'</span></div>';
- return h;
+ return h+chartSummaryHtml();
 }
 
 /* ---------- جدول ---------- */
@@ -1324,7 +1335,7 @@ function preparePrint(){
  }catch(e){}
  var area=document.getElementById('alrPrint');
  if(!area){area=document.createElement('div');area.id='alrPrint';document.body.appendChild(area)}
- area.innerHTML='<h1>گزارش غایبین ناهار</h1><div class="alr-tab-title">'+esc2(tabTitle())+'</div>'+viewHtml(false);
+ area.innerHTML='<h1>گزارش غایبین ناهار</h1><div class="alr-tab-title">'+esc2(tabTitle())+'</div>'+(S.chart?'<section class="alr-chart alr-print-chart"><h3>نمودار معاونتها</h3>'+chartHtml()+'</section>':'')+viewHtml(false);
  var dyn=document.getElementById('alrPrintDyn');
  if(!dyn){dyn=document.createElement('style');dyn.id='alrPrintDyn';document.head.appendChild(dyn)}
  var cols=activeFields().length*S.blocks;

@@ -97,3 +97,15 @@ def test_food_modals_use_top_layer_popovers_for_all_three_dialogs():
     css = (ROOT / "assets/food-menu.css").read_text()
     assert ".fm-leftover-backdrop{position:fixed" in css
     assert "z-index:2147483000" in css
+
+
+def test_leftover_person_rows_show_full_names_only_with_aligned_checkboxes():
+    js = (ROOT / "assets/food-menu.js").read_text()
+    start = js.index("m.people.map(function(person)")
+    end = js.index(".join('');", start)
+    row = js[start:end]
+    assert "esc(person.name||'')" in row
+    assert "employee_number" not in row
+    css = (ROOT / "assets/food-menu.css").read_text()
+    assert "grid-template-columns:20px max-content 76px" in css
+    assert "overflow:visible;text-overflow:clip" in css

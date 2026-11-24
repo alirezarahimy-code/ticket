@@ -4008,7 +4008,7 @@ function food_ticket_aggregate_row(array $selected, array $person): array
     return $out;
 }
 
-function food_ticket_api_absent(string $fromDate, ?string $toDate = null): array
+function food_ticket_api_absent(string $fromDate, ?string $toDate = null, ?array &$rangeTotals = null): array
 {
     $fromDate = food_ticket_parse_date($fromDate) ?: trim($fromDate);
     $toDate = food_ticket_parse_date($toDate ?? $fromDate) ?: trim((string) ($toDate ?? $fromDate));
@@ -4045,6 +4045,17 @@ function food_ticket_api_absent(string $fromDate, ?string $toDate = null): array
         app_error_log('[absent] internal orders query failed: ' . $e->getMessage());
         throw $e;
     }
+
+    $totalOrderers = [];
+    $totalOrderPortions = 0;
+    foreach ($orders as $dayOrders) {
+        $totalOrderPortions += count($dayOrders);
+        foreach (array_keys($dayOrders) as $identityKey) $totalOrderers[(string)$identityKey] = true;
+    }
+    $rangeTotals = [
+        'total_ordered_people' => count($totalOrderers),
+        'total_ordered_portions' => $totalOrderPortions,
+    ];
 
     // کسانی که فیش چاپ‌شده دارند از لیست غایب خارج می‌شوند
     $printed = [];
@@ -5251,7 +5262,9 @@ function food_ticket_api_handle(string $route, array $user): never
             if ($from === null || $to === null || $from > $to) {
                 food_ticket_api_json(['error' => 'بازهٔ تاریخ گزارش معتبر نیست.'], 400);
             }
-            food_ticket_api_json(['items' => food_ticket_api_absent($from, $to), 'from' => $from, 'to' => $to]);
+            $rangeTotals = [];
+            $absentItems = food_ticket_api_absent($from, $to, $rangeTotals);
+            food_ticket_api_json(['items' => $absentItems, 'totals' => $rangeTotals, 'from' => $from, 'to' => $to]);
         }
         if ($_SERVER['REQUEST_METHOD'] === 'GET' && $route === 'guest-requests-report') {
             // گزارش درخواست‌های غذای مهمان مدیران؛ فیلتر معاونت: all یا شناسهٔ معاونت

@@ -386,7 +386,7 @@
 .fm-leftover-modal footer{display:flex;justify-content:flex-end;gap:8px;padding:0 20px 16px}
 .fm-gap-extra b{color:#087e72;font-size:14px}
 .fm-reconciliation-auto-hint{margin:4px 0 0;padding:9px 12px;border:1px dashed #d3e4e1;border-radius:10px;background:#fbfdfc;color:#5f7a76}
-@media(max-width:520px){.fm-leftover-row{flex-wrap:wrap}.fm-leftover-count{margin-right:26px}}
+@media(max-width:520px){.fm-leftover-row{flex-wrap:wrap}.fm-leftover-count{margin-right:26px}.fm-leftover-person{grid-template-columns:18px max-content 56px;width:max-content;min-width:100%;gap:6px}.fm-leftover-person label{grid-template-columns:18px max-content;gap:6px}.fm-leftover-person input[type=number][data-leftover-person-qty]{width:56px;min-width:56px}}
 
 
 /* 1.62.93 follow-up: cancel-request cutoff + compact date/meal fields + wide single-line reason */
@@ -435,7 +435,7 @@
 .fm-stats-mode:hover { background:#f3f7f6; }
 .fm-stats-mode input { margin:0; accent-color:var(--teal,#087f78); }
 .fm-stats-mode:has(input:checked) { background:var(--teal2,#d9f3ef); border-color:var(--teal,#087f78); color:var(--teal,#087f78); font-weight:700; }
-.fm-leftover-people{max-height:270px;overflow:auto;border:1px solid var(--fm-line,#dbe4e8);border-radius:10px;padding:8px;margin:8px 0}.fm-leftover-person{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:7px 4px;border-bottom:1px solid #e8eef0}.fm-leftover-person[hidden]{display:none}.fm-leftover-person label{display:flex;align-items:center;gap:8px;min-width:0}.fm-leftover-person small{color:#71808a}.fm-leftover-person-qty{display:flex;align-items:center;gap:4px}.fm-leftover-person-qty input{width:64px;text-align:center}.fm-leftover-person-qty button{display:none!important}.fm-leftover-person-qty button:disabled{opacity:.4}.fm-leftover-person-qty input:disabled{opacity:.55}.fm-invoice-price-modal .fm-field small{display:block}
+.fm-leftover-people{max-height:270px;overflow:auto;border:1px solid var(--fm-line,#dbe4e8);border-radius:10px;padding:8px;margin:8px 0}.fm-leftover-person{display:grid;grid-template-columns:20px max-content 76px;width:max-content;min-width:100%;align-items:center;gap:10px;padding:7px 4px;border-bottom:1px solid #e8eef0;box-sizing:border-box}.fm-leftover-person[hidden]{display:none}.fm-leftover-person label{grid-column:1/3;display:grid;grid-template-columns:20px max-content;align-items:center;gap:10px;min-width:0;margin:0}.fm-leftover-person label input[type=checkbox]{grid-column:1;width:17px;height:17px;min-width:17px;margin:0;justify-self:center}.fm-leftover-person-label{grid-column:2;min-width:0;white-space:nowrap;overflow:visible;text-overflow:clip}.fm-leftover-person input[type=number][data-leftover-person-qty]{grid-column:3;justify-self:end}.fm-leftover-person small{color:#71808a}.fm-leftover-person-qty{display:flex;align-items:center;gap:4px}.fm-leftover-person-qty input{width:64px;text-align:center}.fm-leftover-person-qty button{display:none!important}.fm-leftover-person-qty button:disabled{opacity:.4}.fm-leftover-person-qty input:disabled{opacity:.55}.fm-invoice-price-modal .fm-field small{display:block}
 
 /* مودال‌های قیمت قطعی و سرنوشت مانده: لایهٔ مستقل بالای هدر و فرم قیمت فشرده */
 .fm-price-modal{width:min(680px,100%)}
@@ -446,10 +446,15 @@
 .fm-price-currency{font-size:12px;font-weight:800;color:#24424b;white-space:nowrap}
 .fm-price-state{grid-column:1/-1;color:#71808a;font-size:10px}
 .fm-leftover-people[hidden]{display:none}
-.fm-leftover-person-label{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.fm-leftover-person-label{min-width:0;white-space:nowrap;overflow:visible;text-overflow:clip}
 .fm-leftover-person input[type=number]{box-sizing:border-box;width:76px;min-width:76px;height:34px;padding:4px 7px;border:1px solid #cbd8df;border-radius:8px;text-align:center;font:inherit}
 .fm-leftover-person input[type=number]:disabled{opacity:.5;background:#f2f5f5}
 .fm-leftover-person-row[hidden]{display:none}
 .fm-leftover-person-qty button{display:none!important}
 .fm-invoice-price-modal .fm-field small{display:block}
 @media(max-width:520px){.fm-price-row{grid-template-columns:minmax(0,1fr) minmax(8ch,12ch) auto}.fm-leftover-person{gap:6px}.fm-leftover-person input[type=number]{width:62px;min-width:62px}}
+
+/* نمودار غایبین: مقایسهٔ بازه در یک خط، قابل چاپ */
+.alr-chart-summary{display:block;margin:12px 0 2px;padding:10px 12px;border:1px solid var(--food-line);border-radius:9px;background:var(--food-paper);color:var(--navy);text-align:center;font-size:16px;font-weight:800;line-height:1.5;white-space:nowrap;overflow-x:auto}
+.alr-chart-summary b{font-size:18px;font-weight:900;color:var(--teal)}
+@media print{#alrPrint .alr-print-chart{display:block!important;break-inside:avoid;page-break-inside:avoid}#alrPrint .alr-chart-summary{white-space:nowrap;overflow:visible;border:1px solid #333;color:#111;background:#fff!important;font-size:14px}#alrPrint .alr-chart-summary b{color:#111!important}}

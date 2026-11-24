@@ -100,3 +100,12 @@ def test_flat_and_department_show_per_person_absence_amount_totals_without_dates
     dept = fields.split("dept:[", 1)[1].split("]", 1)[0]
     assert 'jal' not in flat and 'jal' not in dept
     assert 'amountTotal' in flat and 'amountTotal' in dept
+
+
+def test_chart_has_range_ratios_and_prints_when_enabled():
+    assert 'function chartSummaryHtml()' in BUNDLE
+    assert "مجموع نفرات غایب = <b>" in BUNDLE
+    assert "مجموع پرس غذا = <b>" in BUNDLE
+    assert 'total_ordered_people' in BUNDLE and 'total_ordered_portions' in BUNDLE
+    assert "(S.chart?'<section class=\"alr-chart alr-print-chart\"" in BUNDLE
+    assert '.alr-chart-summary b' in HTML or '.alr-chart-summary b' in (ROOT / 'assets/food-menu.css').read_text()

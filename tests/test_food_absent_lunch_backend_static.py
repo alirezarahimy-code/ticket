@@ -29,3 +29,11 @@ def test_absent_amount_uses_only_final_current_month_prices():
     fn = PHP[PHP.index('function food_ticket_api_absent('):PHP.index('\nfunction ', PHP.index('function food_ticket_api_absent(') + 10)]
     assert "p.invoice_month<? OR EXISTS (SELECT 1 FROM food_monthly_invoices" in fn
     assert "i.finalized_at IS NOT NULL" in fn
+
+
+def test_absent_range_response_includes_orderer_and_portion_denominators():
+    fn = PHP[PHP.index('function food_ticket_api_absent('):PHP.index('\nfunction ', PHP.index('function food_ticket_api_absent(') + 10)]
+    assert "?array &$rangeTotals = null" in fn
+    assert "total_ordered_people" in fn
+    assert "total_ordered_portions" in fn
+    assert "count($dayOrders)" in fn
