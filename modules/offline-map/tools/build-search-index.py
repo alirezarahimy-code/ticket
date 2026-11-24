@@ -176,6 +176,7 @@ def main() -> int:
         manifest.setdefault("schema_version", 1)
         manifest["search_index"] = result
         manifest.setdefault("not_included_or_not_verified", [])
+        manifest["not_included_or_not_verified"] = [x for x in manifest["not_included_or_not_verified"] if x != "Persian offline search index"]
         for note in ("official postal addresses and house numbers", "official municipal district boundaries", "completeness of all named roads and POIs"):
             if note not in manifest["not_included_or_not_verified"]:
                 manifest["not_included_or_not_verified"].append(note)
