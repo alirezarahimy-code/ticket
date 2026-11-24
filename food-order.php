@@ -3891,6 +3891,7 @@ function food_order_menu_api_handle(string $route, array $user): never
             'food-menu/reconciliation-remainder',
             'food-menu/guest-actuals',
             'food-menu/reconciliation-export', 'food-menu/invoice-upload', 'food-menu/invoice-file',
+            'food-menu/reconciliation-employees',
         ], true)) {
             if (!function_exists('food_reconciliation_api_handle')) {
                 throw new RuntimeException('ماژول تطبیق و فاکتور غذا بارگذاری نشده است.');

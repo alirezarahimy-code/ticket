@@ -13,7 +13,7 @@ const FOOD_RECONCILIATION_MAX_INVOICE_BYTES = 8 * 1024 * 1024;
 function food_reconciliation_schema_ensure(): void
 {
     food_order_schema_ensure();
-    $required = ['food_meal_reconciliations', 'food_monthly_invoices'];
+    $required = ['food_meal_reconciliations', 'food_monthly_invoices', 'food_monthly_prices', 'food_leftover_allocations', 'food_reconciliation_change_audit'];
     $placeholders = implode(',', array_fill(0, count($required), '?'));
     $stmt = db()->prepare("SELECT TABLE_NAME FROM information_schema.TABLES
         WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME IN ({$placeholders})");
@@ -381,6 +381,16 @@ function food_reconciliation_rows(string $from, string $to, string $mealFilter =
             'closed_at' => (string) ($row['closed_at'] ?? ''),
         ];
     }
+    $ids=array_values(array_filter(array_map(static fn($item)=>$item['id']??null,$items)));
+    $allocationMap=[];
+    if($ids){
+        $marks=implode(',',array_fill(0,count($ids),'?'));
+        $allocStmt=db()->prepare("SELECT a.reconciliation_id,a.employee_id,a.quantity,COALESCE(u.full_name,CONCAT('کاربر ',a.employee_id)) AS employee_name FROM food_leftover_allocations a LEFT JOIN users u ON u.id=a.employee_id WHERE a.is_current=1 AND a.reconciliation_id IN ({$marks}) ORDER BY u.full_name,a.id");
+        $allocStmt->execute($ids);
+        foreach($allocStmt->fetchAll(PDO::FETCH_ASSOC) as $alloc){$rid=(int)$alloc['reconciliation_id'];$allocationMap[$rid][]=['employee_id'=>(int)$alloc['employee_id'],'employee_name'=>(string)$alloc['employee_name'],'quantity'=>(int)$alloc['quantity']];}
+    }
+    foreach($items as &$item){$item['leftover_allocations']=$item['id']!==null?($allocationMap[(int)$item['id']]??[]):[];}
+    unset($item);
     return $items;
 }
 
@@ -388,7 +398,7 @@ function food_reconciliation_invoice_rows(string $monthStart): array
 {
     food_reconciliation_schema_ensure();
     $stmt = db()->prepare('SELECT id, invoice_month, invoice_date, supplier_name, invoice_number,
-            portion_count, amount_toman, original_name, mime_type, size_bytes, created_at
+            portion_count, amount_irr, original_name, mime_type, size_bytes, created_at
         FROM food_monthly_invoices WHERE invoice_month = ? ORDER BY invoice_date DESC, id DESC');
     $stmt->execute([$monthStart]);
     return array_map(static function (array $row): array {
@@ -399,13 +409,32 @@ function food_reconciliation_invoice_rows(string $monthStart): array
             'supplier_name' => (string) $row['supplier_name'],
             'invoice_number' => (string) $row['invoice_number'],
             'portion_count' => (int) $row['portion_count'],
-            'amount_toman' => $row['amount_toman'] === null ? null : (int) $row['amount_toman'],
+            'amount_irr' => $row['amount_irr'] === null ? null : (int) $row['amount_irr'],
             'original_name' => (string) $row['original_name'],
             'mime_type' => (string) $row['mime_type'],
             'size_bytes' => (int) $row['size_bytes'],
             'created_at' => (string) $row['created_at'],
         ];
     }, $stmt->fetchAll(PDO::FETCH_ASSOC));
+}
+
+function food_reconciliation_month_foods(string $from, string $to, string $monthStart): array
+{
+    $stmt = db()->prepare("SELECT food_id AS id, food_name FROM (SELECT DISTINCT c.id AS food_id,c.food_name FROM food_orders o JOIN food_calendar_items i ON i.id=o.calendar_item_id JOIN food_catalog c ON c.id=i.food_id WHERE o.food_date BETWEEN ? AND ? AND o.status='active' UNION SELECT DISTINCT c.id AS food_id,c.food_name FROM food_guest_requests g JOIN food_catalog c ON c.id=g.food_id WHERE g.request_date BETWEEN ? AND ? AND g.status='active' AND g.food_id IS NOT NULL) selected_foods ORDER BY food_name,id");
+    $stmt->execute([$from, $to, $from, $to]);
+    $foods = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    $current = db()->prepare('SELECT food_id, price_irr FROM food_monthly_prices WHERE invoice_month = ?');
+    $current->execute([$monthStart]);
+    $currentMap = [];
+    foreach ($current->fetchAll(PDO::FETCH_ASSOC) as $row) $currentMap[(int)$row['food_id']] = (int)$row['price_irr'];
+    $previous = db()->prepare('SELECT p.food_id, p.price_irr FROM food_monthly_prices p JOIN (SELECT food_id, MAX(invoice_month) AS last_month FROM food_monthly_prices WHERE invoice_month < ? GROUP BY food_id) x ON x.food_id=p.food_id AND x.last_month=p.invoice_month');
+    $previous->execute([$monthStart]);
+    $previousMap = [];
+    foreach ($previous->fetchAll(PDO::FETCH_ASSOC) as $row) $previousMap[(int)$row['food_id']] = (int)$row['price_irr'];
+    return array_map(static function(array $food) use ($currentMap,$previousMap): array {
+        $id=(int)$food['id']; $final=array_key_exists($id,$currentMap);
+        return ['food_id'=>$id,'food_name'=>(string)$food['food_name'],'price_irr'=>$final?$currentMap[$id]:($previousMap[$id]??null),'price_status'=>$final?'final':(isset($previousMap[$id])?'estimated':'missing')];
+    }, $foods);
 }
 
 function food_reconciliation_report(string $fromRaw, string $toRaw, string $mealRaw, string $monthRaw): array
@@ -458,7 +487,7 @@ function food_reconciliation_report(string $fromRaw, string $toRaw, string $meal
         'month' => food_reconciliation_month_key($monthStart),
         'invoice_count' => count($invoices),
         'invoice_portions' => 0,
-        'invoice_amount_toman' => 0,
+        'invoice_amount_irr' => 0,
         'daily_received_portions' => 0,
         'daily_received_recorded_rows' => 0,
         'daily_received_missing_rows' => 0,
@@ -466,7 +495,7 @@ function food_reconciliation_report(string $fromRaw, string $toRaw, string $meal
     ];
     foreach ($invoices as $invoice) {
         $monthSummary['invoice_portions'] += $invoice['portion_count'];
-        $monthSummary['invoice_amount_toman'] += (int) ($invoice['amount_toman'] ?? 0);
+        $monthSummary['invoice_amount_irr'] += (int) ($invoice['amount_irr'] ?? 0);
     }
     foreach ($monthItems as $item) {
         if ($item['received_quantity'] === null) {
@@ -481,7 +510,11 @@ function food_reconciliation_report(string $fromRaw, string $toRaw, string $meal
     if ($monthSummary['invoice_count'] > 0 && $monthSummary['daily_received_recorded_rows'] > 0 && $monthSummary['daily_received_missing_rows'] === 0) {
         $monthSummary['invoice_difference'] = $monthSummary['invoice_portions'] - $monthSummary['daily_received_portions'];
     }
+    $priceFoods = food_reconciliation_month_foods($monthFrom, $monthTo, $monthStart);
+    $invoiceFinalized = count($invoices) > 0;
     return [
+        'price_foods' => $priceFoods,
+        'invoice_finalized' => $invoiceFinalized,
         'from' => $from,
         'to' => $to,
         'meal_type' => $meal,
@@ -513,27 +546,16 @@ function food_reconciliation_audit(string $action, array $user, int $targetId, m
  */
 function food_meal_closed_guard(string $date, string $mealType, string $action = ''): void
 {
-    static $cache = [];
-    $mealType = $mealType === 'dinner' ? 'dinner' : 'lunch';
-    if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $date)) {
-        return;
-    }
-    $key = $date . "\0" . $mealType;
-    if (!isset($cache[$key])) {
-        $cache[$key] = false;
-        try {
-            $stmt = db()->prepare("SELECT status FROM food_meal_reconciliations WHERE food_date = ? AND meal_type = ? LIMIT 1");
-            $stmt->execute([$date, $mealType]);
-            $cache[$key] = strtolower((string) ($stmt->fetchColumn() ?: '')) === 'closed';
-        } catch (Throwable $e) {
-            app_error_log('[food-reconciliation] closed-day guard check failed: ' . $e->getMessage());
+    if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $date)) return;
+    try {
+        $monthStart = food_reconciliation_month(substr($date, 0, 7));
+        $stmt = db()->prepare('SELECT id FROM food_monthly_invoices WHERE invoice_month = ? LIMIT 1');
+        $stmt->execute([$monthStart]);
+        if ($stmt->fetchColumn() !== false) {
+            throw new RuntimeException('فاکتور ماه نهایی شده است؛ تغییر سفارش یا تطبیق در این ماه مسدود است.');
         }
-    }
-    if ($cache[$key]) {
-        $what = trim($action);
-        $mealLabel = $mealType === 'dinner' ? 'شام' : 'ناهار';
-        throw new RuntimeException('این روز بسته شده است؛ هرگونه تغییر در روز/وعدهٔ بسته‌شده (' . $mealLabel . ') مسدود است' . ($what !== '' ? ' — «' . $what . '»' : '') . '.');
-    }
+    } catch (RuntimeException $e) { throw $e; }
+    catch (Throwable $e) { app_error_log('[food-reconciliation] monthly lock check failed: '.$e->getMessage()); throw new RuntimeException('قفل ماهانه بررسی نشد؛ برای جلوگیری از تغییر ناخواسته درخواست رد شد.'); }
 }
 
 /**
@@ -596,6 +618,17 @@ function food_reconciliation_disposition_parse(array $body, int $remaining): arr
     } else {
         $otherNote = substr($otherNote, 0, 500);
     }
+    $allocations = $body['leftover_allocations'] ?? [];
+    if (!is_array($allocations)) throw new RuntimeException('فهرست تخصیص پرسنل معتبر نیست.');
+    $allocationTotal = 0; $seenEmployees = [];
+    foreach ($allocations as $allocation) {
+        if (!is_array($allocation)) continue;
+        $employeeId = (int)($allocation['employee_id'] ?? 0);
+        $quantity = food_reconciliation_count($allocation['quantity'] ?? '', 'تعداد تخصیص فرد', false);
+        if ($employeeId < 1 || $quantity < 1 || isset($seenEmployees[$employeeId])) throw new RuntimeException('تخصیص پرسنل تکراری یا نامعتبر است.');
+        $seenEmployees[$employeeId] = true; $allocationTotal += $quantity;
+    }
+    if ($allocationTotal !== $staff) throw new RuntimeException('مجموع تخصیص فردی باید دقیقاً برابر تعداد «توزیع بین پرسنل» باشد.');
     $sum = $staff + $waste + $keep + $other;
     if ($sum === 0) {
         throw new RuntimeException('برای بستن این روز باید سرنوشت غذای باقیمانده را مشخص کنید؛ حداقل یک گزینه را با تعداد وارد کنید.');
@@ -670,10 +703,10 @@ function food_reconciliation_save(array $body, array $user): array
         $existingStmt->execute([$date, $meal]);
         $existing = $existingStmt->fetch(PDO::FETCH_ASSOC) ?: null;
         $wasClosed = $existing !== null && (string) $existing['status'] === 'closed';
-        if ($wasClosed) {
-            // تصمیم مالک ۲۰۲۶-۱۱-۲۰: بعد از بستن، هرگونه تغییر — حتی با دلیل اصلاح — کاملاً مسدود است.
-            throw new RuntimeException('این روز بسته شده است؛ هرگونه تغییر در روز/وعدهٔ بسته‌شده مسدود است.');
-        }
+        $monthStart = food_reconciliation_month(substr($date, 0, 7));
+        $lock = $pdo->prepare('SELECT id FROM food_monthly_invoices WHERE invoice_month = ? LIMIT 1 FOR UPDATE');
+        $lock->execute([$monthStart]);
+        if ($lock->fetchColumn() !== false) throw new RuntimeException('فاکتور این ماه نهایی شده است؛ روزهای ماه دیگر قابل ویرایش نیستند.');
         $counts = food_reconciliation_order_counts($date, $meal);
         $snapshotEmployee = $existing !== null && $existing['employee_orders_at_order'] !== null
             ? (int) $existing['employee_orders_at_order'] : $counts['active_employee_orders'];
@@ -684,6 +717,7 @@ function food_reconciliation_save(array $body, array $user): array
             throw new RuntimeException('تعداد پرس سفارش/تحویل واقعی پیمانکار را وارد کنید.');
         }
         $oldValue = $existing;
+        if ($existing !== null) { $oldAllocStmt=$pdo->prepare('SELECT employee_id,quantity,created_by,created_at FROM food_leftover_allocations WHERE reconciliation_id=? AND is_current=1 ORDER BY id'); $oldAllocStmt->execute([(int)$existing['id']]); $oldValue['leftover_allocations']=$oldAllocStmt->fetchAll(PDO::FETCH_ASSOC); }
         $nowAction = $action === 'close' ? 'closed' : ($wasClosed ? 'closed' : 'ordered');
         $receivedValue = $action === 'close' ? $received : ($existing['received_quantity'] ?? null);
         $orderedBy = $existing !== null && $existing['ordered_by'] !== null ? (int) $existing['ordered_by'] : (int) ($user['id'] ?? 0);
@@ -760,6 +794,22 @@ function food_reconciliation_save(array $body, array $user): array
             ]);
             $id = (int) $existing['id'];
         }
+        if ($action === 'close') {
+            $delAlloc = $pdo->prepare('UPDATE food_leftover_allocations SET is_current=0 WHERE reconciliation_id = ? AND is_current=1'); $delAlloc->execute([$id]);
+            $allocations = is_array($body['leftover_allocations'] ?? null) ? $body['leftover_allocations'] : [];
+            $allocIns = $pdo->prepare('INSERT INTO food_leftover_allocations (reconciliation_id, employee_id, quantity, created_by) VALUES (?,?,?,?)');
+            foreach ($allocations as $allocation) if (is_array($allocation)) {
+                $personId=(int)$allocation['employee_id'];
+                $personCheck=$pdo->prepare("SELECT id FROM users WHERE id=? AND company_id=? AND is_active=1 AND role IN ('user','local_user') LIMIT 1");
+                $personCheck->execute([$personId,(int)($user['company_id']??1)]);
+                if($personCheck->fetchColumn()===false) throw new RuntimeException('یکی از پرسنل انتخاب‌شده دیگر فعال یا مجاز نیست؛ فهرست را تازه‌سازی کنید.');
+                $allocIns->execute([$id,$personId,(int)$allocation['quantity'],(int)($user['id']??0)]);
+            }
+        }
+        $auditAllocations=$action==='close'&&is_array($body['leftover_allocations']??null)?$body['leftover_allocations']:($oldValue['leftover_allocations']??[]);
+        $auditNew=['food_date'=>$date,'meal_type'=>$meal,'supplier_order_quantity'=>$orderedQuantity,'received_quantity'=>$receivedValue,'status'=>$nowAction,'leftover_disposition'=>$disposition,'leftover_allocations'=>$auditAllocations];
+        $audit=$pdo->prepare('INSERT INTO food_reconciliation_change_audit (reconciliation_id,action,changed_by,reason,old_value,new_value) VALUES (?,?,?,?,?,?)');
+        $audit->execute([$id,'food_meal_reconciliation_saved',(int)($user['id']??0),$reason!==''?$reason:null,json_encode($oldValue,JSON_UNESCAPED_UNICODE|JSON_INVALID_UTF8_SUBSTITUTE),json_encode($auditNew,JSON_UNESCAPED_UNICODE|JSON_INVALID_UTF8_SUBSTITUTE)]);
         $pdo->commit();
         $newValue = [
             'food_date' => $date,
@@ -775,6 +825,7 @@ function food_reconciliation_save(array $body, array $user): array
             'leftover_keep_quantity' => $leftoverKeep,
             'leftover_other_quantity' => $leftoverOther,
             'leftover_other_note' => $leftoverOtherNote,
+            'leftover_allocations' => is_array($body['leftover_allocations'] ?? null) ? $body['leftover_allocations'] : [],
             'status' => $nowAction,
         ];
         food_reconciliation_audit('food_meal_reconciliation_saved', $user, $id, $oldValue, $newValue, $reason !== '' ? $reason : null);
@@ -876,86 +927,56 @@ function food_reconciliation_upload_invoice(array $post, array $files, array $us
 {
     food_order_require_permission($user, 'food.menu_edit');
     food_reconciliation_schema_ensure();
-    $monthStart = food_reconciliation_month($post['invoice_month'] ?? $post['month'] ?? '');
-    $invoiceDate = food_order_iso_date((string) ($post['invoice_date'] ?? ''));
-    [$invoiceMonthFrom, $invoiceMonthToExclusive] = food_reconciliation_month_range($monthStart);
-    if ($invoiceDate === null || $invoiceDate < $invoiceMonthFrom || $invoiceDate >= $invoiceMonthToExclusive) {
-        throw new RuntimeException('تاریخ فاکتور باید در همان ماه انتخاب‌شده باشد.');
+    $monthStart = food_reconciliation_month($post['invoice_month'] ?? '');
+    $invoiceDate = food_order_iso_date((string)($post['invoice_date'] ?? ''));
+    [$monthFrom, $monthToExclusive] = food_reconciliation_month_range($monthStart);
+    if ($invoiceDate === null || $invoiceDate < $monthFrom || $invoiceDate >= $monthToExclusive) throw new RuntimeException('تاریخ فاکتور باید در همان ماه انتخاب‌شده باشد.');
+    $supplier=trim((string)($post['supplier_name']??'')); $number=trim((string)($post['invoice_number']??''));
+    if($supplier===''||$number==='') throw new RuntimeException('نام پیمانکار و شمارهٔ فاکتور الزامی است.');
+    $supplier=function_exists('mb_substr')?mb_substr($supplier,0,190,'UTF-8'):substr($supplier,0,190);
+    $number=function_exists('mb_substr')?mb_substr($number,0,100,'UTF-8'):substr($number,0,100);
+    $portions=food_reconciliation_count($post['portion_count']??'','تعداد پرس طبق فاکتور',false,1000000);
+    if($portions<1) throw new RuntimeException('تعداد پرس فاکتور باید دست‌کم یک باشد.');
+    $amountRaw=trim(food_order_normalize_digits($post['amount_irr']??'')); $amountRaw=str_replace([',','٬',' '],'',$amountRaw);
+    if(!preg_match('/^\d+$/',$amountRaw)||strlen(ltrim($amountRaw,'0'))>15) throw new RuntimeException('مبلغ کل فاکتور به ریال الزامی و باید عدد صحیح مثبت باشد.');
+    $amount=(int)$amountRaw; if($amount<1) throw new RuntimeException('مبلغ فاکتور باید بزرگ‌تر از صفر باشد.');
+    $upload=$files['file']??null; if(!is_array($upload)) throw new RuntimeException('فایل فاکتور را انتخاب کنید.');
+    $fileInfo=food_reconciliation_validate_file($upload);
+    $rawPrices=json_decode((string)($post['prices_json']??''),true);
+    if(!is_array($rawPrices)) throw new RuntimeException('فهرست قیمت غذاها کامل نیست.');
+    $foods=food_reconciliation_month_foods($monthFrom,(new DateTimeImmutable($monthToExclusive))->modify('-1 day')->format('Y-m-d'),$monthStart);
+    $requiredIds=array_map(static fn($f)=>(int)$f['food_id'],$foods); sort($requiredIds);
+    $prices=[];
+    foreach($rawPrices as $entry){
+        if(!is_array($entry)) continue;
+        $id=(int)($entry['food_id']??0); $raw=trim(food_order_normalize_digits($entry['price_irr']??'')); $raw=str_replace([',','٬',' '],'',$raw);
+        if($id<1||!preg_match('/^\d+$/',$raw)||strlen(ltrim($raw,'0'))>15||(int)$raw<1) throw new RuntimeException('قیمت ریالی همهٔ غذاهای فهرست را به‌صورت عدد مثبت وارد کنید.');
+        if(isset($prices[$id])) throw new RuntimeException('یک غذا در فهرست قیمت تکرار شده است.');
+        $prices[$id]=(int)$raw;
     }
-    $supplier = trim((string) ($post['supplier_name'] ?? ''));
-    $invoiceNumber = trim((string) ($post['invoice_number'] ?? ''));
-    if ($supplier === '' || $invoiceNumber === '') {
-        throw new RuntimeException('نام پیمانکار و شمارهٔ فاکتور را وارد کنید.');
-    }
-    $supplier = function_exists('mb_substr') ? mb_substr($supplier, 0, 190, 'UTF-8') : substr($supplier, 0, 190);
-    $invoiceNumber = function_exists('mb_substr') ? mb_substr($invoiceNumber, 0, 100, 'UTF-8') : substr($invoiceNumber, 0, 100);
-    $portions = food_reconciliation_count($post['portion_count'] ?? '', 'تعداد پرس طبق فاکتور', false, 1000000);
-    if ($portions < 1) {
-        throw new RuntimeException('تعداد پرس فاکتور باید دست‌کم یک باشد.');
-    }
-    $amountRaw = trim(food_order_normalize_digits($post['amount_toman'] ?? ''));
-    $amountRaw = str_replace([',', '٬', ' '], '', $amountRaw);
-    $amount = null;
-    if ($amountRaw !== '') {
-        if (!preg_match('/^\d+$/', $amountRaw) || strlen(ltrim($amountRaw, '0')) > 15) {
-            throw new RuntimeException('مبلغ فاکتور باید عدد صحیحِ نامنفی و به تومان باشد.');
-        }
-        $amount = (int) $amountRaw;
-    }
-    $upload = $files['file'] ?? null;
-    if (!is_array($upload)) {
-        throw new RuntimeException('فایل فاکتور را انتخاب کنید.');
-    }
-    $fileInfo = food_reconciliation_validate_file($upload);
-    $duplicate = db()->prepare('SELECT id FROM food_monthly_invoices WHERE invoice_month = ? AND supplier_name = ? AND invoice_number = ? LIMIT 1');
-    $duplicate->execute([$monthStart, $supplier, $invoiceNumber]);
-    if ($duplicate->fetchColumn() !== false) {
-        throw new RuntimeException('این شمارهٔ فاکتور برای همین ماه و پیمانکار قبلاً ثبت شده است.');
-    }
-
-    $directory = food_reconciliation_upload_directory();
-    if (!is_dir($directory) && !mkdir($directory, 0750, true) && !is_dir($directory)) {
-        throw new RuntimeException('پوشهٔ امن نگه‌داری فاکتورها ساخته نشد.');
-    }
-    @file_put_contents($directory . '/.htaccess', "Require all denied\nOptions -Indexes\n");
-    @file_put_contents($directory . '/web.config', '<?xml version="1.0" encoding="UTF-8"?><configuration><system.webServer><security><authorization><remove users="*" roles="" verbs=""/><add accessType="Deny" users="*"/></authorization></security><directoryBrowse enabled="false"/></system.webServer></configuration>');
-    $storedName = bin2hex(random_bytes(24)) . '.' . $fileInfo['extension'];
-    $destination = $directory . '/' . $storedName;
-    if (!move_uploaded_file((string) $upload['tmp_name'], $destination)) {
-        throw new RuntimeException('ذخیرهٔ امن فایل فاکتور ناموفق بود.');
-    }
-    @chmod($destination, 0640);
-    $sha256 = hash_file('sha256', $destination) ?: '';
+    $submittedIds=array_keys($prices); sort($submittedIds);
+    if($submittedIds!==$requiredIds) throw new RuntimeException('فهرست غذاهای قیمت‌گذاری‌شده با منوی ماه انتخاب‌شده همخوان نیست؛ گزارش را تازه‌سازی و دوباره تلاش کنید.');
+    $directory=food_reconciliation_upload_directory();
+    if(!is_dir($directory)&&!mkdir($directory,0750,true)&&!is_dir($directory)) throw new RuntimeException('پوشهٔ امن نگه‌داری فاکتورها ساخته نشد.');
+    @file_put_contents($directory.'/.htaccess',"Require all denied\nOptions -Indexes\n");
+    $storedName=bin2hex(random_bytes(24)).'.'.$fileInfo['extension']; $destination=$directory.'/'.$storedName;
+    if(!move_uploaded_file((string)$upload['tmp_name'],$destination)) throw new RuntimeException('ذخیرهٔ امن فایل فاکتور ناموفق بود.');
+    @chmod($destination,0640); $sha256=hash_file('sha256',$destination)?:''; $pdo=db();
     try {
-        $insert = db()->prepare('INSERT INTO food_monthly_invoices
-            (invoice_month, invoice_date, supplier_name, invoice_number, portion_count, amount_toman,
-             original_name, stored_name, mime_type, size_bytes, sha256, uploaded_by)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)');
-        $insert->execute([
-            $monthStart, $invoiceDate, $supplier, $invoiceNumber, $portions, $amount,
-            $fileInfo['original_name'], $storedName, $fileInfo['mime_type'], $fileInfo['size_bytes'], $sha256,
-            (int) ($user['id'] ?? 0),
-        ]);
-    } catch (Throwable $e) {
-        @unlink($destination);
-        if ($e instanceof PDOException && (string) $e->getCode() === '23000') {
-            throw new RuntimeException('این شمارهٔ فاکتور برای همین ماه و پیمانکار قبلاً ثبت شده است.');
-        }
-        throw $e;
-    }
-    $id = (int) db()->lastInsertId();
-    try {
-        food_order_audit('food_monthly_invoice_uploaded', $user, 'food_monthly_invoice', $id, null, [
-            'month' => food_reconciliation_month_key($monthStart),
-            'invoice_number' => $invoiceNumber,
-            'portion_count' => $portions,
-            'amount_toman' => $amount,
-            'file_size' => $fileInfo['size_bytes'],
-        ]);
-    } catch (Throwable $e) {
-        app_error_log('[food-reconciliation] invoice audit write failed: ' . $e->getMessage());
-    }
-    return ['ok' => true, 'id' => $id, 'message' => 'فاکتور ماهانه و تعداد پرس آن ثبت شد.'];
+        $pdo->beginTransaction();
+        $check=$pdo->prepare('SELECT id FROM food_monthly_invoices WHERE invoice_month=? LIMIT 1 FOR UPDATE'); $check->execute([$monthStart]);
+        if($check->fetchColumn()!==false) throw new RuntimeException('برای این ماه فاکتور قبلاً نهایی شده است.');
+        $ins=$pdo->prepare('INSERT INTO food_monthly_invoices (invoice_month,invoice_date,supplier_name,invoice_number,portion_count,amount_toman,amount_irr,original_name,stored_name,mime_type,size_bytes,sha256,uploaded_by) VALUES (?,?,?,?,?,NULL,?,?,?,?,?,?,?)');
+        $ins->execute([$monthStart,$invoiceDate,$supplier,$number,$portions,$amount,$fileInfo['original_name'],$storedName,$fileInfo['mime_type'],$fileInfo['size_bytes'],$sha256,(int)($user['id']??0)]);
+        $invoiceId=(int)$pdo->lastInsertId();
+        $priceIns=$pdo->prepare('INSERT INTO food_monthly_prices (invoice_month,food_id,price_irr,invoice_id,created_by) VALUES (?,?,?,?,?)');
+        foreach($prices as $foodId=>$price) $priceIns->execute([$monthStart,$foodId,$price,$invoiceId,(int)($user['id']??0)]);
+        $audit=$pdo->prepare('INSERT INTO food_reconciliation_change_audit (reconciliation_id,action,changed_by,old_value,new_value) VALUES (0,?,?,?,?)');
+        $audit->execute(['food_monthly_invoice_finalized',(int)($user['id']??0),null,json_encode(['invoice_id'=>$invoiceId,'invoice_month'=>$monthStart,'amount_irr'=>$amount,'food_prices'=>$prices],JSON_UNESCAPED_UNICODE|JSON_INVALID_UTF8_SUBSTITUTE)]);
+        $pdo->commit();
+    } catch(Throwable $e) { if($pdo->inTransaction())$pdo->rollBack(); @unlink($destination); if($e instanceof PDOException&&(string)$e->getCode()==='23000') throw new RuntimeException('فاکتور یا قیمت این ماه قبلاً ثبت شده است.'); throw $e; }
+    try { food_order_audit('food_monthly_invoice_finalized',$user,'food_monthly_invoice',$invoiceId,null,['month'=>food_reconciliation_month_key($monthStart),'invoice_number'=>$number,'portion_count'=>$portions,'amount_irr'=>$amount,'food_prices'=>$prices]); } catch(Throwable $e){app_error_log('[food-reconciliation] invoice audit failed: '.$e->getMessage());}
+    return ['ok'=>true,'id'=>$invoiceId,'message'=>'فاکتور، فایل و قیمت‌های ماه با موفقیت نهایی شدند؛ روزهای این ماه قفل شد.'];
 }
 
 function food_reconciliation_download_invoice(int $invoiceId, array $user): never
@@ -1009,7 +1030,7 @@ function food_reconciliation_export(string $fromRaw, string $toRaw, string $meal
         'وضعیت', 'یادداشت',
         'مهمان واقعی (به‌تفکیک بخش)',
         'ماه فاکتور', 'تعداد فاکتور ماه', 'پرس طبق فاکتور ماه', 'جمع تحویل واقعی روزانهٔ ماه',
-        'اختلاف فاکتور − تحویل ماه', 'وضعیت مقایسهٔ ماهانه',
+        'اختلاف فاکتور − تحویل ماه', 'وضعیت مقایسهٔ ماهانه', 'مبلغ کل فاکتور ماه (ریال)', 'تخصیص فردی غذای باقیمانده',
     ];
     $gapText = static function (?int $gap): string {
         if ($gap === null) {
@@ -1038,7 +1059,8 @@ function food_reconciliation_export(string $fromRaw, string $toRaw, string $meal
             $item['status'] === 'closed' ? 'بسته' : ($item['status'] === 'ordered' ? 'سفارش ثبت شد' : 'بدون ثبت خرید'),
             $item['note'],
             $item['guest_actuals_summary'] ?? '—',
-            '', '', '', '', '', '',
+            '', '', '', '', '', '', '',
+            implode(' · ',array_map(static fn($a)=>(string)$a['employee_name'].' × '.(string)$a['quantity'],$item['leftover_allocations']??[])),
         ];
     }
     $monthSummary = $report['month_summary'];
@@ -1056,6 +1078,7 @@ function food_reconciliation_export(string $fromRaw, string $toRaw, string $meal
     $monthlyRow[20] = $monthSummary['daily_received_portions'];
     $monthlyRow[21] = $monthSummary['invoice_difference'] ?? '—';
     $monthlyRow[22] = $comparisonStatus;
+    $monthlyRow[23] = $monthSummary['invoice_amount_irr'];
     $data[] = $monthlyRow;
     foreach ($data as &$row) {
         foreach ($row as &$value) {
@@ -1410,6 +1433,12 @@ function food_reconciliation_api_handle(string $route, string $method, array $us
         } catch (RuntimeException $e) {
             food_order_send_json(['error' => $e->getMessage()], 422);
         }
+    }
+    if ($method === 'GET' && $route === 'food-menu/reconciliation-employees') {
+        food_order_require_permission($user, 'food.menu');
+        $stmt=db()->prepare("SELECT id, full_name, employee_number FROM users WHERE company_id=? AND is_active=1 AND role IN ('user','local_user') ORDER BY full_name LIMIT 3000");
+        $stmt->execute([(int)($user['company_id']??1)]);
+        food_order_send_json(['items'=>array_map(static fn($r)=>['id'=>(int)$r['id'],'name'=>(string)$r['full_name'],'employee_number'=>(string)($r['employee_number']??'')],$stmt->fetchAll(PDO::FETCH_ASSOC))]);
     }
     if ($method === 'POST' && $route === 'food-menu/reconciliation-save') {
         food_order_send_json(food_reconciliation_save(food_order_api_body(), $user));

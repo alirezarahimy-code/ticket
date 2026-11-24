@@ -147,7 +147,7 @@ function food_ticket_route_allowed(array $user, string $route): bool
         $readMenu = [
             'food-menu/status', 'food-menu/month', 'food-menu/catalog', 'food-menu/cancel-requests',
             'food-menu/emergency/people', 'food-menu/emergency/orders', 'food-menu/bulk-snapshot',
-            'food-menu/guest-requests',
+            'food-menu/guest-requests', 'food-menu/reconciliation-employees',
         ];
         $writeMenu = [
             'food-menu/catalog', 'food-menu/day', 'food-menu/cancel-request-decide',
@@ -4037,6 +4037,7 @@ function food_ticket_api_absent(string $fromDate, ?string $toDate = null): array
                 'first' => (string) ($it['first'] ?? ''),
                 'last' => (string) ($it['last'] ?? ''),
                 'food' => (string) ($it['food'] ?? ''),
+                'foodId' => (int) ($it['foodId'] ?? 0),
                 'foodDate' => $day,
             ];
         }
@@ -4098,6 +4099,12 @@ function food_ticket_api_absent(string $fromDate, ?string $toDate = null): array
                 continue;
             }
             $row['full_name'] = trim(($row['first'] ?? '') . ' ' . ($row['last'] ?? ''));
+            $foodId=(int)($row['foodId']??0); $dayMonth=substr((string)$day,0,7).'-01';
+            $priceStmt=db()->prepare('SELECT price_irr, invoice_month FROM food_monthly_prices WHERE food_id=? AND invoice_month<=? ORDER BY invoice_month DESC LIMIT 1');
+            $priceStmt->execute([$foodId,$dayMonth]); $priceRow=$priceStmt->fetch(PDO::FETCH_ASSOC)?:null;
+            $row['price_irr']=$priceRow?(int)$priceRow['price_irr']:null;
+            $row['price_status']=$priceRow&&$priceRow['invoice_month']===$dayMonth?'final':($priceRow?'estimated':'missing');
+            $row['amount_irr']=$row['price_irr'];
             $declared = false;
             try {
                 $uid = 0;

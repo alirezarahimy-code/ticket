@@ -38,7 +38,7 @@ def test_panel_versions_match():
 def test_three_subviews_and_fields():
     for title in ('فهرست یکجا', 'بر اساس معاونت', 'تفکیک و جزئیات'):
         assert title in BUNDLE
-    assert "detail:['row','pc','first','last','dep','food','jal','status']" in BUNDLE
+    assert "detail:['row','pc','first','last','dep','food','jal','status','amount','priceState']" in BUNDLE
     assert "flat:['row','pc','first','last','dep','count','jal','status']" in BUNDLE
     assert "dept:['row','pc','first','last','dep','count','status']" in BUNDLE
     assert "label:'وعده'" not in BUNDLE

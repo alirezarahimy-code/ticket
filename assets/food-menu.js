@@ -63,8 +63,10 @@
     reconciliationForm: { food_date: '', meal_type: 'lunch', portion_quantity: '', note: '', edit_reason: '' },
     leftoverModal: null,
     guestActualModal: null,
-    invoiceDraft: { invoice_month: '', invoice_date: '', supplier_name: '', invoice_number: '', portion_count: '', amount_toman: '' },
+    invoiceDraft: { invoice_month: '', invoice_date: '', supplier_name: '', invoice_number: '', portion_count: '', amount_irr: '' },
     invoiceUploading: false,
+    invoicePriceModal: null,
+    invoicePending: null,
     monthData: null,
     catalog: [],
     orders: [],
@@ -1039,9 +1041,10 @@
 
   function reconciliationLeftoverCell(item) {
     var summary = item.leftover_disposition_summary;
-    if (!summary) return '<td>—</td>';
+    var people=(item.leftover_allocations||[]).map(function(a){return String(a.employee_name||'')+' × '+faDigits(a.quantity||0);}).join('، ');
+    if (!summary && !people) return '<td>—</td>';
     var title = item.leftover_other_note ? ' title="' + esc(item.leftover_other_note) + '"' : '';
-    return '<td' + title + '>' + esc(summary) + '</td>';
+    return '<td' + title + '>' + (summary?esc(summary):'—') + (people?'<br><small class="fm-small">دریافت‌کنندگان: '+esc(people)+'</small>':'') + '</td>';
   }
 
   function reconciliationNumber(value) {
@@ -1078,10 +1081,12 @@
       : ('اختلاف فاکتور − تحویل: ' + reconciliationNumber(difference) + ' پرس');
     var differenceClass = difference == null ? 'fm-small' : (Number(difference) === 0 ? 'fm-alert good' : 'fm-alert error');
     var invoiceSummary = '<div class="fm-reconciliation-cards">'
-      + '<div class="fm-card fm-reconciliation-stat"><span>پرس طبق فاکتور ماه ' + esc(faDigits(month.replace('/', '/'))) + '</span><strong>' + reconciliationNumber(monthSummary.invoice_portions || 0) + '</strong><small>' + faDigits(monthSummary.invoice_count || 0) + ' فاکتور · ' + reconciliationAmount(monthSummary.invoice_amount_toman || 0) + ' تومان</small></div>'
+      + '<div class="fm-card fm-reconciliation-stat"><span>پرس طبق فاکتور ماه ' + esc(faDigits(month.replace('/', '/'))) + '</span><strong>' + reconciliationNumber(monthSummary.invoice_portions || 0) + '</strong><small>' + faDigits(monthSummary.invoice_count || 0) + ' فاکتور · ' + reconciliationAmount(monthSummary.invoice_amount_irr || 0) + ' ریال</small></div>'
       + '<div class="fm-card fm-reconciliation-stat"><span>جمع تحویل واقعی روزانه در ماه</span><strong>' + reconciliationNumber(monthSummary.daily_received_portions || 0) + '</strong><small>' + faDigits(monthSummary.daily_received_recorded_rows || 0) + ' ردیف تحویل ثبت‌شده · ' + faDigits(monthSummary.daily_received_missing_rows || 0) + ' ردیف نیازمند ثبت تحویل</small></div>'
       + '<div class="fm-card fm-reconciliation-stat"><span>مقایسهٔ مستقل (جمع نمی‌شوند)</span><strong>' + (difference == null ? '—' : reconciliationNumber(Math.abs(Number(difference)))) + '</strong><small class="' + differenceClass + '">' + esc(differenceLabel) + '</small></div>'
       + '</div>';
+    var priceFoods=Array.isArray(report.price_foods)?report.price_foods:[];
+    var monthlyPriceTable='<section class="fm-section-gap"><h3>قیمت‌های غذا در ماه '+esc(faDigits(month))+'</h3>'+(priceFoods.length?'<div class="fm-table-wrap"><table class="fm-rows"><thead><tr><th>غذا</th><th>قیمت هر پرس (ریال)</th><th>وضعیت</th></tr></thead><tbody>'+priceFoods.map(function(food){var st=food.price_status==='final'?'قطعی این ماه':(food.price_status==='estimated'?'برآوردی از ماه قبل':'قیمت ثبت نشده');return '<tr><td>'+esc(food.food_name||'—')+'</td><td>'+reconciliationAmount(food.price_irr)+'</td><td>'+esc(st)+'</td></tr>';}).join('')+'</tbody></table></div>':'<div class="fm-empty">در این ماه غذای سفارشی برای نمایش قیمت ثبت نشده است.</div>')+'</section>';
     var dailyTable = dailyRows.length ? '<div class="fm-table-wrap"><table class="fm-rows fm-reconciliation-table"><thead><tr>'
       + '<th>تاریخ</th><th>وعده</th><th>کل سفارشات پرسنل</th><th>تقاضای فعال پرسنل</th><th>لغوشدهٔ پرسنل</th><th>درخواست مهمان (نفرات)</th><th>پرس سفارش/تحویل پیمانکار</th><th>توزیع پرسنل</th><th>مهمان توزیع‌شده</th><th>کل توزیع</th><th>پرس باقیمانده</th><th>کسری/اضافهٔ سفارش</th><th>غایبین</th><th>سرنوشت باقیمانده</th><th>وضعیت</th><th>ثبت/ویرایش</th></tr></thead><tbody>'
       + dailyRows.map(function (item) {
@@ -1096,11 +1101,11 @@
           + reconciliationRemainingCell(item) + reconciliationGapCell(item) + '<td>' + reconciliationNumber(item.absentees) + '</td>'
           + reconciliationLeftoverCell(item)
           + '<td><span class="fm-status ' + statusClass + '">' + status + '</span></td>'
-          + '<td>' + (item.status === 'closed' ? '<span class="fm-status good">بسته ✓</span>' : (canMenuEdit ? '<button type="button" class="btn secondary" data-fm-action="reconciliation-select" data-date="' + esc(item.date) + '" data-meal="' + esc(item.meal_type) + '">ثبت/ویرایش</button>' : 'فقط‌خواندنی')) + '</td></tr>';
+          + '<td>' + (state.reconciliation && state.reconciliation.invoice_finalized ? '<span class="fm-status good">فاکتور نهایی · قفل</span>' : (canMenuEdit ? '<button type="button" class="btn secondary" data-fm-action="reconciliation-select" data-date="' + esc(item.date) + '" data-meal="' + esc(item.meal_type) + '">ثبت/ویرایش</button>' : 'فقط‌خواندنی')) + '</td></tr>';
       }).join('') + '</tbody></table></div>' : '<div class="fm-empty">برای این بازه سفارش یا درخواست مهمان و ثبت تطبیقی پیدا نشد.</div>';
     var formClosedRow = null;
     for (var ci = 0; ci < dailyRows.length; ci++) {
-      if (String(dailyRows[ci].date) === String(formDateIso) && String(dailyRows[ci].meal_type) === String(formMeal) && dailyRows[ci].status === 'closed') { formClosedRow = dailyRows[ci]; break; }
+      if (String(dailyRows[ci].date) === String(formDateIso) && String(dailyRows[ci].meal_type) === String(formMeal) && dailyRows[ci].status === 'closed' && state.reconciliation && state.reconciliation.invoice_finalized) { formClosedRow = dailyRows[ci]; break; }
     }
     var dailyForm = canMenuEdit
       ? (formClosedRow
@@ -1119,19 +1124,29 @@
         + '<form id="fm-invoice-form" class="fm-reconciliation-form" enctype="multipart/form-data"><label class="fm-field">ماه شمسی فاکتور<input type="text" name="invoice_month" data-jalali-month inputmode="numeric" placeholder="۱۴۰۵/۰۷" value="' + esc(faDigits(invoiceMonthValue)) + '" required></label>'
         + '<label class="fm-field">تاریخ فاکتور (شمسی)<input type="text" name="invoice_date" data-jalali inputmode="numeric" placeholder="۱۴۰۵/۰۷/۳۰" value="' + esc(faDigits(invoiceDateInput)) + '" required></label>'
         + '<label class="fm-field">پیمانکار<input type="text" name="supplier_name" maxlength="190" value="' + esc(invoiceDraft.supplier_name || '') + '" required></label><label class="fm-field">شمارهٔ فاکتور<input type="text" name="invoice_number" maxlength="100" value="' + esc(invoiceDraft.invoice_number || '') + '" required></label>'
-        + '<label class="fm-field">تعداد پرس فاکتور<input type="number" name="portion_count" min="1" max="1000000" step="1" inputmode="numeric" value="' + esc(invoiceDraft.portion_count || '') + '" required></label><label class="fm-field">مبلغ (تومان، اختیاری)<input type="text" name="amount_toman" inputmode="numeric" value="' + esc(faDigits(invoiceDraft.amount_toman || '')) + '"></label>'
+        + '<label class="fm-field">تعداد پرس فاکتور<input type="number" name="portion_count" min="1" max="1000000" step="1" inputmode="numeric" value="' + esc(invoiceDraft.portion_count || '') + '" required></label><label class="fm-field">مبلغ کل فاکتور با احتساب مالیات (ریال)<input type="text" name="amount_irr" inputmode="numeric" required value="' + esc(faDigits(invoiceDraft.amount_irr || '')) + '"></label>'
         + '<label class="fm-field fm-field-wide">فایل فاکتور<input type="file" name="file" accept=".pdf,.jpg,.jpeg,.png,.xls,.xlsx,application/pdf,image/jpeg,image/png" required></label>'
         + '<div class="fm-form-actions"><button class="btn primary" type="submit"' + (state.invoiceUploading ? ' disabled' : '') + '>ثبت فاکتور و بارگذاری امن</button></div></form></section>'
       : '';
-    var invoiceTable = invoiceRows.length ? '<div class="fm-table-wrap"><table class="fm-rows"><thead><tr><th>ماه</th><th>تاریخ</th><th>پیمانکار</th><th>شمارهٔ فاکتور</th><th>پرس</th><th>مبلغ (تومان)</th><th>فایل</th></tr></thead><tbody>'
+    var invoiceTable = invoiceRows.length ? '<div class="fm-table-wrap"><table class="fm-rows"><thead><tr><th>ماه</th><th>تاریخ</th><th>پیمانکار</th><th>شمارهٔ فاکتور</th><th>پرس</th><th>مبلغ (ریال)</th><th>فایل</th></tr></thead><tbody>'
       + invoiceRows.map(function (invoice) {
-        return '<tr><td>' + esc(faDigits(month)) + '</td><td>' + esc(faDigits(jalaliFromIso(invoice.invoice_date) || invoice.invoice_date || '—')) + '</td><td>' + esc(invoice.supplier_name || '—') + '</td><td>' + esc(invoice.invoice_number || '—') + '</td><td>' + reconciliationNumber(invoice.portion_count) + '</td><td>' + reconciliationAmount(invoice.amount_toman) + '</td><td><a class="btn secondary" href="' + esc(buildUrl('food-menu/invoice-file', { id: invoice.id })) + '" target="_blank" rel="noopener">دریافت امن · ' + esc(invoice.original_name || 'فاکتور') + '</a></td></tr>';
+        return '<tr><td>' + esc(faDigits(month)) + '</td><td>' + esc(faDigits(jalaliFromIso(invoice.invoice_date) || invoice.invoice_date || '—')) + '</td><td>' + esc(invoice.supplier_name || '—') + '</td><td>' + esc(invoice.invoice_number || '—') + '</td><td>' + reconciliationNumber(invoice.portion_count) + '</td><td>' + reconciliationAmount(invoice.amount_irr) + '</td><td><a class="btn secondary" href="' + esc(buildUrl('food-menu/invoice-file', { id: invoice.id })) + '" target="_blank" rel="noopener">دریافت امن · ' + esc(invoice.original_name || 'فاکتور') + '</a></td></tr>';
       }).join('') + '</tbody></table></div>' : '<div class="fm-empty">برای این ماه فاکتوری ثبت نشده است.</div>';
     var loading = state.reconciliationLoading ? '<div class="fm-spinner">در حال دریافت گزارش تطبیق…</div>' : '';
     var errors = !state.reconciliationLoaded && !state.reconciliationLoading ? '<div class="fm-empty">برای دریافت گزارش، بازهٔ تاریخ و ماه را انتخاب کنید.</div>' : '';
     return '<section class="fm-card fm-reconciliation-report"><div class="fm-toolbar"><div><h3>تطبیق سفارش، خرید و توزیع غذا</h3><span class="fm-small">تقاضای کل = سفارش فعال پرسنل + درخواست فعال مهمان (نفرات)؛ لغوشده‌ها جدا هستند و وارد این جمع نمی‌شوند. کسری/اضافهٔ سفارش روی همین تقاضای کل است.</span></div><button class="btn secondary" type="button" data-fm-action="reconciliation-export"' + (!state.reconciliationLoaded || state.reconciliationLoading ? ' disabled' : '') + '>خروجی Excel</button></div>'
       + '<form id="fm-reconciliation-filter" class="fm-order-date"><label class="fm-field">از تاریخ شمسی<input type="text" name="from" data-jalali inputmode="numeric" placeholder="۱۴۰۵/۰۷/۰۱" value="' + esc(faDigits(from)) + '" required></label><label class="fm-field">تا تاریخ شمسی<input type="text" name="to" data-jalali inputmode="numeric" placeholder="۱۴۰۵/۰۷/۳۰" value="' + esc(faDigits(to)) + '" required></label><label class="fm-field">ماه فاکتور (شمسی)<input type="text" name="month" data-jalali-month inputmode="numeric" placeholder="۱۴۰۵/۰۷" value="' + esc(faDigits(month)) + '" required></label><label class="fm-field">وعده<select name="meal_type"><option value="all"' + (state.reconciliationMealType === 'all' ? ' selected' : '') + '>همه</option><option value="lunch"' + (state.reconciliationMealType === 'lunch' ? ' selected' : '') + '>ناهار</option><option value="dinner"' + (state.reconciliationMealType === 'dinner' ? ' selected' : '') + '>شام</option></select></label><button class="btn primary" type="submit">نمایش گزارش</button></form>'
-      + loading + errors + (state.reconciliationLoaded ? invoiceSummary + '<div class="fm-alert">«پرس فاکتور ماهانه» و «جمع تحویل روزانه» دو عدد مستقل‌اند؛ فقط اختلافشان گزارش می‌شود و هرگز با هم جمع نمی‌شوند. «پرس سفارش/تحویل پیمانکار» در این جدول یک عدد واحد است (در ۹۹٫۹٪ موارد سفارش و تحویل برابرند).</div><section class="fm-section-gap"><h3>تطبیق روزانه</h3>' + dailyTable + '</section>' + dailyForm + '<section class="fm-section-gap"><h3>فاکتورهای ماه ' + esc(faDigits(month)) + '</h3>' + invoiceTable + '</section>' + invoiceForm + renderGuestActualModal() + renderLeftoverModal() : '') + '</section>';
+      + loading + errors + (state.reconciliationLoaded ? invoiceSummary + monthlyPriceTable + '<div class="fm-alert">«پرس فاکتور ماهانه» و «جمع تحویل روزانه» دو عدد مستقل‌اند؛ فقط اختلافشان گزارش می‌شود و هرگز با هم جمع نمی‌شوند. «پرس سفارش/تحویل پیمانکار» در این جدول یک عدد واحد است (در ۹۹٫۹٪ موارد سفارش و تحویل برابرند).</div><section class="fm-section-gap"><h3>تطبیق روزانه</h3>' + dailyTable + '</section>' + dailyForm + '<section class="fm-section-gap"><h3>فاکتورهای ماه ' + esc(faDigits(month)) + '</h3>' + invoiceTable + '</section>' + invoiceForm + renderGuestActualModal() + renderLeftoverModal() : '') + renderInvoicePriceModal() + '</section>';
+  }
+
+  function renderInvoicePriceModal() {
+    var m=state.invoicePriceModal; if(!m) return '';
+    var rows=(m.foods||[]).map(function(food){
+      var prior=(state.invoicePending&&state.invoicePending.prices||[]).find(function(x){return Number(x.food_id)===Number(food.food_id);}); var value=prior?String(prior.price_irr):(food.price_irr==null?'':String(food.price_irr));
+      var status=food.price_status==='final'?'قیمت قطعی همین ماه':(food.price_status==='estimated'?'پیش‌فرض موقت از ماه قبل':'بدون سابقهٔ قیمت؛ ورود الزامی');
+      return '<label class="fm-field fm-field-wide">'+esc(food.food_name)+'<input type="text" inputmode="numeric" name="price_'+Number(food.food_id)+'" value="'+esc(value)+'" required><small class="fm-small">'+esc(status)+(food.price_status==='estimated'?' · تا نهایی‌شدن فاکتور برآوردی است':'')+'</small></label>';
+    }).join('');
+    return '<div class="fm-leftover-backdrop" data-fm-action="invoice-price-backdrop"><section class="fm-leftover-modal" role="dialog" aria-modal="true" aria-labelledby="fm-price-title"><header><h3 id="fm-price-title">قیمت قطعی غذاهای ماه '+esc(faDigits(m.monthLabel))+'</h3><p>هر غذا یک نرخ دارد و برای ناهار و شام یکسان است. قیمت‌های ماه قبل فقط تا نهایی‌شدن این فاکتور برآوردی هستند.</p></header><form id="fm-invoice-prices-form" class="fm-leftover-modal-body"><div class="fm-reconciliation-form">'+(rows||'<p class="fm-empty">برای این ماه غذای ثبت‌شده‌ای در برنامه وجود ندارد.</p>')+'</div><footer><button type="button" class="btn secondary" data-fm-action="invoice-price-cancel">انصراف</button><button type="submit" class="btn primary">نهایی‌کردن فاکتور و قیمت‌ها</button></footer></form></section></div>';
   }
 
   function renderGuestActualModal() {
@@ -1205,7 +1220,7 @@
       render();
       return;
     }
-    if (fresh && fresh.status === 'closed') {
+    if (fresh && fresh.month_finalized) {
       state.guestActualModal = null;
       state.error = 'این روز بسته شده است؛ هرگونه تغییر در روز/وعدهٔ بسته‌شده مسدود است.';
       render();
@@ -1214,8 +1229,9 @@
     var servedTotal = Number((fresh && fresh.served_total) || 0);
     var remaining = Number(portionQuantity) - servedTotal;
     if (isFinite(remaining) && remaining >= 1) {
-      state.leftoverModal = { food_date: foodDate, meal_type: meal, remaining: remaining, body: body };
+      state.leftoverModal = { food_date: foodDate, meal_type: meal, remaining: remaining, body: body, people: [], peopleLoading: true };
       render();
+      request('food-menu/reconciliation-employees', {}).then(function(result){ if(state.leftoverModal&&state.leftoverModal.food_date===foodDate){state.leftoverModal.people=result.items||[];state.leftoverModal.peopleLoading=false;render();} }).catch(function(){if(state.leftoverModal){state.leftoverModal.peopleLoading=false;state.leftoverModal.people=[];render();}});
       return;
     }
     await postReconciliation(body);
@@ -1275,7 +1291,9 @@
       + '<header><h3 id="fm-leftover-title">تعیین تکلیف غذای باقیمانده</h3><p>امروز برابر با «' + faDigits(remaining) + '» عدد غذا باقیمانده · ' + esc(dateJalali) + ' · ' + esc(mealLabel) + '</p></header>'
       + '<div class="fm-leftover-modal-body" id="fm-leftover-form">'
       + '<p class="fm-leftover-hint">سرنوشت غذاهای باقیمانده را مشخص کنید؛ می‌توانید چند گزینه را هم‌زمان انتخاب کنید. مجموع تعدادها باید <b>دقیقاً برابر</b> با «' + faDigits(remaining) + '» پرس باشد — نه بیشتر، نه کمتر.</p>'
-      + row('staff', 'توزیع بین پرسنل همین شرکت')
+      + '<div class="fm-leftover-row fm-leftover-staff"><label class="fm-leftover-check"><input type="checkbox" name="opt_staff" data-leftover-opt="staff"><b>توزیع بین پرسنل همین شرکت</b></label><strong>تعداد انتخاب‌شده: <span data-leftover-staff-total>۰</span></strong></div>'
+      + '<div class="fm-leftover-people"><label class="fm-field">جستجوی پرسنل<input type="search" data-leftover-people-search placeholder="نام یا کد پرسنلی" autocomplete="off"></label>'
+      + (m.peopleLoading ? '<div class="fm-small">در حال دریافت فهرست پرسنل…</div>' : (m.people||[]).map(function(person){return '<div class="fm-leftover-person" data-leftover-person-row><label><input type="checkbox" data-leftover-person-id="'+Number(person.id)+'"><span>'+esc(person.name||'')+'</span><small>'+esc(faDigits(person.employee_number||''))+'</small></label><div class="fm-leftover-person-qty"><button type="button" data-fm-action="leftover-person-step" data-leftover-person-step="-1" data-employee-id="'+Number(person.id)+'" aria-label="کاهش">−</button><input type="number" min="1" step="1" value="1" data-leftover-person-qty="'+Number(person.id)+'" disabled><button type="button" data-fm-action="leftover-person-step" data-leftover-person-step="1" data-employee-id="'+Number(person.id)+'" aria-label="افزایش">+</button></div></div>';}).join('') || '<div class="fm-empty">فهرست پرسنل در دسترس نیست.</div>')+'</div>'
       + row('waste', 'دورریز (ضایعات)')
       + row('keep', 'نگه‌داری برای وعدهٔ بعد')
       + row('other', 'سایر')
@@ -1304,7 +1322,7 @@
       else { state.error = 'شمارش تازهٔ باقیمانده از سرور دریافت نشد.'; }
       return;
     }
-    if (fresh && fresh.status === 'closed') {
+    if (fresh && fresh.month_finalized) {
       state.leftoverModal = null;
       state.error = 'این روز بسته شده است؛ هرگونه تغییر در روز/وعدهٔ بسته‌شده مسدود است.';
       render();
@@ -1336,17 +1354,22 @@
     for (var key in labels) {
       var box = form.querySelector('[data-leftover-opt="' + key + '"]');
       if (!box || !box.checked) continue;
+      if (key === 'staff') {
+        var selectedTotal=0; form.querySelectorAll('[data-leftover-person-id]:checked').forEach(function(ch){var pid=Number(ch.getAttribute('data-leftover-person-id'));var q=form.querySelector('[data-leftover-person-qty="'+pid+'"]');selectedTotal+=Number(asciiDigits(q&&q.value||'1'))||0;});
+        if(selectedTotal<1){leftoverInlineError('برای توزیع بین پرسنل، دست‌کم یک نفر را انتخاب کنید.');return;}
+        counts.staff=selectedTotal; sum+=selectedTotal; continue;
+      }
       var input = form.querySelector('[data-leftover-count="' + key + '"]');
       var raw = asciiDigits(input && input.value ? input.value : '').replace(/[,٬، ]/g, '').trim();
-      if (raw === '' || !/^\d+$/.test(raw) || Number(raw) < 1) {
-        leftoverInlineError('برای «' + labels[key] + '» تعداد معتبر (حداقل ۱) وارد کنید.');
-        return;
-      }
-      counts[key] = Number(raw);
-      sum += counts[key];
+      if (raw === '' || !/^\d+$/.test(raw) || Number(raw) < 1) { leftoverInlineError('برای «' + labels[key] + '» تعداد معتبر (حداقل ۱) وارد کنید.'); return; }
+      counts[key] = Number(raw); sum += counts[key];
     }
     if (sum === 0) { leftoverInlineError('حداقل یک گزینه را تیک بزنید و تعداد را وارد کنید.'); return; }
     if (sum !== remaining) { leftoverInlineError('مجموع تعیین تکلیف (' + faDigits(sum) + ' پرس) باید دقیقاً برابر با ماندهٔ امروز (' + faDigits(remaining) + ' پرس) باشد.'); return; }
+    var allocations=[]; var allocationTotal=0;
+    form.querySelectorAll('[data-leftover-person-id]:checked').forEach(function(check){var id=Number(check.getAttribute('data-leftover-person-id'));var qty=form.querySelector('[data-leftover-person-qty="'+id+'"]');var n=Number(asciiDigits(qty&&qty.value||'1'));if(!isFinite(n)||n<1||Math.floor(n)!==n){allocationTotal=-1;return;}allocations.push({employee_id:id,quantity:n});allocationTotal+=n;});
+    if(counts.staff>0 && allocationTotal!==counts.staff){leftoverInlineError('مجموع تعداد افراد انتخاب‌شده ('+faDigits(allocationTotal)+') باید برابر مقدار توزیع بین پرسنل باشد.');return;}
+    if(counts.staff===0 && allocationTotal>0){leftoverInlineError('برای تخصیص پرسنل، گزینهٔ توزیع بین پرسنل را انتخاب کنید.');return;}
     var otherNote = String((form.querySelector('[name="leftover_other_note"]') || {}).value || '').trim();
     var merged = {
       food_date: m.body.food_date, meal_type: m.body.meal_type, action: m.body.action,
@@ -1355,6 +1378,7 @@
       leftover_staff_quantity: counts.staff, leftover_waste_quantity: counts.waste,
       leftover_keep_quantity: counts.keep, leftover_other_quantity: counts.other,
       leftover_other_note: otherNote,
+      leftover_allocations: allocations,
     };
     var confirmButton = root.querySelector('[data-fm-action="leftover-confirm"]');
     if (confirmButton) { confirmButton.disabled = true; confirmButton.textContent = 'در حال ثبت…'; }
@@ -1489,7 +1513,7 @@
         render();
         return;
       }
-      if (guestsReport && guestsReport.status === 'closed') {
+      if (guestsReport && guestsReport.month_finalized) {
         state.error = 'این روز بسته شده است؛ هرگونه تغییر در روز/وعدهٔ بسته‌شده مسدود است.';
         render();
         return;
@@ -1511,22 +1535,40 @@
     await postReconciliation(body);
   }
 
-  async function uploadReconciliationInvoice(form) {
+  async function uploadReconciliationInvoice(form, priceList) {
     if (!canMenuEdit || state.invoiceUploading) return;
+    if (!priceList) {
+      var initial = new FormData(form);
+      var selectedFile = form.elements.file && form.elements.file.files && form.elements.file.files[0];
+      var invoiceMonth = normalizeJalaliMonth(initial.get('invoice_month'));
+      if (!invoiceMonth) { state.error='ماه شمسی فاکتور را به‌شکل سال/ماه وارد کنید.'; render(); return; }
+      if (!selectedFile) { state.error='فایل فاکتور را انتخاب کنید.'; render(); return; }
+      if (!String(initial.get('amount_irr')||'').trim() || !String(initial.get('supplier_name')||'').trim() || !String(initial.get('invoice_number')||'').trim() || !String(initial.get('portion_count')||'').trim() || !normalizeIsoDate(initial.get('invoice_date'))) { state.error='همهٔ فیلدهای فاکتور را کامل و معتبر کنید.'; return; }
+      state.invoicePending={month:invoiceMonth, form:{invoice_month:invoiceMonth,invoice_date:String(initial.get('invoice_date')||''),supplier_name:String(initial.get('supplier_name')||''),invoice_number:String(initial.get('invoice_number')||''),portion_count:String(initial.get('portion_count')||''),amount_irr:String(initial.get('amount_irr')||'')},file:selectedFile};
+      state.invoiceDraft=state.invoicePending.form;
+      if(normalizeJalaliMonth(state.reconciliation&&state.reconciliation.month)!==invoiceMonth){
+        state.error=''; await loadReconciliation(state.reconciliationFrom,state.reconciliationTo,state.reconciliationMealType,invoiceMonth);
+        if(!state.reconciliationLoaded){state.error='فهرست غذاهای ماه فاکتور دریافت نشد؛ گزارش ماه را بررسی و دوباره تلاش کنید.';safeReportRender();return;}
+      }
+      var foods=(state.reconciliation&&state.reconciliation.price_foods)||[];
+      state.invoicePriceModal={monthLabel:invoiceMonth,foods:foods}; state.error=''; render(); return;
+    }
     var data = new FormData(form);
-    var invoiceMonthRaw = String(data.get('invoice_month') || '');
+    var invoiceMonthRaw = String(data.get('invoice_month') || (state.invoicePending&&state.invoicePending.month) || '');
+    if(state.invoicePending){ Object.keys(state.invoicePending.form).forEach(function(k){data.set(k,state.invoicePending.form[k]);}); data.set('file',state.invoicePending.file); }
+    data.set('prices_json',JSON.stringify(priceList));
     var invoiceDateRaw = String(data.get('invoice_date') || '');
     var month = normalizeJalaliMonth(invoiceMonthRaw);
     var invoiceDate = normalizeIsoDate(invoiceDateRaw);
     state.invoiceDraft = {
       invoice_month: invoiceMonthRaw, invoice_date: invoiceDateRaw,
       supplier_name: String(data.get('supplier_name') || ''), invoice_number: String(data.get('invoice_number') || ''),
-      portion_count: String(data.get('portion_count') || ''), amount_toman: String(data.get('amount_toman') || ''),
+      portion_count: String(data.get('portion_count') || ''), amount_irr: String(data.get('amount_irr') || ''),
     };
     if (!month) { state.error = 'ماه شمسی فاکتور را به‌شکل سال/ماه وارد کنید.'; render(); return; }
     state.reconciliationMonth = month;
     if (!invoiceDate) { state.error = 'تاریخ فاکتور را به‌درستی انتخاب کنید.'; render(); return; }
-    if (!form.elements.file || !form.elements.file.files || !form.elements.file.files.length) { state.error = 'فایل فاکتور را انتخاب کنید.'; render(); return; }
+    if ((!form.elements.file || !form.elements.file.files || !form.elements.file.files.length) && !(state.invoicePending && state.invoicePending.file)) { state.error = 'فایل فاکتور را انتخاب کنید.'; render(); return; }
     data.set('invoice_month', month);
     data.set('invoice_date', invoiceDate);
     state.invoiceUploading = true;
@@ -1537,10 +1579,12 @@
       var result = await request('food-menu/invoice-upload', null, { method: 'POST', body: data });
       state.notice = result.message || 'فاکتور ماهانه ثبت شد.';
       state.reconciliationMonth = month;
-      state.invoiceDraft = { invoice_month: month, invoice_date: '', supplier_name: '', invoice_number: '', portion_count: '', amount_toman: '' };
+      state.invoiceDraft = { invoice_month: month, invoice_date: '', supplier_name: '', invoice_number: '', portion_count: '', amount_irr: '' };
+      state.invoicePending=null; state.invoicePriceModal=null;
       form.reset();
       await loadReconciliation(state.reconciliationFrom, state.reconciliationTo, state.reconciliationMealType, month);
     } catch (error) {
+      if(state.invoicePending){state.invoicePending.prices=priceList;state.invoicePriceModal={monthLabel:state.invoicePending.month,foods:(state.reconciliation&&state.reconciliation.price_foods)||[]};}
       state.error = error.message || 'بارگذاری فاکتور انجام نشد.';
     } finally {
       state.invoiceUploading = false;
@@ -2518,6 +2562,8 @@
     em.orders = payload.items || [];
   }
   function daySearchInput(event) {
+    var leftoverSearch=event.target.closest&&event.target.closest('[data-leftover-people-search]');
+    if(leftoverSearch){var query=String(leftoverSearch.value||'').toLowerCase();(root.querySelectorAll('[data-leftover-person-row]')||[]).forEach(function(row){row.hidden=row.textContent.toLowerCase().indexOf(query)<0;});return;}
     var reportEmployeeSearch = event.target.closest && event.target.closest('[data-stat-employee-search]');
     if (reportEmployeeSearch) {
       state.reportEmployeeQuery = String(reportEmployeeSearch.value || '');
@@ -2737,7 +2783,9 @@
       }
       if (act === 'delivered-report-export') exportPrintedDeliveryReport();
       if (act === 'delivered-report-print') printPrintedDeliveryReport();
-      if (act === 'leftover-cancel' || act === 'leftover-backdrop') { if (act === 'leftover-backdrop' && event.target !== action) return; state.leftoverModal = null; state.error = ''; render(); return; }
+      if (act === 'leftover-person-step') { var eid=Number(action.dataset.employeeId||0); var q=root.querySelector('[data-leftover-person-qty="'+eid+'"]'); if(q){q.value=String(Math.max(1,Number(q.value||1)+Number(action.dataset.leftoverPersonStep||0)));} return; }
+      if (act === 'invoice-price-cancel' || act === 'invoice-price-backdrop') { if(act==='invoice-price-backdrop'&&event.target!==action)return; state.invoicePriceModal=null; state.invoicePending=null; state.error=''; render(); return; }
+            if (act === 'leftover-cancel' || act === 'leftover-backdrop') { if (act === 'leftover-backdrop' && event.target !== action) return; state.leftoverModal = null; state.error = ''; render(); return; }
       if (act === 'guest-actual-cancel' || act === 'guest-actual-backdrop') { if (act === 'guest-actual-backdrop' && event.target !== action) return; state.guestActualModal = null; state.error = ''; render(); return; }
       if (act === 'guest-actual-confirm') { confirmGuestActualModal(); return; }
       if (act === 'leftover-confirm') { confirmLeftoverModal(); return; }
@@ -2788,6 +2836,7 @@
 
   function eventChange(event) {
     var input = event.target;
+    if(input&&input.matches&&input.matches('[data-leftover-person-id]')){var eid=Number(input.getAttribute('data-leftover-person-id'));var qty=root.querySelector('[data-leftover-person-qty="'+eid+'"]');if(qty)qty.disabled=!input.checked;var staffOpt=root.querySelector('[data-leftover-opt="staff"]');if(staffOpt)staffOpt.checked=Array.from(root.querySelectorAll('[data-leftover-person-id]:checked')).length>0;}
     if (input && input.matches && input.matches('[data-leftover-opt]')) {
       var leftoverKey = input.dataset.leftoverOpt || '';
       var leftoverTarget = root && root.querySelector('[data-leftover-count="' + leftoverKey + '"]');
@@ -2901,9 +2950,17 @@
       var recAction = event.submitter && event.submitter.dataset.reconciliationAction === 'close' ? 'close' : 'order';
       saveReconciliationForm(form, recAction); return;
     }
-    if (form.id === 'fm-invoice-form') {
-      event.preventDefault(); uploadReconciliationInvoice(form); return;
+    if (form.id === 'fm-invoice-prices-form') {
+      event.preventDefault();
+      var entries=[]; var foods=(state.invoicePriceModal&&state.invoicePriceModal.foods)||[]; var missing=false;
+      foods.forEach(function(food){var input=form.elements['price_'+Number(food.food_id)]; if(!input||!String(input.value||'').trim()||Number(asciiDigits(input.value))<=0){missing=true;return;} entries.push({food_id:Number(food.food_id),price_irr:String(input.value)});});
+      if(missing){state.error='قیمت ریالی همهٔ غذاها را وارد کنید؛ غذای بدون سابقهٔ قیمت نمی‌تواند صفر بماند.';safeReportRender();return;}
+      var pending=state.invoicePending; if(pending)pending.prices=entries; state.invoicePriceModal=null; render();
+      var invoiceForm=root.querySelector('#fm-invoice-form');
+      if(pending&&invoiceForm) uploadReconciliationInvoice(invoiceForm,entries);
+      return;
     }
+    if (form.id === 'fm-invoice-form') { event.preventDefault(); uploadReconciliationInvoice(form); return; }
     if (form.id === 'fm-delivery-date') {
       event.preventDefault();
       var picked = normalizeIsoDate(new FormData(form).get('date'));

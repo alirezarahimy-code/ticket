@@ -34,7 +34,7 @@ A(html.includes('alr-chips'), 'چیپهای صفحهٔ غایبین');
 
 // سه تب و فیلدها
 A(['فهرست یکجا','بر اساس معاونت','تفکیک و جزئیات'].every(t => bundle.includes(t)), 'نام سه زیرنما');
-A(bundle.includes("detail:['row','pc','first','last','dep','food','jal','status']"), 'فیلدهای تفکیک و جزئیات');
+A(bundle.includes("detail:['row','pc','first','last','dep','food','jal','status','amount','priceState']"), 'فیلدهای تفکیک و جزئیات');
 A(bundle.includes("flat:['row','pc','first','last','dep','count','jal','status']"), 'تاریخ غیبت در فهرست یکجا');
 A(bundle.includes("dept:['row','pc','first','last','dep','count','status']"), 'تعداد غیبت در بر اساس معاونت');
 A(!bundle.includes("label:'وعده'"), 'ستون وعده حذف شده');

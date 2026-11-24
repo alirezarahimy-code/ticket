@@ -121,7 +121,7 @@ function food_order_internal_items(string $fromDate, ?string $toDate = null): ar
     if ($from === null || $to === null || new DateTimeImmutable($from, new DateTimeZone('UTC')) > new DateTimeImmutable($to, new DateTimeZone('UTC'))) {
         throw new RuntimeException('بازهٔ تاریخ سفارش داخلی معتبر نیست.');
     }
-    $stmt = db()->prepare("SELECT o.employee_id, o.food_date, o.created_at, u.employee_number, u.national_code,
+    $stmt = db()->prepare("SELECT o.employee_id, o.food_date, o.created_at, i.food_id, u.employee_number, u.national_code,
             u.first_name, u.last_name, u.full_name, c.food_name
         FROM food_orders o
         JOIN users u ON u.id = o.employee_id
@@ -147,6 +147,7 @@ function food_order_internal_items(string $fromDate, ?string $toDate = null): ar
             'first' => $first,
             'last' => $last,
             'food' => (string) ($row['food_name'] ?? ''),
+            'foodId' => (int) ($row['food_id'] ?? 0),
             'foodDate' => $isoDate,
             'rawDate' => $isoDate,
             'reserveDate' => substr($created, 0, 10),

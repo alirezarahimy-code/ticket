@@ -86,7 +86,7 @@ label.field .browse-btn{max-width:100%}
 <style>.settings-shell{display:grid;grid-template-columns:220px minmax(0,1fr);gap:18px;align-items:start}.settings-tabs{display:flex;flex-direction:column;gap:7px;padding:10px;background:#fff;border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow)}.settings-tab{padding:11px 13px;border-radius:9px;background:transparent;color:var(--ink);text-align:right;font-weight:700}.settings-tab:hover,.settings-tab.active{background:var(--teal2);color:var(--teal)}.settings-subtab{margin-right:10px;padding-right:22px;border-right:2px solid var(--teal2);font-size:13px}.settings-parent{color:var(--muted);cursor:default;padding-bottom:2px}.settings-content{min-width:0}@media(max-width:900px){.settings-shell{grid-template-columns:1fr}.settings-tabs{flex-direction:row;overflow:auto}.settings-tab{white-space:nowrap}.settings-subtab{margin-right:0}}</style>
 <link rel="stylesheet" href="assets/food-ticket-theme.css?v=11">
 <link rel="stylesheet" href="assets/food-order.css?v=16">
-<link rel="stylesheet" href="assets/food-menu.css?v=1.63.3">
+<link rel="stylesheet" href="assets/food-menu.css?v=1.63.4">
 <link rel="stylesheet" href="assets/food-capitalio-dashboard-r42.css?v=1.62.2-dashboard-fix">
 <link rel="stylesheet" href="assets/food-ticket-global-theme-r42.css?v=45">
 <script defer src="assets/food-capitalio-dashboard-r42.js?v=1.62.2-dashboard-fix"></script>
@@ -1141,7 +1141,7 @@ if(serviceMode){
 <script src="assets/fa-digits.js?v=1"></script>
 <script src="assets/food-order-calendar.js?v=1"></script>
 <script src="assets/list-sort.js?v=2"></script><script src="assets/food-org-groups.js?v=1.63.3"></script>
-<script src="assets/food-menu.js?v=1.63.3"></script><script>
+<script src="assets/food-menu.js?v=1.63.4"></script><script>
 document.addEventListener('change',function(e){if(!e.target||e.target.name!=='guest-cap-mode')return;const chosen=e.target.value;if(guestCapSaving){e.target.checked=false;document.querySelectorAll('input[name="guest-cap-mode"]').forEach(r=>{r.checked=r.value===state.guests.capMode});return}const box=document.getElementById('guest-cap-live');const notice=document.getElementById('guest-cap-save-status');const previous=(box&&box.dataset.savedMode)||'';guestCapRevision++;state.guests.capMode=chosen;guestCapModeDirty=chosen!==previous;if(notice){notice.hidden=!guestCapModeDirty;notice.textContent='در حال ذخیرهٔ حالت سقف…'}if(!serviceMode){persist();return}if(!guestCapModeDirty)return;guestCapSaving=true;document.querySelectorAll('[data-action="save-guests"]').forEach(b=>b.disabled=true);const radios=Array.from(document.querySelectorAll('input[name="guest-cap-mode"]'));radios.forEach(r=>r.disabled=true);api('/api/guest-cap',{method:'POST',body:JSON.stringify({mode:chosen})}).then(x=>{if(!x||x.mode!==chosen)throw new Error('حالت سقف تأیید نشد.');return loadGuestCap()}).then(x=>{if(!x||x.mode!==chosen)throw new Error('خواندن مجدد حالت سقف ناموفق بود.');guestCapModeDirty=false;state.guests.capMode=chosen;persist();const n=document.getElementById('guest-cap-save-status');if(n)n.hidden=true;toast(chosen==='requested'?'سقف بر اساس مجموع درخواست‌های فعال ذخیره شد.':'سقف کنترل تردد ذخیره شد.')}).catch(err=>{guestCapModeDirty=true;document.querySelectorAll('input[name="guest-cap-mode"]').forEach(r=>r.checked=false);const n=document.getElementById('guest-cap-save-status');if(n){n.hidden=false;n.textContent='ذخیره یا خواندن مجدد حالت سقف تأیید نشد؛ دوباره تلاش کنید.'}toast(err.message||'ذخیرهٔ حالت سقف تأیید نشد.')}).finally(()=>{guestCapSaving=false;document.querySelectorAll('input[name="guest-cap-mode"]').forEach(r=>r.disabled=false);document.querySelectorAll('[data-action="save-guests"]').forEach(b=>b.disabled=false)});});
 setInterval(function(){var box=document.getElementById('guest-cap-live');if(box&&box.style.display!=='none'&&typeof loadGuestCap==='function')loadGuestCap();},60000);
 </script>
@@ -1151,8 +1151,8 @@ setInterval(function(){var box=document.getElementById('guest-cap-live');if(box&
 (function(){
 'use strict';
 var FIELDS=[{key:'row',label:'ردیف'},{key:'pc',label:'کد پرسنلی'},{key:'first',label:'نام'},{key:'last',label:'نام خانوادگی'},
- {key:'dep',label:'معاونت'},{key:'count',label:'تعداد غیبت'},{key:'food',label:'نوع غذا'},{key:'jal',label:'تاریخ غیبت'},{key:'status',label:'وضعیت غیبت'}];
-var TAB_FIELDS={flat:['row','pc','first','last','dep','count','jal','status'],dept:['row','pc','first','last','dep','count','status'],detail:['row','pc','first','last','dep','food','jal','status']};
+ {key:'dep',label:'معاونت'},{key:'count',label:'تعداد غیبت'},{key:'food',label:'نوع غذا'},{key:'jal',label:'تاریخ غیبت'},{key:'status',label:'وضعیت غیبت'},{key:'amount',label:'مبلغ برآوردی (ریال)'},{key:'priceState',label:'وضعیت قیمت'}];
+var TAB_FIELDS={flat:['row','pc','first','last','dep','count','jal','status'],dept:['row','pc','first','last','dep','count','status'],detail:['row','pc','first','last','dep','food','jal','status','amount','priceState']};
 var FKEY='food-ticket-absent-fields-v2',BKEY='food-ticket-absent-blocks-v1';
 var PAL=['var(--teal)','var(--navy-2)','var(--gold)','var(--danger)','#4f91c6','#8a63c9','#d9812b'];
 var S={rows:[],key:'',seq:0,loading:false,error:'',tab:'detail',blocks:1,metric:'people',chart:true,query:'',deps:new Set(),
@@ -1183,7 +1183,7 @@ function mapped(items,orgMap){
  return (items||[]).map(function(it){
   var declared=!!it.declared_absent;
   var r={pc:String(it.pc||it.nat||'—'),nat:String(it.nat||''),first:String(it.first||''),last:String(it.last||''),
-   food:String(it.food||''),iso:String(it.foodDate||''),jal:jal(String(it.foodDate||'')),
+   food:String(it.food||''),iso:String(it.foodDate||''),jal:jal(String(it.foodDate||'')),amount:it.amount_irr==null?'—':fa(it.amount_irr),priceState:it.price_status==='final'?'قطعی':(it.price_status==='estimated'?'برآوردی':'قیمت ثبت نشده'),
    dep:'بدون معاونت سازمانی',deputy:'بدون معاونت سازمانی',declared:declared,
    status:declared?'غایب اعلامشده — فیش چاپ نشده':'غایب — سفارش دارد، فیش چاپ نشده',short:declared?'غایب اعلامشده':'غایب'};
   try{if(map&&window.FoodOrgGroups&&typeof window.FoodOrgGroups.groupOf==='function'){
