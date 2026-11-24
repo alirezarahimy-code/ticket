@@ -1,25 +1,24 @@
 <?php
 declare(strict_types=1);
 
-/** Offline map workspace; rendered inside the authenticated system shell. */
+/** Offline GIS workspace rendered inside the authenticated application shell. */
 $user = require_permission('map.view');
 require_once __DIR__ . '/../MapRepository.php';
 $mapRepo = new OfflineMapRepository(db());
 $schemaReady = $mapRepo->ready();
 $canManageFeatures = user_can($user, 'map.features.manage') || user_can($user, 'map.admin');
-$mapDataPath = __DIR__ . '/../data/iran.pmtiles';
-$mapStylePath = __DIR__ . '/../data/style.json';
+$dataDir = __DIR__ . '/../data';
+$mapDataPath = $dataDir . '/iran.pmtiles';
+$manifestPath = $dataDir . '/manifest.json';
+$mapStylePath = $dataDir . '/style.json';
+$manifest = is_file($manifestPath) ? json_decode((string) file_get_contents($manifestPath), true) : null;
 $styleJson = is_file($mapStylePath) ? json_decode((string) file_get_contents($mapStylePath), true) : null;
 $styleText = is_file($mapStylePath) ? (string) file_get_contents($mapStylePath) : '';
-$dataDir = __DIR__ . '/../data';
-$manifestPath = $dataDir . '/manifest.json';
-$manifest = is_file($manifestPath) ? json_decode((string) file_get_contents($manifestPath), true) : null;
 $manifestReady = is_array($manifest)
     && ($manifest['tiles']['file'] ?? '') === 'iran.pmtiles'
     && ($manifest['tiles']['format'] ?? '') === 'PMTiles'
     && (int) ($manifest['tiles']['bytes'] ?? 0) === (is_file($mapDataPath) ? (int) filesize($mapDataPath) : 0);
-$styleHasPmtiles = is_array($styleJson)
-    && preg_match('~pmtiles://[^"\\\\]+iran\\.pmtiles~i', $styleText) === 1;
+$styleHasPmtiles = is_array($styleJson) && preg_match('~pmtiles://[^"\\\\]*iran\\.pmtiles~i', $styleText) === 1;
 $styleIsOffline = is_array($styleJson)
     && !preg_match('~(?:https?:)?//|mapbox://~i', $styleText)
     && $styleHasPmtiles;
@@ -27,48 +26,105 @@ $mapLibraryPath = __DIR__ . '/../vendor/maplibre-gl.js';
 $pmtilesLibraryPath = __DIR__ . '/../vendor/pmtiles.js';
 $mapCssPath = __DIR__ . '/../vendor/maplibre-gl.css';
 $mapReady = is_file($mapDataPath) && $manifestReady && $styleIsOffline && is_file($mapLibraryPath) && is_file($pmtilesLibraryPath) && is_file($mapCssPath);
-$features = $schemaReady ? $mapRepo->search(trim((string) ($_GET['q'] ?? ''))) : [];
-render_header('نقشهٔ آفلاین ایران', $user);
+$searchReady = is_file($dataDir . '/search.sqlite');
+$features = $schemaReady ? $mapRepo->search(trim((string) ($_GET['q'] ?? '')), 1000) : [];
+render_header('سامانه اطلاعات مکانی آفلاین ایران', $user);
 ?>
-<link rel="stylesheet" href="modules/offline-map/Assets/offline-map.css?v=1">
+<link rel="stylesheet" href="modules/offline-map/Assets/offline-map.css?v=3">
 <?php if ($mapReady): ?><link rel="stylesheet" href="modules/offline-map/vendor/maplibre-gl.css"><?php endif; ?>
 <section class="page-heading offline-map-heading">
-  <div><span class="eyebrow">سامانهٔ اطلاعات مکانی</span><h1>نقشهٔ آفلاین ایران</h1><p>نمایش نقشهٔ پایه از بستهٔ محلی و نگهداری مستقل نقاط و اطلاعات ثبت‌شدهٔ سازمان.</p></div>
-  <a class="button secondary" href="index.php">بازگشت به داشبورد</a>
+  <div><span class="eyebrow">سامانه اطلاعات مکانی</span><h1>نقشهٔ آفلاین ایران</h1><p>نقشهٔ پایه، جست‌وجوی محلی و عوارض مکانی سازمان در یک محیط مستقل.</p></div>
+  <div class="offline-map-heading-actions"><span class="offline-map-status <?= $mapReady ? 'is-ready' : 'is-pending' ?>"><?= $mapReady ? 'بستهٔ پایه نصب شده' : 'بستهٔ پایه نصب نشده' ?></span><a class="button secondary" href="index.php">بازگشت</a></div>
 </section>
-<?php if (!$schemaReady): ?>
-<section class="card offline-map-notice"><h2>پایگاه‌دادهٔ ماژول آماده نیست</h2><p>ابتدا فایل <code>migrations/038-offline-map-features.sql</code> را روی نسخهٔ پشتیبان‌شدهٔ پایگاه‌داده اجرا کنید. این صفحه عمداً ساختار پایگاه‌داده را خودکار تغییر نمی‌دهد.</p></section>
-<?php endif; ?>
-<?php if (!$mapReady): ?>
-<section class="card offline-map-notice" role="status"><h2>بستهٔ نقشه هنوز نصب نشده است</h2><p>کتابخانهٔ محلی MapLibre، فایل سبک محلی و بستهٔ PMTiles ایران در مسیر <code>modules/offline-map/data/</code> نصب نشده‌اند. برای جلوگیری از وابستگی اینترنتی، نقشهٔ راه‌دور یا CDN بارگذاری نمی‌شود.</p><p class="muted">پس از آماده‌شدن بستهٔ داده، نقشهٔ پایه در همین بخش فعال می‌شود. ثبت نقاط سازمانی مستقل از بستهٔ نقشه باقی می‌ماند.</p></section>
-<?php endif; ?>
-<div class="offline-map-layout">
-  <section class="card offline-map-canvas" aria-label="محیط نقشه">
-    <div class="offline-map-canvas-inner"><div class="offline-map-compass">N</div><div id="offline-map-map" data-map-ready="<?= $mapReady ? '1' : '0' ?>" aria-label="نقشهٔ برداری آفلاین ایران"></div><?php if (!$mapReady): ?><div class="offline-map-empty"><span class="offline-map-globe">◎</span><strong>محیط نقشهٔ ایران</strong><span>در انتظار نصب داده‌های برداری آفلاین</span></div><?php endif; ?></div>
-    <div class="offline-map-legend"><span><i></i> نقاط ثبت‌شدهٔ سازمان</span><span>مختصات جغرافیایی WGS84</span></div>
-  </section>
-  <aside class="card offline-map-sidebar">
-    <?php if ($canManageFeatures): ?>
-    <h2>ثبت نقطهٔ جدید</h2>
-    <p class="muted">مختصات را به درجهٔ اعشاری وارد کنید. طول جغرافیایی بین ۴۴ تا ۶۴ و عرض جغرافیایی بین ۲۴ تا ۴۰ برای محدودهٔ تقریبی ایران پذیرفته می‌شود.</p>
-    <form id="offline-map-create" class="offline-map-form">
-      <input type="hidden" name="csrf" value="<?= e(csrf_token()) ?>">
-      <label>عنوان نقطه<input name="title" maxlength="190" required placeholder="مثلاً ساختمان مرکزی"></label>
-      <label>توضیحات<textarea name="description" rows="3" maxlength="4000" placeholder="اطلاعات تکمیلی"></textarea></label>
-      <div class="offline-map-coordinates"><label>طول جغرافیایی<input name="longitude" type="number" min="44" max="64" step="any" required placeholder="51.3890"></label><label>عرض جغرافیایی<input name="latitude" type="number" min="24" max="40" step="any" required placeholder="35.6892"></label></div>
-      <button class="button" type="submit" <?= $schemaReady ? '' : 'disabled' ?>>ثبت نقطه</button>
-      <p id="offline-map-feedback" class="muted" aria-live="polite"></p>
-    </form>
-    <?php else: ?><h2>نقشهٔ سازمانی</h2><p class="muted">دسترسی شما فقط مشاهدهٔ نقشه و نقاط ثبت‌شده است.</p><?php endif; ?>
-    <hr>
-    <form method="get" class="offline-map-search"><input type="hidden" name="page" value="offline-map"><label>جست‌وجوی نقاط ثبت‌شده<input name="q" value="<?= e((string) ($_GET['q'] ?? '')) ?>" placeholder="عنوان یا توضیحات"></label><button class="button secondary" type="submit">جست‌وجو</button></form>
+<?php if (!$schemaReady): ?><section class="card offline-map-notice"><h2>پایگاه‌دادهٔ ماژول آماده نیست</h2><p>مهاجرت <code>migrations/038-offline-map-features.sql</code> را روی نسخهٔ پشتیبان‌شده اجرا کنید.</p></section><?php endif; ?>
+<?php if (!$mapReady): ?><section class="card offline-map-notice" role="status"><h2>فایل‌های نقشهٔ پایه نصب نشده‌اند</h2><p>برای نمایش نقشه، PMTiles، manifest، استایل محلی، کتابخانه‌های MapLibre و PMTiles باید در مسیر <code>modules/offline-map/</code> نصب شوند. در حالت آفلاین هیچ سرویس اینترنتی جایگزین نمی‌شود.</p></section><?php endif; ?>
+<div class="offline-map-workspace">
+  <main class="offline-map-main card">
+    <div class="offline-map-toolbar" role="toolbar" aria-label="ابزارهای نقشه">
+      <div class="offline-map-tool-group">
+        <button type="button" class="button secondary map-tool is-active" data-tool="pan" title="حرکت و انتخاب">انتخاب</button>
+        <?php if ($canManageFeatures): ?>
+        <button type="button" class="button secondary map-tool" data-tool="Point">نقطه</button>
+        <button type="button" class="button secondary map-tool" data-tool="LineString">خط</button>
+        <button type="button" class="button secondary map-tool" data-tool="Polygon">محدوده</button>
+        <?php endif; ?>
+        <button type="button" class="button secondary map-tool" data-tool="measure">اندازه‌گیری</button>
+      </div>
+      <div class="offline-map-tool-group">
+        <button type="button" class="button secondary" id="offline-map-undo" disabled>بازگشت رأس</button>
+        <button type="button" class="button secondary" id="offline-map-finish" disabled>پایان ترسیم</button>
+        <button type="button" class="button secondary" id="offline-map-cancel" disabled>لغو</button>
+      </div>
+    </div>
+    <div class="offline-map-canvas-inner">
+      <div id="offline-map-map" data-map-ready="<?= $mapReady ? '1' : '0' ?>" data-can-edit="<?= $canManageFeatures ? '1' : '0' ?>" aria-label="نقشهٔ تعاملی آفلاین ایران">
+      <?php if (!$mapReady): ?><div class="offline-map-empty"><span class="offline-map-globe">◎</span><strong>محیط نقشهٔ ایران</strong><span>پس از نصب بستهٔ داده فعال می‌شود.</span></div><?php endif; ?>
+      </div>
+      <div class="offline-map-compass" aria-hidden="true">N</div>
+      <div class="offline-map-scale" id="offline-map-scale">—</div>
+      <div class="offline-map-coordinate" id="offline-map-coordinate">مختصات: —</div>
+    </div>
+    <div class="offline-map-footer">
+      <span id="offline-map-statusline" aria-live="polite"><?= $mapReady ? 'نقشه آمادهٔ بارگذاری است.' : 'نمایش نقشه در انتظار نصب بسته است.' ?></span>
+      <span>© OpenStreetMap contributors</span>
+    </div>
+  </main>
+  <aside class="offline-map-panel">
+    <section class="card offline-map-panel-section">
+      <h2>جست‌وجوی نقشه</h2>
+      <form id="offline-map-place-search" class="offline-map-search">
+        <label for="offline-map-search-input">خیابان، کوچه، محله، شهر یا مکان</label>
+        <div class="offline-map-search-row"><input id="offline-map-search-input" name="q" type="search" minlength="2" maxlength="100" placeholder="مثلاً خیابان ولیعصر" autocomplete="off"><button class="button" type="submit">جست‌وجو</button></div>
+      </form>
+      <div id="offline-map-search-results" class="offline-map-search-results" aria-live="polite"><p class="muted"><?= $searchReady ? 'عبارت موردنظر را وارد کنید.' : 'شاخص جست‌وجوی آفلاین هنوز نصب نشده است.' ?></p></div>
+    </section>
+    <section class="card offline-map-panel-section">
+      <h2>لایه‌ها</h2>
+      <div class="offline-map-layer-list">
+        <label><input type="checkbox" data-layer-toggle="base" checked disabled> نقشهٔ پایه</label>
+        <label><input type="checkbox" data-layer-toggle="user" checked> عوارض سازمانی</label>
+        <label><input type="checkbox" data-layer-toggle="roads" checked disabled> معابر</label>
+        <label><input type="checkbox" data-layer-toggle="places" checked disabled> مکان‌ها و خدمات</label>
+        <label><input type="checkbox" data-layer-toggle="boundaries" checked disabled> مرزهای اداری</label>
+        <label><input type="checkbox" data-layer-toggle="transport" checked disabled> حمل‌ونقل عمومی</label>
+      </div>
+      <p class="muted small">فعال‌سازی هر لایهٔ پایه به وجود دادهٔ متناظر در بستهٔ نقشه وابسته است.</p>
+    </section>
+    <section class="card offline-map-panel-section">
+      <div class="offline-map-section-heading"><h2>عوارض سازمانی</h2><span><?= count($features) ?> مورد</span></div>
+      <div class="offline-map-feature-filters">
+        <label><input type="checkbox" id="offline-map-only-mine"> فقط موارد من</label>
+      </div>
+      <div id="offline-map-feature-list" class="offline-map-feature-list">
+      <?php if (!$schemaReady): ?><p class="muted">پایگاه‌داده نصب نشده است.</p>
+      <?php elseif (!$features): ?><p class="muted">هنوز عارضه‌ای ثبت نشده است.</p>
+      <?php else: foreach ($features as $feature): ?>
+        <button type="button" class="offline-map-feature-item" data-feature-focus="<?= (int) $feature['id'] ?>">
+          <span class="offline-map-feature-symbol type-<?= e(strtolower((string) $feature['feature_type'])) ?>"></span>
+          <span><strong><?= e($feature['title']) ?></strong><small><?= e((string) $feature['feature_type']) ?> · <?= e((string) $feature['updated_at']) ?></small></span>
+        </button>
+      <?php endforeach; endif; ?>
+      </div>
+    </section>
   </aside>
 </div>
-<section class="list-section offline-map-feature-list"><div class="section-title"><div><h2>نقاط ثبت‌شده</h2><p><?= count($features) ?> نقطه در فهرست فعلی</p></div></div>
-<?php if (!$schemaReady): ?><div class="card empty-state">پس از اجرای مهاجرت، فهرست نقاط در این قسمت نمایش داده می‌شود.</div>
-<?php elseif (!$features): ?><div class="card empty-state">هنوز نقطه‌ای ثبت نشده است.</div>
-<?php else: ?><div class="card offline-map-feature-table"><?php foreach ($features as $feature): ?><article class="offline-map-feature" data-feature-id="<?= (int) $feature['id'] ?>"><div><strong><?= e($feature['title']) ?></strong><p><?= e((string) ($feature['description'] ?? '')) ?></p><small><?= e(number_format((float) $feature['geometry']['coordinates'][1], 6)) ?> ، <?= e(number_format((float) $feature['geometry']['coordinates'][0], 6)) ?></small></div><?php if ($canManageFeatures && ((int) $feature['created_by'] === (int) $user['id'] || user_can($user, 'map.admin'))): ?><button type="button" class="button danger small" data-delete-feature="<?= (int) $feature['id'] ?>">حذف</button><?php endif; ?></article><?php endforeach; ?></div><?php endif; ?>
-</section>
+<?php if ($canManageFeatures): ?>
+<dialog id="offline-map-feature-dialog" class="offline-map-dialog">
+  <form id="offline-map-feature-form" method="dialog">
+    <input type="hidden" name="id" value="0">
+    <h2 id="offline-map-dialog-title">ثبت عارضهٔ جدید</h2>
+    <label>عنوان <input name="title" maxlength="190" required></label>
+    <label>توضیحات <textarea name="description" rows="3" maxlength="4000"></textarea></label>
+    <label>دسته‌بندی
+      <select name="category"><option value="general">عمومی</option><option value="office">اداری</option><option value="facility">خدماتی</option><option value="incident">رخداد</option><option value="asset">دارایی</option><option value="restricted">محدودهٔ محدود</option></select>
+    </label>
+    <label>نشانی یا توضیح مکانی <input name="address" maxlength="500"></label>
+    <label>شماره تماس <input name="phone" maxlength="60"></label>
+    <div class="offline-map-dialog-actions"><button type="button" class="button secondary" data-dialog-close>انصراف</button><button type="submit" class="button">ذخیره</button></div>
+    <p id="offline-map-form-feedback" aria-live="polite"></p>
+  </form>
+</dialog>
+<?php endif; ?>
 <?php if ($mapReady): ?><script src="modules/offline-map/vendor/maplibre-gl.js" defer></script><script src="modules/offline-map/vendor/pmtiles.js" defer></script><?php endif; ?>
-<script src="modules/offline-map/Assets/offline-map.js?v=2" defer></script>
+<script src="modules/offline-map/Assets/offline-map.js?v=3" defer></script>
 <?php render_footer(); ?>
