@@ -226,7 +226,7 @@
         .then(function (style) {
           // MapLibre requires an absolute glyph URL. Resolve it against the current application path,
           // and resolve PMTiles to the same local origin so subfolder deployments remain portable.
-          style.glyphs = new URL('modules/offline-map/data/fonts/{fontstack}/{range}.pbf', window.location.href).toString();
+          style.glyphs = new URL('modules/offline-map/data/fonts/', window.location.href).toString() + '{fontstack}/{range}.pbf';
           if (style.sources && style.sources.iran) {
             style.sources.iran.url = 'pmtiles://' + new URL('modules/offline-map/data/iran.pmtiles', window.location.href).toString();
           }
