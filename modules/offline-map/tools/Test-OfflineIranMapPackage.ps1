@@ -18,6 +18,8 @@ $stylePath = Join-Path $DataDir 'style.json'
 Require-File $tilePath 'PMTiles archive'
 Require-File $manifestPath 'build manifest'
 Require-File $stylePath 'MapLibre style'
+$searchPath = Join-Path $DataDir 'search.sqlite'
+Require-File $searchPath 'Persian offline search index'
 Require-File (Join-Path $VendorDir 'maplibre-gl.js') 'MapLibre GL JS'
 Require-File (Join-Path $VendorDir 'maplibre-gl.css') 'MapLibre CSS'
 Require-File (Join-Path $VendorDir 'pmtiles.js') 'PMTiles protocol library'
@@ -31,6 +33,12 @@ if (Test-Path -LiteralPath $tilePath -PathType Leaf) {
     finally { $stream.Dispose() }
     if ([Text.Encoding]::ASCII.GetString($magic, 0, $read) -ne 'PMTiles') { $errors.Add('iran.pmtiles does not have a PMTiles header.') }
 }
+if (Test-Path -LiteralPath $searchPath -PathType Leaf) {
+    $searchStream = [IO.File]::OpenRead($searchPath)
+    try { $sqliteMagic = New-Object byte[] 16; $searchRead = $searchStream.Read($sqliteMagic, 0, 16) }
+    finally { $searchStream.Dispose() }
+    if ([Text.Encoding]::ASCII.GetString($sqliteMagic, 0, $searchRead) -ne "SQLite format 3`0") { $errors.Add('search.sqlite does not have a valid SQLite header.') }
+}
 if ((Test-Path -LiteralPath $manifestPath -PathType Leaf) -and (Test-Path -LiteralPath $tilePath -PathType Leaf)) {
     try {
         $manifest = Get-Content -LiteralPath $manifestPath -Raw | ConvertFrom-Json
@@ -39,6 +47,10 @@ if ((Test-Path -LiteralPath $manifestPath -PathType Leaf) -and (Test-Path -Liter
         if ([long]$manifest.tiles.bytes -ne (Get-Item -LiteralPath $tilePath).Length) { $errors.Add('Manifest tile size does not match iran.pmtiles.') }
         $actualHash = (Get-FileHash -LiteralPath $tilePath -Algorithm SHA256).Hash.ToLowerInvariant()
         if ($manifest.tiles.sha256 -ne $actualHash) { $errors.Add('Manifest SHA-256 does not match iran.pmtiles.') }
+        if ($manifest.search_index -and (Test-Path -LiteralPath $searchPath -PathType Leaf)) {
+            $searchHash = (Get-FileHash -LiteralPath $searchPath -Algorithm SHA256).Hash.ToLowerInvariant()
+            if ($manifest.search_index.sha256 -ne $searchHash) { $errors.Add('Manifest SHA-256 does not match search.sqlite.') }
+        } else { $errors.Add('Manifest does not describe the offline search index.') }
     } catch { $errors.Add("Manifest cannot be parsed or verified: $($_.Exception.Message)") }
 }
 if (Test-Path -LiteralPath $stylePath -PathType Leaf) {
