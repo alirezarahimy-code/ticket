@@ -117,7 +117,7 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'GET' && (string) ($_GET['api'] ??
                 $tokens = preg_split('/\\s+/u', $term, -1, PREG_SPLIT_NO_EMPTY) ?: [];
                 $ftsQuery = implode(' AND ', array_map(static fn(string $token): string => '"' . str_replace('"', '""', $token) . '"*', $tokens));
                 if ($ftsQuery !== '') {
-                    $stmt = $db->prepare('SELECT p.id,p.name,p.name_fa,p.kind,p.category,p.lat,p.lon FROM places_fts f JOIN places p ON p.rowid=f.rowid WHERE places_fts MATCH :q ORDER BY p.rank DESC LIMIT 30');
+                    $stmt = $db->prepare('SELECT p.id,p.name,p.name_fa,p.kind,p.category,p.lat,p.lon FROM places_fts JOIN places p ON p.rowid=places_fts.rowid WHERE places_fts MATCH :q ORDER BY p.rank DESC LIMIT 30');
                     $stmt->execute([':q' => $ftsQuery]);
                     $results = $stmt->fetchAll();
                 }
