@@ -42,7 +42,8 @@ if (Test-Path -LiteralPath $stylePath -PathType Leaf) {
     try {
         $style = Get-Content -LiteralPath $stylePath -Raw | ConvertFrom-Json
         $styleText = Get-Content -LiteralPath $stylePath -Raw
-        if ($styleText -match '(?i)(https?:)?//|mapbox://') { $errors.Add('Style contains a remote URL or mapbox:// reference.') }
+        $styleTextWithoutPmtiles = $styleText -replace '(?i)pmtiles://', ''
+        if ($styleTextWithoutPmtiles -match '(?i)(https?:)?//|mapbox://') { $errors.Add('Style contains a remote URL or mapbox:// reference.') }
         if ($styleText -notmatch '(?i)pmtiles://[^"]*iran\.pmtiles') { $errors.Add('Style does not reference the local iran.pmtiles archive through pmtiles://.') }
         if (-not $style.sources -or $style.sources.Count -lt 1) { $errors.Add('Style has no vector sources.') }
         if (-not $style.glyphs) { $errors.Add('Style has no local glyphs path; Persian labels may not render.') }
