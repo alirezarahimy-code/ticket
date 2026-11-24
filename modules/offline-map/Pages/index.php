@@ -18,7 +18,8 @@ $manifestReady = is_array($manifest)
     && ($manifest['tiles']['file'] ?? '') === 'iran.pmtiles'
     && ($manifest['tiles']['format'] ?? '') === 'PMTiles'
     && (int) ($manifest['tiles']['bytes'] ?? 0) === (is_file($mapDataPath) ? (int) filesize($mapDataPath) : 0);
-$styleHasPmtiles = is_array($styleJson) && preg_match('~pmtiles://[^"\\\\]*iran\\.pmtiles~i', $styleText) === 1;
+$pmtilesUrl = is_array($styleJson) ? (string) ($styleJson['sources']['iran']['url'] ?? '') : '';
+$styleHasPmtiles = strpos($pmtilesUrl, 'pmtiles://') === 0 && strpos($pmtilesUrl, 'iran.pmtiles') !== false;
 $styleTextWithoutPmtiles = str_ireplace('pmtiles://', '', $styleText);
 $styleIsOffline = is_array($styleJson)
     && !preg_match('~(?:https?:)?//|mapbox://~i', $styleTextWithoutPmtiles)
