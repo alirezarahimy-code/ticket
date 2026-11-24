@@ -14,7 +14,8 @@ $styleText = is_file($mapStylePath) ? (string) file_get_contents($mapStylePath) 
 $styleIsOffline = is_array($styleJson) && !preg_match('~(?:https?:)?//|mapbox://~i', $styleText);
 $mapLibraryPath = __DIR__ . '/../vendor/maplibre-gl.js';
 $pmtilesLibraryPath = __DIR__ . '/../vendor/pmtiles.js';
-$mapReady = is_file($mapDataPath) && $styleIsOffline && is_file($mapLibraryPath) && is_file($pmtilesLibraryPath);
+$mapCssPath = __DIR__ . '/../vendor/maplibre-gl.css';
+$mapReady = is_file($mapDataPath) && $styleIsOffline && is_file($mapLibraryPath) && is_file($pmtilesLibraryPath) && is_file($mapCssPath);
 $features = $schemaReady ? $mapRepo->search(trim((string) ($_GET['q'] ?? ''))) : [];
 render_header('نقشهٔ آفلاین ایران', $user);
 ?>
