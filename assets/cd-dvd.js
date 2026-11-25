@@ -40,6 +40,7 @@ document.addEventListener('click', function (event) {
     const userOptions = userPicker ? userPicker.querySelector('.cd-dvd-user-options') : null;
     const nextSerial = window.CD_DVD_NEXT || {};
     let lastSelectedMedia = media ? media.value : ((document.querySelector('input[name="media"]:checked') || {}).value || 'CD');
+    let serialFormInitialized = false;
 
     function normalize(value) {
         return String(value || '').toLocaleLowerCase('fa').trim();
@@ -292,23 +293,21 @@ document.addEventListener('click', function (event) {
             }
         } else if (serial) {
             serial.required = false;
-            const numeric = String(serial.value || '').replace(/[^0-9]/g, '').slice(-4);
             const next = String(nextSerial[selectedMedia] || String(bounds.min).padStart(4, '0')).replace(/^P86-/, '');
-            const rangeIsValid = numeric !== '' && Number(numeric) >= bounds.min && Number(numeric) <= bounds.max;
-            serial.min = String(bounds.min);
-            serial.max = String(bounds.max);
-            serial.placeholder = String(bounds.min).padStart(4, '0');
-            if ((mediaChanged || !numeric || !rangeIsValid) && next) {
+            // پیشنهاد فقط هنگام ورود اولیه یا تعویض نوع رسانه اعمال می‌شود. هنگام
+            // تایپ، حتی مقدارهای موقت مثل «0» حفظ می‌شوند تا پیشنهاد با هر کلید
+            // جایگزین نشده و کاربر بتواند شمارهٔ برگشتی را دستی وارد کند.
+            if ((mediaChanged || (!serialFormInitialized && String(serial.value || '').trim() === '')) && next) {
                 serial.value = next;
-            } else {
-                serial.value = numeric;
             }
+            serial.placeholder = String(bounds.min).padStart(4, '0');
+            const numeric = String(serial.value || '').replace(/[^0-9]/g, '').slice(-4);
+            const rangeIsValid = numeric !== '' && Number(numeric) >= bounds.min && Number(numeric) <= bounds.max;
             if (serialFull) {
-                const finalNumeric = String(serial.value || '').replace(/[^0-9]/g, '').slice(-4);
-                const finalValid = finalNumeric !== '' && Number(finalNumeric) >= bounds.min && Number(finalNumeric) <= bounds.max;
-                serialFull.value = finalValid ? 'P86-' + finalNumeric.padStart(4, '0') : '';
+                serialFull.value = rangeIsValid ? 'P86-' + numeric.padStart(4, '0') : '';
             }
         }
+        serialFormInitialized = true;
         lastSelectedMedia = selectedMedia;
     }
 

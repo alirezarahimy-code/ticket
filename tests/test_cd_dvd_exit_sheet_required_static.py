@@ -55,7 +55,7 @@ class ExitSheetRequiredTest(unittest.TestCase):
         self.assertIn('event.preventDefault();', self.script)
 
     def test_live_renderer_uses_fresh_cache_buster(self):
-        self.assertIn('assets/cd-dvd.js?v=3.4.12', self.source)
+        self.assertIn('assets/cd-dvd.js?v=3.4.13', self.source)
 
 
 if __name__ == '__main__':
