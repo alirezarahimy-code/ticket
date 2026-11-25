@@ -270,8 +270,15 @@ document.addEventListener('click', function (event) {
         if (serialOutWrap) {
             serialOutWrap.hidden = isIncoming;
         }
+        if (serial) {
+            // The visible outgoing control is the submitted value (not the mirror field).
+            // Disable it only when the incoming manual field is active.
+            serial.disabled = Boolean(serialManual && isIncoming);
+            serial.required = serialManual ? !isIncoming : true;
+        }
         if (serialManual) {
             serialManual.hidden = !isIncoming;
+            serialManual.disabled = !isIncoming;
             serialManual.required = isIncoming;
         }
         if (serialHelp) {
@@ -281,10 +288,7 @@ document.addEventListener('click', function (event) {
         }
 
         if (isIncoming) {
-            // شماره ورودی دستی است؛ مقدار خودکار P86 نباید وارد شود.
-            if (serial && !serialManual.hidden) {
-                serial.required = false;
-            }
+            // شماره ورودی از فیلد دستی ارسال می‌شود؛ فیلد خروجی غیرفعال است.
             if (serialManual && serialManual.value.trim() === '' && serial && serial.value.trim() !== '' && mediaChanged) {
                 serial.value = '';
             }
@@ -292,7 +296,6 @@ document.addEventListener('click', function (event) {
                 serialFull.value = serialManual ? serialManual.value.trim() : '';
             }
         } else if (serial) {
-            serial.required = false;
             const next = String(nextSerial[selectedMedia] || String(bounds.min).padStart(4, '0')).replace(/^P86-/, '');
             // پیشنهاد فقط هنگام ورود اولیه یا تعویض نوع رسانه اعمال می‌شود. هنگام
             // تایپ، حتی مقدارهای موقت مثل «0» حفظ می‌شوند تا پیشنهاد با هر کلید
@@ -324,13 +327,21 @@ document.addEventListener('click', function (event) {
             const emptyField = Array.from(form.querySelectorAll('[required]')).find(function (field) {
                 return !field.disabled && !field.closest('[hidden]') && String(field.value || '').trim() === '';
             });
-            if (!emptyField) {
+            if (emptyField) {
+                event.preventDefault();
+                const label = emptyField.dataset.requiredLabel || 'نامشخص';
+                window.alert('فیلد «' + label + '» خالی است و باید پر شود.');
+                emptyField.focus();
                 return;
             }
-            event.preventDefault();
-            const label = emptyField.dataset.requiredLabel || 'نامشخص';
-            window.alert('فیلد «' + label + '» خالی است و باید پر شود.');
-            emptyField.focus();
+            // An outgoing number must resolve to the CD/DVD range before submit.
+            // Keep the user's field active and focus it rather than sending a blank mirror.
+            if (serialManual && direction && direction.value !== 'IN' && serial && serialFull
+                && String(serial.value || '').trim() !== '' && String(serialFull.value || '').trim() === '') {
+                event.preventDefault();
+                window.alert('شماره CD/DVD با بازهٔ نوع رسانه سازگار نیست؛ شماره را بررسی کنید.');
+                serial.focus();
+            }
         });
         form.addEventListener('change', function (event) {
             if (event.target.matches('input[name="media"], #cd-dvd-media')) {

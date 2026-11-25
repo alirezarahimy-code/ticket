@@ -26,6 +26,14 @@ function cd_dvd_internal_number(string $serial): ?int
  */
 function cd_dvd_normalize_input_serial(string $serial, string $media, string $direction): string
 {
+    // Normalize Persian and Arabic-Indic digits so numeric keyboards on mobile
+    // produce the same canonical serial as ASCII input.
+    $serial = strtr($serial, [
+        '۰' => '0', '۱' => '1', '۲' => '2', '۳' => '3', '۴' => '4',
+        '۵' => '5', '۶' => '6', '۷' => '7', '۸' => '8', '۹' => '9',
+        '٠' => '0', '١' => '1', '٢' => '2', '٣' => '3', '٤' => '4',
+        '٥' => '5', '٦' => '6', '٧' => '7', '٨' => '8', '٩' => '9',
+    ]);
     $serial = cd_dvd_normalize_serial($serial);
     if (!preg_match('/^\\d{1,4}$/', $serial)) {
         return $serial;
@@ -874,7 +882,7 @@ function cd_dvd_render_page_legacy(array $user): never
     <section class="card ticket-table cd-dvd-table"><div class="table-head"><span>رسانه و شماره</span><span>جهت</span><span>تاریخ</span><span>ثبت‌کننده</span><span>عملیات</span></div>
   <?php foreach ($records as $record): ?><div class="table-row"><span class="ticket-title"><b><?= e($record['media']) ?> • <?= e($record['department_name'] ?: 'بدون جایگاه') ?></b><strong><?= e($record['serial']) ?></strong><small><?= e($record['info_desc']) ?></small></span><span><em class="status <?= $record['direction'] === 'IN' ? 'in_progress' : 'waiting_user' ?>"><?= $record['direction'] === 'IN' ? 'ورود' : 'خروج' ?></em></span><span class="date-cell"><?= e($record['date_str']) ?></span><span><?= e($record['recorder_display_name'] ?: $record['recorder_name']) ?><?php if ($record['direction'] === 'IN' && ($record['brought_by_user_name'] || $record['brought_by'])): ?><small class="muted block">واردکننده: <?= e($record['brought_by_user_name'] ?: $record['brought_by']) ?><?= $record['brought_by_user_username'] ? ' • ' . e($record['brought_by_user_username']) : '' ?></small><?php endif; ?></span><span class="actions"><a class="mini-button" href="index.php?page=cd-dvd-history&serial=<?= rawurlencode($record['serial']) ?>&media=<?= rawurlencode($record['media']) ?>">تاریخچه</a><?php if (cd_dvd_can_manage_record($record, $user)): ?><a class="mini-button" href="index.php?page=cd-dvd&edit=<?= (int) $record['id'] ?>">ویرایش</a><form method="post" data-confirm="این ثبت حذف شود؟"><input type="hidden" name="action" value="cd_dvd_delete"><?= csrf_field() ?><input type="hidden" name="record_id" value="<?= (int) $record['id'] ?>"><button class="mini-button danger" type="submit">حذف</button></form><?php else: ?><a class="mini-button" href="index.php?page=new-ticket&amp;request=cd_dvd_edit&amp;record_id=<?= (int) $record['id'] ?>">درخواست اصلاح</a><?php endif; ?></span></div><?php endforeach; ?>
     <?php if (!$records): ?><div class="empty-state"><h3>ثبت رسانه‌ای پیدا نشد.</h3><p>با فیلتر دیگری جست‌وجو کنید یا یک گردش جدید ثبت کنید.</p></div><?php endif; ?></section>
-    <script nonce="<?= e(csp_nonce()) ?>">window.CD_DVD_NEXT = <?= json_encode(['CD' => cd_dvd_next_serial('CD'), 'DVD' => cd_dvd_next_serial('DVD')], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?>;</script><script src="assets/cd-dvd.js?v=3.4.14"></script>
+    <script nonce="<?= e(csp_nonce()) ?>">window.CD_DVD_NEXT = <?= json_encode(['CD' => cd_dvd_next_serial('CD'), 'DVD' => cd_dvd_next_serial('DVD')], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?>;</script><script src="assets/cd-dvd.js?v=3.4.15"></script>
     <?php
     render_footer();
     exit;
@@ -983,7 +991,7 @@ function cd_dvd_render_page(array $user): never
                 <div class="section-title"><div><span class="eyebrow">فرم ثبت</span><h2><?= $editRecord ? 'ویرایش رسانه ثبت‌شده' : 'ثبت رسانه جدید' ?></h2><p>فیلد ثبت‌کننده به‌صورت خودکار از حساب فعلی سامانه ذخیره می‌شود.</p></div><a class="button secondary" href="<?= e($tabUrl('dashboard')) ?>">بازگشت به داشبورد</a></div>
                 <?php if ($editDeniedRecord): ?><div class="alert info">ویرایش مستقیم این رکورد فقط برای ادمین اصلی، سوپروایزر و بازرسی مجاز است. <a href="index.php?page=new-ticket&amp;request=cd_dvd_edit&amp;record_id=<?= (int) $editDeniedRecord['id'] ?>">ثبت درخواست اصلاح</a></div><?php endif; ?>
                 <?php if (!$canIn): ?><div class="alert info">ثبت رسانه ورودی فقط برای کاربر منتسب به بازرسی فعال است.</div><?php endif; ?>
-                <form method="post" class="cd-dvd-form" novalidate>
+                <form method="post" class="cd-dvd-form">
                     <?= csrf_field() ?><input type="hidden" name="action" value="<?= e($formAction) ?>"><input type="hidden" name="record_id" value="<?= (int) $form['id'] ?>">
                     <div class="cd-dvd-form-grid">
                         <label>جهت تردد<select name="direction" id="cd-dvd-direction"><?php if ($canOut): ?><option value="OUT" <?= $form['direction'] === 'OUT' ? 'selected' : '' ?>>خروج</option><?php endif; ?><?php if ($canIn): ?><option value="IN" <?= $form['direction'] === 'IN' ? 'selected' : '' ?>>ورود</option><?php endif; ?></select></label>
@@ -991,8 +999,8 @@ function cd_dvd_render_page(array $user): never
                         <label>نوع اطلاعات<select name="info_type" required data-required-label="نوع اطلاعات"><?php foreach ($types as $type): ?><option value="<?= e($type) ?>" <?= $form['info_type'] === $type ? 'selected' : '' ?>><?= e($type) ?></option><?php endforeach; ?></select></label>
                         <label>تاریخ<div class="jalali-picker" data-jalali-picker><input data-jalali-input name="event_date" value="<?= e($form['event_date']) ?>" placeholder="۱۴۰۵/۰۱/۰۱" required data-required-label="تاریخ" autocomplete="off"><button type="button" class="calendar-trigger" aria-label="بازکردن تقویم">▦</button><div class="jalali-calendar" hidden></div></div></label>
                         <label>شماره CD/DVD
-                            <div class="serial-input cd-dvd-serial-out" <?= $form['direction'] === 'IN' ? 'hidden' : '' ?>><span>P86-</span><input id="cd-dvd-serial" value="<?= e(preg_replace('/^P86-/', '', (string) $form['serial'])) ?>" maxlength="4" inputmode="numeric" autocomplete="off"><input type="hidden" name="serial" id="cd-dvd-serial-full" value="<?= e($form['serial']) ?>"></div>
-                            <input type="text" id="cd-dvd-serial-manual" name="serial_manual" class="cd-dvd-serial-in" maxlength="20" autocomplete="off" placeholder="شماره روی رسانه را دستی وارد کنید" value="<?= $form['direction'] === 'IN' ? e((string) $form['serial']) : '' ?>" data-required-label="شماره CD/DVD" <?= $form['direction'] === 'IN' ? 'required' : 'hidden' ?>>
+                            <div class="serial-input cd-dvd-serial-out" <?= $form['direction'] === 'IN' ? 'hidden' : '' ?>><span>P86-</span><input id="cd-dvd-serial" name="serial" value="<?= e(preg_replace('/^P86-/', '', (string) $form['serial'])) ?>" maxlength="4" inputmode="numeric" autocomplete="off" data-required-label="شماره CD/DVD" <?= $form['direction'] === 'IN' ? 'disabled' : 'required' ?>><input type="hidden" id="cd-dvd-serial-full" value="<?= e($form['serial']) ?>"></div>
+                            <input type="text" id="cd-dvd-serial-manual" name="serial_manual" class="cd-dvd-serial-in" maxlength="20" autocomplete="off" placeholder="شماره روی رسانه را دستی وارد کنید" value="<?= $form['direction'] === 'IN' ? e((string) $form['serial']) : '' ?>" data-required-label="شماره CD/DVD" <?= $form['direction'] === 'IN' ? 'required' : 'hidden disabled' ?>>
                             <small id="cd-dvd-serial-help"><?= $form['direction'] === 'IN' ? 'برای رسانه ورودی از بیرون سازمان، شماره را همان‌طور که روی رسانه درج شده دستی وارد کنید.' : 'CD: P86-0001 تا P86-1000' ?></small>
                         </label>
                         <?= cd_dvd_department_field_html($departments, $form, $user, $editRecord, true) ?>
@@ -1013,7 +1021,7 @@ function cd_dvd_render_page(array $user): never
                 <?php if (!$records): ?><div class="empty-state"><h3>رکوردی پیدا نشد.</h3><p>فیلتر دیگری انتخاب کنید یا ثبت جدید را بزنید.</p></div><?php endif; ?></div>
             </section>
     </section>
-    <script nonce="<?= e(csp_nonce()) ?>">window.CD_DVD_NEXT = <?= json_encode(['CD' => cd_dvd_next_serial('CD'), 'DVD' => cd_dvd_next_serial('DVD')], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?>;</script><script src="assets/cd-dvd.js?v=3.4.14"></script>
+    <script nonce="<?= e(csp_nonce()) ?>">window.CD_DVD_NEXT = <?= json_encode(['CD' => cd_dvd_next_serial('CD'), 'DVD' => cd_dvd_next_serial('DVD')], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?>;</script><script src="assets/cd-dvd.js?v=3.4.15"></script>
     <?php
     render_footer();
     exit;
