@@ -882,7 +882,7 @@ function cd_dvd_render_page_legacy(array $user): never
     <section class="card ticket-table cd-dvd-table"><div class="table-head"><span>رسانه و شماره</span><span>جهت</span><span>تاریخ</span><span>ثبت‌کننده</span><span>عملیات</span></div>
   <?php foreach ($records as $record): ?><div class="table-row"><span class="ticket-title"><b><?= e($record['media']) ?> • <?= e($record['department_name'] ?: 'بدون جایگاه') ?></b><strong><?= e($record['serial']) ?></strong><small><?= e($record['info_desc']) ?></small></span><span><em class="status <?= $record['direction'] === 'IN' ? 'in_progress' : 'waiting_user' ?>"><?= $record['direction'] === 'IN' ? 'ورود' : 'خروج' ?></em></span><span class="date-cell"><?= e($record['date_str']) ?></span><span><?= e($record['recorder_display_name'] ?: $record['recorder_name']) ?><?php if ($record['direction'] === 'IN' && ($record['brought_by_user_name'] || $record['brought_by'])): ?><small class="muted block">واردکننده: <?= e($record['brought_by_user_name'] ?: $record['brought_by']) ?><?= $record['brought_by_user_username'] ? ' • ' . e($record['brought_by_user_username']) : '' ?></small><?php endif; ?></span><span class="actions"><a class="mini-button" href="index.php?page=cd-dvd-history&serial=<?= rawurlencode($record['serial']) ?>&media=<?= rawurlencode($record['media']) ?>">تاریخچه</a><?php if (cd_dvd_can_manage_record($record, $user)): ?><a class="mini-button" href="index.php?page=cd-dvd&edit=<?= (int) $record['id'] ?>">ویرایش</a><form method="post" data-confirm="این ثبت حذف شود؟"><input type="hidden" name="action" value="cd_dvd_delete"><?= csrf_field() ?><input type="hidden" name="record_id" value="<?= (int) $record['id'] ?>"><button class="mini-button danger" type="submit">حذف</button></form><?php else: ?><a class="mini-button" href="index.php?page=new-ticket&amp;request=cd_dvd_edit&amp;record_id=<?= (int) $record['id'] ?>">درخواست اصلاح</a><?php endif; ?></span></div><?php endforeach; ?>
     <?php if (!$records): ?><div class="empty-state"><h3>ثبت رسانه‌ای پیدا نشد.</h3><p>با فیلتر دیگری جست‌وجو کنید یا یک گردش جدید ثبت کنید.</p></div><?php endif; ?></section>
-    <script nonce="<?= e(csp_nonce()) ?>">window.CD_DVD_NEXT = <?= json_encode(['CD' => cd_dvd_next_serial('CD'), 'DVD' => cd_dvd_next_serial('DVD')], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?>;</script><script src="assets/cd-dvd.js?v=3.4.15"></script>
+    <script nonce="<?= e(csp_nonce()) ?>">window.CD_DVD_NEXT = <?= json_encode(['CD' => cd_dvd_next_serial('CD'), 'DVD' => cd_dvd_next_serial('DVD')], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?>;</script><script src="assets/cd-dvd.js?v=3.4.16"></script>
     <?php
     render_footer();
     exit;
@@ -1021,7 +1021,7 @@ function cd_dvd_render_page(array $user): never
                 <?php if (!$records): ?><div class="empty-state"><h3>رکوردی پیدا نشد.</h3><p>فیلتر دیگری انتخاب کنید یا ثبت جدید را بزنید.</p></div><?php endif; ?></div>
             </section>
     </section>
-    <script nonce="<?= e(csp_nonce()) ?>">window.CD_DVD_NEXT = <?= json_encode(['CD' => cd_dvd_next_serial('CD'), 'DVD' => cd_dvd_next_serial('DVD')], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?>;</script><script src="assets/cd-dvd.js?v=3.4.15"></script>
+    <script nonce="<?= e(csp_nonce()) ?>">window.CD_DVD_NEXT = <?= json_encode(['CD' => cd_dvd_next_serial('CD'), 'DVD' => cd_dvd_next_serial('DVD')], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?>;</script><script src="assets/cd-dvd.js?v=3.4.16"></script>
     <?php
     render_footer();
     exit;

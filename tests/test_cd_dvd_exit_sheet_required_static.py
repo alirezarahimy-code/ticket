@@ -55,7 +55,7 @@ class ExitSheetRequiredTest(unittest.TestCase):
         self.assertIn('event.preventDefault();', self.script)
 
     def test_live_renderer_uses_fresh_cache_buster(self):
-        self.assertIn('assets/cd-dvd.js?v=3.4.15', self.source)
+        self.assertIn('assets/cd-dvd.js?v=3.4.16', self.source)
 
     def test_visible_outgoing_serial_is_the_submitted_value(self):
         self.assertIn('id="cd-dvd-serial" name="serial"', self.source)
@@ -65,9 +65,12 @@ class ExitSheetRequiredTest(unittest.TestCase):
         self.assertIn("serialManual.disabled = !isIncoming;", self.script)
 
     def test_invalid_nonempty_serial_is_blocked_and_focused(self):
-        self.assertIn("String(serialFull.value || '').trim() === ''", self.script)
+        self.assertIn("const submittedDigits = normalizeDigits(serial.value).trim();", self.script)
+        self.assertIn("const submittedNumber = /^\\d{1,4}$/.test(submittedDigits) ? Number(submittedDigits) : NaN;", self.script)
         self.assertIn('شماره CD/DVD با بازهٔ نوع رسانه سازگار نیست', self.script)
         self.assertIn('serial.focus();', self.script)
+        self.assertIn("const persianDigits = '۰۱۲۳۴۵۶۷۸۹';", self.script)
+        self.assertIn("const arabicDigits = '٠١٢٣٤٥٦٧٨٩';", self.script)
 
 
 if __name__ == '__main__':

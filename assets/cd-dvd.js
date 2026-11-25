@@ -232,6 +232,15 @@ document.addEventListener('click', function (event) {
         return value === 'DVD' ? { min: 1001, max: 2000, label: 'DVD: P86-1001 تا P86-2000' } : { min: 1, max: 1000, label: 'CD: P86-0001 تا P86-1000' };
     }
 
+    function normalizeDigits(value) {
+        const persianDigits = '۰۱۲۳۴۵۶۷۸۹';
+        const arabicDigits = '٠١٢٣٤٥٦٧٨٩';
+        return String(value || '').replace(/[۰-۹٠-٩]/g, function (digit) {
+            const persianIndex = persianDigits.indexOf(digit);
+            return String(persianIndex >= 0 ? persianIndex : arabicDigits.indexOf(digit));
+        });
+    }
+
     function updateForm() {
         const isIncoming = direction && direction.value === 'IN';
         const selectedMedia = getSelectedMedia();
@@ -304,7 +313,8 @@ document.addEventListener('click', function (event) {
                 serial.value = next;
             }
             serial.placeholder = String(bounds.min).padStart(4, '0');
-            const numeric = String(serial.value || '').replace(/[^0-9]/g, '').slice(-4);
+            const normalizedSerial = normalizeDigits(serial.value).trim();
+            const numeric = /^\d{1,4}$/.test(normalizedSerial) ? normalizedSerial : '';
             const rangeIsValid = numeric !== '' && Number(numeric) >= bounds.min && Number(numeric) <= bounds.max;
             if (serialFull) {
                 serialFull.value = rangeIsValid ? 'P86-' + numeric.padStart(4, '0') : '';
@@ -336,11 +346,20 @@ document.addEventListener('click', function (event) {
             }
             // An outgoing number must resolve to the CD/DVD range before submit.
             // Keep the user's field active and focus it rather than sending a blank mirror.
-            if (serialManual && direction && direction.value !== 'IN' && serial && serialFull
-                && String(serial.value || '').trim() !== '' && String(serialFull.value || '').trim() === '') {
-                event.preventDefault();
-                window.alert('شماره CD/DVD با بازهٔ نوع رسانه سازگار نیست؛ شماره را بررسی کنید.');
-                serial.focus();
+            if (serialManual && direction && direction.value !== 'IN' && serial
+                && String(serial.value || '').trim() !== '') {
+                const submittedDigits = normalizeDigits(serial.value).trim();
+                const submittedNumber = /^\d{1,4}$/.test(submittedDigits) ? Number(submittedDigits) : NaN;
+                const submittedBounds = mediaBounds(getSelectedMedia());
+                if (!Number.isFinite(submittedNumber) || submittedNumber < submittedBounds.min || submittedNumber > submittedBounds.max) {
+                    event.preventDefault();
+                    window.alert('شماره CD/DVD با بازهٔ نوع رسانه سازگار نیست؛ شماره را بررسی کنید.');
+                    serial.focus();
+                    return;
+                }
+                if (serialFull) {
+                    serialFull.value = 'P86-' + String(submittedNumber).padStart(4, '0');
+                }
             }
         });
         form.addEventListener('change', function (event) {

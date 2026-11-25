@@ -33,7 +33,7 @@ class CdDvdReusableSerialAndHistoryTests(unittest.TestCase):
 
     def test_both_cd_dvd_script_references_use_current_cache_version(self):
         source = (ROOT / "cd-dvd.php").read_text(encoding="utf-8")
-        self.assertEqual(source.count('assets/cd-dvd.js?v=3.4.15'), 2)
+        self.assertEqual(source.count('assets/cd-dvd.js?v=3.4.16'), 2)
 
 
 if __name__ == "__main__":
