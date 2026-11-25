@@ -113,7 +113,7 @@ function food_order_internal_food_for_employee(int $employeeId, string $isoDate)
 }
 
 /** خروجی با قرارداد صفحهٔ سفارش‌های پنل چاپ فیش (nat/pc/first/last/food/foodDate/...). */
-function food_order_internal_items(string $fromDate, ?string $toDate = null): array
+function food_order_internal_items(string $fromDate, ?string $toDate = null, ?array $orgUnitIds = null): array
 {
     food_order_schema_ensure();
     $from = food_order_iso_date($fromDate);
@@ -121,15 +121,27 @@ function food_order_internal_items(string $fromDate, ?string $toDate = null): ar
     if ($from === null || $to === null || new DateTimeImmutable($from, new DateTimeZone('UTC')) > new DateTimeImmutable($to, new DateTimeZone('UTC'))) {
         throw new RuntimeException('بازهٔ تاریخ سفارش داخلی معتبر نیست.');
     }
+    $params = [$from, $to];
+    $scopeJoin = '';
+    $scopeWhere = '';
+    $scopeSelect = '';
+    if ($orgUnitIds !== null) {
+        $orgUnitIds = array_values(array_unique(array_filter(array_map('intval', $orgUnitIds), static fn (int $id): bool => $id > 0)));
+        if ($orgUnitIds === []) return [];
+        $scopeJoin = ' JOIN org_units scope_unit ON scope_unit.id = u.org_unit_id AND scope_unit.is_active = 1';
+        $scopeWhere = ' AND u.is_active = 1 AND scope_unit.id IN (' . implode(',', array_fill(0, count($orgUnitIds), '?')) . ')';
+        $scopeSelect = ', u.org_unit_id';
+        array_push($params, ...$orgUnitIds);
+    }
     $stmt = db()->prepare("SELECT o.employee_id, o.food_date, o.created_at, i.food_id, u.employee_number, u.national_code,
-            u.first_name, u.last_name, u.full_name, c.food_name
+            u.first_name, u.last_name, u.full_name, c.food_name" . $scopeSelect . "
         FROM food_orders o
         JOIN users u ON u.id = o.employee_id
         JOIN food_calendar_items i ON i.id = o.calendar_item_id
-        JOIN food_catalog c ON c.id = i.food_id
-        WHERE o.food_date BETWEEN ? AND ? AND o.meal_type = 'lunch' AND o.status = 'active'
+        JOIN food_catalog c ON c.id = i.food_id" . $scopeJoin . "
+        WHERE o.food_date BETWEEN ? AND ? AND o.meal_type = 'lunch' AND o.status = 'active'" . $scopeWhere . "
         ORDER BY o.food_date, u.full_name, o.id");
-    $stmt->execute([$from, $to]);
+    $stmt->execute($params);
     $items = [];
     foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $row) {
         $first = trim((string) ($row['first_name'] ?? ''));
@@ -141,7 +153,7 @@ function food_order_internal_items(string $fromDate, ?string $toDate = null): ar
         }
         $created = (string) ($row['created_at'] ?? '');
         $isoDate = (string) $row['food_date'];
-        $items[] = [
+        $item = [
             'nat' => food_order_digits($row['national_code'] ?? ''),
             'pc' => (string) ($row['employee_number'] ?? ''),
             'first' => $first,
@@ -153,6 +165,11 @@ function food_order_internal_items(string $fromDate, ?string $toDate = null): ar
             'reserveDate' => substr($created, 0, 10),
             'reserveTime' => substr($created, 11, 8),
         ];
+        if ($orgUnitIds !== null) {
+            $item['org_unit_id'] = (int) ($row['org_unit_id'] ?? 0);
+            $item['user_id'] = (int) ($row['employee_id'] ?? 0);
+        }
+        $items[] = $item;
     }
     return $items;
 }

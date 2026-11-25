@@ -1,18 +1,26 @@
 #!/usr/bin/env python3
-"""Build the refreshed 1.63.4 full-install and incremental update packages."""
+"""Build the combined 1.63.4 full-install and incremental update packages."""
 from __future__ import annotations
 import hashlib, json, subprocess, zipfile
 from pathlib import Path
 ROOT=Path(__file__).resolve().parents[1]
 VERSION='1.63.4'; REQUIRES='1.63.3'; DATE=(2026,11,19,12,0,0)
+SLUG='r7-combined-deputy-scope'
+REPORT='downloads/CHANGE-REPORT-FA-1.63.4-r7-combined.md'
 EXCLUDED=('downloads/','updates/','patches/','preview/','storage/','.git/','node_modules/','vendor/','.venv/','coverage/','build/','dist/')
 MIGRATIONS=('041-food-monthly-prices-and-leftover-allocations.sql','042-food-invoice-finalization-state.sql')
 REQUIRED_FILES=(
-    'VERSION','assets/food-menu.css','assets/food-menu.js',
-    'downloads/CHANGE-REPORT-FA-1.63.4-r6.md','food-reconciliation.php','food-ticket.php',
+    'VERSION','assets/food-menu.css','assets/food-menu.js','assets/cd-dvd.js','cd-dvd.php',
+    'downloads/CHANGE-REPORT-FA-1.63.4-r6.md',REPORT,
+    'food-reconciliation.php','food-ticket.php','food-ticket-order-source.php','permissions.php',
     'food-ticket-web/assets/food-menu.css','food-ticket-web/assets/food-menu.js','food-ticket-web/index.html',
     'install-empty-db.sql','lib/release-notes.php','schema.sql',
-    'tests/test_food_absent_lunch_backend_static.py','tests/test_food_absent_lunch_tab_static.py',
+    'tests/test_cd_dvd_exit_sheet_required_static.py',
+    'tests/test_cd_dvd_incoming_and_permissions_static.py',
+    'tests/test_cd_dvd_reusable_serial_and_history_separator.py',
+    'tests/test_food_absent_lunch_backend_static.py',
+    'tests/test_food_absent_lunch_deputy_scope_static.py',
+    'tests/test_food_absent_lunch_tab_static.py',
     'tests/test_food_reconciliation_1_63_4_static.py','tools/build_release_1_63_4.py',
 )
 
@@ -37,29 +45,28 @@ def main():
         if allowed(n) and (ROOT/n).is_file(): full[n]=(ROOT/n).read_bytes()
     for n in tracked_paths(['ls-files','--others','--exclude-standard','-z']):
         if allowed(n) and (ROOT/n).is_file(): full[n]=(ROOT/n).read_bytes()
-    note='''بستهٔ سورس کامل ۱.۶۳.۴ — نصب تازه
+    note='''بستهٔ سورس کامل و تجمیعی ۱.۶۳.۴ — نصب تازه
 
-شامل سورس جاری برنامه، اسکیما و مهاجرت‌های ۰۴۱ و ۰۴۲ برای قیمت‌های ماهانه، تخصیص فردی غذای مازاد، ممیزی تغییرها و تشخیص صریح نهایی‌شدن فاکتور است. ارتفاع و حالت عادی گزارش حفظ شده و فقط باکس تطبیق تا عرض صفحه گسترش یافته است؛ دکمه‌های تمام‌صفحه حذف شده و همهٔ تب‌ها دیده می‌شوند. پاپ‌آپ سرنوشت مانده کوچک می‌ماند. تب مبلغ و فاکتور، ثبت فاکتور را زیر خلاصه قرار می‌دهد و PDF/تصویر را درست باز می‌کند. مرتب‌سازی نماهای گروهی و اصلاحات قبلی حفظ شده‌اند. فایل config.php و داده‌های storage عمداً در بسته نیستند. پیش از نصب از دیتابیس و فایل‌ها نسخهٔ پشتیبان تهیه کنید.
+این بسته اصلاحات گزارش‌ها و فاکتور، رابط تطبیق، CD/DVD و دامنهٔ سروری گزارش غایبین ناهار را یکجا دارد. شماره نسخه تغییر نکرده است. دامنهٔ مدیر معاونت از چارت جاری سرور ساخته می‌شود؛ گزارش گذشته نیز بر اساس چارت فعلی است. آزمون static موفق است، اما آزمون integration نقش‌ها باید پیش از بهره‌برداری در staging انجام شود. فایل‌های config.php و داده‌های runtime/storage عمداً بسته‌بندی نشده‌اند. پیش از نصب از دیتابیس و فایل‌ها پشتیبان بگیرید.
 
-نصب: ZIP را در htdocs استخراج کنید، سپس install.php را از خود سرور اجرا کنید.
+نصب: ZIP را در مسیر نصب برنامه استخراج کنید و مراحل استاندارد نصب تازه را از خود سرور اجرا کنید.
 '''
     full['00-FULL-PACKAGE-1.63.4-FA.txt']=note.encode()
-    report=ROOT/'downloads/CHANGE-REPORT-FA-1.63.4-r6.md'
-    if report.is_file(): full['downloads/CHANGE-REPORT-FA-1.63.4-r6.md']=report.read_bytes()
-    out=ROOT/'downloads'; full_path=out/'ticket-full-1.63.4-r6-reconciliation-wide-layout-no-fullscreen-20261119.zip'
+    report=ROOT/REPORT
+    if report.is_file(): full[REPORT]=report.read_bytes()
+    out=ROOT/'downloads'; full_path=out/f'ticket-full-1.63.4-{SLUG}-20261119.zip'
     full_sha=zip_write(full_path,{'ticket/'+k:v for k,v in full.items()})
     changed=set(tracked_paths(['diff','--name-only','HEAD','-z']))|set(tracked_paths(['ls-files','--others','--exclude-standard','-z']))
     changed={n for n in changed if allowed(n) and (ROOT/n).is_file()}
     changed.update(REQUIRED_FILES)
     files={n:(ROOT/n).read_bytes() for n in sorted(changed) if (ROOT/n).is_file()}
-    migration_bytes={name:Path('migrations/'+name).read_bytes() for name in MIGRATIONS}
-    for name,data in migration_bytes.items(): files['migrations/'+name]=data
+    for name in MIGRATIONS: files['migrations/'+name]=Path('migrations/'+name).read_bytes()
     files['VERSION']=b'1.63.4\n'
-    manifest={'name':'food-reconciliation-wide-layout-invoice-sort-r6','version':VERSION,'requires_version':REQUIRES,'date':'2026-11-19','title':'اصلاحات ۱.۶۳.۴: تمام‌صفحه‌شدن تطبیق و نمایش درست فاکتور','migrations':list(MIGRATIONS),'files':sorted(files),'sha256':{n:digest(files[n]) for n in sorted(files)},'description':'Refreshes version 1.63.4 without changing its number. Removes the reconciliation full-screen overlay/toggle while expanding only the reconciliation card width; keeps all tabs visible and the leftover popup compact; places invoice entry below the month summary, serves PDF/images inline, and enables grouped absence sorting without splitting row data.'}
+    manifest={'name':'food-1.63.4-'+SLUG,'version':VERSION,'requires_version':REQUIRES,'date':'2026-11-19','title':'بستهٔ تجمیعی ۱.۶۳.۴: اصلاحات رابط، CD/DVD و دامنهٔ معاونت غایبین ناهار','migrations':list(MIGRATIONS),'files':sorted(files),'sha256':{n:digest(files[n]) for n in sorted(files)},'description':'Combined 1.63.4 update: retains the existing food reconciliation/invoice and CD/DVD changes, adds server-enforced active deputy-tree scoping for absent-lunch APIs, aggregate output, charts, export and print. Historical dates use the current organization chart. Role runtime integration testing remains required in staging.'}
     update={'manifest.json':(json.dumps(manifest,ensure_ascii=False,indent=2)+'\n').encode()}
-    update.update({'migrations/'+name:data for name,data in migration_bytes.items()})
+    update.update({'migrations/'+name:data for name,data in ((n,Path('migrations/'+n).read_bytes()) for n in MIGRATIONS)})
     update.update({'files/'+n:b for n,b in files.items()})
-    upd_path=out/'ticket-update-1.63.4-r6-reconciliation-wide-layout-no-fullscreen-20261119.zip'
+    upd_path=out/f'ticket-update-1.63.4-{SLUG}-20261119.zip'
     upd_sha=zip_write(upd_path,update)
     print(f'FULL {full_path.name} files={len(full)} bytes={full_path.stat().st_size} sha256={full_sha}')
     print(f'UPDATE {upd_path.name} files={len(files)} bytes={upd_path.stat().st_size} sha256={upd_sha}')

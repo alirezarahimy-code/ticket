@@ -149,6 +149,7 @@ function permission_catalog(): array
                 ['code' => 'food.groups', 'label' => 'گروه‌های غذا'],
                 ['code' => 'food.groups_edit', 'label' => 'ویرایش'],
                 ['code' => 'food.reports', 'label' => 'گزارش‌ها'],
+                ['code' => 'food.absent.own_deputy', 'label' => 'غایبین ناهارِ معاونت خود'],
             ],
         ],
         [

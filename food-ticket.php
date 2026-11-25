@@ -75,8 +75,90 @@ function food_ticket_is_support_manager(array $user): bool
     return in_array((string) ($user['role'] ?? ''), ['manager', 'support_manager'], true) && user_service_group($user) === 'support';
 }
 
+/**
+ * تعیین دسترسی غایبین ناهار فقط از انتساب مدیرِ نشست‌دار در چارت فعلی.
+ * مدیران واحدهای غیرمعاونت، حتی با food.reports، از این مسیر مجوز نمی‌گیرند.
+ * خروجی unit_ids و unit_labels صرفاً از DB سمت سرور ساخته می‌شود.
+ */
+function food_ticket_absent_lunch_scope(array $user): array
+{
+    if (food_ticket_is_primary_admin($user) || food_ticket_is_support_manager($user)) {
+        return ['allowed' => true, 'global' => true, 'unit_ids' => null, 'unit_labels' => []];
+    }
+    if ((int) ($user['id'] ?? 0) <= 0
+        || !function_exists('user_can')
+        || !user_can($user, 'food.absent.own_deputy')
+        || !function_exists('db')
+        || !function_exists('org_ensure_schema')) {
+        return ['allowed' => false, 'global' => false, 'unit_ids' => [], 'unit_labels' => []];
+    }
+
+    try {
+        org_ensure_schema();
+        $managerId = (int) $user['id'];
+        $rootsQuery = db()->prepare(
+            "SELECT DISTINCT ou.id, ou.company_id, ou.name
+               FROM org_units ou
+               LEFT JOIN org_unit_managers oum ON oum.unit_id = ou.id AND oum.user_id = ?
+              WHERE ou.is_active = 1 AND ou.unit_type = 'deputy'
+                AND (ou.manager_user_id = ? OR oum.user_id IS NOT NULL)"
+        );
+        $rootsQuery->execute([$managerId, $managerId]);
+        $roots = $rootsQuery->fetchAll(PDO::FETCH_ASSOC);
+        if (!$roots) {
+            return ['allowed' => false, 'global' => false, 'unit_ids' => [], 'unit_labels' => []];
+        }
+
+        $unitRows = db()->query('SELECT id, parent_id, company_id, name FROM org_units WHERE is_active = 1')->fetchAll(PDO::FETCH_ASSOC);
+        $children = [];
+        $byId = [];
+        foreach ($unitRows as $row) {
+            $id = (int) ($row['id'] ?? 0);
+            $parentId = (int) ($row['parent_id'] ?? 0);
+            if ($id <= 0) continue;
+            $byId[$id] = $row;
+            $children[$parentId][] = $id;
+        }
+
+        $unitIds = [];
+        $unitLabels = [];
+        foreach ($roots as $root) {
+            $rootId = (int) ($root['id'] ?? 0);
+            $companyId = (int) ($root['company_id'] ?? 0);
+            if ($rootId <= 0 || !isset($byId[$rootId])) continue;
+            $rootName = trim((string) ($root['name'] ?? ''));
+            $stack = [$rootId];
+            $visited = [];
+            while ($stack) {
+                $unitId = (int) array_pop($stack);
+                if ($unitId <= 0 || isset($visited[$unitId]) || !isset($byId[$unitId])) continue;
+                if ((int) ($byId[$unitId]['company_id'] ?? 0) !== $companyId) continue;
+                $visited[$unitId] = true;
+                $unitIds[$unitId] = $unitId;
+                $unitLabels[$unitId] = $rootName;
+                foreach ($children[$unitId] ?? [] as $childId) $stack[] = (int) $childId;
+            }
+        }
+        if (!$unitIds) {
+            return ['allowed' => false, 'global' => false, 'unit_ids' => [], 'unit_labels' => []];
+        }
+        return ['allowed' => true, 'global' => false, 'unit_ids' => array_values($unitIds), 'unit_labels' => $unitLabels];
+    } catch (Throwable $error) {
+        app_error_log('[food-absent-scope] fail-closed: ' . $error->getMessage());
+        return ['allowed' => false, 'global' => false, 'unit_ids' => [], 'unit_labels' => []];
+    }
+}
+
+function food_ticket_can_view_absent_lunch(array $user): bool
+{
+    return !empty(food_ticket_absent_lunch_scope($user)['allowed']);
+}
+
 function food_ticket_is_allowed(array $user): bool
 {
+    if (food_ticket_can_view_absent_lunch($user)) {
+        return true;
+    }
     if (function_exists('user_can')) {
         return user_can_any($user, ['food.dashboard', 'food.monitor', 'food.reports', 'food.employees', 'food.guest', 'food.groups', 'food.db', 'food.printer', 'food.design', 'food.health', 'food.menu', 'food.manual_attendance', 'food.emergency_window']);
     }
@@ -193,6 +275,10 @@ function food_ticket_route_allowed(array $user, string $route): bool
             return user_can($user, 'food.menu');
         }
         return false;
+    }
+    if ($route === 'absent') {
+        return strtoupper((string) ($_SERVER['REQUEST_METHOD'] ?? 'GET')) === 'GET'
+            && food_ticket_can_view_absent_lunch($user);
     }
     if (food_ticket_is_primary_admin($user)) {
         return true;
@@ -3730,7 +3816,7 @@ function food_ticket_aggregate_diagnostics(string $fromDate, string $toDate, arr
     ];
 }
 
-function food_ticket_api_aggregate_report(string $fromDate, string $toDate): array
+function food_ticket_api_aggregate_report(string $fromDate, string $toDate, array $user = []): array
 {
     $from = food_ticket_parse_date($fromDate);
     $to = food_ticket_parse_date($toDate);
@@ -3855,8 +3941,13 @@ function food_ticket_api_aggregate_report(string $fromDate, string $toDate): arr
 
     // غایبین (سفارش ناهار دارند ولی فیش ناهار نگرفته‌اند).
     $absentPeople = [];
+    $absentRangeTotals = [];
+    $canSeeAbsent = $user === [] || food_ticket_can_view_absent_lunch($user);
     try {
-        foreach (food_ticket_api_absent($from, $to) as $row) {
+        $scopedAbsentRows = $canSeeAbsent
+            ? food_ticket_api_absent($from, $to, $absentRangeTotals, $user)
+            : [];
+        foreach ($scopedAbsentRows as $row) {
             $absFirst = trim((string) ($row['first'] ?? ''));
             $absLast = trim((string) ($row['last'] ?? ''));
             if ($absFirst === '' && $absLast === '') {
@@ -3882,31 +3973,71 @@ function food_ticket_api_aggregate_report(string $fromDate, string $toDate): arr
         throw new RuntimeException('منابع گزارش تجمیعی در دسترس نیستند؛ آمار قابل محاسبه نیست.', 0, $e);
     }
 
-    $counts['absent'] = count($absentPeople);
-    // فیش و غیبت شام جدا گزارش می‌شوند و در تفریق غایبین ناهار وارد نمی‌شوند.
-    $expected = $counts['lunch_orders'] - $counts['printed_final'];
-    $counts['expected_absent'] = $expected;
-    $counts['has_mismatch'] = ($expected !== $counts['absent']);
-    $counts['difference'] = $expected - $counts['absent'];
+    if ($canSeeAbsent) {
+        $counts['absent'] = count($absentPeople);
+        if ($user !== [] && empty(food_ticket_absent_lunch_scope($user)['global'])) {
+            // شاخص‌های تطبیق هم از همان کوئریِ محدودشده به معاونت فعلی ساخته شوند.
+            $counts['lunch_orders'] = (int) ($absentRangeTotals['total_ordered_portions'] ?? 0);
+            $counts['order_rows'] = $counts['lunch_orders'];
+            $counts['printed_final'] = (int) ($absentRangeTotals['printed_ordered_portions'] ?? 0);
+            $expected = (int) ($absentRangeTotals['expected_absent'] ?? 0);
+        } else {
+            // فیش و غیبت شام جدا گزارش می‌شوند و در تفریق غایبین ناهار وارد نمی‌شوند.
+            $expected = $counts['lunch_orders'] - $counts['printed_final'];
+        }
+        $counts['expected_absent'] = $expected;
+        $counts['has_mismatch'] = ($expected !== $counts['absent']);
+        $counts['difference'] = $expected - $counts['absent'];
+    }
 
     food_ticket_aggregate_sort_people($printedPeople);
     food_ticket_aggregate_sort_people($absentPeople);
-    $diagnostics = food_ticket_aggregate_diagnostics($from, $to, $printedPeople, $counts, $sourceNotes);
+    $reportScope = $user !== [] ? food_ticket_absent_lunch_scope($user) : ['global' => true];
+    $isDeputyScoped = $user !== [] && !empty($canSeeAbsent) && empty($reportScope['global']);
+    $diagnostics = ($user === [] || !empty($reportScope['global']))
+        ? food_ticket_aggregate_diagnostics($from, $to, $printedPeople, $counts, $sourceNotes)
+        : [];
+    if ($isDeputyScoped) {
+        // گزارش تجمیعی برای مدیر معاونت نباید در خلاصه/چاپ/Excel آمار یا فهرست کل سازمان را نشت دهد.
+        $scopedCounts = array_fill_keys(array_keys($counts), 0);
+        $scopedCounts['lunch_orders'] = (int) ($absentRangeTotals['total_ordered_portions'] ?? 0);
+        $scopedCounts['order_rows'] = $scopedCounts['lunch_orders'];
+        $scopedCounts['printed_final'] = (int) ($absentRangeTotals['printed_ordered_portions'] ?? 0);
+        $scopedCounts['absent'] = count($absentPeople);
+        $scopedCounts['expected_absent'] = (int) ($absentRangeTotals['expected_absent'] ?? 0);
+        $scopedCounts['has_mismatch'] = ($scopedCounts['expected_absent'] !== $scopedCounts['absent']);
+        $scopedCounts['difference'] = $scopedCounts['expected_absent'] - $scopedCounts['absent'];
+        $counts = $scopedCounts;
+        $printedPeople = [];
+        $sourceNotes = [];
+        $diagnostics = [];
+    }
     $publicPrintedPeople = $printedPeople;
     foreach ($publicPrintedPeople as &$person) {
         // شناسه و کد ملی فقط برای تطبیق سمت سرور است و به مرورگر گزارش نمی‌شود.
         unset($person['nat'], $person['event_id'], $person['legacy_printed']);
     }
     unset($person);
-    return [
+    $result = [
         'from' => $from,
         'to' => $to,
         'counts' => $counts,
         'printed_people' => $publicPrintedPeople,
-        'absent_people' => $absentPeople,
         'diagnostics' => $diagnostics,
         'source_notes' => $sourceNotes,
     ];
+    if ($canSeeAbsent) {
+        $result['absent_people'] = $absentPeople;
+    } else {
+        // مجوز عمومی food.reports به‌تنهایی نباید شمار یا ردیف‌های غایبین را افشا کند.
+        unset($result['counts']['absent'], $result['counts']['expected_absent'], $result['counts']['has_mismatch'], $result['counts']['difference']);
+        unset($result['diagnostics']);
+    }
+    if ($user !== [] && !empty($canSeeAbsent) && empty(food_ticket_absent_lunch_scope($user)['global'])) {
+        // داده‌های عیب‌یابیِ مبتنی بر کل سازمان را در پاسخ مدیر معاونت قرار نده.
+        $result['diagnostics'] = [];
+    }
+    return $result;
 }
 
 /** ستونهای قابلانتخاب گزارش تجمیعی (برای نمایش، استخراج و چاپ). */
@@ -3927,9 +4058,9 @@ function food_ticket_aggregate_columns(): array
 }
 
 /** خروجی XLSX گزارش تجمیعی — فقط ستونهای انتخابشده. */
-function food_ticket_aggregate_export(string $fromDate, string $toDate, string $fieldsRaw): never
+function food_ticket_aggregate_export(string $fromDate, string $toDate, string $fieldsRaw, array $user = []): never
 {
-    $report = food_ticket_api_aggregate_report($fromDate, $toDate);
+    $report = food_ticket_api_aggregate_report($fromDate, $toDate, $user);
     $all = food_ticket_aggregate_columns();
     $keys = array_values(array_unique(array_filter(array_map('trim', explode(',', $fieldsRaw)))));
     $selected = array_values(array_filter($all, static fn (array $c): bool => in_array($c['key'], $keys, true)));
@@ -3953,10 +4084,14 @@ function food_ticket_aggregate_export(string $fromDate, string $toDate, string $
     $rows[] = ['فیش مهمان ثبت‌شدهٔ ناهار', $c['guest_printed_lunch'], 'فیش مهمان ثبت‌شدهٔ شام', $c['guest_printed_dinner']];
     $rows[] = ['چاپ فیزیکی مهمان ناهار', $c['physical_guest_printed_lunch'], 'چاپ فیزیکی مهمان شام', $c['physical_guest_printed_dinner']];
     $rows[] = ['فیش خودکار مهمان ناهار', $c['auto_guest_printed_lunch'], 'فیش خودکار مهمان شام', $c['auto_guest_printed_dinner']];
-    $rows[] = ['تعداد غایبین', $c['absent'], 'تفریق تخمینی، نه تطبیق فردی', $c['expected_absent'] ?? 0];
+    if (array_key_exists('absent_people', $report)) {
+        $rows[] = ['تعداد غایبین', $c['absent'] ?? 0, 'تفریق تخمینی، نه تطبیق فردی', $c['expected_absent'] ?? 0];
+    }
     $rows[] = ['فیش چاپی به‌تنهایی تأیید مستقل تحویل فیزیکی غذا نیست.'];
     $rows[] = ['فیش‌های قدیمی نوع print', $c['legacy_printed'], 'باقیماندهٔ مغایرت', $c['difference'] ?? 0];
-    $rows[] = ['مغایرت ناهار', $c['has_mismatch'] ? 'دارد' : 'ندارد', 'اختلاف', $c['difference'] ?? 0];
+    if (array_key_exists('absent_people', $report)) {
+        $rows[] = ['مغایرت ناهار', !empty($c['has_mismatch']) ? 'دارد' : 'ندارد', 'اختلاف', $c['difference'] ?? 0];
+    }
     $rows[] = [];
     $rows[] = ['فهرست نفراتی که فیش چاپشده دارند'];
     $rows[] = $headers;
@@ -3965,13 +4100,15 @@ function food_ticket_aggregate_export(string $fromDate, string $toDate, string $
         $i++;
         $rows[] = food_ticket_aggregate_row($selected, $person + ['row' => $i, 'status' => 'چاپشده']);
     }
-    $rows[] = [];
-    $rows[] = ['فهرست غایبین'];
-    $rows[] = $headers;
-    $i = 0;
-    foreach ($report['absent_people'] as $person) {
-        $i++;
-        $rows[] = food_ticket_aggregate_row($selected, $person + ['row' => $i, 'time' => '', 'kind' => '—']);
+    if (array_key_exists('absent_people', $report)) {
+        $rows[] = [];
+        $rows[] = ['فهرست غایبین'];
+        $rows[] = $headers;
+        $i = 0;
+        foreach ($report['absent_people'] as $person) {
+            $i++;
+            $rows[] = food_ticket_aggregate_row($selected, $person + ['row' => $i, 'time' => '', 'kind' => '—']);
+        }
     }
     $token = preg_replace('/[^0-9A-Za-z_-]/', '', $report['from'] . '_' . $report['to']) ?: date('Y-m-d');
     require_once __DIR__ . '/xlsx-writer.php';
@@ -4008,7 +4145,7 @@ function food_ticket_aggregate_row(array $selected, array $person): array
     return $out;
 }
 
-function food_ticket_api_absent(string $fromDate, ?string $toDate = null, ?array &$rangeTotals = null): array
+function food_ticket_api_absent(string $fromDate, ?string $toDate = null, ?array &$rangeTotals = null, array $user = []): array
 {
     $fromDate = food_ticket_parse_date($fromDate) ?: trim($fromDate);
     $toDate = food_ticket_parse_date($toDate ?? $fromDate) ?: trim((string) ($toDate ?? $fromDate));
@@ -4019,10 +4156,23 @@ function food_ticket_api_absent(string $fromDate, ?string $toDate = null, ?array
         throw new RuntimeException('گزارش غایبین در دسترس نیست.');
     }
 
-    // سفارش‌های بازه فقط از منبع داخلی خوانده می‌شوند؛ خطای MySQL نباید به «بدون سفارش» تبدیل شود.
+    // مجوز و دامنه از حساب نشست‌دار و چارت فعلی گرفته می‌شود؛ ورودی مرورگر در این تصمیم نقشی ندارد.
+    $scope = $user !== []
+        ? food_ticket_absent_lunch_scope($user)
+        : ['allowed' => true, 'global' => true, 'unit_ids' => null, 'unit_labels' => []];
+    if (empty($scope['allowed'])) {
+        throw new RuntimeException('دسترسی گزارش غایبین ناهار برای این حساب مجاز نیست.');
+    }
+    $scopeUnitIds = !empty($scope['global']) ? null : (array) ($scope['unit_ids'] ?? []);
+
+    // سفارش‌های بازه فقط از منبع داخلی خوانده می‌شوند؛ در دامنهٔ محدود، SQL هم فقط کارکنان فعالِ زیردرخت را می‌خواند.
     $orders = [];
+    $scopeEmployeeIds = [];
+    $scopeNationalCodes = [];
+    $scopePersonnelCodes = [];
     try {
-        $items = food_ticket_api_orders($fromDate, '', $toDate);
+        $items = food_ticket_api_orders($fromDate, '', $toDate, $scopeUnitIds);
+        $personRefs = [];
         foreach ($items as $it) {
             $nat = food_ticket_digits((string) ($it['nat'] ?? ''));
             $pc = trim((string) ($it['pc'] ?? ''));
@@ -4031,15 +4181,35 @@ function food_ticket_api_absent(string $fromDate, ?string $toDate = null, ?array
             }
             $day = (string) ($it['foodDate'] ?? $fromDate);
             $identityKey = $nat !== '' ? 'nat:' . $nat : 'pc:' . $pc;
-            $orders[$day][$identityKey] = [
+            if (!isset($personRefs[$identityKey])) {
+                $personRefs[$identityKey] = 'person-' . (count($personRefs) + 1);
+            }
+            $orderRow = [
                 'nat' => $nat,
                 'pc' => $pc,
+                'person_ref' => $personRefs[$identityKey],
                 'first' => (string) ($it['first'] ?? ''),
                 'last' => (string) ($it['last'] ?? ''),
                 'food' => (string) ($it['food'] ?? ''),
                 'foodId' => (int) ($it['foodId'] ?? 0),
                 'foodDate' => $day,
             ];
+            if ($scopeUnitIds !== null) {
+                $unitId = (int) ($it['org_unit_id'] ?? 0);
+                if ((int) ($it['user_id'] ?? 0) > 0) $scopeEmployeeIds[(int) $it['user_id']] = true;
+                if ($nat !== '') {
+                    $scopeNationalCodes[$nat] = true;
+                    $rawNationalCode = trim((string) ($it['national_code'] ?? ''));
+                    if ($rawNationalCode !== '') $scopeNationalCodes[$rawNationalCode] = true;
+                    $unpadNationalCode = ltrim($nat, '0');
+                    if ($unpadNationalCode !== '') $scopeNationalCodes[$unpadNationalCode] = true;
+                }
+                if ($pc !== '') $scopePersonnelCodes[$pc] = true;
+                $orderRow['org_unit_id'] = $unitId;
+                $orderRow['user_id'] = (int) ($it['user_id'] ?? 0);
+                $orderRow['deputy_name'] = (string) (($scope['unit_labels'][$unitId] ?? ''));
+            }
+            $orders[$day][$identityKey] = $orderRow;
         }
     } catch (Throwable $e) {
         app_error_log('[absent] internal orders query failed: ' . $e->getMessage());
@@ -4052,22 +4222,29 @@ function food_ticket_api_absent(string $fromDate, ?string $toDate = null, ?array
         $totalOrderPortions += count($dayOrders);
         foreach (array_keys($dayOrders) as $identityKey) $totalOrderers[(string)$identityKey] = true;
     }
-    $rangeTotals = [
-        'total_ordered_people' => count($totalOrderers),
-        'total_ordered_portions' => $totalOrderPortions,
-    ];
-
     // کسانی که فیش چاپ‌شده دارند از لیست غایب خارج می‌شوند
     $printed = [];
     try {
+        $eventParams = [$fromDate, $toDate];
+        $scopeEventWhere = '';
+        if ($scopeUnitIds !== null) {
+            $scopeEventClauses = [];
+            foreach ([['user_id', array_keys($scopeEmployeeIds)], ['national_code', array_keys($scopeNationalCodes)], ['personnel_code', array_keys($scopePersonnelCodes)]] as [$column, $values]) {
+                $values = array_values(array_unique(array_filter($values, static fn ($value): bool => (string) $value !== '')));
+                if (!$values) continue;
+                $scopeEventClauses[] = $column . ' IN (' . implode(',', array_fill(0, count($values), '?')) . ')';
+                array_push($eventParams, ...$values);
+            }
+            $scopeEventWhere = $scopeEventClauses ? ' AND (' . implode(' OR ', $scopeEventClauses) . ')' : ' AND 1 = 0';
+        }
         $q = db()->prepare(
             "SELECT punch_date, national_code, personnel_code FROM food_ticket_events
              WHERE punch_date BETWEEN ? AND ?
                AND print_status = 'printed'
                AND COALESCE(meal_type, 'lunch') = 'lunch'
-               AND event_type IN ('printed','print','auto_printed')"
+               AND event_type IN ('printed','print','auto_printed')" . $scopeEventWhere
         );
-        $q->execute([$fromDate, $toDate]);
+        $q->execute($eventParams);
         foreach ($q->fetchAll() as $row) {
             $day = (string) ($row['punch_date'] ?? '');
             $nat = food_ticket_digits((string) ($row['national_code'] ?? ''));
@@ -4083,6 +4260,24 @@ function food_ticket_api_absent(string $fromDate, ?string $toDate = null, ?array
         app_error_log('[absent] events: ' . $e->getMessage());
         throw new RuntimeException('وضعیت چاپ برای محاسبهٔ فیش‌های دریافت‌نشده در دسترس نیست.', 0, $e);
     }
+
+    $printedOrderPortions = 0;
+    foreach ($orders as $day => $dayOrders) {
+        foreach ($dayOrders as $row) {
+            $nat = food_ticket_digits((string) ($row['nat'] ?? ''));
+            $pc = trim((string) ($row['pc'] ?? ''));
+            if (($nat !== '' && !empty($printed[$day]['nat:' . $nat]))
+                || ($pc !== '' && !empty($printed[$day]['pc:' . $pc]))) {
+                $printedOrderPortions++;
+            }
+        }
+    }
+    $rangeTotals = [
+        'total_ordered_people' => count($totalOrderers),
+        'total_ordered_portions' => $totalOrderPortions,
+        'printed_ordered_portions' => $printedOrderPortions,
+        'expected_absent' => max(0, $totalOrderPortions - $printedOrderPortions),
+    ];
 
     // «غایب اعلام‌شده»: کسانی که برای همان تاریخ در فرم گروه، غایب ثبت شده‌اند
     // (آمار بازرسی گروه‌های بیرون از ساختمان) — این‌ها با برچسب جداگانه نمایش داده می‌شوند.
@@ -4118,15 +4313,15 @@ function food_ticket_api_absent(string $fromDate, ?string $toDate = null, ?array
             $row['amount_irr']=$row['price_irr'];
             $declared = false;
             try {
-                $uid = 0;
-                if ($nat !== '') {
+                $uid = (int) ($row['user_id'] ?? 0);
+                if ($uid <= 0 && $nat !== '') {
                     if (!isset($userIdsByNational[$nat])) {
                         $uq = db()->prepare('SELECT id FROM users WHERE national_code = ? OR national_code = ? LIMIT 1');
                         $uq->execute([$nat, ltrim($nat, '0') ?: '0']);
                         $userIdsByNational[$nat] = (int) ($uq->fetchColumn() ?: 0);
                     }
                     $uid = (int) $userIdsByNational[$nat];
-                } elseif ($pc !== '') {
+                } elseif ($uid <= 0 && $nat === '' && $pc !== '') {
                     if (!isset($userIdsByPersonnel[$pc])) {
                         $uq = db()->prepare('SELECT id FROM users WHERE employee_number = ? LIMIT 1');
                         $uq->execute([$pc]);
@@ -4142,6 +4337,12 @@ function food_ticket_api_absent(string $fromDate, ?string $toDate = null, ?array
             $row['status'] = $declared
                 ? 'غایب اعلام‌شده — فیش چاپ نشده'
                 : 'غایب — سفارش دارد، فیش چاپ نشده';
+            if ($scopeUnitIds !== null) {
+                $row['dep'] = (string) ($row['deputy_name'] ?? '');
+                unset($row['org_unit_id'], $row['user_id'], $row['deputy_name']);
+            }
+            $row['person_ref'] = (string) ($row['person_ref'] ?? '');
+            unset($row['nat']);
             $absent[] = $row;
         }
     }
@@ -4310,7 +4511,7 @@ function food_ticket_order_date_key(mixed $value): string
     return '';
 }
 
-function food_ticket_api_orders(string $foodDate, string $jalaliHint = '', ?string $toDate = null): array
+function food_ticket_api_orders(string $foodDate, string $jalaliHint = '', ?string $toDate = null, ?array $orgUnitIds = null): array
 {
     if (!function_exists('food_order_internal_items')) {
         throw new RuntimeException('ماژول سفارش‌ها در دسترس نیست.');
@@ -4321,7 +4522,7 @@ function food_ticket_api_orders(string $foodDate, string $jalaliHint = '', ?stri
     if ($from === null || $to === null) {
         throw new RuntimeException('تاریخ سفارش معتبر نیست.');
     }
-    return food_order_internal_items($from, $to);
+    return food_order_internal_items($from, $to, $orgUnitIds);
 }
 
 /**
@@ -5237,7 +5438,7 @@ function food_ticket_api_handle(string $route, array $user): never
             if ($aggFrom === null || $aggTo === null || $aggFrom > $aggTo) {
                 food_ticket_api_json(['error' => 'بازهٔ تاریخ گزارش تجمیعی معتبر نیست.'], 400);
             }
-            food_ticket_api_json(['ok' => true] + food_ticket_api_aggregate_report($aggFrom, $aggTo)
+            food_ticket_api_json(['ok' => true] + food_ticket_api_aggregate_report($aggFrom, $aggTo, is_array($user) ? $user : [])
                 + ['columns' => food_ticket_aggregate_columns()]);
         }
         if ($_SERVER['REQUEST_METHOD'] === 'GET' && $route === 'aggregate-report-export') {
@@ -5246,7 +5447,7 @@ function food_ticket_api_handle(string $route, array $user): never
             if ($aggFrom === null || $aggTo === null || $aggFrom > $aggTo) {
                 food_ticket_api_json(['error' => 'بازهٔ تاریخ گزارش تجمیعی معتبر نیست.'], 400);
             }
-            food_ticket_aggregate_export($aggFrom, $aggTo, (string) ($_GET['fields'] ?? ''));
+            food_ticket_aggregate_export($aggFrom, $aggTo, (string) ($_GET['fields'] ?? ''), is_array($user) ? $user : []);
         }
         if ($_SERVER['REQUEST_METHOD'] === 'GET' && $route === 'absent') {
             // این گزارش عمداً فقط ناهار را پوشش می‌دهد؛ درخواست صریح برای وعدهٔ دیگر باید روشن رد شود، نه نادیده.
@@ -5263,7 +5464,7 @@ function food_ticket_api_handle(string $route, array $user): never
                 food_ticket_api_json(['error' => 'بازهٔ تاریخ گزارش معتبر نیست.'], 400);
             }
             $rangeTotals = [];
-            $absentItems = food_ticket_api_absent($from, $to, $rangeTotals);
+            $absentItems = food_ticket_api_absent($from, $to, $rangeTotals, is_array($user) ? $user : []);
             food_ticket_api_json(['items' => $absentItems, 'totals' => $rangeTotals, 'from' => $from, 'to' => $to]);
         }
         if ($_SERVER['REQUEST_METHOD'] === 'GET' && $route === 'guest-requests-report') {
@@ -6007,6 +6208,9 @@ function food_ticket_render_page(array $user): void
     // دسترسی هر بخش پنل از روی کدهای food.* (ادمین اصلی همه‌چیز). سرور هم هر درخواست را جداگانه کنترل می‌کند.
     $fpIsPrimary = food_ticket_is_primary_admin($user);
     $fpCan = static fn (string $code): bool => $fpIsPrimary || (function_exists('user_can') && user_can($user, $code));
+    $fpCanAbsentLunch = food_ticket_can_view_absent_lunch($user);
+    $fpAbsentScope = $fpCanAbsentLunch ? food_ticket_absent_lunch_scope($user) : ['global' => false];
+    $fpCanGeneralReports = $fpCan('food.reports');
     $fpCanManageGuestRequests = function_exists('food_guest_request_is_reviewer') && food_guest_request_is_reviewer($user);
     $fpViews = [
         'dashboard' => $fpCan('food.dashboard'),
@@ -6014,7 +6218,7 @@ function food_ticket_render_page(array $user): void
         'employees' => $fpCan('food.employees'),
         'food-menu' => $fpCan('food.menu') || $fpCan('food.menu_edit'),
         'food-groups' => $fpCan('food.groups'),
-        'reports' => $fpCan('food.reports'),
+        'reports' => $fpCanGeneralReports || $fpCanAbsentLunch,
         'settings' => $fpCan('food.db') || $fpCan('food.printer') || $fpCan('food.guest') || $fpCan('food.design') || $fpCan('food.health') || $fpCan('food.manual_attendance') || $fpCan('food.emergency_window'),
     ];
     $fpSections = [
@@ -6051,6 +6255,9 @@ function food_ticket_render_page(array $user): void
         . ';window.FOOD_TICKET_CAN_ORDER_CLOSE=' . ($canOrderClose ? 'true' : 'false')
         . ';window.FOOD_TICKET_CAN_EMERGENCY=' . ($canMenuEdit ? 'true' : 'false')
         . ';window.FOOD_TICKET_CAN_GUEST_REQUEST_MANAGE=' . ($canMenuEdit ? 'true' : 'false')
+        . ';window.FOOD_TICKET_CAN_ABSENT_LUNCH_REPORT=' . ($fpCanAbsentLunch ? 'true' : 'false')
+        . ';window.FOOD_TICKET_ABSENT_LUNCH_ONLY=' . ($fpCanAbsentLunch && !$fpCanGeneralReports ? 'true' : 'false')
+        . ';window.FOOD_TICKET_ABSENT_LUNCH_SERVER_SCOPE=' . ($fpCanAbsentLunch && empty($fpAbsentScope['global']) ? 'true' : 'false')
         . ';window.FOOD_TICKET_IS_PRIMARY_ADMIN=' . (food_ticket_is_primary_admin($user) ? 'true' : 'false')
         . ';window.FOOD_TICKET_USER_ID=' . (int) ($user['id'] ?? 0) . ';</script>';
     // برچسب‌های قدیمی (نام‌های نسخه‌های پیشین) در متن نمایش داده نشوند:
