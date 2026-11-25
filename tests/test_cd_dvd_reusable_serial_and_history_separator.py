@@ -15,6 +15,12 @@ class CdDvdReusableSerialAndHistoryTests(unittest.TestCase):
         source = (ROOT / "cd-dvd.php").read_text(encoding="utf-8")
         self.assertIn("if ($last && $direction === (string) $last['direction'])", source)
         self.assertIn("'این شماره از سازمان خارج شده است.'", source)
+        self.assertIn("function cd_dvd_normalize_input_serial(string $serial, string $media, string $direction): string", source)
+        self.assertIn("return $query->fetchColumn() ? $canonical : $serial;", source)
+        self.assertIn("elseif ($serial === '' && $excludeId === 0)", source)
+        self.assertIn("Never infer a new serial during edit", source)
+        self.assertIn("cd_dvd_acquire_write_lock($scope)", source)
+        self.assertIn("updateForm();", script)
 
     def test_history_has_readable_separator_before_receiver_label(self):
         source = (ROOT / "cd-dvd.php").read_text(encoding="utf-8")
@@ -22,7 +28,7 @@ class CdDvdReusableSerialAndHistoryTests(unittest.TestCase):
 
     def test_both_cd_dvd_script_references_use_current_cache_version(self):
         source = (ROOT / "cd-dvd.php").read_text(encoding="utf-8")
-        self.assertEqual(source.count('assets/cd-dvd.js?v=3.4.13'), 2)
+        self.assertEqual(source.count('assets/cd-dvd.js?v=3.4.14'), 2)
 
 
 if __name__ == "__main__":

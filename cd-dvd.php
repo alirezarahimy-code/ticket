@@ -19,6 +19,31 @@ function cd_dvd_internal_number(string $serial): ?int
     return preg_match('/^P86-(\d{4})$/', $serial, $matches) ? (int) $matches[1] : null;
 }
 
+/**
+ * Resolve a short numeric entry such as 009 to its canonical internal serial.
+ * Incoming numeric serials are treated as internal only when that P86 serial
+ * already exists; this preserves genuinely external serials such as "009".
+ */
+function cd_dvd_normalize_input_serial(string $serial, string $media, string $direction): string
+{
+    $serial = cd_dvd_normalize_serial($serial);
+    if (!preg_match('/^\\d{1,4}$/', $serial)) {
+        return $serial;
+    }
+    $number = (int) $serial;
+    [$min, $max] = cd_dvd_media_bounds($media);
+    if ($number < $min || $number > $max) {
+        return $serial;
+    }
+    $canonical = 'P86-' . str_pad((string) $number, 4, '0', STR_PAD_LEFT);
+    if (strtoupper($direction) !== 'IN') {
+        return $canonical;
+    }
+    $query = db()->prepare('SELECT id FROM cd_dvd_records WHERE media = ? AND serial = ? LIMIT 1');
+    $query->execute([strtoupper($media), $canonical]);
+    return $query->fetchColumn() ? $canonical : $serial;
+}
+
 function cd_dvd_serial_valid(string $serial): bool
 {
     return $serial !== '' && strlen($serial) <= 20 && preg_match('/^[A-Z0-9][A-Z0-9._\/-]*$/', $serial) === 1;
@@ -347,14 +372,17 @@ function cd_dvd_validate_payload(array $data, array $user, int $excludeId = 0, ?
         && $direction === 'OUT' && !cd_dvd_can_submit_out($user)) {
         throw new RuntimeException('ثبت خروج رسانه برای نقش شما مجاز نیست.');
     }
-    $serial = cd_dvd_normalize_serial((string) ($data['serial'] ?? ''));
+    $serial = cd_dvd_normalize_input_serial((string) ($data['serial'] ?? ''), $media, $direction);
     if ($direction === 'IN') {
-        // رسانه ورودی از بیرون سازمان معمولاً شماره‌گذاری داخلی ندارد؛ مقدار دستی مقدم است.
-        $manualSerial = cd_dvd_normalize_serial((string) ($data['serial_manual'] ?? ''));
+        // شماره دستی مقدم است؛ ورودی کوتاه 009 در صورت وجود سابقهٔ P86-0009
+        // به همان رسانهٔ داخلی نگاشت می‌شود و شمارهٔ بیرونی بی‌سابقه دست‌نخورده می‌ماند.
+        $manualSerial = cd_dvd_normalize_input_serial((string) ($data['serial_manual'] ?? ''), $media, $direction);
         if ($manualSerial !== '') {
             $serial = $manualSerial;
         }
-    } elseif ($serial === '') {
+    } elseif ($serial === '' && $excludeId === 0) {
+        // شماره‌گذاری خودکار فقط برای ثبت جدید است؛ ویرایش با فیلد خالی نباید
+        // بی‌صدا به شمارهٔ بعدی بپرد.
         $serial = cd_dvd_next_serial($media) ?? '';
     }
     if ($serial === '') {
@@ -492,13 +520,15 @@ function cd_dvd_create_record(array $user): int
     $media = valid_choice((string) ($_POST['media'] ?? ''), ['CD', 'DVD'], 'CD');
     $direction = valid_choice((string) ($_POST['direction'] ?? ''), ['IN', 'OUT'], 'OUT');
     $data = $_POST;
-    $serial = cd_dvd_normalize_serial((string) ($data['serial'] ?? ''));
+    $serial = cd_dvd_normalize_input_serial((string) ($data['serial'] ?? ''), $media, $direction);
     if ($direction === 'IN') {
-        $manualSerial = cd_dvd_normalize_serial((string) ($data['serial_manual'] ?? ''));
+        $manualSerial = cd_dvd_normalize_input_serial((string) ($data['serial_manual'] ?? ''), $media, $direction);
         if ($manualSerial !== '') {
             $serial = $manualSerial;
+            $data['serial_manual'] = $manualSerial;
         }
     }
+    $data['serial'] = $serial;
 
     $locks = [];
     try {
@@ -544,19 +574,50 @@ function cd_dvd_update_record(array $user): void
     if (!$record || !cd_dvd_can_edit_records($user)) {
         throw new RuntimeException('ویرایش مستقیم سوابق فقط برای ادمین اصلی، سوپروایزر و بازرسی مجاز است؛ برای اصلاح این رکورد درخواست ثبت کنید.');
     }
-    $payload = cd_dvd_validate_payload($_POST, $user, $id, (string) ($record['direction'] ?? ''), (int) ($record['department_id'] ?? 0));
-    db()->beginTransaction();
-    try {
-        $query = db()->prepare('UPDATE cd_dvd_records SET media = ?, direction = ?, serial = ?, info_type = ?, info_desc = ?, jy = ?, jm = ?, jd = ?, date_str = ?, sort_key = ?, receiver = ?, receiver_unit = ?, brought_by = ?, brought_by_user_id = ?, exit_sheet = ?, note = ?, department_id = ? WHERE id = ?');
-        $query->execute([$payload['media'], $payload['direction'], $payload['serial'], $payload['info_type'], $payload['info_desc'], $payload['jy'], $payload['jm'], $payload['jd'], $payload['date_str'], $payload['sort_key'], $payload['receiver'], $payload['receiver_unit'], $payload['brought_by'], $payload['brought_by_user_id'], $payload['exit_sheet'], $payload['note'], $payload['department_id'], $id]);
-        $after = cd_dvd_fetch_record($id) ?: [];
-        save_audit_required((int) $user['id'], 'cd_dvd_updated', null, ['record_id' => $id, 'serial' => $payload['serial'], 'before' => cd_dvd_audit_snapshot($record), 'after' => cd_dvd_audit_snapshot($after)]);
-        db()->commit();
-    } catch (Throwable $exception) {
-        if (db()->inTransaction()) {
-            db()->rollBack();
+
+    $data = $_POST;
+    $media = valid_choice((string) ($data['media'] ?? ''), ['CD', 'DVD'], 'CD');
+    $direction = valid_choice((string) ($data['direction'] ?? ''), ['IN', 'OUT'], 'OUT');
+    $serial = cd_dvd_normalize_input_serial((string) ($data['serial'] ?? ''), $media, $direction);
+    if ($direction === 'IN') {
+        $manualSerial = cd_dvd_normalize_input_serial((string) ($data['serial_manual'] ?? ''), $media, $direction);
+        if ($manualSerial !== '') {
+            $serial = $manualSerial;
+            $data['serial_manual'] = $manualSerial;
         }
-        throw $exception;
+    }
+    $data['serial'] = $serial;
+
+    $lockScopes = [];
+    $oldMedia = strtoupper((string) ($record['media'] ?? 'CD'));
+    $oldSerial = cd_dvd_normalize_serial((string) ($record['serial'] ?? ''));
+    if ($oldMedia !== '' && $oldSerial !== '') $lockScopes[] = 'serial:' . $oldMedia . ':' . $oldSerial;
+    if ($serial !== '') $lockScopes[] = 'serial:' . $media . ':' . $serial;
+    $lockScopes = array_values(array_unique($lockScopes));
+    sort($lockScopes, SORT_STRING);
+    $locks = [];
+    try {
+        foreach ($lockScopes as $scope) $locks[] = cd_dvd_acquire_write_lock($scope);
+        db()->beginTransaction();
+        try {
+            // Never infer a new serial during edit. A missing/manual input is an error,
+            // not a reason to silently replace it with the next available number.
+            $payload = cd_dvd_validate_payload($data, $user, $id, (string) ($record['direction'] ?? ''), (int) ($record['department_id'] ?? 0));
+            $query = db()->prepare('UPDATE cd_dvd_records SET media = ?, direction = ?, serial = ?, info_type = ?, info_desc = ?, jy = ?, jm = ?, jd = ?, date_str = ?, sort_key = ?, receiver = ?, receiver_unit = ?, brought_by = ?, brought_by_user_id = ?, exit_sheet = ?, note = ?, department_id = ? WHERE id = ?');
+            $query->execute([$payload['media'], $payload['direction'], $payload['serial'], $payload['info_type'], $payload['info_desc'], $payload['jy'], $payload['jm'], $payload['jd'], $payload['date_str'], $payload['sort_key'], $payload['receiver'], $payload['receiver_unit'], $payload['brought_by'], $payload['brought_by_user_id'], $payload['exit_sheet'], $payload['note'], $payload['department_id'], $id]);
+            $after = cd_dvd_fetch_record($id) ?: [];
+            save_audit_required((int) $user['id'], 'cd_dvd_updated', null, ['record_id' => $id, 'serial' => $payload['serial'], 'before' => cd_dvd_audit_snapshot($record), 'after' => cd_dvd_audit_snapshot($after)]);
+            db()->commit();
+        } catch (Throwable $exception) {
+            if (db()->inTransaction()) {
+                db()->rollBack();
+            }
+            throw $exception;
+        }
+    } finally {
+        foreach (array_reverse($locks) as $lockName) {
+            cd_dvd_release_write_lock($lockName);
+        }
     }
 }
 
@@ -813,7 +874,7 @@ function cd_dvd_render_page_legacy(array $user): never
     <section class="card ticket-table cd-dvd-table"><div class="table-head"><span>رسانه و شماره</span><span>جهت</span><span>تاریخ</span><span>ثبت‌کننده</span><span>عملیات</span></div>
   <?php foreach ($records as $record): ?><div class="table-row"><span class="ticket-title"><b><?= e($record['media']) ?> • <?= e($record['department_name'] ?: 'بدون جایگاه') ?></b><strong><?= e($record['serial']) ?></strong><small><?= e($record['info_desc']) ?></small></span><span><em class="status <?= $record['direction'] === 'IN' ? 'in_progress' : 'waiting_user' ?>"><?= $record['direction'] === 'IN' ? 'ورود' : 'خروج' ?></em></span><span class="date-cell"><?= e($record['date_str']) ?></span><span><?= e($record['recorder_display_name'] ?: $record['recorder_name']) ?><?php if ($record['direction'] === 'IN' && ($record['brought_by_user_name'] || $record['brought_by'])): ?><small class="muted block">واردکننده: <?= e($record['brought_by_user_name'] ?: $record['brought_by']) ?><?= $record['brought_by_user_username'] ? ' • ' . e($record['brought_by_user_username']) : '' ?></small><?php endif; ?></span><span class="actions"><a class="mini-button" href="index.php?page=cd-dvd-history&serial=<?= rawurlencode($record['serial']) ?>&media=<?= rawurlencode($record['media']) ?>">تاریخچه</a><?php if (cd_dvd_can_manage_record($record, $user)): ?><a class="mini-button" href="index.php?page=cd-dvd&edit=<?= (int) $record['id'] ?>">ویرایش</a><form method="post" data-confirm="این ثبت حذف شود؟"><input type="hidden" name="action" value="cd_dvd_delete"><?= csrf_field() ?><input type="hidden" name="record_id" value="<?= (int) $record['id'] ?>"><button class="mini-button danger" type="submit">حذف</button></form><?php else: ?><a class="mini-button" href="index.php?page=new-ticket&amp;request=cd_dvd_edit&amp;record_id=<?= (int) $record['id'] ?>">درخواست اصلاح</a><?php endif; ?></span></div><?php endforeach; ?>
     <?php if (!$records): ?><div class="empty-state"><h3>ثبت رسانه‌ای پیدا نشد.</h3><p>با فیلتر دیگری جست‌وجو کنید یا یک گردش جدید ثبت کنید.</p></div><?php endif; ?></section>
-    <script nonce="<?= e(csp_nonce()) ?>">window.CD_DVD_NEXT = <?= json_encode(['CD' => cd_dvd_next_serial('CD'), 'DVD' => cd_dvd_next_serial('DVD')], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?>;</script><script src="assets/cd-dvd.js?v=3.4.13"></script>
+    <script nonce="<?= e(csp_nonce()) ?>">window.CD_DVD_NEXT = <?= json_encode(['CD' => cd_dvd_next_serial('CD'), 'DVD' => cd_dvd_next_serial('DVD')], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?>;</script><script src="assets/cd-dvd.js?v=3.4.14"></script>
     <?php
     render_footer();
     exit;
@@ -952,7 +1013,7 @@ function cd_dvd_render_page(array $user): never
                 <?php if (!$records): ?><div class="empty-state"><h3>رکوردی پیدا نشد.</h3><p>فیلتر دیگری انتخاب کنید یا ثبت جدید را بزنید.</p></div><?php endif; ?></div>
             </section>
     </section>
-    <script nonce="<?= e(csp_nonce()) ?>">window.CD_DVD_NEXT = <?= json_encode(['CD' => cd_dvd_next_serial('CD'), 'DVD' => cd_dvd_next_serial('DVD')], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?>;</script><script src="assets/cd-dvd.js?v=3.4.13"></script>
+    <script nonce="<?= e(csp_nonce()) ?>">window.CD_DVD_NEXT = <?= json_encode(['CD' => cd_dvd_next_serial('CD'), 'DVD' => cd_dvd_next_serial('DVD')], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?>;</script><script src="assets/cd-dvd.js?v=3.4.14"></script>
     <?php
     render_footer();
     exit;

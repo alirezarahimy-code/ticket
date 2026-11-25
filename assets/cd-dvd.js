@@ -319,6 +319,8 @@ document.addEventListener('click', function (event) {
     if (form) {
         form.noValidate = true;
         form.addEventListener('submit', function (event) {
+            // Rebuild the canonical hidden serial from the final visible value at submit time.
+            updateForm();
             const emptyField = Array.from(form.querySelectorAll('[required]')).find(function (field) {
                 return !field.disabled && !field.closest('[hidden]') && String(field.value || '').trim() === '';
             });
